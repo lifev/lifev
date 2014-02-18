@@ -331,62 +331,62 @@ public:
       Return a vector containing 1 where vector elements are == scalar
       @param scalar Value for the comparison.
      */
-    VectorEpetra operator== ( const Real& scalar );
+    VectorEpetra operator== ( const Real& scalar ) const;
 
     //! Inequality operator
     /*!
       Return a vector containing 1 where vector elements are != scalar
       @param scalar Value for the comparison.
      */
-    VectorEpetra operator!= ( const Real& scalar );
+    VectorEpetra operator!= ( const Real& scalar ) const;
 
     //! Less than operator
     /*!
       Return a vector containing 1 where vector elements are < scalar
       @param scalar Value for the comparison.
      */
-    VectorEpetra operator< ( const Real& scalar );
+    VectorEpetra operator< ( const Real& scalar ) const;
 
     //! Greater than operator
     /*!
       Return a vector containing 1 where vector elements are > scalar
       @param scalar Value for the comparison.
      */
-    VectorEpetra operator> ( const Real& scalar );
+    VectorEpetra operator> ( const Real& scalar ) const;
 
     //! Less than or equal to operator
     /*!
       Return a vector containing 1 where vector elements are <= scalar
       @param scalar Value for the comparison.
      */
-    VectorEpetra operator<= ( const Real& scalar );
+    VectorEpetra operator<= ( const Real& scalar ) const;
 
     //! Greater than or equal to operator
     /*!
       Return a vector containing 1 where vector elements are >= scalar
       @param scalar Value for the comparison.
      */
-    VectorEpetra operator>= ( const Real& scalar );
+    VectorEpetra operator>= ( const Real& scalar ) const;
 
     //! Logical AND operator
     /*!
       Return a vector containing one where both elements are != zero
       @param vector Vector for the logical comparison.
      */
-    VectorEpetra operator&& ( const VectorEpetra& vector );
+    VectorEpetra operator&& ( const VectorEpetra& vector ) const;
 
     //! Logical OR operator
     /*!
       Return a vector containing one where one of the elements is != zero
       @param vector Vector for the logical comparison.
      */
-    VectorEpetra operator|| ( const VectorEpetra& vector );
+    VectorEpetra operator|| ( const VectorEpetra& vector ) const;
 
     //! Logical NOT operator
     /*!
       Return a vector containing one where the vector is equal to zero
      */
-    VectorEpetra operator! ( void );
+    VectorEpetra operator! ( void ) const;
 
     //@}
 
