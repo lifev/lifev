@@ -336,7 +336,7 @@ private:
     // Storage for the divergence of the basis functions
     array2D_Type M_divergence;
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     // Debug informations, defined only if the code
     // is compiled in debug mode. These booleans store the
     // information about what the last call to "update"
@@ -347,6 +347,7 @@ private:
     bool M_isDetJacobianUpdated;
     bool M_isInverseJacobianUpdated;
     bool M_isWDetUpdated;
+    bool M_isPhiUpdated;
     bool M_isDphiUpdated;
     bool M_isDivergenceUpdated;
 #endif
@@ -396,13 +397,14 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadrat
     M_dphi(),
     M_divergence()
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     , M_isCellNodeUpdated (false),
     M_isQuadNodeUpdated (false),
     M_isJacobianUpdated (false),
     M_isDetJacobianUpdated (false),
     M_isInverseJacobianUpdated (false),
     M_isWDetUpdated (false),
+    M_isPhiUpdated (false),
     M_isDphiUpdated (false),
     M_isDivergenceUpdated (false)
 #endif
@@ -441,13 +443,14 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap)
     M_dphi(),
     M_divergence()
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     , M_isCellNodeUpdated (false),
     M_isQuadNodeUpdated (false),
     M_isJacobianUpdated (false),
     M_isDetJacobianUpdated (false),
     M_isInverseJacobianUpdated (false),
     M_isWDetUpdated (false),
+    M_isPhiUpdated (false),
     M_isDphiUpdated (false),
     M_isDivergenceUpdated (false)
 #endif
@@ -485,7 +488,7 @@ ETCurrentFE (const ETCurrentFE<spaceDim, fieldDim>& otherFE)
     M_dphi (otherFE.M_dphi),
     M_divergence (otherFE.M_divergence)
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     //Beware for the comma at the begining of this line!
     , M_isCellNodeUpdated ( otherFE.M_isCellNodeUpdated ),
     M_isQuadNodeUpdated ( otherFE.M_isQuadNodeUpdated ),
@@ -493,6 +496,7 @@ ETCurrentFE (const ETCurrentFE<spaceDim, fieldDim>& otherFE)
     M_isDetJacobianUpdated ( otherFE.M_isDetJacobianUpdated ),
     M_isInverseJacobianUpdated ( otherFE.M_isInverseJacobianUpdated ),
     M_isWDetUpdated ( otherFE.M_isWDetUpdated ),
+    M_isPhiUpdated ( otherFE.M_isPhiUpdated ),
     M_isDphiUpdated ( otherFE.M_isDphiUpdated ),
     M_isDivergenceUpdated ( otherFE.M_isDivergenceUpdated )
 #endif
@@ -518,7 +522,7 @@ update (const elementType& element, const flag_Type& flag)
     ASSERT (M_geometricMap != 0, "No geometric mapping for the update");
     ASSERT (M_quadratureRule != 0, "No quadrature rule for the update");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     // Reset all the flags to false
     M_isCellNodeUpdated = false;
     M_isQuadNodeUpdated = false;
@@ -701,6 +705,9 @@ setupInternalConstants()
             }
         }
     }
+#ifdef HAVE_LIFEV_DEBUG
+    M_isPhiUpdated = true;
+#endif
 
     // PHI MAP
     M_phiMap.resize (M_nbQuadPt);
@@ -814,7 +821,7 @@ updateQuadNode (const UInt& iQuadPt)
     ASSERT (M_isCellNodeUpdated, "Cell must be updated to compute the quadrature node position");
 
     // Set the check boolean
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isQuadNodeUpdated = true;
 #endif
 
@@ -838,7 +845,7 @@ updateJacobian (const UInt& iQuadPt)
     ASSERT (M_isCellNodeUpdated, "Cell must be updated to compute the jacobian");
 
     // Set the check boolean
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isJacobianUpdated = true;
 #endif
 
@@ -864,7 +871,7 @@ void ETCurrentFE< spaceDim, fieldDim >::updateWDet ( const UInt& iQuadPt )
     ASSERT ( M_isDetJacobianUpdated,
              "Determinant of the jacobian must be updated to compute WDet" );
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isWDetUpdated = true;
 #endif
 
@@ -877,7 +884,7 @@ void ETCurrentFE< spaceDim, fieldDim >::updateDphi ( const UInt& iQuadPt )
     ASSERT ( M_isInverseJacobianUpdated,
              "Inverse jacobian must be updated to compute the derivative of the basis functions" );
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isDphiUpdated = true;
 #endif
 
@@ -911,7 +918,7 @@ void ETCurrentFE< spaceDim, fieldDim >::updateDivergence ( const UInt& iQuadPt )
     ASSERT ( M_isDphiUpdated,
              "Basis function derivatives must be updated to compute the divergence" );
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isDivergenceUpdated = true;
 #endif
 
@@ -936,7 +943,7 @@ ETCurrentFE<spaceDim, fieldDim>::
 updateCellNode (const ElementType& element)
 {
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isCellNodeUpdated = true;
 #endif
 

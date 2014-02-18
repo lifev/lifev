@@ -178,7 +178,7 @@ template<UInt solutionDim>
 const flag_Type EvaluationPhiJ<solutionDim>::S_testUpdateFlag = ET_UPDATE_NONE;
 
 template<UInt solutionDim>
-const flag_Type EvaluationPhiJ<solutionDim>::S_solutionUpdateFlag = ET_UPDATE_PHI;
+const flag_Type EvaluationPhiJ<solutionDim>::S_solutionUpdateFlag = ET_UPDATE_NONE;
 
 
 //! Evaluation of the basis function phi_j in the case of a scalar FE.

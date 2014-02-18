@@ -594,8 +594,7 @@ solveOneTimeStep ()
     {
 
         // Update the property of the current element
-        M_FESpace.fe().update ( M_FESpace.mesh()->element ( iElem ),
-                                UPDATE_QUAD_NODES | UPDATE_WDET | UPDATE_PHI );
+        M_FESpace.fe().update ( M_FESpace.mesh()->element(iElem), UPDATE_QUAD_NODES | UPDATE_WDET);
 
         // Reconstruct step of the current element
         localReconstruct ( iElem );
@@ -651,8 +650,7 @@ CFL()
     for ( UInt iElem (0); iElem < meshNumberOfElements; ++iElem )
     {
         // Update the property of the current element
-        M_FESpace.fe().update ( M_FESpace.mesh()->element ( iElem ),
-                                UPDATE_QUAD_NODES | UPDATE_WDET | UPDATE_PHI );
+        M_FESpace.fe().update ( M_FESpace.mesh()->element (iElem), UPDATE_QUAD_NODES | UPDATE_WDET);
 
         // Volumetric measure of the current element
         const Real K ( M_FESpace.fe().measure() );

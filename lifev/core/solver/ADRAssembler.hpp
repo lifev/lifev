@@ -531,7 +531,7 @@ addMass (matrix_ptrType matrix, const Real& coefficient, const UInt& offsetLeft,
     for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
     {
         // Update the mass current FE
-        M_massCFE->update ( M_fespace->mesh()->element (iterElement), UPDATE_PHI | UPDATE_WDET );
+        M_massCFE->update ( M_fespace->mesh()->element (iterElement), UPDATE_WDET );
 
         // Clean the local matrix
         M_localMass->zero();
@@ -591,8 +591,7 @@ addAdvection (matrix_ptrType matrix, const vector_type& beta, const UInt& offset
     for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
     {
         // Update the advection current FEs
-        M_advCFE->update ( M_fespace->mesh()->element (iterElement), UPDATE_PHI | UPDATE_DPHI | UPDATE_WDET );
-        M_advBetaCFE->update (M_fespace->mesh()->element (iterElement), UPDATE_PHI );
+        M_advCFE->update ( M_fespace->mesh()->element (iterElement), UPDATE_DPHI | UPDATE_WDET );
 
         // Clean the local matrix
         M_localAdv->zero();
@@ -745,7 +744,7 @@ addMassRhs (vector_type& rhs, const vector_type& f)
     for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
-        M_massRhsCFE->update ( M_fespace->mesh()->element (iterElement), UPDATE_PHI | UPDATE_WDET );
+        M_massRhsCFE->update ( M_fespace->mesh()->element (iterElement), UPDATE_WDET );
 
         // Clean the local matrix
         M_localMassRhs->zero();
@@ -825,7 +824,7 @@ addMassRhs (vector_type& rhs, const function_type& f, const Real& t)
     for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
-        M_massRhsCFE->update ( M_fespace->mesh()->element (iterElement), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET );
+        M_massRhsCFE->update ( M_fespace->mesh()->element (iterElement), UPDATE_QUAD_NODES | UPDATE_WDET );
 
         // Clean the local matrix
         M_localMassRhs->zero();

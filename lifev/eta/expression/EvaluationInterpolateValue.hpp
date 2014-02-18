@@ -156,8 +156,6 @@ public:
     {
         zero();
 
-        M_currentFE.update (M_fespace->mesh()->element (iElement), ET_UPDATE_PHI);
-
         for (UInt i (0); i < M_fespace->refFE().nbDof(); ++i)
         {
             for (UInt q (0); q < M_quadrature->nbQuadPt(); ++q)
@@ -382,8 +380,6 @@ public:
     void update (const UInt& iElement)
     {
         zero();
-
-        M_currentFE.update (M_fespace->mesh()->element (iElement), ET_UPDATE_PHI);
 
         for (UInt i (0); i < M_fespace->refFE().nbDof(); ++i)
         {
