@@ -149,6 +149,7 @@ CurrentFE::CurrentFE ( const ReferenceFE& refFE, const GeometricMap& geoMap, con
 
     M_phiUpdated = true;
     M_dphiRefUpdated = true;
+    M_divPhiRefUpdated = true;
     M_d2phiRefUpdated = true;
     M_dphiGeometricMapUpdated = true;
 }
@@ -820,6 +821,7 @@ void CurrentFE::setQuadRule (const QuadratureRule& newQuadRule)
 
     M_phiUpdated = true;
     M_dphiRefUpdated = true;
+    M_divPhiRefUpdated = true;
     M_d2phiRefUpdated = true;
     M_dphiGeometricMapUpdated = true;
 }
