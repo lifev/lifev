@@ -44,6 +44,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace LifeV
 {
+
 // Forward declarations
 class DebugStream;
 class NdebugStream;
@@ -172,7 +173,7 @@ inline NdebugStream& flush ( NdebugStream& s )
     return s;
 }
 
-#ifndef NDEBUG_OLD
+#ifdef HAVE_LIFEV_DEBUG
 DebugStream debugStream ( int area = 0, DebugStream::stprintf = 0 );
 DebugStream debugStream ( bool cond, int area = 0, DebugStream::stprintf = 0 );
 LIFEV_DEPRECATED ( DebugStream Debug ( int area = 0, DebugStream::stprintf func = 0 ) );
