@@ -35,9 +35,6 @@
     working correctly in the CurrentFE class.
  */
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
@@ -47,9 +44,6 @@
 #include <Epetra_SerialComm.h>
 #endif
 
-//Tell the compiler to restore the warning previously silented
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 
@@ -131,9 +125,6 @@ main ( int argc, char** argv )
     test_CFE.update (Tetra1, UPDATE_QUAD_NODES);
     test_CFE.quadNode (0, 0);
 
-    test_CFE.update (Tetra1, UPDATE_PHI);
-    test_CFE.phi (1, 1);
-
     test_CFE.update (Tetra1, UPDATE_DPHI);
     test_CFE.dphi (2, 0, 3);
 
@@ -149,7 +140,7 @@ main ( int argc, char** argv )
 
     std::cout << " Checking partition of unity ... " << std::endl;
 
-    test_CFE.update (Tetra1, UPDATE_PHI | UPDATE_DPHI);
+    test_CFE.update (Tetra1, UPDATE_DPHI);
     Real sum_phi;
     Real sum_dphi;
     for (UInt i (0); i < test_CFE.nbQuadPt(); ++i)
@@ -196,9 +187,6 @@ main ( int argc, char** argv )
 
     test_CFE.update (Tetra1, UPDATE_QUAD_NODES);
     test_CFE.quadNode (3, 0);
-
-    test_CFE.update (Tetra1, UPDATE_PHI);
-    test_CFE.phi (1, 4);
 
     test_CFE.update (Tetra1, UPDATE_DPHI);
     test_CFE.dphi (2, 0, 4);

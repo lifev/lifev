@@ -38,15 +38,9 @@
     This class manages the distribution of elements of matrices or vectors on a parallel machine
  */
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_Util.h>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
@@ -81,29 +75,24 @@ MapEpetra::MapEpetra ( Int  numGlobalElements,
                 *commPtr );
 }
 
-MapEpetra::MapEpetra ( std::pair< std::vector<Int>, std::vector<Int> > myGlobalElements,
-                       const comm_ptrtype& commPtr ) :
+MapEpetra::MapEpetra ( mapData_Type const& mapData, comm_ptrtype const& commPtr ) :
     M_repeatedMapEpetra(),
     M_uniqueMapEpetra(),
     M_exporter(),
     M_importer(),
     M_commPtr ( commPtr )
 {
-    std::vector<Int> const& myGlobalElementsUnique = myGlobalElements.first;
-    std::vector<Int> const& myGlobalElementsRepeated = myGlobalElements.second;
-
     M_uniqueMapEpetra.reset ( new Epetra_Map ( -1,
-                                               myGlobalElementsUnique.size(),
-                                               &myGlobalElementsUnique[ 0 ],
+                                               mapData.unique.size(),
+                                               &mapData.unique[ 0 ],
                                                0,
                                                *M_commPtr ) );
     M_repeatedMapEpetra.reset ( new Epetra_Map ( -1,
-                                                 myGlobalElementsRepeated.size(),
-                                                 &myGlobalElementsRepeated[ 0 ],
+                                                 mapData.repeated.size(),
+                                                 &mapData.repeated[ 0 ],
                                                  0,
                                                  *M_commPtr ) );
 }
-
 
 MapEpetra::MapEpetra ( const Int numGlobalElements,
                        const Int /*notUsed*/,

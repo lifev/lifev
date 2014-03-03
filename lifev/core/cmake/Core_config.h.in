@@ -16,11 +16,17 @@
 /* define prefix dir for life installation */
 #define LIFEV_PREFIX "@CMAKE_INSTALL_PREFIX@"
 
-/* Define if the HDF5 library is used. */
+/* Define if the HDF5 library is used in Trilinos. */
 #cmakedefine HAVE_HDF5
+
+/* Define if the HDF5 library is enabled as a TPL for LifeV */
+#cmakedefine LIFEV_HAS_HDF5
 
 /* Define to disable the Boost Spirit code */
 #cmakedefine ENABLE_SPIRIT_PARSER
+
+/* Define to enable OpenMP critical region for MatrixEpetra::sumIntoCoefficients */
+#cmakedefine LIFEV_MT_CRITICAL_UPDATES
 
 /* Define if the Boost library version is greater than 1.39 */
 #cmakedefine HAVE_BOOST_GT_1_39
@@ -42,6 +48,9 @@
 
 /* Define if the Trilinos Nox-thyra library is used. */
 #cmakedefine HAVE_NOX_THYRA
+
+/* Define if the Trilinos Teko library is used. */
+#cmakedefine LIFEV_HAVE_TEKO
 
 /* Define if the Trilinos version is greater than 10.6 */
 #cmakedefine HAVE_TRILINOS_GT_10_6

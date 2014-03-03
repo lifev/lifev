@@ -34,9 +34,6 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -49,13 +46,10 @@
 #include <Epetra_SerialComm.h>
 #endif
 
-// Tell the compiler to restore the warning previously silented
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LifeV includes
 #include <lifev/core/LifeV.hpp>
-#include <lifev/bc_interface/fem/BCInterface0D.hpp>
+#include <lifev/bc_interface/0D/bc/BCInterface0D.hpp>
 #include <lifev/zero_dimensional/solver/ZeroDimensionalData.hpp>
 #include <lifev/zero_dimensional/solver/ZeroDimensionalSolver.hpp>
 

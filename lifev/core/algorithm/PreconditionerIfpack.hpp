@@ -39,20 +39,18 @@
 #define _IFPACKPRECONDITIONER_HPP_
 
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Ifpack_ConfigDefs.h>
+#ifdef HAVE_IFPACK_DYNAMIC_FACTORY
+#include <Ifpack_DynamicFactory.h>
+#else
 #include <Ifpack.h>
+#endif
 #include <Ifpack_Preconditioner.h>
 #include <Ifpack_AdditiveSchwarz.h>
 #include <Ifpack_Amesos.h>
 #include <Ifpack_ILU.h>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 

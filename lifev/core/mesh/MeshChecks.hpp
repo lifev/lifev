@@ -42,7 +42,7 @@
 #include <lifev/core/mesh/MeshUtility.hpp>
 #include <lifev/core/fem/GeometricMap.hpp>
 #include <lifev/core/fem/CurrentFE.hpp>
-#include <lifev/core/fem/CurrentBoundaryFE.hpp>
+#include <lifev/core/fem/CurrentFEManifold.hpp>
 
 //! \file mesh_util.h
 //! \file mesh_util.h
@@ -210,33 +210,32 @@ void getVolumeFromFaces ( RegionMesh const& mesh,
     vols[ 1 ] = 0.0;
     vols[ 2 ] = 0.0;
     typedef typename RegionMesh::facetShape_Type GeoBShape;
-    typedef typename RegionMesh::facet_Type facet_Type;
-    typedef boost::shared_ptr<CurrentBoundaryFE> current_fe_type;
+    typedef boost::shared_ptr<CurrentFEManifold> current_fe_type;
 
     current_fe_type bdfe;
 
     switch ( GeoBShape::S_shape )
     {
         case TRIANGLE:
-            bdfe = current_fe_type ( new CurrentBoundaryFE ( feTriaP1, geoLinearTria,
+            bdfe = current_fe_type ( new CurrentFEManifold ( feTriaP1, geoLinearTria,
                                                              quadRuleTria1pt ) );
             for ( ID i = 0; i < mesh.numBFaces(); i++ )
             {
-                bdfe->updateMeasNormal ( mesh.face ( i ) );
-                vols[ 0 ] += bdfe->integral_n ( getx );
-                vols[ 1 ] += bdfe->integral_n ( gety );
-                vols[ 2 ] += bdfe->integral_n ( getz );
+                bdfe->update ( mesh.face ( i ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS | UPDATE_QUAD_NODES );
+                vols[ 0 ] += bdfe->normalIntegral ( getx );
+                vols[ 1 ] += bdfe->normalIntegral ( gety );
+                vols[ 2 ] += bdfe->normalIntegral ( getz );
             }
             break;
         case QUAD:
-            bdfe = current_fe_type ( new CurrentBoundaryFE ( feQuadQ1, geoBilinearQuad,
+            bdfe = current_fe_type ( new CurrentFEManifold ( feQuadQ1, geoBilinearQuad,
                                                              quadRuleQuad1pt ) );
             for ( ID i = 0; i < mesh.numBFaces(); i++ )
             {
-                bdfe->updateMeasNormal ( mesh.face ( i ) );
-                vols[ 0 ] += bdfe->integral_n ( getx );
-                vols[ 1 ] += bdfe->integral_n ( gety );
-                vols[ 2 ] += bdfe->integral_n ( getz );
+                bdfe->update ( mesh.face ( i ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS | UPDATE_QUAD_NODES );
+                vols[ 0 ] += bdfe->normalIntegral ( getx );
+                vols[ 1 ] += bdfe->normalIntegral ( gety );
+                vols[ 2 ] += bdfe->normalIntegral ( getz );
             }
             break;
         default:
@@ -253,9 +252,7 @@ template <typename RegionMesh>
 Real testClosedDomain ( RegionMesh const& mesh,
                         std::ostream& err = std::cerr )
 {
-    typedef typename RegionMesh::facet_Type facet_Type;
-
-    typedef boost::shared_ptr<CurrentBoundaryFE> current_fe_type;
+    typedef boost::shared_ptr<CurrentFEManifold> current_fe_type;
     current_fe_type bdfe;
 
     MeshUtility::GetOnes ones;
@@ -264,21 +261,21 @@ Real testClosedDomain ( RegionMesh const& mesh,
     switch ( RegionMesh::facetShape_Type::S_shape )
     {
         case TRIANGLE:
-            bdfe = current_fe_type ( new CurrentBoundaryFE ( feTriaP1, geoLinearTria,
+            bdfe = current_fe_type ( new CurrentFEManifold ( feTriaP1, geoLinearTria,
                                                              quadRuleTria1pt ) );
             for ( ID i = 0; i < mesh.numBFaces(); i++ )
             {
-                bdfe->updateMeasNormal ( mesh.face ( i ) );
-                test += bdfe->integral_n ( ones );
+                bdfe->update ( mesh.face ( i ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS | UPDATE_QUAD_NODES );
+                test += bdfe->normalIntegral ( ones );
             }
             break;
         case QUAD:
-            bdfe = current_fe_type ( new CurrentBoundaryFE ( feQuadQ1, geoBilinearQuad,
+            bdfe = current_fe_type ( new CurrentFEManifold ( feQuadQ1, geoBilinearQuad,
                                                              quadRuleQuad1pt ) );
             for ( ID i = 0; i < mesh.numBFaces(); i++ )
             {
-                bdfe->updateMeasNormal ( mesh.face ( i ) );
-                test += bdfe->integral_n ( ones );
+                bdfe->update ( mesh.face ( i ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS | UPDATE_QUAD_NODES );
+                test += bdfe->normalIntegral ( ones );
             }
 
             break;

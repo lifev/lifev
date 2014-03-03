@@ -47,7 +47,6 @@
 
 #include <lifev/core/fem/ReferenceFEScalar.hpp>
 #include <lifev/core/fem/ReferenceFEHdiv.hpp>
-#include <lifev/core/fem/ReferenceFEHybrid.hpp>
 
 #include <lifev/core/fem/QuadratureRule.hpp>
 
@@ -127,9 +126,6 @@ namespace LifeV
     <th> UPDATE_QUAD_NODES </th> <th> Update everything needed to know the position of the quadrature nodes in the current cell </th>
    </tr>
    <tr>
-    <th> UPDATE_PHI </th> <th> Update everything needed to know the values of the basis functions in the quadrature nodes (in the current cell) </th>
-   </tr>
-   <tr>
     <th> UPDATE_DPHI </th> <th>  Update everything needed to know the values of the derivatives of the basis functions in the quadrature nodes (in the current cell) </th>
    </tr>
    <tr>
@@ -141,31 +137,28 @@ namespace LifeV
 
   </table>
 
+  Note: in the old versions there was also the flag UPDATE_PHI. This flag (together with UPDATE_ONLY_PHI) has been removed, since the values of the basis functions in the quadrature nodes are always the same, so they do not need to be updated.
   Besides this usual flags, there are a couple of "primitive" flags, that update only a particular element in the currentFE structure. Be sure to know what you are doing before using them.
 
 */
 
 const flag_Type UPDATE_ONLY_CELL_NODES (1);
 const flag_Type UPDATE_ONLY_QUAD_NODES (2);
-const flag_Type UPDATE_ONLY_PHI (4);
-const flag_Type UPDATE_ONLY_DPHI_GEO_MAP (8);
-const flag_Type UPDATE_ONLY_JACOBIAN (16);
-const flag_Type UPDATE_ONLY_T_INVERSE_JACOBIAN (32);
-const flag_Type UPDATE_ONLY_W_DET_JACOBIAN (64);
-const flag_Type UPDATE_ONLY_DPHI_REF (128);
-const flag_Type UPDATE_ONLY_DPHI (256);
-const flag_Type UPDATE_ONLY_D2PHI_REF (512);
-const flag_Type UPDATE_ONLY_D2PHI (1024);
-const flag_Type UPDATE_ONLY_PHI_VECT (2048);
-const flag_Type UPDATE_ONLY_DIV_PHI_REF (4096);
-const flag_Type UPDATE_ONLY_DET_JACOBIAN (8192);
+const flag_Type UPDATE_ONLY_DPHI_GEO_MAP (4);
+const flag_Type UPDATE_ONLY_JACOBIAN (8);
+const flag_Type UPDATE_ONLY_T_INVERSE_JACOBIAN (16);
+const flag_Type UPDATE_ONLY_W_DET_JACOBIAN (32);
+const flag_Type UPDATE_ONLY_DPHI_REF (64);
+const flag_Type UPDATE_ONLY_DPHI (128);
+const flag_Type UPDATE_ONLY_D2PHI_REF (256);
+const flag_Type UPDATE_ONLY_D2PHI (512);
+const flag_Type UPDATE_ONLY_PHI_VECT (1024);
+const flag_Type UPDATE_ONLY_DIV_PHI_REF (2048);
+const flag_Type UPDATE_ONLY_DET_JACOBIAN (4096);
 
 
 const flag_Type UPDATE_QUAD_NODES (UPDATE_ONLY_CELL_NODES
                                    | UPDATE_ONLY_QUAD_NODES);
-
-const flag_Type UPDATE_PHI (UPDATE_ONLY_PHI
-                            | UPDATE_ONLY_CELL_NODES);
 
 const flag_Type UPDATE_DPHI (UPDATE_ONLY_CELL_NODES
                              | UPDATE_ONLY_DPHI_GEO_MAP
@@ -272,7 +265,7 @@ public:
     CurrentFE ( const ReferenceFE& refFE, const GeometricMap& geoMap);
 
     //! Destructor
-    ~CurrentFE()
+    virtual ~CurrentFE()
     {
         delete M_quadRule;
     }
@@ -291,16 +284,16 @@ public:
       @param upFlag The flag to explain the quantities that we want to update
      */
     template<typename MeshElementMarkedType>
-    void update (const MeshElementMarkedType& geoele, const flag_Type& upFlag);
+    void update (const MeshElementMarkedType& geoele, flag_Type upFlag);
 
     //! Update method using only point coordinates. It used the flags, as defined in \ref update_procedure "this page".
-    void update (const std::vector<std::vector<Real> >& pts, const flag_Type& upFlag);
+    virtual void update (const std::vector<std::vector<Real> >& pts, flag_Type upFlag);
 
     //! Update method using only point coordinates. It used the flags, as defined in \ref update_procedure "this page".
-    void update (const std::vector<GeoVector>& pts, const flag_Type& upFlag);
+    void update (const std::vector<GeoVector>& pts, flag_Type upFlag);
 
     //! Return the measure of the current element
-    Real measure() const;
+    virtual Real measure() const;
 
     //! return the barycenter of the element
     void barycenter ( Real& x, Real& y, Real& z ) const;
@@ -317,7 +310,7 @@ public:
       and   (x,y,z) the coor in the current element
       (if the code is compiled in 2D mode then z=0 and zeta is disgarded)
     */
-    void coorMap ( Real& x, Real& y, Real& z, const Real& xi, const Real& eta, const Real& zeta ) const;
+    void coorMap ( Real& x, Real& y, Real& z, Real xi, Real eta, Real zeta ) const;
 
     /*!
       return the coordinates in the current element of the point
@@ -355,25 +348,31 @@ public:
     //@{
 
     //! Getter for the ID of the current cell
-    inline const UInt& currentId() const
+    inline UInt currentId() const
     {
         return M_currentId;
     }
 
     //! Getter for the local ID of the current cell
-    inline const UInt& currentLocalId() const
+    inline UInt currentLocalId() const
     {
         return M_currentLocalId;
     }
 
     //! Getter for the number of quadrature nodes
-    inline const UInt& nbQuadPt() const
+    inline UInt nbQuadPt() const
     {
         return M_nbQuadPt;
     }
 
+    //! Getter for the number of geometrical nodes
+    inline UInt nbGeoNode() const
+    {
+        return M_nbGeoNode;
+    }
+
     //! Getter for the number of nodes
-    inline const UInt& nbFEDof() const
+    inline UInt nbFEDof() const
     {
         return M_nbNode;
     }
@@ -397,27 +396,33 @@ public:
     };
 
     //! Getter for the number of entries in the pattern
-    inline const UInt& nbPattern() const
+    inline UInt nbPattern() const
     {
         return M_nbPattern;
     };
 
     //! Getter for the diagonal entries in the pattern
-    inline const UInt& nbDiag() const
+    inline UInt nbDiag() const
     {
         return M_nbDiag;
     };
 
     //! Getter for the number of entries in the pattern
-    inline const UInt& nbUpper() const
+    inline UInt nbUpper() const
     {
         return M_nbUpper;
     };
 
-    //! Getter for the number of coordinates
-    inline const UInt& nbCoor() const
+    //! Old getter for the number of local coordinates
+    inline LIFEV_DEPRECATED ( UInt ) nbCoor() const
     {
-        return M_nbCoor;
+        return M_nbLocalCoor;
+    };
+
+    //! Getter for the number of local coordinates
+    UInt nbLocalCoor () const
+    {
+        return M_nbLocalCoor;
     };
 
     //@}
@@ -427,75 +432,74 @@ public:
     //@{
 
     //! Getter for the nodes of the cell
-    inline const Real& cellNode (const UInt& node, const UInt& coordinate) const
+    inline Real cellNode (UInt node, UInt coordinate) const
     {
         ASSERT (M_cellNodesUpdated, "Cell nodes are not updated!");
         return M_cellNodes[node][coordinate];
     };
 
     //! Getter for the quadrature nodes
-    inline const Real& quadNode (const UInt& node, const UInt& coordinate) const
+    inline Real quadNode (UInt node, UInt coordinate) const
     {
         ASSERT (M_quadNodesUpdated, "Quad nodes are not updated!");
         return M_quadNodes[node][coordinate];
     };
 
     //! Getter for the determinant of the jacobian in a given quadrature node
-    inline const Real& detJacobian (const UInt& quadNode) const
+    inline Real detJacobian (UInt quadNode) const
     {
         ASSERT (M_detJacobianUpdated, "Jacobian determinant is not updated!");
         return M_detJacobian[quadNode];
     };
 
     //! Getter for the weighted jacobian determinant
-    inline const Real& wDetJacobian (const UInt& quadNode) const
+    inline Real wDetJacobian (UInt quadNode) const
     {
         ASSERT (M_wDetJacobianUpdated, "Weighted jacobian determinant is not updated!");
         return M_wDetJacobian[quadNode];
     };
 
     //! Getter for the inverse of the jacobian
-    inline const Real& tInverseJacobian (const UInt& element1, const UInt& element2, const UInt& quadNode) const
+    inline Real tInverseJacobian (UInt element1, UInt element2, UInt quadNode) const
     {
         ASSERT (M_tInverseJacobianUpdated, "Inverse jacobian is not updated!");
         return M_tInverseJacobian[element1][element2][quadNode];
     };
 
     //! Getter for basis function values (scalar FE case)
-    inline const Real& phi (const UInt& node, const UInt& quadNode) const
+    inline Real phi (UInt node, UInt quadNode) const
     {
         ASSERT (M_phiUpdated, "Function values are not updated!");
         return M_phi[node][0][quadNode];
     };
 
     //! Getter for basis function values (vectorial FE case)
-    inline const Real& phi (const UInt& node, const UInt& component, const UInt& quadNode) const
+    inline Real phi (UInt node, UInt component, UInt quadNode) const
     {
         ASSERT (M_phiVectUpdated, "Function values are not updated!");
         return M_phiVect[node][component][quadNode];
     };
 
     //! Getter for the derivatives of the basis functions
-    inline const Real& dphi (const UInt& node, const UInt& derivative, const UInt& quadNode) const
+    inline Real dphi (UInt node, UInt derivative, UInt quadNode) const
     {
         ASSERT (M_dphiUpdated, "Basis derivatives are not updated!");
         return M_dphi[node][derivative][quadNode];
     };
 
     //! Getter for the second derivatives of the basis functions
-    inline const Real& d2phi (const UInt& node, const UInt& derivative1, const UInt& derivative2, const UInt& quadNode) const
+    inline Real d2phi (UInt node, UInt derivative1, UInt derivative2, UInt quadNode) const
     {
         ASSERT (M_d2phiUpdated, "Basis second derivatives are not updated!");
         return M_d2phi[node][derivative1][derivative2][quadNode];
     };
 
     //! Getter for the divergence of a vectorial FE in the reference frame.
-    inline const Real& divPhiRef (const UInt& node, const UInt& quadNode) const
+    inline Real divPhiRef (UInt node, UInt quadNode) const
     {
         ASSERT (M_divPhiRefUpdated, "Basis divergence are not updated!");
         return M_divPhiRef[node][quadNode];
     };
-
     //@}
 
 
@@ -504,49 +508,49 @@ public:
     //@{
 
     //! Old accessor, use cellNode instead.
-    inline const Real& point (const UInt& node, const UInt& coordinate) const
+    inline Real point (UInt node, UInt coordinate) const
     {
         ASSERT (M_cellNodesUpdated, "Cell nodes are not updated!");
         return M_cellNodes[node][coordinate];
     };
 
     //! Old accessor, use quadNode instead
-    inline const Real& quadPt (const UInt& node, const UInt& coordinate) const
+    inline Real quadPt (UInt node, UInt coordinate) const
     {
         ASSERT (M_quadNodesUpdated, "Quad nodes are not updated!");
         return M_quadNodes[node][coordinate];
     };
 
     //! Old accessor, use wDetJacobian instead
-    inline const Real& weightDet (const UInt& quadNode) const
+    inline Real weightDet (UInt quadNode) const
     {
         ASSERT (M_wDetJacobianUpdated, "Weighted jacobian determinant is not updated!");
         return M_wDetJacobian[quadNode];
     };
 
     //! Getter for the determinant of the jacobian in a given quadrature node
-    inline const Real& detJac (const UInt& quadNode) const
+    inline Real detJac (UInt quadNode) const
     {
         ASSERT (M_detJacobianUpdated, "Jacobian determinant is not updated!");
         return M_detJacobian[quadNode];
     };
 
     //! Old accessor, use iInverseJacobian instead
-    inline const Real& tInvJac (const UInt& element1, const UInt& element2, const UInt& quadNode) const
+    inline Real tInvJac (UInt element1, UInt element2, UInt quadNode) const
     {
         ASSERT (M_tInverseJacobianUpdated, "Inverse jacobian is not updated!");
         return M_tInverseJacobian[element1][element2][quadNode];
     };
 
     //! Old accessor, use dphi instead
-    inline const Real& phiDer (const UInt& node, const UInt& derivative, const UInt& quadNode) const
+    inline Real phiDer (UInt node, UInt derivative, UInt quadNode) const
     {
         ASSERT (M_dphiUpdated, "Basis derivatives are not updated!");
         return M_dphi[node][derivative][quadNode];
     };
 
     //! Old accessor, use d2phi instead
-    inline const Real& phiDer2 (const UInt& node, const UInt& derivative1, const UInt& derivative2, const UInt& quadNode) const
+    inline Real phiDer2 (UInt node, UInt derivative1, UInt derivative2, UInt quadNode) const
     {
         ASSERT (M_d2phiUpdated, "Basis second derivatives are not updated!");
         return M_d2phi[node][derivative1][derivative2][quadNode];
@@ -554,11 +558,11 @@ public:
 
     //@}
 
-
-
-
-private:
+protected:
+    // Default constructor is NOT implemented
     CurrentFE( );
+
+    // Copy constructor possibly used only in derived classes
     CurrentFE ( const CurrentFE& );
 
     //! Update the nodes of the cell to the current one.
@@ -570,9 +574,6 @@ private:
 
     //! Update the location of the quadrature in the current cell.
     void computeQuadNodes();
-
-    //! Compute the values of the basis functions in the quadrature nodes
-    void computePhi();
 
     //! Compute the values of the derivatives of the mapping in the quadrature nodes
     void computeDphiGeometricMap();
@@ -605,9 +606,8 @@ private:
     void computePhiVect();
 
     // Constants
-private:
     const UInt M_nbNode;
-    const UInt M_nbCoor;
+    const UInt M_nbLocalCoor;
     const UInt M_nbDiag;
     const UInt M_nbUpper;
     const UInt M_nbPattern;
@@ -648,6 +648,7 @@ private:
     boost::multi_array<Real, 2> M_divPhiRef;
 
     // Check
+
     bool M_cellNodesUpdated;
     bool M_quadNodesUpdated;
 
@@ -676,26 +677,26 @@ public:
     /*!
       compute the coordinate (xi,eta,zeta)=inv(F)(x,y,z)
     */
-    void coorBackMap (const Real& x, const Real& y, const Real& z,
+    void coorBackMap (Real x, Real y, Real z,
                       Real& xi, Real& eta, Real& zeta) const;
 
     /*!
       compute the jacobian at a given point : d x_compx / d zeta_compzeta
     */
-    Real pointJacobian (const Real& hat_x, const Real& hat_y, const Real& hat_z,
+    Real pointJacobian (Real hat_x, Real hat_y, Real hat_z,
                         int compx, int compzeta) const;
 
     /*!
       compute the inverse jacobian
      */
 
-    Real pointInverseJacobian (const Real& hat_x, const Real& hat_y, const Real& hat_z,
+    Real pointInverseJacobian (Real hat_x, Real hat_y, Real hat_z,
                                int compx, int compzeta) const;
 
     /*!
       compute the determinant of the Jacobian at a given point
      */
-    Real pointDetJacobian (const Real& hat_x, const Real& hat_y, const Real& hat_z) const;
+    Real pointDetJacobian (Real hat_x, Real hat_y, Real hat_z) const;
 
     /*!  return (x,y,z) = the global coordinates of the quadrature point ig
       in the current element. \warning this function is almost obsolete since if
@@ -704,7 +705,7 @@ public:
       been computed and may be obtained via quadPt(ig,icoor). This is usually
       much less expensive since it avoids many calls to coorQuadPt
     */
-    inline void coorQuadPt ( Real& x, Real& y, Real& z, const int ig ) const
+    inline void coorQuadPt (Real& x, Real& y, Real& z, int ig ) const
     {
         coorMap ( x, y, z, M_quadRule->quadPointCoor ( ig, 0 ), M_quadRule->quadPointCoor ( ig, 1 ),
                   M_quadRule->quadPointCoor ( ig, 2 ) );
@@ -782,20 +783,19 @@ public:
 
 };
 
-
-
+// ==================================================== IMPLEMENTATION ====================================================== //
 
 template<typename MeshElementMarked>
-void CurrentFE::update (const MeshElementMarked& geoele, const flag_Type& upFlag)
+void CurrentFE::update (const MeshElementMarked& geoele, flag_Type upFlag)
 {
     M_currentId      = geoele.id();
     M_currentLocalId = geoele.localId();
 
-    std::vector< std::vector <Real> > pts (M_nbGeoNode, std::vector<Real> (M_nbCoor) );
+    std::vector< std::vector <Real> > pts (M_nbGeoNode, std::vector<Real> (nDimensions) );
 
     for ( UInt i (0); i < M_nbGeoNode; ++i )
     {
-        for ( UInt icoor (0); icoor < M_nbCoor; ++icoor)
+        for ( UInt icoor (0); icoor < nDimensions; ++icoor)
         {
             pts[i][icoor] = geoele.point (i).coordinate (icoor);
         }
@@ -803,15 +803,14 @@ void CurrentFE::update (const MeshElementMarked& geoele, const flag_Type& upFlag
     update (pts, upFlag);
 }
 
-
 template<typename MeshElementMarked>
 void CurrentFE::computeCellNodes (const MeshElementMarked& geoele)
 {
-    std::vector< std::vector <Real> > pts (M_nbGeoNode, std::vector<Real> (M_nbCoor) );
+    std::vector< std::vector <Real> > pts (M_nbGeoNode, std::vector<Real> (nDimensions) );
 
     for ( UInt i (0); i < M_nbGeoNode; ++i )
     {
-        for ( UInt icoor (0); icoor < M_nbCoor; ++icoor)
+        for ( UInt icoor (0); icoor < nDimensions; ++icoor)
         {
             pts[i][icoor] = geoele.point (i).coordinate (icoor);
         }

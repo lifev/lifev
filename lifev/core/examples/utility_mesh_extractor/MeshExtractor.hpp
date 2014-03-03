@@ -21,7 +21,6 @@ RegionMesh< typename RegionMesh<geoShape_Type>::facetShape_Type >*   extractBoun
     typedef RegionMesh<geoShape_Type>  mesh_Type;
     typedef typename mesh_Type::facetShape_Type facetShape_Type;
     typedef typename mesh_Type::facet_Type facet_Type;
-    typedef typename mesh_Type::ridge_Type ridge_Type;
     typedef RegionMesh<facetShape_Type> boundaryRegionMesh_Type;
 
     //(1) Extract the list of faces with marker boundaryFaceMarker.

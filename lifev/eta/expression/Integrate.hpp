@@ -38,6 +38,8 @@
 
 #include <lifev/core/LifeV.hpp>
 
+#include <lifev/core/util/OpenMPParameters.hpp>
+
 #include <lifev/eta/expression/RequestLoopElement.hpp>
 
 #include <lifev/core/fem/QuadratureRule.hpp>
@@ -74,10 +76,58 @@ integrate ( const RequestLoopElement<MeshType>& request,
             const QuadratureRule& quadrature,
             const boost::shared_ptr<TestSpaceType>& testSpace,
             const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-            const ExpressionType& expression)
+            const ExpressionType& expression,
+            const UInt offsetUp = 0,
+            const UInt offsetLeft = 0);
+template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
+IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>
+integrate ( const RequestLoopElement<MeshType>& request,
+            const QuadratureRule& quadrature,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+            const ExpressionType& expression,
+            const UInt offsetUp,
+            const UInt offsetLeft)
 {
     return IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>
-           (request.mesh(), quadrature, testSpace, solutionSpace, expression);
+           (request.mesh(), quadrature, testSpace, solutionSpace, expression, offsetUp, offsetLeft);
+}
+
+//! Integrate function for matricial expressions (multi-threaded path)
+/*!
+  @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+
+  This class is an helper function to instantiate the class
+  for performing an integration, here to assemble a matrix
+  with a loop on the elements.
+
+  This is an overload of the integrate function for matrices, which
+  uses multiple threads to do assembly
+ */
+template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
+IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>
+integrate ( const RequestLoopElement<MeshType>& request,
+            const QuadratureRule& quadrature,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+            const ExpressionType& expression,
+            const OpenMPParameters& ompParams,
+            const UInt offsetUp = 0,
+            const UInt offsetLeft = 0);
+template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
+IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>
+integrate ( const RequestLoopElement<MeshType>& request,
+            const QuadratureRule& quadrature,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+            const ExpressionType& expression,
+            const OpenMPParameters& ompParams,
+            const UInt offsetUp,
+            const UInt offsetLeft)
+{
+    return IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>
+           (request.mesh(), quadrature, testSpace, solutionSpace, expression,
+            ompParams, offsetUp, offsetLeft);
 }
 
 //! Integrate function for vectorial expressions
@@ -93,10 +143,18 @@ IntegrateVectorElement<MeshType, TestSpaceType, ExpressionType>
 integrate ( const RequestLoopElement<MeshType>& request,
             const QuadratureRule& quadrature,
             const boost::shared_ptr<TestSpaceType>& testSpace,
-            const ExpressionType& expression)
+            const ExpressionType& expression,
+            const UInt offset = 0);
+template < typename MeshType, typename TestSpaceType, typename ExpressionType>
+IntegrateVectorElement<MeshType, TestSpaceType, ExpressionType>
+integrate ( const RequestLoopElement<MeshType>& request,
+            const QuadratureRule& quadrature,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const ExpressionType& expression,
+            const UInt offset)
 {
     return IntegrateVectorElement<MeshType, TestSpaceType, ExpressionType>
-           (request.mesh(), quadrature, testSpace, expression);
+           (request.mesh(), quadrature, testSpace, expression, offset);
 }
 
 //! Integrate function for benchmark expressions

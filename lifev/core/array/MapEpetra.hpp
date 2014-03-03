@@ -41,10 +41,6 @@
 #ifndef _EPETRAMAP_
 #define _EPETRAMAP_
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-pedantic"
 
 #include <Epetra_Map.h>
 #include <Epetra_Export.h>
@@ -55,18 +51,13 @@
 #include <EpetraExt_HDF5.h>
 #endif
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-#pragma GCC diagnostic warning "-pedantic"
-
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/array/EnumMapEpetra.hpp>
+#include <lifev/core/array/MapEpetraData.hpp>
 #include <lifev/core/array/MapVector.hpp>
 
 namespace LifeV
 {
-
 
 //! MapEpetra - Wrapper for Epetra_Map
 /*!
@@ -87,6 +78,8 @@ public:
 
     typedef Epetra_Map                                            map_type;
     typedef boost::shared_ptr<map_type>                           map_ptrtype;
+
+    typedef MapEpetraData                                         mapData_Type;
 
     /* Double shared_ptr are used here to ensure that all the similar MapEpetra
        point to the same exporter/importer. If double shared_ptr were not used, a
@@ -121,8 +114,13 @@ public:
                 Int* myGlobalElements,
                 const comm_ptrtype& commPtr );
 
-    MapEpetra ( std::pair<std::vector<Int>, std::vector<Int> > myGlobalElements,
-                const comm_ptrtype& commPtr );
+    //! Constructor
+    /*!
+      To define a linear map, set MyGlobalElements = 0
+      @param mapData Structure containing Ids for the local Unique and Repeated map
+      @param commPtr Pointer to the communicator
+    */
+    MapEpetra ( mapData_Type const& mapData, comm_ptrtype const& commPtr );
 
     //! Constructor
     /*
@@ -280,7 +278,7 @@ public:
     //! check if a global id is owned by the current partition
     bool isOwned ( const UInt globalId ) const
     {
-        return ( M_uniqueMapEpetra->LID ( globalId ) > -1 );
+        return ( M_uniqueMapEpetra->LID ( static_cast<int> (globalId) ) > -1 );
     }
 
     //@}

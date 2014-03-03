@@ -156,8 +156,6 @@ public:
     {
         zero();
 
-        M_currentFE.update (M_fespace->mesh()->element (iElement), ET_UPDATE_PHI);
-
         for (UInt i (0); i < M_fespace->refFE().nbDof(); ++i)
         {
             for (UInt q (0); q < M_quadrature->nbQuadPt(); ++q)
@@ -277,7 +275,7 @@ private:
     vector_Type M_vector;
 
     QuadratureRule* M_quadrature;
-    ETCurrentFE<3, 1> M_currentFE;
+    ETCurrentFE<SpaceDim, 1> M_currentFE;
 
     std::vector<return_Type> M_interpolatedValues;
 };
@@ -382,8 +380,6 @@ public:
     void update (const UInt& iElement)
     {
         zero();
-
-        M_currentFE.update (M_fespace->mesh()->element (iElement), ET_UPDATE_PHI);
 
         for (UInt i (0); i < M_fespace->refFE().nbDof(); ++i)
         {
@@ -499,7 +495,7 @@ private:
     QuadratureRule* M_quadrature;
 
     //! Structure for the computations
-    ETCurrentFE<3, 1> M_currentFE;
+    ETCurrentFE<SpaceDim, 1> M_currentFE;
 
     //! Storage for the temporary values
     std::vector<return_Type> M_interpolatedValues;

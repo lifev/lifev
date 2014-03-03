@@ -39,14 +39,10 @@
 #ifndef _DARCYSOLVERLINEAR_HPP_
 #define _DARCYSOLVERLINEAR_HPP_ 1
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_LAPACK.h>
 #include <Epetra_BLAS.h>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/algorithm/LinearSolver.hpp>
 
@@ -1215,7 +1211,7 @@ localMatrixComputation ( const UInt& iElem, MatrixElemental& elmatMix,
     const Real reactionValue = M_reactionTermFct->eval ( iElem, barycenter, M_data->dataTimePtr()->time() );
 
     // Update the current element of ID iElem for the primal variable.
-    M_primalField->getFESpace().fe().update ( element, UPDATE_PHI | UPDATE_WDET );
+    M_primalField->getFESpace().fe().update ( element, UPDATE_WDET );
 
     // Compute the reaction matrix.
     mass ( reactionValue, elmatReactionTerm, M_primalField->getFESpace().fe(), 0, 0 );
@@ -1258,7 +1254,7 @@ localVectorComputation ( const UInt& iElem, VectorElemental& elvecMix )
 
     /* Update the current element of ID iElem only for the primal variable,
        it is used for computing the source term. */
-    M_primalField->getFESpace().fe().update ( element, UPDATE_PHI | UPDATE_WDET );
+    M_primalField->getFESpace().fe().update ( element, UPDATE_WDET );
 
     // Compute the scalar source term.
     source ( scalarSourceValue, elvecMix, M_primalField->getFESpace().fe(), 1 );

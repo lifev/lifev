@@ -79,6 +79,8 @@ public:
     typedef SolverType                                        linearSolver_Type;
     typedef OseenSolver< mesh_Type, linearSolver_Type >       oseenSolver_Type;
     typedef typename oseenSolver_Type::vector_Type            vector_Type;
+    typedef typename oseenSolver_Type::solution_Type          solution_Type;
+    typedef typename oseenSolver_Type::solutionPtr_Type       solutionPtr_Type;
     typedef typename oseenSolver_Type::matrix_Type            matrix_Type;
     typedef typename oseenSolver_Type::matrixPtr_Type         matrixPtr_Type;
     typedef typename oseenSolver_Type::data_Type              data_Type;
@@ -580,7 +582,7 @@ template<typename MeshType, typename SolverType>
 Real
 OseenSolverShapeDerivative<MeshType, SolverType>::linearKineticNormalStress ( const markerID_Type& flag, const vector_Type& solution, const vector_Type& linearSolution )
 {
-    vector_Type velocityAndPressure ( solution, Repeated );
+    vector_Type velocityAndPressure ( solution, Repeated, Add );
     vector_Type velocity ( this->M_velocityFESpace.map(), Repeated );
     velocity.subset ( velocityAndPressure );
 

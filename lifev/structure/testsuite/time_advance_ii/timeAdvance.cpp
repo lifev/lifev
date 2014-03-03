@@ -59,9 +59,6 @@ nonlinear_function.hpp:
 // ===================================================
 //! Includes
 // ===================================================
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
@@ -71,9 +68,6 @@ nonlinear_function.hpp:
 #include <Epetra_SerialComm.h>
 #endif
 
-//Tell the compiler to restore the warning previously silented
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/array/MapEpetra.hpp>
 #include <lifev/core/mesh/MeshData.hpp>
@@ -385,13 +379,8 @@ problem::run()
         for ( UInt previousPass = 0; previousPass < dataProblem->dataTimeAdvance()->orderBDF() ; previousPass++)
         {
             Real previousTimeStep = -previousPass * dt;
-            // <<<<<<< HEAD
-            feSpace->interpolate (uexact, *U, previousTimeStep );
+            feSpace->interpolate (static_cast<FESpace_type::function_Type> ( uexact ), *U, previousTimeStep );
             uv0.push_back (U);
-            // =======
-            // feSpace->interpolate( static_cast<FESpace_type::function_Type>( uexact ), *U, previousTimeStep);
-            // uv0.push_back(*U);
-            //>>>>>>> master
         }
     }
 

@@ -40,13 +40,9 @@
 #ifndef ADRASSEMBLERIP_H
 #define ADRASSEMBLERIP_H 1
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <boost/scoped_ptr.hpp>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 
@@ -224,13 +220,13 @@ public:
 
 private:
 
-    typedef MatrixElemental                               localMatrix_type;
+    typedef MatrixElemental                              localMatrix_type;
     typedef boost::scoped_ptr<localMatrix_type>          localMatrix_ptrType;
 
-    typedef CurrentFE                             currentFE_type;
+    typedef CurrentFE                                    currentFE_type;
     typedef boost::scoped_ptr<currentFE_type>            currentFE_ptrType;
 
-    typedef CurrentBoundaryFE                           currentBdFE_type;
+    typedef CurrentFEManifold                            currentBdFE_type;
     typedef boost::scoped_ptr<currentBdFE_type>          currentBdFE_ptrType;
 
 
@@ -298,7 +294,7 @@ setup ( const fespace_ptrType& fespace, const fespace_ptrType& betaFESpace )
     M_fespace = fespace;
     M_betaFESpace = betaFESpace;
 
-    M_IPFaceCFE.reset (new CurrentBoundaryFE (M_fespace->feBd().refFE, M_fespace->feBd().geoMap, M_fespace->feBd().qr) );
+    M_IPFaceCFE.reset (new CurrentFEManifold (M_fespace->feBd().refFE(), M_fespace->feBd().geoMap(), M_fespace->feBd().quadRule() ) );
 
     // For the two next CurrentFEs, the quadrature plays no role
     M_IPQuad1CFE.reset (new CurrentFE (M_fespace->refFE(), M_fespace->fe().geoMap(), M_fespace->qr() ) );
@@ -383,7 +379,7 @@ addIPStabilizationStencil (const matrix_ptrType& matrixGalerkin,
         // we need to update the currentFEs with a quadrature that lies on the face.
         // First step , we compute this quadrature.
 
-        M_IPFaceCFE->updateMeasNormalQuadPt (M_fespace->mesh()->face (iFace) );
+        M_IPFaceCFE->update (M_fespace->mesh()->face (iFace), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS | UPDATE_QUAD_NODES);
         hFace2 = M_IPFaceCFE->measure();
 
         // Second step, we take the quadrature back to the reference frame for both
@@ -427,7 +423,6 @@ addIPStabilizationStencil (const matrix_ptrType& matrixGalerkin,
 
         M_IP1CFE->update (M_fespace->mesh()->element (adjacentElement1), UPDATE_DPHI | UPDATE_WDET);
         M_IP2CFE->update (M_fespace->mesh()->element (adjacentElement2), UPDATE_DPHI | UPDATE_WDET);
-        M_IPBetaCFE->update (M_fespace->mesh()->element (adjacentElement1), UPDATE_PHI );
 
         // Before starting the assembly, we compute the values of |beta n|
         // in the quadrature nodes
@@ -608,7 +603,7 @@ addIPStabilizationStencil (const matrix_ptrType& matrixGalerkin,
         // we need to update the currentFEs with a quadrature that lies on the face.
         // First step , we compute this quadrature.
 
-        M_IPFaceCFE->updateMeasNormalQuadPt (M_fespace->mesh()->face (iFace) );
+        M_IPFaceCFE->update (M_fespace->mesh()->face (iFace), UPDATE_W_ROOT_DET_METRIC | UPDATE_QUAD_NODES);
         hFace2 = M_IPFaceCFE->measure();
 
         // Second step, we take the quadrature back to the reference frame for both

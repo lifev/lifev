@@ -71,11 +71,11 @@ int main ( int argc, char* argv[] )
     MeshData meshData;
     meshData.setup (dataFile, "space_discretization");
 
-    boost::shared_ptr<mesh_Type> fullMeshPtr ( new mesh_Type ( Comm ) );
+    meshPtr_Type fullMeshPtr ( new mesh_Type ( Comm ) );
     readMesh (*fullMeshPtr, meshData);
 
     MeshPartitioner<mesh_Type> meshPart;
-    boost::shared_ptr<mesh_Type> localMeshPtr;
+    meshPtr_Type localMeshPtr;
 
     // Partitioning the mesh with a number of overlapping regions equal to leveloverlap
     int levelOverlap = 0;
@@ -86,7 +86,7 @@ int main ( int argc, char* argv[] )
     // Creating and setting up a GhostHandler object
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > FESpaceP1 (new FESpace<mesh_Type, MapEpetra> (localMeshPtr, "P1", 1, Comm) );
     GhostHandler<mesh_Type> ghostObj ( fullMeshPtr, localMeshPtr, FESpaceP1->mapPtr(), Comm );
-    ghostObj.setUp();
+    ghostObj.setUpNeighbors();
 
     // Remark: by calling the setup method, such a class identifies the closest neighbors of grid each node, as it is shown below:
     //
@@ -114,11 +114,11 @@ int main ( int argc, char* argv[] )
     // a user-defined number of circles. Regarding the example above, if one chooses as number of circles equal to 1,
     // we identify as additional neighbors the nodes n6, n7, n8, n9, n10, n11, n12 and n13.
 
-    UInt ID_trial = 89;
-    std::set<ID> Neighbors;
+    UInt ID_trial = 40;
+    neighbors_Type Neighbors;
     UInt nc = 2;
 
-    Neighbors = ghostObj.createCircleNodeNodeNeighborsMap (nc, fullMeshPtr->point (ID_trial).id() );
+    Neighbors = ghostObj.circleNeighbors ( fullMeshPtr->point (ID_trial).id(), nc );
     Neighbors.insert (fullMeshPtr->point (ID_trial).id() );
 
     // createCircleNodeNodeNeighborsMap takes both the number of circles (nc) where to find the neighbors, and the
@@ -128,8 +128,9 @@ int main ( int argc, char* argv[] )
     // EXPORTING THE RESULT FOR ONE NODE (with globalID: ID_trial), IN ORDER TO VISUALIZE THE RESULT WITH PARAVIEW
     vectorPtr_Type TrialOutput (new vector_Type (FESpaceP1->map(), Unique) );
 
-    for (std::set<ID>::iterator ii = Neighbors.begin(); ii != Neighbors.end(); ++ii)
-        if (TrialOutput->blockMap().LID (*ii) != -1)
+    for (neighbors_Type::iterator ii = Neighbors.begin(); ii != Neighbors.end(); ++ii)
+        if (TrialOutput->blockMap().LID (static_cast<int> (*ii) ) != -1)
+        {
             if (*ii == ID_trial)
             {
                 (*TrialOutput) [*ii] = -1;
@@ -138,6 +139,7 @@ int main ( int argc, char* argv[] )
             {
                 (*TrialOutput) [*ii] =  1;
             }
+        }
 
     ExporterHDF5<mesh_Type> exporter (dataFile, localMeshPtr, "Output_test_neighborsCircle", Comm->MyPID() );
     exporter.setMeshProcId (localMeshPtr, Comm->MyPID() );

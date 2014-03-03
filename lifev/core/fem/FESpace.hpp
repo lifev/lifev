@@ -51,7 +51,7 @@
 
 #include <lifev/core/fem/BCHandler.hpp>
 #include <lifev/core/fem/CurrentFE.hpp>
-#include <lifev/core/fem/CurrentBoundaryFE.hpp>
+#include <lifev/core/fem/CurrentFEManifold.hpp>
 #include <lifev/core/fem/DOF.hpp>
 #include <lifev/core/fem/SobolevNorms.hpp>
 
@@ -142,7 +142,7 @@ public:
     //! @name Methods
     //@{
 
-    //! Interpolate a given velocity function nodally onto a velocity vector
+    //! Interpolate a given function nodally onto a vector
     template<typename vector_type>
     void interpolate ( const function_Type& fct, vector_type& vect, const Real time = 0.);
 
@@ -373,11 +373,11 @@ public:
     //    const mesh_type& mesh() const {return *M_mesh;}
     //    mesh_type& mesh() {return *M_mesh;}
 
-    const meshPtr_Type  mesh()  const
+    const meshPtr_Type& mesh()  const
     {
         return M_mesh;
     }
-    meshPtr_Type        mesh()
+    meshPtr_Type&       mesh()
     {
         return M_mesh;
     }
@@ -422,7 +422,7 @@ public:
     }
 
     //! Returns the current boundary FE
-    CurrentBoundaryFE&      feBd()
+    CurrentFEManifold&      feBd()
     {
         return *M_feBd;
     }
@@ -457,9 +457,7 @@ public:
 
     //@}
 
-
-
-private:
+protected:
 
     //! @name Private Methods
     //@{
@@ -533,7 +531,7 @@ private:
 
 
     //! Set space Map (useful for switch syntax with strings)
-    enum spaceData {P1, P1_HIGH, P1Bubble, P2, P2_HIGH};
+    enum spaceData {P0 = 1, P1 = 10, P1_HIGH = 15, P1Bubble = 16, P2 = 20, P2_HIGH = 25, P2Bubble = 26};
     std::map<std::string, spaceData>        M_spaceMap;
 
     //! reference to the mesh
@@ -559,7 +557,7 @@ private:
 
     //! Current FE
     boost::shared_ptr<CurrentFE>            M_fe;
-    boost::shared_ptr<CurrentBoundaryFE>    M_feBd;
+    boost::shared_ptr<CurrentFEManifold>    M_feBd;
 
     //! Map
     mapPtr_Type                             M_map;
@@ -609,11 +607,13 @@ FESpace ( MeshPartitioner<MeshType>& mesh,
     M_map           ( new map_Type() )
 {
     // Set spaceMap
+    M_spaceMap["P0"]        = P0;
     M_spaceMap["P1"]        = P1;
     M_spaceMap["P1_HIGH"]   = P1_HIGH;
     M_spaceMap["P1Bubble"]  = P1Bubble;
     M_spaceMap["P2"]        = P2;
     M_spaceMap["P2_HIGH"]   = P2_HIGH;
+    M_spaceMap["P2Bubble"]  = P2Bubble;
 
     // Set space
     setSpace ( space, mesh_Type::S_geoDimensions );
@@ -665,11 +665,13 @@ FESpace ( meshPtr_Type         mesh,
     M_map           ( new map_Type() )
 {
     // Set spaceMap
+    M_spaceMap["P0"]        = P0;
     M_spaceMap["P1"]        = P1;
     M_spaceMap["P1_HIGH"]   = P1_HIGH;
     M_spaceMap["P1Bubble"]  = P1Bubble;
     M_spaceMap["P2"]        = P2;
     M_spaceMap["P2_HIGH"]   = P2_HIGH;
+    M_spaceMap["P2Bubble"]  = P2Bubble;
 
     // Set space
     setSpace ( space, mesh_Type::S_geoDimensions );
@@ -865,7 +867,7 @@ FESpace<MeshType, MapType>::l2ScalarProduct ( const function_Type& fct, vector_t
 
     for ( UInt iVol = 0; iVol < this->mesh()->numElements(); iVol++ )
     {
-        this->fe().update ( this->mesh()->element ( iVol ), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET );
+        this->fe().update ( this->mesh()->element ( iVol ), UPDATE_QUAD_NODES | UPDATE_WDET );
 
         Real f, x, y, z;
 
@@ -914,7 +916,7 @@ FESpace<MeshType, MapType>::l20Error ( const function_Type& fexact,
 
     for ( UInt iVol = 0; iVol < this->mesh()->numElements(); iVol++ )
     {
-        this->fe().update ( this->mesh()->element ( iVol ), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET );
+        this->fe().update ( this->mesh()->element ( iVol ), UPDATE_QUAD_NODES | UPDATE_WDET );
 
         normU += elementaryDifferenceL2NormSquare ( vec, fexact, this->fe(), this->dof(), time, M_fieldDim );
 
@@ -965,23 +967,26 @@ FESpace<MeshType, MapType>::l2Error ( const function_Type&    fexact,
 
     for ( UInt iVol  = 0; iVol < this->mesh()->numElements(); iVol++ )
     {
-        //this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
-
-        // CurrentFE newFE(this->fe().refFE(),this->fe().geoMap(),quadRuleTetra64pt);
-        this->fe().update (this->mesh()->element ( iVol ),  UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET);
-
-        normU += elementaryDifferenceL2NormSquare ( vec, fexact,
-                                                    this->fe(),
-                                                    //newFE,
-                                                    this->dof(),
-                                                    time,
-                                                    M_fieldDim );
-        if (relError)
+        if ( this->mesh()->element ( iVol ).isOwned() )
         {
-            sumExact += elementaryFctL2NormSquare ( fexact,
-                                                    this->fe(),
-                                                    time,
-                                                    M_fieldDim );
+            //this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
+
+            // CurrentFE newFE(this->fe().refFE(),this->fe().geoMap(),quadRuleTetra64pt);
+            this->fe().update (this->mesh()->element ( iVol ),  UPDATE_QUAD_NODES | UPDATE_WDET);
+
+            normU += elementaryDifferenceL2NormSquare ( vec, fexact,
+                                                        this->fe(),
+                                                        //newFE,
+                                                        this->dof(),
+                                                        time,
+                                                        M_fieldDim );
+            if (relError)
+            {
+                sumExact += elementaryFctL2NormSquare ( fexact,
+                                                        this->fe(),
+                                                        time,
+                                                        M_fieldDim );
+            }
         }
     }
 
@@ -1014,7 +1019,7 @@ FESpace<MeshType, MapType>::l2NormFunction ( const function& f, const Real time)
     //
     for ( UInt ielem = 0; ielem < this->mesh()->numElements(); ielem++ )
     {
-        this->fe().update ( this->mesh()->element ( ielem ),  UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET  );
+        this->fe().update ( this->mesh()->element ( ielem ),  UPDATE_QUAD_NODES | UPDATE_WDET  );
 
         sumExact += elementaryFctL2NormSquare ( f, this->fe(), time, M_fieldDim );
     }
@@ -1050,7 +1055,7 @@ FESpace<MeshType, MapType>:: l2ErrorWeighted (const function_Type&    exactSolut
 
     for (UInt iVol (0); iVol < this->mesh()->numElements(); ++iVol)
     {
-        this->fe().update (this->mesh()->element (iVol), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET);
+        this->fe().update (this->mesh()->element (iVol), UPDATE_QUAD_NODES | UPDATE_WDET);
 
         for (UInt iQuad (0); iQuad < this->fe().nbQuadPt(); ++iQuad)
         {
@@ -1161,7 +1166,7 @@ FESpace<MeshType, MapType>::l2Norm ( const vector_type& vec)
     for ( UInt ielem = 0; ielem < this->mesh()->numElements(); ielem++ )
     {
         //UInt elem = M_FESpace.mesh()->element( ielem ).id();
-        this->fe().update ( this->mesh()->element ( ielem ), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET );
+        this->fe().update ( this->mesh()->element ( ielem ), UPDATE_QUAD_NODES | UPDATE_WDET );
         //
         norm += elementaryL2NormSquare ( vec, this->fe(), this->dof(), nbComp );
     }
@@ -1224,7 +1229,7 @@ feInterpolateValue (const ID& elementID, const vector_type& solutionVector, cons
     }
 
     // Make sur everything is up to date
-    M_fe->update ( M_mesh->element ( elementID ), UPDATE_PHI);
+    M_fe->update ( M_mesh->element ( elementID ), UPDATE_ONLY_CELL_NODES);
 
     // Map the point back to the ref FE
     Real hat_x (0);
@@ -1280,7 +1285,7 @@ FESpace<MeshType, MapType>::
 feInterpolateValueLocal (const ID& elementID, const vector_type& solutionVector, const point_type& pt ) const
 {
     // Make sur everything is up to date
-    M_fe->update ( M_mesh->element ( elementID ), UPDATE_PHI);
+    M_fe->update ( M_mesh->element ( elementID ), UPDATE_ONLY_CELL_NODES);
 
     // Map the point back to the ref FE
     Real hat_x (0);
@@ -1633,82 +1638,147 @@ template <typename MeshType, typename MapType>
 inline void
 FESpace<MeshType, MapType>::setSpace ( const std::string& space, UInt dimension )
 {
-
-    if (dimension == 2)
+    switch (dimension)
     {
-        switch ( M_spaceMap[space] )
-        {
-            case P1 :
-                M_refFE = &feTriaP1;
-                M_Qr    = &quadRuleTria3pt;
-                M_bdQr  = &quadRuleSeg2pt;
-                break;
+            // 1D case
+        case 1:
+            switch ( M_spaceMap[space] )
+            {
+                case P0 :
+                    M_refFE = &feSegP0;
+                    M_Qr    = &quadRuleSeg1pt;
+                    M_bdQr  = &quadRuleNode1pt;
+                case P1 :
+                    M_refFE = &feSegP1;
+                    M_Qr    = &quadRuleSeg2pt;
+                    M_bdQr  = &quadRuleNode1pt;
+                    break;
 
-            case P1_HIGH :
-                M_refFE = &feTriaP1;
-                M_Qr    = &quadRuleTria6pt;
-                M_bdQr  = &quadRuleSeg3pt;
-                break;
+                case P1_HIGH :
+                    M_refFE = &feSegP1;
+                    M_Qr    = &quadRuleSeg3pt;
+                    M_bdQr  = &quadRuleNode1pt;
+                    break;
 
-            case P1Bubble :
-                M_refFE = &feTriaP1bubble;
-                M_Qr    = &quadRuleTria6pt;
-                M_bdQr  = &quadRuleSeg2pt;
-                break;
+                    // In 1D, P1Bubble are "somehow" equivalent to P2, so just use those (same pattern, same dimension of the system).
+                case P1Bubble :
+                case P2 :
+                    M_refFE = &feSegP2;
+                    M_Qr    = &quadRuleSeg3pt;
+                    M_bdQr  = &quadRuleNode1pt;
+                    break;
 
-            case P2 :
-                M_refFE = &feTriaP2;
-                M_Qr    = &quadRuleTria6pt;
-                M_bdQr  = &quadRuleSeg3pt;
-                break;
+                case P2_HIGH :
+                    M_refFE = &feSegP2;
+                    M_Qr    = &quadRuleSeg4pt;
+                    M_bdQr  = &quadRuleNode1pt;
+                    break;
 
-            case P2_HIGH :
-                M_refFE = &feTriaP2;
-                M_Qr    = &quadRuleTria7pt;
-                M_bdQr  = &quadRuleSeg3pt;
-                break;
+                default :
+                    std::cout << "!!! WARNING: Space " << space << "not implemented for " << dimension << "D FESpaces!" << std::endl;
+                    break;
+            }
+            break;
 
-            default :
-                std::cout << "!!! WARNING: Space " << space << "not implemented in FESpace class !!!" << std::endl;
-        }
-    }
-    else
-    {
-        switch ( M_spaceMap[space] )
-        {
-            case P1 :
-                M_refFE = &feTetraP1;
-                M_Qr    = &quadRuleTetra4pt;
-                M_bdQr  = &quadRuleTria3pt;
-                break;
+            // 2D case
+        case 2:
+            switch ( M_spaceMap[space] )
+            {
+                case P0 :
+                    M_refFE = &feTriaP0;
+                    M_Qr    = &quadRuleTria3pt;
+                    M_bdQr  = &quadRuleSeg2pt;
+                case P1 :
+                    M_refFE = &feTriaP1;
+                    M_Qr    = &quadRuleTria3pt;
+                    M_bdQr  = &quadRuleSeg2pt;
+                    break;
 
-            case P1_HIGH :
-                M_refFE = &feTetraP1;
-                M_Qr    = &quadRuleTetra15pt;
-                M_bdQr  = &quadRuleTria4pt;
-                break;
+                case P1_HIGH :
+                    M_refFE = &feTriaP1;
+                    M_Qr    = &quadRuleTria6pt;
+                    M_bdQr  = &quadRuleSeg3pt;
+                    break;
 
-            case P1Bubble :
-                M_refFE = &feTetraP1bubble;
-                M_Qr    = &quadRuleTetra64pt;
-                M_bdQr  = &quadRuleTria3pt;
-                break;
+                case P1Bubble :
+                    M_refFE = &feTriaP1bubble;
+                    M_Qr    = &quadRuleTria6pt;
+                    M_bdQr  = &quadRuleSeg2pt;
+                    break;
 
-            case P2 :
-                M_refFE = &feTetraP2;
-                M_Qr    = &quadRuleTetra15pt;
-                M_bdQr  = &quadRuleTria4pt;
-                break;
+                case P2 :
+                    M_refFE = &feTriaP2;
+                    M_Qr    = &quadRuleTria6pt;
+                    M_bdQr  = &quadRuleSeg3pt;
+                    break;
 
-            case P2_HIGH :
-                M_refFE = &feTetraP2;
-                M_Qr    = &quadRuleTetra64pt;
-                M_bdQr  = &quadRuleTria4pt;
-                break;
+                case P2_HIGH :
+                    M_refFE = &feTriaP2;
+                    M_Qr    = &quadRuleTria7pt;
+                    M_bdQr  = &quadRuleSeg3pt;
+                    break;
 
-            default :
-                std::cout << "!!! WARNING: Space " << space << "not implemented in FESpace class !!!" << std::endl;
-        }
+                default :
+                    std::cout << "!!! WARNING: Space " << space << "not implemented for " << dimension << "D FESpaces!" << std::endl;
+                    break;
+            }
+            break;
+
+            // 3D case
+        case 3:
+            switch ( M_spaceMap[space] )
+            {
+                case P0 :
+                    M_refFE = &feTetraP0;
+                    M_Qr    = &quadRuleTetra4pt;
+                    M_bdQr  = &quadRuleTria3pt;
+                    break;
+
+                case P1 :
+                    M_refFE = &feTetraP1;
+                    M_Qr    = &quadRuleTetra4pt;
+                    M_bdQr  = &quadRuleTria3pt;
+                    break;
+
+                case P1_HIGH :
+                    M_refFE = &feTetraP1;
+                    M_Qr    = &quadRuleTetra15pt;
+                    M_bdQr  = &quadRuleTria4pt;
+                    break;
+
+                case P1Bubble :
+                    M_refFE = &feTetraP1bubble;
+                    M_Qr    = &quadRuleTetra64pt;
+                    M_bdQr  = &quadRuleTria3pt;
+                    break;
+
+                case P2 :
+                    M_refFE = &feTetraP2;
+                    M_Qr    = &quadRuleTetra15pt;
+                    M_bdQr  = &quadRuleTria4pt;
+                    break;
+
+                case P2_HIGH :
+                    M_refFE = &feTetraP2;
+                    M_Qr    = &quadRuleTetra64pt;
+                    M_bdQr  = &quadRuleTria4pt;
+                    break;
+
+                case P2Bubble :
+                    M_refFE = &feTetraP2tilde;
+                    M_Qr    = &quadRuleTetra64pt;
+                    M_bdQr  = &quadRuleTria4pt;
+                    break;
+
+                default :
+                    std::cout << "!!! WARNING: Space " << space << "not implemented for " << dimension << "D FESpaces!" << std::endl;
+                    break;
+            }
+            break;
+
+            // Other dimensions not supported
+        default:
+            ERROR_MSG ("Error! This dimension is not supported by LifeV.\n");
     }
 }
 
@@ -1746,10 +1816,12 @@ createMap (const commPtr_Type& commptr)
 {
     // Against dummies
     ASSERT_PRE (this->M_dof->numTotalDof() > 0, " Cannot create FeSpace with no degrees of freedom");
+
     // get globalElements list from DOF
-    std::vector<Int> myGlobalElements ( this->M_dof->globalElements ( *this->M_mesh ) );
+    typename MapType::mapData_Type mapData = this->M_dof->createMapData ( *this->M_mesh );
     // Create the map
-    MapType map ( -1, myGlobalElements.size(), &myGlobalElements[0], commptr );
+    MapType map ( mapData, commptr );
+
     // Store the map. If more than one field is present the map is
     // duplicated by offsetting the DOFs
     for ( UInt ii = 0; ii < M_fieldDim; ++ii )
@@ -1766,7 +1838,7 @@ resetBoundaryFE()
 {
     if (M_refFE->hasBoundaryFE() )
     {
-        M_feBd.reset (new CurrentBoundaryFE ( M_refFE->boundaryFE(), getGeometricMap ( *M_mesh ).boundaryMap(), *M_bdQr ) );
+        M_feBd.reset (new CurrentFEManifold ( M_refFE->boundaryFE(), getGeometricMap ( *M_mesh ).boundaryMap(), *M_bdQr ) );
     }
 }
 
@@ -1984,7 +2056,7 @@ RT0ToP0Interpolate (const FESpace<mesh_Type, map_Type>& OriginalSpace,
         Vector3D barCurrentFE, barRefFE, Jac;
 
         // Update the current element of the P0 vector space.
-        M_fe->update (this->mesh()->element (elemId), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET);
+        M_fe->update (this->mesh()->element (elemId), UPDATE_QUAD_NODES | UPDATE_WDET);
 
         // Store the number of local DoF
         const UInt nDof (OriginalSpace.dof().numLocalDof() );

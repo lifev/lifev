@@ -100,15 +100,11 @@
 #include <map>
 #include <vector>
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/function.hpp>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 // deprecated attribute for LifeV functions
 // the macro is needed to avoid problems with compilers other than gcc
@@ -199,6 +195,9 @@ typedef uint32_type ID;
 //! bit-flag with up to 32 different flags
 typedef uint32_type flag_Type;
 
+//! Epetra int type (can be int or long long, accordingly to release notes)
+typedef int EpetraInt_Type; // 32-bit (long long for 64-bit indices)
+
 //! flag related free functions and functors
 namespace Flag
 {
@@ -216,6 +215,12 @@ inline bool testAllSet ( flag_Type const& inputFlag, flag_Type const& refFlag )
 inline bool testOneSet ( flag_Type const& inputFlag, flag_Type const& refFlag )
 {
     return inputFlag  & refFlag;
+}
+
+//! returns false if at least one flag set in refFlag is set in inputFlag
+inline bool testOneNotSet ( flag_Type const& inputFlag, flag_Type const& refFlag )
+{
+    return ! (inputFlag & refFlag);
 }
 
 //! turns on the refFlag active bits in inputFlag

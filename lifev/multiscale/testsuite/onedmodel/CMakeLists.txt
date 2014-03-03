@@ -1,7 +1,6 @@
 
 INCLUDE(TribitsAddExecutableAndTest)
-
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
+INCLUDE(TribitsCopyFilesToBinaryDir)
 
 TRIBITS_ADD_EXECUTABLE_AND_TEST(
   OneDModel

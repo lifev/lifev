@@ -73,12 +73,12 @@ int main ( int argc, char* argv[] )
     MeshData meshData;
     meshData.setup (dataFile, "space_discretization");
 
-    boost::shared_ptr<mesh_Type> fullMeshPtr ( new mesh_Type ( Comm ) );
+    meshPtr_Type fullMeshPtr ( new mesh_Type ( Comm ) );
     readMesh (*fullMeshPtr, meshData);
 
     // Mesh partitioning
     MeshPartitioner<mesh_Type> meshPart;
-    boost::shared_ptr<mesh_Type> localMeshPtr;
+    meshPtr_Type localMeshPtr;
 
     // Partitioning the mesh with a number of overlapping regions equal to leveloverlap
     int levelOverlap = 5;
@@ -91,23 +91,24 @@ int main ( int argc, char* argv[] )
     GhostHandler<mesh_Type> ghostObj ( fullMeshPtr, localMeshPtr, FESpaceP1->mapPtr(), Comm );
 
     // Creating node-node map over the interface
-    std::vector<int> interface_flags (2);
-    interface_flags[0] = 20;
-    interface_flags[1] = 1;
-    ghostObj.setUp (interface_flags);
+    std::vector<markerID_Type> interfaceMarkers (2);
+    interfaceMarkers[0] = 20;
+    interfaceMarkers[1] = 1;
+    ghostObj.createPointPointNeighborsList ( interfaceMarkers );
 
-    UInt ID_trial = 1277;
-    std::set<ID> Neighbors;
+    UInt ID_trial = 314;
+    neighbors_Type Neighbors;
     double radius = 4 * (double) MeshUtility::MeshStatistics::computeSize (*fullMeshPtr).maxH;
 
-    Neighbors = ghostObj.createNodeNodeNeighborsMapWithinRadius (radius, fullMeshPtr->point (ID_trial).id() );
+    Neighbors = ghostObj.neighborsWithinRadius ( fullMeshPtr->point (ID_trial).id(), radius );
     Neighbors.insert (fullMeshPtr->point (ID_trial).id() );
 
     // Exporting the solution
     vectorPtr_Type TrialOutput (new vector_Type (FESpaceP1->map(), Unique) );
 
-    for (std::set<ID>::iterator ii = Neighbors.begin(); ii != Neighbors.end(); ++ii)
-        if (TrialOutput->blockMap().LID (*ii) != -1)
+    for (neighbors_Type::iterator ii = Neighbors.begin(); ii != Neighbors.end(); ++ii)
+        if (TrialOutput->blockMap().LID (static_cast<int> (*ii) ) != -1)
+        {
             if (*ii == ID_trial)
             {
                 (*TrialOutput) [*ii] = -1;
@@ -116,6 +117,7 @@ int main ( int argc, char* argv[] )
             {
                 (*TrialOutput) [*ii] =  1;
             }
+        }
 
     ExporterHDF5<mesh_Type> exporter (dataFile, localMeshPtr, "Output_test_neighborsRadius", Comm->MyPID() );
     exporter.setMeshProcId (localMeshPtr, Comm->MyPID() );

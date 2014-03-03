@@ -67,10 +67,7 @@
  * The outflow boundary condition is of absorbing type. At the outer wall for the structure a Robin condition is imposed.
  */
 
-// Tell the compiler to ignore specific kind of warnings:
 #undef HAVE_HDF5
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <cassert>
 #include <cstdlib>
@@ -85,9 +82,6 @@
 #include <Epetra_SerialComm.h>
 #endif
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LifeV includes
 #include <lifev/core/fem/BCHandler.hpp>

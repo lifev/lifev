@@ -1,10 +1,10 @@
 #! /bin/bash
 #
 # author: Antonio Cervone <ant.cervone@gmail.com>
-# date:   09-01-2013
+# date:   13-02-2013
 #
 
-ver='3.2'
+ver=
 
 download_lifev() {
   pushd ${lifev_src} >/dev/null
@@ -20,12 +20,14 @@ unpack_lifev() {
 }
 
 build_lifev() {
+  mkdir -p "${lifev_build}"
   pushd "${lifev_build}" >/dev/null
   if [ $MOX_MACHINE ]; then
     mox_extra="\
       -D CMAKE_SYSTEM_PREFIX_PATH:PATH=$REPO "
   fi
 
+  lib_extra=""
   echo_dbg "checking hdf5 (set to ${hdf5})"
   if [ "${hdf5}" != "NO" ]; then
     lib_extra+=" -D TPL_ENABLE_HDF5:BOOL=ON \
@@ -33,14 +35,16 @@ build_lifev() {
                  -D HDF5_LIBRARY_DIRS:PATH=${hdf5_lib} "
   fi
 
-  echo_dbg "checking blas (blas_name = ${blas_name})"
-  if [ "${blas_name}" != "" ]; then
-    lib_extra+=" -D TPL_BLAS_LIBRARIES:FILEPATH=${blas_lib}/${blas_name} "
+  echo_dbg "checking blas (blas_names = ${blas_names})"
+  if [ "${blas_names}" != "" ]; then
+    lib_extra+=" -D BLAS_LIBRARY_DIRS:PATH=${blas_lib} "
+    lib_extra+=" -D BLAS_LIBRARY_NAMES:STRING=${blas_names} "
   fi
 
-  echo_dbg "checking lapack (lapack_name = ${lapack_name})"
-  if [ "${lapack_name}" != "" ]; then
-    lib_extra+=" -D TPL_LAPACK_LIBRARIES:FILEPATH=${lapack_lib}/${lapack_name} "
+  echo_dbg "checking lapack (lapack_names = ${lapack_names})"
+  if [ "${lapack_names}" != "" ]; then
+    lib_extra+=" -D LAPACK_LIBRARY_DIRS:PATH=${palack_lib} "
+    lib_extra+=" -D LAPACK_LIBRARY_NAMES:STRING=${lapack_names} "
   fi
 
   echo_dbg "checking mpi (mpi_base = ${mpi_base})"
@@ -57,6 +61,7 @@ build_lifev() {
     -D LifeV_ENABLE_ALL_PACKAGES:BOOL=ON \
     -D LifeV_ENABLE_TESTS:BOOL=ON \
     -D LifeV_ENABLE_STRONG_CXX_COMPILE_WARNINGS:BOOL=ON \
+    -D LifeV_EXTRA_LINK_FLAGS:STRING="${lifev_flags}" \
     -D Trilinos_INCLUDE_DIRS:PATH="${trilinos_include}" \
     -D Trilinos_LIBRARY_DIRS:PATH="${trilinos_lib}" \
     -D ParMETIS_INCLUDE_DIRS:PATH="${parmetis_include}" \
@@ -66,13 +71,13 @@ build_lifev() {
     ${mox_extra} \
     "${lifev_src}"
 
-  make -j${NUM_PROC}
-  make -j${NUM_PROC} doc
+  make
+  make doc
   popd >/dev/null
 }
 
 install_lifev() {
   pushd "${lifev_build}" >/dev/null
-  make -j${NUM_PROC} install
+  make install
   popd >/dev/null
 }

@@ -25,7 +25,7 @@
 //@HEADER
 
 /*!
-    @file GhostHandler.hpp
+    @file
     @brief class to manage ghost data across procs
 
     @author Antonio Cervone <ant.cervone@gmail.com>
@@ -36,27 +36,42 @@
 #ifndef _GHOSTHANDLER_HPP_
 #define _GHOSTHANDLER_HPP_
 
-#include <lifev/core/mesh/NeighborMarker.hpp>
-#include <lifev/core/array/MapEpetra.hpp>
-
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-pedantic"
+#include <bitset>
 
 #ifdef HAVE_HDF5
 #include <EpetraExt_HDF5.h>
 #endif
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-#pragma GCC diagnostic warning "-pedantic"
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/LifeChronoManager.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/mesh/NeighborMarker.hpp>
+
+#ifdef HAVE_LIFEV_DEBUG
+//#define LIFEV_GHOSTHANDLER_DEBUG 1
+#endif
 
 namespace LifeV
 {
 
-template <typename Mesh>
+typedef std::bitset<4> NeighborType;
+
+NeighborType const   POINT_NEIGHBORS = 0x1;
+NeighborType const   RIDGE_NEIGHBORS = 0x2;
+NeighborType const   FACET_NEIGHBORS = 0x4;
+NeighborType const ELEMENT_NEIGHBORS = 0x8;
+NeighborType const     ALL_NEIGHBORS = POINT_NEIGHBORS | RIDGE_NEIGHBORS | FACET_NEIGHBORS | ELEMENT_NEIGHBORS;
+
+//! GhostHandler
+/*!
+  This class manages neighborhood information across processes.
+  The aim is to have the possibility to build overlapping maps
+  in order to ease the retrieving of ghosted values. The class
+  offers also the possibility to build phisically overlapped
+  meshes that do not require communication to retrieve mesh
+  information from adjacent elements.
+ */
+template <typename MeshType>
 class GhostHandler
 {
 public:
@@ -64,30 +79,44 @@ public:
     //! @name Public Types
     //@{
 
-    typedef Mesh mesh_Type;
+    typedef MeshType mesh_Type;
     typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
     typedef Epetra_Comm comm_Type;
     typedef boost::shared_ptr<comm_Type> commPtr_Type;
-    typedef std::set<ID> neighbors_Type;
-    typedef std::vector<neighbors_Type> neighborList_Type;
     typedef MapEpetra map_Type;
     typedef boost::shared_ptr<map_Type> mapPtr_Type;
-    typedef std::map< UInt, mapPtr_Type > mapList_Type;
-    typedef std::vector<std::vector<Int> > graph_Type;
+    typedef std::vector<Int> idList_Type;
+    typedef boost::shared_ptr<idList_Type> idListPtr_Type;
+    typedef std::vector<idList_Type> graph_Type;
     typedef boost::shared_ptr<graph_Type> graphPtr_Type;
-    typedef std::vector<int> flag_Type;
+    typedef std::vector<idListPtr_Type> vertexPartition_Type;
+    typedef boost::shared_ptr<vertexPartition_Type> vertexPartitionPtr_Type;
+    typedef std::vector<markerID_Type> markerIDList_Type;
 
     //@}
 
     //! @name Constructors & Destructors
     //@{
     //! Constructor
+    /*!
+     * @param comm. Communicator
+     */
     explicit GhostHandler ( commPtr_Type const& comm );
 
     //! Constructor
+    /*!
+     * @param fullMesh. Original mesh, before partitioning
+     * @param comm. Communicator
+     */
     GhostHandler ( meshPtr_Type fullMesh, commPtr_Type const& comm );
 
     //! Constructor
+    /*!
+     * @param fullMesh. Original mesh, before partitioning
+     * @param localMesh. Local mesh of the current proc
+     * @param map. Original map without overlapping
+     * @param comm. Communicator
+     */
     GhostHandler ( meshPtr_Type fullMesh,
                    meshPtr_Type localMesh,
                    mapPtr_Type map,
@@ -119,25 +148,25 @@ public:
         return *M_map;
     }
 
-    //! Node to node neighbor map
-    neighborList_Type const& nodeNodeNeighborsList()
+    //! List of point neighbors to a point (identified by the global ID)
+    neighborList_Type const& pointPointNeighborsList()
     {
-        ASSERT ( !M_nodeNodeNeighborsList.empty(), "M_nodeNodeNeighborsList is empty" );
-        return M_nodeNodeNeighborsList;
+        ASSERT ( !M_pointPointNeighborsList.empty(), "M_pointPointNeighborsList is empty" );
+        return M_pointPointNeighborsList;
     }
 
-    //! Node to edge neighbor map
-    neighborList_Type const& nodeEdgeNeighborsList()
+    //! List of edge neighbors to a point (identified by the global ID)
+    neighborList_Type const& pointEdgeNeighborsList()
     {
-        ASSERT ( !M_nodeEdgeNeighborsList.empty(), "M_nodeEdgeNeighborsList is empty" );
-        return M_nodeEdgeNeighborsList;
+        ASSERT ( !M_pointEdgeNeighborsList.empty(), "M_pointEdgeNeighborsList is empty" );
+        return M_pointEdgeNeighborsList;
     }
 
-    //! Node to element neighbor map
-    neighborList_Type const& nodeElementNeighborsList()
+    //! List of element neighbors to a point (identified by the global ID)
+    neighborList_Type const& pointElementNeighborsList()
     {
-        ASSERT ( !M_nodeElementNeighborsList.empty(), "M_nodeElementNeighborsList is empty" );
-        return M_nodeElementNeighborsList;
+        ASSERT ( !M_pointElementNeighborsList.empty(), "M_pointElementNeighborsList is empty" );
+        return M_pointElementNeighborsList;
     }
 
     //@}
@@ -145,6 +174,10 @@ public:
     //! @name Set Methods
     //@{
 
+    //! Set verbosity
+    /*!
+     * @param verbose
+     */
     void setVerbose ( const bool& verbose )
     {
         M_verbose = verbose && ( M_me == 0 );
@@ -155,87 +188,129 @@ public:
     //! @name General Methods
     //@{
 
-    //! setup
-    void setUp();
+    //! Initialize neighbors list
+    void setUpNeighbors ( NeighborType const neighborType = ALL_NEIGHBORS );
 
-    //! setup
-    void setUp (flag_Type const& flags);
-
-    //! release
+    //! Release pointers to full and local mesh
     void release();
 
-    //! clean
-    void clean();
+    //! Clean up neighbor lists
+    void clean ( NeighborType const neighborType = ALL_NEIGHBORS );
 
 #ifdef HAVE_HDF5
-    //! export
+    //! Export neighbor lists to an hdf5 file
+    /*!
+     * @param fileName. Name of the file to write
+     * @param truncate. Must be true when the file already exists on disk
+     */
     void exportToHDF5 ( std::string const& fileName = "ghostmap", bool const& truncate = true );
 
-    //! import
+    //! Import neighbor lists to an hdf5 file
+    /*!
+     * @param fileName. Name of the file to write
+     */
     void importFromHDF5 ( std::string const& fileName = "ghostmap" );
 #endif // HAVE_HDF5
 
-    //! create node node neighbors on node markers
-    void createNodeNeighbors();
+    //! Create point neighbors to points and store them in the NeighborMarker
+    void createPointNeighbors();
 
-    //! create node node neighbors map
-    void createNodeNodeNeighborsMap();
+    //! Create the list of point neighbors to points
+    void createPointPointNeighborsList();
 
-    //! create node node neighbors map for some specified flag
-    void createNodeNodeNeighborsMap (flag_Type const& flags);
+    //! Create the list of point neighbors to points that are in the given list of MarkerIDs
+    /*!
+     * @param flags. The list of MarkerIDs to restrict to.
+     */
+    void createPointPointNeighborsList (markerIDList_Type const& flags);
 
-    //! create node node neighbors map, where the neighbors are selected over the first circles
-    std::set<ID> createCircleNodeNodeNeighborsMap (UInt Ncircles, UInt GlobalID);
+    //! Create neighbors to a given point, with a specified number of generations
+    /*!
+     * @param globalID. ID of the point to be examined.
+     * @param nCircles. Number of circles (generations) to consider.
+     * @return the set of neighbors global IDs
+     */
+    neighbors_Type circleNeighbors ( UInt globalID, UInt nCircles = 1 );
 
-    //! create node node neighbors map, where the neighbors are selected within a certain user-defined radius
-    std::set<ID> createNodeNodeNeighborsMapWithinRadius (double Radius, UInt GlobalID);
+    //! Create neighbors to a given point within a specified radius
+    /*!
+     * @param globalID. ID of the point to be examined.
+     * @param radius. The value of the circle radius within which neighbors are included
+     * @return the set of neighbors global IDs
+     */
+    neighbors_Type neighborsWithinRadius ( UInt globalID, Real radius );
 
-    //! create node edge neighbors map
-    void createNodeEdgeNeighborsMap();
+    //! Create the list of edge neighbors to the points
+    void createPointEdgeNeighborsList();
 
-    //! create node element neighbors map
-    void createNodeElementNeighborsMap();
+    //! Create the list of element neighbors to the points
+    void createPointElementNeighborsList();
 
-    //! create ghost map
-    map_Type& ghostMapOnNodes();
+    //! Create an overlapped map on points
+    /*! Create a map based on points, expanding it across suddomain interfaces
+     * with overlap 1, using NeighborMarker.
+     */
+    map_Type& ghostMapOnPoints();
 
-    //! create ghost map
-    map_Type& ghostMapOnNodes ( UInt overlap );
+    //! Create an overlapped map on points
+    /*! Create a map based on points, expanding it across suddomain interfaces
+     * with generic overlap.
+     *  @param overlap. Level of overlap between subdomains
+     *  @return the overlapped map
+     */
+    map_Type& ghostMapOnPoints ( UInt overlap );
 
-    //! create ghost map
+    //! Create an overlapped map on edges
+    /*! Create a map based on edges, expanding it across suddomain interfaces
+     * with generic overlap.
+     *  @param overlap. Level of overlap between subdomains
+     *  @return the overlapped map
+     */
     map_Type& ghostMapOnEdges ( UInt overlap );
 
-    //! create ghost map
+    //! Create an overlapped map on elements for Finite Volumes
+    /*! Create a map based on elements, expanding it across suddomain interfaces.
+     *  The elements added are only those that share a facet with the current subdomain.
+     *  This type of map is typically used for Finite Volumes.
+     *  @return the overlapped map
+     */
     // ghostMapOnElementsCommonFacet
-    map_Type& ghostMapOnElementsP0();
+    map_Type& ghostMapOnElementsFV();
 
-    //! create ghost map
-    // ghostMapOnElementsCommonNodes
-    map_Type& ghostMapOnElementsP1 ( UInt overlap );
+    //! Create an overlapped map on elements for Finite Elements
+    /*! Create a map based on elements, expanding it across suddomain interfaces.
+     *  The elements added are all those that share a point with the current subdomain.
+     *  This type of map is typically used for Finite Elements.
+     *  @param overlap. Level of overlap between subdomains
+     */
+    // ghostMapOnElementsCommonPoints
+    map_Type& ghostMapOnElementsFE ( UInt overlap );
 
-    //! fill entityPID
-    void fillEntityPID ( graphPtr_Type elemGraph, std::vector<std::vector<UInt> >& entityPID );
+    //! Extend the subdomains graph of the given overlap.
+    /*!
+     * This method enriches each subdomain with the closest elements such that
+     * the partitions have the required overlap.
+     * \param elemGraph. The list of subdomain elements
+     * \param entityPID. Info about proc ownership of each mesh entity.
+     * \param overlap. Level of overlap between partitions.
+     */
+    void extendGraphFE ( graphPtr_Type elemGraph, idList_Type const& pointPID, UInt overlap );
 
-    //! create ghost map
-    void ghostMapOnElementsP1 ( graphPtr_Type elemGraph, const std::vector<UInt>& entityPID, UInt overlap );
-
-    //! create ghost map
-    map_Type& ghostMapOnNodesMap ( UInt overlap );
-
-    //! create ghost map
-    map_Type& ghostMapOnEdgesMap ( UInt overlap );
-
-    //! create ghost map
-    map_Type& ghostMapOnElementsP0Map();
-
-    //! create ghost map
-    map_Type& ghostMapOnElementsP1Map ( UInt overlap );
+    //! Extend the subdomains graph of the given overlap.
+    /*!
+     * This method enriches each subdomain with the closest elements such that
+     * the partitions have the required overlap.
+     * \param elemGraph. The list of subdomain elements
+     * \param entityPID. Info about proc ownership of each mesh entity.
+     * \param overlap. Level of overlap between partitions.
+     */
+    void extendGraphFE ( const vertexPartitionPtr_Type& elemGraph,
+                         idList_Type const& pointPID,
+                         UInt overlap,
+                         UInt partIndex);
 
     //! showMe method
     void showMe ( bool const verbose = false, std::ostream& out = std::cout );
-
-    //! Check if the point with markerID pointMarker has to be selected
-    bool isInside (ID const&   pointMarker, flag_Type const& flags);
 
     //@}
 
@@ -244,10 +319,10 @@ protected:
     //! @name Ghost Maps
     //@{
 
-    mapPtr_Type M_ghostMapOnNodes;
+    mapPtr_Type M_ghostMapOnPoints;
     mapPtr_Type M_ghostMapOnEdges;
-    mapPtr_Type M_ghostMapOnElementsP0;
-    mapPtr_Type M_ghostMapOnElementsP1;
+    mapPtr_Type M_ghostMapOnElementsFV;
+    mapPtr_Type M_ghostMapOnElementsFE;
 
     //@}
 
@@ -260,102 +335,109 @@ protected:
     commPtr_Type const M_comm;
     UInt const M_me;
 
-    neighborList_Type M_nodeNodeNeighborsList;
-    neighborList_Type M_nodeEdgeNeighborsList;
-    neighborList_Type M_nodeElementNeighborsList;
+    neighborList_Type M_pointPointNeighborsList;
+    neighborList_Type M_pointEdgeNeighborsList;
+    neighborList_Type M_pointElementNeighborsList;
 
     bool M_verbose;
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
     std::ofstream M_debugOut;
-
+#endif
     //@}
 };
 
-template <typename Mesh>
-GhostHandler<Mesh>::GhostHandler ( commPtr_Type const& comm ) :
+template <typename MeshType>
+GhostHandler<MeshType>::GhostHandler ( commPtr_Type const& comm ) :
     M_fullMesh(),
     M_localMesh(),
     M_map(),
     M_comm ( comm ),
     M_me ( comm->MyPID() ),
-    M_nodeNodeNeighborsList(),
-    M_nodeEdgeNeighborsList(),
-    M_nodeElementNeighborsList(),
-    M_verbose ( 0 ),
-#ifdef HAVE_LIFEV_DEBUG
-    M_debugOut ( ( "gh." + ( comm->NumProc() > 1 ? boost::lexical_cast<std::string> ( M_me ) : "s" ) + ".out" ).c_str() )
-#else
-    M_debugOut()
+    M_pointPointNeighborsList(),
+    M_pointEdgeNeighborsList(),
+    M_pointElementNeighborsList(),
+    M_verbose ( 0 )
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    , M_debugOut ( ( "gh." + ( comm->NumProc() > 1 ? boost::lexical_cast<std::string> ( M_me ) : "s" ) + ".out" ).c_str() )
 #endif
 {
 }
 
-template <typename Mesh>
-GhostHandler<Mesh>::GhostHandler ( meshPtr_Type fullMesh,
-                                   meshPtr_Type localMesh,
-                                   mapPtr_Type map,
-                                   commPtr_Type const& comm ) :
+template <typename MeshType>
+GhostHandler<MeshType>::GhostHandler ( meshPtr_Type fullMesh,
+                                       meshPtr_Type localMesh,
+                                       mapPtr_Type map,
+                                       commPtr_Type const& comm ) :
     M_fullMesh ( fullMesh ),
     M_localMesh ( localMesh ),
     M_map ( map ),
     M_comm ( comm ),
     M_me ( comm->MyPID() ),
-    M_nodeNodeNeighborsList(),
-    M_nodeEdgeNeighborsList(),
-    M_nodeElementNeighborsList(),
-    M_verbose ( 0 ),
-#ifdef HAVE_LIFEV_DEBUG
-    M_debugOut ( ( "gh." + ( comm->NumProc() > 1 ? boost::lexical_cast<std::string> ( M_me ) : "s" ) + ".out" ).c_str() )
-#else
-    M_debugOut()
+    M_pointPointNeighborsList(),
+    M_pointEdgeNeighborsList(),
+    M_pointElementNeighborsList(),
+    M_verbose ( 0 )
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    , M_debugOut ( ( "gh." + ( comm->NumProc() > 1 ? boost::lexical_cast<std::string> ( M_me ) : "s" ) + ".out" ).c_str() )
 #endif
 {
 }
 
-template <typename Mesh>
-GhostHandler<Mesh>::GhostHandler ( meshPtr_Type fullMesh,
-                                   commPtr_Type const& comm ) :
+template <typename MeshType>
+GhostHandler<MeshType>::GhostHandler ( meshPtr_Type fullMesh,
+                                       commPtr_Type const& comm ) :
     M_fullMesh ( fullMesh ),
     M_comm ( comm ),
     M_me ( comm->MyPID() ),
-    M_nodeNodeNeighborsList(),
-    M_nodeEdgeNeighborsList(),
-    M_nodeElementNeighborsList(),
-    M_verbose ( 0 ),
-#ifdef HAVE_LIFEV_DEBUG
-    M_debugOut ( ( "gh." + ( comm->NumProc() > 1 ? boost::lexical_cast<std::string> ( M_me ) : "s" ) + ".out" ).c_str() )
-#else
-    M_debugOut()
+    M_pointPointNeighborsList(),
+    M_pointEdgeNeighborsList(),
+    M_pointElementNeighborsList(),
+    M_verbose ( 0 )
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    , M_debugOut ( ( "gh." + ( comm->NumProc() > 1 ? boost::lexical_cast<std::string> ( M_me ) : "s" ) + ".out" ).c_str() )
 #endif
 {
 }
 
-template <typename Mesh>
-void GhostHandler<Mesh>::setUp()
+template <typename MeshType>
+void GhostHandler<MeshType>::setUpNeighbors ( NeighborType const neighborType )
 {
-    this->createNodeNodeNeighborsMap();
-    //this->createNodeEdgeNeighborsMap();
-    //this->createNodeElementNeighborsMap();
+    if ( (neighborType & POINT_NEIGHBORS) != 0 )
+    {
+        this->createPointPointNeighborsList();
+    }
+    if ( (neighborType & RIDGE_NEIGHBORS) != 0 )
+    {
+        this->createPointEdgeNeighborsList();
+    }
+    if ( (neighborType & ELEMENT_NEIGHBORS) != 0 )
+    {
+        this->createPointElementNeighborsList();
+    }
 }
 
-template <typename Mesh>
-void GhostHandler<Mesh>::setUp (flag_Type const& flags)
-{
-    this->createNodeNodeNeighborsMap (flags);
-}
-
-template <typename Mesh>
-void GhostHandler<Mesh>::release()
+template <typename MeshType>
+void GhostHandler<MeshType>::release()
 {
     M_fullMesh.reset();
     M_localMesh.reset();
 }
 
-template <typename Mesh>
-void GhostHandler<Mesh>::clean()
+template <typename MeshType>
+void GhostHandler<MeshType>::clean ( NeighborType const neighborType )
 {
-    clearVector ( M_nodeNodeNeighborsList );
-    clearVector ( M_nodeEdgeNeighborsList );
-    clearVector ( M_nodeElementNeighborsList );
+    if ( (neighborType & POINT_NEIGHBORS) != 0 )
+    {
+        clearVector ( M_pointPointNeighborsList );
+    }
+    if ( (neighborType & RIDGE_NEIGHBORS) != 0 )
+    {
+        clearVector ( M_pointEdgeNeighborsList );
+    }
+    if ( (neighborType & ELEMENT_NEIGHBORS) != 0 )
+    {
+        clearVector ( M_pointElementNeighborsList );
+    }
 }
 
 #ifdef HAVE_HDF5
@@ -386,7 +468,7 @@ void writeNeighborMap ( EpetraExt::HDF5& file, neighborList_Type& list, std::str
     file.Write ( name, "valueSize", static_cast<Int> ( values.size() ) );
     file.Write ( name, "values", H5T_NATIVE_INT, values.size(), &values[ 0 ] );
 
-    //#ifdef HAVE_LIFEV_DEBUG
+    //#ifdef LIFEV_GHOSTHANDLER_DEBUG
     //    std::cerr << name << std::endl;
     //    for ( UInt i ( 0 ); i < map.size(); i++ )
     //    {
@@ -422,7 +504,7 @@ void readNeighborMap ( EpetraExt::HDF5& file, neighborList_Type& list, std::stri
         }
     }
 
-    //#ifdef HAVE_LIFEV_DEBUG
+    //#ifdef LIFEV_GHOSTHANDLER_DEBUG
     //    std::cerr << name << std::endl;
     //    for ( UInt i ( 0 ); i < map.size(); i++ )
     //    {
@@ -438,8 +520,8 @@ void readNeighborMap ( EpetraExt::HDF5& file, neighborList_Type& list, std::stri
 
 }
 
-template <typename Mesh>
-void GhostHandler<Mesh>::exportToHDF5 ( std::string const& fileName, bool const& truncate )
+template <typename MeshType>
+void GhostHandler<MeshType>::exportToHDF5 ( std::string const& fileName, bool const& truncate )
 {
     EpetraExt::HDF5 HDF5 ( *M_comm );
 
@@ -461,16 +543,16 @@ void GhostHandler<Mesh>::exportToHDF5 ( std::string const& fileName, bool const&
         abort();
     }
 
-    writeNeighborMap ( HDF5, M_nodeNodeNeighborsList, "nodeNodeNeighborsMap" );
-    writeNeighborMap ( HDF5, M_nodeEdgeNeighborsList, "nodeEdgeNeighborsMap" );
-    writeNeighborMap ( HDF5, M_nodeElementNeighborsList, "nodeElementNeighborsMap" );
+    writeNeighborMap ( HDF5, M_pointPointNeighborsList, "pointPointNeighborsMap" );
+    writeNeighborMap ( HDF5, M_pointEdgeNeighborsList, "pointEdgeNeighborsMap" );
+    writeNeighborMap ( HDF5, M_pointElementNeighborsList, "pointElementNeighborsMap" );
 
     // Close the file
     HDF5.Close();
 }
 
-template <typename Mesh>
-void GhostHandler<Mesh>::importFromHDF5 ( std::string const& fileName )
+template <typename MeshType>
+void GhostHandler<MeshType>::importFromHDF5 ( std::string const& fileName )
 {
     EpetraExt::HDF5 HDF5 ( *M_comm );
 
@@ -484,9 +566,9 @@ void GhostHandler<Mesh>::importFromHDF5 ( std::string const& fileName )
         abort();
     }
 
-    readNeighborMap ( HDF5, M_nodeNodeNeighborsList, "nodeNodeNeighborsMap" );
-    readNeighborMap ( HDF5, M_nodeEdgeNeighborsList, "nodeEdgeNeighborsMap" );
-    readNeighborMap ( HDF5, M_nodeElementNeighborsList, "nodeElementNeighborsMap" );
+    readNeighborMap ( HDF5, M_pointPointNeighborsList, "pointPointNeighborsMap" );
+    readNeighborMap ( HDF5, M_pointEdgeNeighborsList, "pointEdgeNeighborsMap" );
+    readNeighborMap ( HDF5, M_pointElementNeighborsList, "pointElementNeighborsMap" );
 
     // Close the file
     HDF5.Close();
@@ -494,20 +576,20 @@ void GhostHandler<Mesh>::importFromHDF5 ( std::string const& fileName )
 
 #endif // HAVE_HDF5
 
-//! this routine generates node neighbors for the given mesh
+//! this routine generates point neighbors for the given mesh
 /*! the routine assumes that the mesh is not yet partitioned or reordered
  *  (i.e. the local id and the global id are the same).
  *  if this is not true the method should be changed to use a more
  *  expensive STL find on the mesh points to get the correct point that has
  *  the given global id or construct a globalToLocal map beforehand.
  */
-template <typename Mesh>
-void GhostHandler<Mesh>::createNodeNeighbors()
+template <typename MeshType>
+void GhostHandler<MeshType>::createPointNeighbors()
 {
     // @TODO: ASSERT_COMPILE_TIME that MeshType::pointMarker == NeighborMarker
-    // this guarantees that the nodeNeighbors structure is available.
+    // this guarantees that the pointNeighbors structure is available.
 
-    // generate node neighbors by watching edges
+    // generate point neighbors by watching edges
     // note: this can be based also on faces or volumes
     for ( UInt ie = 0; ie < M_fullMesh->numEdges(); ie++ )
     {
@@ -518,22 +600,22 @@ void GhostHandler<Mesh>::createNodeNeighbors()
                  "the mesh has been reordered, the point must be found" );
 
         // fill fullMesh points neighboring
-        M_fullMesh->point ( id0 ).nodeNeighbors().insert ( id1 );
-        M_fullMesh->point ( id1 ).nodeNeighbors().insert ( id0 );
+        M_fullMesh->point ( id0 ).pointNeighbors().insert ( id1 );
+        M_fullMesh->point ( id1 ).pointNeighbors().insert ( id0 );
     }
 
     // update localMesh points
     for ( UInt ip = 0; ip < M_localMesh->numPoints(); ip++ )
     {
-        M_localMesh->point ( ip ).nodeNeighbors() = M_fullMesh->point ( M_localMesh->point ( ip ).id() ).nodeNeighbors();
+        M_localMesh->point ( ip ).pointNeighbors() = M_fullMesh->point ( M_localMesh->point ( ip ).id() ).pointNeighbors();
     }
 }
 
-template <typename Mesh>
-void GhostHandler<Mesh>::createNodeNodeNeighborsMap()
+template <typename MeshType>
+void GhostHandler<MeshType>::createPointPointNeighborsList()
 {
-    M_nodeNodeNeighborsList.resize ( M_fullMesh->numGlobalPoints() );
-    // generate node neighbors by watching edges
+    M_pointPointNeighborsList.resize ( M_fullMesh->numGlobalPoints() );
+    // generate point neighbors by watching edges
     // note: this can be based also on faces or volumes
     for ( UInt ie = 0; ie < M_fullMesh->numEdges(); ie++ )
     {
@@ -543,17 +625,17 @@ void GhostHandler<Mesh>::createNodeNodeNeighborsMap()
         ASSERT ( M_fullMesh->point ( id0 ).id() == id0 && M_fullMesh->point ( id1 ).id() == id1,
                  "the mesh has been reordered, the point must be found" );
 
-        M_nodeNodeNeighborsList[ id0 ].insert ( id1 );
-        M_nodeNodeNeighborsList[ id1 ].insert ( id0 );
+        M_pointPointNeighborsList[ id0 ].insert ( id1 );
+        M_pointPointNeighborsList[ id1 ].insert ( id0 );
     }
 
-#ifdef HAVE_LIFEV_DEBUG
-    M_debugOut << "M_nodeNodeNeighborsList on proc " << M_me << std::endl;
-    for ( UInt i = 0; i < M_nodeNodeNeighborsList.size(); i++ )
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    M_debugOut << "M_pointPointNeighborsList on proc " << M_me << std::endl;
+    for ( UInt i = 0; i < M_pointPointNeighborsList.size(); i++ )
     {
         M_debugOut << i << ": ";
-        for ( neighbors_Type::const_iterator it = M_nodeNodeNeighborsList[ i ].begin();
-                it != M_nodeNodeNeighborsList[ i ].end(); ++it )
+        for ( neighbors_Type::const_iterator it = M_pointPointNeighborsList[ i ].begin();
+                it != M_pointPointNeighborsList[ i ].end(); ++it )
         {
             M_debugOut << *it << " ";
         }
@@ -562,12 +644,26 @@ void GhostHandler<Mesh>::createNodeNodeNeighborsMap()
 #endif
 }
 
-
-template <typename Mesh>
-void GhostHandler<Mesh>::createNodeNodeNeighborsMap (flag_Type const& flags)
+namespace
 {
-    M_nodeNodeNeighborsList.resize ( M_fullMesh->numGlobalPoints() );
-    // generate node neighbors by watching edges
+
+inline bool isInside ( markerID_Type const& pointMarker, std::vector<markerID_Type> const& markerIDList )
+{
+    for ( UInt i = 0; i < markerIDList.size(); ++i)
+        if ( pointMarker == markerIDList[i] )
+        {
+            return true;
+        }
+    return false;
+}
+
+}
+
+template <typename MeshType>
+void GhostHandler<MeshType>::createPointPointNeighborsList (markerIDList_Type const& flags)
+{
+    M_pointPointNeighborsList.resize ( M_fullMesh->numGlobalPoints() );
+    // generate point neighbors by watching edges
     // note: this can be based also on faces or volumes
     for ( UInt ie = 0; ie < M_fullMesh->numEdges(); ie++ )
     {
@@ -577,111 +673,102 @@ void GhostHandler<Mesh>::createNodeNodeNeighborsMap (flag_Type const& flags)
         ASSERT ( M_fullMesh->point ( id0 ).id() == id0 && M_fullMesh->point ( id1 ).id() == id1,
                  "the mesh has been reordered, the point must be found" );
 
-        if ( this->isInside (M_fullMesh->edge ( ie ).point ( 1 ).markerID(), flags) )
+        if ( isInside (M_fullMesh->edge ( ie ).point ( 1 ).markerID(), flags) )
         {
-            M_nodeNodeNeighborsList[ id0 ].insert ( id1 );
+            M_pointPointNeighborsList[ id0 ].insert ( id1 );
         }
 
-        if ( this->isInside (M_fullMesh->edge ( ie ).point ( 0 ).markerID(), flags) )
+        if ( isInside (M_fullMesh->edge ( ie ).point ( 0 ).markerID(), flags) )
         {
-            M_nodeNodeNeighborsList[ id1 ].insert ( id0 );
+            M_pointPointNeighborsList[ id1 ].insert ( id0 );
         }
 
         //if(M_fullMesh->edge( ie ).point( 1 ).markerID()==20 || M_fullMesh->edge( ie ).point( 1 ).markerID()==1)
-        //    M_nodeNodeNeighborsList[ id0 ].insert( id1 );
+        //    M_pointPointNeighborsList[ id0 ].insert( id1 );
 
         //if(M_fullMesh->edge( ie ).point( 0 ).markerID()==20 || M_fullMesh->edge( ie ).point( 0 ).markerID()==1)
-        //    M_nodeNodeNeighborsList[ id1 ].insert( id0 );
+        //    M_pointPointNeighborsList[ id1 ].insert( id0 );
     }
 }
 
-template <typename Mesh>
-bool GhostHandler<Mesh>::isInside (ID const& pointMarker, flag_Type const& flags)
+template <typename MeshType>
+neighbors_Type GhostHandler<MeshType>::circleNeighbors ( UInt globalID, UInt nCircles )
 {
-    int check = 0;
-    for (UInt i = 0; i < flags.size(); ++i)
-        if (pointMarker == flags[i])
-        {
-            ++check;
-        }
-    return (check > 0) ? true : false;
-}
+    neighbors_Type neighbors;
+    neighbors_Type newEntries;
+    neighbors_Type newNeighbors;
 
-template <typename Mesh>
-std::set<ID> GhostHandler<Mesh>::createCircleNodeNodeNeighborsMap (UInt Ncircles, UInt GlobalID)
-{
-    std::set<ID> Neighbors;
-    std::set<ID> New_entries;
-    std::set<ID> New_neighbors;
+    neighbors = this->pointPointNeighborsList() [ globalID ];
 
-    Neighbors = this->nodeNodeNeighborsList() [GlobalID];
-
-    for (UInt i = 0; i < Ncircles - 1; ++i)
+    for (UInt i = 0; i < nCircles - 1; ++i)
     {
-        for (std::set<ID>::iterator it = Neighbors.begin(); it != Neighbors.end(); ++it)
+        for (neighbors_Type::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
-            New_entries = this->nodeNodeNeighborsList() [*it];
-            for (std::set<ID>::iterator ii = New_entries.begin(); ii != New_entries.end(); ++ii)
+            newEntries = this->pointPointNeighborsList() [*it];
+            for (neighbors_Type::iterator ii = newEntries.begin(); ii != newEntries.end(); ++ii)
             {
-                New_neighbors.insert (*ii);
+                newNeighbors.insert (*ii);
             }
         }
-        Neighbors = New_neighbors;
+        neighbors = newNeighbors;
     }
 
-    return Neighbors;
+    return neighbors;
 }
 
 
-template <typename Mesh>
-std::set<ID> GhostHandler<Mesh>::createNodeNodeNeighborsMapWithinRadius (double Radius, UInt GlobalID)
+template <typename MeshType>
+neighbors_Type GhostHandler<MeshType>::neighborsWithinRadius ( UInt globalID, Real radius )
 {
-    std::set<ID> Neighbors;
-    std::set<ID> New_entries;
-    std::set<ID> New_neighbors;
+    neighbors_Type neighbors;
+    neighbors_Type newEntries;
+    neighbors_Type newNeighbors;
     bool isInside = true;
-    double d = 0;
+    Real d = 0;
     UInt mysize = 0;
 
-    Neighbors = this->nodeNodeNeighborsList() [GlobalID];
+    neighbors = this->pointPointNeighborsList() [globalID];
+
+    typename mesh_Type::point_Type const& p = M_fullMesh->point (globalID);
 
     while (isInside)
     {
-        for (std::set<ID>::iterator it = Neighbors.begin(); it != Neighbors.end(); ++it)
+        for (neighbors_Type::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
-            New_entries = this->nodeNodeNeighborsList() [*it];
-            for (std::set<ID>::iterator ii = New_entries.begin(); ii != New_entries.end(); ++ii)
+            newEntries = this->pointPointNeighborsList() [*it];
+            for (neighbors_Type::iterator ii = newEntries.begin(); ii != newEntries.end(); ++ii)
             {
-                d = std::sqrt ( pow ( M_fullMesh->point (*ii).x() - M_fullMesh->point (GlobalID).x() , 2) +
-                                pow ( M_fullMesh->point (*ii).y() - M_fullMesh->point (GlobalID).y() , 2) +
-                                pow ( M_fullMesh->point (*ii).z() - M_fullMesh->point (GlobalID).z() , 2) );
-                if (d < Radius)
+                typename mesh_Type::point_Type const& n = M_fullMesh->point (*ii);
+                d = std::sqrt ( ( n.x() - p.x() ) * ( n.x() - p.x() ) +
+                                ( n.y() - p.y() ) * ( n.y() - p.y() ) +
+                                ( n.z() - p.z() ) * ( n.z() - p.z() ) );
+                if (d < radius)
                 {
-                    New_neighbors.insert (*ii);
+                    newNeighbors.insert (*ii);
                 }
             }
         }
 
-        Neighbors = New_neighbors;
+        neighbors = newNeighbors;
 
-        if (Neighbors.size() == mysize)
+        if (neighbors.size() == mysize)
         {
             isInside = false;
         }
 
-        mysize = Neighbors.size();
+        mysize = neighbors.size();
 
     }
 
-    return Neighbors;
+    return neighbors;
 
 }
 
-template <typename Mesh>
-void GhostHandler<Mesh>::createNodeEdgeNeighborsMap()
+template <typename MeshType>
+void GhostHandler<MeshType>::createPointEdgeNeighborsList()
 {
-    M_nodeEdgeNeighborsList.resize ( M_fullMesh->numGlobalPoints() );
-    // generate node neighbors by watching edges
+    M_pointEdgeNeighborsList.resize ( M_fullMesh->numGlobalPoints() );
+    // generate point neighbors by watching edges
     // note: this can be based also on faces or volumes
     for ( UInt ie = 0; ie < M_fullMesh->numEdges(); ie++ )
     {
@@ -691,71 +778,70 @@ void GhostHandler<Mesh>::createNodeEdgeNeighborsMap()
         ASSERT ( M_fullMesh->point ( id0 ).id() == id0 && M_fullMesh->point ( id1 ).id() == id1,
                  "the mesh has been reordered, the point must be found" );
 
-        M_nodeEdgeNeighborsList[ id0 ].insert ( ie );
-        M_nodeEdgeNeighborsList[ id1 ].insert ( ie );
+        M_pointEdgeNeighborsList[ id0 ].insert ( ie );
+        M_pointEdgeNeighborsList[ id1 ].insert ( ie );
     }
 
-#ifdef HAVE_LIFEV_DEBUG
-    M_debugOut << "M_nodeEdgeNeighborsList on proc " << M_me << std::endl;
-    for ( UInt i = 0; i < M_nodeEdgeNeighborsList.size(); i++ )
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    M_debugOut << "M_pointEdgeNeighborsList on proc " << M_me << std::endl;
+    for ( UInt i = 0; i < M_pointEdgeNeighborsList.size(); i++ )
     {
         M_debugOut << i << ": ";
-        for ( neighbors_Type::const_iterator it = M_nodeEdgeNeighborsList[ i ].begin();
-                it != M_nodeEdgeNeighborsList[ i ].end(); ++it )
+        for ( neighbors_Type::const_iterator it = M_pointEdgeNeighborsList[ i ].begin();
+                it != M_pointEdgeNeighborsList[ i ].end(); ++it )
         {
             M_debugOut << *it << " ";
         }
         M_debugOut << std::endl;
     }
 #endif
-
 }
 
-template <typename Mesh>
-void GhostHandler<Mesh>::createNodeElementNeighborsMap()
+template <typename MeshType>
+void GhostHandler<MeshType>::createPointElementNeighborsList()
 {
-    M_nodeElementNeighborsList.resize ( M_fullMesh->numGlobalPoints() );
+    M_pointElementNeighborsList.resize ( M_fullMesh->numGlobalPoints() );
     // generate element neighbors by cycling on elements
     for ( UInt ie = 0; ie < M_fullMesh->numElements(); ie++ )
     {
         ASSERT ( M_fullMesh->element ( ie ).id() == ie,
                  "the mesh has been reordered, the point must be found" );
 
-        for ( UInt k = 0; k < Mesh::element_Type::S_numPoints; k++ )
+        for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
         {
             ID id ( M_fullMesh->element ( ie ).point ( k ).id() );
-            M_nodeElementNeighborsList[ id ].insert ( ie );
+            M_pointElementNeighborsList[ id ].insert ( ie );
         }
     }
 }
 
-template <typename Mesh>
-typename GhostHandler<Mesh>::map_Type& GhostHandler<Mesh>::ghostMapOnNodes()
+template <typename MeshType>
+typename GhostHandler<MeshType>::map_Type& GhostHandler<MeshType>::ghostMapOnPoints()
 {
     // if the map has already been created, return it
-    if ( M_ghostMapOnNodes )
+    if ( M_ghostMapOnPoints )
     {
-        return *M_ghostMapOnNodes;
+        return *M_ghostMapOnPoints;
     }
 
     if ( M_verbose )
     {
-        std::cout << " GH- ghostMapOnNodes()" << std::endl;
+        std::cout << " GH- ghostMapOnPoints()" << std::endl;
     }
 
-    // check that the nodeNeighbors have been created
-    if ( M_localMesh->point ( 0 ).nodeNeighbors().empty()  )
+    // check that the pointNeighbors have been created
+    if ( M_localMesh->point ( 0 ).pointNeighbors().empty()  )
     {
         if ( M_verbose )
         {
-            std::cerr << "the nodeNeighbors are empty, will be generated now" << std::endl;
+            std::cerr << "the pointNeighbors are empty, will be generated now" << std::endl;
         }
-        this->createNodeNeighbors();
+        this->createPointNeighbors();
     }
 
     // create map
-    M_ghostMapOnNodes.reset ( new map_Type() );
-    map_Type& ghostMap ( *M_ghostMapOnNodes );
+    M_ghostMapOnPoints.reset ( new map_Type() );
+    map_Type& ghostMap ( *M_ghostMapOnPoints );
 
     // use the same Unique map and comm of the original map
     ghostMap.setMap ( M_map->map ( Unique ), Unique );
@@ -765,12 +851,12 @@ typename GhostHandler<Mesh>::map_Type& GhostHandler<Mesh>::ghostMapOnNodes()
     std::set<Int> myGlobalElementsSet;
 
     // iterate on local mesh points
-    // @todo: this can start from the repeated map and add only neighbors for SUBDOMAIN_INTERFACE marked nodes
+    // @todo: this can start from the repeated map and add only neighbors for SUBDOMAIN_INTERFACE marked points
     for ( UInt k = 0; k < M_localMesh->numPoints(); k++ )
     {
-        // iterate on each node neighborhood
-        for ( typename mesh_Type::PointMarker::neighborConstIterator_Type neighborIt = M_localMesh->point ( k ).nodeNeighbors().begin();
-                neighborIt != M_localMesh->point ( k ).nodeNeighbors().end(); ++neighborIt )
+        // iterate on each point neighborhood
+        for ( typename mesh_Type::PointMarker::neighborConstIterator_Type neighborIt = M_localMesh->point ( k ).pointNeighbors().begin();
+                neighborIt != M_localMesh->point ( k ).pointNeighbors().end(); ++neighborIt )
         {
             myGlobalElementsSet.insert ( *neighborIt );
         }
@@ -782,36 +868,36 @@ typename GhostHandler<Mesh>::map_Type& GhostHandler<Mesh>::ghostMapOnNodes()
     map_Type::map_ptrtype repeatedMap ( new Epetra_Map ( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap ( repeatedMap, Repeated );
 
-    return *M_ghostMapOnNodes;
+    return *M_ghostMapOnPoints;
 }
 
-template <typename Mesh>
-typename GhostHandler<Mesh>::map_Type& GhostHandler<Mesh>::ghostMapOnNodes ( UInt overlap )
+template <typename MeshType>
+typename GhostHandler<MeshType>::map_Type& GhostHandler<MeshType>::ghostMapOnPoints ( UInt overlap )
 {
     // if the map has already been created, return it
-    if ( M_ghostMapOnNodes )
+    if ( M_ghostMapOnPoints )
     {
-        return *M_ghostMapOnNodes;
+        return *M_ghostMapOnPoints;
     }
 
     if ( M_verbose )
     {
-        std::cout << " GH- ghostMapOnNodes( UInt )" << std::endl;
+        std::cout << " GH- ghostMapOnPoints( UInt )" << std::endl;
     }
 
-    // check that the nodeNodeNeighborsMap has been created
-    if ( M_nodeNodeNeighborsList.empty()  )
+    // check that the pointPointNeighborsMap has been created
+    if ( M_pointPointNeighborsList.empty()  )
     {
         if ( M_verbose )
         {
-            std::cerr << "the nodeNodeNeighborsMap is empty, will be generated now" << std::endl;
+            std::cerr << "the pointPointNeighborsList is empty, will be generated now" << std::endl;
         }
-        this->createNodeNodeNeighborsMap();
+        this->createPointPointNeighborsList();
     }
 
     // create map
-    M_ghostMapOnNodes.reset ( new map_Type() );
-    map_Type& ghostMap ( *M_ghostMapOnNodes );
+    M_ghostMapOnPoints.reset ( new map_Type() );
+    map_Type& ghostMap ( *M_ghostMapOnPoints );
 
     // use the same Unique map and comm of the original map
     ghostMap.setMap ( M_map->map ( Unique ), Unique );
@@ -830,16 +916,16 @@ typename GhostHandler<Mesh>::map_Type& GhostHandler<Mesh>::ghostMapOnNodes ( UIn
     // todo: optimize this!!
     // 1: work only on the boundary
     // 2: copy back only if necessary
-    // repeat on actual nodes to expand overlap
+    // repeat on actual points to expand overlap
     for ( UInt i = 0; i < overlap; i++ )
     {
         // iterate on points adding all neighbors
-        for ( std::set<Int>::const_iterator nodeIt = myOriginalElementsSet.begin();
-                nodeIt != myOriginalElementsSet.end(); ++nodeIt )
+        for ( std::set<Int>::const_iterator pointIt = myOriginalElementsSet.begin();
+                pointIt != myOriginalElementsSet.end(); ++pointIt )
         {
-            // iterate on each node neighborhood
-            for ( neighbors_Type::const_iterator neighborIt = M_nodeNodeNeighborsList[ *nodeIt ].begin();
-                    neighborIt != M_nodeNodeNeighborsList[ *nodeIt ].end(); ++neighborIt )
+            // iterate on each point neighborhood
+            for ( neighbors_Type::const_iterator neighborIt = M_pointPointNeighborsList[ *pointIt ].begin();
+                    neighborIt != M_pointPointNeighborsList[ *pointIt ].end(); ++neighborIt )
             {
                 myGlobalElementsSet.insert ( *neighborIt );
             }
@@ -853,11 +939,11 @@ typename GhostHandler<Mesh>::map_Type& GhostHandler<Mesh>::ghostMapOnNodes ( UIn
     map_Type::map_ptrtype repeatedMap ( new Epetra_Map ( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap ( repeatedMap, Repeated );
 
-    return *M_ghostMapOnNodes;
+    return *M_ghostMapOnPoints;
 }
 
-template <typename Mesh>
-typename GhostHandler<Mesh>::map_Type& GhostHandler<Mesh>::ghostMapOnEdges ( UInt overlap )
+template <typename MeshType>
+typename GhostHandler<MeshType>::map_Type& GhostHandler<MeshType>::ghostMapOnEdges ( UInt overlap )
 {
     // if the map has already been created, return it
     if ( M_ghostMapOnEdges )
@@ -870,31 +956,31 @@ typename GhostHandler<Mesh>::map_Type& GhostHandler<Mesh>::ghostMapOnEdges ( UIn
         std::cout << " GH- ghostMapOnEdges()" << std::endl;
     }
 
-    // check that the nodeEdgeNeighborsMap has been created
-    if ( M_nodeEdgeNeighborsList.empty()  )
+    // check that the pointEdgeNeighborsMap has been created
+    if ( M_pointEdgeNeighborsList.empty()  )
     {
         if ( M_verbose )
         {
-            std::cerr << "the nodeEdgeNeighborsMap is empty, will be generated now" << std::endl;
+            std::cerr << "the pointEdgeNeighborsList is empty, will be generated now" << std::endl;
         }
-        this->createNodeEdgeNeighborsMap();
+        this->createPointEdgeNeighborsList();
     }
 
-    // set up Unique (first) and Repeated edges based on the OWNED flag
-    std::pair< std::vector<Int>, std::vector<Int> > myGlobalElements;
-    myGlobalElements.first.reserve ( M_localMesh->numEdges() );
-    myGlobalElements.second.reserve ( M_localMesh->numEdges() );
+    // set up Unique (first) and Repeated edges based on the GHOST flag
+    MapEpetraData mapData;
+    mapData.unique.reserve   ( M_localMesh->numEdges() );
+    mapData.repeated.reserve ( M_localMesh->numEdges() );
     // loop on local mesh edges
     for ( ID ie = 0; ie < M_localMesh->numEdges(); ie++ )
     {
-        myGlobalElements.second.push_back ( M_localMesh->edge ( ie ).id() );
-        if ( Flag::testOneSet ( M_localMesh->edge ( ie ).flag(), EntityFlags::OWNED ) )
+        mapData.repeated.push_back ( M_localMesh->edge ( ie ).id() );
+        if ( M_localMesh->edge ( ie ).isOwned() )
         {
-            myGlobalElements.first.push_back ( M_localMesh->edge ( ie ).id() );
+            mapData.unique.push_back ( M_localMesh->edge ( ie ).id() );
         }
     }
 
-    M_ghostMapOnEdges.reset ( new map_Type ( myGlobalElements, M_comm ) );
+    M_ghostMapOnEdges.reset ( new map_Type ( mapData, M_comm ) );
 
     if ( overlap > 0 )
     {
@@ -903,30 +989,30 @@ typename GhostHandler<Mesh>::map_Type& GhostHandler<Mesh>::ghostMapOnEdges ( UIn
         std::set<Int> myGlobalElementsSet;
         std::set<Int> addedElementsSet;
 
-        for (  UInt k ( 0 ); k < myGlobalElements.second.size(); k++ )
+        for (  UInt k ( 0 ); k < mapData.repeated.size(); k++ )
         {
-            typename mesh_Type::edge_Type const& edge = M_fullMesh->edge ( myGlobalElements.second[ k ] );
+            typename mesh_Type::edge_Type const& edge = M_fullMesh->edge ( mapData.repeated[ k ] );
             for ( UInt edgePoint = 0; edgePoint < mesh_Type::edge_Type::S_numPoints; edgePoint++ )
             {
                 addedElementsSet.insert ( edge.point ( edgePoint ).id() );
             }
         }
-        ( myGlobalElements.second.begin(), myGlobalElements.second.end() );
+        ( mapData.repeated.begin(), mapData.repeated.end() );
 
 
         // @todo: optimize this!!
         // 1: work only on the boundary
         // 2: copy back only if necessary
-        // repeat on actual nodes to expand overlap
+        // repeat on actual points to expand overlap
         for ( UInt i = 0; i < overlap; i++ )
         {
             // iterate on points adding all neighbors
-            for ( std::set<Int>::const_iterator nodeIt = addedElementsSet.begin();
-                    nodeIt != addedElementsSet.end(); ++nodeIt )
+            for ( std::set<Int>::const_iterator pointIt = addedElementsSet.begin();
+                    pointIt != addedElementsSet.end(); ++pointIt )
             {
-                // iterate on each node neighborhood
-                for ( neighbors_Type::const_iterator neighborIt = M_nodeEdgeNeighborsList[ *nodeIt ].begin();
-                        neighborIt != M_nodeEdgeNeighborsList[ *nodeIt ].end(); ++neighborIt )
+                // iterate on each point neighborhood
+                for ( neighbors_Type::const_iterator neighborIt = M_pointEdgeNeighborsList[ *pointIt ].begin();
+                        neighborIt != M_pointEdgeNeighborsList[ *pointIt ].end(); ++neighborIt )
                 {
                     std::pair<std::set<Int>::iterator, bool> isInserted = myGlobalElementsSet.insert ( *neighborIt );
                     if ( isInserted.second )
@@ -934,8 +1020,8 @@ typename GhostHandler<Mesh>::map_Type& GhostHandler<Mesh>::ghostMapOnEdges ( UIn
                         typename mesh_Type::EdgeType const& edge = M_fullMesh->edge ( *neighborIt );
                         for ( UInt edgePoint = 0; edgePoint < mesh_Type::EdgeType::S_numPoints; edgePoint++ )
                         {
-                            // TODO exclude already included nodes
-                            //                            if ( edge.point( edgePoint ).id() != *nodeIt )
+                            // TODO exclude already included points
+                            //                            if ( edge.point( edgePoint ).id() != *pointIt )
                             addedElementsSet.insert ( edge.point ( edgePoint ).id() );
                         }
                     }
@@ -943,32 +1029,36 @@ typename GhostHandler<Mesh>::map_Type& GhostHandler<Mesh>::ghostMapOnEdges ( UIn
             }
         }
 
-        myGlobalElements.second.assign ( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
+        mapData.repeated.assign ( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
 
-        map_Type::map_ptrtype repeatedMap ( new Epetra_Map ( -1, myGlobalElements.second.size(), &myGlobalElements.second[0], 0, *M_comm ) );
+        map_Type::map_ptrtype repeatedMap ( new Epetra_Map ( -1,
+                                                             mapData.repeated.size(),
+                                                             &mapData.repeated[0],
+                                                             0,
+                                                             *M_comm ) );
         ghostMap.setMap ( repeatedMap, Repeated );
     }
 
     return *M_ghostMapOnEdges;
 }
 
-template <typename Mesh>
-typename GhostHandler<Mesh>::map_Type& GhostHandler<Mesh>::ghostMapOnElementsP0()
+template <typename MeshType>
+typename GhostHandler<MeshType>::map_Type& GhostHandler<MeshType>::ghostMapOnElementsFV()
 {
     // if the map has already been created, return it
-    if ( M_ghostMapOnElementsP0 )
+    if ( M_ghostMapOnElementsFV )
     {
-        return *M_ghostMapOnElementsP0;
+        return *M_ghostMapOnElementsFV;
     }
 
     if ( M_verbose )
     {
-        std::cout << " GH- ghostMapOnElementsP0()" << std::endl;
+        std::cout << " GH- ghostMapOnElementsFV()" << std::endl;
     }
 
     // create the map
-    M_ghostMapOnElementsP0.reset ( new map_Type() );
-    map_Type& ghostMap ( *M_ghostMapOnElementsP0 );
+    M_ghostMapOnElementsFV.reset ( new map_Type() );
+    map_Type& ghostMap ( *M_ghostMapOnElementsFV );
 
     // use the same Unique map and comm of the original map
     ghostMap.setMap ( M_map->map ( Unique ), Unique );
@@ -1002,52 +1092,52 @@ typename GhostHandler<Mesh>::map_Type& GhostHandler<Mesh>::ghostMapOnElementsP0(
     map_Type::map_ptrtype repeatedMap ( new Epetra_Map ( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap ( repeatedMap, Repeated );
 
-    return *M_ghostMapOnElementsP0;
+    return *M_ghostMapOnElementsFV;
 }
 
-template <typename Mesh>
-typename GhostHandler<Mesh>::map_Type& GhostHandler<Mesh>::ghostMapOnElementsP1 ( UInt overlap )
+template <typename MeshType>
+typename GhostHandler<MeshType>::map_Type& GhostHandler<MeshType>::ghostMapOnElementsFE ( UInt overlap )
 {
     // if the map has already been created, return it
-    if ( M_ghostMapOnElementsP1 )
+    if ( M_ghostMapOnElementsFE )
     {
-        return *M_ghostMapOnElementsP1;
+        return *M_ghostMapOnElementsFE;
     }
 
     if ( M_verbose )
     {
-        std::cout << " GH- ghostMapOnElementsP1()" << std::endl;
+        std::cout << " GH- ghostMapOnElementsFE()" << std::endl;
     }
 
-    // check that the nodeElementNeighborsMap has been created
-    if ( M_nodeElementNeighborsList.empty()  )
+    // check that the pointElementNeighborsMap has been created
+    if ( M_pointElementNeighborsList.empty()  )
     {
         if ( M_verbose )
         {
-            std::cerr << "the nodeElementNeighborsMap is empty, will be generated now" << std::endl;
+            std::cerr << "the pointElementNeighborsList is empty, will be generated now" << std::endl;
         }
-        this->createNodeElementNeighborsMap();
+        this->createPointElementNeighborsList();
     }
 
     // create the map
-    M_ghostMapOnElementsP1.reset ( new map_Type() );
-    map_Type& ghostMap ( *M_ghostMapOnElementsP1 );
+    M_ghostMapOnElementsFE.reset ( new map_Type() );
+    map_Type& ghostMap ( *M_ghostMapOnElementsFE );
 
     // use the same Unique map and comm of the original map
     ghostMap.setMap ( M_map->map ( Unique ), Unique );
     ghostMap.setComm ( M_comm );
 
     Int*          pointer;
-    std::set<Int> map;
+    std::set<Int> myGlobalElementsSet;
 
     // get all elements from the repeated map
     pointer = M_map->map ( Repeated )->MyGlobalElements();
     for ( Int ii = 0; ii < M_map->map ( Repeated )->NumMyElements(); ++ii, ++pointer )
     {
-        map.insert ( *pointer );
+        myGlobalElementsSet.insert ( *pointer );
     }
 
-    // add all elements with a node on SUBDOMAIN_INTERFACE
+    // add all elements with a point on SUBDOMAIN_INTERFACE
     typedef typename mesh_Type::point_Type const* pointPtr_Type;
     std::vector<pointPtr_Type>
     pointsOnSubdInt = M_localMesh->pointList.extractElementsWithFlag (
@@ -1066,134 +1156,70 @@ typename GhostHandler<Mesh>::map_Type& GhostHandler<Mesh>::ghostMapOnElementsP1 
         for ( std::vector<ID>::const_iterator globalId = pointIDOnSubdInt.begin();
                 globalId != pointIDOnSubdInt.end(); ++globalId )
         {
-            // iterate on each node neighborhood
-            for ( neighbors_Type::const_iterator neighborIt = M_nodeElementNeighborsList[ *globalId ].begin();
-                    neighborIt != M_nodeElementNeighborsList[ *globalId ].end(); ++neighborIt )
+            // iterate on each point neighborhood
+            for ( neighbors_Type::const_iterator neighborIt = M_pointElementNeighborsList[ *globalId ].begin();
+                    neighborIt != M_pointElementNeighborsList[ *globalId ].end(); ++neighborIt )
             {
-                std::pair<std::set<Int>::iterator, bool> isInserted = map.insert ( *neighborIt );
+                std::pair<std::set<Int>::iterator, bool> isInserted = myGlobalElementsSet.insert ( *neighborIt );
                 if ( isInserted.second )
                 {
                     typename mesh_Type::element_Type const& elem = M_fullMesh->element ( *neighborIt );
                     for ( UInt elemPoint = 0; elemPoint < mesh_Type::element_Type::S_numPoints; elemPoint++ )
                     {
-                        // TODO exclude already included nodes
+                        // TODO exclude already included points
                         addedPoints.push_back ( elem.point ( elemPoint ).id() );
                     }
                 }
             }
         }
-        // TODO: this must be done only if overlap > 1
-        pointIDOnSubdInt = addedPoints;
+        if ( overlap > 1 )
+        {
+            pointIDOnSubdInt = addedPoints;
+        }
     }
 
     // convert unique list to vector to assure continuity in memorization
-    std::vector<Int> myGlobalElements ( map.begin(), map.end() );
+    std::vector<Int> myGlobalElements ( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
 
     // generate map
     map_Type::map_ptrtype repeatedMap ( new Epetra_Map ( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap ( repeatedMap, Repeated );
 
-    return *M_ghostMapOnElementsP1;
+    return *M_ghostMapOnElementsFE;
 }
 
-template <typename Mesh>
-void GhostHandler<Mesh>::fillEntityPID ( graphPtr_Type elemGraph, std::vector<std::vector<UInt> >& entityPID )
-{
-    //@todo: this routine does not belong here, should be moved to MeshPartitioner
-    if ( M_verbose )
-    {
-        std::cout << " GH- fillEntityPID()" << std::endl;
-    }
-
-    // initialize pointPID to NumProc
-    std::vector<UInt>& pointPID = entityPID[ 3 ];
-    std::vector<UInt>& elemPID = entityPID[ 0 ];
-    std::vector<UInt>& facetPID = entityPID[ 1 ];
-    std::vector<UInt>& ridgePID = entityPID[ 2 ];
-    pointPID.resize ( M_fullMesh->numPoints(), M_comm->NumProc() );
-    elemPID.resize ( M_fullMesh->numElements(), M_comm->NumProc() );
-    facetPID.resize ( M_fullMesh->numFacets(), M_comm->NumProc() );
-    ridgePID.resize ( M_fullMesh->numRidges(), M_comm->NumProc() );
-
-    // @todo: check if parallel building + comm is faster
-    for ( UInt p = 0; p < static_cast<UInt> ( M_comm->NumProc() ); p++ )
-    {
-        for ( UInt e = 0; e < (*elemGraph) [ p ].size(); e++ )
-        {
-            // point block
-            for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
-            {
-                const ID& pointID = M_fullMesh->element ( (*elemGraph) [ p ][ e ] ).point ( k ).id();
-                const UInt& pointCurrentPID = pointPID[ pointID ];
-                // pointPID should be the minimum between the proc that own it
-                if ( p < pointCurrentPID )
-                {
-                    pointPID[ pointID ] = p;
-                }
-            }
-
-            // elem block
-            const ID& elemID = M_fullMesh->element ( (*elemGraph) [ p ][ e ] ).id();
-            // elemPID is always at its initialization value
-            elemPID[ elemID ] = p;
-
-            // facet block
-            for ( UInt k = 0; k < mesh_Type::element_Type::S_numFacets; k++ )
-            {
-                const ID& facetID = M_fullMesh->facet ( M_fullMesh->localFacetId ( elemID, k ) ).id();
-                const UInt& facetCurrentPID = facetPID[ facetID ];
-                // facetPID should be the minimum between the proc that own it
-                if ( p < facetCurrentPID )
-                {
-                    facetPID[ facetID ] = p;
-                }
-            }
-
-            // ridge block
-            for ( UInt k = 0; k < mesh_Type::element_Type::S_numRidges; k++ )
-            {
-                const ID& ridgeID = M_fullMesh->ridge ( M_fullMesh->localRidgeId ( elemID, k ) ).id();
-                const UInt& ridgeCurrentPID = ridgePID[ ridgeID ];
-                // ridgePID should be the minimum between the proc that own it
-                if ( p < ridgeCurrentPID )
-                {
-                    ridgePID[ ridgeID ] = p;
-                }
-            }
-        }
-    }
-}
-
-template <typename Mesh>
-void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
-                                                const std::vector<UInt>& pointPID,
-                                                UInt overlap )
+template <typename MeshType>
+void GhostHandler<MeshType>::extendGraphFE ( graphPtr_Type elemGraph,
+                                             idList_Type const& pointPID,
+                                             UInt overlap )
 {
     if ( M_verbose )
     {
         std::cout << " GH- ghostMapOnElementsP1( graph )" << std::endl;
     }
 
-    // check that the nodeElementNeighborsMap has been created
-    if ( M_nodeElementNeighborsList.empty()  )
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    LifeChronoManager<> timeMgr ( M_comm );
+    LifeChrono timeNL;
+    timeMgr.add ( "point-element ngbr list", &timeNL );
+    timeNL.start();
+#endif
+    // check that the pointElementNeighborsMap has been created
+    if ( M_pointElementNeighborsList.empty()  )
     {
         if ( M_verbose )
         {
-            std::cerr << "the nodeElementNeighborsMap is empty, will be generated now" << std::endl;
+            std::cerr << "the pointElementNeighborsList is empty, will be generated now" << std::endl;
         }
-        this->createNodeElementNeighborsMap();
+        this->createPointElementNeighborsList();
     }
-    if ( M_nodeNodeNeighborsList.empty()  )
-    {
-        if ( M_verbose )
-        {
-            std::cerr << "the nodeElementNeighborsMap is empty, will be generated now" << std::endl;
-        }
-        this->createNodeNodeNeighborsMap();
-    }
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    timeNL.stop();
+#endif
 
     std::vector<int>& myElems = (*elemGraph) [M_me];
-#ifdef HAVE_LIFEV_DEBUG
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
     // show own elements
     M_debugOut << "own elements on proc " << M_me << std::endl;
     for ( UInt i = 0; i < myElems.size(); i++ )
@@ -1202,27 +1228,52 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
     }
 #endif
 
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    LifeChrono timePG;
+    timeMgr.add ( "point graph", &timePG );
+    timePG.start();
+#endif
     // generate graph of points
+    // check: parallel algorithm seems to be faster for this
     graph_Type pointGraph ( M_comm->NumProc() );
 
-    // @todo: check if parallel building + comm is faster
+    std::set<int> localPointsSet;
+    for ( UInt e = 0; e < (*elemGraph) [ M_me ].size(); e++ )
+    {
+        // point block
+        for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
+        {
+            const ID& pointID = M_fullMesh->element ( (*elemGraph) [ M_me ][ e ] ).point ( k ).id();
+            localPointsSet.insert ( pointID );
+        }
+    }
+    pointGraph[ M_me ].assign ( localPointsSet.begin(), localPointsSet.end() );
+
+    std::vector<Int> pointGraphSize ( M_comm->NumProc(), -1 );
+    pointGraphSize[ M_me ] = pointGraph[ M_me ].size();
     for ( UInt p = 0; p < static_cast<UInt> ( M_comm->NumProc() ); p++ )
     {
-        std::set<int> localPointsSet;
-        for ( UInt e = 0; e < (*elemGraph) [ p ].size(); e++ )
-        {
-            // point block
-            for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
-            {
-                const ID& pointID = M_fullMesh->element ( (*elemGraph) [ p ][ e ] ).point ( k ).id();
-                localPointsSet.insert ( pointID );
-            }
-        }
-        pointGraph[ p ].assign ( localPointsSet.begin(), localPointsSet.end() );
+        M_comm->Broadcast ( &pointGraphSize[ p ], 1, p );
     }
 
+    for ( UInt p = 0; p < static_cast<UInt> ( M_comm->NumProc() ); p++ )
+    {
+        pointGraph[ p ].resize ( pointGraphSize[ p ] );
+    }
+
+    // communicate other proc point graphs
+    for ( UInt p = 0; p < static_cast<UInt> ( M_comm->NumProc() ); p++ )
+    {
+        M_comm->Broadcast ( &pointGraph[p][0], pointGraph[p].size(), p );
+    }
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    timePG.stop();
+#endif
+
     std::vector<int> const& myPoints = pointGraph[ M_me ];
-#ifdef HAVE_LIFEV_DEBUG
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
     M_debugOut << "own points on proc " << M_me << std::endl;
     for ( UInt i = 0; i < myPoints.size(); i++ )
     {
@@ -1230,18 +1281,19 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
     }
 #endif
 
-    // initialize a bool vector to know if a point is in current partition
-    std::vector<bool> isInPartition ( M_fullMesh->numPoints(), false );
-    for ( UInt e = 0; e < (*elemGraph) [ M_me ].size(); e++ )
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    LifeChrono timeSI;
+    timeMgr.add ( "find SUBD_INT", &timeSI );
+    timeSI.start();
+#endif
+    // initialize a bool vector that tells if an element is in the current partition
+    std::vector<bool> isInPartition ( M_fullMesh->numElements(), false );
+    for ( UInt e = 0; e < myElems.size(); e++ )
     {
-        for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
-        {
-            const ID& pointID = M_fullMesh->element ( (*elemGraph) [ M_me ][ e ] ).point ( k ).id();
-            isInPartition[ pointID ] = true;
-        }
+        isInPartition[ myElems[ e ] ] = true;
     }
 
-    // find subdomain interface nodes
+    // find subdomain interface points
     std::set<Int> mySubdIntPoints;
     for ( UInt k = 0; k < myPoints.size(); k++ )
     {
@@ -1249,10 +1301,9 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
         // mark as SUBD_INT point only if the point is owned by current process
         if ( pointPID[ currentPoint ] == M_me )
         {
-
-            // check if all neighbors are on this proc
-            for ( neighbors_Type::const_iterator neighborIt = M_nodeNodeNeighborsList[ currentPoint ].begin();
-                    neighborIt != M_nodeNodeNeighborsList[ currentPoint ].end(); ++neighborIt )
+            // check if all element neighbors are on this proc
+            for ( neighbors_Type::const_iterator neighborIt = M_pointElementNeighborsList[ currentPoint ].begin();
+                    neighborIt != M_pointElementNeighborsList[ currentPoint ].end(); ++neighborIt )
             {
                 // add the point if a neighbor is missing
                 if ( !isInPartition[ *neighborIt ] )
@@ -1263,12 +1314,22 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
             }
         }
     }
-#ifdef HAVE_LIFEV_DEBUG
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    timeSI.stop();
+#endif
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
     M_debugOut << "own SUBDOMAIN_INTERFACE points on proc " << M_me << std::endl;
     for ( std::set<Int>::const_iterator i = mySubdIntPoints.begin(); i != mySubdIntPoints.end(); ++i )
     {
         M_debugOut << *i << std::endl;
     }
+#endif
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    LifeChrono timeOP;
+    timeMgr.add ( "overlapping points", &timeOP );
+    timeOP.start();
 #endif
 
     std::vector<int> workingPoints ( mySubdIntPoints.begin(), mySubdIntPoints.end() );
@@ -1277,20 +1338,20 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
 
     for ( UInt o = 0; o < overlap; o++ )
     {
-#ifdef HAVE_LIFEV_DEBUG
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
         M_debugOut << "workingPoints" << std::endl;
         for ( UInt i = 0; i < workingPoints.size(); i++ )
         {
             M_debugOut << workingPoints[ i ] << std::endl;
         }
 #endif
-
         for ( UInt k = 0; k < workingPoints.size(); k++ )
         {
             const int& currentPoint = workingPoints[ k ];
             // iterate on point neighborhood
-            for ( neighbors_Type::const_iterator neighborIt = M_nodeElementNeighborsList[ currentPoint ].begin();
-                    neighborIt != M_nodeElementNeighborsList[ currentPoint ].end(); ++neighborIt )
+            for ( neighbors_Type::const_iterator neighborIt = M_pointElementNeighborsList[ currentPoint ].begin();
+                    neighborIt != M_pointElementNeighborsList[ currentPoint ].end(); ++neighborIt )
             {
                 std::pair<std::set<Int>::iterator, bool> isInserted = augmentedElemsSet.insert ( *neighborIt );
                 if ( isInserted.second )
@@ -1305,59 +1366,286 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
             }
         }
 
-#ifdef HAVE_LIFEV_DEBUG
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
         M_debugOut << "augmentedElemsSet" << std::endl;
         for ( std::set<Int>::const_iterator i = augmentedElemsSet.begin(); i != augmentedElemsSet.end(); ++i )
         {
             M_debugOut << *i << std::endl;
         }
 #endif
-
         // clean up newPoints from already analized points
         for ( UInt k = 0; k < workingPoints.size(); k++ )
         {
             newPoints.erase ( newPoints.find ( workingPoints[ k ] ) );
         }
-#ifdef HAVE_LIFEV_DEBUG
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
         M_debugOut << "newPoints" << std::endl;
         for ( std::set<int>::const_iterator i = newPoints.begin(); i != newPoints.end(); ++i )
         {
             M_debugOut << *i << std::endl;
         }
 #endif
-
         // set up workingPoints if we are not exiting
         if ( o + 1 < overlap  )
         {
             workingPoints.assign ( newPoints.begin(), newPoints.end() );
         }
     }
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    timeOP.stop();
+#endif
 
     // assign the augmentedElems to the element graph
     myElems.assign ( augmentedElemsSet.begin(), augmentedElemsSet.end() );
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    timeMgr.print();
+#endif
 }
 
-template <typename Mesh>
-void GhostHandler<Mesh>::showMe ( bool const /*verbose*/, std::ostream& out )
+template <typename MeshType>
+void GhostHandler<MeshType>::extendGraphFE ( const vertexPartitionPtr_Type& elemGraph,
+                                             idList_Type const& pointPID,
+                                             UInt overlap,
+                                             UInt partIndex)
+{
+    if ( M_verbose )
+    {
+        std::cout << " GH- ghostMapOnElementsP1( graph )" << std::endl;
+    }
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    LifeChronoManager<> timeMgr ( M_comm );
+    LifeChrono timeNL;
+    timeMgr.add ( "node-element ngbr list", &timeNL );
+    timeNL.start();
+#endif
+    // check that the pointElementNeighborsMap has been created
+    if ( M_pointElementNeighborsList.empty()  )
+    {
+        if ( M_verbose )
+        {
+            std::cerr << "the pointElementNeighborsList is empty, will be generated now" << std::endl;
+        }
+        this->createPointElementNeighborsList();
+    }
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    timeNL.stop();
+#endif
+
+    std::vector<int>& myElems = * (elemGraph->at (partIndex) );
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    // show own elements
+    M_debugOut << "own elements on proc " << partIndex << std::endl;
+    for ( UInt i = 0; i < myElems.size(); i++ )
+    {
+        M_debugOut << myElems[ i ] << std::endl;
+    }
+#endif
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    LifeChrono timePG;
+    timeMgr.add ( "point graph", &timePG );
+    timePG.start();
+#endif
+    // generate graph of points
+    // check: parallel algorithm seems to be faster for this
+    Int numParts = elemGraph->size();
+    graph_Type pointGraph ( numParts );
+
+    std::set<int> localPointsSet;
+    for ( UInt e = 0; e < elemGraph->at (partIndex)->size(); e++ )
+    {
+        // point block
+        for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
+        {
+            const ID& pointID = M_fullMesh->element ( elemGraph->at (partIndex)->at (e) ).point ( k ).id();
+            localPointsSet.insert ( pointID );
+        }
+    }
+    pointGraph[ partIndex ].assign ( localPointsSet.begin(), localPointsSet.end() );
+
+    std::vector<Int> pointGraphSize ( numParts, -1 );
+    pointGraphSize[ partIndex ] = pointGraph[ partIndex ].size();
+    if (M_comm->NumProc() > 1)
+    {
+        for ( UInt p = 0; p < static_cast<UInt> ( M_comm->NumProc() ); p++ )
+        {
+            M_comm->Broadcast ( &pointGraphSize[ p ], 1, p );
+        }
+
+        for ( UInt p = 0; p < static_cast<UInt> ( M_comm->NumProc() ); p++ )
+        {
+            pointGraph[ p ].resize ( pointGraphSize[ p ] );
+        }
+
+        // communicate other proc point graphs
+        for ( UInt p = 0; p < static_cast<UInt> ( M_comm->NumProc() ); p++ )
+        {
+            M_comm->Broadcast ( &pointGraph[p][0], pointGraph[p].size(), p );
+        }
+    }
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    timePG.stop();
+#endif
+
+    std::vector<int> const& myPoints = pointGraph[ partIndex ];
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    M_debugOut << "own points on proc " << partIndex << std::endl;
+    for ( UInt i = 0; i < myPoints.size(); i++ )
+    {
+        M_debugOut << myPoints[ i ] << std::endl;
+    }
+#endif
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    LifeChrono timeSI;
+    timeMgr.add ( "find SUBD_INT", &timeSI );
+    timeSI.start();
+#endif
+    // initialize a bool vector that tells if an element is in the current partition
+    std::vector<bool> isInPartition ( M_fullMesh->numElements(), false );
+    for ( UInt e = 0; e < myElems.size(); e++ )
+    {
+        isInPartition[ myElems[ e ] ] = true;
+    }
+
+    // find subdomain interface points
+    std::set<Int> mySubdIntPoints;
+    for ( UInt k = 0; k < myPoints.size(); k++ )
+    {
+        int const& currentPoint = myPoints[ k ];
+        // mark as SUBD_INT point only if the point is owned by current process
+        if ( pointPID[ currentPoint ] == partIndex )
+        {
+            // check if all element neighbors are on this proc
+            for ( neighbors_Type::const_iterator neighborIt = M_pointElementNeighborsList[ currentPoint ].begin();
+                    neighborIt != M_pointElementNeighborsList[ currentPoint ].end(); ++neighborIt )
+            {
+                // add the point if a neighbor is missing
+                if ( !isInPartition[ *neighborIt ] )
+                {
+                    mySubdIntPoints.insert ( currentPoint );
+                    break;
+                }
+            }
+        }
+    }
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    timeSI.stop();
+#endif
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    M_debugOut << "own SUBDOMAIN_INTERFACE points on proc " << partIndex << std::endl;
+    for ( std::set<Int>::const_iterator i = mySubdIntPoints.begin(); i != mySubdIntPoints.end(); ++i )
+    {
+        M_debugOut << *i << std::endl;
+    }
+#endif
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    LifeChrono timeOP;
+    timeMgr.add ( "overlapping points", &timeOP );
+    timeOP.start();
+#endif
+
+    std::vector<int> workingPoints ( mySubdIntPoints.begin(), mySubdIntPoints.end() );
+    std::set<int> newPoints;
+    std::set<int> augmentedElemsSet ( myElems.begin(), myElems.end() );
+
+    for ( UInt o = 0; o < overlap; o++ )
+    {
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+        M_debugOut << "workingPoints" << std::endl;
+        for ( UInt i = 0; i < workingPoints.size(); i++ )
+        {
+            M_debugOut << workingPoints[ i ] << std::endl;
+        }
+#endif
+        for ( UInt k = 0; k < workingPoints.size(); k++ )
+        {
+            const int& currentPoint = workingPoints[ k ];
+            // iterate on point neighborhood
+            for ( neighbors_Type::const_iterator neighborIt = M_pointElementNeighborsList[ currentPoint ].begin();
+                    neighborIt != M_pointElementNeighborsList[ currentPoint ].end(); ++neighborIt )
+            {
+                std::pair<std::set<Int>::iterator, bool> isInserted = augmentedElemsSet.insert ( *neighborIt );
+                if ( isInserted.second )
+                {
+                    // if the element is inserted in the list, we add its points to the ones
+                    // to be checked for next overlap value
+                    for ( UInt j = 0; j < mesh_Type::element_Type::S_numPoints; j++ )
+                    {
+                        newPoints.insert ( M_fullMesh->element ( *neighborIt ).point ( j ).id() );
+                    }
+                }
+            }
+        }
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+        M_debugOut << "augmentedElemsSet" << std::endl;
+        for ( std::set<Int>::const_iterator i = augmentedElemsSet.begin(); i != augmentedElemsSet.end(); ++i )
+        {
+            M_debugOut << *i << std::endl;
+        }
+#endif
+        // clean up newPoints from already analized points
+        for ( UInt k = 0; k < workingPoints.size(); k++ )
+        {
+            newPoints.erase ( newPoints.find ( workingPoints[ k ] ) );
+        }
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+        M_debugOut << "newPoints" << std::endl;
+        for ( std::set<int>::const_iterator i = newPoints.begin(); i != newPoints.end(); ++i )
+        {
+            M_debugOut << *i << std::endl;
+        }
+#endif
+        // set up workingPoints if we are not exiting
+        if ( o + 1 < overlap  )
+        {
+            workingPoints.assign ( newPoints.begin(), newPoints.end() );
+        }
+    }
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    timeOP.stop();
+#endif
+
+    // assign the augmentedElems to the element graph
+    myElems.assign ( augmentedElemsSet.begin(), augmentedElemsSet.end() );
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    timeMgr.print();
+#endif
+}
+
+template <typename MeshType>
+void GhostHandler<MeshType>::showMe ( bool const /*verbose*/, std::ostream& out )
 {
     out << "GhostHandler::showMe()" << std::endl;
-    out << "M_nodeNodeNeighborsMap" << std::endl;
-    for ( UInt i = 0; i < M_nodeNodeNeighborsList.size(); i++ )
+    out << "M_pointPointNeighborsMap" << std::endl;
+    for ( UInt i = 0; i < M_pointPointNeighborsList.size(); i++ )
     {
         out << i << " > ";
-        for ( neighbors_Type::const_iterator nIt = M_nodeNodeNeighborsList[ i ].begin();
-                nIt != M_nodeNodeNeighborsList[ i ].end(); ++nIt )
+        for ( neighbors_Type::const_iterator nIt = M_pointPointNeighborsList[ i ].begin();
+                nIt != M_pointPointNeighborsList[ i ].end(); ++nIt )
         {
             out << *nIt << " ";
         }
         out << std::endl;
     }
-    out << "M_nodeElementNeighborsMap" << std::endl;
-    for ( UInt i = 0; i < M_nodeNodeNeighborsList.size(); i++ )
+    out << "M_pointElementNeighborsMap" << std::endl;
+    for ( UInt i = 0; i < M_pointPointNeighborsList.size(); i++ )
     {
         out << i << " > ";
-        for ( neighbors_Type::const_iterator nIt = M_nodeNodeNeighborsList[ i ].begin();
-                nIt != M_nodeNodeNeighborsList[ i ].end(); ++nIt )
+        for ( neighbors_Type::const_iterator nIt = M_pointPointNeighborsList[ i ].begin();
+                nIt != M_pointPointNeighborsList[ i ].end(); ++nIt )
         {
             out << *nIt << " ";
         }

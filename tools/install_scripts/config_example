@@ -8,10 +8,10 @@
 #DBG=1
 
 # select library installation path
-INSTALL_DIR=${HOME}/lifev/install
+INSTALL_DIR=${HOME}/lifev-env
 
 # select temporary build directory
-BUILD_DIR=${HOME}/lifev/build
+BUILD_DIR=${HOME}/lifev-env
 
 # comment next line to keep build files
 RM_TMP=1
@@ -24,6 +24,12 @@ DOWNLOAD=1
 
 # comment next line to disable unpack
 UNPACK=1
+
+# comment next line to disable build
+BUILD=1
+
+# comment next line to disable install
+INSTALL=1
 
 # check if we are using a mox machine
 if [ $( uname -a | grep polimi ) ]; then MOX_MACHINE=1; fi

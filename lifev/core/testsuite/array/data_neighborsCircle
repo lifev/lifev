@@ -14,7 +14,7 @@
 
 [space_discretization]
 mesh_dir      = ./                    # the directory where the mesh file is
-mesh_file     = unstructured_square.msh
+mesh_file     = square_unstructured.msh
 mesh_type     = .msh
 mesh_faces    = all
 verbose       = 0                     # verbose during mesh-reading

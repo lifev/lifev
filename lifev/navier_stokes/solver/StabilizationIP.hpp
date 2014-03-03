@@ -107,20 +107,6 @@ public:
     //! Default Constructor
     StabilizationIP();
 
-    //! Constructor
-    /*!
-     * @param mesh       meshPtr_Type  a pointer to the mesh
-     * @param dof        dof_Type      the velocity/pressure dof (same order discretization)
-     * @param refFE      ReferenceFE         the velocity/pressure field reference finite
-     * @param feBd       CurrentBoundaryFE   the facet current fe to be used to compute the jumps
-     *                                 on the interface within elements.
-     * @param quadRule   QuadratureRule      the element quadrature rule used for the facet projection
-     * @param gammaBeta  Real          the stabilization parameter @f$\gamma_\beta@f$ for @f$\Sigma_{f\in\mathcal{F}}\int_{f} [\beta \cdot \nabla \mathbf{u}] [\beta \cdot \nabla \mathbf{v}]@f$
-     * @param gammaDiv   Real          the stabilization parameter @f$\gamma_d@f$ for @f$\Sigma_{f\in\mathcal{F}}\int_{f} [div \mathbf{u}] [div \mathbf{v}]@f$
-     * @param gammaPress Real          the stabilization parameter @f$\gamma_p@f$ for @f$\Sigma_{f\in\mathcal{F}}\int_{f} [\nabla p] \cdot [\nabla q]@f$
-     * @param viscosity  Real          the fluid viscosity @f$\nu@f$
-     */
-
     virtual ~StabilizationIP() {};
     //@}
 
@@ -190,7 +176,7 @@ public:
         M_mesh = mesh;
     }
     //! Set Discretization
-    void setDiscretization (const dofPtr_Type& dof, const ReferenceFE& refFE, CurrentBoundaryFE& feBd, const QuadratureRule& quadRule);
+    void setDiscretization (const dofPtr_Type& dof, const ReferenceFE& refFE, CurrentFEManifold& feBd, const QuadratureRule& quadRule);
     //! Set the fespace
     template<typename MapType>
     void setFeSpaceVelocity (FESpace<mesh_Type, MapType>& feSpaceVelocity);
@@ -220,7 +206,7 @@ private:
     //! current Fe on side 2 of the current facet
     boost::shared_ptr<CurrentFE>    M_feOnSide2;
     //! current boundary FE
-    CurrentBoundaryFE*  M_feBd;
+    CurrentFEManifold*  M_feBd;
     //! Stabilization parameter @f$\gamma_\beta@f$ for @f$\int_{facet} [\beta \cdot \nabla \mathbf{u}] [\beta \cdot \nabla \mathbf{v}]@f$
     Real         M_gammaBeta;
     //! Stabilization parameter @f$\gamma_d@f$ for @f$\int_{facet} [div \mathbf{u}] [div \mathbf{v}]@f$
@@ -285,7 +271,7 @@ void StabilizationIP<MeshType, DofType>::apply ( MatrixType& matrix,  const Vect
     state.normInf (&normInf);
 
     // local trace of the velocity
-    VectorElemental beta ( M_feBd->nbNode(), geoDimensions );
+    VectorElemental beta ( M_feBd->nbFEDof(), geoDimensions );
 
     UInt myFacets (0);
 
@@ -308,7 +294,7 @@ void StabilizationIP<MeshType, DofType>::apply ( MatrixType& matrix,  const Vect
         chronoUpdate.start();
         // update current finite elements
 #if WITH_DIVERGENCE
-        M_feBd->updateMeas ( M_mesh->facet ( iFacet ) );
+        M_feBd->update ( M_mesh->facet ( iFacet ), UPDATE_W_ROOT_DET_METRIC );
 #else
         M_feBd->updateMeasNormal ( M_mesh->facet ( iFacet ) );
         KNM<Real>& normal = M_feBd->normal;
@@ -329,22 +315,22 @@ void StabilizationIP<MeshType, DofType>::apply ( MatrixType& matrix,  const Vect
 
             // local id of the facet in its adjacent element
             UInt iFaEl ( M_mesh->facet ( iFacet ).firstAdjacentElementPosition() );
-            for ( UInt iNode ( 0 ); iNode < M_feBd->nbNode(); ++iNode )
+            for ( UInt iNode ( 0 ); iNode < M_feBd->nbFEDof(); ++iNode )
             {
                 UInt iloc ( M_facetToPoint ( iFaEl, iNode ) );
-                for ( UInt iCoor ( 0 ); iCoor < M_feOnSide1->nbCoor(); ++iCoor )
+                for ( UInt iCoor ( 0 ); iCoor < M_feOnSide1->nbLocalCoor(); ++iCoor )
                 {
                     UInt ig ( M_dof->localToGlobalMap ( iElAd1, iloc ) + iCoor * nDof );
 
-                    if (state.blockMap().LID (ig) >= 0)
+                    if (state.blockMap().LID ( static_cast<EpetraInt_Type> (ig) ) >= 0)
                     {
-                        beta.vec() [ iCoor * M_feBd->nbNode() + iNode ] = state ( ig);
+                        beta.vec() [ iCoor * M_feBd->nbFEDof() + iNode ] = state ( ig);
                     }
                 }
             }
 
             // second, calculate its max norm
-            for ( UInt l ( 0 ); l < static_cast<UInt> ( M_feOnSide1->nbCoor() *M_feBd->nbNode() ); ++l )
+            for ( UInt l ( 0 ); l < static_cast<UInt> ( M_feOnSide1->nbLocalCoor() *M_feBd->nbFEDof() ); ++l )
             {
                 if ( bmax < std::fabs ( beta.vec() [ l ] ) )
                 {
@@ -438,7 +424,7 @@ void StabilizationIP<MeshType, DofType>::apply ( MatrixType& matrix,  const Vect
             for ( UInt iNode (0); iNode < M_feBd->nbNode; ++iNode )
             {
                 Real bn ( 0 );
-                for ( UInt iCoor (0); iCoor < M_feOnSide1->nbCoor(); ++iCoor )
+                for ( UInt iCoor (0); iCoor < M_feOnSide1->nbLocalCoor(); ++iCoor )
                 {
                     bn += normal (iNode, iCoor) *
                           beta.vec() [ iCoor * M_feBd->nbNode + iNode ];
@@ -598,7 +584,7 @@ void StabilizationIP<MeshType, DofType>::showMe (std::ostream& output) const
 // Setters method
 //=============================================================================
 template<typename MeshType, typename DofType>
-void StabilizationIP<MeshType, DofType>::setDiscretization (const dofPtr_Type& dof, const ReferenceFE& refFE, CurrentBoundaryFE& feBd, const QuadratureRule& quadRule)
+void StabilizationIP<MeshType, DofType>::setDiscretization (const dofPtr_Type& dof, const ReferenceFE& refFE, CurrentFEManifold& feBd, const QuadratureRule& quadRule)
 {
     M_dof = dof;
     M_feOnSide1.reset ( new CurrentFE (refFE, getGeometricMap (*M_mesh), quadRule) );

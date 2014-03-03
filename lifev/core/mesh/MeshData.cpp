@@ -87,6 +87,24 @@ MeshData::setup ( const GetPot& dataFile, const std::string& section )
     M_verbose   = dataFile ( ( section + "/verbose"   ).data(), false );
 }
 
+void
+MeshData::setup ( const Teuchos::ParameterList& meshParameters )
+{
+    Teuchos::ParameterList defaultParameters;
+    defaultParameters.set ("mesh_dir", "./");
+    defaultParameters.set ("mesh_file", "mesh.mesh");
+    defaultParameters.set ("mesh_type", ".mesh");
+    defaultParameters.set ("order", "P1");
+    defaultParameters.set ("verbose", false);
+    defaultParameters.setParameters (meshParameters);
+
+    M_meshDir = defaultParameters.get<std::string> ("mesh_dir");
+    M_meshFile = defaultParameters.get<std::string> ("mesh_file");
+    M_meshType = defaultParameters.get<std::string> ("mesh_type");
+    M_order = defaultParameters.get<std::string> ("order");
+    M_verbose = defaultParameters.get<bool> ("verbose");
+}
+
 void MeshData::showMe ( std::ostream& output ) const
 {
     output << "\n*** MeshData: values for user-defined data\n\n";

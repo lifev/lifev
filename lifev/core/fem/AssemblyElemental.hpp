@@ -45,20 +45,17 @@
 #ifndef _ELEMOPER_H_INCLUDED
 #define _ELEMOPER_H_INCLUDED
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <boost/numeric/ublas/matrix.hpp>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 
 #include <lifev/core/array/MatrixElemental.hpp>
 #include <lifev/core/array/VectorElemental.hpp>
 
-#include <lifev/core/fem/CurrentBoundaryFE.hpp>
+#include <lifev/core/fem/CurrentFEManifold.hpp>
+#include <lifev/core/fem/ReferenceFEHybrid.hpp>
 #include <lifev/core/fem/CurrentFE.hpp>
 #include <lifev/core/fem/DOF.hpp>
 
@@ -169,7 +166,7 @@ void interpolateGradient (localVector& localGradient,
         {
 
             for (UInt jDim (0); jDim < nDimensions; ++jDim)
-                //for ( jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+                //for ( jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
             {
                 localGradient[ iQuadPt ][ iterDim ][ jDim ] = 0.0;
                 for ( UInt i = 0; i < nbFEDof; ++i )
@@ -287,7 +284,7 @@ void advection (MatrixElemental& localAdv,
             for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
             {
                 advGrad = 0.;
-                for (UInt iDim (0); iDim < advCFE.nbCoor(); ++iDim)
+                for (UInt iDim (0); iDim < advCFE.nbLocalCoor(); ++iDim)
                 {
                     advGrad += localValues[iQuadPt][iDim]
                                * advCFE.dphi (jDof, iDim, iQuadPt);
@@ -588,26 +585,26 @@ void source_stiff (const std::vector<Real>& constant, VectorElemental& elvec, co
 //! \f$ coef < \nabla p1, \nabla q2 >\f$
 void ipstab_grad ( const Real coef, MatrixElemental& elmat,
                    const CurrentFE& fe1, const CurrentFE& fe2,
-                   const CurrentBoundaryFE& bdfe, int iblock = 0, int jblock = 0 );
+                   const CurrentFEManifold& bdfe, int iblock = 0, int jblock = 0 );
 
 //! \f$ coef < \nabla u1, \nabla v2 >\f$
 void ipstab_grad ( const Real coef, MatrixElemental& elmat,
                    const CurrentFE& fe1, const CurrentFE& fe2,
-                   const CurrentBoundaryFE& bdfe, int iblock, int jblock, int nb );
+                   const CurrentFEManifold& bdfe, int iblock, int jblock, int nb );
 
 //! \f$ coef < \nabla\cdot  u1, \nabla\cdot  v2 >\f$
 void ipstab_div ( const Real coef, MatrixElemental& elmat,
                   const CurrentFE& fe1, const CurrentFE& fe2,
-                  const CurrentBoundaryFE& bdfe, int iblock = 0, int jblock = 0 );
+                  const CurrentFEManifold& bdfe, int iblock = 0, int jblock = 0 );
 //! \f$ coef < \beta1 . \nabla u1, \beta2 . \nabla v2 >\f$
 void ipstab_bgrad ( const Real coef, MatrixElemental& elmat,
                     const CurrentFE& fe1, const CurrentFE& fe2,
-                    const VectorElemental& beta, const CurrentBoundaryFE& bdfe,
+                    const VectorElemental& beta, const CurrentFEManifold& bdfe,
                     int iblock, int jblock, int nb );
 //! \f$ coef < |\beta . n|^2 / |\beta| \nabla p1, \nabla q2 >\f$
 void ipstab_bagrad ( const Real coef, MatrixElemental& elmat,
                      const CurrentFE& fe1, const CurrentFE& fe2,
-                     const VectorElemental& beta, const CurrentBoundaryFE& bdfe,
+                     const VectorElemental& beta, const CurrentFEManifold& bdfe,
                      int iblock = 0, int jblock = 0 );
 
 //!\f$ coef < |\beta\cdot n| \nabla p1, \nabla q2 >\f$
@@ -621,7 +618,7 @@ void ipstab_bagrad ( const Real           coef,
                      const CurrentFE&     fe2,
                      const CurrentFE&     fe3,
                      const VectorElemental&       beta,
-                     const CurrentBoundaryFE&   bdfe,
+                     const CurrentFEManifold&   bdfe,
                      int iblock = 0, int jblock = 0 );
 
 //!@}

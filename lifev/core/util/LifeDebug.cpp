@@ -40,8 +40,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <fstream>
 #include <iterator>
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <boost/lexical_cast.hpp>
 
@@ -49,8 +47,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 # include <execinfo.h>
 #endif
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/util/LifeDebug.hpp>
@@ -365,7 +361,7 @@ void DebugStream::detachAll()
 {
 }
 
-#ifndef NDEBUG_OLD
+#ifdef HAVE_LIFEV_DEBUG
 DebugStream
 Debug ( int area, DebugStream::stprintf func )
 {

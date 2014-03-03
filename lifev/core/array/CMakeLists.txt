@@ -9,6 +9,7 @@ SET(array_HEADERS
   array/MatrixEpetraStructuredUtility.hpp
   array/MatrixEpetraStructuredView.hpp
   array/MapEpetra.hpp
+  array/MapEpetraData.hpp
   array/RNMOperatorConstant.hpp
   array/RNM.hpp
   array/VectorContainer.hpp

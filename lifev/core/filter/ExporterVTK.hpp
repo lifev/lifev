@@ -488,7 +488,7 @@ void ExporterVTK<MeshType>::postProcess (const Real& time)
     this->computePostfix();
 
     std::size_t found ( this->M_postfix.find ( "*" ) );
-    if ( found == string::npos )
+    if ( found == std::string::npos )
     {
         if (this->M_procId == 0)
         {
@@ -883,7 +883,7 @@ ExporterVTK<MeshType>::readBinaryData ( const std::string& line, std::vector<Rea
     std::stringstream decodedData, dataToBeDecoded;
     dataToBeDecoded.str ("");
     std::string decodedDataString;
-    UInt sizeOfFloat ( 0 ), sizeOfVector ( values.size() ), lengthOfRawData;
+    UInt sizeOfFloat ( 0 ), sizeOfVector ( values.size() );
 
     switch ( numBits )
     {
@@ -900,8 +900,6 @@ ExporterVTK<MeshType>::readBinaryData ( const std::string& line, std::vector<Rea
             break;
     }
 
-    lengthOfRawData = sizeOfVector * sizeOfFloat + sizeof (int32_type);
-
     // assign the block of char to a stringstream (to convert it into a string)
     dataToBeDecoded.write ( line.c_str(), line.size() );
 
@@ -910,8 +908,10 @@ ExporterVTK<MeshType>::readBinaryData ( const std::string& line, std::vector<Rea
     decodedDataString = base64_decode ( dataToBeDecoded.str() );
     decodedData.str ( decodedDataString );
 
+#ifdef HAVE_LIFEV_DEBUG
+    UInt lengthOfRawData = sizeOfVector * sizeOfFloat + sizeof (int32_type);
     ASSERT ( lengthOfRawData == decodedDataString.size(), "unexpected line length" );
-
+#endif
 
     // the first value in the string is the size of the subsequent bunch of data
     int32_type* inputInt = new int32_type;

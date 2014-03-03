@@ -111,14 +111,17 @@ public:
 #ifdef HAVE_NS_PREC
     typedef MatrixEpetraStructured<Real>                matrix_Type;
 #else
-    typedef typename linearSolver_Type::matrix_type       matrix_Type;
+    typedef typename linearSolver_Type::matrix_type     matrix_Type;
 #endif
     typedef boost::shared_ptr<matrix_Type>              matrixPtr_Type;
     typedef typename linearSolver_Type::vector_type     vector_Type;
     typedef boost::shared_ptr<vector_Type>              vectorPtr_Type;
 
-    typedef typename linearSolver_Type::prec_raw_type preconditioner_Type;
-    typedef typename linearSolver_Type::prec_type     preconditionerPtr_Type;
+    typedef vector_Type                                 solution_Type;
+    typedef boost::shared_ptr<solution_Type>            solutionPtr_Type;
+
+    typedef typename linearSolver_Type::prec_raw_type   preconditioner_Type;
+    typedef typename linearSolver_Type::prec_type       preconditionerPtr_Type;
 
     //@}
 
@@ -1471,7 +1474,7 @@ updateSystem ( const Real         alpha,
         // vector with repeated nodes over the processors
 
         vector_Type betaVectorRepeated ( betaVector, Repeated );
-        vector_Type unRepeated ( un, Repeated );
+        vector_Type unRepeated ( un, Repeated, Add );
 
         chrono.stop();
 
@@ -1630,7 +1633,7 @@ OseenSolver<MeshType, SolverType>::updateStabilization ( matrix_Type& matrixFull
 template <typename Mesh, typename SolverType>
 void OseenSolver<Mesh, SolverType>::updateSourceTerm ( source_Type const& source )
 {
-    vector_Type rhs (vector_Type (*M_localMap) );
+    vector_Type rhs ( M_localMap );
 
     VectorElemental M_elvec (M_velocityFESpace->fe().nbFEDof(), nDimensions);
     UInt nc = nDimensions;
@@ -1800,7 +1803,7 @@ Real
 OseenSolver<MeshType, SolverType>::flux ( const markerID_Type& flag,
                                           const vector_Type& solution )
 {
-    vector_Type velocityAndPressure ( solution, Repeated );
+    vector_Type velocityAndPressure ( solution, Repeated, Add );
     vector_Type velocity ( this->M_velocityFESpace.map(), Repeated );
     velocity.subset ( velocityAndPressure );
 
@@ -1819,7 +1822,7 @@ Real
 OseenSolver<MeshType, SolverType>::kineticNormalStress ( const markerID_Type& flag,
                                                          const vector_Type& solution )
 {
-    vector_Type velocityAndPressure ( solution, Repeated );
+    vector_Type velocityAndPressure ( solution, Repeated, Add );
     vector_Type velocity ( this->M_velocityFESpace.map(), Repeated );
     velocity.subset ( velocityAndPressure );
 
@@ -1859,7 +1862,7 @@ Real
 OseenSolver<MeshType, SolverType>::pressure (const markerID_Type& flag,
                                              const vector_Type& solution)
 {
-    vector_Type velocityAndPressure ( solution, Repeated );
+    vector_Type velocityAndPressure ( solution, Repeated, Add );
     vector_Type pressure ( this->M_pressureFESpace.map(), Repeated );
     pressure.subset ( velocityAndPressure,
                       this->M_velocityFESpace.dim() *this->M_velocityFESpace.fieldDim() );
@@ -1926,7 +1929,7 @@ OseenSolver<MeshType, SolverType>::lagrangeMultiplier ( const markerID_Type&  fl
     bcName_Type fluxbcName_Type = bcHandler.findBCWithFlag ( flag ).name();
 
     // Create a Repeated vector for looking to the lambda
-    vector_Type velocityPressureLambda ( solution, Repeated );
+    vector_Type velocityPressureLambda ( solution, Repeated, Add );
 
     // Find the index associated to the correct Lagrange multiplier
     for ( UInt lmIndex = 0; lmIndex < static_cast <UInt> ( fluxBCVector.size() ); ++lmIndex )

@@ -40,9 +40,6 @@
  *  This is a test to verify that the One Dimensional Model works correctly.
  */
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
@@ -52,9 +49,6 @@
 #include <Epetra_SerialComm.h>
 #endif
 
-// Tell the compiler to restore the warning previously silented
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LifeV includes
 #include <lifev/core/LifeV.hpp>
@@ -65,7 +59,7 @@
 // Mathcard includes
 #include <lifev/one_d_fsi/fem/OneDFSIBCHandler.hpp>
 #include <lifev/one_d_fsi/solver/OneDFSISolver.hpp>
-#include <lifev/multiscale/solver/MultiscaleModelFSI1D.hpp>
+#include <lifev/multiscale/models/MultiscaleModelFSI1D.hpp>
 
 #include "ud_functions.hpp"
 

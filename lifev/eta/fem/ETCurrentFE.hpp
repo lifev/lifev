@@ -40,6 +40,7 @@
 #include <lifev/core/LifeV.hpp>
 
 #include <lifev/core/array/VectorSmall.hpp>
+#include <lifev/eta/array/MatrixSmall.hpp>
 
 #include <lifev/eta/fem/ETCurrentFlag.hpp>
 
@@ -101,16 +102,8 @@ class EvaluationMeas;
   specialization of this class).
 
 */
-template <UInt spaceDim, UInt fieldDim>
-class ETCurrentFE
-{
-private:
-    ~ETCurrentFE();
-    ETCurrentFE();
-    ETCurrentFE (const ETCurrentFE&);
-    void operator= (const ETCurrentFE&);
-};
-
+// This header contains the non-specialized version of the class
+#include "ETCurrentFE_FD3.hpp"
 
 /*!
   The ETCurrentFE is the class to be used to compute quantities related
@@ -490,7 +483,7 @@ private:
     // Storage for the derivative of the basis functions
     array2D_vector_Type M_dphi;
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     // Debug informations, defined only if the code
     // is compiled in debug mode. These booleans store the
     // information about what the last call to "update"
@@ -504,6 +497,7 @@ private:
     bool M_isDetJacobianUpdated;
     bool M_isInverseJacobianUpdated;
     bool M_isWDetUpdated;
+    bool M_isPhiUpdated;
     bool M_isDphiUpdated;
 
 #endif
@@ -560,7 +554,7 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadrat
     M_tInverseJacobian(),
     M_dphi()
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     , M_isCellNodeUpdated (false),
     M_isDiameterUpdated (false),
     M_isMeasureUpdated (false),
@@ -569,6 +563,7 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadrat
     M_isDetJacobianUpdated (false),
     M_isInverseJacobianUpdated (false),
     M_isWDetUpdated (false),
+    M_isPhiUpdated (false),
     M_isDphiUpdated (false)
 #endif
 
@@ -609,7 +604,7 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap)
     M_tInverseJacobian(),
     M_dphi()
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     , M_isCellNodeUpdated (false),
     M_isDiameterUpdated (false),
     M_isMeasureUpdated (false),
@@ -618,6 +613,7 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap)
     M_isDetJacobianUpdated (false),
     M_isInverseJacobianUpdated (false),
     M_isWDetUpdated (false),
+    M_isPhiUpdated (false),
     M_isDphiUpdated (false)
 #endif
 
@@ -655,7 +651,7 @@ ETCurrentFE (const ETCurrentFE<spaceDim, 1>& otherFE)
     M_tInverseJacobian (otherFE.M_tInverseJacobian),
     M_dphi (otherFE.M_dphi)
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     //Beware for the comma at the begining of this line!
     , M_isCellNodeUpdated ( otherFE.M_isCellNodeUpdated ),
     M_isDiameterUpdated ( otherFE.M_isDiameterUpdated ),
@@ -665,6 +661,7 @@ ETCurrentFE (const ETCurrentFE<spaceDim, 1>& otherFE)
     M_isDetJacobianUpdated ( otherFE.M_isDetJacobianUpdated ),
     M_isInverseJacobianUpdated ( otherFE.M_isInverseJacobianUpdated ),
     M_isWDetUpdated ( otherFE.M_isWDetUpdated ),
+    M_isPhiUpdated ( otherFE.M_isPhiUpdated ),
     M_isDphiUpdated ( otherFE.M_isDphiUpdated )
 #endif
 
@@ -697,7 +694,7 @@ update (const elementType& element, const flag_Type& flag)
     ASSERT (M_geometricMap != 0, "No geometric mapping for the update");
     ASSERT (M_quadratureRule != 0, "No quadrature rule for the update");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     // Reset all the flags to false
     M_isCellNodeUpdated = false;
     M_isDiameterUpdated = false;
@@ -871,6 +868,10 @@ setupInternalConstants()
         }
     }
 
+#ifdef HAVE_LIFEV_DEBUG
+    M_isDphiUpdated = true;
+#endif
+
     // PHI MAP
     M_phiMap.resize (M_nbQuadPt);
     for (UInt q (0); q < M_nbQuadPt; ++q)
@@ -977,7 +978,7 @@ updateQuadNode (const UInt& iQuadPt)
     ASSERT (M_isCellNodeUpdated, "Cell must be updated to compute the quadrature node position");
 
     // Set the check boolean
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isQuadNodeUpdated = true;
 #endif
 
@@ -1002,7 +1003,7 @@ updateJacobian (const UInt& iQuadPt)
     ASSERT (M_isCellNodeUpdated, "Cell must be updated to compute the jacobian");
 
     // Set the check boolean
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isJacobianUpdated = true;
 #endif
 
@@ -1022,138 +1023,6 @@ updateJacobian (const UInt& iQuadPt)
     }
 }
 
-// Full specialization for the computation of the determinant
-template<>
-void
-ETCurrentFE<1, 1>::
-updateDetJacobian (const UInt& iQuadPt)
-{
-    ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its determinant");
-
-#ifndef NDEBUG
-    M_isDetJacobianUpdated = true;
-#endif
-
-    M_detJacobian[iQuadPt] = M_jacobian[iQuadPt][0][0];
-}
-
-// Full specialization for the computation of the determinant
-template<>
-void
-ETCurrentFE<2, 1>::
-updateDetJacobian (const UInt& iQuadPt)
-{
-    ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its determinant");
-
-#ifndef NDEBUG
-    M_isDetJacobianUpdated = true;
-#endif
-
-    M_detJacobian[iQuadPt] = M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][1][1]
-                             - M_jacobian[iQuadPt][1][0] * M_jacobian[iQuadPt][0][1];
-}
-
-// Full specialization for the computation of the determinant
-template<>
-void
-ETCurrentFE<3, 1>::
-updateDetJacobian (const UInt& iQuadPt)
-{
-    ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its determinant");
-
-#ifndef NDEBUG
-    M_isDetJacobianUpdated = true;
-#endif
-
-    M_detJacobian[iQuadPt] =
-        M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][1][1] * M_jacobian[iQuadPt][2][2]
-        + M_jacobian[iQuadPt][0][1] * M_jacobian[iQuadPt][1][2] * M_jacobian[iQuadPt][2][0]
-        + M_jacobian[iQuadPt][0][2] * M_jacobian[iQuadPt][1][0] * M_jacobian[iQuadPt][2][1]
-        - M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][1][2] * M_jacobian[iQuadPt][2][1]
-        - M_jacobian[iQuadPt][0][1] * M_jacobian[iQuadPt][1][0] * M_jacobian[iQuadPt][2][2]
-        - M_jacobian[iQuadPt][0][2] * M_jacobian[iQuadPt][1][1] * M_jacobian[iQuadPt][2][0];
-}
-
-
-template<>
-void
-ETCurrentFE<1, 1>::
-updateInverseJacobian (const UInt& iQuadPt)
-{
-
-    ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its inverse");
-    ASSERT (M_isDetJacobianUpdated, "The determinant of the jacobian must be updated to compute its inverse");
-
-#ifndef NDEBUG
-    M_isInverseJacobianUpdated = true;
-#endif
-
-    M_tInverseJacobian[iQuadPt][0][0] = 1.0 / M_jacobian[iQuadPt][0][0];
-}
-
-
-template<>
-void
-ETCurrentFE<2, 1>::
-updateInverseJacobian (const UInt& iQuadPt)
-{
-
-    ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its inverse");
-    ASSERT (M_isDetJacobianUpdated, "The determinant of the jacobian must be updated to compute its inverse");
-
-#ifndef NDEBUG
-    M_isInverseJacobianUpdated = true;
-#endif
-
-    Real det = M_detJacobian[iQuadPt];
-
-    M_tInverseJacobian[iQuadPt][0][0] =  M_jacobian[iQuadPt][0][0] / det;
-    M_tInverseJacobian[iQuadPt][1][0] = -M_jacobian[iQuadPt][1][0] / det;
-    M_tInverseJacobian[iQuadPt][0][1] = -M_jacobian[iQuadPt][0][1] / det;
-    M_tInverseJacobian[iQuadPt][1][1] =  M_jacobian[iQuadPt][1][1] / det;
-}
-
-template<>
-void
-ETCurrentFE<3, 1>::
-updateInverseJacobian (const UInt& iQuadPt)
-{
-    ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its inverse");
-    ASSERT (M_isDetJacobianUpdated, "The determinant of the jacobian must be updated to compute its inverse");
-
-#ifndef NDEBUG
-    M_isInverseJacobianUpdated = true;
-#endif
-
-    Real det = M_detJacobian[iQuadPt];
-
-    M_tInverseJacobian[iQuadPt][0][0] = ( M_jacobian[iQuadPt][1][1] * M_jacobian[iQuadPt][2][2]
-                                          - M_jacobian[iQuadPt][1][2] * M_jacobian[iQuadPt][2][1]) / det;
-
-    M_tInverseJacobian[iQuadPt][0][1] = ( M_jacobian[iQuadPt][1][2] * M_jacobian[iQuadPt][2][0]
-                                          - M_jacobian[iQuadPt][1][0] * M_jacobian[iQuadPt][2][2]) / det;
-
-    M_tInverseJacobian[iQuadPt][0][2] = ( M_jacobian[iQuadPt][1][0] * M_jacobian[iQuadPt][2][1]
-                                          - M_jacobian[iQuadPt][1][1] * M_jacobian[iQuadPt][2][0]) / det;
-
-    M_tInverseJacobian[iQuadPt][1][0] = ( M_jacobian[iQuadPt][0][2] * M_jacobian[iQuadPt][2][1]
-                                          - M_jacobian[iQuadPt][0][1] * M_jacobian[iQuadPt][2][2]) / det;
-
-    M_tInverseJacobian[iQuadPt][1][1] = ( M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][2][2]
-                                          - M_jacobian[iQuadPt][0][2] * M_jacobian[iQuadPt][2][0]) / det;
-
-    M_tInverseJacobian[iQuadPt][1][2] = ( M_jacobian[iQuadPt][0][1] * M_jacobian[iQuadPt][2][0]
-                                          - M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][2][1]) / det;
-
-    M_tInverseJacobian[iQuadPt][2][0] = ( M_jacobian[iQuadPt][0][1] * M_jacobian[iQuadPt][1][2]
-                                          - M_jacobian[iQuadPt][0][2] * M_jacobian[iQuadPt][1][1]) / det;
-
-    M_tInverseJacobian[iQuadPt][2][1] = ( M_jacobian[iQuadPt][0][2] * M_jacobian[iQuadPt][1][0]
-                                          - M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][1][2]) / det;
-
-    M_tInverseJacobian[iQuadPt][2][2] = ( M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][1][1]
-                                          - M_jacobian[iQuadPt][0][1] * M_jacobian[iQuadPt][1][0]) / det;
-}
 
 template< UInt spaceDim>
 void
@@ -1162,7 +1031,7 @@ updateWDet (const UInt& iQuadPt)
 {
     ASSERT (M_isDetJacobianUpdated, "Determinant of the jacobian must be updated to compute WDet");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isWDetUpdated = true;
 #endif
 
@@ -1178,7 +1047,7 @@ updateDphi (const UInt& iQuadPt)
     ASSERT (M_isInverseJacobianUpdated,
             "Inverse jacobian must be updated to compute the derivative of the basis functions");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isDphiUpdated = true;
 #endif
 
@@ -1206,7 +1075,7 @@ ETCurrentFE<spaceDim, 1>::
 updateCellNode (const ElementType& element)
 {
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isCellNodeUpdated = true;
 #endif
 
@@ -1227,7 +1096,7 @@ void
 ETCurrentFE<spaceDim, 1>::
 updateCellNode (const std::vector<VectorSmall<spaceDim> >& ptsCoordinates)
 {
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isCellNodeUpdated = true;
 #endif
 
@@ -1249,7 +1118,7 @@ updateDiameter()
 {
     ASSERT (M_isCellNodeUpdated, "Cell must be updated to compute the diameter");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isDiameterUpdated = true;
 #endif
 
@@ -1279,7 +1148,7 @@ updateMeasure()
 {
     ASSERT (M_isWDetUpdated, "Wdet must be updated to compute the measure");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isMeasureUpdated = true;
 #endif
 
@@ -1293,10 +1162,5 @@ updateMeasure()
 
 
 } // Namespace LifeV
-
-/*
- * Including header for ETCurrentFE for fieldDim=3
- */
-#include "ETCurrentFE_FD3.hpp"
 
 #endif /* ETCURRENTFE_HPP */

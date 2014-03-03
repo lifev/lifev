@@ -1,0 +1,5 @@
+*.pyc
+*~
+dependencies/CDashSubprojectDependencies.xml
+dependencies/LifeVPackageDependencies.xml
+dependencies/LifeVPackageDependenciesTable.html

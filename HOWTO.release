@@ -12,10 +12,15 @@ git remote add github git@github.com:lifev/lifev.git
 
 1- update Version.cmake
 
-2- update NEWS
+2- update NEWS.md
 
-3- tag master with the tag LifeV-X.Y.Z
-   X_Y_Z=3.4.2
+3- commit Version.cmake and NEWS.md
+   X_Y_Z=3.8.3
+
+   git commit -m"Releasing ${X_Y_Z}" Version.cmake NEWS.md HOWTO.release
+
+
+4- tag master with the tag LifeV-X.Y.Z
 
    git tag  LifeV-${X_Y_Z}
 
@@ -24,6 +29,6 @@ git remote add github git@github.com:lifev/lifev.git
    git push origin  master:master
    git push origin  LifeV-${X_Y_Z}
 
-4- add news on cmcsforge.epfl.ch and www.lifev.org
+5- add news on cmcsforge.epfl.ch and www.lifev.org
 
-5- send email on lifev-dev@
+6- send email on lifev-dev@

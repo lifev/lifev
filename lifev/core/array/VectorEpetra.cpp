@@ -37,15 +37,9 @@
     @date 04-10-2006
  */
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <EpetraExt_MultiVectorOut.h>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
@@ -56,27 +50,31 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-VectorEpetra::VectorEpetra ( const MapEpetraType& mapType ) :
+VectorEpetra::VectorEpetra ( const MapEpetraType& mapType, const combineMode_Type combineMode ) :
     M_epetraMap   (),
     M_mapType     ( mapType ),
     M_epetraVector(),
-    M_combineMode ( Add )
+    M_combineMode ( combineMode )
 {
 }
 
-VectorEpetra::VectorEpetra ( const MapEpetra& map, const MapEpetraType& mapType ) :
+VectorEpetra::VectorEpetra ( const MapEpetra& map,
+                             const MapEpetraType& mapType,
+                             const combineMode_Type combineMode ) :
     M_epetraMap   ( new MapEpetra ( map ) ),
     M_mapType     ( mapType ),
     M_epetraVector ( new vector_type ( *M_epetraMap->map (M_mapType) ) ),
-    M_combineMode ( Add )
+    M_combineMode ( combineMode )
 {
 }
 
-VectorEpetra::VectorEpetra ( const boost::shared_ptr<MapEpetra>& map, const MapEpetraType& mapType ) :
+VectorEpetra::VectorEpetra ( const boost::shared_ptr<MapEpetra>& map,
+                             const MapEpetraType& mapType,
+                             const combineMode_Type combineMode ) :
     M_epetraMap   ( map ),
     M_mapType     ( mapType ),
     M_epetraVector ( new vector_type ( *M_epetraMap->map (M_mapType) ) ),
-    M_combineMode ( Add )
+    M_combineMode ( combineMode )
 {
 }
 
@@ -92,7 +90,7 @@ VectorEpetra::VectorEpetra ( const VectorEpetra& vector, const MapEpetraType& ma
     M_epetraMap   ( vector.M_epetraMap ),
     M_mapType     ( mapType ),
     M_epetraVector ( new vector_type ( *M_epetraMap->map ( M_mapType ) ) ),
-    M_combineMode ( Add )
+    M_combineMode ( vector.M_combineMode )
 {
     operator = (vector);
 }
@@ -102,7 +100,7 @@ VectorEpetra::VectorEpetra ( const VectorEpetra& vector, const MapEpetraType& ma
     M_epetraMap   ( vector.M_epetraMap ),
     M_mapType     ( mapType ),
     M_epetraVector ( new vector_type ( *M_epetraMap->map ( M_mapType ) ) ),
-    M_combineMode ( Add )
+    M_combineMode ( vector.M_combineMode )
 {
     if (mapType == vector.M_mapType)
     {
@@ -125,11 +123,12 @@ VectorEpetra::VectorEpetra ( const VectorEpetra& vector, const MapEpetraType& ma
 
 VectorEpetra::VectorEpetra ( const Epetra_MultiVector&          vector,
                              const boost::shared_ptr<MapEpetra> map,
-                             const MapEpetraType&               mapType ) :
+                             const MapEpetraType&               mapType,
+                             const combineMode_Type             combineMode ) :
     M_epetraMap   ( map ),
     M_mapType     ( mapType ),
     M_epetraVector ( new vector_type ( *map->map ( mapType ) ) ),
-    M_combineMode ( Add )
+    M_combineMode ( combineMode )
 {
     assert ( this->blockMap().SameAs (vector.Map() ) );
     M_epetraVector->Update (1., vector, 0.);
@@ -139,7 +138,7 @@ VectorEpetra::VectorEpetra ( const VectorEpetra& vector, const Int& reduceToProc
     M_epetraMap   ( vector.M_epetraMap->createRootMap ( reduceToProc ) ),
     M_mapType     ( Unique ),
     M_epetraVector ( new vector_type ( *M_epetraMap->map ( M_mapType ) ) ),
-    M_combineMode ( Add )
+    M_combineMode ( vector.M_combineMode )
 {
     operator = ( vector );
 }
@@ -151,7 +150,9 @@ VectorEpetra::VectorEpetra ( const VectorEpetra& vector, const Int& reduceToProc
 VectorEpetra::data_type&
 VectorEpetra::operator[] ( const UInt row )
 {
-    Int lrow = blockMap().LID (row);
+    Int lrow = blockMap().LID ( static_cast<EpetraInt_Type> (row) );
+
+#ifdef HAVE_LIFEV_DEBUG
     if ( lrow < 0 )
     {
         std::cout << M_epetraVector->Comm().MyPID() << " " << row << " " << lrow << std::endl;
@@ -164,7 +165,9 @@ VectorEpetra::operator[] ( const UInt row )
 const VectorEpetra::data_type&
 VectorEpetra::operator[] ( const UInt row ) const
 {
-    Int lrow = blockMap().LID (row);
+    Int lrow = blockMap().LID ( static_cast<EpetraInt_Type> (row) );
+
+#ifdef HAVE_LIFEV_DEBUG
     if ( lrow < 0 )
     {
         std::cout << M_epetraVector->Comm().MyPID() << " " << row << " " << lrow << std::endl;
@@ -284,7 +287,7 @@ VectorEpetra::operator+= ( const VectorEpetra& vector )
     }
     else
     {
-        VectorEpetra vCopy ( vector, M_mapType );
+        VectorEpetra vCopy ( vector, M_mapType, M_combineMode );
         M_epetraVector->Update ( 1., vCopy.epetraVector(), 1. );
     }
 
@@ -457,7 +460,7 @@ VectorEpetra::operator/ ( const data_type& scalar ) const
 }
 
 VectorEpetra
-VectorEpetra::operator== ( const Real& scalar )
+VectorEpetra::operator== ( const Real& scalar ) const
 {
     VectorEpetra comparisonVector ( *M_epetraMap, M_mapType );
 
@@ -472,7 +475,7 @@ VectorEpetra::operator== ( const Real& scalar )
 }
 
 VectorEpetra
-VectorEpetra::operator!= ( const Real& scalar )
+VectorEpetra::operator!= ( const Real& scalar ) const
 {
     VectorEpetra comparisonVector ( *M_epetraMap, M_mapType );
 
@@ -487,7 +490,7 @@ VectorEpetra::operator!= ( const Real& scalar )
 }
 
 VectorEpetra
-VectorEpetra::operator< ( const Real& scalar )
+VectorEpetra::operator< ( const Real& scalar ) const
 {
     VectorEpetra comparisonVector ( *M_epetraMap, M_mapType );
 
@@ -502,7 +505,7 @@ VectorEpetra::operator< ( const Real& scalar )
 }
 
 VectorEpetra
-VectorEpetra::operator> ( const Real& scalar )
+VectorEpetra::operator> ( const Real& scalar ) const
 {
     VectorEpetra comparisonVector ( *M_epetraMap, M_mapType );
 
@@ -517,7 +520,7 @@ VectorEpetra::operator> ( const Real& scalar )
 }
 
 VectorEpetra
-VectorEpetra::operator<= ( const Real& scalar )
+VectorEpetra::operator<= ( const Real& scalar ) const
 {
     VectorEpetra comparisonVector ( *M_epetraMap, M_mapType );
 
@@ -532,7 +535,7 @@ VectorEpetra::operator<= ( const Real& scalar )
 }
 
 VectorEpetra
-VectorEpetra::operator>= ( const Real& scalar )
+VectorEpetra::operator>= ( const Real& scalar ) const
 {
     VectorEpetra comparisonVector ( *M_epetraMap, M_mapType );
 
@@ -547,7 +550,7 @@ VectorEpetra::operator>= ( const Real& scalar )
 }
 
 VectorEpetra
-VectorEpetra::operator&& ( const VectorEpetra& vector )
+VectorEpetra::operator&& ( const VectorEpetra& vector ) const
 {
     VectorEpetra comparisonVector ( *M_epetraMap, M_mapType );
 
@@ -562,7 +565,7 @@ VectorEpetra::operator&& ( const VectorEpetra& vector )
 }
 
 VectorEpetra
-VectorEpetra::operator|| ( const VectorEpetra& vector )
+VectorEpetra::operator|| ( const VectorEpetra& vector ) const
 {
     VectorEpetra comparisonVector ( *M_epetraMap, M_mapType );
 
@@ -577,7 +580,7 @@ VectorEpetra::operator|| ( const VectorEpetra& vector )
 }
 
 VectorEpetra
-VectorEpetra::operator! ( void )
+VectorEpetra::operator! ( void ) const
 {
     VectorEpetra comparisonVector ( *M_epetraMap, M_mapType );
 
@@ -597,12 +600,12 @@ VectorEpetra::operator! ( void )
 // ===================================================
 bool VectorEpetra::isGlobalIDPresent (const UInt row) const
 {
-    return blockMap().LID (row) >= 0;
+    return blockMap().LID ( static_cast<EpetraInt_Type> (row) ) >= 0;
 }
 
 Int VectorEpetra::globalToLocalRowId ( const UInt row ) const
 {
-    Int lrow = blockMap().LID (row);
+    Int lrow = blockMap().LID ( static_cast<EpetraInt_Type> (row) );
 
     if ( lrow < 0 && blockMap().Comm().NumProc() == 1 )
     {
@@ -761,8 +764,8 @@ VectorEpetra::subset ( const Epetra_MultiVector& vector,
     // eg:  p = (u,p) or u = (u,p)
     for ( UInt i = 0; i < numMyEntries; ++i )
     {
-        lid1 = vector.Map().LID (gids[i] + offset1);
-        lid2 = blockMap().LID (gids[i] + offset2);
+        lid1 = vector.Map().LID ( static_cast<EpetraInt_Type> (gids[i] + offset1) );
+        lid2 = blockMap().LID ( static_cast<EpetraInt_Type> (gids[i] + offset2) );
         ASSERT ( ( lid2 >= 0 ) && ( lid1 >= 0 ), "VectorEpetra::subset ERROR : !! lid < 0\n" );
         (*M_epetraVector) [0][lid2] = vector[column][lid1];
     }

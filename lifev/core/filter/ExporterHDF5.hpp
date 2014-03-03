@@ -39,9 +39,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <sstream>
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-pedantic"
 
 #include <Epetra_ConfigDefs.h>
 #include <EpetraExt_DistArray.h>
@@ -52,10 +49,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/algorithm/string.hpp>
 #include <boost/shared_array.hpp>
-
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-#pragma GCC diagnostic warning "-pedantic"
+#include <boost/shared_ptr.hpp>
 
 #ifndef HAVE_HDF5
 
@@ -314,7 +308,7 @@ void ExporterHDF5<MeshType>::postProcess (const Real& time)
     this->computePostfix();
 
     std::size_t found ( this->M_postfix.find ( "*" ) );
-    if ( found == string::npos )
+    if ( found == std::string::npos )
     {
         if (!this->M_procId)
         {
@@ -880,7 +874,7 @@ void ExporterHDF5<MeshType>::writeVectorDatastructure  ( std::ofstream& xdmf, co
 {
 
 
-    string coord[3] = {"X", "Y", "Z"}; // see also wr_vector
+    std::string coord[3] = {"X", "Y", "Z"}; // see also wr_vector
 
     xdmf << "         <DataStructure ItemType=\"Function\"\n"
          << "                        Dimensions=\""
@@ -955,12 +949,11 @@ void ExporterHDF5<MeshType>::writeVector (const exporterData_Type& dvar)
     UInt size  = dvar.numDOF();
     UInt start = dvar.start();
 
-    using namespace boost;
-
     // solution array has to be reordered and stored in a Multivector.
     // Using auxiliary arrays:
     Real**                                  ArrayOfPointers (new Real*[nDimensions]);
-    shared_array< shared_ptr<vector_Type> > ArrayOfVectors (new shared_ptr<vector_Type>[nDimensions]);
+    boost::shared_array< boost::shared_ptr<vector_Type> >
+    		ArrayOfVectors (new boost::shared_ptr<vector_Type>[nDimensions]);
 
     Int MyLDA;
 
@@ -1030,13 +1023,13 @@ void ExporterHDF5<MeshType>::writeGeometry()
     UInt numberOfPoints = MeshType::elementShape_Type::S_numPoints;
 
     std::vector<Int> elementList;
-    UInt ownedElements = this->M_mesh->elementList().countElementsWithFlag ( EntityFlags::OWNED, &Flag::testOneSet );
+    UInt ownedElements = this->M_mesh->elementList().countElementsWithFlag ( EntityFlags::GHOST, &Flag::testOneNotSet );
     elementList.reserve ( ownedElements * numberOfPoints );
     UInt elementCount = 0;
     for ( ID i = 0; i < this->M_mesh->numElements(); ++i )
     {
         typename MeshType::element_Type const& element (this->M_mesh->element (i) );
-        if ( Flag::testOneSet ( element.flag(), EntityFlags::OWNED ) )
+        if ( element.isOwned() )
         {
             UInt lid = elementCount * numberOfPoints;
             for (ID j = 0; j < numberOfPoints; ++j, ++lid)
@@ -1057,7 +1050,7 @@ void ExporterHDF5<MeshType>::writeGeometry()
     for (ID i = 0; i < this->M_mesh->numElements(); ++i)
     {
         typename MeshType::element_Type const& element (this->M_mesh->element (i) );
-        if ( Flag::testOneSet ( element.flag(), EntityFlags::OWNED ) )
+        if ( element.isOwned() )
         {
             UInt lid = elementCount * numberOfPoints;
             for (ID j = 0; j < numberOfPoints; ++j, ++lid)
@@ -1144,7 +1137,7 @@ void ExporterHDF5<MeshType>::writeGeometry()
             point = this->M_mesh->meshTransformer().pointInitial (i);
         }
 
-        if ( Flag::testOneSet ( point.flag(), EntityFlags::OWNED ) )
+        if ( point.isOwned() )
         {
 
             gid = point.id();

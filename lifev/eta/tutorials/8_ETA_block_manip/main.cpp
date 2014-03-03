@@ -54,8 +54,6 @@
 // MatrixEpetraStructuredUtility to use the block copy features.
 // ---------------------------------------------------------------
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
@@ -65,8 +63,6 @@
 #include <Epetra_SerialComm.h>
 #endif
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 
@@ -137,7 +133,11 @@ int main ( int argc, char** argv )
                     2.0,   2.0,   2.0,
                     -1.0,  -1.0,  -1.0);
 
-    MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
+    boost::shared_ptr< mesh_Type > meshPtr;
+    {
+        MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
+        meshPtr = meshPart.meshPartition();
+    }
 
     fullMeshPtr.reset();
 
@@ -162,13 +162,13 @@ int main ( int argc, char** argv )
     }
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 3 > > ETuSpace
-    ( new ETFESpace< mesh_Type, MapEpetra, 3, 3 > (meshPart, &feTetraP2, Comm) );
+    ( new ETFESpace< mesh_Type, MapEpetra, 3, 3 > (meshPtr, &feTetraP2, Comm) );
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > ETpSpace
-    ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPart, &feTetraP1, Comm) );
+    ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPtr, &feTetraP1, Comm) );
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > ETuCompSpace
-    ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPart, &feTetraP2, Comm) );
+    ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPtr, &feTetraP2, Comm) );
 
     if (verbose)
     {

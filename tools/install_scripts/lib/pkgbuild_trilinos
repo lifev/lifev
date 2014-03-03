@@ -7,7 +7,7 @@
 ver='10.12.2'
 
 download_trilinos() {
-  wget "http://trilinos.sandia.gov/download/files/trilinos-${ver}-Source.tar.gz"
+  wget -c "http://trilinos.sandia.gov/download/files/trilinos-${ver}-Source.tar.gz"
 }
 
 unpack_trilinos() {
@@ -61,14 +61,16 @@ build_trilinos() {
                  -D HDF5_LIBRARY_DIRS:PATH=${hdf5_lib} "
   fi
 
-  echo_dbg "checking blas (blas_name = ${blas_name})"
-  if [ "${blas_name}" != "" ]; then
-    lib_extra+=" -D TPL_BLAS_LIBRARIES:FILEPATH=${blas_lib}/${blas_name} "
+  echo_dbg "checking blas (blas_names = ${blas_names})"
+  if [ "${blas_names}" != "" ]; then
+    lib_extra+=" -D BLAS_LIBRARY_DIRS:PATH=${blas_lib} "
+    lib_extra+=" -D BLAS_LIBRARY_NAMES:STRING=${blas_names} "
   fi
 
-  echo_dbg "checking lapack (lapack_name = ${lapack_name})"
-  if [ "${lapack_name}" != "" ]; then
-    lib_extra+=" -D TPL_LAPACK_LIBRARIES:FILEPATH=${lapack_lib}/${lapack_name} "
+  echo_dbg "checking lapack (lapack_names = ${lapack_names})"
+  if [ "${lapack_names}" != "" ]; then
+    lib_extra+=" -D LAPACK_LIBRARY_DIRS:PATH=${palack_lib} "
+    lib_extra+=" -D LAPACK_LIBRARY_NAMES:STRING=${lapack_names} "
   fi
 
   echo_dbg "checking mpi (mpi_base = ${mpi_base})"
@@ -100,6 +102,9 @@ build_trilinos() {
     -D Trilinos_ENABLE_NOX:BOOL=ON \
     -D Trilinos_ENABLE_Thyra:BOOL=ON \
     -D Trilinos_ENABLE_Rythmos:BOOL=ON \
+    -D Trilinos_ENABLE_Teko:BOOL=ON \
+    -D Trilinos_ENABLE_Stratimikos:BOOL=ON \
+    -D Trilinos_ENABLE_Isorropia:BOOL=ON \
     -D Trilinos_ENABLE_ML:BOOL=ON \
     -D Trilinos_ENABLE_Ifpack:BOOL=ON \
     -D Trilinos_ENABLE_Amesos:BOOL=ON \
@@ -113,10 +118,10 @@ build_trilinos() {
     \
     ${src_dir}/trilinos-$ver-Source
 
-  make -j$NUM_PROC
+  make
 }
 
 install_trilinos() {
-  make -j$NUM_PROC install
+  make install
 }
 

@@ -178,7 +178,7 @@ template<UInt solutionDim>
 const flag_Type EvaluationPhiJ<solutionDim>::S_testUpdateFlag = ET_UPDATE_NONE;
 
 template<UInt solutionDim>
-const flag_Type EvaluationPhiJ<solutionDim>::S_solutionUpdateFlag = ET_UPDATE_PHI;
+const flag_Type EvaluationPhiJ<solutionDim>::S_solutionUpdateFlag = ET_UPDATE_NONE;
 
 
 //! Evaluation of the basis function phi_j in the case of a scalar FE.
@@ -298,13 +298,6 @@ private:
     std::vector< std::vector < Real > > const* M_valuesPtr;
 
 };
-
-
-const flag_Type EvaluationPhiJ<1>::S_globalUpdateFlag = ET_UPDATE_NONE;
-
-const flag_Type EvaluationPhiJ<1>::S_testUpdateFlag = ET_UPDATE_NONE;
-
-const flag_Type EvaluationPhiJ<1>::S_solutionUpdateFlag = ET_UPDATE_PHI;
 
 
 } // Namespace ExpressionAssembly

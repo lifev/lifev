@@ -38,27 +38,19 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <lifev/core/LifeV.hpp>
 
+
 #include <Epetra_config.h>
 
 #include <map>
 #include <string>
 
-#ifdef HAVE_HDF5
+#ifdef LIFEV_HAS_HDF5
 #ifdef HAVE_MPI
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
-#include <mpi.h>
 #include <hdf5.h>
 
-#include <boost/shared_ptr.hpp>
 #include <Epetra_MpiComm.h>
 
-//Tell the compiler to restore the warning previously silented
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 namespace LifeV
 {
@@ -87,7 +79,7 @@ class HDF5IO
 public:
     //! @name Public Types
     //@{
-    typedef boost::shared_ptr<Epetra_Comm> commPtr_Type;
+    typedef boost::shared_ptr<Epetra_MpiComm> commPtr_Type;
     //@}
 
     //! @name Constructors and Destructor
@@ -104,7 +96,7 @@ public:
      *        or not. If it exists, data is appended
      */
     HDF5IO (const std::string& fileName, const commPtr_Type& comm,
-            const bool& existing);
+            const bool& existing = false);
 
     //! Empty destructor
     virtual ~HDF5IO() {}
@@ -208,5 +200,6 @@ private:
 } /* namespace LifeV */
 
 #endif /* HAVE_MPI */
-#endif /* HAVE_HDF5 */
+#endif /* LIFEV_HAS_HDF5 */
+
 #endif /* HDF5_IO_H_ */
