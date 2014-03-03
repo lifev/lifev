@@ -5,30 +5,17 @@
  *      Author: uvilla
  */
 
-#ifndef LINEAROPERATOR_HPP_
-#define LINEAROPERATOR_HPP_
+#ifndef LINEAR_OPERATOR_HPP_
+#define LINEAR_OPERATOR_HPP_
 
-
-#include <lifev/core/LifeV.hpp>
-
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
-#pragma GCC diagnostic ignored "-Wextra"
+#include <boost/shared_ptr.hpp>
 
 #include <Epetra_Comm.h>
 #include <Epetra_Map.h>
 #include <Epetra_Operator.h>
 #include <Epetra_MultiVector.h>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-#pragma GCC diagnostic warning "-Wunused-local-typedefs"
-#pragma GCC diagnostic warning "-Wextra"
-
-#include <boost/shared_ptr.hpp>
+#include <lifev/core/LifeV.hpp>
 
 namespace LifeV
 {
@@ -321,4 +308,4 @@ private:
 
 } /*end namespace Operators*/
 } /*end namespace */
-#endif /* LINEAROPERATOR_HPP_ */
+#endif /* LINEAR_OPERATOR_HPP_ */

@@ -11,25 +11,15 @@
  * Abstract class to construct preconditioners from a matrix in Epetra_CsrFormat.
  */
 
-#ifndef ROWMATRIXPRECONDITIONER_HPP_
-#define ROWMATRIXPRECONDITIONER_HPP_
-
-#include <lifev/operator/linear_algebra/LinearOperator.hpp>
-#include <lifev/core/util/FactorySingleton.hpp>
-#include <lifev/core/util/Factory.hpp>
-
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
-#pragma GCC diagnostic ignored "-Wextra"
+#ifndef ROW_MATRIX_PRECONDITIONER_HPP_
+#define ROW_MATRIX_PRECONDITIONER_HPP_
 
 #include <Epetra_CrsMatrix.h>
 #include <Teuchos_ParameterList.hpp>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-#pragma GCC diagnostic warning "-Wunused-local-typedefs"
-#pragma GCC diagnostic warning "-Wextra"
+#include <lifev/operator/linear_algebra/LinearOperator.hpp>
+#include <lifev/core/util/FactorySingleton.hpp>
+#include <lifev/core/util/Factory.hpp>
 
 namespace LifeV
 {
@@ -181,4 +171,4 @@ typedef FactorySingleton<Factory<RowMatrixPreconditioner, std::string> > RowMatr
 } /* end Operator namespace */
 } /* end LifeV namespace */
 
-#endif /* ROWMATRIXPRECONDITIONER_HPP_ */
+#endif /* ROW_MATRIX_PRECONDITIONER_HPP_ */

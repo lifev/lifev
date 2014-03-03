@@ -14,7 +14,7 @@
 #include <Epetra_CrsMatrix.h>
 #include <Epetra_Vector.h>
 
-#include<lifev/operator/linear_algebra/LinearOperator.hpp>
+#include <lifev/operator/linear_algebra/LinearOperator.hpp>
 
 namespace LifeV
 {
