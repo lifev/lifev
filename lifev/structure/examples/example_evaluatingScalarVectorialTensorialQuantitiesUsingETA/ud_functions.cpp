@@ -39,6 +39,8 @@
  */
 
 #include "ud_functions.hpp"
+#include<lifev/core/array/VectorSmall.hpp>
+#include<lifev/core/array/MatrixSmall.hpp>
 
 #define PI 3.14159265359
 
@@ -231,34 +233,98 @@ Real traction (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const R
 //----------------------------------------------Fibers Directions--------------
 Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
-    Real theta =  PI/6.0; // value for anisotropic characterization taken from Robertson // ( PI / 6.0 );
-    //Real thetaChangeOfVariable = std::atan(  y / x );
+    Real theta =  0.74725; // value for anisotropic characterization taken from Robertson // ( PI / 6.0 );
+    Real thetaChangeOfVariable = std::atan(  y / x );
 
-    // if( x < 0 )
-    // {
-    //     // This is due to the periodicity of std::atan ( ref. official documentation )
-    //     thetaChangeOfVariable += PI;
-    // }
+    if( x < 0 )
+    {
+        // This is due to the periodicity of std::atan ( ref. official documentation )
+        thetaChangeOfVariable += PI;
+    }
+
+    // Half thorus
+    // Real thetaFiber ( theta );
+    // Real xT (0.138);
+    // Real rT ( xT );
+    // Real thetaFree(0);
+    // Real thetaRotation(0);
+    // Real thetaPosition(0);
+    // thetaFree = std::atan( z / ( x - xT ) );
+    // thetaPosition = thetaFree;
+    // if ( x < xT )
+    //   {
+    // 	thetaPosition = thetaFree + PI;
+    // 	thetaRotation = PI/2.0 - std::fabs( thetaFree );
+    //   }
+    // else
+    //   {
+    // 	thetaRotation = thetaFree - PI/2.0;
+    //   }
+
+    // Real xCenter;
+    // Real zCenter;
+    // xCenter = rT * std::cos( thetaPosition ) + xT;
+    // zCenter = rT * std::sin( thetaPosition );
+
+    // VectorSmall<3> positionCenter;
+    // positionCenter[0] = xCenter;
+    // positionCenter[1] = 0;
+    // positionCenter[2] = zCenter;
+
+    // VectorSmall<3> position;
+    // position[0] = x;
+    // position[1] = y;
+    // position[2] = z;
+
+    // MatrixSmall<3,3> changeOfVariable;
+    // changeOfVariable(0,0) = std::cos( thetaRotation );  changeOfVariable(0,1) = 0.0; changeOfVariable(0,2) = std::sin( thetaRotation );
+    // changeOfVariable(1,0) = 0.0;                        changeOfVariable(1,1) = 1.0; changeOfVariable(1,2) = 0.0;
+    // changeOfVariable(2,0) = -std::sin( thetaRotation ); changeOfVariable(2,1) = 0.0; changeOfVariable(2,2) = std::cos( thetaRotation );
+
+    // VectorSmall<3> localPosition;
+    // localPosition = changeOfVariable * ( position - positionCenter );
+
+    // Real thetaPositionOnSection(0);
+    // thetaPositionOnSection = std::atan( localPosition[2] / localPosition[1] );
+
+    // if ( localPosition[1] < 0 )
+    //   thetaPositionOnSection += PI;
+
+    // VectorSmall<3> localFibers;
+    // localFibers[0] = std::sin( thetaFiber );
+    // localFibers[1] = std::cos( thetaFiber ) *  std::sin( thetaPositionOnSection );
+    // localFibers[2] = -  std::cos( thetaFiber ) *  std::cos( thetaPositionOnSection );
+
+    // VectorSmall<3> originFibers;
+    // originFibers = changeOfVariable.transpose() * localFibers + positionCenter;
+
+    // originFibers.normalize();
 
     switch (i)
     {
         case 0:
 	    // Tube
-        //    return - std::sin( thetaChangeOfVariable ) * std::cos( theta );
+	    return - std::sin( thetaChangeOfVariable ) * std::cos( theta );
+	    // half thorus
+	    //return originFibers[0];
 	    // Cube
-            return std::sin( theta );
+	    //  return std::sin( theta );
             break;
         case 1:
 	    // Tube
-            //return   std::cos( thetaChangeOfVariable ) * std::cos( theta );
+            return   std::cos( thetaChangeOfVariable ) * std::cos( theta );
+	    // half thorus
+	    //return originFibers[1];
 	    // Cube
-            return std::cos( theta );
+            //return std::cos( theta );
             break;
         case 2:
 	    // Tube
-            //return std::sin( theta );
+            return std::sin( theta );
+	    // half thorus
+	    //return originFibers[2];
 	    // Cube
-             return 0.0;
+            // return 0.0;
             break;
         default:
             ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
@@ -269,34 +335,98 @@ Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
 
 Real Family2 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
-    Real theta = ( - PI / 6.0 );
-    //    Real thetaChangeOfVariable = std::atan( y / x );
+    Real theta = -0.74725;
+       Real thetaChangeOfVariable = std::atan( y / x );
 
-    // if( x < 0 )
-    // {
-    //     // This is due to the periodicity of std::atan ( ref. official documentation )
-    //     thetaChangeOfVariable += PI;
-    // }
+    if( x < 0 )
+    {
+        // This is due to the periodicity of std::atan ( ref. official documentation )
+        thetaChangeOfVariable += PI;
+    }
+
+    // Half thorus
+    // Real thetaFiber ( theta );
+    // Real xT (0.138);
+    // Real rT ( xT );
+    // Real thetaFree(0);
+    // Real thetaRotation(0);
+    // Real thetaPosition(0);
+    // thetaFree = std::atan( z / ( x - xT ) );
+    // thetaPosition = thetaFree;
+    // if ( x < xT )
+    //   {
+    // 	thetaPosition = thetaFree + PI;
+    // 	thetaRotation = PI/2.0 - std::fabs( thetaFree );
+    //   }
+    // else
+    //   {
+    // 	thetaRotation = thetaFree - PI/2.0;
+    //   }
+
+    // Real xCenter;
+    // Real zCenter;
+    // xCenter = rT * std::cos( thetaPosition ) + xT;
+    // zCenter = rT * std::sin( thetaPosition );
+
+    // VectorSmall<3> positionCenter;
+    // positionCenter[0] = xCenter;
+    // positionCenter[1] = 0;
+    // positionCenter[2] = zCenter;
+
+    // VectorSmall<3> position;
+    // position[0] = x;
+    // position[1] = y;
+    // position[2] = z;
+
+    // MatrixSmall<3,3> changeOfVariable;
+    // changeOfVariable(0,0) = std::cos( thetaRotation );  changeOfVariable(0,1) = 0.0; changeOfVariable(0,2) = std::sin( thetaRotation );
+    // changeOfVariable(1,0) = 0.0;                        changeOfVariable(1,1) = 1.0; changeOfVariable(1,2) = 0.0;
+    // changeOfVariable(2,0) = -std::sin( thetaRotation ); changeOfVariable(2,1) = 0.0; changeOfVariable(2,2) = std::cos( thetaRotation );
+
+    // VectorSmall<3> localPosition;
+    // localPosition = changeOfVariable * ( position - positionCenter );
+
+    // Real thetaPositionOnSection(0);
+    // thetaPositionOnSection = std::atan( localPosition[2] / localPosition[1] );
+
+    // if ( localPosition[1] < 0 )
+    //   thetaPositionOnSection += PI;
+
+    // VectorSmall<3> localFibers;
+    // localFibers[0] = std::sin( thetaFiber );
+    // localFibers[1] = std::cos( thetaFiber ) *  std::sin( thetaPositionOnSection );
+    // localFibers[2] = -  std::cos( thetaFiber ) *  std::cos( thetaPositionOnSection );
+
+    // VectorSmall<3> originFibers;
+    // originFibers = changeOfVariable.transpose() * localFibers + positionCenter;
+
+    // originFibers.normalize();
 
     switch (i)
     {
         case 0:
 	    // Tube
-            //      return - std::sin( thetaChangeOfVariable ) * std::cos( theta );
+            return - std::sin( thetaChangeOfVariable ) * std::cos( theta );
+	    // half thorus
+	    //return originFibers[0];
 	    // Cube
-            return std::sin( theta );
+            //return std::sin( theta );
             break;
         case 1:
 	    // Tube
-            //return   std::cos( thetaChangeOfVariable ) * std::cos( theta );
+            return   std::cos( thetaChangeOfVariable ) * std::cos( theta );
+	    // half thorus
+	    //return originFibers[1];
 	    // Cube
-            return std::cos( theta );
+            //return std::cos( theta );
             break;
         case 2:
 	    // Tube
-            //return   std::sin( theta );
+            return   std::sin( theta );
+	    // half thorus
+	    //return originFibers[2];
 	    // Cube
-            return 0.0;
+            //return 0.0;
             break;
         default:
             ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");

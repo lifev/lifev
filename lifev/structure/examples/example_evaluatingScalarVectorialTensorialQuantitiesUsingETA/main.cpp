@@ -262,42 +262,42 @@ Structure::run3d()
     vectorFiberFunctionPtr_Type pointerToVectorOfFamilies( new vectorFiberFunction_Type( ) );
     (*pointerToVectorOfFamilies).resize( dataStructure->numberFibersFamilies( ) );
 
-    // if( verbose )
-    //     std::cout << "Number of families: " << (*pointerToVectorOfFamilies).size() << std::endl;
+    if( verbose )
+        std::cout << "Number of families: " << (*pointerToVectorOfFamilies).size() << std::endl;
 
-    // fibersDirectionList setOfFiberFunctions;
-    // setOfFiberFunctions.setupFiberDefinitions( dataStructure->numberFibersFamilies( ) );
+    fibersDirectionList setOfFiberFunctions;
+    setOfFiberFunctions.setupFiberDefinitions( dataStructure->numberFibersFamilies( ) );
 
-    // // Setting the vector of fibers functions
-    // for( UInt k(1); k <= pointerToVectorOfFamilies->size( ); k++ )
-    // {
-    //     // Setting up the name of the function to define the family
-    //     std::string family="Family";
-    //     // adding the number of the family
-    //     std::string familyNumber;
-    //     std::ostringstream number;
-    //     number << ( k );
-    //     familyNumber = number.str();
+    // Setting the vector of fibers functions
+    for( UInt k(1); k <= pointerToVectorOfFamilies->size( ); k++ )
+    {
+        // Setting up the name of the function to define the family
+        std::string family="Family";
+        // adding the number of the family
+        std::string familyNumber;
+        std::ostringstream number;
+        number << ( k );
+        familyNumber = number.str();
 
-    //     // Name of the function to create
-    //     std::string creationString = family + familyNumber;
-    //     (*pointerToVectorOfFamilies)[ k-1 ].reset( new fiberFunction_Type() );
-    //     (*pointerToVectorOfFamilies)[ k-1 ] = setOfFiberFunctions.fiberDefinition( creationString );
-    // }
+        // Name of the function to create
+        std::string creationString = family + familyNumber;
+        (*pointerToVectorOfFamilies)[ k-1 ].reset( new fiberFunction_Type() );
+        (*pointerToVectorOfFamilies)[ k-1 ] = setOfFiberFunctions.fiberDefinition( creationString );
+    }
 
-    // // Interpolate fibers
-    // std::vector<vectorPtr_Type> vectorInterpolated(0);
+    // Interpolate fibers
+    std::vector<vectorPtr_Type> vectorInterpolated(0);
 
-    // // Interpolating fiber fields
-    // vectorInterpolated.resize( (*pointerToVectorOfFamilies).size() );
+    // Interpolating fiber fields
+    vectorInterpolated.resize( (*pointerToVectorOfFamilies).size() );
 
-    // for( UInt k(0); k < (*pointerToVectorOfFamilies).size(); k++ )
-    // {
-    //     vectorInterpolated[ k ].reset( new vector_Type( dFESpace->map() ) );
-    //     dFESpace->interpolate ( *( ( *(pointerToVectorOfFamilies) )[ k ] ) ,
-    //                             * ( ( vectorInterpolated )[ k ] ),
-    //                             0.0 );
-    // }
+    for( UInt k(0); k < (*pointerToVectorOfFamilies).size(); k++ )
+    {
+        vectorInterpolated[ k ].reset( new vector_Type( dFESpace->map() ) );
+        dFESpace->interpolate ( *( ( *(pointerToVectorOfFamilies) )[ k ] ) ,
+                                * ( ( vectorInterpolated )[ k ] ),
+                                0.0 );
+    }
 
 
     //! 3. Creation of the importers to read the displacement field
@@ -381,7 +381,12 @@ Structure::run3d()
 
     vectorPtr_Type disp;
     vectorPtr_Type dispRead;
-
+    vectorPtr_Type family1;
+    vectorPtr_Type family2;
+    vectorPtr_Type family1Read;
+    vectorPtr_Type family2Read;
+    vectorPtr_Type family1Computed;
+    vectorPtr_Type family2Computed;
     // vectorPtr_Type deformationGradient_1;
     // vectorPtr_Type deformationGradient_2;
     // vectorPtr_Type deformationGradient_3;
@@ -391,18 +396,25 @@ Structure::run3d()
     // vectorPtr_Type reconstructed_2;
     // vectorPtr_Type reconstructed_3;
 
-    // std::vector< vectorPtr_Type > activationFunction(0);
-    // std::vector< vectorPtr_Type > stretch(0);
+    std::vector< vectorPtr_Type > activationFunction(0);
+    std::vector< vectorPtr_Type > stretch(0);
 
-    // activationFunction.resize( dataStructure->numberFibersFamilies( ) );
-    // stretch.resize( dataStructure->numberFibersFamilies( ) );
+    activationFunction.resize( dataStructure->numberFibersFamilies( ) );
+    stretch.resize( dataStructure->numberFibersFamilies( ) );
 
-    //    patchAreaVector.reset ( new vector_Type ( dETFESpace->map() ) );
+    //patchAreaVector.reset ( new vector_Type ( dETFESpace->map() ) );
     patchAreaVectorScalar.reset ( new vector_Type ( dScalarETFESpace->map() ) );
     jacobianF.reset ( new vector_Type ( dScalarETFESpace->map() ) );
 
     disp.reset( new vector_Type( dFESpace->map() ) );
+    family1.reset( new vector_Type( dFESpace->map() ) );
+    family2.reset( new vector_Type( dFESpace->map() ) );
+    family1Computed.reset( new vector_Type( dFESpace->map() ) );
+    family2Computed.reset( new vector_Type( dFESpace->map() ) );
+
     dispRead.reset( new vector_Type( dFESpace->map() ) );
+    family1Read.reset( new vector_Type( dFESpace->map() ) );
+    family2Read.reset( new vector_Type( dFESpace->map() ) );
 
     // deformationGradient_1.reset( new vector_Type( dFESpace->map() ) );
     // deformationGradient_2.reset( new vector_Type( dFESpace->map() ) );
@@ -414,6 +426,18 @@ Structure::run3d()
 
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement",
                               dFESpace, dispRead, UInt (0) );
+
+    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "family1",
+                              dFESpace, family1Read, UInt (0) );
+
+    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "family2",
+                              dFESpace, family2Read, UInt (0) );
+
+    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "family1Comput",
+                              dFESpace, family1Computed, UInt (0) );
+
+    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "family2Comput",
+                              dFESpace, family2Computed, UInt (0) );
 
     // exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "deformationGradient_1",
     //                           dFESpace, deformationGradient_1, UInt (0) );
@@ -436,28 +460,31 @@ Structure::run3d()
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, "jacobianF",
 				dScalarFESpace, jacobianF, UInt (0) );
 
-    // for( UInt i(0); i < dataStructure->numberFibersFamilies( ); i++ )
-    // {
-    //     std::string familyNumber;
-    //     std::ostringstream number;
-    //     number << ( i + 1 );
-    //     familyNumber = number.str();
+    for( UInt i(0); i < dataStructure->numberFibersFamilies( ); i++ )
+    {
+        std::string familyNumber;
+        std::ostringstream number;
+        number << ( i + 1 );
+        familyNumber = number.str();
 
-    //     activationFunction[ i ].reset( new vector_Type( dScalarFESpace->map() ) );
-    //     stretch[ i ].reset( new vector_Type( dScalarFESpace->map() ) );
+        activationFunction[ i ].reset( new vector_Type( dScalarFESpace->map() ) );
+        stretch[ i ].reset( new vector_Type( dScalarFESpace->map() ) );
 
-    //     std::string stringNameA("activation");
-    //     std::string stringNameS("stretch");
+        std::string stringNameA("activation");
+        std::string stringNameS("stretch");
 
-    //     stringNameA += "-"; stringNameA += familyNumber;
-    //     stringNameS += "-"; stringNameS += familyNumber;
+        stringNameA += "-"; stringNameA += familyNumber;
+        stringNameS += "-"; stringNameS += familyNumber;
 
-    //     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, stringNameA,
-    //                               dScalarFESpace, activationFunction[ i ], UInt (0) );
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, stringNameA,
+                                  dScalarFESpace, activationFunction[ i ], UInt (0) );
 
-    //     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, stringNameS,
-    //                               dScalarFESpace, stretch[ i ], UInt (0) );
-    // }
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, stringNameS,
+                                  dScalarFESpace, stretch[ i ], UInt (0) );
+    }
+    
+    *family1Computed = *(vectorInterpolated[ 0 ] );
+    *family2Computed = *(vectorInterpolated[ 1 ] );
 
     exporter->postProcess ( 0.0 );
 
@@ -527,7 +554,12 @@ Structure::run3d()
         // Reading the solution
         // resetting the element of the vector
         *disp *= 0.0;
+        *family1 *= 0.0;
+        *family2 *= 0.0;
+
         *dispRead *= 0.0;
+        *family1Read *= 0.0;
+        *family2Read *= 0.0;
 
         UInt current(0);
         if( !readType.compare("interval") )
@@ -544,6 +576,8 @@ Structure::run3d()
         number.fill ( '0' );
         number << std::setw (5) << ( current );
         iterationString = number.str();
+        std::string fam1 = "Family-1";
+        std::string fam2 = "Family-2";
 
         std::cout << "Current reading: " << iterationString << std::endl;
 
@@ -551,10 +585,20 @@ Structure::run3d()
         LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField,nameField + "." + iterationString,
                                                        dFESpace, disp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
+        LifeV::ExporterData<mesh_Type> family1Data  (LifeV::ExporterData<mesh_Type>::VectorField,fam1 + "." + iterationString,
+                                                       dFESpace, family1, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+
+        LifeV::ExporterData<mesh_Type> family2Data  (LifeV::ExporterData<mesh_Type>::VectorField,fam2 + "." + iterationString,
+                                                       dFESpace, family2, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+
         //Read the variable
         M_importer->readVariable (solutionDispl);
+        M_importer->readVariable (family2Data);
+        M_importer->readVariable (family1Data);
 
         *dispRead = *disp;
+        *family1Read = *family1;
+        *family2Read = *family2;
 
         // Computing references
         // *reconstructed_1 = dFESpace->gradientRecovery (*disp, 0);
@@ -565,9 +609,9 @@ Structure::run3d()
         ExpressionDefinitions::deformationGradient_Type  F =
             ExpressionDefinitions::deformationGradient ( dETFESpace,  *disp, 0, identity );
 
-        // // Definition of C = F^T F
-        // ExpressionDefinitions::rightCauchyGreenTensor_Type C =
-        //     ExpressionDefinitions::tensorC( transpose(F), F );
+        // Definition of C = F^T F
+        ExpressionDefinitions::rightCauchyGreenTensor_Type C =
+            ExpressionDefinitions::tensorC( transpose(F), F );
 
         // Definition of J
         ExpressionDefinitions::determinantTensorF_Type J =
@@ -615,44 +659,44 @@ Structure::run3d()
         *jacobianF = *jacobianF / *patchAreaVectorScalar;
 
 
-        // // Evaluating quantities that are related to fibers
-        // for( UInt j(0); j < dataStructure->numberFibersFamilies( ); j++ )
-        // {
-        //     // Fibers definitions
-        //     ExpressionDefinitions::interpolatedValue_Type fiberIth =
-        //         ExpressionDefinitions::interpolateFiber( dETFESpace, *(vectorInterpolated[ j ] ) );
+        // Evaluating quantities that are related to fibers
+        for( UInt j(0); j < dataStructure->numberFibersFamilies( ); j++ )
+        {
+            // Fibers definitions
+            ExpressionDefinitions::interpolatedValue_Type fiberIth =
+                ExpressionDefinitions::interpolateFiber( dETFESpace, *(vectorInterpolated[ j ] ) );
 
-        //     // f /otimes f
-        //     ExpressionDefinitions::outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( fiberIth );
+            // f /otimes f
+            ExpressionDefinitions::outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( fiberIth );
 
-        //     // Definition of the fourth invariant : I_4^i = C:Mith
-        //     ExpressionDefinitions::stretch_Type IVith = ExpressionDefinitions::fiberStretch( C, Mith );
+            // Definition of the fourth invariant : I_4^i = C:Mith
+            ExpressionDefinitions::stretch_Type IVith = ExpressionDefinitions::fiberStretch( C, Mith );
 
-        //     // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
-        //     ExpressionDefinitions::isochoricStretch_Type IVithBar =
-        //         ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
+            // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
+            ExpressionDefinitions::isochoricStretch_Type IVithBar =
+                ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
 
-	//     *stretch[ j ] *= 0.0;
-	//     *activationFunction[ j ] *= 0.0;
+	    *stretch[ j ] *= 0.0;
+	    *activationFunction[ j ] *= 0.0;
 
-        //     evaluateNode( elements ( dScalarETFESpace->mesh() ),
-        //                   fakeQuadratureRule,
-        //                   dScalarETFESpace,
-        //                   meas_K * IVithBar  * phi_i
-        //                   ) >> stretch[ j ];
-        //     stretch[ j ]->globalAssemble();
-        //     *(stretch[ j ]) = *(stretch[ j ]) / *patchAreaVectorScalar;
+            evaluateNode( elements ( dScalarETFESpace->mesh() ),
+                          fakeQuadratureRule,
+                          dScalarETFESpace,
+                          meas_K * IVithBar  * phi_i
+                          ) >> stretch[ j ];
+            stretch[ j ]->globalAssemble();
+            *(stretch[ j ]) = *(stretch[ j ]) / *patchAreaVectorScalar;
 
-        //     Real stretch = dataStructure->ithCharacteristicStretch( j );
-        //     evaluateNode( elements ( dScalarETFESpace->mesh() ),
-        //                   fakeQuadratureRule,
-        //                   dScalarETFESpace,
-        //                   meas_K * atan( IVithBar - value( stretch ) , dataStructure->smoothness() , ( 1 / 3.14159265359 ), ( 1.0/2.0 )  )  * phi_i
-        //                   ) >> activationFunction[ j ];
-        //     activationFunction[ j ]->globalAssemble();
-        //     *(activationFunction[ j ]) = *(activationFunction[ j ]) / *patchAreaVectorScalar;
+            Real stretch = dataStructure->ithCharacteristicStretch( j ) * dataStructure->ithCharacteristicStretch( j );
+            evaluateNode( elements ( dScalarETFESpace->mesh() ),
+                          fakeQuadratureRule,
+                          dScalarETFESpace,
+                          meas_K * atan( IVithBar - value( stretch ) , dataStructure->smoothness() , ( 1 / 3.14159265359 ), ( 1.0/2.0 )  )  * phi_i
+                          ) >> activationFunction[ j ];
+            activationFunction[ j ]->globalAssemble();
+            *(activationFunction[ j ]) = *(activationFunction[ j ]) / *patchAreaVectorScalar;
 
-        // }
+        }
         exporter->postProcess( 1.0 * ( i + 1 ) );
     }
 
