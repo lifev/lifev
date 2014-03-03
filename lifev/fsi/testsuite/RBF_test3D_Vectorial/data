@@ -4,8 +4,8 @@
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
 #                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
-#      Author(s): Davide Forti
-#           Date: 02-21-2013
+#      Author(s):
+#           Date: 00-00-0000
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
@@ -14,22 +14,18 @@
 
 [fluid]
     [./space_discretization]
-       	mesh_dir                 = ./
-       	mesh_file                = tube20_circ.mesh
-       	mesh_type                = .mesh
+        mesh_dir                 = ./
+        mesh_file                = tube20_circ.mesh
+	    mesh_type                = .mesh
 
 [solid]
     [./space_discretization]
-       	mesh_dir                 = ./
-       	mesh_file                = vessel20.mesh
-       	mesh_type                = .mesh
-
-[interpolation]
-    interpolation_Type           = RBFhtpVectorial # RBFlocallyRescaledVectorial, RBFrescaledVectorial, RBFvectorial, RBFhtpVectorial
-    basis 			 = TPS                         # BW, TPS, IMQ to be used only when using RBFvectorial
+        mesh_dir                 = ./
+        mesh_file                = vessel20.mesh
+        mesh_type                = .mesh
 
 [prec]
-    prectype                     = Ifpack # Ifpack or ML
+    prectype                     = ML # Ifpack or ML
     displayList                  = false
 
     [./ifpack]
@@ -52,5 +48,3 @@
 
 		[../]
 	[../]
-
-

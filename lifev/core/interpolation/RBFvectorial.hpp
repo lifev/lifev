@@ -240,11 +240,11 @@ void RBFvectorial<Mesh>::interpolationOperator()
         M_neighbors.reset ( new neighbors_Type ( M_fullMeshKnown, M_localMeshKnown, M_knownField->mapPtr(), M_knownField->mapPtr()->commPtr() ) );
         if (M_flags[0] == -1)
         {
-            M_neighbors->setUp();
+            M_neighbors->setUpNeighbors ();
         }
         else
         {
-            M_neighbors->setUp (M_flags);
+            M_neighbors->createPointPointNeighborsList (M_flags);
         }
 
         int LocalNodesNumber = M_GIdsKnownMesh.size();
@@ -258,7 +258,7 @@ void RBFvectorial<Mesh>::interpolationOperator()
         for (std::set<ID>::iterator it = M_GIdsKnownMesh.begin(); it != M_GIdsKnownMesh.end(); ++it)
         {
             GlobalID[k] = *it;
-            MatrixGraph[k] = M_neighbors->createNodeNodeNeighborsMapWithinRadius (M_radius, GlobalID[k]);
+            MatrixGraph[k] = M_neighbors->neighborsWithinRadius (M_radius, GlobalID[k]);
             MatrixGraph[k].insert (GlobalID[k]);
             ElementsPerRow[k] = MatrixGraph[k].size();
             if (ElementsPerRow[k] > Max_entries)
@@ -381,7 +381,7 @@ void RBFvectorial<mesh_Type>::projectionOperator()
                 }
             }
 
-            MatrixGraph[k] = M_neighbors->createNodeNodeNeighborsMapWithinRadius (M_radius, nearestPoint);
+            MatrixGraph[k] = M_neighbors->neighborsWithinRadius (M_radius, nearestPoint);
             MatrixGraph[k].insert (nearestPoint);
             ElementsPerRow[k] = MatrixGraph[k].size();
             if (ElementsPerRow[k] > Max_entries)

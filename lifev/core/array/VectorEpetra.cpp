@@ -150,7 +150,7 @@ VectorEpetra::VectorEpetra ( const VectorEpetra& vector, const Int& reduceToProc
 VectorEpetra::data_type&
 VectorEpetra::operator[] ( const UInt row )
 {
-    Int lrow = blockMap().LID ( static_cast<EpetraInt_Type> (row) );
+    Int lrow = blockMap().LID (row);
 
 #ifdef HAVE_LIFEV_DEBUG
     if ( lrow < 0 )
@@ -158,6 +158,7 @@ VectorEpetra::operator[] ( const UInt row )
         std::cout << M_epetraVector->Comm().MyPID() << " " << row << " " << lrow << std::endl;
         ERROR_MSG ( "VectorEpetra::operator [] ERROR : !! lrow < 0\n" );
     }
+#endif
 
     return (*M_epetraVector) [0][lrow];
 }
@@ -165,7 +166,7 @@ VectorEpetra::operator[] ( const UInt row )
 const VectorEpetra::data_type&
 VectorEpetra::operator[] ( const UInt row ) const
 {
-    Int lrow = blockMap().LID ( static_cast<EpetraInt_Type> (row) );
+    Int lrow = blockMap().LID (row);
 
 #ifdef HAVE_LIFEV_DEBUG
     if ( lrow < 0 )
@@ -174,6 +175,7 @@ VectorEpetra::operator[] ( const UInt row ) const
         ERROR_MSG ( "VectorEpetra::operator () ERROR : !! lrow < 0\n" );
 
     }
+#endif
 
     return ( (*M_epetraVector) [0][lrow]);
 }

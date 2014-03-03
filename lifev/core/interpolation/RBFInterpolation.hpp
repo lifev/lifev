@@ -64,7 +64,7 @@ public:
 
     typedef std::vector<int>                                                      flagContainer_Type;
 
-    typedef std::set<ID>                                                          idContainer_Type;
+    typedef boost::unordered_set<ID>                                                          idContainer_Type;
 
     typedef MapEpetra                                                             map_Type;
     typedef boost::shared_ptr<MapEpetra>                                          mapPtr_Type;
@@ -100,7 +100,7 @@ public:
 
     virtual void interpolateCostantField() {};
 
-    virtual void identifyNodes (meshPtr_Type LocalMesh, std::set<ID>& GID_nodes, vectorPtr_Type CheckVector) = 0;
+    virtual void identifyNodes (meshPtr_Type LocalMesh, boost::unordered_set<ID>& GID_nodes, vectorPtr_Type CheckVector) = 0;
 
     virtual bool isInside (ID pointMarker, flagContainer_Type Flags) = 0;
 

@@ -26,7 +26,7 @@
 
 [interpolation]
     interpolation_Type           = RBFhtp       # RBFlocallyRescaledScalar, RBFrescaledScalar, RBFscalar, RBFhtp
-    basis 			 = TPS          # BW, TPS, IMQ to be used only when using RBFscalar
+    basis 			             = TPS          # BW, TPS, IMQ to be used only when using RBFscalar
 
 [prec]
     prectype                     = Ifpack # Ifpack or ML

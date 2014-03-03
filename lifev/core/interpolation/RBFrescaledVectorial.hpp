@@ -56,7 +56,7 @@ public:
 
     typedef std::vector<int>                                                      flagContainer_Type;
 
-    typedef std::set<ID>                                                          idContainer_Type;
+    typedef boost::unordered_set<ID>                                                          idContainer_Type;
 
     typedef MapEpetra                                                             map_Type;
     typedef boost::shared_ptr<MapEpetra>                                          mapPtr_Type;
@@ -90,7 +90,7 @@ public:
 
     void interpolateCostantField();
 
-    void identifyNodes (meshPtr_Type LocalMesh, std::set<ID>& GID_nodes, vectorPtr_Type CheckVector);
+    void identifyNodes (meshPtr_Type LocalMesh, boost::unordered_set<ID>& GID_nodes, vectorPtr_Type CheckVector);
 
     bool isInside (ID pointMarker, flagContainer_Type Flags);
 
@@ -185,25 +185,25 @@ void RBFrescaledVectorial<Mesh>::interpolationOperator()
     M_neighbors.reset ( new neighbors_Type ( M_fullMeshKnown, M_localMeshKnown, M_knownField->mapPtr(), M_knownField->mapPtr()->commPtr() ) );
     if (M_flags[0] == -1)
     {
-        M_neighbors->setUp();
+        M_neighbors->setUpNeighbors ();
     }
     else
     {
-        M_neighbors->setUp (M_flags);
+        M_neighbors->createPointPointNeighborsList (M_flags);
     }
 
     int LocalNodesNumber = M_GIdsKnownMesh.size();
 
-    std::vector<std::set<ID> > MatrixGraph (LocalNodesNumber);
+    std::vector<boost::unordered_set<ID> > MatrixGraph (LocalNodesNumber);
     int* ElementsPerRow = new int[LocalNodesNumber];
     int* GlobalID = new int[LocalNodesNumber];
     int k = 0;
     int Max_entries = 0;
 
-    for (std::set<ID>::iterator it = M_GIdsKnownMesh.begin(); it != M_GIdsKnownMesh.end(); ++it)
+    for (boost::unordered_set<ID>::iterator it = M_GIdsKnownMesh.begin(); it != M_GIdsKnownMesh.end(); ++it)
     {
         GlobalID[k] = *it;
-        MatrixGraph[k] = M_neighbors->createNodeNodeNeighborsMapWithinRadius (M_radius, GlobalID[k]);
+        MatrixGraph[k] = M_neighbors->neighborsWithinRadius (M_radius, GlobalID[k]);
         MatrixGraph[k].insert (GlobalID[k]);
         ElementsPerRow[k] = MatrixGraph[k].size();
         if (ElementsPerRow[k] > Max_entries)
@@ -222,7 +222,7 @@ void RBFrescaledVectorial<Mesh>::interpolationOperator()
     for ( int i = 0 ; i < LocalNodesNumber; ++i )
     {
         k = 0;
-        for ( std::set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
+        for ( boost::unordered_set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
         {
             Indices[k] = *it;
             Values[k]  = rbf ( M_fullMeshKnown->point (GlobalID[i]).x(),
@@ -250,7 +250,7 @@ void RBFrescaledVectorial<mesh_Type>::projectionOperator()
 
     int LocalNodesNumber = M_GIdsUnknownMesh.size();
 
-    std::vector<std::set<ID> > MatrixGraph (LocalNodesNumber);
+    std::vector<boost::unordered_set<ID> > MatrixGraph (LocalNodesNumber);
     int* ElementsPerRow = new int[LocalNodesNumber];
     int* GlobalID = new int[LocalNodesNumber];
     int k = 0;
@@ -259,7 +259,7 @@ void RBFrescaledVectorial<mesh_Type>::projectionOperator()
     double d_min;
     int nearestPoint;
 
-    for (std::set<ID>::iterator it = M_GIdsUnknownMesh.begin(); it != M_GIdsUnknownMesh.end(); ++it)
+    for (boost::unordered_set<ID>::iterator it = M_GIdsUnknownMesh.begin(); it != M_GIdsUnknownMesh.end(); ++it)
     {
         GlobalID[k] = *it;
         d_min = 100;
@@ -278,7 +278,7 @@ void RBFrescaledVectorial<mesh_Type>::projectionOperator()
             }
         }
 
-        MatrixGraph[k] = M_neighbors->createNodeNodeNeighborsMapWithinRadius (M_radius, nearestPoint);
+        MatrixGraph[k] = M_neighbors->neighborsWithinRadius (M_radius, nearestPoint);
         MatrixGraph[k].insert (nearestPoint);
         ElementsPerRow[k] = MatrixGraph[k].size();
         if (ElementsPerRow[k] > Max_entries)
@@ -297,7 +297,7 @@ void RBFrescaledVectorial<mesh_Type>::projectionOperator()
     for ( int i = 0 ; i < LocalNodesNumber; ++i )
     {
         k = 0;
-        for ( std::set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
+        for ( boost::unordered_set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
         {
             Indices[k] = *it;
             Values[k]  = rbf ( M_fullMeshUnknown->point (GlobalID[i]).x(),
@@ -451,7 +451,7 @@ void RBFrescaledVectorial<mesh_Type>::interpolate()
 }
 
 template <typename mesh_Type>
-void RBFrescaledVectorial<mesh_Type>::identifyNodes (meshPtr_Type LocalMesh, std::set<ID>& GID_nodes, vectorPtr_Type CheckVector)
+void RBFrescaledVectorial<mesh_Type>::identifyNodes (meshPtr_Type LocalMesh, boost::unordered_set<ID>& GID_nodes, vectorPtr_Type CheckVector)
 {
     if (M_flags[0] == -1)
     {

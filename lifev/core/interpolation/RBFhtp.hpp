@@ -57,7 +57,7 @@ public:
 
     typedef std::vector<int>                                                      flagContainer_Type;
 
-    typedef std::set<ID>                                                          idContainer_Type;
+    typedef boost::unordered_set<ID>                                                          idContainer_Type;
 
     typedef MapEpetra                                                             map_Type;
     typedef boost::shared_ptr<MapEpetra>                                          mapPtr_Type;
@@ -89,7 +89,7 @@ public:
 
     void buildRhs();
 
-    void identifyNodes (meshPtr_Type LocalMesh, std::set<ID>& GID_nodes, vectorPtr_Type CheckVector);
+    void identifyNodes (meshPtr_Type LocalMesh, boost::unordered_set<ID>& GID_nodes, vectorPtr_Type CheckVector);
 
     bool isInside (ID pointMarker, flagContainer_Type Flags);
 
@@ -324,26 +324,26 @@ void RBFhtp<Mesh>::interpolationOperator()
     M_neighbors.reset ( new neighbors_Type ( M_fullMeshKnown, M_localMeshKnown, M_knownField->mapPtr(), M_knownField->mapPtr()->commPtr() ) );
     if (M_flags[0] == -1) 
     {
-        M_neighbors->setUp();
+        M_neighbors->setUpNeighbors ();
     }
     else
     {
-        M_neighbors->setUp (M_flags);
+        M_neighbors->createPointPointNeighborsList (M_flags);
     }
 
     int LocalNodesNumber = M_GIdsKnownMesh.size();
 
 
     std::vector<double>   RBF_radius (LocalNodesNumber);
-    std::vector<std::set<ID> > MatrixGraph (LocalNodesNumber);
+    std::vector<boost::unordered_set<ID> > MatrixGraph (LocalNodesNumber);
     int* GlobalID = new int[LocalNodesNumber];
     int k = 0;
     int Max_entries = 0;
 
-    for (std::set<ID>::iterator it = M_GIdsKnownMesh.begin(); it != M_GIdsKnownMesh.end(); ++it)
+    for (boost::unordered_set<ID>::iterator it = M_GIdsKnownMesh.begin(); it != M_GIdsKnownMesh.end(); ++it)
     {
         GlobalID[k] = *it;
-        MatrixGraph[k] = M_neighbors->nodeNodeNeighborsList() [GlobalID[k]];
+        MatrixGraph[k] = M_neighbors->pointPointNeighborsList() [GlobalID[k]];
         RBF_radius[k] = computeRBFradius ( M_fullMeshKnown, M_fullMeshKnown, MatrixGraph[k], GlobalID[k]);
         ++k;
     }
@@ -359,7 +359,7 @@ void RBFhtp<Mesh>::interpolationOperator()
     for ( int i = 0 ; i < LocalNodesNumber; ++i )
     {
         k = 0;
-        for ( std::set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
+        for ( boost::unordered_set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
         {
                 Indices[k] = *it;
                 Values[k]  = rbf ( M_kx[GlobalID[i]], M_ky[GlobalID[i]], M_kz[GlobalID[i]],
@@ -385,7 +385,7 @@ void RBFhtp<mesh_Type>::projectionOperator()
     int LocalNodesNumber = M_GIdsUnknownMesh.size();
 
     std::vector<double>        RBF_radius (LocalNodesNumber);
-    std::vector<std::set<ID> > MatrixGraph (LocalNodesNumber);
+    std::vector<boost::unordered_set<ID> > MatrixGraph (LocalNodesNumber);
     int* GlobalID = new int[LocalNodesNumber];
     int k = 0;
     int Max_entries = 0;
@@ -393,7 +393,7 @@ void RBFhtp<mesh_Type>::projectionOperator()
     double d_min;
     int nearestPoint;
 
-    for (std::set<ID>::iterator it = M_GIdsUnknownMesh.begin(); it != M_GIdsUnknownMesh.end(); ++it)
+    for (boost::unordered_set<ID>::iterator it = M_GIdsUnknownMesh.begin(); it != M_GIdsUnknownMesh.end(); ++it)
     {
         GlobalID[k] = *it;
         d_min = 100;
@@ -411,7 +411,7 @@ void RBFhtp<mesh_Type>::projectionOperator()
                 }
             }
         }
-        MatrixGraph[k] = M_neighbors->nodeNodeNeighborsList() [nearestPoint];
+        MatrixGraph[k] = M_neighbors->pointPointNeighborsList() [nearestPoint];
         MatrixGraph[k].insert (nearestPoint);
         RBF_radius[k] = computeRBFradius ( M_fullMeshKnown, M_fullMeshUnknown, MatrixGraph[k], GlobalID[k]);
         ++k;
@@ -426,7 +426,7 @@ void RBFhtp<mesh_Type>::projectionOperator()
     for ( int i = 0 ; i < LocalNodesNumber; ++i )
     {
         k = 0;
-        for ( std::set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
+        for ( boost::unordered_set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
         {
             Indices[k] = *it;
             Values[k]  = rbf ( M_ukx[GlobalID[i]], M_uky[GlobalID[i]], M_ukz[GlobalID[i]],
@@ -467,7 +467,7 @@ void RBFhtp<mesh_Type>::buildRhs()
 }
 
 template <typename mesh_Type>
-void RBFhtp<mesh_Type>::identifyNodes (meshPtr_Type LocalMesh, std::set<ID>& GID_nodes, vectorPtr_Type CheckVector)
+void RBFhtp<mesh_Type>::identifyNodes (meshPtr_Type LocalMesh, boost::unordered_set<ID>& GID_nodes, vectorPtr_Type CheckVector)
 {
     if (M_flags[0] == -1)
     {

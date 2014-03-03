@@ -92,6 +92,7 @@ public:
     typedef std::vector<idListPtr_Type> vertexPartition_Type;
     typedef boost::shared_ptr<vertexPartition_Type> vertexPartitionPtr_Type;
     typedef std::vector<markerID_Type> markerIDList_Type;
+    typedef std::vector<int> markerIDListSigned_Type;
 
     //@}
 
@@ -222,7 +223,7 @@ public:
     /*!
      * @param flags. The list of MarkerIDs to restrict to.
      */
-    void createPointPointNeighborsList (markerIDList_Type const& flags);
+    void createPointPointNeighborsList (markerIDListSigned_Type const& flags);
 
     //! Create neighbors to a given point, with a specified number of generations
     /*!
@@ -647,7 +648,7 @@ void GhostHandler<MeshType>::createPointPointNeighborsList()
 namespace
 {
 
-inline bool isInside ( markerID_Type const& pointMarker, std::vector<markerID_Type> const& markerIDList )
+inline bool isInside ( markerID_Type const& pointMarker, std::vector<int> const& markerIDList )
 {
     for ( UInt i = 0; i < markerIDList.size(); ++i)
         if ( pointMarker == markerIDList[i] )
@@ -660,7 +661,7 @@ inline bool isInside ( markerID_Type const& pointMarker, std::vector<markerID_Ty
 }
 
 template <typename MeshType>
-void GhostHandler<MeshType>::createPointPointNeighborsList (markerIDList_Type const& flags)
+void GhostHandler<MeshType>::createPointPointNeighborsList (markerIDListSigned_Type const& flags)
 {
     M_pointPointNeighborsList.resize ( M_fullMesh->numGlobalPoints() );
     // generate point neighbors by watching edges

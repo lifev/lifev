@@ -53,7 +53,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/interpolation/RBFhtpVectorial.hpp>
 #include <lifev/core/interpolation/RBFlocallyRescaledVectorial.hpp>
 #include <lifev/core/interpolation/RBFrescaledVectorial.hpp>
-#include <lifev/core/interpolation/RBFvectorial.hpp>
+//#include <lifev/core/interpolation/RBFvectorial.hpp>
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
 #include <Teuchos_RCP.hpp>
