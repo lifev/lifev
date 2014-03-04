@@ -312,14 +312,14 @@ Structure::run3d()
 
     if( !readType.compare("instant") )
       {
-	numberOfSol = dataFile.vector_variable_size ( "importer/iteration"  );
-	ASSERT( numberOfSol, "You did not set any solution to read!! ");
+          numberOfSol = dataFile.vector_variable_size ( "importer/iteration"  );
+          ASSERT( numberOfSol, "You did not set any solution to read!! ");
       }
     else
       {
-	start = dataFile ( "importer/iterationStart" , 0 );
-	end = dataFile ( "importer/iterationEnd" , 0 );
-	numberOfSol = end - start;
+          start = dataFile ( "importer/iterationStart" , 0 );
+          end = dataFile ( "importer/iterationEnd" , 0 );
+          numberOfSol = end - start;
       }
     ASSERT( numberOfSol, "You did not set any solution to read!! ");
 
@@ -433,10 +433,10 @@ Structure::run3d()
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "family2",
                               dFESpace, family2Read, UInt (0) );
 
-    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "family1Comput",
+    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "family1Computed",
                               dFESpace, family1Computed, UInt (0) );
 
-    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "family2Comput",
+    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "family2Computed",
                               dFESpace, family2Computed, UInt (0) );
 
     // exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "deformationGradient_1",
@@ -482,7 +482,7 @@ Structure::run3d()
         exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, stringNameS,
                                   dScalarFESpace, stretch[ i ], UInt (0) );
     }
-    
+
     *family1Computed = *(vectorInterpolated[ 0 ] );
     *family2Computed = *(vectorInterpolated[ 1 ] );
 
@@ -543,8 +543,9 @@ Structure::run3d()
     // patchAreaVector->globalAssemble();
 
     std::string const nameField =  dataFile ( "importer/nameField", "displacement");
+    UInt i,k;
 
-    for( UInt i(start); i < numberOfSol; i++ )
+    for( i=start,k =0; i < numberOfSol; i++, k++ )
     {
 
         // *reconstructed_1 *=0.0; *reconstructed_2 *=0.0; *reconstructed_3 *=0.0;
@@ -697,7 +698,7 @@ Structure::run3d()
             *(activationFunction[ j ]) = *(activationFunction[ j ]) / *patchAreaVectorScalar;
 
         }
-        exporter->postProcess( 1.0 * ( i + 1 ) );
+        exporter->postProcess( dataStructure->dataTime()->initialTime() + k * dataStructure->dataTime()->timeStep() );
     }
 
 

@@ -20,15 +20,16 @@
 [exporter]
 type       = hdf5 			# hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
-start      = 0
+name       = ThreeHundred
+start      = 15
 save       = 1
 
 [importer]
 type        = hdf5 #ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
-filename    = generalizedHolzapfelAnisotropicBulk-9
-nameField   = displacement
+filename    = correctTa-structured/solidGI-healthy-EXP2-MM-hRes-st-cA-05
+nameField   = s-displacement
 analysis    = instant
-iteration   = '21'
+iteration   = '1'
 
 [solid]
 
@@ -38,21 +39,21 @@ material_flag   = 1
 thickness       =  0.1
 
 [../model]
-constitutiveLaw = isotropic   #isotropic, anisotropic
+constitutiveLaw = anisotropic   #isotropic, anisotropic
 young     	= 8.e+6
 poisson   	= 0.49
 bulk		= 1.3333e+8
 alpha 		= 1.0e+5
 gamma		= 1.0
 solidTypeIsotropic 	= exponential		# linearVenantKirchhoff / nonLinearVenantKirchhoff / neoHookean / expoenential
-solidTypeAnisotropic 	= multimechanism		# linearVenantKirchhoff / nonLinearVenantKirchhoff / neoHookean / expoenential
+solidTypeAnisotropic 	= holzapfelGeneralized		# linearVenantKirchhoff / nonLinearVenantKirchhoff / neoHookean / expoenential
 
 [./fibers]
 numberFamilies = 2
 stiffness      = '1e+5 1e+5'
 nonlinearity   = '1.0 1.0'
-stretch        = '1.2 1.2'
-smoothness     = 100000000
+stretch        = '1.2697 1.2697'
+smoothness     = 500000
 [./]
 
 [../../time_discretization]
@@ -64,8 +65,8 @@ BDF_order   	= 2
 
 [../space_discretization]
 mesh_type   = .mesh
-mesh_dir  	= ./
-mesh_file 	= WulandandaGeometry.mesh
+mesh_dir  	= ./correctTa-structured/
+mesh_file 	= structuredMeditSolidStraight.mesh
 order     	= P1
 
 [../miscellaneous]
