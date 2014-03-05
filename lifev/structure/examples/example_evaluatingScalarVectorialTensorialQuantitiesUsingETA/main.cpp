@@ -398,11 +398,13 @@ Structure::run3d()
 
     std::vector< vectorPtr_Type > activationFunction(0);
     std::vector< vectorPtr_Type > stretch(0);
+    std::vector< vectorPtr_Type > deformedVector(0);
 
     activationFunction.resize( dataStructure->numberFibersFamilies( ) );
     stretch.resize( dataStructure->numberFibersFamilies( ) );
+    deformedVector.resize( dataStructure->numberFibersFamilies( ) );
 
-    //patchAreaVector.reset ( new vector_Type ( dETFESpace->map() ) );
+    patchAreaVector.reset ( new vector_Type ( dETFESpace->map() ) );
     patchAreaVectorScalar.reset ( new vector_Type ( dScalarETFESpace->map() ) );
     jacobianF.reset ( new vector_Type ( dScalarETFESpace->map() ) );
 
@@ -469,18 +471,24 @@ Structure::run3d()
 
         activationFunction[ i ].reset( new vector_Type( dScalarFESpace->map() ) );
         stretch[ i ].reset( new vector_Type( dScalarFESpace->map() ) );
+        deformedVector[ i ].reset( new vector_Type( dFESpace->map() ) );
 
         std::string stringNameA("activation");
         std::string stringNameS("stretch");
+        std::string deformedName("deformed");
 
-        stringNameA += "-"; stringNameA += familyNumber;
-        stringNameS += "-"; stringNameS += familyNumber;
+        stringNameA  += "-"; stringNameA  += familyNumber;
+        stringNameS  += "-"; stringNameS  += familyNumber;
+        deformedName += "-"; deformedName += familyNumber;
 
         exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, stringNameA,
                                   dScalarFESpace, activationFunction[ i ], UInt (0) );
 
         exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, stringNameS,
                                   dScalarFESpace, stretch[ i ], UInt (0) );
+
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, deformedName,
+                                  dFESpace, deformedVector[ i ], UInt (0) );
     }
 
     *family1Computed = *(vectorInterpolated[ 0 ] );
@@ -534,13 +542,13 @@ Structure::run3d()
                   ) >> patchAreaVectorScalar;
     patchAreaVectorScalar->globalAssemble();
 
-    // ExpressionVectorFromNonConstantScalar<ExpressionMeas, 3  > vMeas( meas_K );
-    // evaluateNode( elements ( dETFESpace->mesh() ),
-    // 		  fakeQuadratureRule,
-    // 		  dETFESpace,
-    // 		  dot( vMeas , phi_i )
-    // 		  ) >> patchAreaVector;
-    // patchAreaVector->globalAssemble();
+    ExpressionVectorFromNonConstantScalar<ExpressionMeas, 3  > vMeas( meas_K );
+    evaluateNode( elements ( dETFESpace->mesh() ),
+                  fakeQuadratureRule,
+                  dETFESpace,
+                  dot( vMeas , phi_i )
+                  ) >> patchAreaVector;
+    patchAreaVector->globalAssemble();
 
     std::string const nameField =  dataFile ( "importer/nameField", "displacement");
     UInt i,k;
@@ -651,6 +659,7 @@ Structure::run3d()
         // deformationGradient_3->globalAssemble();
         // *deformationGradient_3 = *deformationGradient_3 / *patchAreaVector;
 
+
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dScalarETFESpace,
@@ -677,8 +686,9 @@ Structure::run3d()
             ExpressionDefinitions::isochoricStretch_Type IVithBar =
                 ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
 
-	    *stretch[ j ] *= 0.0;
-	    *activationFunction[ j ] *= 0.0;
+            *stretch[ j ] *= 0.0;
+            *activationFunction[ j ] *= 0.0;
+            *deformedVector[ j ] *= 0.0;
 
             evaluateNode( elements ( dScalarETFESpace->mesh() ),
                           fakeQuadratureRule,
@@ -696,6 +706,15 @@ Structure::run3d()
                           ) >> activationFunction[ j ];
             activationFunction[ j ]->globalAssemble();
             *(activationFunction[ j ]) = *(activationFunction[ j ]) / *patchAreaVectorScalar;
+
+            evaluateNode( elements ( dETFESpace->mesh() ),
+                          fakeQuadratureRule,
+                          dETFESpace,
+                          meas_K *  dot( ( F * value( dETFESpace ,*vectorInterpolated[ j ] ) )  , phi_i )
+                          ) >> deformedVector[ j ];
+            deformedVector[ j ]->globalAssemble();
+            *deformedVector[ j ] = *deformedVector[ j ] / *patchAreaVector;
+
 
         }
         exporter->postProcess( dataStructure->dataTime()->initialTime() + k * dataStructure->dataTime()->timeStep() );

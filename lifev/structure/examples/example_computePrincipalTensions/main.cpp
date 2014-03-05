@@ -66,9 +66,13 @@
 
 #include <lifev/structure/fem/ExpressionDefinitions.hpp>
 
-#include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
 #include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinearPenalized.hpp>
+#include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/SecondOrderExponentialMaterialNonLinear.hpp>
+
 #include <lifev/structure/solver/anisotropic/HolzapfelMaterialNonLinear.hpp>
+#include <lifev/structure/solver/anisotropic/HolzapfelMaterialNonLinear.hpp>
+#include <lifev/structure/solver/anisotropic/HolzapfelGeneralizedMaterialNonLinear.hpp>
 
 // Evaluation operations
 #include <lifev/core/array/MatrixSmall.hpp>
@@ -344,10 +348,24 @@ Structure::run3d()
     std::string const importerType = dataFile ( "importer/type", "hdf5");
 
     // How many solution do we have to read?
+    std::string readType = dataFile ( "importer/analysis", "instant");
     UInt numberOfSol(0);
-    numberOfSol = dataFile.vector_variable_size ( "importer/iteration"  );
+    UInt start(0);
+    UInt end(0);
 
+    if( !readType.compare("instant") )
+      {
+          numberOfSol = dataFile.vector_variable_size ( "importer/iteration"  );
+          ASSERT( numberOfSol, "You did not set any solution to read!! ");
+      }
+    else
+      {
+          start = dataFile ( "importer/iterationStart" , 0 );
+          end = dataFile ( "importer/iterationEnd" , 0 );
+          numberOfSol = end - start;
+      }
     ASSERT( numberOfSol, "You did not set any solution to read!! ");
+
 
     if (verbose)
     {
@@ -495,19 +513,6 @@ Structure::run3d()
     fakeQuadratureRule.setDimensionShape ( shapeDimension (dFESpace->refFE().shape() ), dFESpace->refFE().shape() );
     fakeQuadratureRule.setPoints (coords, weights);
 
-    // Creation of the original class
-    //! 1. Constructor of the class to compute the tensions
-    WallTensionEstimator< mesh_Type > tensionsClass;
-
-    //! 2. Its setup
-    tensionsClass.setup (dataStructure,
-			 tensionData,
-			 dFESpace,
-			 dETFESpace,
-			 parameters->comm,
-			 1);
-
-
     //fakeQuadratureRule.showMe();
     using namespace ExpressionAssembly;
 
@@ -541,7 +546,9 @@ Structure::run3d()
 
     std::string const nameField =  dataFile ( "importer/nameField", "displacement");
 
-    for( UInt i(0); i < numberOfSol; i++ )
+    UInt i,k;
+
+    for( i=start,k =0; i < numberOfSol; i++, k++ )
     {
         *sigma_1 *=0.0;
         *sigma_2 *=0.0;
@@ -553,7 +560,15 @@ Structure::run3d()
         *disp *= 0.0;
         *dispRead *= 0.0;
 
-        UInt current = dataFile ( "importer/iteration" , 100000, i );
+        UInt current(0);
+        if( !readType.compare("interval") )
+        {
+            current = i ;
+        }
+        else
+        {
+            current = dataFile ( "importer/iteration" , 100000, i );
+        }
         // Transform current ingot a string
         std::string iterationString;
         std::ostringstream number;
