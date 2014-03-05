@@ -389,8 +389,8 @@ Structure::run3d()
 
     vectorPtr_Type family1;
     vectorPtr_Type family2;
-    vectorPtr_Type family1Read;
-    vectorPtr_Type family2Read;
+    //vectorPtr_Type family1Read;
+    //vectorPtr_Type family2Read;
     vectorPtr_Type family1Computed;
     vectorPtr_Type family2Computed;
 
@@ -418,8 +418,8 @@ Structure::run3d()
         family1Computed.reset( new vector_Type( dFESpace->map() ) );
         family2Computed.reset( new vector_Type( dFESpace->map() ) );
 
-        family1Read.reset( new vector_Type( dFESpace->map() ) );
-        family2Read.reset( new vector_Type( dFESpace->map() ) );
+        //family1Read.reset( new vector_Type( dFESpace->map() ) );
+        //family2Read.reset( new vector_Type( dFESpace->map() ) );
     }
 
     patchAreaVector.reset ( new vector_Type ( dETFESpace->map() ) );
@@ -463,11 +463,11 @@ Structure::run3d()
 
     if( !dataStructure->constitutiveLaw().compare("anisotropic") )
     {
-        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "family1",
-                                dFESpace, family1Read, UInt (0) );
+        // exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "family1",
+        //                         dFESpace, family1Read, UInt (0) );
 
-        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "family2",
-                                dFESpace, family2Read, UInt (0) );
+        // exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "family2",
+        //                         dFESpace, family2Read, UInt (0) );
 
         exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "family1Computed",
                                 dFESpace, family1Computed, UInt (0) );
@@ -568,7 +568,7 @@ Structure::run3d()
     std::string const nameField =  dataFile ( "importer/nameField", "displacement");
     UInt i,k;
 
-    for( i=start,k =0; i < numberOfSol; i++, k++ )
+    for( i=0,k =0; i < numberOfSol; i++, k++ )
     {
 
         // *reconstructed_1 *=0.0; *reconstructed_2 *=0.0; *reconstructed_3 *=0.0;
@@ -585,14 +585,14 @@ Structure::run3d()
             *family1 *= 0.0;
             *family2 *= 0.0;
 
-            *family1Read *= 0.0;
-            *family2Read *= 0.0;
+            // *family1Read *= 0.0;
+            // *family2Read *= 0.0;
         }
 
         UInt current(0);
         if( !readType.compare("interval") )
         {
-            current = i ;
+            current = i + start;
         }
         else
         {
@@ -679,17 +679,17 @@ Structure::run3d()
 
         if( !dataStructure->constitutiveLaw().compare("anisotropic") )
         {
-            LifeV::ExporterData<mesh_Type> family1Data  (LifeV::ExporterData<mesh_Type>::VectorField,fam1 + "." + iterationString,
-                                                         dFESpace, family1, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+            // LifeV::ExporterData<mesh_Type> family1Data  (LifeV::ExporterData<mesh_Type>::VectorField,fam1 + "." + iterationString,
+            //                                              dFESpace, family1, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
-            LifeV::ExporterData<mesh_Type> family2Data  (LifeV::ExporterData<mesh_Type>::VectorField,fam2 + "." + iterationString,
-                                                         dFESpace, family2, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+            // LifeV::ExporterData<mesh_Type> family2Data  (LifeV::ExporterData<mesh_Type>::VectorField,fam2 + "." + iterationString,
+            //                                              dFESpace, family2, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
-            M_importer->readVariable (family2Data);
-            M_importer->readVariable (family1Data);
+            // M_importer->readVariable (family2Data);
+            // M_importer->readVariable (family1Data);
 
-            *family1Read = *family1;
-            *family2Read = *family2;
+            // *family1Read = *family1;
+            // *family2Read = *family2;
 
             // Evaluating quantities that are related to fibers
             for( UInt j(0); j < dataStructure->numberFibersFamilies( ); j++ )
