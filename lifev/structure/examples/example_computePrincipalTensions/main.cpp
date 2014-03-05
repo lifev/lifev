@@ -644,7 +644,7 @@ Structure::run3d()
 
             }
         }
-        exporter->postProcess( 1.0 * ( i + 1 ) );
+        exporter->postProcess( dataStructure->dataTime()->initialTime() + k * dataStructure->dataTime()->timeStep() );
     }
 
 
