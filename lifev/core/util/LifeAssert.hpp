@@ -80,13 +80,13 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #define TEST_INV
 #define TEST_BOUNDS
 #define NOINLINE
-#undef  NDEBUG
+#define HAVE_LIFEV_DEBUG
 #endif /* LIFEV_CHECK_ALL */
 
-#ifdef NDEBUG
-#define ASSERT(X,A)
-#else
+#ifdef HAVE_LIFEV_DEBUG
 #define ASSERT(X,A) ASSERT0(X,A)
+#else
+#define ASSERT(X,A)
 #endif
 
 #ifdef TEST_PRE

@@ -423,7 +423,6 @@ addIPStabilizationStencil (const matrix_ptrType& matrixGalerkin,
 
         M_IP1CFE->update (M_fespace->mesh()->element (adjacentElement1), UPDATE_DPHI | UPDATE_WDET);
         M_IP2CFE->update (M_fespace->mesh()->element (adjacentElement2), UPDATE_DPHI | UPDATE_WDET);
-        M_IPBetaCFE->update (M_fespace->mesh()->element (adjacentElement1), UPDATE_PHI );
 
         // Before starting the assembly, we compute the values of |beta n|
         // in the quadrature nodes

@@ -125,9 +125,6 @@ main ( int argc, char** argv )
     test_CFE.update (Tetra1, UPDATE_QUAD_NODES);
     test_CFE.quadNode (0, 0);
 
-    test_CFE.update (Tetra1, UPDATE_PHI);
-    test_CFE.phi (1, 1);
-
     test_CFE.update (Tetra1, UPDATE_DPHI);
     test_CFE.dphi (2, 0, 3);
 
@@ -143,7 +140,7 @@ main ( int argc, char** argv )
 
     std::cout << " Checking partition of unity ... " << std::endl;
 
-    test_CFE.update (Tetra1, UPDATE_PHI | UPDATE_DPHI);
+    test_CFE.update (Tetra1, UPDATE_DPHI);
     Real sum_phi;
     Real sum_dphi;
     for (UInt i (0); i < test_CFE.nbQuadPt(); ++i)
@@ -190,9 +187,6 @@ main ( int argc, char** argv )
 
     test_CFE.update (Tetra1, UPDATE_QUAD_NODES);
     test_CFE.quadNode (3, 0);
-
-    test_CFE.update (Tetra1, UPDATE_PHI);
-    test_CFE.phi (1, 4);
 
     test_CFE.update (Tetra1, UPDATE_DPHI);
     test_CFE.dphi (2, 0, 4);

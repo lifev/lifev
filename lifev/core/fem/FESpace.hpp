@@ -893,7 +893,7 @@ FESpace<MeshType, MapType>::l2ScalarProduct ( const function_Type& fct, vector_t
 
     for ( UInt iVol = 0; iVol < this->mesh()->numElements(); iVol++ )
     {
-        this->fe().update ( this->mesh()->element ( iVol ), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET );
+        this->fe().update ( this->mesh()->element ( iVol ), UPDATE_QUAD_NODES | UPDATE_WDET );
 
         Real f, x, y, z;
 
@@ -942,7 +942,7 @@ FESpace<MeshType, MapType>::l20Error ( const function_Type& fexact,
 
     for ( UInt iVol = 0; iVol < this->mesh()->numElements(); iVol++ )
     {
-        this->fe().update ( this->mesh()->element ( iVol ), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET );
+        this->fe().update ( this->mesh()->element ( iVol ), UPDATE_QUAD_NODES | UPDATE_WDET );
 
         normU += elementaryDifferenceL2NormSquare ( vec, fexact, this->fe(), this->dof(), time, M_fieldDim );
 
@@ -998,7 +998,7 @@ FESpace<MeshType, MapType>::l2Error ( const function_Type&    fexact,
             //this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
 
             // CurrentFE newFE(this->fe().refFE(),this->fe().geoMap(),quadRuleTetra64pt);
-            this->fe().update (this->mesh()->element ( iVol ),  UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET);
+            this->fe().update (this->mesh()->element ( iVol ),  UPDATE_QUAD_NODES | UPDATE_WDET);
 
             normU += elementaryDifferenceL2NormSquare ( vec, fexact,
                                                         this->fe(),
@@ -1045,7 +1045,7 @@ FESpace<MeshType, MapType>::l2NormFunction ( const function& f, const Real time)
     //
     for ( UInt ielem = 0; ielem < this->mesh()->numElements(); ielem++ )
     {
-        this->fe().update ( this->mesh()->element ( ielem ),  UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET  );
+        this->fe().update ( this->mesh()->element ( ielem ),  UPDATE_QUAD_NODES | UPDATE_WDET  );
 
         sumExact += elementaryFctL2NormSquare ( f, this->fe(), time, M_fieldDim );
     }
@@ -1081,7 +1081,7 @@ FESpace<MeshType, MapType>:: l2ErrorWeighted (const function_Type&    exactSolut
 
     for (UInt iVol (0); iVol < this->mesh()->numElements(); ++iVol)
     {
-        this->fe().update (this->mesh()->element (iVol), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET);
+        this->fe().update (this->mesh()->element (iVol), UPDATE_QUAD_NODES | UPDATE_WDET);
 
         for (UInt iQuad (0); iQuad < this->fe().nbQuadPt(); ++iQuad)
         {
@@ -1192,7 +1192,7 @@ FESpace<MeshType, MapType>::l2Norm ( const vector_type& vec)
     for ( UInt ielem = 0; ielem < this->mesh()->numElements(); ielem++ )
     {
         //UInt elem = M_FESpace.mesh()->element( ielem ).id();
-        this->fe().update ( this->mesh()->element ( ielem ), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET );
+        this->fe().update ( this->mesh()->element ( ielem ), UPDATE_QUAD_NODES | UPDATE_WDET );
         //
         norm += elementaryL2NormSquare ( vec, this->fe(), this->dof(), nbComp );
     }
@@ -1255,7 +1255,7 @@ feInterpolateValue (const ID& elementID, const vector_type& solutionVector, cons
     }
 
     // Make sur everything is up to date
-    M_fe->update ( M_mesh->element ( elementID ), UPDATE_PHI);
+    M_fe->update ( M_mesh->element ( elementID ), UPDATE_ONLY_CELL_NODES);
 
     // Map the point back to the ref FE
     Real hat_x (0);
@@ -1311,7 +1311,7 @@ FESpace<MeshType, MapType>::
 feInterpolateValueLocal (const ID& elementID, const vector_type& solutionVector, const point_type& pt ) const
 {
     // Make sur everything is up to date
-    M_fe->update ( M_mesh->element ( elementID ), UPDATE_PHI);
+    M_fe->update ( M_mesh->element ( elementID ), UPDATE_ONLY_CELL_NODES);
 
     // Map the point back to the ref FE
     Real hat_x (0);
@@ -2092,7 +2092,7 @@ RT0ToP0Interpolate (const FESpace<mesh_Type, map_Type>& OriginalSpace,
         Vector3D barCurrentFE, barRefFE, Jac;
 
         // Update the current element of the P0 vector space.
-        M_fe->update (this->mesh()->element (elemId), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET);
+        M_fe->update (this->mesh()->element (elemId), UPDATE_QUAD_NODES | UPDATE_WDET);
 
         // Store the number of local DoF
         const UInt nDof (OriginalSpace.dof().numLocalDof() );

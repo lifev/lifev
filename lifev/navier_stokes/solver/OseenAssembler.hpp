@@ -577,7 +577,7 @@ addGradPressure (matrixType& matrix, const UInt& offsetLeft, const UInt& offsetU
     {
         // Update the diffusion current FE
         M_gradPressureUCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_DPHI | UPDATE_WDET );
-        M_gradPressurePCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_PHI | UPDATE_WDET );
+        M_gradPressurePCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_WDET );
 
         // Clean the local matrix
         M_localGradPressure->zero();
@@ -624,7 +624,7 @@ addGradientTranspose (matrixType& matrix, const UInt& offsetLeft, const UInt& of
     {
         // Update the diffusion current FE
         M_gradPressureUCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_DPHI | UPDATE_WDET );
-        M_gradPressurePCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_PHI | UPDATE_WDET );
+        M_gradPressurePCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_WDET );
 
         // Clean the local matrix
         M_localGradPressure->zero();
@@ -671,7 +671,7 @@ addDivergence (matrixType& matrix, const UInt& offsetLeft, const UInt& offsetUp,
     {
         // Update the diffusion current FE
         M_divergenceUCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_DPHI | UPDATE_WDET );
-        M_divergencePCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_PHI | UPDATE_WDET );
+        M_divergencePCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_WDET );
 
         // Clean the local matrix
         M_localDivergence->zero();
@@ -727,7 +727,6 @@ addConvection (matrixType& matrix, const Real& coefficient, const vectorType& be
     {
         // Update the diffusion current FE
         M_convectionUCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_DPHI | UPDATE_WDET );
-        M_convectionBetaCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_PHI );
 
         // Clean the local matrix
         M_localConvection->zero();
@@ -782,7 +781,6 @@ addNewtonConvection ( matrixType& matrix, const vectorType& beta, const UInt& of
     {
         // Update the diffusion current FE
         M_convectionUCFE->update ( M_uFESpace->mesh()->element ( iterElement ), UPDATE_DPHI | UPDATE_WDET );
-        M_convectionBetaCFE->update ( M_uFESpace->mesh()->element ( iterElement ), UPDATE_PHI );
 
         // Clean the local matrix
         M_localConvection->zero();
@@ -857,8 +855,8 @@ addSymmetricConvection (matrixType& matrix, const Real& coefficient, const vecto
     for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
-        M_convectionUCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_PHI | UPDATE_DPHI | UPDATE_WDET );
-        M_convectionBetaCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_PHI | UPDATE_DPHI );
+        M_convectionUCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_DPHI | UPDATE_WDET );
+        M_convectionBetaCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_DPHI );
 
         // Clean the local matrix
         M_localConvection->zero();
@@ -921,7 +919,7 @@ addConvectionRhs (vectorType& rhs, const Real& coefficient, const vectorType& ve
     for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
-        M_convectionRhsUCFE->update ( M_betaFESpace->mesh()->element (iterElement), UPDATE_PHI | UPDATE_DPHI | UPDATE_WDET );
+        M_convectionRhsUCFE->update ( M_betaFESpace->mesh()->element (iterElement), UPDATE_DPHI | UPDATE_WDET );
 
         // Clean the local vector
         M_localConvectionRhs->zero();
@@ -976,7 +974,7 @@ addMass (matrixType& matrix, const Real& coefficient, const UInt& offsetLeft, co
     for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
-        M_massCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_PHI | UPDATE_WDET );
+        M_massCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_WDET );
 
         // Clean the local matrix
         M_localMass->zero();
@@ -1020,7 +1018,7 @@ addPressureMass (matrixType& matrix, const Real& coefficient, const UInt& offset
     for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
-        M_massPressureCFE->update ( M_pFESpace->mesh()->element (iterElement), UPDATE_PHI | UPDATE_WDET );
+        M_massPressureCFE->update ( M_pFESpace->mesh()->element (iterElement), UPDATE_WDET );
 
         // Clean the local matrix
         M_localMassPressure->zero();
@@ -1074,7 +1072,7 @@ addMassDivW (matrixType& matrix, const Real& coefficient, const vectorType& beta
     for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
-        M_convectionUCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_PHI | UPDATE_WDET );
+        M_convectionUCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_WDET );
         M_convectionBetaCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_DPHI | UPDATE_WDET );
 
         // Clean the local matrix
@@ -1118,7 +1116,7 @@ addMassRhs (vectorType& rhs, const function_Type& fun, const Real& t)
     for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
-        M_massRhsCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET );
+        M_massRhsCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_QUAD_NODES | UPDATE_WDET );
 
         // Clean the local matrix
         M_localMassRhs->zero();

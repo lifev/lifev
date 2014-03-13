@@ -461,7 +461,7 @@ VectorEpetra::operator/ ( const data_type& scalar ) const
 }
 
 VectorEpetra
-VectorEpetra::operator== ( const Real& scalar )
+VectorEpetra::operator== ( const Real& scalar ) const
 {
     VectorEpetra comparisonVector ( *M_epetraMap, M_mapType );
 
@@ -476,7 +476,7 @@ VectorEpetra::operator== ( const Real& scalar )
 }
 
 VectorEpetra
-VectorEpetra::operator!= ( const Real& scalar )
+VectorEpetra::operator!= ( const Real& scalar ) const
 {
     VectorEpetra comparisonVector ( *M_epetraMap, M_mapType );
 
@@ -491,7 +491,7 @@ VectorEpetra::operator!= ( const Real& scalar )
 }
 
 VectorEpetra
-VectorEpetra::operator< ( const Real& scalar )
+VectorEpetra::operator< ( const Real& scalar ) const
 {
     VectorEpetra comparisonVector ( *M_epetraMap, M_mapType );
 
@@ -506,7 +506,7 @@ VectorEpetra::operator< ( const Real& scalar )
 }
 
 VectorEpetra
-VectorEpetra::operator> ( const Real& scalar )
+VectorEpetra::operator> ( const Real& scalar ) const
 {
     VectorEpetra comparisonVector ( *M_epetraMap, M_mapType );
 
@@ -521,7 +521,7 @@ VectorEpetra::operator> ( const Real& scalar )
 }
 
 VectorEpetra
-VectorEpetra::operator<= ( const Real& scalar )
+VectorEpetra::operator<= ( const Real& scalar ) const
 {
     VectorEpetra comparisonVector ( *M_epetraMap, M_mapType );
 
@@ -536,7 +536,7 @@ VectorEpetra::operator<= ( const Real& scalar )
 }
 
 VectorEpetra
-VectorEpetra::operator>= ( const Real& scalar )
+VectorEpetra::operator>= ( const Real& scalar ) const
 {
     VectorEpetra comparisonVector ( *M_epetraMap, M_mapType );
 
@@ -551,7 +551,7 @@ VectorEpetra::operator>= ( const Real& scalar )
 }
 
 VectorEpetra
-VectorEpetra::operator&& ( const VectorEpetra& vector )
+VectorEpetra::operator&& ( const VectorEpetra& vector ) const
 {
     VectorEpetra comparisonVector ( *M_epetraMap, M_mapType );
 
@@ -566,7 +566,7 @@ VectorEpetra::operator&& ( const VectorEpetra& vector )
 }
 
 VectorEpetra
-VectorEpetra::operator|| ( const VectorEpetra& vector )
+VectorEpetra::operator|| ( const VectorEpetra& vector ) const
 {
     VectorEpetra comparisonVector ( *M_epetraMap, M_mapType );
 
@@ -581,7 +581,7 @@ VectorEpetra::operator|| ( const VectorEpetra& vector )
 }
 
 VectorEpetra
-VectorEpetra::operator! ( void )
+VectorEpetra::operator! ( void ) const
 {
     VectorEpetra comparisonVector ( *M_epetraMap, M_mapType );
 
