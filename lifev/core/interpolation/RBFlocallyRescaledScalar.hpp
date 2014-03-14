@@ -307,9 +307,9 @@ void RBFlocallyRescaledScalar<mesh_Type>::projectionOperator()
         {
             if ( M_flags[0] == -1 || this->isInside (M_fullMeshKnown->point (j).markerID(), M_flags) )
             {
-                d = std::sqrt ( pow (M_kx[j] - M_ukx[GlobalID[k]], 2)
-                                + pow (M_ky[j] - M_uky[GlobalID[k]], 2)
-                                + pow (M_kz[j] - M_ukz[GlobalID[k]], 2) );
+                d = std::sqrt ( std::pow (M_kx[j] - M_ukx[GlobalID[k]], 2)
+                                + std::pow (M_ky[j] - M_uky[GlobalID[k]], 2)
+                                + std::pow (M_kz[j] - M_ukz[GlobalID[k]], 2) );
                 if (d < d_min)
                 {
                     d_min = d;
@@ -360,9 +360,9 @@ double RBFlocallyRescaledScalar<mesh_Type>::computeRBFradius (meshPtr_Type MeshN
     double r_max = 0;
     for (idContainer_Type::iterator it = Neighbors.begin(); it != Neighbors.end(); ++it)
     {
-        r = std::sqrt ( pow ( MeshGID->point ( GlobalID ).x() - MeshNeighbors->point ( *it ).x(), 2 )
-                        + pow ( MeshGID->point ( GlobalID ).y() - MeshNeighbors->point ( *it ).y(), 2 )
-                        + pow ( MeshGID->point ( GlobalID ).z() - MeshNeighbors->point ( *it ).z(), 2 ) );
+        r = std::sqrt ( std::pow ( MeshGID->point ( GlobalID ).x() - MeshNeighbors->point ( *it ).x(), 2 )
+                        + std::pow ( MeshGID->point ( GlobalID ).y() - MeshNeighbors->point ( *it ).y(), 2 )
+                        + std::pow ( MeshGID->point ( GlobalID ).z() - MeshNeighbors->point ( *it ).z(), 2 ) );
         r_max = ( r > r_max ) ? r : r_max;
     }
     return r_max;
@@ -481,8 +481,8 @@ bool RBFlocallyRescaledScalar<mesh_Type>::isInside (ID pointMarker, flagContaine
 template <typename mesh_Type>
 double RBFlocallyRescaledScalar<mesh_Type>::rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius)
 {
-    double distance = sqrt ( pow (x1 - x2, 2) + pow (y1 - y2, 2) + pow (z1 - z2, 2) );
-    return pow (1 - distance / radius, 4) * (4 * distance / radius + 1);
+    double distance = std::sqrt ( std::pow (x1 - x2, 2) + std::pow (y1 - y2, 2) + std::pow (z1 - z2, 2) );
+    return std::pow (1 - distance / radius, 4) * (4 * distance / radius + 1);
 }
 
 template <typename mesh_Type>

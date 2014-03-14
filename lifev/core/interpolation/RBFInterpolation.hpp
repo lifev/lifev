@@ -86,37 +86,39 @@ public:
 
     virtual ~RBFInterpolation() {}
 
-    virtual void setup( meshPtr_Type fullMeshKnown, meshPtr_Type localMeshKnown, meshPtr_Type fullMeshUnknown, meshPtr_Type localMeshUnknown, flagContainer_Type flags ) = 0;
+    virtual void setup( meshPtr_Type fullMeshKnown, meshPtr_Type localMeshKnown, meshPtr_Type fullMeshUnknown, meshPtr_Type localMeshUnknown, flagContainer_Type flags ) {};
 
-    virtual void setupRBFData (vectorPtr_Type KnownField, vectorPtr_Type UnknownField, GetPot datafile, parameterList_Type belosList) = 0;
+    virtual void setupRBFData (vectorPtr_Type KnownField, vectorPtr_Type UnknownField, GetPot datafile, parameterList_Type belosList) {};
 
-    virtual void buildOperators() = 0;
+    virtual void setupRBFData (vectorPtr_Type KnownField, vectorPtr_Type UnknownField) {};
 
-    virtual void interpolationOperator() = 0;
+    virtual void buildOperators() {};
 
-    virtual void projectionOperator() = 0;
+    virtual void interpolationOperator() {};
 
-    virtual void buildRhs() = 0;
+    virtual void projectionOperator() {};
+
+    virtual void buildRhs() {};
 
     virtual void interpolateCostantField() {};
 
-    virtual void identifyNodes (meshPtr_Type LocalMesh, boost::unordered_set<ID>& GID_nodes, vectorPtr_Type CheckVector) = 0;
+    virtual void identifyNodes (meshPtr_Type LocalMesh, boost::unordered_set<ID>& GID_nodes, vectorPtr_Type CheckVector) {};
 
-    virtual bool isInside (ID pointMarker, flagContainer_Type Flags) = 0;
+    virtual bool isInside (ID pointMarker, flagContainer_Type Flags) {};
 
     virtual double computeRBFradius (meshPtr_Type , meshPtr_Type , idContainer_Type , ID ) {};
 
     virtual void setBasis (const std::string &) {};
 
-    virtual double rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius) = 0;
+    virtual double rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius) {};
 
-    virtual void interpolate() = 0;
+    virtual void interpolate() {};
 
-    virtual void solution (vectorPtr_Type& Solution) = 0;
+    virtual void solution (vectorPtr_Type& Solution) {};
 
     virtual void solutionrbf (vectorPtr_Type & ) {};
 
-    virtual void updateRhs(vectorPtr_Type newRhs) = 0;
+    virtual void updateRhs(vectorPtr_Type newRhs) {};
 
     virtual void setRadius ( double ){};
 

@@ -240,10 +240,10 @@ void RBFscalar<mesh_Type>::interpolationOperator()
             M_interpolationOperator->matrixPtr()->InsertGlobalValues (GlobalID[i], k, Values, Indices);
         }
         M_interpolationOperator->globalAssemble();
-        delete Indices;
-        delete Values;
-        delete ElementsPerRow;
-        delete GlobalID;
+        delete [] Indices;
+        delete [] Values;
+        delete [] ElementsPerRow;
+        delete [] GlobalID;
     }
     if(M_basis=="BW"){
         this->identifyNodes (M_localMeshKnown, M_GIdsKnownMesh, M_knownField);
@@ -302,10 +302,10 @@ void RBFscalar<mesh_Type>::interpolationOperator()
             M_interpolationOperator->matrixPtr()->InsertGlobalValues (GlobalID[i], k, Values, Indices);
         }
         M_interpolationOperator->globalAssemble();
-        delete Indices;
-        delete Values;
-        delete ElementsPerRow;
-        delete GlobalID;
+        delete [] Indices;
+        delete [] Values;
+        delete [] ElementsPerRow;
+        delete [] GlobalID;
     }
 }
 
@@ -355,10 +355,10 @@ void RBFscalar<mesh_Type>::projectionOperator()
             M_projectionOperator->matrixPtr()->InsertGlobalValues (GlobalID[i], k, Values, Indices);
         }
         M_projectionOperator->globalAssemble (M_interpolationOperatorMap, M_projectionOperatorMap);
-        delete Indices;
-        delete Values;
-        delete ElementsPerRow;
-        delete GlobalID;
+        delete [] Indices;
+        delete [] Values;
+        delete [] ElementsPerRow;
+        delete [] GlobalID;
     }
 
     if(M_basis=="BW"){
@@ -380,9 +380,9 @@ void RBFscalar<mesh_Type>::projectionOperator()
             {
                 if ( M_flags[0] == -1 || this->isInside (M_fullMeshKnown->point (j).markerID(), M_flags) )
                 {
-                    d = std::sqrt ( pow (M_fullMeshKnown->point (j).x() - M_fullMeshUnknown->point (GlobalID[k]).x(), 2)
-                                    + pow (M_fullMeshKnown->point (j).y() - M_fullMeshUnknown->point (GlobalID[k]).y(), 2)
-                                    + pow (M_fullMeshKnown->point (j).z() - M_fullMeshUnknown->point (GlobalID[k]).z(), 2) );
+                    d = std::sqrt ( std::pow (M_fullMeshKnown->point (j).x() - M_fullMeshUnknown->point (GlobalID[k]).x(), 2)
+                                    + std::pow (M_fullMeshKnown->point (j).y() - M_fullMeshUnknown->point (GlobalID[k]).y(), 2)
+                                    + std::pow (M_fullMeshKnown->point (j).z() - M_fullMeshUnknown->point (GlobalID[k]).z(), 2) );
                     if (d < d_min)
                     {
                         d_min = d;
@@ -513,18 +513,23 @@ bool RBFscalar<mesh_Type>::isInside (ID pointMarker, flagContainer_Type flags)
 template <typename mesh_Type>
 double RBFscalar<mesh_Type>::rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius)
 {
-    double distance = sqrt ( pow (x1 - x2, 2) + pow (y1 - y2, 2) + pow (z1 - z2, 2) );
+    double distance = std::sqrt ( std::pow (x1 - x2, 2) + std::pow (y1 - y2, 2) + std::pow (z1 - z2, 2) );
 
-    if(M_basis=="BW")
-        return pow (1 - distance / radius, 4) * (4 * distance / radius + 1);
-    else if(M_basis=="TPS")
+    if (M_basis == "BW")
+    {
+        return std::pow (1 - distance / radius, 4) * (4 * distance / radius + 1);
+    }
+    else if (M_basis == "TPS")
         if (distance == 0)
             return 0;
         else
-            return abs(distance/radius)*abs(distance/radius)*log(distance/radius);
-    else if(M_basis=="IMQ")
-        return 1/sqrt( abs(distance)*abs(distance) + radius*radius);
-
+        {
+            return std::abs (distance / radius) * std::abs (distance / radius) * std::log (distance / radius);
+        }
+    else if (M_basis == "IMQ")
+    {
+        return 1 / std::sqrt ( abs (distance) * abs (distance) + radius * radius);
+    }
 }
 
 template <typename mesh_Type>
