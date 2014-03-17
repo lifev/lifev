@@ -61,7 +61,7 @@ void BlockOperator::setUp(const operatorPtrContainer_Type & blockOper, const com
     for(UInt iblock=0; iblock < M_nBlockRows; ++iblock)
         for(UInt jblock=0; jblock < M_nBlockCols; ++jblock)
         {
-            if(blockOper(iblock,jblock) != 0)
+            if(blockOper(iblock,jblock) != 0 && rangeBlockMaps[iblock]==0)
             {
                 rangeBlockMaps[iblock].reset(new Epetra_Map(blockOper(iblock,jblock)->OperatorRangeMap() ));
                 jblock = M_nBlockCols;
@@ -71,7 +71,7 @@ void BlockOperator::setUp(const operatorPtrContainer_Type & blockOper, const com
     for(UInt jblock=0; jblock < M_nBlockCols; ++jblock)
         for(UInt iblock=0; iblock < M_nBlockRows; ++iblock)
         {
-            if(blockOper(iblock,jblock) != 0)
+            if(blockOper(iblock,jblock) != 0 && domainBlockMaps[jblock]==0)
             {
                 domainBlockMaps[jblock].reset(new Epetra_Map(blockOper(iblock,jblock)->OperatorDomainMap() ));
                 iblock = M_nBlockRows;
