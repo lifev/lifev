@@ -60,17 +60,40 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/fem/Assembly.hpp>
 #include <lifev/core/fem/BCManage.hpp>
 #include <lifev/core/fem/FESpace.hpp>
+
 #include <lifev/core/mesh/MeshEntityContainer.hpp>
 
-#include <lifev/core/algorithm/SolverAztecOO.hpp>
 #include <lifev/core/algorithm/NonLinearRichardson.hpp>
 
 #include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 
+#ifdef COMPUTATION_JACOBIAN
+#include <Epetra_SerialDenseMatrix.h>
+#endif
+
+//Linear Solver includes
+#include <Teuchos_ParameterList.hpp>
+#include <Teuchos_XMLParameterListHelpers.hpp>
+#include <Teuchos_RCP.hpp>
+#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/core/algorithm/PreconditionerML.hpp>
+#include <lifev/core/algorithm/LinearSolver.hpp>
+
+
+//ET includes
+#include <lifev/eta/fem/ETFESpace.hpp>
+#include <lifev/eta/expression/Integrate.hpp>
+
+// Time Advance includes
+#include <lifev/core/fem/TimeAdvance.hpp>
+#include <lifev/core/fem/TimeAdvanceNewmark.hpp>
+#include <lifev/core/fem/TimeAdvanceBDF.hpp>
 
 namespace LifeV
 {
+
+using namespace ExpressionAssembly;
 
 template < typename MeshEntityType,
          typename ComparisonPolicyType = boost::function2 < bool,
@@ -108,9 +131,7 @@ private:
   (St. Venant-Kirchoff materials right now)
 
 */
-template < typename Mesh,
-         typename SolverType = LifeV::SolverAztecOO >
-
+template <typename Mesh>
 class StructuralOperator
 {
 public:
@@ -118,7 +139,8 @@ public:
     //!@name Type definitions
     //@{
     typedef Real ( *function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
-    typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID& ) > source_Type;
+
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > source_Type;
 
     typedef StructuralConstitutiveLaw<Mesh>               material_Type;
     typedef boost::shared_ptr<material_Type>              materialPtr_Type;
@@ -126,32 +148,62 @@ public:
     typedef BCHandler                                     bcHandlerRaw_Type;
     typedef boost::shared_ptr<bcHandlerRaw_Type>          bcHandler_Type;
 
-    typedef SolverType                                    solver_Type;
+    typedef LinearSolver                                  solver_Type;
 
-    typedef typename solver_Type::matrix_type             matrix_Type;
+    typedef typename solver_Type::matrix_Type             matrix_Type;
     typedef boost::shared_ptr<matrix_Type>                matrixPtr_Type;
-    typedef typename solver_Type::vector_type             vector_Type;
+    typedef typename solver_Type::vector_Type             vector_Type;
     typedef boost::shared_ptr<vector_Type>                vectorPtr_Type;
-
-    typedef typename SolverType::prec_raw_type            precRaw_Type;
-    typedef typename SolverType::prec_type                prec_Type;
+    typedef vector_Type                                   solution_Type;
+    typedef boost::shared_ptr<solution_Type>              solutionPtr_Type;
 
     typedef StructuralConstitutiveLawData                 data_Type;
 
     typedef RegionMesh<LinearTetra >                      mesh_Type;
-    typedef std::vector< mesh_Type::element_Type const*> vectorVolumes_Type;
+    typedef std::vector< mesh_Type::element_Type* >       vectorVolumes_Type;
+    typedef std::vector< UInt >                           vectorIndexes_Type;
 
     typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
+    typedef std::map< UInt, vectorIndexes_Type>           mapMarkerIndexes_Type;
     typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
+    typedef boost::shared_ptr<mapMarkerIndexes_Type>      mapMarkerIndexesPtr_Type;
+    typedef mapMarkerVolumes_Type::const_iterator         mapIterator_Type;
 
-    typedef typename mesh_Type::element_Type                        meshEntity_Type;
+    typedef typename mesh_Type::element_Type              meshEntity_Type;
 
     typedef typename boost::function2<bool, const UInt, const UInt> comparisonPolicy_Type;
 
     typedef MarkerSelector<meshEntity_Type, comparisonPolicy_Type> markerSelector_Type;
     typedef boost::scoped_ptr<markerSelector_Type>          markerSelectorPtr_Type;
+
+    typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >  ETFESpace_Type;
+    typedef boost::shared_ptr<ETFESpace_Type>                      ETFESpacePtr_Type;
+
+    typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >          FESpace_Type;
+    typedef boost::shared_ptr<FESpace_Type>                        FESpacePtr_Type;
+
+    //Preconditioners typedef
+    typedef LifeV::Preconditioner                   basePrec_Type;
+    typedef boost::shared_ptr<basePrec_Type>        basePrecPtr_Type;
+    typedef LifeV::PreconditionerIfpack             precIfpack_Type;
+    typedef boost::shared_ptr<precIfpack_Type>      precIfpackPtr_Type;
+    typedef LifeV::PreconditionerML                 precML_Type;
+    typedef boost::shared_ptr<precML_Type>          precMLPtr_Type;
+
+    // Time advance
+    typedef TimeAdvance< vector_Type >                                  timeAdvance_Type;
+    typedef boost::shared_ptr< timeAdvance_Type >                       timeAdvancePtr_Type;
+
     //@}
 
+
+#ifdef COMPUTATION_JACOBIAN
+    typedef Epetra_SerialDenseMatrix                     matrixSerialDense_Type;
+    typedef boost::shared_ptr<matrixSerialDense_Type>    matrixSerialDensePtr_Type;
+    typedef std::vector<LifeV::Real>                     vectorInvariants_Type;
+    typedef boost::shared_ptr<vectorInvariants_Type>     vectorInvariantsPtr_Type;
+#endif
+    //@}
 
     //! @name Constructor & Destructor
     //@{
@@ -172,8 +224,9 @@ public:
       \param BCh boundary conditions for the displacement
       \param comm the Epetra Comunicator
     */
-    void setup ( boost::shared_ptr<data_Type> data,
-                 const boost::shared_ptr< FESpace<Mesh, MapEpetra> >&   FESpace,
+    void setup ( boost::shared_ptr<data_Type>  data,
+                 const FESpacePtr_Type&        dFESpace,
+                 const ETFESpacePtr_Type&      dETFESpace,
                  bcHandler_Type&       BCh,
                  boost::shared_ptr<Epetra_Comm>&     comm
                );
@@ -184,7 +237,8 @@ public:
       \param comm the Epetra Comunicator
     */
     void setup ( boost::shared_ptr<data_Type> data,
-                 const boost::shared_ptr< FESpace<Mesh, MapEpetra> >&   FESpace,
+                 const FESpacePtr_Type&       dFESpace,
+                 const ETFESpacePtr_Type&     dETFESpace,
                  boost::shared_ptr<Epetra_Comm>&     comm
                );
 
@@ -196,11 +250,11 @@ public:
       \param offset the offset parameter
     */
     void setup ( boost::shared_ptr<data_Type> data,
-                 const boost::shared_ptr< FESpace<Mesh, MapEpetra> >&   dFESpace,
+                 const FESpacePtr_Type&       dFESpace,
+                 const ETFESpacePtr_Type&     dETFESpace,
                  boost::shared_ptr<Epetra_Comm>&     comm,
                  const boost::shared_ptr<const MapEpetra>&       monolithicMap,
                  UInt       offset = 0
-                                     //boost::shared_ptr<FESpace<Mesh, MapEpetra> >   uFESpace=0
                );
 
 
@@ -256,7 +310,7 @@ public:
     /*!
       \param bch BCHander object containing the boundary conditions
     */
-    void iterate ( bcHandler_Type& bch );
+    void iterate ( const bcHandler_Type& bch );
 
     //! Solve the linearized problem. Used in FSI segregated in ExactJacobian
     /*!
@@ -279,7 +333,7 @@ public:
     void updateJacobian ( const vector_Type& solution, matrixPtr_Type& jacobian );
 
     //! Update the Jacobian Matrix at each iteration of the nonLinearRichardson method
-    /*!
+    /*! Note: this method is used in FSIExactJacobian
       \param solution the current solution at each iteration of the nonLinearRichardson method
     */
     void updateJacobian (const vector_Type& solution );
@@ -330,21 +384,13 @@ public:
     */
     void evalResidualDisplacementLin ( const vector_Type& solution );
 
-    void evalConstraintTensor();
-
     //! Sets the initial displacement, velocity, acceleration
     /*!
       \param d0 space function describing the initial displacement
       \param w0 space function describing the initial velocity
       \param a0 space function describing the initial acceleration
     */
-    void initialize ( const function& d0, const function& w0, const function& a0 );
-
-    //! Sets the initial velocity
-    /*!
-      \param w0 space function describing the initial velocity
-    */
-    void initializeVel ( const vector_Type& w0);
+    void initialize ( const function& d0 );
 
     //! Sets the initial displacement, velocity, acceleration
     /*!
@@ -352,7 +398,7 @@ public:
       \param w0 empty vector
       \param a0 empty vector
     */
-    void initialize ( vectorPtr_Type d0,  vectorPtr_Type w0 = vectorPtr_Type(),  vectorPtr_Type a0 = vectorPtr_Type() );
+    void initialize ( vectorPtr_Type d0 );
 
     //! Computes the velocity and acceleration vector at the n-th time step
     //void updateVelAndAcceleration();
@@ -379,6 +425,26 @@ public:
     */
     void computeMatrix ( matrixPtr_Type& stiff, const vector_Type& sol, Real const& factor );
 
+
+#ifdef COMPUTATION_JACOBIAN
+    //! compute the value of the determinant of F in all the volumes of the mesh
+    /*!
+      \param displacement the solution at a certain time
+      \return the vector with the values for J
+    */
+    void jacobianDistribution ( vectorPtr_Type displacement, vector_Type& jacobianDistribution );
+#endif
+
+
+#ifdef COLORING_MESH
+    //! compute the value of the determinant of F in all the volumes of the mesh
+    /*!
+      \param displacement the solution at a certain time
+      \return the vector with the values for J
+    */
+    void colorMesh ( vector_Type& meshColors );
+#endif
+
     //void updateMatrix(matrix_Type & bigMatrixStokes);// used for monolithic
     //void updateCoupling(matrix_Type couplingMatrix);// used for monolithic
 
@@ -389,7 +455,7 @@ public:
 
     //!Setters
     //! Set the BCHandler object
-    void setBC (bcHandler_Type& BCd)
+    void setBC (const bcHandler_Type& BCd)
     {
         M_BCh = BCd;
     }
@@ -400,14 +466,8 @@ public:
         M_source = s;
     }
 
-    //! Set the preconditioner
-    void resetPrec (bool reset = true)
-    {
-        if (reset)
-        {
-            M_linearSolver.precReset();
-        }
-    }
+    // //! Set the preconditioner
+    // void resetPrec(bool reset = true) { if (reset) M_linearSolver.precReset(); }
 
     // //! Set the displacement
     // virtual void setDisp(const vector_Type& disp) {*M_disp = disp;} // used for monolithic
@@ -418,8 +478,13 @@ public:
         M_recur = recur;
     }
 
-    //! Set the data fields with the Getpot data file
+    //! Set the data fields with the Getpot data file for preconditioners and solver
     void setDataFromGetPot ( const GetPot& dataFile );
+
+    void setTimeAdvance( const timeAdvancePtr_Type& timeAdvancePtr )
+    {
+        M_timeAdvance = timeAdvancePtr;
+    }
 
     //@}
 
@@ -455,9 +520,15 @@ public:
     }
 
     //! Get the FESpace object
-    FESpace<Mesh, MapEpetra>& dFESpace()
+    FESpace_Type& dispFESpace()
     {
-        return M_FESpace;
+        return *M_dispFESpace;
+    }
+
+    //! Get the ETFESpace object
+    ETFESpace_Type& dispETFESpace()
+    {
+        return *M_dispETFESpace;
     }
 
     //! Get the bCHandler object
@@ -484,20 +555,25 @@ public:
         return *M_disp;
     }
 
-    vector_Type& displacementPtr()
+    vectorPtr_Type displacementPtr()
     {
         return M_disp;
     }
-    //! Get the velocity
-    //vector_Type& velocity()         { return *M_vel; }
-
-    //! Get the velocity
-    //vector_Type& acceleration()         { return *M_acc; }
 
     //! Get the right hand sde without BC
     vectorPtr_Type& rhsWithoutBC()
     {
         return M_rhsNoBC;
+    }
+
+    //! Get the right hand. The member rhsCopy is used for Debug purposes!
+    vector_Type& rhsCopy()
+    {
+        return *M_rhsCopy;
+    }
+    vector_Type& residualCopy()
+    {
+        return *M_residualCopy;
     }
 
     //! Get the comunicator object
@@ -562,19 +638,30 @@ public:
     }
 
     //! Get the data container
-    boost::shared_ptr<data_Type> data()       const
+    const boost::shared_ptr<data_Type>& data() const
     {
         return M_data;
     }
 
     void apply ( const vector_Type& sol, vector_Type& res) const;
 
-
     //! Get the density
     mapMarkerVolumesPtr_Type mapMarkersVolumes() const
     {
         return M_mapMarkersVolumes;
     }
+
+    //! Get the density
+    mapMarkerIndexesPtr_Type mapMarkersIndexes() const
+    {
+        return M_mapMarkersIndexes;
+    }
+
+    const timeAdvancePtr_Type& timeAdvancePtr() const
+    {
+        return M_timeAdvance;
+    }
+
     //@}
 
 protected:
@@ -594,7 +681,7 @@ protected:
 
     UInt dim() const
     {
-        return M_FESpace->dim();
+        return M_dispFESpace->dim();
     }
 
 
@@ -607,33 +694,46 @@ protected:
 
     //!Protected Members
 
+#ifdef COMPUTATION_JACOBIAN
+    //! constructPatchAreaVector: This method build the patch area vector used in the reconstruction process
+    /*!
+      \param NONE
+    */
+    void constructPatchAreaVector ( vector_Type& patchArea, const vector_Type& solution );
+
+
+    //! reconstructElementaryVector: This method applies a reconstruction procedure on the elvec that is passed
+    /*!
+      \param elvecTens VectorElemental over which the reconstruction is applied
+    */
+    void reconstructElementaryVector ( VectorElemental& elVecSigma, vector_Type& patchArea, UInt nVol );
+#endif
+
+
     boost::shared_ptr<data_Type>         M_data;
 
-    boost::shared_ptr<FESpace<Mesh, MapEpetra> >      M_FESpace;
+    FESpacePtr_Type                      M_dispFESpace;
 
-    boost::shared_ptr<const Displayer>         M_Displayer;
+    ETFESpacePtr_Type                    M_dispETFESpace;
+
+    boost::shared_ptr<const Displayer>   M_Displayer;
 
     Int                                  M_me;
 
-    //! data for solving tangent problem with aztec
+    //! data for solving tangent problem with aztec + preconditioner
     boost::shared_ptr<solver_Type>       M_linearSolver;
+    basePrecPtr_Type                     M_preconditioner;
 
     //! Elementary matrices and vectors
     boost::shared_ptr<MatrixElemental>   M_elmatM;
 
     //! linearized velocity
     vectorPtr_Type                       M_disp;
-    //vectorPtr_Type                       M_vel;
-    //vectorPtr_Type                       M_acc;
 
     //! right  hand  side displacement
     vectorPtr_Type                       M_rhs;
-
-    //! right  hand  side velocity
-    //  vectorPtr_Type                       M_rhsW;
-
-    //! right  hand  side velocity
-    //vectorPtr_Type                       M_rhsA;
+    vectorPtr_Type                       M_rhsCopy;
+    vectorPtr_Type                       M_residualCopy;
 
     //! right  hand  side
     vectorPtr_Type                       M_rhsNoBC;
@@ -643,11 +743,6 @@ protected:
 
     //! residual
     boost::shared_ptr<vector_Type>       M_residual_d;
-
-    //! Components of the Constraint Tensor
-    vectorPtr_Type                       M_sxx;
-    vectorPtr_Type                       M_syy;
-    vectorPtr_Type                       M_szz;
 
     //! files for lists of iterations and residuals per timestep
     std::ofstream                        M_out_iter;
@@ -686,26 +781,37 @@ protected:
     //! Map between markers and volumes on the mesh
     mapMarkerVolumesPtr_Type             M_mapMarkersVolumes;
 
+    //! Map between markers and volumes on the mesh
+    mapMarkerIndexesPtr_Type             M_mapMarkersIndexes;
+
+#ifdef COMPUTATION_JACOBIAN
+    //! Elementary matrix for the tensor F
+    matrixSerialDensePtr_Type            M_deformationF;
+    vectorInvariants_Type                M_invariants;
+#endif
+
+    timeAdvancePtr_Type                  M_timeAdvance;
 };
 
 //====================================
 // Constructor
 //=====================================
 
-template <typename Mesh, typename SolverType>
-StructuralOperator<Mesh, SolverType>::StructuralOperator( ) :
+template <typename Mesh>
+StructuralOperator<Mesh>::StructuralOperator( ) :
     M_data                       ( ),
-    M_FESpace                    ( ),
+    M_dispFESpace                    ( ),
+    M_dispETFESpace                  ( ),
     M_Displayer                  ( ),
     M_me                         ( 0 ),
     M_linearSolver               ( ),
+    M_preconditioner             ( ),
     M_elmatM                     ( ),
     M_disp                       ( ),
     M_rhsNoBC                    ( ),
+    M_rhsCopy                    ( ),
+    M_residualCopy               ( ),
     M_residual_d                 ( ),
-    M_sxx                        (/*M_localMap*/),//useless
-    M_syy                        (/*M_localMap*/),//useless
-    M_szz                        (/*M_localMap*/),//useless
     M_out_iter                   ( ),
     M_out_res                    ( ),
     M_BCh                        ( ),
@@ -718,52 +824,62 @@ StructuralOperator<Mesh, SolverType>::StructuralOperator( ) :
     M_offset                     ( 0 ),
     M_rescaleFactor              ( 1. ),
     M_material                   ( ),
-    M_mapMarkersVolumes          ( )
+#ifdef COMPUTATION_JACOBIAN
+    M_deformationF               ( ),
+    M_invariants                 ( ),
+#endif
+    M_mapMarkersVolumes          ( ),
+    M_mapMarkersIndexes          ( ),
+    M_timeAdvance                ( )
 {
+
     //    M_Displayer->leaderPrint("I am in the constructor for the solver");
 }
 
-template <typename Mesh, typename SolverType>
+template <typename Mesh>
 void
-StructuralOperator<Mesh, SolverType>::setup (boost::shared_ptr<data_Type>          data,
-                                             const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-                                             bcHandler_Type&                    BCh,
-                                             boost::shared_ptr<Epetra_Comm>&   comm)
+StructuralOperator<Mesh>::setup (boost::shared_ptr<data_Type>          data,
+                                 const FESpacePtr_Type& dFESpace,
+                                 const ETFESpacePtr_Type& dETFESpace,
+                                 bcHandler_Type&                    BCh,
+                                 boost::shared_ptr<Epetra_Comm>&   comm)
 {
-    setup (data, dFESpace, comm);
+    setup (data, dFESpace, dETFESpace, comm);
     M_BCh = BCh;
 }
 
-template <typename Mesh, typename SolverType>
+template <typename Mesh>
 void
-StructuralOperator<Mesh, SolverType>::setup (boost::shared_ptr<data_Type>        data,
-                                             const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-                                             boost::shared_ptr<Epetra_Comm>&     comm)
+StructuralOperator<Mesh>::setup (boost::shared_ptr<data_Type>        data,
+                                 const FESpacePtr_Type& dFESpace,
+                                 const ETFESpacePtr_Type& dETFESpace,
+                                 boost::shared_ptr<Epetra_Comm>&     comm)
 {
-    setup ( data, dFESpace, comm, dFESpace->mapPtr(), (UInt) 0 );
+    setup ( data, dFESpace, dETFESpace, comm, dFESpace->mapPtr(), (UInt) 0 );
 
     M_rhs.reset                        ( new vector_Type (*M_localMap) );
+    M_rhsCopy.reset                    ( new vector_Type (*M_localMap) );
+    M_residualCopy.reset               ( new vector_Type (*M_localMap) );
     M_rhsNoBC.reset                    ( new vector_Type (*M_localMap) );
-    M_sxx.reset                        ( new vector_Type (*M_localMap) );
-    M_syy.reset                        ( new vector_Type (*M_localMap) );
-    M_szz.reset                        ( new vector_Type (*M_localMap) );
-    M_linearSolver.reset               ( new SolverType ( comm ) );
+    M_linearSolver.reset               ( new LinearSolver ( comm ) );
     M_disp.reset                       ( new vector_Type (*M_localMap) );
 }
 
-template <typename Mesh, typename SolverType>
+template <typename Mesh>
 void
-StructuralOperator<Mesh, SolverType>::setup (boost::shared_ptr<data_Type>        data,
-                                             const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-                                             boost::shared_ptr<Epetra_Comm>&     comm,
-                                             const boost::shared_ptr<const MapEpetra>&  monolithicMap,
-                                             UInt                                offset)
+StructuralOperator<Mesh>::setup (boost::shared_ptr<data_Type>        data,
+                                 const FESpacePtr_Type& dFESpace,
+                                 const ETFESpacePtr_Type& dETFESpace,
+                                 boost::shared_ptr<Epetra_Comm>&     comm,
+                                 const boost::shared_ptr<const MapEpetra>&  monolithicMap,
+                                 UInt                                offset)
 {
     M_data                            = data;
-    M_FESpace                         = dFESpace;
+    M_dispFESpace                     = dFESpace;
+    M_dispETFESpace                   = dETFESpace;
     M_Displayer.reset                 (new Displayer (comm) );
     M_me                              = comm->MyPID();
-    M_elmatM.reset                    ( new MatrixElemental ( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+    M_elmatM.reset                    ( new MatrixElemental ( M_dispFESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
     M_localMap                        = monolithicMap;
     M_massMatrix.reset                (new matrix_Type (*M_localMap) );
     M_systemMatrix.reset              (new matrix_Type (*M_localMap) );
@@ -772,7 +888,7 @@ StructuralOperator<Mesh, SolverType>::setup (boost::shared_ptr<data_Type>       
     M_offset                          = offset;
 
     M_material.reset ( material_Type::StructureMaterialFactory::instance().createObject ( M_data->solidType() ) );
-    M_material->setup ( dFESpace, M_localMap, M_offset, M_data, M_Displayer );
+    M_material->setup ( dFESpace, dETFESpace, M_localMap, M_offset, M_data, M_Displayer );
 
     if ( M_data->verbose() )
     {
@@ -780,13 +896,21 @@ StructuralOperator<Mesh, SolverType>::setup (boost::shared_ptr<data_Type>       
         M_out_res.open ( "out_res_solid" );
     }
     M_mapMarkersVolumes.reset ( new mapMarkerVolumes_Type() );
-    this->setupMapMarkersVolumes();
+    M_mapMarkersIndexes.reset ( new mapMarkerIndexes_Type() );
+    //this->setupMapMarkersVolumes();
 }
 
 
-template <typename Mesh, typename SolverType>
-void StructuralOperator<Mesh, SolverType>::setupMapMarkersVolumes ( void )
+template <typename Mesh>
+void StructuralOperator<Mesh>::setupMapMarkersVolumes ( void )
 {
+
+    LifeChrono time;
+
+    this->M_Displayer->leaderPrint (" S-  Starting the time:  \n");
+
+    time.start();
+
 
     this->M_Displayer->leaderPrint (" S-  Building the map between volumesMarkers <--> volumes \n");
 
@@ -798,7 +922,7 @@ void StructuralOperator<Mesh, SolverType>::setupMapMarkersVolumes ( void )
         markerSelectorPtr_Type ref ( new markerSelector_Type (M_data->vectorFlags() [i]) );
 
         //Number of volumes with the current marker
-        UInt numExtractedVolumes = this->M_FESpace->mesh()->elementList().countAccordingToPredicate ( *ref );
+        UInt numExtractedVolumes = this->M_dispFESpace->mesh()->elementList().countAccordingToPredicate ( *ref );
 
         this->M_Displayer->leaderPrint (" Current marker: ", M_data->vectorFlags() [i]);
         this->M_Displayer->leaderPrint (" \n");
@@ -807,30 +931,37 @@ void StructuralOperator<Mesh, SolverType>::setupMapMarkersVolumes ( void )
 
         //Vector large enough to contain the number of volumes with the current marker
         vectorVolumes_Type extractedVolumes ( numExtractedVolumes );
+        vectorIndexes_Type extractedIndexes;
 
-        //Extracting the volumes
-        extractedVolumes = this->M_FESpace->mesh()->elementList().extractAccordingToPredicate ( *ref );
+        //Extracting the volumes and the corresponding position
+        extractedVolumes = this->M_dispFESpace->mesh()->elementList().extractAccordingToPredicateNonConstElement ( *ref, extractedIndexes );
 
         //Insert the correspondande Marker <--> List of Volumes inside the map
         M_mapMarkersVolumes->insert ( pair<UInt, vectorVolumes_Type> (M_data->vectorFlags() [i], extractedVolumes) ) ;
+        M_mapMarkersIndexes->insert ( pair<UInt, vectorIndexes_Type> (M_data->vectorFlags() [i], extractedIndexes) ) ;
+
+        // for( UInt i(0); i<extractedIndexes.size(); i++ )
+        //     std::cout << "Element: " << extractedIndexes[i] << std::endl;
 
         //Cleaning the vector
         extractedVolumes.clear();
+        extractedIndexes.clear();
 
     }
+
+    time.stop();
+
+    this->M_Displayer->leaderPrint (" S-  Time to build the map:", time.diff() );
 }
 
-
-
-
-template <typename Mesh, typename SolverType>
-void StructuralOperator<Mesh, SolverType>::updateSystem ( void )
+template <typename Mesh>
+void StructuralOperator<Mesh>::updateSystem ( void )
 {
     updateSystem (M_systemMatrix);
 }
 
-template <typename Mesh, typename SolverType>
-void StructuralOperator<Mesh, SolverType>::updateSystem ( matrixPtr_Type& mat_stiff)
+template <typename Mesh>
+void StructuralOperator<Mesh>::updateSystem ( matrixPtr_Type& mat_stiff)
 {
     M_Displayer->leaderPrint (" S-  Updating mass term on right hand side... ");
 
@@ -838,9 +969,9 @@ void StructuralOperator<Mesh, SolverType>::updateSystem ( matrixPtr_Type& mat_st
     chrono.start();
 
     //Compute the new Stiffness Matrix
-    M_material->computeStiffness (*M_disp, M_rescaleFactor, M_data, M_mapMarkersVolumes, M_Displayer);
+    M_material->computeStiffness (*M_disp, M_rescaleFactor, M_data, M_mapMarkersVolumes, M_mapMarkersIndexes, M_Displayer);
 
-    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonLinearVenantKirchhoff" )
+    if ( M_data->solidType() == "linearVenantKirchhoff" )
     {
         *mat_stiff += *M_material->stiffMatrix();
         mat_stiff->globalAssemble();
@@ -852,94 +983,79 @@ void StructuralOperator<Mesh, SolverType>::updateSystem ( matrixPtr_Type& mat_st
 
 }
 
-template <typename Mesh, typename SolverType>
-void StructuralOperator<Mesh, SolverType>::updateSourceTerm ( source_Type const& source )
+template <typename Mesh>
+void StructuralOperator<Mesh>::updateSourceTerm ( source_Type const& source )
 {
     vector_Type rhs ( *M_localMap );
 
-    VectorElemental M_elvec (M_FESpace->fe().nbFEDof(), nDimensions);
+    VectorElemental M_elvec (M_dispFESpace->fe().nbFEDof(), nDimensions);
     UInt nc = nDimensions;
 
     // loop on volumes: assembling source term
-    for ( UInt i = 1; i <= M_FESpace->mesh()->numVolumes(); ++i )
+    for ( UInt i = 1; i <= M_dispFESpace->mesh()->numVolumes(); ++i )
     {
 
-        M_FESpace->fe().updateFirstDerivQuadPt ( M_FESpace->mesh()->volumeList ( i ) );
+        M_dispFESpace->fe().updateFirstDerivQuadPt ( M_dispFESpace->mesh()->volumeList ( i ) );
 
         M_elvec.zero();
 
         for ( UInt ic = 0; ic < nc; ++ic )
         {
-            compute_vec ( source, M_elvec, M_FESpace->fe(),  M_data->dataTime()->time(), ic ); // compute local vector
-            assembleVector ( *rhs, M_elvec, M_FESpace->fe(), M_FESpace->dof(), ic, ic * M_FESpace->getDim() ); // assemble local vector into global one
+            //compute_vec( source, M_elvec, M_dispFESpace->fe(),  M_data->dataTime()->time(), ic ); // compute local vector
+            assembleVector ( rhs, M_elvec, M_dispFESpace->fe(), M_dispFESpace->dof(), ic, ic * M_dispFESpace->fieldDim() ); // assemble local vector into global one
         }
     }
     M_rhsNoBC += rhs;
 }
 
-template <typename Mesh, typename SolverType>
-void StructuralOperator<Mesh, SolverType>::buildSystem ( const Real coefficient )
+template <typename Mesh>
+void StructuralOperator<Mesh>::buildSystem ( const Real coefficient )
 {
     M_Displayer->leaderPrint ("  S-  Computing constant matrices ...          ");
     LifeChrono chrono;
     chrono.start();
 
     computeMassMatrix ( coefficient );
-    M_material->computeLinearStiff (M_data, M_mapMarkersVolumes);
+    M_material->computeLinearStiff (M_data, M_mapMarkersVolumes, M_mapMarkersIndexes);
 
     chrono.stop();
     M_Displayer->leaderPrintMax ( "done in ", chrono.diff() );
 
 }
 
-
-// template <typename Mesh, typename SolverType>
-// void  StructuralOperator<Mesh, SolverType>::buildSystem(matrix_Type & bigMatrixStokes, const Real& timeAdvanceCoefficient, const Real& factor)
-// {}
-// ;
-
-
-template <typename Mesh, typename SolverType>
+template <typename Mesh>
 void
-StructuralOperator<Mesh, SolverType>::computeMassMatrix ( const Real factor)
+StructuralOperator<Mesh>::computeMassMatrix ( const Real factor)
 {
-    UInt totalDof = M_FESpace->dof().numTotalDof();
+    using namespace ExpressionAssembly;
+
+    //UInt totalDof = M_dispFESpace->dof().numTotalDof();
 
     //! Number of displacement components
-    UInt nc = nDimensions;
+    /*UInt nc = nDimensions;*/
     const Real factorMassMatrix = factor * M_data->rho();
 
-    //! Elementary computation and matrix assembling
-    //! Loop on elements
-    for ( UInt i = 0; i < M_FESpace->mesh()->numVolumes(); i++ )
-    {
+    //Assembling using the Expression Template
+    //At the moment, that the ET is not the standard, when the integration is
+    //performed the quadrature rule set in FESpace is used.
+    //Otherwhise, one can set his preferred quadrature rule for the integrals.
 
-        M_FESpace->fe().updateFirstDerivQuadPt ( M_FESpace->mesh()->volumeList ( i ) );
-
-        M_elmatM->zero();
-
-        // mass
-        // The method mass is implemented in AssemblyElemental.cpp
-        mass ( factorMassMatrix , *M_elmatM, M_FESpace->fe(), 0, 0, nDimensions );
-
-        //! assembling
-        for ( UInt ic = 0; ic < nc; ic++ )
-        {
-            //mass
-            assembleMatrix ( *M_massMatrix, *M_elmatM, M_FESpace->fe(), M_FESpace->dof(), ic, ic, M_offset +  ic * totalDof, M_offset +  ic * totalDof);
-        }
-    }
-
-    //getComunicator()->Barrier();
+    integrate ( elements (M_dispETFESpace->mesh() ),
+                M_dispFESpace->qr(),
+                M_dispETFESpace,
+                M_dispETFESpace,
+                value (factorMassMatrix) *  dot ( phi_i , phi_j ) ) >> M_massMatrix;
 
     M_massMatrix->globalAssemble();
+
+    //M_massMatrix->spy("massMatrixStructure.m");
 
     //*massStiff *= factor; //M_data.dataTime()->timeStep() * M_rescaleFactor;
 }
 
-template <typename Mesh, typename SolverType>
+template <typename Mesh>
 void
-StructuralOperator<Mesh, SolverType>::iterate ( bcHandler_Type& bch )
+StructuralOperator<Mesh>::iterate ( const bcHandler_Type& bch )
 {
     LifeChrono chrono;
 
@@ -950,7 +1066,7 @@ StructuralOperator<Mesh, SolverType>::iterate ( bcHandler_Type& bch )
 
     Real abstol  = 1.e-7;
     Real reltol  = 1.e-7;
-    UInt maxiter = 50;
+    UInt maxiter = 200;
     Real etamax  = 1e-7;
     Int NonLinearLineSearch = 0;
 
@@ -987,8 +1103,6 @@ StructuralOperator<Mesh, SolverType>::iterate ( bcHandler_Type& bch )
         }
     }
 
-    // updateVelAndAcceleration();
-
     // std::cout << "iterate: d norm       = " << M_disp->norm2() << std::endl;
 
     //These two lines mut be checked fo FSI. With the linear solver, they have a totally
@@ -996,25 +1110,25 @@ StructuralOperator<Mesh, SolverType>::iterate ( bcHandler_Type& bch )
     evalResidualDisplacement (*M_disp); //\todo related to FSI. Should be caled from outside
 }
 
-template <typename Mesh, typename SolverType>
+template <typename Mesh>
 void
-StructuralOperator<Mesh, SolverType>::iterateLin ( bcHandler_Type& bch )
+StructuralOperator<Mesh>::iterateLin ( bcHandler_Type& bch )
 {
     vector_Type rhsFull (M_rhsNoBC->map() );
     Real zero (0.);
     if ( !bch->bcUpdateDone() )
     {
-        bch->bcUpdate ( *M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
+        bch->bcUpdate ( *M_dispFESpace->mesh(), M_dispFESpace->feBd(), M_dispFESpace->dof() );
     }
-    bcManageVector ( rhsFull, *M_FESpace->mesh(), M_FESpace->dof(), *bch, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0 );
+    bcManageVector ( rhsFull, *M_dispFESpace->mesh(), M_dispFESpace->dof(), *bch, M_dispFESpace->feBd(), M_data->dataTime()->time(), 1.0 );
     solveJacobian (*M_disp, rhsFull, zero, bch);
     evalResidualDisplacementLin (*M_disp);
 }
 
 
-template <typename Mesh, typename SolverType>
+template <typename Mesh>
 void
-StructuralOperator<Mesh, SolverType>::showMe ( std::ostream& c  ) const
+StructuralOperator<Mesh>::showMe ( std::ostream& c  ) const
 {
     c << "\n*** StructuralOperator::showMe method" << std::endl;
 
@@ -1022,8 +1136,8 @@ StructuralOperator<Mesh, SolverType>::showMe ( std::ostream& c  ) const
 
 }
 
-template <typename Mesh, typename SolverType>
-void StructuralOperator<Mesh, SolverType>::computeMatrix ( matrixPtr_Type& stiff, const vector_Type& sol,  Real const& /*factor*/)
+template <typename Mesh>
+void StructuralOperator<Mesh>::computeMatrix ( matrixPtr_Type& stiff, const vector_Type& sol,  Real const& /*factor*/)
 {
     M_Displayer->leaderPrint ( " Computing residual ... \t\t\t");
 
@@ -1031,9 +1145,9 @@ void StructuralOperator<Mesh, SolverType>::computeMatrix ( matrixPtr_Type& stiff
     chrono.start();
 
     //! It is right to do globalAssemble() inside the M_material class
-    M_material->computeStiffness ( sol, 1., M_data, M_mapMarkersVolumes, M_Displayer);
+    M_material->computeStiffness ( sol, 1., M_data, M_mapMarkersVolumes, M_mapMarkersIndexes, M_Displayer);
 
-    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonLinearVenantKirchhoff" )
+    if ( M_data->solidType() == "linearVenantKirchhoff" )
     {
         *stiff = *M_material->stiffMatrix();
         *stiff += *M_massMatrix;
@@ -1044,10 +1158,255 @@ void StructuralOperator<Mesh, SolverType>::computeMatrix ( matrixPtr_Type& stiff
     M_Displayer->leaderPrintMax ("done in ", chrono.diff() );
 }
 
+#ifdef COMPUTATION_JACOBIAN
 
-template <typename Mesh, typename SolverType>
+template <typename Mesh>
+void StructuralOperator<Mesh>::jacobianDistribution ( vectorPtr_Type displacement, vector_Type& jacobianDistribution )
+{
+    M_Displayer->leaderPrint ( " Computing the jacobian for all the volumes ... \t\t\t");
+
+    //Initialization of the deformationF matrix
+    M_deformationF.reset  ( new matrixSerialDense_Type ( M_dispFESpace->fieldDim(), M_dispFESpace->fieldDim() ) );
+
+    vector_Type vectorJacobian ( jacobianDistribution );
+    vectorJacobian *= 0.0;
+
+    LifeChrono chrono;
+    chrono.start();
+
+    //construct a vector to store the are
+    vector_Type patchArea (*displacement, Unique, Add);
+    patchArea *= 0.0;
+
+    constructPatchAreaVector ( patchArea, *displacement );
+
+    //Before assembling the reconstruction process is done
+    vector_Type patchAreaR (patchArea, Repeated);
+
+
+    //Loop over the volumes to compute J = det(F)
+    //Inside the loop, the determinant is store in the appropriate positions
+    vector_Type dRep (*displacement, Repeated);
+    UInt totalDof = M_dispFESpace->dof().numTotalDof();
+    VectorElemental dk_loc ( M_dispFESpace->fe().nbFEDof(), this->M_dispFESpace->fieldDim() );
+    VectorElemental elVecDet ( M_dispFESpace->fe().nbFEDof(), this->M_dispFESpace->fieldDim() );
+
+    //Building fake quadrature rules to compute the deformation gradient F at the nodes
+    QuadratureRule fakeQuadratureRule;
+
+    Real refElemArea (0); //area of reference element
+    //compute the area of reference element
+    for (UInt iq = 0; iq < M_dispFESpace->qr().nbQuadPt(); iq++)
+    {
+        refElemArea += M_dispFESpace->qr().weight (iq);
+    }
+
+    Real wQuad (refElemArea / M_dispFESpace->refFE().nbDof() );
+
+    //Setting the quadrature Points = DOFs of the element and weight = 1
+    std::vector<GeoVector> coords = M_dispFESpace->refFE().refCoor();
+    std::vector<Real> weights (M_dispFESpace->fe().nbFEDof(), wQuad);
+    fakeQuadratureRule.setDimensionShape ( shapeDimension (M_dispFESpace->refFE().shape() ), M_dispFESpace->refFE().shape() );
+    fakeQuadratureRule.setPoints (coords, weights);
+
+    //Set the new quadrature rule
+    M_dispFESpace->setQuadRule (fakeQuadratureRule);
+
+
+    //Loop over the volumes. No markerIDs are necessary on this loop for J = det(F)
+    for ( UInt i = 0; i < M_dispFESpace->mesh()->numVolumes(); ++i )
+    {
+
+        //Vectors for the deformation tensor
+        std::vector<matrixSerialDense_Type> vectorDeformationF (M_dispFESpace->fe().nbFEDof(), *M_deformationF);
+        M_invariants.resize   ( M_dispFESpace->fieldDim() + 1 );
+
+
+        M_dispFESpace->fe().updateFirstDerivQuadPt ( M_dispFESpace->mesh()->volumeList ( i ) );
+
+        UInt eleID = M_dispFESpace->fe().currentLocalId();
+
+        //Extracting the local displacement
+        for ( UInt iNode = 0; iNode < ( UInt ) M_dispFESpace->fe().nbFEDof(); iNode++ )
+        {
+            UInt  iloc = M_dispFESpace->fe().patternFirst ( iNode );
+
+            for ( UInt iComp = 0; iComp < this->M_dispFESpace->fieldDim(); ++iComp )
+            {
+                UInt ig = M_dispFESpace->dof().localToGlobalMap ( eleID, iloc ) + iComp * M_dispFESpace->dim() + this->M_offset;
+                dk_loc[iloc + iComp * M_dispFESpace->fe().nbFEDof()] = dRep[ig];
+            }
+        }
+
+        //computing the tensor F
+        AssemblyElementalStructure::computeLocalDeformationGradient ( dk_loc, vectorDeformationF, M_dispFESpace->fe() );
+
+
+        //Cycle over the nDofs/element
+        for ( UInt nDOF = 0; nDOF < ( UInt ) M_dispFESpace->fe().nbFEDof(); nDOF++ )
+        {
+            UInt  iloc = M_dispFESpace->fe().patternFirst ( nDOF );
+
+            //computing the determinant
+            AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor ( M_invariants, vectorDeformationF[nDOF] );
+
+            //Assembling elemental vector
+            (elVecDet) [ iloc ] = M_invariants[3];
+            (elVecDet) [ iloc + M_dispFESpace->fe().nbFEDof() ] = 0.0;
+            (elVecDet) [ iloc + 2 * M_dispFESpace->fe().nbFEDof() ] = 0.0;
+
+        }
+
+        //multiplying it for the patch area
+        reconstructElementaryVector ( elVecDet, patchAreaR, i );
+
+        //assembling it into the global vector
+        for ( UInt ic = 0; ic < this->M_dispFESpace->fieldDim(); ++ic )
+        {
+            assembleVector (vectorJacobian, elVecDet, M_dispFESpace->fe(), M_dispFESpace->dof(), ic, this->M_offset +  ic * totalDof );
+        }
+
+        vectorDeformationF.clear();
+        M_invariants.clear();
+
+    }
+
+    vectorJacobian.globalAssemble();
+
+    chrono.stop();
+    M_Displayer->leaderPrintMax ("done in ", chrono.diff() );
+
+    jacobianDistribution = vectorJacobian;
+}
+
+
+template <typename Mesh>
+void StructuralOperator<Mesh >::constructPatchAreaVector ( vector_Type& patchArea,
+                                                           const vector_Type& solution )
+{
+
+    vector_Type patchAreaR (solution, Repeated);
+    patchAreaR *= 0.0;
+
+    Real refElemArea (0); //area of reference element
+    UInt totalDof = M_dispFESpace->dof().numTotalDof();
+    //compute the area of reference element
+    for (UInt iq = 0; iq < M_dispFESpace->qr().nbQuadPt(); iq++)
+    {
+        refElemArea += M_dispFESpace->qr().weight (iq);
+    }
+
+    // Define a special quadrature rule for the interpolation
+    QuadratureRule interpQuad;
+    interpQuad.setDimensionShape (shapeDimension (M_dispFESpace->refFE().shape() ), M_dispFESpace->refFE().shape() );
+    Real wQuad (refElemArea / M_dispFESpace->refFE().nbDof() );
+
+    for (UInt i (0); i < M_dispFESpace->refFE().nbDof(); ++i) //nbRefCoor
+    {
+        interpQuad.addPoint (QuadraturePoint (M_dispFESpace->refFE().xi (i), M_dispFESpace->refFE().eta (i), M_dispFESpace->refFE().zeta (i), wQuad) );
+    }
+
+    UInt totalNumberVolumes (M_dispFESpace->mesh()->numVolumes() );
+    UInt numberLocalDof (M_dispFESpace->dof().numLocalDof() );
+
+    CurrentFE interpCFE (M_dispFESpace->refFE(), getGeometricMap (* (M_dispFESpace->mesh() ) ), interpQuad);
+
+    // Loop over the cells
+    for (UInt iterElement (0); iterElement < totalNumberVolumes; iterElement++)
+    {
+        interpCFE.update (M_dispFESpace->mesh()->volumeList ( iterElement ), UPDATE_WDET );
+
+        for (UInt iterDof (0); iterDof < numberLocalDof; iterDof++)
+        {
+            for (UInt iDim (0); iDim < M_dispFESpace->fieldDim(); ++iDim)
+            {
+                ID globalDofID (M_dispFESpace->dof().localToGlobalMap (iterElement, iterDof) + iDim * totalDof);
+                patchAreaR[globalDofID] += interpCFE.measure();
+            }
+        }
+    }
+
+    vector_Type final (patchAreaR, Unique, Add);
+
+    patchArea.add (final);
+
+}
+
+template <typename Mesh>
 void
-StructuralOperator<Mesh, SolverType>::evalResidual ( vector_Type& residual, const vector_Type& solution, Int iter)
+StructuralOperator<Mesh >::reconstructElementaryVector ( VectorElemental& elVecDet,
+                                                         vector_Type& patchArea,
+                                                         UInt nVol )
+{
+    //UpdateElement Infos
+    //M_dispFESpace->fe().updateFirstDerivQuadPt( M_dispFESpace->mesh()->volumeList( nVol ) );
+
+    Real measure = M_dispFESpace->fe().measure();
+    UInt eleID = M_dispFESpace->fe().currentLocalId();
+
+    for (UInt iDof = 0; iDof < M_dispFESpace->fe().nbFEDof(); iDof++)
+    {
+        UInt  iloc = M_dispFESpace->fe().patternFirst ( iDof );
+
+        for ( UInt icoor = 0;  icoor < M_dispFESpace->fieldDim(); icoor++ )
+        {
+            ID globalDofID (M_dispFESpace->dof().localToGlobalMap (eleID, iDof) + icoor * M_dispFESpace->dof().numTotalDof() );
+
+            elVecDet[iloc + icoor * M_dispFESpace->fe().nbFEDof()] *= ( measure / patchArea[globalDofID] );
+        }
+
+    }
+}
+
+#endif
+
+
+#ifdef COLORING_MESH
+template <typename Mesh>
+void StructuralOperator<Mesh>::colorMesh ( vector_Type& meshColors )
+{
+    UInt totalDof = this->M_dispFESpace->dof().numTotalDof();
+
+    mapIterator_Type it;
+
+    for ( it = (*M_mapMarkersVolumes).begin(); it != (*M_mapMarkersVolumes).end(); it++ )
+    {
+
+        //Given the marker pointed by the iterator, let's extract the material parameters
+        UInt marker = it->first;
+
+        for ( UInt j (0); j < it->second.size(); j++ )
+        {
+            this->M_dispFESpace->fe().updateFirstDerivQuadPt ( * (it->second[j]) );
+
+            UInt eleID = this->M_dispFESpace->fe().currentLocalId();
+
+            for ( UInt iNode = 0; iNode < ( UInt ) this->M_dispFESpace->fe().nbFEDof(); iNode++ )
+            {
+                UInt  iloc = this->M_dispFESpace->fe().patternFirst ( iNode );
+
+                //Extract the global ID of the x-component of the field
+                UInt globalIDofDOF = this->M_dispFESpace->dof().localToGlobalMap ( eleID, iloc );
+
+                if ( meshColors.blockMap().LID (globalIDofDOF) != -1 ) // The Global ID is on the calling processors
+                {
+                    Int LIDid = meshColors.blockMap().LID ( globalIDofDOF );
+                    Int GIDid = meshColors.blockMap().GID ( LIDid );
+                    meshColors[ GIDid ] = marker;
+
+                }
+
+            }
+        }
+
+    }
+}
+
+#endif
+
+template <typename Mesh>
+void
+StructuralOperator<Mesh>::evalResidual ( vector_Type& residual, const vector_Type& solution, Int iter)
 {
 
     //This method call the M_material computeStiffness
@@ -1059,11 +1418,11 @@ StructuralOperator<Mesh, SolverType>::evalResidual ( vector_Type& residual, cons
 
     if ( !M_BCh->bcUpdateDone() )
     {
-        M_BCh->bcUpdate ( *M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
+        M_BCh->bcUpdate ( *M_dispFESpace->mesh(), M_dispFESpace->feBd(), M_dispFESpace->dof() );
     }
 
     // ignoring non-local entries, Otherwise they are summed up lately
-    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonLinearVenantKirchhoff" )
+    if ( M_data->solidType() == "linearVenantKirchhoff" )
     {
         chrono.start();
 
@@ -1072,45 +1431,60 @@ StructuralOperator<Mesh, SolverType>::evalResidual ( vector_Type& residual, cons
         if (iter == 0)
         {
             *M_rhs = *M_rhsNoBC;
-            bcManageVector ( *M_rhs, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(),  M_data->dataTime()->time(), 1.0 );
+
+            bcManageVector ( *M_rhs, *M_dispFESpace->mesh(), M_dispFESpace->dof(), *M_BCh, M_dispFESpace->feBd(),  M_data->dataTime()->time(), 1.0 );
+
+            //To export for check
+            M_rhsCopy = M_rhs;
+
+            // std::string nameFile="residualAfterBC";
+            // M_rhs->spy(nameFile);
+            // int n;
+            // std::cin >> n;
         }
 
-        bcManageMatrix ( matrixFull, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), 1.0 );
+        bcManageMatrix ( matrixFull, *M_dispFESpace->mesh(), M_dispFESpace->dof(), *M_BCh, M_dispFESpace->feBd(), 1.0 );
 
         residual  = matrixFull * solution;
         residual -= *M_rhs;
         chrono.stop();
         M_Displayer->leaderPrintMax ("done in ", chrono.diff() );
     }
-    else //NH and Exp
+    else //NH and Exp and SVK VK-Penalized
     {
         chrono.start();
         *M_rhs = *M_rhsNoBC;
         residual = *M_massMatrix * solution;
         residual += *M_material->stiffVector();
         vector_Type solRep (solution, Repeated);
-        bcManageResidual ( residual, *M_rhs, solRep, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0 );
+        bcManageResidual ( residual, *M_rhs, solRep, *M_dispFESpace->mesh(), M_dispFESpace->dof(), *M_BCh, M_dispFESpace->feBd(), M_data->dataTime()->time(), 1.0 );
         residual -= *M_rhs;
         chrono.stop();
         M_Displayer->leaderPrintMax ("done in ", chrono.diff() );
     }
+
+    if ( iter == 0 )
+    {
+        *M_residualCopy = residual;
+        M_rhsCopy = M_rhs;
+    }
 }
 
-template <typename Mesh, typename SolverType>
+template <typename Mesh>
 void
-StructuralOperator<Mesh, SolverType>::evalResidualDisplacement ( const vector_Type& solution )
+StructuralOperator<Mesh>::evalResidualDisplacement ( const vector_Type& solution )
 {
 
     M_Displayer->leaderPrint ("    S- Computing the residual displacement for the structure..... \t");
     LifeChrono chrono;
     chrono.start();
 
-    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonLinearVenantKirchhoff" )
+    if ( M_data->solidType() == "linearVenantKirchhoff" )
     {
         M_residual_d.reset (new vector_Type ( *M_systemMatrix * solution ) );
         *M_residual_d -= *M_rhsNoBC;
     }
-    else
+    else //Cases: NH, Exp, VK-Penalized
     {
         M_residual_d.reset (new vector_Type ( *M_material->stiffVector() ) );
         *M_residual_d -= *M_rhsNoBC;
@@ -1120,9 +1494,9 @@ StructuralOperator<Mesh, SolverType>::evalResidualDisplacement ( const vector_Ty
 }
 
 
-template <typename Mesh, typename SolverType>
+template <typename Mesh>
 void
-StructuralOperator<Mesh, SolverType>::evalResidualDisplacementLin ( const vector_Type& solution )
+StructuralOperator<Mesh>::evalResidualDisplacementLin ( const vector_Type& solution )
 {
 
     M_Displayer->leaderPrint ("    S- Computing the residual displacement for the structure..... \t");
@@ -1137,186 +1511,25 @@ StructuralOperator<Mesh, SolverType>::evalResidualDisplacementLin ( const vector
 }
 
 
-
-template <typename Mesh, typename SolverType>
+template <typename Mesh>
 void
-StructuralOperator<Mesh, SolverType>::evalConstraintTensor()
-{
-    vector_Type count (*M_localMap);
-
-    *M_sxx *= 0.;
-    *M_syy *= 0.;
-    *M_szz *= 0.;
-
-    for ( UInt ielem = 0; ielem < M_FESpace->mesh()->numVolumes(); ielem++ )
-    {
-        //UInt elem = M_FESpace->mesh()->volumeList( ielem ).id();
-        M_FESpace->fe().updateFirstDerivQuadPt ( M_FESpace->mesh()->volumeList ( ielem ) );
-
-        //int    marker = M_FESpace->mesh()->volumeList( ielem ).marker();
-        Real s      = 0;
-        Real volume = M_FESpace->fe().detJac (0);
-
-        for ( Int ig = 0; ig < M_FESpace->fe().nbQuadPt; ++ig )
-        {
-            for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
-            {
-                Int i    = M_FESpace->fe().patternFirst (k);
-                Int idof = M_FESpace->dof().localToGlobal (M_FESpace->fe().currentLocalId(), i + 1);
-
-                s += (2 * M_data->mu (1) + M_data->lambda (1) ) *
-                     M_FESpace->fe().weightDet ( ig ) *
-                     M_FESpace->fe().phiDer ( k, 0 , ig ) *
-                     (*M_disp) [idof + 0 * M_FESpace->dim()];
-
-                s += M_data->lambda (1) *
-                     M_FESpace->fe().weightDet ( ig ) *
-                     M_FESpace->fe().phiDer ( k, 1 , ig ) *
-                     (*M_disp) [idof + 1 * M_FESpace->dim()];
-
-                s += M_data->lambda (1) *
-                     M_FESpace->fe().weightDet ( ig ) *
-                     M_FESpace->fe().phiDer ( k, 2 , ig ) *
-                     (*M_disp) [idof + 2 * M_FESpace->dim()];
-
-                count[idof]++;
-            }
-        }
-
-        for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
-        {
-            Int i    = M_FESpace->fe().patternFirst (k);
-            Int idof = M_FESpace->dof().localToGlobal (M_FESpace->fe().currentLocalId(), i + 1);
-
-            (*M_sxx) [idof] += s / M_FESpace->fe().detJac (0);
-        }
-
-        s = 0;
-
-        for ( Int ig = 0; ig < M_FESpace->fe().nbQuadPt; ++ig )
-        {
-            for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
-            {
-                Int i    = M_FESpace->fe().patternFirst (k);
-                Int idof = M_FESpace->dof().localToGlobal (M_FESpace->fe().currentLocalId(), i + 1);
-
-                s += M_data->lambda (1) *
-                     M_FESpace->fe().weightDet ( ig ) *
-                     M_FESpace->fe().phiDer ( k, 0 , ig ) *
-                     (*M_disp) [idof + 0 * M_FESpace->dim()];
-
-                s += (2 * M_data->mu (1) + M_data->lambda (1) ) *
-                     M_FESpace->fe().weightDet ( ig ) *
-                     M_FESpace->fe().phiDer ( k, 1 , ig ) *
-                     (*M_disp) [idof + 1 * M_FESpace->dim()];
-
-                s += M_data->lambda (1) *
-                     M_FESpace->fe().weightDet ( ig ) *
-                     M_FESpace->fe().phiDer ( k, 2 , ig ) *
-                     (*M_disp) [idof + 2 * M_FESpace->dim()];
-                //                         M_sxx[idof] += s;
-
-                //                M_syy[idof] += s/volume;
-            }
-        }
-
-        for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
-        {
-            Int i    = M_FESpace->fe().patternFirst (k);
-            Int idof = M_FESpace->dof().localToGlobal (M_FESpace->fe().currentLocalId(), i + 1);
-
-            (*M_syy) [idof] += s / volume;
-        }
-
-
-        s = 0;
-
-        for ( Int ig = 0; ig < M_FESpace->fe().nbQuadPt; ++ig )
-        {
-            for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
-            {
-                Int i    = M_FESpace->fe().patternFirst (k);
-                Int idof = M_FESpace->dof().localToGlobal (M_FESpace->fe().currentLocalId(), i + 1);
-
-                s += M_data->lambda (1) *
-                     M_FESpace->fe().weightDet ( ig ) *
-                     M_FESpace->fe().phiDer ( k, 0 , ig ) *
-                     (*M_disp) [idof + 0 * M_FESpace->dim()];
-
-                s += M_data->lambda (1) *
-                     M_FESpace->fe().weightDet ( ig ) *
-                     M_FESpace->fe().phiDer ( k, 1 , ig ) *
-                     (*M_disp) [idof + 1 * M_FESpace->dim()];
-
-                s += (2 * M_data->mu (1) + M_data->lambda (1) ) *
-                     M_FESpace->fe().weightDet ( ig ) *
-                     M_FESpace->fe().phiDer ( k, 2 , ig ) *
-                     (*M_disp) [idof + 2 * M_FESpace->dim()];
-
-                //                         M_sxx[idof] += s;
-            }
-        }
-
-        for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
-        {
-            Int i    = M_FESpace->fe().patternFirst (k);
-            Int idof = M_FESpace->dof().localToGlobal (M_FESpace->fe().currentLocalId(), i + 1);
-
-            (*M_szz) [idof] += s / M_FESpace->fe().detJac (0);
-        }
-
-    }
-
-    for (UInt ii = 1; ii <= M_FESpace->dim(); ++ii)
-    {
-        (*M_sxx) [ii] /= count[ii];
-        (*M_syy) [ii] /= count[ii];
-        (*M_szz) [ii] /= count[ii];
-    }
-}
-
-
-template <typename Mesh, typename SolverType>
-void
-StructuralOperator<Mesh, SolverType>::initialize ( vectorPtr_Type disp, vectorPtr_Type /*vel*/, vectorPtr_Type /*acc*/)
+StructuralOperator<Mesh>::initialize ( vectorPtr_Type disp )
 {
     *M_disp = *disp;
-    //  if (vel.get())
-    //    initializeVel(*vel);
 }
-/*
-  template <typename Mesh, typename SolverType>
-  void
-  StructuralOperator<Mesh, SolverType>::initializeVel( const vector_Type& vel)
-  {
-  *M_vel = vel;
-  }
-*/
 
-template <typename Mesh, typename SolverType>
+template <typename Mesh>
 void
-StructuralOperator<Mesh, SolverType>::initialize ( const function& d0, const function& w0, const function& a0 )
+StructuralOperator<Mesh>::initialize ( const function& d0 )
 {
-    M_FESpace->interpolate ( static_cast<typename FESpace<Mesh, MapEpetra>::function_Type> ( d0 ), *M_disp, 0.0);
+    M_dispFESpace->interpolate ( static_cast<typename FESpace<Mesh, MapEpetra>::function_Type> ( d0 ), *M_disp, 0.0);
     //M_FESpace->interpolate(w0, *M_vel , 0.0);
     // M_FESpace->interpolate(a0, *M_acc , 0.0);
 }
 
-/*
-//Matteo this method isn't necessary timeAdvance compute the accelerate and velocity
-template <typename Mesh, typename SolverType>
-void StructuralOperator<Mesh, SolverType>::updateVelAndAcceleration()
-{
-Real DeltaT = M_data->dataTime()->timeStep();
-
-*M_acc = (2.0 /( M_zeta * pow(DeltaT,2) ))  * (*M_disp)  - *M_rhsA;
-*M_vel = *M_rhsW + M_theta * DeltaT * (*M_acc) ;
-}
-*/
-
-template<typename Mesh, typename SolverType>
+template<typename Mesh>
 void
-StructuralOperator<Mesh, SolverType>::reduceSolution ( Vector& displacement, Vector& velocity )
+StructuralOperator<Mesh>::reduceSolution ( Vector& displacement, Vector& velocity )
 {
     vector_Type disp (*M_disp, 0);
     //vector_Type vel(*M_vel , 0);
@@ -1326,42 +1539,78 @@ StructuralOperator<Mesh, SolverType>::reduceSolution ( Vector& displacement, Vec
         for ( UInt iDof = 0; iDof < nDimensions * dim(); ++iDof )
         {
             disp[ iDof ] = displacement[ iDof + 1 ];
-            //vel [ iDof ] = velocity    [ iDof + 1 ];
         }
     }
 }
 
 
-template <typename Mesh, typename SolverType>
+template <typename Mesh>
 void
-StructuralOperator<Mesh, SolverType>::setDataFromGetPot ( const GetPot& dataFile )
+StructuralOperator<Mesh>::setDataFromGetPot ( const GetPot& dataFile )
 {
-    M_linearSolver->setDataFromGetPot ( dataFile, "solid/solver" );
-    M_linearSolver->setupPreconditioner (dataFile, "solid/prec");
+
+    M_Displayer->leaderPrint ( "Setting up Preconditioner... \n" );
+    //Setting up the preconditioner
+    const std::string preconditionerType = dataFile ( "solid/prec/prectype", "Ifpack" );
+    const std::string xmlFileName = dataFile ( "solid/prec/xmlName", "xmlParameters.xml" );
+    basePrecPtr_Type precPtr; //Abstract class for preconditioners
+
+    if (  ! ( preconditionerType.compare ("Ifpack") ) ) //The preconditioner if Ifpack
+    {
+        precIfpack_Type* precRawPtr;
+        precRawPtr = new precIfpack_Type;
+        precRawPtr->setDataFromGetPot ( dataFile, "solid/prec" );
+
+        //Initializing the preconditioner
+        M_preconditioner.reset ( precRawPtr );
+    }
+    else
+    {
+        precML_Type* precRawPtr;
+        precRawPtr = new precML_Type;
+        precRawPtr->setDataFromGetPot ( dataFile, "solid/prec" );
+
+        //Initializing the preconditioner
+        M_preconditioner.reset ( precRawPtr );
+    }
+
+
+    M_Displayer->leaderPrint ( "Setting up LinearSolver... \n" );
+
+    Teuchos::RCP< Teuchos::ParameterList > paramList = Teuchos::rcp ( new Teuchos::ParameterList );
+    paramList = Teuchos::getParametersFromXmlFile ( xmlFileName );
+
+
+    M_linearSolver->setParameters ( *paramList );
+    M_linearSolver->setPreconditioner ( M_preconditioner );
     M_rescaleFactor = dataFile ( "solid/rescaleFactor", 0. );
-    // This is done in DataClass
-    // UInt marker = M_FESpace->mesh()->volumeList( 1 ).marker();
-    // if (!M_data->young(marker))
-    //     M_data->setYoung(dataFile( "solid/physics/young", 0. ), marker);
-    // if (!M_data->poisson(marker))
-    //     M_data->setPoisson(dataFile( "solid/physics/poisson", 0. ), marker);
 }
 
 
 //Method UpdateJacobian
-template <typename Mesh, typename SolverType>
-void StructuralOperator<Mesh, SolverType>::updateJacobian ( const vector_Type& sol, matrixPtr_Type& jacobian  )
+template <typename Mesh>
+void StructuralOperator<Mesh>::updateJacobian ( const vector_Type& sol, matrixPtr_Type& jacobian  )
 {
     M_Displayer->leaderPrint ("  S-  Solid: Updating JACOBIAN... ");
 
     LifeChrono chrono;
     chrono.start();
 
-    M_material->updateJacobianMatrix (sol, M_data, M_mapMarkersVolumes, M_Displayer);
+    M_material->updateJacobianMatrix (sol, M_data, M_mapMarkersVolumes, M_mapMarkersIndexes,  M_Displayer);
 
     jacobian.reset (new matrix_Type (*M_localMap) );
-    *jacobian += *M_material->jacobian();
+    *jacobian += * (M_material->jacobian() );
+
+    //Spying the static part of the Jacobian to check if it is symmetric
+    // M_material->jacobian()->spy("staticJacobianMatrix");
+
+    // std::cout << "spyed" << std::endl;
+    // int n;
+    // std::cin >> n ;
+
     *jacobian += *M_massMatrix;
+
+    jacobian->globalAssemble();
 
     chrono.stop();
     M_Displayer->leaderPrintMax ("   ... done in ", chrono.diff() );
@@ -1369,15 +1618,15 @@ void StructuralOperator<Mesh, SolverType>::updateJacobian ( const vector_Type& s
 }
 
 //Method UpdateJacobian
-template <typename Mesh, typename SolverType>
-void StructuralOperator<Mesh, SolverType>::updateJacobian ( const vector_Type& sol)
+template <typename Mesh>
+void StructuralOperator<Mesh>::updateJacobian ( const vector_Type& sol)
 {
     updateJacobian (sol, M_jacobian);
 }
 
 //solveJac( const Vector& res, Real& linear_rel_tol, Vector &step)
-template <typename Mesh, typename SolverType>
-void StructuralOperator<Mesh, SolverType>::
+template <typename Mesh>
+void StructuralOperator<Mesh>::
 solveJac ( vector_Type& step, const vector_Type& res, Real& linear_rel_tol)
 {
     updateJacobian ( *M_disp, M_jacobian );
@@ -1386,16 +1635,22 @@ solveJac ( vector_Type& step, const vector_Type& res, Real& linear_rel_tol)
 
 
 //Method SolveJacobian
-template <typename Mesh, typename SolverType>
-void StructuralOperator<Mesh, SolverType>::
+template <typename Mesh>
+void StructuralOperator<Mesh>::
 solveJacobian (vector_Type&           step,
                const vector_Type&     res,
-               Real&                /*linear_rel_tol*/,
+               Real&                 /*linear_rel_tol*/,
                bcHandler_Type&       /* BCh*/)
 {
     LifeChrono chrono;
 
-    M_jacobian->globalAssemble();
+    //Creating pointers to vectors for linear solver
+    vectorPtr_Type pointerToRes ( new vector_Type (res) );
+    vectorPtr_Type pointerToStep ( new vector_Type (*M_localMap) );
+
+    //Initializing the pointer
+    *pointerToStep *= 0.0;
+
     matrixPtr_Type matrFull (new matrix_Type (*M_localMap) );
     *matrFull += *M_jacobian;
 
@@ -1406,38 +1661,40 @@ solveJacobian (vector_Type&           step,
 
     if ( !M_BCh->bcUpdateDone() )
     {
-        M_BCh->bcUpdate ( *M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
+        M_BCh->bcUpdate ( *M_dispFESpace->mesh(), M_dispFESpace->feBd(), M_dispFESpace->dof() );
     }
-    bcManageMatrix ( *matrFull, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), 1.0 );
+    bcManageMatrix ( *matrFull, *M_dispFESpace->mesh(), M_dispFESpace->dof(), *M_BCh, M_dispFESpace->feBd(), 1.0 );
 
     M_Displayer->leaderPrintMax ( "done in ", chrono.diff() );
 
     M_Displayer->leaderPrint ("\tS'-  Solving system                    ... \n");
     chrono.start();
 
-    M_linearSolver->setMatrix (*matrFull);
+    //Setting up the quantities
+    M_linearSolver->setOperator ( matrFull );
+    M_linearSolver->setRightHandSide ( pointerToRes );
 
-    M_linearSolver->solveSystem ( res, step, matrFull );
+    //Solving the system
+    M_linearSolver->solve ( pointerToStep );
 
-    //     matrFull->spy("J");
-    //     M_material->stiffMatrix()->spy("S");
-    //     M_systemMatrix->spy("M");
+    step = *pointerToStep;
+
     chrono.stop();
 }
 
-template<typename Mesh, typename SolverType>
-void StructuralOperator<Mesh, SolverType>::apply ( const vector_Type& sol, vector_Type& res) const
+template<typename Mesh>
+void StructuralOperator<Mesh>::apply ( const vector_Type& sol, vector_Type& res) const
 {
-    M_material->apply (sol, res, M_mapMarkersVolumes);
+    M_material->apply (sol, res, M_mapMarkersVolumes, M_mapMarkersIndexes);
     res += (*M_massMatrix) * sol;
 }
 
-template<typename Mesh, typename SolverType>
+template<typename Mesh>
 void
-StructuralOperator<Mesh, SolverType>::applyBoundaryConditions ( matrix_Type&        matrix,
-                                                                vector_Type&        rhs,
-                                                                bcHandler_Type&     BCh,
-                                                                UInt                offset)
+StructuralOperator<Mesh>::applyBoundaryConditions ( matrix_Type&        matrix,
+                                                    vector_Type&        rhs,
+                                                    bcHandler_Type&     BCh,
+                                                    UInt                offset)
 {
     // BC manage for the velocity
     if (offset)
@@ -1446,13 +1703,13 @@ StructuralOperator<Mesh, SolverType>::applyBoundaryConditions ( matrix_Type&    
     }
     if ( !BCh->bcUpdateDone() )
     {
-        BCh->bcUpdate ( *M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
+        BCh->bcUpdate ( *M_dispFESpace->mesh(), M_dispFESpace->feBd(), M_dispFESpace->dof() );
     }
 
     // vector_Type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
     vector_Type rhsFull (rhs, Unique); // bcManages now manages the also repeated parts
 
-    bcManage ( matrix, rhsFull, *M_FESpace->mesh(), M_FESpace->dof(), *BCh, M_FESpace->feBd(), 1., M_data->dataTime()->time() );
+    bcManage ( matrix, rhsFull, *M_dispFESpace->mesh(), M_dispFESpace->dof(), *BCh, M_dispFESpace->feBd(), 1., M_data->dataTime()->time() );
 
     // matrix should be GlobalAssembled by  bcManage
 

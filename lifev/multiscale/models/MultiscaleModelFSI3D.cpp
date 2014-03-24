@@ -66,11 +66,24 @@ MultiscaleModelFSI3D::MultiscaleModelFSI3D() :
     M_boundaryAreaFunctions        (),
     M_boundaryFlagsArea            (),
 #endif
+#ifdef FSI_WITH_STRESSOUTPUT
+    M_wallTensionEstimator         ( new wallTensionEstimator_Type() ),
+#endif
     M_fluidVelocity                (),
     M_fluidPressure                (),
     M_fluidDisplacement            (),
     M_solidVelocity                (),
     M_solidDisplacement            (),
+#ifdef FSI_WITH_STRESSOUTPUT
+    M_solidStressXX                (),
+    M_solidStressXY                (),
+    M_solidStressXZ                (),
+    M_solidStressYY                (),
+    M_solidStressYZ                (),
+    M_solidStressZZ                (),
+    M_solidStressVonMises          (),
+#endif
+    M_stateVariable                (),
     M_nonLinearRichardsonIteration ( 0 ),
     M_fluidBC                      ( new bcInterface_Type() ),
     M_solidBC                      ( new bcInterface_Type() ),
@@ -214,6 +227,10 @@ MultiscaleModelFSI3D::setupModel()
     {
         ( *i )->setup();
     }
+#endif
+
+#ifdef FSI_WITH_STRESSOUTPUT
+    M_wallTensionEstimator->setup ( M_FSIoperator->solid().data(), M_FSIoperator->dFESpacePtr(), M_FSIoperator->dFESpaceETPtr(), M_comm, static_cast<UInt> ( 0 ) );
 #endif
 
     // Setup Exporters
@@ -699,6 +716,10 @@ MultiscaleModelFSI3D::initializeSolution()
         // Finalize restart
         M_FSIoperator->finalizeRestart();
 
+        // Re-initialize fluid and velocity vectors
+        exportFluidSolution();
+        exportSolidSolution();
+
 #ifdef HAVE_HDF5
         if ( M_FSIoperator->isFluid() )
         {
@@ -745,10 +766,6 @@ MultiscaleModelFSI3D::initializeSolution()
         // Finalize restart
         M_FSIoperator->finalizeRestart();
     }
-
-    // Re-initialize fluid and velocity vectors
-    exportFluidSolution();
-    exportSolidSolution();
 
     // Initialize state variables
     M_stateVariable.reset ( new vector_Type ( M_FSIoperator->fluidTimeAdvance()->singleElement (0) ) );
@@ -865,13 +882,33 @@ MultiscaleModelFSI3D::setExporterFluid ( const IOFilePtr_Type& exporter )
 void
 MultiscaleModelFSI3D::setExporterSolid ( const IOFilePtr_Type& exporter )
 {
-    M_solidDisplacement.reset ( new vector_Type ( M_FSIoperator->dFESpace().map(), M_exporterSolid->mapType() ) );
-    M_solidVelocity.reset    ( new vector_Type ( M_FSIoperator->dFESpace().map(), M_exporterSolid->mapType() ) );
+    M_solidDisplacement.reset (   new vector_Type ( M_FSIoperator->dFESpace().map(), M_exporterSolid->mapType() ) );
+    M_solidVelocity.reset (       new vector_Type ( M_FSIoperator->dFESpace().map(), M_exporterSolid->mapType() ) );
+
+#ifdef FSI_WITH_STRESSOUTPUT
+    M_solidStressXX.reset (       new vector_Type ( M_wallTensionEstimator->feSpaceScalar().map(), M_exporterSolid->mapType() ) );
+    M_solidStressXY.reset (       new vector_Type ( M_wallTensionEstimator->feSpaceScalar().map(), M_exporterSolid->mapType() ) );
+    M_solidStressXZ.reset (       new vector_Type ( M_wallTensionEstimator->feSpaceScalar().map(), M_exporterSolid->mapType() ) );
+    M_solidStressYY.reset (       new vector_Type ( M_wallTensionEstimator->feSpaceScalar().map(), M_exporterSolid->mapType() ) );
+    M_solidStressYZ.reset (       new vector_Type ( M_wallTensionEstimator->feSpaceScalar().map(), M_exporterSolid->mapType() ) );
+    M_solidStressZZ.reset (       new vector_Type ( M_wallTensionEstimator->feSpaceScalar().map(), M_exporterSolid->mapType() ) );
+    M_solidStressVonMises.reset ( new vector_Type ( M_wallTensionEstimator->feSpaceScalar().map(), M_exporterSolid->mapType() ) );
+#endif
 
     exporter->setMeshProcId ( M_FSIoperator->dFESpace().mesh(), M_FSIoperator->dFESpace().map().comm().MyPID() );
 
     exporter->addVariable ( IOData_Type::VectorField, "Displacement (solid)", M_FSIoperator->dFESpacePtr(), M_solidDisplacement, static_cast<UInt> ( 0 ) );
     exporter->addVariable ( IOData_Type::VectorField, "Velocity (solid)",     M_FSIoperator->dFESpacePtr(), M_solidVelocity,     static_cast<UInt> ( 0 ) );
+
+#ifdef FSI_WITH_STRESSOUTPUT
+    exporter->addVariable ( IOData_Type::ScalarField, "Stress XX (solid)", M_wallTensionEstimator->feSpaceScalarPtr(), M_solidStressXX, static_cast<UInt> ( 0 ) );
+    exporter->addVariable ( IOData_Type::ScalarField, "Stress XY (solid)", M_wallTensionEstimator->feSpaceScalarPtr(), M_solidStressXY, static_cast<UInt> ( 0 ) );
+    exporter->addVariable ( IOData_Type::ScalarField, "Stress XZ (solid)", M_wallTensionEstimator->feSpaceScalarPtr(), M_solidStressXZ, static_cast<UInt> ( 0 ) );
+    exporter->addVariable ( IOData_Type::ScalarField, "Stress YY (solid)", M_wallTensionEstimator->feSpaceScalarPtr(), M_solidStressYY, static_cast<UInt> ( 0 ) );
+    exporter->addVariable ( IOData_Type::ScalarField, "Stress YZ (solid)", M_wallTensionEstimator->feSpaceScalarPtr(), M_solidStressYZ, static_cast<UInt> ( 0 ) );
+    exporter->addVariable ( IOData_Type::ScalarField, "Stress ZZ (solid)", M_wallTensionEstimator->feSpaceScalarPtr(), M_solidStressZZ, static_cast<UInt> ( 0 ) );
+    exporter->addVariable ( IOData_Type::ScalarField, "Stress Von Mises (solid)", M_wallTensionEstimator->feSpaceScalarPtr(), M_solidStressVonMises, static_cast<UInt> ( 0 ) );
+#endif
 }
 
 void
@@ -897,6 +934,19 @@ MultiscaleModelFSI3D::exportSolidSolution()
     {
         M_FSIoperator->exportSolidDisplacement ( *M_solidDisplacement );
         M_FSIoperator->exportSolidVelocity ( *M_solidVelocity );
+
+#ifdef FSI_WITH_STRESSOUTPUT
+        M_wallTensionEstimator->setDisplacement ( *M_solidDisplacement );
+        M_wallTensionEstimator->analyzeTensionsRecoveryVonMisesStress ( );
+
+        M_wallTensionEstimator->exportStressXX ( *M_solidStressXX );
+        M_wallTensionEstimator->exportStressXY ( *M_solidStressXY );
+        M_wallTensionEstimator->exportStressXZ ( *M_solidStressXZ );
+        M_wallTensionEstimator->exportStressYY ( *M_solidStressYY );
+        M_wallTensionEstimator->exportStressYZ ( *M_solidStressYZ );
+        M_wallTensionEstimator->exportStressZZ ( *M_solidStressZZ );
+        M_wallTensionEstimator->exportStressVonMises ( *M_solidStressVonMises );
+#endif
     }
 }
 

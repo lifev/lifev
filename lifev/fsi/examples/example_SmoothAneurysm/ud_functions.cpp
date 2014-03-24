@@ -546,6 +546,38 @@ Real fZero (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real&
     return 0.0;
 }
 
+Real outerWallPressure (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& z, const ID& /*i*/)
+{
+    Real highestPressure( - ( 13330 - 113305 ) );
+    Real pressure(0);
+    Real totalTime = 0.8;
+    Real halfTime = totalTime / 2.0;
+
+    Real a = ( highestPressure / 2 ) * ( 1/ ( halfTime * halfTime ) );
+
+    if ( t <= totalTime )
+        pressure = ( highestPressure / totalTime ) * t;
+    else
+        pressure = highestPressure;
+
+    // if ( t <= 0.8 )
+    // {
+    //     return ( value / ( 0.8 * 0.8 * 0.8 * 0.8 ) ) * ( t * t *t *t );
+    // }
+    // else
+    // {
+    //     return value;
+    // }
+
+    return -pressure;
+
+}
+
+Real pressureInitial (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+{
+    return 113305;
+}
+
 // Initial velocity
 Real u0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
@@ -558,9 +590,15 @@ Real p0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*
 }
 
 
-Real E (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+Real E (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    return -10000;  // (see paper by Liu, Dang, etc.. about the sourrounding tissue effect on arteries)
+    if( t <= 0.4 )
+        return -10000000 * ( t - 0.4 );
+    else
+        return 0.0;
+
+    return 0.0;
+
 }
 
 
@@ -625,6 +663,27 @@ Real d0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*
     }
 }
 
+Real epsilon (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+{
+
+    switch (i)
+    {
+        case 0:
+            return 0.0;
+            break;
+        case 1:
+            return 0.0;
+            break;
+        case 2:
+            return 113487.36193;
+            break;
+        default:
+            ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
+            return 0.;
+            break;
+    }
+}
+
 Real w0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
 
@@ -655,26 +714,29 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
 {
 
     Real fluxFinal;
-    Real rampAmpl (0.4);
+    Real rampAmpl (1.012);
+    Real activeRamp ( rampAmpl / 1.0 );
     Real dt (0.001);
 
-    if ( t <= 0.4 )
-    {
-        fluxFinal = (1.8334 / 0.4) * t;
-    }
+    if ( t <= activeRamp )
+      {
+        fluxFinal = ( 0.1747 / activeRamp ) * t; // 0.033 cm
+      }
+    else if ( t > activeRamp  && t <= rampAmpl )
+      {
+    	fluxFinal = ( 0.1747 );
+      }
     else
-    {
+      {
 
 
         // We change the flux for our geometry
-        const Real pi         = 3.141592653589793;
-        //Simone's area
-        //const Real area       = 0.0907122;
-        //const Real area       = 0.0777195; //FluidSmooth
-        const Real area = 0.193529; // BigMesh
+        const Real pi   = 3.141592653589793;
+        const Real area = 0.0033853;  // radius = 0.033 cm
+        // const Real area = 0.013684; // radius = 0.066 cm
 
-        const Real areaFactor = area / ( (0.6 / 2) * (0.6 / 2) * pi);
-        const Real Average = (48.21 * pow (area, 1.84) ) * 60; //Mean Cebral's Flux per minut
+        const Real areaFactor = area / ( 0.195 * 0.195  * pi);
+        //const Real Average = (48.21 * pow (area, 1.84) ) * 60; //Mean Cebral's Flux per minut
 
         // Unit conversion from ml/min to cm^3/s
         const Real unitFactor = 1. / 60.;
@@ -684,7 +746,7 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
 
         // a0 is the average VFR (the value is taken from Karniadakis p970)
         const Real a0         = 255;
-        const Real volumetric = Average / a0; //VolumetricFactor per minut
+        //const Real volumetric = Average / a0; //VolumetricFactor per minut
 
         // Fourrier
         const Int M (7);
@@ -692,8 +754,7 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
         const Real b[M] = { 0.129013, -0.031435, -0.086106, 0.028263, 0.010177, 0.012160, -0.026303};
 
         Real flux (0);
-        //      const Real xi(2*pi*t/T);
-        const Real xi (2 * pi * (t - rampAmpl + dt) / T);
+        const Real xi (2 * pi * (t - 0.8 + dt) / T);
 
         flux = a0;
         Int k (1);
@@ -702,10 +763,10 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
             flux += a0 * (a[k - 1] * cos (k * xi) + b[k - 1] * sin (k * xi) );
         }
 
-        //return - (flux * areaFactor * unitFactor);
-        fluxFinal =  (flux * volumetric * unitFactor);
+        fluxFinal =  (flux * areaFactor * unitFactor);
+      }
 
-    }
+    std::cout << "Flux that is imposed" << fluxFinal << std::endl;
 
     return fluxFinal;
 
@@ -713,41 +774,42 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
 
 Real aneurismFluxInVectorial (const Real&  t, const Real& x, const Real& y, const Real& z, const ID& i)
 {
-    //Components for Simone's mesh
-    /*
-      Real n1(-0.000019768882940);
-      Real n2(-0.978289616345544);
-      Real n3( 0.207242433298975);
-    */
-    /*
-      Real n1(-0.67460);
-      Real n2(-0.19888);
-      Real n3(-0.17089);
-    */
-    Real n1 (-0.671731456);
-    Real n2 (-0.204172511);
-    Real n3 (-0.712102827);
+    Real n1 (0.0);
+    Real n2 (0.0);
+    Real n3 (1.0);
+
+    Real x0 (0.0);
+    Real y0 (0.0);
 
 
     Real flux (fluxFunctionAneurysm (t, x, y, z, i) );
-    //Simone's area
-    //Real area(0.0907122); // Computed with the triangle on the INLET boundary
+    Real area (0.0033853); // 0.033 cm
+    //Real area (0.013684);   // 0.066 cm
 
-    //Real area(0.0777195); //fluidsmooth
-    Real area (0.193529); //fluidBig
+    //Parabolic profile
+    Real radius(0.033);
+    Real radiusSquared = radius * radius;
+    Real peak(0);
+    peak = ( 2 * flux ) / ( area );
+
     switch (i)
     {
-        case 0:
-            return n1 * flux / area;
-        case 1:
-            return n2 * flux / area;
-        case 2:
-            return n3 * flux / area;
-        default:
-            return 0.0;
+    case 0:
+        // Flat profile: flux / area;
+        // return n1 * flux / area;
+        return n1 * ( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) ) ;
+    case 1:
+        // Flat profile: flux / area;
+        //return n2 * flux / area;
+        return n2 * ( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) ) ;
+    case 2:
+        // Flat profile: flux / area;
+        //return n3 * flux / area;
+        return n3 * ( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) ) ;
+    default:
+        return 0.0;
     }
 }
-
 
 
 Real squareSinusoidalFluxFunction (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)

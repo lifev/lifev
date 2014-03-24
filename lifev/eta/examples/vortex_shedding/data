@@ -1,0 +1,82 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
+#           Date: 14-03-2011
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### DATA FILE #####################################################################################
+###################################################################################################
+
+[exporter]
+
+type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
+multimesh  = false
+start      = 0
+save       = 1
+
+[fluid]
+
+    [./physics]
+    density         = 1.0           # density   [kg/m^3]
+    viscosity       = 0.01          # viscosity [kg/m/s]
+
+    [../time_discretization]
+    initialtime     = 0.
+    endtime         = 100.0
+    timestep        =  0.005
+    BDF_order       = 3
+
+    [../space_discretization]
+    mesh_dir        = ./Mesh/
+    mesh_file       = flow_square_2.mesh
+    mesh_type       = .mesh
+
+    verbose         = 0             # verbose during mesh-reading
+    linearized      = 0
+    diagonalize     = 0 # weight, 0=off. for P2P1 better to be on=1
+    div_beta_u_v    = 1             # 1=on, 0=off
+    vel_order       = P1           # P1, P1Bubble, P2
+    press_order     = P1            # P1, P2
+
+[prec]
+	prectype                = Ifpack # Ifpack or ML
+	displayList             = false
+
+        [./ifpack]
+	        overlap		= 2
+
+           	[./fact]
+           	ilut_level-of-fill            = 1
+           	drop_tolerance                = 1.e-5
+           	relax_value                   = 0
+
+           	[../amesos]
+           	solvertype =  Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+
+           	[../partitioner]
+           	overlap = 2
+
+           	[../schwarz]
+           	reordering_type = none #metis, rcm, none
+           	filter_singletons = true
+
+		    [../]
+	    [../]
+
+[solver]
+    solver          = gmres
+    scaling         = none
+    output          = all # none
+    conv            = rhs
+    max_iter        = 200
+    reuse           = false
+    max_iter_reuse  = 80
+    kspace          = 100
+    tol             = 1.e-10    # AztecOO tolerance
+
+

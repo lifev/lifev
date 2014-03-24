@@ -41,6 +41,7 @@
 #include <lifev/eta/expression/ExpressionBase.hpp>
 #include <lifev/eta/expression/ExpressionScalar.hpp>
 #include <lifev/eta/expression/ExpressionVector.hpp>
+#include <lifev/eta/expression/ExpressionMatrix.hpp>
 
 namespace LifeV
 {
@@ -203,6 +204,28 @@ ExpressionAddition<LExpressionType, ExpressionVector<Vdim> >
 operator+ (const ExpressionBase<LExpressionType>& l, const VectorSmall<Vdim>& r)
 {
     return ExpressionAddition<LExpressionType, ExpressionVector<Vdim> > (l.cast(), ExpressionVector<Vdim> (r) );
+}
+
+// Specialization for the matrix constants
+template< typename RExpressionType , UInt Dim1, UInt Dim2>
+ExpressionAddition<ExpressionMatrix<Dim1, Dim2>, RExpressionType>
+operator+ (const MatrixSmall<Dim1, Dim2>& l, const ExpressionBase<RExpressionType>& r)
+{
+    return ExpressionAddition<ExpressionMatrix<Dim1, Dim2>, RExpressionType> (ExpressionMatrix<Dim1, Dim2> (l), r.cast() );
+}
+
+template< typename LExpressionType, UInt Dim1, UInt Dim2 >
+ExpressionAddition<LExpressionType, ExpressionMatrix<Dim1, Dim2> >
+operator+ (const ExpressionBase<LExpressionType>& l, const MatrixSmall<Dim1, Dim2>& r)
+{
+    return ExpressionAddition<LExpressionType, ExpressionMatrix<Dim1, Dim2> > (l.cast(), ExpressionMatrix<Dim1, Dim2> (r) );
+}
+
+template<  UInt Dim1, UInt Dim2 >
+ExpressionAddition< ExpressionMatrix<Dim1, Dim2>, ExpressionMatrix<Dim1, Dim2> >
+operator+ (const MatrixSmall<Dim1, Dim2>& l, const MatrixSmall<Dim1, Dim2>& r)
+{
+    return ExpressionAddition< ExpressionMatrix<Dim1, Dim2>, ExpressionMatrix<Dim1, Dim2> > (ExpressionMatrix<Dim1, Dim2> (l), ExpressionMatrix<Dim1, Dim2> (r) );
 }
 
 

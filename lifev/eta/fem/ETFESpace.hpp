@@ -116,10 +116,10 @@ public:
     //@{
 
     //! Dimension of the space
-    const static UInt S_spaceDim;
+    enum {space_dim = SpaceDim};
 
     //! Dimension of the field of the FE space
-    const static UInt S_fieldDim;
+    enum {field_dim = FieldDim};
 
     //@}
 
@@ -252,20 +252,19 @@ public:
     /*!
       @return The dimension of the space in which this FE space is defined
      */
-    static const UInt& spaceDim()
+    const UInt spaceDim() const
     {
-        return S_spaceDim;
+        return space_dim;
     }
 
     //! Getter for the dimension of the field (scalar vs vectorial FE)
     /*!
       @return The dimension of the field represented.
      */
-    static const UInt& fieldDim()
+    const UInt fieldDim() const
     {
-        return S_fieldDim;
+        return field_dim;
     }
-
     //@}
 
 private:
@@ -303,15 +302,6 @@ private:
 // IMPLEMENTATION
 // ===================================================
 
-// The static constant just take the value of the template parameter
-template<typename MeshType, typename MapType, UInt SpaceDim, UInt FieldDim>
-const UInt ETFESpace<MeshType, MapType, SpaceDim, FieldDim>::S_spaceDim = SpaceDim;
-
-// The static constant just take the value of the template parameter
-template<typename MeshType, typename MapType, UInt SpaceDim, UInt FieldDim>
-const UInt ETFESpace<MeshType, MapType, SpaceDim, FieldDim>::S_fieldDim = FieldDim;
-
-
 // ===================================================
 // Constructors & Destructor
 // ===================================================
@@ -339,6 +329,7 @@ ETFESpace (const meshPtr_Type& mesh, const ReferenceFE* refFE, commPtr_Type& com
       M_dof ( new DOF ( *M_mesh, *M_referenceFE ) ),
       M_map (new MapType() )
 {
+
     createMap (commptr);
 }
 

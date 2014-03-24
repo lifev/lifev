@@ -226,6 +226,10 @@ public:
      */
     void vtkExport ( const std::string& filename) const;
 
+    //! Method for importing the quadrature rule from another class
+    template <typename QRType>
+    void import ( const QRType& qr);
+
     //@}
 
 
@@ -356,6 +360,22 @@ private:
     UInt M_dimension;
 };
 
+
+// Definition of the template method
+template< typename QRType>
+void
+QuadratureRule::import (const QRType& qr)
+{
+    for (UInt i (0); i < qr.nbQuadPt(); ++i)
+    {
+        M_pt.push_back (qr.quadPoint (i) );
+    }
+    M_shape = qr.shape();
+    M_name = "";
+    M_nbQuadPt = qr.nbQuadPt();
+    M_degOfExact = 0;
+    M_dimension = qr.dimension();
+}
 
 
 

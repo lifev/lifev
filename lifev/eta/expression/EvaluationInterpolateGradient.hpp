@@ -40,6 +40,7 @@
 
 #include <lifev/core/array/VectorEpetra.hpp>
 #include <lifev/core/array/VectorSmall.hpp>
+#include <lifev/core/array/MatrixSmall.hpp>
 
 #include <lifev/eta/fem/ETCurrentFE.hpp>
 #include <lifev/eta/fem/ETCurrentFlag.hpp>
@@ -204,7 +205,7 @@ public:
     }
 
     //! Display method
-    static void display (ostream& out = std::cout)
+    static void display (std::ostream& out = std::cout)
     {
         out << "interpolated[ " << FieldDim << " ][ " << SpaceDim << " ]";
     }
@@ -365,6 +366,7 @@ public:
         :
         M_fespace ( evaluation.M_fespace),
         M_vector ( evaluation.M_vector, Repeated),
+        M_offset ( evaluation.M_offset ),
         M_quadrature (0),
         M_currentFE (evaluation.M_currentFE),
         M_interpolatedGradients (evaluation.M_interpolatedGradients)
@@ -380,6 +382,7 @@ public:
         :
         M_fespace ( expression.fespace() ),
         M_vector ( expression.vector(), Repeated ),
+        M_offset ( expression.offset() ),
         M_quadrature (0),
         M_currentFE (M_fespace->refFE(), M_fespace->geoMap() ),
         M_interpolatedGradients (0)
@@ -411,7 +414,7 @@ public:
         {
             for (UInt q (0); q < M_quadrature->nbQuadPt(); ++q)
             {
-                UInt globalID (M_fespace->dof().localToGlobalMap (iElement, i) );
+                UInt globalID (M_fespace->dof().localToGlobalMap (iElement, i) + M_offset);
 
                 for (UInt iDim (0); iDim < SpaceDim; ++iDim)
                 {
@@ -447,7 +450,7 @@ public:
     }
 
     //! Display method
-    static void display (ostream& out = std::cout)
+    static void display (std::ostream& out = std::cout)
     {
         out << "interpolated[ " << SpaceDim << " ]";
     }
@@ -524,6 +527,7 @@ private:
     //! Data storage
     fespacePtr_Type M_fespace;
     vector_Type M_vector;
+    UInt M_offset;
     QuadratureRule* M_quadrature;
 
     //! Structure for the computations
@@ -548,6 +552,269 @@ template<typename MeshType, typename MapType, UInt SpaceDim>
 const flag_Type
 EvaluationInterpolateGradient<MeshType, MapType, SpaceDim, 1>::
 S_solutionUpdateFlag = ET_UPDATE_NONE;
+
+
+
+
+//! Evaluation for the interpolation of the gradient of a FE function
+/*!
+  @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+
+  This class aims at representing an interpolated FE gradient.
+
+  This is the specialized (partially) implementation representing a vector FE
+
+  This class is an Evaluation class, and therefore, has all the methods
+  required to work within the Evaluation trees.
+ */
+template<typename MeshType, typename MapType>
+class EvaluationInterpolateGradient<MeshType, MapType, 3, 3>
+{
+
+public:
+
+    //! @name Public Types
+    //@{
+
+    //! Type of the value returned by this class
+    typedef MatrixSmall<3, 3> return_Type;
+
+    //! Type of the FESpace to be used in this class
+    typedef ETFESpace<MeshType, MapType, 3, 3> fespace_Type;
+
+    //! Type of the pointer on the FESpace
+    typedef boost::shared_ptr<fespace_Type> fespacePtr_Type;
+
+    //! Type of the vector to be used
+    typedef VectorEpetra vector_Type;
+
+    //@}
+
+
+    //! @name Static constants
+    //@{
+
+    //! Flag for the global current FE
+    const static flag_Type S_globalUpdateFlag;
+
+    //! Flag for the test current FE
+    const static flag_Type S_testUpdateFlag;
+
+    //! Flag for the solution current FE
+    const static flag_Type S_solutionUpdateFlag;
+
+    //@}
+
+
+    //! @name Constructors, destructor
+    //@{
+
+    //! Copy constructor
+    EvaluationInterpolateGradient (const EvaluationInterpolateGradient<MeshType, MapType, 3, 3>& evaluation)
+        :
+        M_fespace ( evaluation.M_fespace),
+        M_vector ( evaluation.M_vector, Repeated),
+        M_offset ( evaluation.M_offset ),
+        M_quadrature (0),
+        M_currentFE (evaluation.M_currentFE),
+        M_interpolatedGradients (evaluation.M_interpolatedGradients)
+    {
+        if (evaluation.M_quadrature != 0)
+        {
+            M_quadrature = new QuadratureRule (* (evaluation.M_quadrature) );
+        }
+    }
+
+    //! Expression-based constructor
+    explicit EvaluationInterpolateGradient (const ExpressionInterpolateGradient<MeshType, MapType, 3, 3>& expression)
+        :
+        M_fespace ( expression.fespace() ),
+        M_vector ( expression.vector(), Repeated ),
+        M_offset ( expression.offset() ),
+        M_quadrature (0),
+        M_currentFE (M_fespace->refFE(), M_fespace->geoMap() ),
+        M_interpolatedGradients (0)
+    {}
+
+    //! Destructor
+    ~EvaluationInterpolateGradient()
+    {
+        if (M_quadrature != 0)
+        {
+            delete M_quadrature;
+        }
+    }
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
+    //! Internal update: computes the interpolated gradients
+    void update (const UInt& iElement)
+    {
+        zero();
+
+        M_currentFE.update (M_fespace->mesh()->element (iElement), ET_UPDATE_DPHI);
+        Real nbFEDof (M_fespace->refFE().nbDof() );
+
+        VectorSmall<3> nodalValues;
+        MatrixSmall<3, 3> nodalGradMatrix;
+
+        for (UInt i (0); i < nbFEDof; ++i)
+        {
+            for (UInt iField (0); iField < 3; ++iField)
+            {
+                UInt globalID (M_fespace->dof().localToGlobalMap (iElement, i) + iField * M_fespace->dof().numTotalDof() + M_offset);
+                nodalValues[iField] = M_vector[globalID];
+            }
+
+
+
+            for (UInt q (0); q < M_quadrature->nbQuadPt(); ++q)
+            {
+                nodalGradMatrix = M_currentFE.dphi (i, q)
+                                  + M_currentFE.dphi (i + nbFEDof, q)
+                                  + M_currentFE.dphi (i + 2 * nbFEDof, q);
+
+                M_interpolatedGradients[q] += nodalGradMatrix.emult (nodalValues);
+
+            }
+
+        }
+    }
+
+    //! Erase the interpolated gradients stored internally
+    void zero()
+    {
+        for (UInt q (0); q < M_quadrature->nbQuadPt(); ++q)
+        {
+            for (UInt j (0); j < 3; ++j)
+            {
+                for (UInt i (0); i < 3; ++i)
+                {
+                    M_interpolatedGradients[q][j][i] = 0.0;
+                }
+            }
+        }
+    }
+
+    //! Show the values
+    void showValues() const
+    {
+        std::cout << " Gradients : " << std::endl;
+
+        for (UInt i (0); i < M_quadrature->nbQuadPt(); ++i)
+        {
+            std::cout << M_interpolatedGradients[i] << std::endl;
+        }
+    }
+
+    //! Display method
+    static void display (std::ostream& out = std::cout)
+    {
+        out << "interpolated[ " << 3 << " ]";
+    }
+
+    //@}
+
+
+    //! @name Set Methods
+    //@{
+
+    //! Do nothing setter for the global current FE
+    template< typename CFEType >
+    void setGlobalCFE (const CFEType* /*globalCFE*/)
+    {}
+
+    //! Do nothing setter for the test current FE
+    template< typename CFEType >
+    void setTestCFE (const CFEType* /*testCFE*/)
+    {}
+
+    //! Do nothing setter for the solution current FE
+    template< typename CFEType >
+    void setSolutionCFE (const CFEType* /*solutionCFE*/)
+    {}
+
+    //! Setter for the quadrature rule
+    void setQuadrature (const QuadratureRule& qr)
+    {
+        if (M_quadrature != 0)
+        {
+            delete M_quadrature;
+        }
+        M_quadrature = new QuadratureRule (qr);
+        M_currentFE.setQuadratureRule (qr);
+        M_interpolatedGradients.resize (qr.nbQuadPt() );
+    }
+
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+
+    //! Getter for a value
+    return_Type value_q (const UInt& q) const
+    {
+        return M_interpolatedGradients[q];
+    }
+
+    //! Getter for the value for a vector
+    return_Type value_qi (const UInt& q, const UInt& /*i*/) const
+    {
+        return M_interpolatedGradients[q];
+    }
+
+    //! Getter for the value for a matrix
+    return_Type value_qij (const UInt& q, const UInt& /*i*/, const UInt& /*j*/) const
+    {
+        return M_interpolatedGradients[q];
+    }
+
+    //@}
+
+private:
+
+    //! @name Private Methods
+    //@{
+
+    //! No empty constructor
+    EvaluationInterpolateGradient();
+
+    //@}
+
+    //! Data storage
+    fespacePtr_Type M_fespace;
+    vector_Type M_vector;
+    UInt M_offset;
+    QuadratureRule* M_quadrature;
+
+    //! Structure for the computations
+    ETCurrentFE<3, 3> M_currentFE;
+
+    //! Storage for the temporary values
+    std::vector<return_Type> M_interpolatedGradients;
+};
+
+
+template<typename MeshType, typename MapType >
+const flag_Type
+EvaluationInterpolateGradient<MeshType, MapType, 3, 3>::
+S_globalUpdateFlag = ET_UPDATE_NONE;
+
+template<typename MeshType, typename MapType>
+const flag_Type
+EvaluationInterpolateGradient<MeshType, MapType, 3, 3>::
+S_testUpdateFlag = ET_UPDATE_NONE;
+
+template<typename MeshType, typename MapType>
+const flag_Type
+EvaluationInterpolateGradient<MeshType, MapType, 3, 3>::
+S_solutionUpdateFlag = ET_UPDATE_NONE;
+
 
 } // Namespace ExpressionAssembly
 

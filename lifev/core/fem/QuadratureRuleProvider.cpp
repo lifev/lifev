@@ -39,34 +39,29 @@
 namespace LifeV
 {
 
-const UInt QuadratureRuleProvider::S_maxExactnessTetra = 7;
-const UInt QuadratureRuleProvider::S_maxExactnessPrism = 0;
-const UInt QuadratureRuleProvider::S_maxExactnessHexa = 3;
-const UInt QuadratureRuleProvider::S_maxExactnessQuad = 5;
-const UInt QuadratureRuleProvider::S_maxExactnessTriangle = 5;
-const UInt QuadratureRuleProvider::S_maxExactnessLine = 3;
-
-// ===================================================
-// Constructors & Destructor
-// ===================================================
-
-// ===================================================
-// Operators
-// ===================================================
+QuadratureRuleProvider::NoPreciseExactness QuadratureRuleProvider::S_BehaviorNoPreciseExactness = QuadratureRuleProvider::ReturnSup;
+QuadratureRuleProvider::TooHighExactness QuadratureRuleProvider::S_BehaviorTooHighExactness = QuadratureRuleProvider::ErrorTooHigh;
+QuadratureRuleProvider::NegativeWeight QuadratureRuleProvider::S_BehaviorNegativeWeight = QuadratureRuleProvider::Accept;
 
 // ===================================================
 // Methods
 // ===================================================
 
-const QuadratureRule&
+QuadratureRule
 QuadratureRuleProvider::
 provideExactness (const ReferenceShapes& shape, const UInt& exactness)
 {
     switch (shape)
     {
         case TETRA:
+        {
+            if (S_BehaviorNegativeWeight == Reject)
+            {
+                return provideExactnessTetraNoNeg (exactness);
+            }
             return provideExactnessTetra (exactness);
             break;
+        }
 
         case PRISM:
             return provideExactnessPrism (exactness);
@@ -81,6 +76,10 @@ provideExactness (const ReferenceShapes& shape, const UInt& exactness)
             break;
 
         case TRIANGLE:
+            if (S_BehaviorNegativeWeight == Reject)
+            {
+                return provideExactnessTriangleNoNeg (exactness);
+            }
             return provideExactnessTriangle (exactness);
             break;
 
@@ -94,87 +93,33 @@ provideExactness (const ReferenceShapes& shape, const UInt& exactness)
 
         case NONE:
         default:
-            std::cerr << " QuadratureRuleProvider: No quadrature can be furnished for this shape! " << std::endl;
-            abort();
+            std::cerr << " QuadratureRuleProvider: No quadrature for this shape! " << std::endl;
+            std::abort();
     };
 
-    // In case you have found nothing, return the maximal
-    // quadrature rule.
-    return provideMaximal (shape);
+    // Impossible case, but avoids a warning
+    return QuadratureRule();
 }
 
-const QuadratureRule&
-QuadratureRuleProvider::
-provideExactnessMax (const ReferenceShapes& shape, const UInt& exactness)
-{
-    switch (shape)
-    {
-        case TETRA:
-            if (exactness <= S_maxExactnessTetra)
-            {
-                return provideExactnessTetra (exactness);
-            }
 
-        case PRISM:
-            if (exactness <= S_maxExactnessPrism)
-            {
-                return provideExactnessPrism (exactness);
-            }
-            break;
-
-        case HEXA:
-            if (exactness <= S_maxExactnessHexa)
-            {
-                return provideExactnessHexa (exactness);
-            }
-            break;
-
-        case QUAD:
-            if (exactness <= S_maxExactnessQuad)
-            {
-                return provideExactnessQuad (exactness);
-            }
-            break;
-
-        case TRIANGLE:
-            if (exactness <= S_maxExactnessTriangle)
-            {
-                return provideExactnessTriangle (exactness);
-            }
-            break;
-
-        case LINE:
-            if (exactness <= S_maxExactnessLine)
-            {
-                return provideExactnessLine (exactness);
-            }
-            break;
-
-        case POINT:
-            // No matter the exactness, this is always exact!
-            return provideExactnessPoint (exactness);
-            break;
-
-        case NONE:
-        default:
-            std::cerr << " QuadratureRuleProvider: No quadrature can be furnished for this shape! " << std::endl;
-            abort();
-    };
-
-    // In case you have found nothing, return the maximal
-    // quadrature rule.
-    return provideMaximal (shape);
-}
-
-const QuadratureRule&
+QuadratureRule
 QuadratureRuleProvider::
 provideMaximal (const ReferenceShapes& shape)
 {
     switch (shape)
     {
         case TETRA:
-            return quadRuleTetra64pt;
+        {
+            if (S_BehaviorNegativeWeight == Reject)
+            {
+                return quadRuleTetra64pt;
+            }
+            manageWarningNegativeWeight();
+            QuadratureRule qr;
+            qr.import ( QRKeast<7>() );
+            return qr;
             break;
+        }
 
         case HEXA:
             return quadRuleHexa8pt;
@@ -199,26 +144,19 @@ provideMaximal (const ReferenceShapes& shape)
         case PRISM:
         case NONE:
         default:
-            std::cerr << " QuadratureRuleProvider: No quadrature can be furnished for this shape! " << std::endl;
-            abort();
+            std::cerr << " QuadratureRuleProvider: No quadrature for this shape! " << std::endl;
+            std::abort();
     };
 
-    return quadRuleTetra64pt;
+    // Impossible case, but avoids a warning
+    return QuadratureRule();
 }
-
-// ===================================================
-// Set Methods
-// ===================================================
-
-// ===================================================
-// Get Methods
-// ===================================================
 
 // ===================================================
 // Private Methods
 // ===================================================
 
-const QuadratureRule&
+QuadratureRule
 QuadratureRuleProvider::
 provideExactnessTetra (const UInt& exactness)
 {
@@ -232,152 +170,201 @@ provideExactnessTetra (const UInt& exactness)
             return quadRuleTetra4pt;
             break;
         case 3:
+            manageWarningNegativeWeight();
             return quadRuleTetra5pt;
             break;
         case 4:
+        {
+            manageWarningNegativeWeight();
+            QuadratureRule qr;
+            qr.import ( QRKeast<4>() );
+            return qr;
+            break;
+        }
         case 5:
             return quadRuleTetra15pt;
             break;
         case 6:
-        case 7:
-            return quadRuleTetra64pt;
+        {
+            QuadratureRule qr;
+            qr.import ( QRKeast<6>() );
+            return qr;
             break;
+        }
+
+        case 7:
+        {
+            manageWarningNegativeWeight();
+            QuadratureRule qr;
+            qr.import ( QRKeast<7>() );
+            return qr;
+            break;
+        }
         default:
-            std::cerr << " QuadratureRuleProvider: No quadrature rule can be furnished with such an exactness (tetra) ";
-            std::cerr << std::endl;
-            abort();
+
+            manageTooHighExactnessCase();
+            manageWarningNegativeWeight();
+            QuadratureRule qr;
+            qr.import ( QRKeast<7>() );
+            return qr;
     };
 
-    return quadRuleTetra64pt;
+    return QuadratureRule();
 }
 
-const QuadratureRule&
+QuadratureRule
 QuadratureRuleProvider::
 provideExactnessPrism (const UInt& exactness)
 {
     switch (exactness)
     {
         default:
-            std::cerr << " QuadratureRuleProvider: No quadrature rule can be furnished with such an exactness (prism) ";
+            std::cerr << " QuadratureRuleProvider: No quadrature for this exactness (prism) ";
             std::cerr << std::endl;
-            abort();
+            std::abort();
     };
 
     /*
      * Fix to remove warning
-     * This line should be changed when a QuadratureRule object for
-     * the prism will be available!
      */
-    return quadRuleTetra64pt;
+    return QuadratureRule();
 }
 
-const QuadratureRule&
+QuadratureRule
 QuadratureRuleProvider::
 provideExactnessHexa (const UInt& exactness)
 {
     switch (exactness)
     {
         case 0:
+
         case 1:
             return quadRuleHexa1pt;
             break;
+
         case 2:
+            manageNoPreciseExactnessCase();
+            // No break here!
+
         case 3:
             return quadRuleHexa8pt;
             break;
+
         default:
-            std::cerr << " QuadratureRuleProvider: No quadrature rule can be furnished with such an exactness (hexa) ";
-            std::cerr << std::endl;
-            abort();
+
+            manageTooHighExactnessCase();
+            return quadRuleHexa8pt;
+
     };
 
-    return quadRuleHexa8pt;
+    return QuadratureRule();
 }
 
-const QuadratureRule&
+QuadratureRule
 QuadratureRuleProvider::
 provideExactnessQuad (const UInt& exactness)
 {
     switch (exactness)
     {
         case 0:
+
         case 1:
             return quadRuleQuad1pt;
             break;
+
         case 2:
+            manageNoPreciseExactnessCase();
+            // No break!
+
         case 3:
             return quadRuleQuad4pt;
             break;
+
         case 4:
+            manageNoPreciseExactnessCase();
+            // No break!
+
         case 5:
             return quadRuleQuad9pt;
             break;
+
         default:
-            std::cerr << " QuadratureRuleProvider: No quadrature rule can be furnished with such an exactness (quad) ";
-            std::cerr << std::endl;
-            abort();
+
+            manageTooHighExactnessCase();
+            return quadRuleQuad9pt;
     };
 
-    return quadRuleQuad9pt;
+    return QuadratureRule();
 }
 
-const QuadratureRule&
+QuadratureRule
 QuadratureRuleProvider::
 provideExactnessTriangle (const UInt& exactness)
 {
     switch (exactness)
     {
         case 0:
+
         case 1:
             return quadRuleTria1pt;
             break;
+
         case 2:
             return quadRuleTria3pt;
             break;
+
         case 3:
+            manageWarningNegativeWeight();
             return quadRuleTria4pt;
             break;
+
         case 4:
             return quadRuleTria6pt;
             break;
+
         case 5:
             return quadRuleTria7pt;
             break;
+
         default:
-            std::cerr << " QuadratureRuleProvider: No quadrature rule can be furnished with such an exactness (triangle) ";
-            std::cerr << std::endl;
-            abort();
+            manageTooHighExactnessCase();
+            return quadRuleTria7pt;
+
     };
 
-    return quadRuleTria7pt;
+    return QuadratureRule();
 }
 
-const QuadratureRule&
+QuadratureRule
 QuadratureRuleProvider::
 provideExactnessLine (const UInt& exactness)
 {
     switch (exactness)
     {
         case 0:
+
         case 1:
             return quadRuleSeg1pt;
             break;
+
         case 2:
             return quadRuleSeg2pt;
             break;
+
         case 3:
             return quadRuleTria3pt;
             break;
+
         default:
-            std::cerr << " QuadratureRuleProvider: No quadrature rule can be furnished with such an exactness (line) ";
-            std::cerr << std::endl;
-            abort();
+
+            manageTooHighExactnessCase();
+            return quadRuleTria3pt;
     };
 
-    return quadRuleTria3pt;
+    return QuadratureRule();
 }
 
-const QuadratureRule&
+QuadratureRule
 QuadratureRuleProvider::
 provideExactnessPoint (const UInt& exactness)
 {
@@ -388,6 +375,130 @@ provideExactnessPoint (const UInt& exactness)
     };
 }
 
+QuadratureRule
+QuadratureRuleProvider::
+provideExactnessTetraNoNeg (const UInt& exactness)
+{
+    switch (exactness)
+    {
+        case 0:
+        case 1:
+            return quadRuleTetra1pt;
+            break;
+        case 2:
+            return quadRuleTetra4pt;
+            break;
+        case 3:
+            manageNoPreciseExactnessCase();
+            // No break!
+        case 4:
+            manageNoPreciseExactnessCase();
+            // No break!
+        case 5:
+            return quadRuleTetra15pt;
+            break;
+        case 6:
+        {
+            QuadratureRule qr;
+            qr.import ( QRKeast<6>() );
+            return qr;
+            break;
+        }
+
+        case 7:
+            return quadRuleTetra64pt;
+            break;
+
+        default:
+
+            manageTooHighExactnessCase();
+            return quadRuleTetra64pt;
+    };
+
+    return QuadratureRule();
+}
+
+QuadratureRule
+QuadratureRuleProvider::
+provideExactnessTriangleNoNeg (const UInt& exactness)
+{
+    switch (exactness)
+    {
+        case 0:
+
+        case 1:
+            return quadRuleTria1pt;
+            break;
+
+        case 2:
+            return quadRuleTria3pt;
+            break;
+
+        case 3:
+            manageNoPreciseExactnessCase();
+            // No break!
+
+        case 4:
+            return quadRuleTria6pt;
+            break;
+
+        case 5:
+            return quadRuleTria7pt;
+            break;
+
+        default:
+            manageTooHighExactnessCase();
+            return quadRuleTria7pt;
+
+    };
+
+    return QuadratureRule();
+}
+
+
+
+void
+QuadratureRuleProvider::
+manageNoPreciseExactnessCase()
+{
+    if ( S_BehaviorNoPreciseExactness == ErrorNoPrecise )
+    {
+        std::cerr << "QuadratureRuleProvider: Error: required degree does not exist" << std::endl;
+        std::abort();
+    }
+    else if (S_BehaviorNoPreciseExactness == WarningAndReturnSup)
+    {
+        std::cerr << "QuadratureRuleProvider: Warning: required degree does not exist" << std::endl;
+        std::cerr << "                        => attempting to find with degree+1" << std::endl;
+
+    }
+}
+
+void
+QuadratureRuleProvider::
+manageTooHighExactnessCase()
+{
+    if (S_BehaviorTooHighExactness == ErrorTooHigh)
+    {
+        std::cerr << "QuadratureRuleProvider: Error: required degree too high. " << std::endl;
+        std::abort();
+    }
+    else if (S_BehaviorTooHighExactness == WarningAndReturnMax)
+    {
+        std::cerr << "QuadratureRuleProvider: Warning: required degree too high. " << std::endl;
+        std::cerr << "                                 => returning highest degree" << std::endl;
+    }
+}
+
+void
+QuadratureRuleProvider::
+manageWarningNegativeWeight()
+{
+    if (S_BehaviorNegativeWeight == WarningAndAccept)
+    {
+        std::cerr << "QuadratureRuleProvider: Warning: negative weights. " << std::endl;
+    }
+}
 
 
 

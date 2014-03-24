@@ -50,12 +50,12 @@ enum BCNAME
     OUTLETPRESSURE   = 3,
     FLUX1            = 4
 
-                       //    BACK   = 1,
-                       //    FRONT  = 2,
-                       //    LEFT   = 3,
-                       //    RIGHT  = 4,
-                       //    BOTTOM = 5,
-                       //    TOP    = 6
+    //    BACK   = 1,
+    //    FRONT  = 2,
+    //    LEFT   = 3,
+    //    RIGHT  = 4,
+    //    BOTTOM = 5,
+    //    TOP    = 6
 };
 
 namespace dataProblem

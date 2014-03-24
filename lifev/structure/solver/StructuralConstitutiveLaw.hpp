@@ -48,6 +48,7 @@
 
 #include <Epetra_Vector.h>
 #include <EpetraExt_MatrixMatrix.h>
+#include <Epetra_SerialDenseMatrix.h>
 
 
 #include <lifev/core/array/MatrixElemental.hpp>
@@ -69,6 +70,10 @@
 
 #include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 
+//ET include for assemblings
+#include <lifev/eta/fem/ETFESpace.hpp>
+#include <lifev/eta/expression/Integrate.hpp>
+
 namespace LifeV
 {
 /*!
@@ -78,35 +83,44 @@ namespace LifeV
   This class has just pure virtual methods. They are implemented in the specific class for one material
 */
 
-template <typename Mesh>
+template <typename MeshType>
 class StructuralConstitutiveLaw
 {
 public:
 
     //!@name Type definitions
     //@{
-
     typedef StructuralConstitutiveLawData          data_Type;
 
-    typedef typename LifeV::SolverAztecOO          solver_Type;
-
-    typedef typename solver_Type::matrix_type      matrix_Type;
+    typedef MatrixEpetra<Real>            matrix_Type;
     typedef boost::shared_ptr<matrix_Type>         matrixPtr_Type;
-    typedef typename solver_Type::vector_type      vector_Type;
+    typedef VectorEpetra           vector_Type;
     typedef boost::shared_ptr<vector_Type>         vectorPtr_Type;
 
     typedef typename boost::shared_ptr<data_Type>  dataPtr_Type;
     typedef typename boost::shared_ptr<const Displayer>    displayerPtr_Type;
 
-    typedef FactorySingleton<Factory<StructuralConstitutiveLaw<Mesh>, std::string> >  StructureMaterialFactory;
+    typedef FactorySingleton<Factory<StructuralConstitutiveLaw<MeshType>, std::string> >  StructureMaterialFactory;
 
-    typedef RegionMesh<LinearTetra >                      mesh_Type;
-    typedef std::vector< mesh_Type::element_Type const*> vectorVolumes_Type;
+    typedef std::vector< typename MeshType::element_Type* > vectorVolumes_Type;
 
     typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
     typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
 
+    typedef std::vector<UInt>                             vectorIndexes_Type;
+    typedef std::map< UInt, vectorIndexes_Type>           mapMarkerIndexes_Type;
+    typedef boost::shared_ptr<mapMarkerIndexes_Type>      mapMarkerIndexesPtr_Type;
 
+
+    typedef ETFESpace<MeshType, MapEpetra, 3, 3 >         ETFESpace_Type;
+    typedef boost::shared_ptr<ETFESpace_Type>             ETFESpacePtr_Type;
+
+    typedef FESpace< MeshType, MapEpetra >                FESpace_Type;
+    typedef boost::shared_ptr<FESpace_Type>               FESpacePtr_Type;
+
+    //Vector for vector parameters
+    typedef std::vector<std::vector<Real> >           vectorsParameters_Type;
+    typedef boost::shared_ptr<vectorsParameters_Type> vectorsParametersPtr_Type;
     //@}
 
 
@@ -131,7 +145,8 @@ public:
       \param monolithicMap: the MapEpetra
       \param offset: the offset parameter used assembling the matrices
     */
-    virtual void setup ( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
+    virtual void setup ( const FESpacePtr_Type& dFESpace,
+                         const ETFESpacePtr_Type& ETFESpace,
                          const boost::shared_ptr<const MapEpetra>&   monolithicMap,
                          const UInt offset, const dataPtr_Type& dataMaterial,
                          const displayerPtr_Type& displayer  ) = 0;
@@ -142,7 +157,8 @@ public:
       \param dataMaterial the class with Material properties data
     */
     virtual  void computeLinearStiff ( dataPtr_Type& dataMaterial,
-                                       const mapMarkerVolumesPtr_Type mapsMarkerVolumes  ) = 0;
+                                       const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                                       const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/ ) = 0;
 
     //! Updates the Jacobian matrix in StructuralSolver::updateJacobian
     /*!
@@ -153,6 +169,7 @@ public:
     */
     virtual  void updateJacobianMatrix ( const vector_Type& disp, const dataPtr_Type& dataMaterial,
                                          const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                         const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
                                          const displayerPtr_Type& displayer ) = 0;
 
     //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field.
@@ -168,6 +185,7 @@ public:
     */
     virtual  void computeStiffness ( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial,
                                      const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                     const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
                                      const displayerPtr_Type& displayer ) = 0;
 
 
@@ -181,10 +199,25 @@ public:
 
     //! Output of the class
     /*!
-      \param fileNamelinearStiff the filename where to apply the spy method for the linear part of the Stiffness matrix
-      \param fileNameStiff the filename where to apply the spy method for the Stiffness matrix
+       \param fileNamelinearStiff the filename where to apply the spy method for the linear part of the Stiffness matrix
+       \param fileNameStiff the filename where to apply the spy method for the Stiffness matrix
     */
     virtual void showMe ( std::string const& fileNameStiff, std::string const& fileNameJacobian ) = 0;
+
+
+    //! Compute the First Piola Kirchhoff Tensor
+    /*!
+       \param firstPiola Epetra_SerialDenseMatrix that has to be filled
+       \param tensorF Epetra_SerialDenseMatrix the deformation gradient
+       \param cofactorF Epetra_SerialDenseMatrix cofactor of F
+       \param invariants std::vector with the invariants of C and the detF
+       \param material UInt number to get the material parameteres form the VenantElasticData class
+    */
+    virtual void computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
+                                                         const Epetra_SerialDenseMatrix& tensorF,
+                                                         const Epetra_SerialDenseMatrix& cofactorF,
+                                                         const std::vector<Real>& invariants,
+                                                         const UInt material) = 0;
 
 
     //! @name Set Methods
@@ -206,9 +239,9 @@ public:
     }
 
     //! Get the FESpace object
-    FESpace<Mesh, MapEpetra>& dFESpace()
+    FESpace_Type& dFESpace()
     {
-        return M_FESpace;
+        return M_dispFESpace;
     }
 
     //! Get the Stiffness matrix
@@ -224,20 +257,28 @@ public:
     virtual vectorPtr_Type const stiffVector() const = 0;
 
     virtual void apply ( const vector_Type& sol, vector_Type& res,
-                         const mapMarkerVolumesPtr_Type mapsMarkerVolumes) = 0;
+                         const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                         const mapMarkerIndexesPtr_Type mapsMarkerIndexes) = 0;
 
     //@}
 
 protected:
 
+
+    //! construct the vectors for the parameters
+    /*!
+      \param VOID
+      \return VOID
+    */
+    virtual void setupVectorsParameters ( void ) = 0;
+
     //!Protected Members
 
-    boost::shared_ptr<FESpace<Mesh, MapEpetra> >   M_FESpace;
+    FESpacePtr_Type                                M_dispFESpace;
+
+    ETFESpacePtr_Type                              M_dispETFESpace;
 
     boost::shared_ptr<const MapEpetra>             M_localMap;
-
-    //! Elementary matrix for the Jacobian
-    boost::scoped_ptr<MatrixElemental>             M_elmatJac;
 
     //! Matrix jacobian
     matrixPtr_Type                                 M_jacobian;
@@ -249,18 +290,22 @@ protected:
 
     displayerPtr_Type                              M_displayer;
 
+    //! Map between markers and volumes on the mesh
+    vectorsParametersPtr_Type           M_vectorsParameters;
 };
 
 //=====================================
 // Constructor
 //=====================================
 
-template <typename Mesh>
-StructuralConstitutiveLaw<Mesh>::StructuralConstitutiveLaw( ) :
-    M_FESpace                    ( ),
+template <typename MeshType>
+StructuralConstitutiveLaw<MeshType>::StructuralConstitutiveLaw( ) :
+    M_dispFESpace                ( ),
+    M_dispETFESpace              ( ),
     M_localMap                   ( ),
     M_jacobian                   ( ),
-    M_offset                     ( 0 )
+    M_offset                     ( 0 ),
+    M_vectorsParameters          ( )
 {
     //    std::cout << "I am in the constructor of StructuralConstitutiveLaw" << std::endl;
 }

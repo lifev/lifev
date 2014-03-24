@@ -39,6 +39,7 @@
 #include <lifev/core/LifeV.hpp>
 
 #include <lifev/core/array/VectorSmall.hpp>
+#include <lifev/core/array/MatrixSmall.hpp>
 
 // LifeV namespace.
 namespace LifeV
@@ -125,6 +126,33 @@ private:
 
     //@}
 };
+
+// specialization for matrix - matrix
+template <UInt Dim1, UInt Dim2>
+class OperationSmallSubstraction< MatrixSmall<Dim1, Dim2> , MatrixSmall<Dim1, Dim2> >
+{
+public:
+
+    //! @name Public Types
+    //@{
+
+    typedef MatrixSmall<Dim1, Dim2> result_Type;
+
+    //@}
+
+private:
+    //! @name Constructors and destructors
+    //@{
+
+    //! No default constructor
+    OperationSmallSubstraction();
+
+    //! No destructor
+    ~OperationSmallSubstraction();
+
+    //@}
+};
+
 
 //! \endcond
 

@@ -232,6 +232,8 @@ public:
 
     virtual void initialize (std::vector<vectorPtr_Type> u0 = std::vector<vectorPtr_Type> (0), std::vector<vectorPtr_Type> ds0 = std::vector<vectorPtr_Type> (0), std::vector<vectorPtr_Type> df0 = std::vector<vectorPtr_Type> (0) );
 
+    virtual void initializeMonolithicOperator (std::vector<vectorPtr_Type> u0 = std::vector<vectorPtr_Type> (0), std::vector<vectorPtr_Type> ds0 = std::vector<vectorPtr_Type> (0), std::vector<vectorPtr_Type> df0 = std::vector<vectorPtr_Type> (0) );
+
     LIFEV_DEPRECATED ( void iterate() );
 
     void iterate ( vectorPtr_Type& solution );

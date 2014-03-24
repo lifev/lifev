@@ -131,10 +131,6 @@ conservativeFormulation       = false  # tells if the conservative or non conser
     endtime            = 0.004
     timestep        = 0.001
     BDF_order        = 2   # can go up to 5
-##theta           = 0.5
-##gamma            = 0.5
-##rhoInf          = 1
-##typeOfGeneralizedAlpha            = HHT
 
 ** #space discretization
     [../space_discretization]
@@ -182,6 +178,7 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
 ** # physical data for the solid
     [./physics]
     solidType = linearVenantKirchhoff
+    lawType   = linear
     material_flag = 1                #the mesh flag of the structure volume
     density   = 1.2
     young     = 4.0E6
@@ -197,8 +194,6 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
     endtime            = 0.004
     timestep        = 0.001
     BDF_order        = 2
-##theta           = 0.25
-##gamma           = 0.5
 
 ** #space discretization
     [../space_discretization]
@@ -494,8 +489,6 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
     endtime            = 0.004
     timestep        = 0.001
     BDF_order        = 2
-##theta           = 0.5
-##gamma            = 0.5
 
 ** #preconditioner (used only in the GE case, when this problem is considered separately)
    [../prec]

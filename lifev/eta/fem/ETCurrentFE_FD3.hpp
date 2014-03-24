@@ -210,6 +210,21 @@ public:
         return M_dphi[q][i][iCoor][dxi];
     }
 
+    //! Getter for the derivatives of the basis function in the quadrature nodes (current element)
+    /*!
+      @param i The index of the basis function
+      @param q The index of the quadrature node
+      @return The local vector of the basis functions derived w.r. to dxi, in the qth quadrature node.
+     */
+    MatrixSmall<spaceDim, 3> const& dphi (const UInt& i, const UInt& q) const
+    {
+        ASSERT ( M_isDphiUpdated, "Derivative of the basis functions have not been updated");
+        ASSERT ( i < 3 * M_nbFEDof, "No basis function with this index");
+        ASSERT ( q < M_nbQuadPt, "No quadrature point with this index");
+        return M_dphi[q][i];
+    }
+
+
     //! Getter for the divergence of the basis functions in the quadrature nodes in the current element
     /*!
       @param i The index of the basis function

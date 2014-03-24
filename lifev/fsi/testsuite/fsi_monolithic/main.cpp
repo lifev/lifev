@@ -239,7 +239,7 @@ public:
         // load using ensight/hdf5
         M_saveEvery = data_file ("exporter/saveEvery", 1);
 
-        M_fsi->initialize();
+        M_fsi->initializeMonolithicOperator();
 
         M_velAndPressure.reset ( new vector_Type ( M_fsi->FSIOper()->fluid().getMap(), M_exporterFluid->mapType() ) );
 

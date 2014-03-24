@@ -57,6 +57,7 @@ updateDetJacobian (const UInt& iQuadPt)
     M_detJacobian[iQuadPt] = M_jacobian[iQuadPt][0][0];
 }
 
+// Full specialization for the computation of the determinant
 template<>
 void
 ETCurrentFE<2, 1>::
@@ -72,6 +73,7 @@ updateDetJacobian (const UInt& iQuadPt)
                              - M_jacobian[iQuadPt][1][0] * M_jacobian[iQuadPt][0][1];
 }
 
+// Full specialization for the computation of the determinant
 template<>
 void
 ETCurrentFE<3, 1>::
@@ -92,7 +94,6 @@ updateDetJacobian (const UInt& iQuadPt)
         - M_jacobian[iQuadPt][0][2] * M_jacobian[iQuadPt][1][1] * M_jacobian[iQuadPt][2][0];
 }
 
-// Full specialization for the computation of the inverse jacobian
 template<>
 void
 ETCurrentFE<1, 1>::
@@ -442,4 +443,3 @@ updateInverseJacobian (const UInt& iQuadPt)
 
 
 } // Namespace LifeV
-

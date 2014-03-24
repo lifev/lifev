@@ -116,7 +116,7 @@ public:
     void update (const UInt& /*iElement*/) {}
 
     //! Display method
-    static void display (ostream& out = std::cout)
+    static void display (std::ostream& out = std::cout)
     {
         out << "phi_i";
     }
@@ -253,7 +253,7 @@ public:
     void update (const UInt& /*iElement*/) {}
 
     //! Display method
-    static void display (ostream& out = std::cout)
+    static void display (std::ostream& out = std::cout)
     {
         out << "phi_i";
     }
@@ -313,7 +313,6 @@ private:
     std::vector< std::vector < Real > > const* M_valuesPtr;
 
 };
-
 
 } // Namespace ExpressionAssembly
 

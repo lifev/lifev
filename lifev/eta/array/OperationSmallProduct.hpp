@@ -152,6 +152,58 @@ private:
     //@}
 };
 
+template <UInt Dim1, UInt Dim2>
+class OperationSmallProduct<  MatrixSmall<Dim1, Dim2> , Real >
+{
+public:
+
+    //! @name Public Types
+    //@{
+
+    typedef MatrixSmall<Dim1, Dim2> result_Type;
+
+    //@}
+
+private:
+    //! @name Constructors and destructors
+    //@{
+
+    //! No default constructor
+    OperationSmallProduct();
+
+    //! No destructor
+    ~OperationSmallProduct();
+
+    //@}
+};
+
+
+template <UInt Dim1, UInt Dim2>
+class OperationSmallProduct< Real , MatrixSmall<Dim1, Dim2> >
+{
+public:
+
+    //! @name Public Types
+    //@{
+
+    typedef MatrixSmall<Dim1, Dim2> result_Type;
+
+    //@}
+
+private:
+    //! @name Constructors and destructors
+    //@{
+
+    //! No default constructor
+    OperationSmallProduct();
+
+    //! No destructor
+    ~OperationSmallProduct();
+
+    //@}
+};
+
+
 // specialization for matrix * vector
 template <UInt Dim1, UInt Dim2>
 class OperationSmallProduct< MatrixSmall<Dim1, Dim2> , VectorSmall<Dim2> >
@@ -214,6 +266,33 @@ public:
     //@{
 
     typedef VectorSmall<Size> result_Type;
+
+    //@}
+
+private:
+    //! @name Constructors and destructors
+    //@{
+
+    //! No default constructor
+    OperationSmallProduct();
+
+    //! No destructor
+    ~OperationSmallProduct();
+
+    //@}
+};
+
+
+// specialization for matrix * matrix (squared result!!)
+template <UInt Dim1, UInt Dim2>
+class OperationSmallProduct< MatrixSmall<Dim1, Dim2>, MatrixSmall<Dim2, Dim1> >
+{
+public:
+
+    //! @name Public Types
+    //@{
+
+    typedef MatrixSmall<Dim1, Dim1> result_Type;
 
     //@}
 

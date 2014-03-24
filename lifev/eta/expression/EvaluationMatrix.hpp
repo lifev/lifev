@@ -37,7 +37,7 @@
 
 #include <lifev/core/LifeV.hpp>
 
-#include <lifev/eta/array/MatrixSmall.hpp>
+#include <lifev/core/array/MatrixSmall.hpp>
 
 #include <lifev/eta/fem/ETCurrentFE.hpp>
 #include <lifev/eta/fem/ETCurrentFlag.hpp>
@@ -52,11 +52,11 @@ namespace LifeV
 namespace ExpressionAssembly
 {
 
-//! Evaluation for a vectorial constant
+//! Evaluation for a matricial constant
 /*!
   @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
 
-  This class aims at representing a matrix constant in the assembly
+  This class aims at representing a matricial constant in the assembly
 
   This class is an Evaluation class, and therefore, has all the methods
   required to work within the Evaluation trees.
@@ -122,7 +122,7 @@ public:
     {}
 
     //! Display method
-    static void display (ostream& out = std::cout)
+    static void display (std::ostream& out = std::cout)
     {
         out << "matrix[" << MatrixDim1 << "][" << MatrixDim2 << "]";
     }

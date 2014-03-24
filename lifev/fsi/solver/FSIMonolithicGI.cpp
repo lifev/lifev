@@ -92,11 +92,11 @@ void FSIMonolithicGI::setupFluidSolid ( UInt const fluxes )
 
     M_solid->setup (M_data->dataSolid(),
                     M_dFESpace,
+                    M_dETFESpace,
                     M_epetraComm,
-                    M_monolithicMap,
-                    M_offset
+                    M_dFESpace->mapPtr(),
+                    UInt (0)
                    );
-
 }
 
 void
@@ -120,10 +120,11 @@ FSIMonolithicGI::evalResidual ( vector_Type&       res,
     UInt offset ( M_solidAndFluidDim + nDimensions * M_interface );
 
     vectorPtr_Type meshDisp ( new vector_Type (M_mmFESpace->map() ) );
-    vectorPtr_Type mmRep ( new vector_Type (M_mmFESpace->map(), Repeated ) );
 
     meshDisp->subset (disp, offset); //if the conv. term is to be condidered implicitly
-    mmRep = meshDisp;
+
+    vectorPtr_Type mmRep ( new vector_Type (*meshDisp, Repeated ) );
+
     moveMesh ( *mmRep );
 
     //here should use extrapolationFirstDerivative instead of velocity
@@ -135,9 +136,9 @@ FSIMonolithicGI::evalResidual ( vector_Type&       res,
     vector_Type interpolatedMeshVelocity (this->M_uFESpace->map() );
 
     interpolateVelocity ( meshVelocityRepeated, interpolatedMeshVelocity );
-
     vectorPtr_Type fluid ( new vector_Type ( M_uFESpace->map() ) );
     M_beta->subset ( disp, 0 );
+
     *M_beta -= interpolatedMeshVelocity; // convective term, u^(n+1) - w^(n+1)
 
     assembleSolidBlock ( iter, disp );
@@ -178,9 +179,9 @@ FSIMonolithicGI::evalResidual ( vector_Type&       res,
     M_monolithicMatrix->blockAssembling();
     super_Type::checkIfChangedFluxBC ( M_monolithicMatrix );
 
-
-
-    if ( (M_data->dataSolid()->solidType().compare ("exponential") && M_data->dataSolid()->solidType().compare ("neoHookean") ) )
+    // formulation matrix * vector (i.e. linear elastic )
+    // todo: pass to boolean for nonlinear structures
+    if ( ! (M_data->dataSolid()->lawType().compare ("linear") ) )
     {
         applyBoundaryConditions();
     }
@@ -189,7 +190,8 @@ FSIMonolithicGI::evalResidual ( vector_Type&       res,
 
     super_Type::evalResidual ( disp, M_rhsFull, res, false );
 
-    if ( ! ( M_data->dataSolid()->solidType().compare ( "exponential" ) && M_data->dataSolid()->solidType().compare ( "neoHookean" ) ) )
+    //case for nonlinear laws which are formulated in the residual form
+    if ( ! ( M_data->dataSolid()->lawType().compare ( "nonlinear" ) ) )
     {
         res += *M_meshBlock * disp;
 
@@ -283,6 +285,7 @@ void FSIMonolithicGI::setALEVectorInStencil ( const vectorPtr_Type& fluidDisp,
         //We sum the vector in the first element of fluidtimeAdvance
         * ( M_fluidTimeAdvance->stencil() [ 0 ] ) += *harmonicSolutionRestartTime;
     }
+
 }
 
 
@@ -295,22 +298,25 @@ void FSIMonolithicGI::setupBlockPrec()
     //The following part accounts for a possibly nonlinear structure model, should not be run when linear
     //elasticity is used
 
-    if ( M_data->dataSolid()->getUseExactJacobian() && ( M_data->dataSolid()->solidType().compare ( "exponential" )
-                                                         && M_data->dataSolid()->solidType().compare ( "neoHookean" ) ) )
-    {
-        M_solid->material()->updateJacobianMatrix ( *M_uk * M_solid->rescaleFactor(),
-                                                    dataSolid(),
-                                                    M_solid->mapMarkersVolumes(),
-                                                    M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
-        M_solidBlockPrec.reset ( new matrix_Type ( *M_monolithicMap,
-                                                   1 ) );
-        *M_solidBlockPrec += *M_solid->massMatrix();
-        *M_solidBlockPrec += *M_solid->material()->jacobian();
-        M_solidBlockPrec->globalAssemble();
-        *M_solidBlockPrec *= M_solid->rescaleFactor();
+    // case of exponential and neohookean model
+    // todo: pass to boolean variable for Nonlinear models ( i.e. for vector formulation )
+    // if ( M_data->dataSolid()->getUseExactJacobian() && ( M_data->dataSolid()->solidType().compare( "exponential" )
+    //                           && M_data->dataSolid()->solidType().compare( "neoHookean" ) ) )
+    // {
+    //     M_solid->material()->updateJacobianMatrix ( *M_uk * M_solid->rescaleFactor(),
+    //                                                 dataSolid(),
+    //                                                 M_solid->mapMarkersVolumes(),
+    //                                                 M_solid->mapMarkersIndexes(),
+    //                                                 M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
+    //     M_solidBlockPrec.reset ( new matrix_Type ( *M_monolithicMap,
+    //                                                1 ) );
+    //     *M_solidBlockPrec += *M_solid->massMatrix();
+    //     *M_solidBlockPrec += *M_solid->material()->jacobian();
+    //     M_solidBlockPrec->globalAssemble();
+    //     *M_solidBlockPrec *= M_solid->rescaleFactor();
 
-        M_monolithicMatrix->replace_matrix ( M_solidBlockPrec, 0 );
-    }
+    //     M_monolithicMatrix->replace_matrix ( M_solidBlockPrec, 0 );
+    // }
 
     M_monolithicMatrix->blockAssembling();
 

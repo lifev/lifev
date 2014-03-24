@@ -61,6 +61,10 @@
 namespace LifeV
 {
 
+template < typename MeshType, typename MapType, typename ReturnType >
+class FEFunction;
+
+
 
 //! FESpace - Short description here please!
 /*!
@@ -155,8 +159,9 @@ public:
       @param vector Interpolated function
       @param time Time in the interpolation
     */
-    template < typename FEFunctionType, typename vector_Type >
-    void interpolate ( const FEFunctionType* fEFunction, vector_Type& vector, const Real time = 0. );
+    template < typename ReturnType, typename vector_type >
+    void interpolate ( const FEFunction<MeshType, MapType, ReturnType>* fEFunction,
+		       vector_type& vector, const Real time = 0. );
 
     //! calculate L2 velocity error for given exact velocity function
     //! \param pexact the exact velocity as a function
@@ -339,6 +344,24 @@ public:
     template <typename vector_type>
     vector_type gradientRecovery (const vector_type& solution, const UInt& component) const;
 
+    //! This method reconstruct a gradient of a solution in the present FE space.
+    /*!
+      The goal of this method is to build an approximation of the gradient of a given
+      FE function in this FESpace. Typically, when one use P1 elements for approximating
+      the solution of a given problem, the gradient is only piecewise constant. However, one
+      could need continuous gradient. The solutions to this problem is either to use specific
+      finite elements (like Hermite FE) or rely on a recovery procedure for the gradient.
+
+      This method implements a recovery procedure that performs a local average with weights
+      corresponding to the areas of the elements:
+      \f[ Gr(P) = \frac{\sum_{P \in T} |T| \nabla u(P)}{\sum_{P \in T} |T|} \f]
+      See Zienkiewicz and Zhu (1987) for more details.
+
+      @Note Results might be very wrong if you are not using lagrangian FE for tetrahedra
+     */
+    template <typename vector_type>
+    vector_type recoveryFunction (const vector_type& solution) const;
+
     //! Reconstruction of the laplacian using gradientRecovery procedures.
     /*!
       This method simply uses the FESpace::gradientRecovery method several times so
@@ -362,6 +385,8 @@ public:
       @param Qr The new quadrule to be used in the FESpace
      */
     void setQuadRule (const QuadratureRule& Qr);
+
+    void setBdQuadRule (const QuadratureRule& bdQr);
 
     //@}
 
@@ -747,9 +772,10 @@ FESpace<MeshType, MapType>::interpolate ( const function_Type& fct,
 }
 
 template < typename MeshType, typename MapType>
-template < typename FEFunctionType, typename vector_Type >
+template < typename ReturnType, typename vector_type>
 void FESpace<MeshType, MapType>::
-interpolate ( const FEFunctionType* fEFunction, vector_Type& vector, const Real time )
+interpolate ( const FEFunction<MeshType, MapType, ReturnType>* fEFunction,
+	      vector_type& vector, const Real time )
 {
 
     // First, we build a "quadrature" that consists in the nodes (0 weight)
@@ -765,7 +791,7 @@ interpolate ( const FEFunctionType* fEFunction, vector_Type& vector, const Real 
     const UInt numberLocalDof ( M_dof->numLocalDof() );
 
     // Storage for the values
-    typename FEFunctionType::point_Type point;
+    typename FEFunction<MeshType, MapType, ReturnType>::point_Type point;
     std::vector<Real> nodalValues (numberLocalDof, 0);
     std::vector<Real> FEValues (numberLocalDof, 0);
 
@@ -1789,6 +1815,16 @@ setQuadRule (const QuadratureRule& Qr)
 {
     M_Qr = &Qr;
     M_fe.reset ( new CurrentFE ( *M_refFE, getGeometricMap ( *M_mesh ), *M_Qr ) );
+}
+
+
+template<typename MeshType, typename MapType>
+void
+FESpace<MeshType, MapType>::
+setBdQuadRule (const QuadratureRule& Qr)
+{
+    M_bdQr = &Qr;
+    resetBoundaryFE();
 }
 
 

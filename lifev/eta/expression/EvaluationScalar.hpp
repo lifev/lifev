@@ -121,7 +121,7 @@ public:
     {}
 
     //! Display method
-    static void display (ostream& out = std::cout)
+    static void display (std::ostream& out = std::cout)
     {
         out << "scalar";
     }
@@ -183,6 +183,152 @@ private:
     Real M_value;
 };
 
+/*const flag_Type EvaluationScalar::S_globalUpdateFlag=ET_UPDATE_NONE;
+
+const flag_Type EvaluationScalar::S_testUpdateFlag = ET_UPDATE_NONE;
+
+const flag_Type EvaluationScalar::S_solutionUpdateFlag=ET_UPDATE_NONE;
+*/
+
+template <typename VectorType>
+class EvaluationExtractScalar
+{
+public:
+
+    //! @name Public Types
+    //@{
+
+    //! Type returned by this class
+    typedef Real return_Type;
+    typedef boost::shared_ptr<VectorType>                               containerPtr_Type;
+    //@}
+
+
+    //! @name Static constants
+    //@{
+
+    //! Flag for the global current FE
+    const static flag_Type S_globalUpdateFlag;
+
+    //! Flag for the test current FE
+    const static flag_Type S_testUpdateFlag;
+
+    //! Flag for the solution current FE
+    const static flag_Type S_solutionUpdateFlag;
+
+    //@}
+
+
+    //! @name Constructors, destructor
+    //@{
+
+    //! Empty constructor
+    EvaluationExtractScalar()
+    {}
+
+    //! Copy constructor
+    EvaluationExtractScalar (const EvaluationExtractScalar& evaluation)
+        : M_vector (evaluation.M_vector)
+    {}
+
+    //! Expression-based constructor
+    template<typename Vector>
+    explicit EvaluationExtractScalar (const ExpressionExtractScalar<Vector>& expression)
+        : M_vector ( expression.vector() )
+    {}
+
+    //! Destructor
+    ~EvaluationExtractScalar()
+    {}
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
+    //! Do nothing internal update
+    void update (const UInt& iElement)
+    {
+        M_value = 0;
+        M_value = (*M_vector) [ iElement ];
+    }
+
+    //! Display method
+    static void display (std::ostream& out = std::cout)
+    {
+        out << "scalar from a vector";
+    }
+
+    //@}
+
+
+    //! @name Set Methods
+    //@{
+
+    //! Do nothing setter for the global current FE
+    template< typename CFEType >
+    void setGlobalCFE (const CFEType* /*globalCFE*/)
+    {}
+
+    //! Do nothing setter for the test current FE
+    template< typename CFEType >
+    void setTestCFE (const CFEType* /*testCFE*/)
+    {}
+
+    //! Do nothing setter for the solution current FE
+    template< typename CFEType >
+    void setSolutionCFE (const CFEType* /*solutionCFE*/)
+    {}
+
+    //! Do nothing setter for the quadrature rule
+    void setQuadrature (const QuadratureRule&)
+    {}
+
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+
+    //! Getter for a value
+    return_Type value_q (const UInt& /*q*/) const
+    {
+        return M_value;
+    }
+
+    //! Getter for the value for a vector
+    return_Type value_qi (const UInt& /*q*/, const UInt& /*i*/) const
+    {
+        return M_value;
+    }
+
+    //! Getter for the value for a matrix
+    return_Type value_qij (const UInt& /*q*/, const UInt& /*i*/, const UInt& /*j*/) const
+    {
+        return M_value;
+    }
+
+    //@}
+
+private:
+
+    // Value stored
+    Real M_value;
+
+    // new members
+    containerPtr_Type M_vector;
+
+};
+
+template< typename VectorType>
+const flag_Type EvaluationExtractScalar<VectorType>::S_globalUpdateFlag = ET_UPDATE_NONE;
+
+template< typename VectorType>
+const flag_Type EvaluationExtractScalar<VectorType>::S_testUpdateFlag = ET_UPDATE_NONE;
+
+template< typename VectorType>
+const flag_Type EvaluationExtractScalar<VectorType>::S_solutionUpdateFlag = ET_UPDATE_NONE;
 
 } // Namespace ExpressionAssembly
 

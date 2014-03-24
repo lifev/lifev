@@ -628,6 +628,9 @@ public:
      */
     void abs ( VectorEpetra& vector );
 
+    //! Apply the square root to of each element in the vector
+    void sqrt ();
+
     //! Compute the scalar product of two vectors
     /*!
       @param vector Second vector for the scalar product
@@ -660,6 +663,8 @@ public:
       @param output Stream where the informations must be printed
      */
     void showMe ( std::ostream& output = std::cout ) const;
+
+    void apply (const boost::function1<Real, Real>& f);
 
     //@}
 

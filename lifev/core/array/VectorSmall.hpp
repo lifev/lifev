@@ -38,6 +38,10 @@
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/array/RNM.hpp>
+//#include <lifev/core/array/MatrixSmall.hpp>
+
+#include <vector>
+#include <cmath>
 
 // LifeV namespace.
 namespace LifeV
@@ -60,6 +64,8 @@ namespace LifeV
   library Matrix class.
 
 */
+template<UInt Dim1, UInt Dim2>
+class MatrixSmall;
 
 template <UInt Dim>
 class VectorSmall
@@ -229,6 +235,18 @@ public:
         return scalarProduct;
     }
 
+    MatrixSmall< Dim , Dim > outerProduct ( VectorSmall<Dim> const& vector ) const
+    {
+        MatrixSmall<Dim, Dim> result;
+
+        for ( UInt i = 0; i < Dim; i++ )
+            for ( UInt j = 0; j < Dim; j++ )
+            {
+                result[i][j] = M_coords[ i ] * vector.M_coords[ j ];
+            }
+        return result;
+    }
+
     //! \f$ L^2 \f$ norm
     /*!
     @return norm value
@@ -336,6 +354,7 @@ inline VectorSmall<Dim> castToVectorSmall ( Vector const& coords )
 
 //@}
 
+
 //! class VectorSmall<3>   Partial specialization for the 3D case
 template <>
 class VectorSmall<3>
@@ -362,6 +381,14 @@ public:
         M_coords[ 0 ] = x;
         M_coords[ 1 ] = y;
         M_coords[ 2 ] = z;
+    }
+
+
+    VectorSmall ( Real* rawVector )
+    {
+        M_coords[ 0 ] = rawVector[0];
+        M_coords[ 1 ] = rawVector[1];
+        M_coords[ 2 ] = rawVector[2];
     }
 
     //! Assignment operator
@@ -505,6 +532,24 @@ public:
                              M_coords[ 0 ] * vector.M_coords[ 1 ]
                              - M_coords[ 1 ] * vector.M_coords[ 0 ] );
     }
+
+    //! Outer product
+    /*!
+    @param vector second operand
+    */
+    MatrixSmall<3, 3> outerProduct ( VectorSmall<3> const& vector ) const;
+
+    //! Extraction of a component
+    /*!
+    @param index of the component to be extracted
+    @return extracted component
+    */
+    Real extract ( UInt const& i ) const
+    {
+        return ( M_coords[ i ] );
+    }
+
+
 
     //! \f$ L^2 \f$ norm
     /*!
