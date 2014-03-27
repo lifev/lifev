@@ -281,7 +281,7 @@ Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
 {
 
     // Tube
-    // Real theta =  0.8426; // value for anisotropic characterization taken from Robertson // ( PI / 6.0 );
+    Real theta =  0.8426; // value for anisotropic characterization taken from Robertson // ( PI / 6.0 );
     // Real thetaChangeOfVariable = std::atan(  y / x );
 
     // if( x < 0 )
@@ -291,7 +291,7 @@ Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
     // }
 
   // Half thorus
-  Real thetaFiber ( 0.0 );
+  Real thetaFiber ( theta );
   Real xT (0.138);
   Real rT ( xT );
   Real thetaFree(0);
@@ -341,7 +341,7 @@ Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
   VectorSmall<3> localFibers;
   localFibers[0] = std::sin( thetaFiber );
   localFibers[1] = std::cos( thetaFiber ) *  std::sin( thetaPositionOnSection );
-  localFibers[2] = -  std::cos( thetaFiber ) *  std::cos( thetaPositionOnSection );
+  localFibers[2] = - std::cos( thetaFiber ) *  std::cos( thetaPositionOnSection );
 
   VectorSmall<3> originFibers;
   originFibers = changeOfVariable.transpose() * localFibers + positionCenter;
@@ -372,7 +372,7 @@ Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
             break;
         case 2:
 	    // Tube
- 	    //return   std::sin( theta );	    
+ 	    //return   std::sin( theta );
 
 	    // half thorus
             return  originFibers[2];
@@ -434,7 +434,7 @@ Real Family1Spherical ( const Real& /*t*/, const Real& x, const Real& y, const R
       tangentVectorToAxisTorus[0] = std::sin( thetaPosition ) ;
       tangentVectorToAxisTorus[1] = 0.0;
       tangentVectorToAxisTorus[2] = -std::cos( thetaPosition );
-      
+
       VectorSmall<3> centerSphereOnSection;
       centerSphereOnSection = centerSphere - ( ( centerSphere - centerOnTorusAxis ).dot( tangentVectorToAxisTorus ) ) * tangentVectorToAxisTorus;
 
@@ -443,7 +443,7 @@ Real Family1Spherical ( const Real& /*t*/, const Real& x, const Real& y, const R
       zCenter = centerSphereOnSection[2];
     }
   else
-    { 
+    {
       xCenter = centerOnTorusAxis[0];
       yCenter = centerOnTorusAxis[1];
       zCenter = centerOnTorusAxis[2];
@@ -503,7 +503,7 @@ Real Family1Spherical ( const Real& /*t*/, const Real& x, const Real& y, const R
             break;
         case 2:
 	    // Tube
- 	    //return   std::sin( theta );	    
+ 	    //return   std::sin( theta );
 
 	    // half thorus
             return  originFibers[2];
@@ -621,7 +621,7 @@ Real localPositionSpherical ( const Real& /*t*/, const Real& x, const Real& y, c
       tangentVectorToAxisTorus[0] = std::sin( thetaPosition ) ;
       tangentVectorToAxisTorus[1] = 0.0;
       tangentVectorToAxisTorus[2] = -std::cos( thetaPosition );
-      
+
       VectorSmall<3> centerSphereOnSection;
       centerSphereOnSection = centerSphere - ( ( centerSphere - centerOnTorusAxis ).dot( tangentVectorToAxisTorus ) ) * tangentVectorToAxisTorus;
 
@@ -630,7 +630,7 @@ Real localPositionSpherical ( const Real& /*t*/, const Real& x, const Real& y, c
       zCenter = centerSphereOnSection[2];
     }
   else
-    { 
+    {
       xCenter = centerOnTorusAxis[0];
       yCenter = centerOnTorusAxis[1];
       zCenter = centerOnTorusAxis[2];
@@ -699,7 +699,7 @@ Real localPosition ( const Real& /*t*/, const Real& x, const Real& y, const Real
   else
     {
       thetaRotation = thetaFree - PI/2.0;
-    } 
+    }
 
   Real xCenter;
   Real zCenter;
@@ -722,7 +722,7 @@ Real localPosition ( const Real& /*t*/, const Real& x, const Real& y, const Real
   changeOfVariable(2,0) = -std::sin( thetaRotation ); changeOfVariable(2,1) = 0.0; changeOfVariable(2,2) = std::cos( thetaRotation );
 
   VectorSmall<3> localPosition;
-  localPosition = changeOfVariable * ( position - positionCenter ); 
+  localPosition = changeOfVariable * ( position - positionCenter );
 
     switch (i)
     {
@@ -771,7 +771,7 @@ Real sphereIndicatorFunction ( const Real& /*t*/, const Real& x, const Real& y, 
       return 1.0;
     }
   else
-    { 
+    {
       return 0.0;
     }
   return 100000.0;
@@ -824,7 +824,7 @@ Real positionCenterSpherical ( const Real& /*t*/, const Real& x, const Real& y, 
       tangentVectorToAxisTorus[0] = std::sin( thetaPosition ) ;
       tangentVectorToAxisTorus[1] = 0.0;
       tangentVectorToAxisTorus[2] = -std::cos( thetaPosition );
-      
+
       VectorSmall<3> centerSphereOnSection;
       centerSphereOnSection = centerSphere - ( ( centerSphere - centerOnTorusAxis ).dot( tangentVectorToAxisTorus ) ) * tangentVectorToAxisTorus;
 
@@ -833,7 +833,7 @@ Real positionCenterSpherical ( const Real& /*t*/, const Real& x, const Real& y, 
       zCenter = centerSphereOnSection[2];
     }
   else
-    { 
+    {
       xCenter = centerOnTorusAxis[0];
       yCenter = centerOnTorusAxis[1];
       zCenter = centerOnTorusAxis[2];
@@ -961,7 +961,7 @@ Real Family2 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
             break;
         case 2:
 	    // Tube
- 	    //return   std::sin( theta );	    
+ 	    //return   std::sin( theta );
 
 	    // half thorus
             return  originFibers[2];

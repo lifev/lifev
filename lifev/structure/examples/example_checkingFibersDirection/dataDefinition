@@ -37,7 +37,7 @@ numberFamilies  = 2
 [../../space_discretization]
 mesh_type = .mesh
 mesh_dir  	= ./
-mesh_file 	= variableThicknessDifferentMarkers.mesh
+mesh_file 	= solidHalfThorus.mesh
 order     	= P1
 [../]
 

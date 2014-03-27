@@ -264,6 +264,7 @@ Structure::run3d()
 
     // Interpolate fibers
     std::vector<vectorPtr_Type> vectorInterpolated(0);
+    vectorPtr_Type              referenceDirectionVector;
 
     // Interpolating fiber fields
     vectorInterpolated.resize( (*pointerToVectorOfFamilies).size() );
@@ -302,6 +303,11 @@ Structure::run3d()
                                     * ( ( vectorInterpolated )[ k ] ),
                                     0.0 );
         }
+
+        referenceDirectionVector.reset( new vector_Type( dFESpace->map() ) );
+        dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( referenceDirection ),
+                                    * ( referenceDirectionVector ),
+                                    0.0 );
     }
 
 
@@ -389,14 +395,16 @@ Structure::run3d()
 
     vectorPtr_Type family1;
     vectorPtr_Type family2;
-    //vectorPtr_Type family1Read;
-    //vectorPtr_Type family2Read;
+    vectorPtr_Type family1Read;
+    vectorPtr_Type family2Read;
     vectorPtr_Type family1Computed;
     vectorPtr_Type family2Computed;
 
     std::vector< vectorPtr_Type > activationFunction(0);
     std::vector< vectorPtr_Type > stretch(0);
     std::vector< vectorPtr_Type > deformedVector(0);
+    std::vector< vectorPtr_Type > characteristicAngle(0);
+    std::vector< vectorPtr_Type > referenceAngle(0);
 
     // vectorPtr_Type deformationGradient_1;
     // vectorPtr_Type deformationGradient_2;
@@ -412,14 +420,16 @@ Structure::run3d()
         activationFunction.resize( dataStructure->numberFibersFamilies( ) );
         stretch.resize( dataStructure->numberFibersFamilies( ) );
         deformedVector.resize( dataStructure->numberFibersFamilies( ) );
+        characteristicAngle.resize( dataStructure->numberFibersFamilies( ) );
+        referenceAngle.resize( dataStructure->numberFibersFamilies( ) );
 
         family1.reset( new vector_Type( dFESpace->map() ) );
         family2.reset( new vector_Type( dFESpace->map() ) );
         family1Computed.reset( new vector_Type( dFESpace->map() ) );
         family2Computed.reset( new vector_Type( dFESpace->map() ) );
 
-        //family1Read.reset( new vector_Type( dFESpace->map() ) );
-        //family2Read.reset( new vector_Type( dFESpace->map() ) );
+        family1Read.reset( new vector_Type( dFESpace->map() ) );
+        family2Read.reset( new vector_Type( dFESpace->map() ) );
     }
 
     patchAreaVector.reset ( new vector_Type ( dETFESpace->map() ) );
@@ -463,11 +473,11 @@ Structure::run3d()
 
     if( !dataStructure->constitutiveLaw().compare("anisotropic") )
     {
-        // exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "family1",
-        //                         dFESpace, family1Read, UInt (0) );
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "family1",
+                                dFESpace, family1Read, UInt (0) );
 
-        // exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "family2",
-        //                         dFESpace, family2Read, UInt (0) );
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "family2",
+                                dFESpace, family2Read, UInt (0) );
 
         exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "family1Computed",
                                 dFESpace, family1Computed, UInt (0) );
@@ -485,14 +495,20 @@ Structure::run3d()
             activationFunction[ i ].reset( new vector_Type( dScalarFESpace->map() ) );
             stretch[ i ].reset( new vector_Type( dScalarFESpace->map() ) );
             deformedVector[ i ].reset( new vector_Type( dFESpace->map() ) );
+            characteristicAngle[ i ].reset( new vector_Type( dScalarFESpace->map() ) );
+            referenceAngle[ i ].reset( new vector_Type( dScalarFESpace->map() ) );
 
             std::string stringNameA("activation");
             std::string stringNameS("stretch");
             std::string deformedName("deformed");
+            std::string angleName("angle");
+            std::string refAngleName("refAngle");
 
             stringNameA  += "-"; stringNameA  += familyNumber;
             stringNameS  += "-"; stringNameS  += familyNumber;
             deformedName += "-"; deformedName += familyNumber;
+            angleName += "-"; angleName += familyNumber;
+            refAngleName += "-"; refAngleName += familyNumber;
 
             exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, stringNameA,
                                     dScalarFESpace, activationFunction[ i ], UInt (0) );
@@ -502,6 +518,13 @@ Structure::run3d()
 
             exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, deformedName,
                                 dFESpace, deformedVector[ i ], UInt (0) );
+
+            exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, angleName,
+                                    dScalarFESpace, characteristicAngle[ i ], UInt (0) );
+
+            exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, refAngleName,
+                                    dScalarFESpace, referenceAngle[ i ], UInt (0) );
+
         }
 
         *family1Computed = *(vectorInterpolated[ 0 ] );
@@ -585,8 +608,8 @@ Structure::run3d()
             *family1 *= 0.0;
             *family2 *= 0.0;
 
-            // *family1Read *= 0.0;
-            // *family2Read *= 0.0;
+            *family1Read *= 0.0;
+            *family2Read *= 0.0;
         }
 
         UInt current(0);
@@ -679,17 +702,17 @@ Structure::run3d()
 
         if( !dataStructure->constitutiveLaw().compare("anisotropic") )
         {
-            // LifeV::ExporterData<mesh_Type> family1Data  (LifeV::ExporterData<mesh_Type>::VectorField,fam1 + "." + iterationString,
-            //                                              dFESpace, family1, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+            LifeV::ExporterData<mesh_Type> family1Data  (LifeV::ExporterData<mesh_Type>::VectorField,fam1 + "." + iterationString,
+                                                         dFESpace, family1, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
-            // LifeV::ExporterData<mesh_Type> family2Data  (LifeV::ExporterData<mesh_Type>::VectorField,fam2 + "." + iterationString,
-            //                                              dFESpace, family2, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+            LifeV::ExporterData<mesh_Type> family2Data  (LifeV::ExporterData<mesh_Type>::VectorField,fam2 + "." + iterationString,
+                                                         dFESpace, family2, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
-            // M_importer->readVariable (family2Data);
-            // M_importer->readVariable (family1Data);
+            M_importer->readVariable (family2Data);
+            M_importer->readVariable (family1Data);
 
-            // *family1Read = *family1;
-            // *family2Read = *family2;
+            *family1Read = *family1;
+            *family2Read = *family2;
 
             // Evaluating quantities that are related to fibers
             for( UInt j(0); j < dataStructure->numberFibersFamilies( ); j++ )
@@ -736,6 +759,23 @@ Structure::run3d()
                               ) >> deformedVector[ j ];
                 deformedVector[ j ]->globalAssemble();
                 *deformedVector[ j ] = *deformedVector[ j ] / *patchAreaVector;
+
+                evaluateNode( elements ( dScalarETFESpace->mesh() ),
+                              fakeQuadratureRule,
+                              dScalarETFESpace,
+                              meas_K * dot( normalize( value( dETFESpace, *deformedVector[j] ) ) , value( dETFESpace, *referenceDirectionVector ) )  * phi_i
+                              ) >> characteristicAngle[ j ];
+                characteristicAngle[ j ]->globalAssemble();
+                *(characteristicAngle[ j ]) = *(characteristicAngle[ j ]) / *patchAreaVectorScalar;
+
+                evaluateNode( elements ( dScalarETFESpace->mesh() ),
+                              fakeQuadratureRule,
+                              dScalarETFESpace,
+                              meas_K * dot( normalize( value( dETFESpace, *vectorInterpolated[j] ) ) , value( dETFESpace, *referenceDirectionVector ) )  * phi_i
+                              ) >> referenceAngle[ j ];
+                referenceAngle[ j ]->globalAssemble();
+                *(referenceAngle[ j ]) = *(referenceAngle[ j ]) / *patchAreaVectorScalar;
+
             }
 
         }
