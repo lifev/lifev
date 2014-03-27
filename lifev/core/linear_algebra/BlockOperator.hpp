@@ -73,7 +73,7 @@ public:
      *                   rangeMap is assumed to be the same of domainMap.
      * @param comm:      the communicator.
      */
-    void setUp(const boost::shared_ptr<BlockEpetra_Map> & map, const commPtr_Type & comm);
+    void setUp (const boost::shared_ptr<BlockEpetra_Map> & map, const commPtr_Type & comm);
 
     //! SetUp for a "rectangular operator"
     /*!
@@ -85,27 +85,26 @@ public:
      *                   rangeMap.
      * @param comm:      the communicator.
      */
-    void setUp(const boost::shared_ptr<BlockEpetra_Map> & domainMap,
-               const boost::shared_ptr<BlockEpetra_Map> & rangeMap,
-               const commPtr_Type & comm
-               );
+    void setUp (const boost::shared_ptr<BlockEpetra_Map> & domainMap,
+                const boost::shared_ptr<BlockEpetra_Map> & rangeMap,
+                const commPtr_Type & comm);
 
     //! SetUp when the operator is given like a boost::matrix
     /*!
      * @param blockOper: a dense matrix to describe the block operator
      * @param comm:      the communicator
      */
-    void setUp(const operatorPtrContainer_Type & blockOper, const commPtr_Type & comm);
+    void setUp (const operatorPtrContainer_Type & blockOper, const commPtr_Type & comm);
 
     //! set a component of the block operator
     /*!
      * @param iblock, jblock: The position of the block is (iblock, jblock).
      * @param operBlock     : an operator_ptr representing the block
      */
-    void setBlock(UInt iblock, UInt jblock, const operatorPtr_Type & operBlock);
+    void setBlock (UInt iblock, UInt jblock, const operatorPtr_Type & operBlock);
 
     //! Complete the block matrix with null operators
-    void fillComplete();
+    void fillComplete ();
 
     //! If true the transpose of the operator will be computed.
     /*
