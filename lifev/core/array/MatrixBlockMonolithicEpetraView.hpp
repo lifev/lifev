@@ -111,9 +111,9 @@ public:
 
     //! Function to sum an elemental matrix in a block which is already closed
     void sumIntoCoefficients ( UInt const numRows, UInt const numColumns,
-                             std::vector<Int> const& blockRowIndices, std::vector<Int> const& blockColumnIndices,
-                             DataType* const* const localValues,
-                             Int format = Epetra_FECrsMatrix::COLUMN_MAJOR ) const;
+                               std::vector<Int> const& blockRowIndices, std::vector<Int> const& blockColumnIndices,
+                               DataType* const* const localValues,
+                               Int format = Epetra_FECrsMatrix::COLUMN_MAJOR ) const;
 
     //@}
 
@@ -258,7 +258,7 @@ bool
 MatrixBlockMonolithicEpetraView<DataType>::
 filled() const
 {
-  return M_matrix->filled();
+    return M_matrix->filled();
 }
 
 
@@ -291,10 +291,10 @@ addToCoefficients ( UInt const numRows, UInt const numColumns,
 template<typename DataType>
 void
 MatrixBlockMonolithicEpetraView<DataType>::
-sumIntoCoefficients( UInt const numRows, UInt const numColumns,
-                    std::vector<Int> const& blockRowIndices, std::vector<Int> const& blockColumnIndices,
-                    DataType* const* const localValues,
-                    Int format) const
+sumIntoCoefficients ( UInt const numRows, UInt const numColumns,
+                      std::vector<Int> const& blockRowIndices, std::vector<Int> const& blockColumnIndices,
+                      DataType* const* const localValues,
+                      Int format) const
 {
     std::vector<Int> rowIndices (blockRowIndices);
     std::vector<Int> columnIndices (blockColumnIndices);
@@ -309,8 +309,8 @@ sumIntoCoefficients( UInt const numRows, UInt const numColumns,
     }
 
     M_matrix->sumIntoCoefficients (numRows, numColumns,
-                                 rowIndices, columnIndices,
-                                 localValues, format);
+                                   rowIndices, columnIndices,
+                                   localValues, format);
 }
 
 

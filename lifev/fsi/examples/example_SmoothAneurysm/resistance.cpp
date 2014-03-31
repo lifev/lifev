@@ -58,9 +58,9 @@ ResistanceBCs::ResistanceBCs() :
 
 
 void ResistanceBCs::initParameters ( const int flag,
-                                      const Real resistance,
-                                      const Real hydrostatic,
-                                      const std::string name)
+                                     const Real resistance,
+                                     const Real hydrostatic,
+                                     const std::string name)
 {
     // In this function we set up the pressure and the resistance value
     // The resistance BCs are applied as Neumann BCs using the flux at
@@ -73,25 +73,25 @@ void ResistanceBCs::initParameters ( const int flag,
 
 }
 
-void ResistanceBCs::renewParameters ( OseenSolverShapeDerivative<RegionMesh<LinearTetra> > &  solver,
+void ResistanceBCs::renewParameters ( OseenSolverShapeDerivative<RegionMesh<LinearTetra> >&   solver,
                                       const VectorEpetra& solution,
                                       const Real time)
 {
 
     M_resistance = 0.0;
-    M_resistance = computeResistance( time );
+    M_resistance = computeResistance ( time );
 
     // Compute the flux using the solution on the desired flag
-    M_outflux = solver.flux( M_flag, solution);
+    M_outflux = solver.flux ( M_flag, solution);
 
     M_outP = 1.0 * ( M_resistance * M_outflux + M_hydrostaticP );
 
     solver.getDisplayer().leaderPrint ( " ****************** Resistance BCs infos ***************************x\n" );
     solver.getDisplayer().leaderPrint ( " Flow rate = " , M_outflux );
     solver.getDisplayer().leaderPrint ( " \n" );
-    solver.getDisplayer().leaderPrint ( " Area Inlet = " , solver.area(2)  );
+    solver.getDisplayer().leaderPrint ( " Area Inlet = " , solver.area (2)  );
     solver.getDisplayer().leaderPrint ( " \n" );
-    solver.getDisplayer().leaderPrint ( " Area Outlet = ", solver.area(3) );
+    solver.getDisplayer().leaderPrint ( " Area Outlet = ", solver.area (3) );
     solver.getDisplayer().leaderPrint ( " \n" );
     solver.getDisplayer().leaderPrint ( " Hydrostatic pressure   = " , M_hydrostaticP );
     solver.getDisplayer().leaderPrint ( " \n" );
@@ -106,22 +106,28 @@ void ResistanceBCs::renewParameters ( OseenSolverShapeDerivative<RegionMesh<Line
 
 Real ResistanceBCs::computeResistance (const Real t )
 {
-    Real resistance(0);
+    Real resistance (0);
 
-    Real highestResistance( 501950 );
+    Real highestResistance ( 501950 );
     Real totalTime = 1.012;
     Real halfTime = totalTime / 3.0;
 
     Real m = ( 0.8 * highestResistance ) / ( totalTime - halfTime );
 
     if ( t <= halfTime )
-      resistance =   ( ( highestResistance / 5 ) / ( halfTime ) ) * t ;
+    {
+        resistance =   ( ( highestResistance / 5 ) / ( halfTime ) ) * t ;
+    }
 
     if ( t > halfTime && t <= totalTime)
-      resistance = m * (t - halfTime ) + highestResistance / 5 ;
+    {
+        resistance = m * (t - halfTime ) + highestResistance / 5 ;
+    }
 
     if ( t > totalTime )
-      resistance = highestResistance;
+    {
+        resistance = highestResistance;
+    }
 
     // Real a = ( highestResistance / 2 ) * ( 1/ ( halfTime * halfTime ) );
 

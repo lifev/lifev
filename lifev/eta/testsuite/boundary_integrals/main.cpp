@@ -89,10 +89,10 @@ using namespace LifeV;
 const Real pi = 3.141592653589793;
 
 // Coefficients
-Real beta( 1.0 );
-Real alpha( 1.0 );
-Real nu( 1.0 );
-UInt wall( 30 );
+Real beta ( 1.0 );
+Real alpha ( 1.0 );
+Real nu ( 1.0 );
+UInt wall ( 30 );
 
 Real uExact ( const Real& /*t*/, const Real& x , const Real& y, const Real& z , const ID& /*i*/)
 {
@@ -102,32 +102,32 @@ Real uExact ( const Real& /*t*/, const Real& x , const Real& y, const Real& z , 
 Real laplacianExact ( const Real& /*t*/, const Real& x , const Real& y, const Real& z , const ID& /*i*/)
 {
     return    ( - pi * pi * std::sin (pi * y) * std::cos (pi * x ) * std::exp ( z )
-                 - pi * pi * std::sin (pi * y) * std::cos (pi * x ) * std::exp ( z )
-                 + std::sin (pi * y) * cos (pi * x ) * exp ( z ) );
+                - pi * pi * std::sin (pi * y) * std::cos (pi * x ) * std::exp ( z )
+                + std::sin (pi * y) * cos (pi * x ) * exp ( z ) );
 }
 
 Real gRobinRhs ( const Real& /*t*/, const Real& x , const Real& y, const Real& z , const ID& /*i*/)
 {
     MatrixSmall<3, 3> hessian;
 
-    hessian[0][0] = - pi * pi * std::sin( pi * y ) * std::cos( pi * x ) * std::exp( z );
+    hessian[0][0] = - pi * pi * std::sin ( pi * y ) * std::cos ( pi * x ) * std::exp ( z );
 
     hessian[0][1] = - pi * pi * std::sin (pi * x ) * std::cos (pi * y) * std::exp ( z );
     hessian[1][0] = hessian[0][1];
 
-    hessian[0][2] = - pi * std::sin( pi * y ) * std::sin( pi * x ) * std::exp ( z );
+    hessian[0][2] = - pi * std::sin ( pi * y ) * std::sin ( pi * x ) * std::exp ( z );
     hessian[2][0] = hessian[0][2];
-    
-    hessian[1][1] = - pi * pi * std::sin( pi * y ) * std::cos( pi * x ) * std::exp( z );
-    hessian[2][2] =  std::sin( pi * y ) * cos( pi * x ) * exp ( z );
 
-    hessian[1][2] =  pi * std::cos( pi * y ) * std::cos( pi * x ) * std::exp ( z );
+    hessian[1][1] = - pi * pi * std::sin ( pi * y ) * std::cos ( pi * x ) * std::exp ( z );
+    hessian[2][2] =  std::sin ( pi * y ) * cos ( pi * x ) * exp ( z );
+
+    hessian[1][2] =  pi * std::cos ( pi * y ) * std::cos ( pi * x ) * std::exp ( z );
     hessian[2][1] =  hessian[1][2];
-    
+
     VectorSmall<3> gradient;
-    gradient[0] = - pi * std::sin( pi * y ) * std::sin( pi * x ) * std::exp ( z );
-    gradient[1] = pi * std::cos( pi * y ) * std::cos( pi * x ) * std::exp ( z );
-    gradient[2] = std::sin( pi * y ) * std::cos( pi * x ) * std::exp ( z );
+    gradient[0] = - pi * std::sin ( pi * y ) * std::sin ( pi * x ) * std::exp ( z );
+    gradient[1] = pi * std::cos ( pi * y ) * std::cos ( pi * x ) * std::exp ( z );
+    gradient[2] = std::sin ( pi * y ) * std::cos ( pi * x ) * std::exp ( z );
 
     VectorSmall<3> normal;
 
@@ -139,8 +139,8 @@ Real gRobinRhs ( const Real& /*t*/, const Real& x , const Real& y, const Real& z
 
     normal.normalize();
 
-    return ( nu * gradient.dot( normal ) + alpha * uExact ( 0, x, y, z, 0 ) 
-	     - beta * ( traceHessian - ( hessian * normal ).dot( normal ) ) );
+    return ( nu * gradient.dot ( normal ) + alpha * uExact ( 0, x, y, z, 0 )
+             - beta * ( traceHessian - ( hessian * normal ).dot ( normal ) ) );
 }
 
 /* LaplacianRhs */
@@ -151,7 +151,7 @@ public:
 
     return_Type operator() ( const VectorSmall<3> spaceCoordinates )
     {
-	return laplacianExact( 0, spaceCoordinates[0], spaceCoordinates[1], spaceCoordinates[2] , 0  ) ;
+        return laplacianExact ( 0, spaceCoordinates[0], spaceCoordinates[1], spaceCoordinates[2] , 0  ) ;
     }
 
     LaplacianExactFunctor() {}
@@ -166,7 +166,7 @@ public:
 
     return_Type operator() ( const VectorSmall<3> spaceCoordinates )
     {
-	return uExact( 0, spaceCoordinates[0], spaceCoordinates[1], spaceCoordinates[2] , 0  ) ;
+        return uExact ( 0, spaceCoordinates[0], spaceCoordinates[1], spaceCoordinates[2] , 0  ) ;
     }
 
     uExactFunctor() {}
@@ -181,15 +181,15 @@ public:
 
     return_Type operator() ( const VectorSmall<3> spaceCoordinates )
     {
-	VectorSmall<3> gradient;
-	Real x = spaceCoordinates[0];
-	Real y = spaceCoordinates[1];
-	Real z = spaceCoordinates[2];
-	gradient[0] = - pi * std::sin( pi * y ) * std::sin( pi * x ) * std::exp ( z );
-	gradient[1] = pi * std::cos( pi * y ) * std::cos( pi * x ) * std::exp ( z );
-	gradient[2] = std::sin( pi * y ) * std::cos( pi * x ) * std::exp ( z );
-	
-	return gradient;
+        VectorSmall<3> gradient;
+        Real x = spaceCoordinates[0];
+        Real y = spaceCoordinates[1];
+        Real z = spaceCoordinates[2];
+        gradient[0] = - pi * std::sin ( pi * y ) * std::sin ( pi * x ) * std::exp ( z );
+        gradient[1] = pi * std::cos ( pi * y ) * std::cos ( pi * x ) * std::exp ( z );
+        gradient[2] = std::sin ( pi * y ) * std::cos ( pi * x ) * std::exp ( z );
+
+        return gradient;
     }
 
     gradExactFunctor() {}
@@ -204,7 +204,7 @@ public:
 
     return_Type operator() ( const VectorSmall<3> spaceCoordinates )
     {
-	return gRobinRhs( 0, spaceCoordinates[0], spaceCoordinates[1], spaceCoordinates[2] , 0  ) ;
+        return gRobinRhs ( 0, spaceCoordinates[0], spaceCoordinates[1], spaceCoordinates[2] , 0  ) ;
     }
 
     GRobinRhsFunctor() {}
@@ -247,7 +247,7 @@ int main ( int argc, char** argv )
     // Open and read the data file
     GetPot command_line (argc, argv);
     string data_file_name = command_line.follow ("data", 2, "-f", "--file");
-    GetPot dataFile( data_file_name );
+    GetPot dataFile ( data_file_name );
 
     // Load the mesh
     MeshData dataMesh;
@@ -285,7 +285,7 @@ int main ( int argc, char** argv )
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > ETuFESpace ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPart, & (uFESpace->refFE() ), Comm) );
 
-    vectorPtr_Type uSolution ( new vector_Type( ETuFESpace->map() , Unique) );
+    vectorPtr_Type uSolution ( new vector_Type ( ETuFESpace->map() , Unique) );
 
     if (verbose)
     {
@@ -295,7 +295,7 @@ int main ( int argc, char** argv )
 
     if ( verbose )
     {
-	std::cout << "Setting up LinearSolver (AztecOO)... " << std::flush;
+        std::cout << "Setting up LinearSolver (AztecOO)... " << std::flush;
     }
 
     prec_Type* precRawPtr;
@@ -313,7 +313,7 @@ int main ( int argc, char** argv )
     linearSolver.setPreconditioner ( precPtr );
     if ( verbose )
     {
-	std::cout << "done" << std::endl;
+        std::cout << "done" << std::endl;
     }
 
     if (verbose)
@@ -356,8 +356,8 @@ int main ( int argc, char** argv )
 
             value (nu) * dot (grad (phi_i) , grad (phi_j) )
 
-		   )
-	    >> *systemMatrix;
+        )
+                >> *systemMatrix;
 
         integrate ( boundary (ETuFESpace->mesh(), wall),
                     myBDQR,
@@ -367,10 +367,10 @@ int main ( int argc, char** argv )
 
                     value ( alpha ) * phi_j * phi_i
 
-                    + value ( beta ) * dot ( ( grad (phi_j) - dot ( grad (phi_j) , Nface ) * Nface ) , 
-					     ( grad (phi_i) - dot ( grad (phi_i) , Nface ) * Nface ) )
+                    + value ( beta ) * dot ( ( grad (phi_j) - dot ( grad (phi_j) , Nface ) * Nface ) ,
+                                             ( grad (phi_i) - dot ( grad (phi_i) , Nface ) * Nface ) )
 
-		    )
+                  )
                 >> *systemMatrix;
     }
 
@@ -387,25 +387,25 @@ int main ( int argc, char** argv )
 
     ChronoItem.start();
 
-    boost::shared_ptr<LaplacianExactFunctor> laplacianFctRhs( new LaplacianExactFunctor );
-    boost::shared_ptr<GRobinRhsFunctor> gRobinFctRhs( new GRobinRhsFunctor );
+    boost::shared_ptr<LaplacianExactFunctor> laplacianFctRhs ( new LaplacianExactFunctor );
+    boost::shared_ptr<GRobinRhsFunctor> gRobinFctRhs ( new GRobinRhsFunctor );
 
     vector_Type uRhs ( ETuFESpace->map() , Repeated );
     uRhs *= 0.0;
 
     {
-	using namespace ExpressionAssembly;
+        using namespace ExpressionAssembly;
 
-	integrate ( elements (ETuFESpace->mesh() ), // Mesh
+        integrate ( elements (ETuFESpace->mesh() ), // Mesh
 
-		    uFESpace->qr(), // QR
+                    uFESpace->qr(), // QR
 
-		    ETuFESpace,
+                    ETuFESpace,
 
-		    value (-nu) * eval ( laplacianFctRhs, X ) * phi_i
+                    value (-nu) * eval ( laplacianFctRhs, X ) * phi_i
 
-		    )
-	    >> uRhs;
+                  )
+                >> uRhs;
 
 
         integrate ( boundary (ETuFESpace->mesh(), wall),
@@ -415,8 +415,8 @@ int main ( int argc, char** argv )
 
                     eval ( gRobinFctRhs, X ) * phi_i
 
-		    ) 
-	    >> uRhs;
+                  )
+                >> uRhs;
     }
 
     ChronoItem.stop();
@@ -437,10 +437,10 @@ int main ( int argc, char** argv )
     ChronoItem.start();
     BCHandler bcHandler;
     BCFunctionBase uexBCFct ( uExact );
-    
+
     bcHandler.addBC ("Wall2", 31, Essential, Full, uexBCFct, 1);
     bcHandler.addBC ("Corners", 32, EssentialEdges, Full, uexBCFct, 1);
-    
+
     bcHandler.bcUpdate ( *meshPart.meshPartition(), uFESpace->feBd(), uFESpace->dof() );
     bcManage (*systemMatrix, *uRhsUnique,
               *uFESpace->mesh(), uFESpace->dof(),
@@ -450,7 +450,7 @@ int main ( int argc, char** argv )
 
     if (verbose)
     {
-	    std::cout << ChronoItem.diff() << " s" << std::endl;
+        std::cout << ChronoItem.diff() << " s" << std::endl;
     }
 
     if (verbose)
@@ -476,17 +476,17 @@ int main ( int argc, char** argv )
         std::cout << " Evaluate Errors " << std::endl;
     }
 
-    Real errorL2SquaredLocal( 0.0 );
-    Real errorH1SquaredLocal( 0.0 );
-    Real errorL2Squared( 0.0 );
-    Real errorH1Squared( 0.0 );
-    Real errorH1BoundarySquared( 0.0 );
-    
-    vector_Type errorH1BoundaryVector( ETuFESpace->map(), Repeated );
-    vector_Type errorH1BoundaryVectorUnique( ETuFESpace->map() );
+    Real errorL2SquaredLocal ( 0.0 );
+    Real errorH1SquaredLocal ( 0.0 );
+    Real errorL2Squared ( 0.0 );
+    Real errorH1Squared ( 0.0 );
+    Real errorH1BoundarySquared ( 0.0 );
 
-    boost::shared_ptr<uExactFunctor> uExactFct( new uExactFunctor );
-    boost::shared_ptr<gradExactFunctor> gradExactFct( new gradExactFunctor );
+    vector_Type errorH1BoundaryVector ( ETuFESpace->map(), Repeated );
+    vector_Type errorH1BoundaryVectorUnique ( ETuFESpace->map() );
+
+    boost::shared_ptr<uExactFunctor> uExactFct ( new uExactFunctor );
+    boost::shared_ptr<gradExactFunctor> gradExactFct ( new gradExactFunctor );
 
     {
         using namespace ExpressionAssembly;
@@ -495,70 +495,70 @@ int main ( int argc, char** argv )
 
             uFESpace->qr(), // QR
 
-            dot (  ( eval ( gradExactFct, X ) - grad( ETuFESpace , *uSolution ) ) , 
-		   ( eval ( gradExactFct, X ) - grad( ETuFESpace , *uSolution ) ) ) /** phi_i*/ 
-	    
-		   )
-	    >> errorH1SquaredLocal;
+            dot (  ( eval ( gradExactFct, X ) - grad ( ETuFESpace , *uSolution ) ) ,
+                   ( eval ( gradExactFct, X ) - grad ( ETuFESpace , *uSolution ) ) ) /** phi_i*/
 
- 
-       integrate (
+        )
+                >> errorH1SquaredLocal;
+
+
+        integrate (
             elements (ETuFESpace->mesh() ), // Mesh
 
             uFESpace->qr(), // QR
 
-	    ( eval ( uExactFct, X ) - value( ETuFESpace , *uSolution ) ) * (  eval ( uExactFct, X ) - value( ETuFESpace , *uSolution ) ) 
-	    
-	   )
-	    >> errorL2SquaredLocal;
+            ( eval ( uExactFct, X ) - value ( ETuFESpace , *uSolution ) ) * (  eval ( uExactFct, X ) - value ( ETuFESpace , *uSolution ) )
+
+        )
+                >> errorL2SquaredLocal;
 
         integrate ( boundary (ETuFESpace->mesh(), wall),
                     myBDQR,
 
-		    ETuFESpace, 
+                    ETuFESpace,
 
-		    dot ( ( eval ( gradExactFct, X ) - dot ( eval ( gradExactFct, X ) , Nface ) * Nface )
-			  -  ( grad( ETuFESpace , *uSolution )- dot ( grad( ETuFESpace , *uSolution ) , Nface ) * Nface ) , 
-			  ( eval ( gradExactFct, X ) - dot ( eval ( gradExactFct, X ) , Nface ) * Nface )
-			  -  ( grad( ETuFESpace , *uSolution )- dot ( grad( ETuFESpace , *uSolution ) , Nface ) * Nface ) 
-			  ) * phi_i  + 
-		    ( eval ( uExactFct, X ) - value( ETuFESpace , *uSolution ) ) 
-		    * (  eval ( uExactFct, X ) - value( ETuFESpace , *uSolution ) ) * phi_i
-		    
-		    )
+                    dot ( ( eval ( gradExactFct, X ) - dot ( eval ( gradExactFct, X ) , Nface ) * Nface )
+                          -  ( grad ( ETuFESpace , *uSolution ) - dot ( grad ( ETuFESpace , *uSolution ) , Nface ) * Nface ) ,
+                          ( eval ( gradExactFct, X ) - dot ( eval ( gradExactFct, X ) , Nface ) * Nface )
+                          -  ( grad ( ETuFESpace , *uSolution ) - dot ( grad ( ETuFESpace , *uSolution ) , Nface ) * Nface )
+                        ) * phi_i  +
+                    ( eval ( uExactFct, X ) - value ( ETuFESpace , *uSolution ) )
+                    * (  eval ( uExactFct, X ) - value ( ETuFESpace , *uSolution ) ) * phi_i
 
-	    >> errorH1BoundaryVector;
+                  )
+
+                >> errorH1BoundaryVector;
 
     }
 
     Comm->Barrier();
     Comm->SumAll (&errorH1SquaredLocal, &errorH1Squared, 1);
     Comm->SumAll (&errorL2SquaredLocal, &errorL2Squared, 1);
-   
-    vector_Type oneVector( ETuFESpace->map(), Unique );
-    errorH1BoundaryVectorUnique = errorH1BoundaryVector; 
-    oneVector *=0;
-    oneVector +=1;
-    errorH1BoundarySquared = errorH1BoundaryVectorUnique.dot( oneVector );
 
-    if (verbose) 
+    vector_Type oneVector ( ETuFESpace->map(), Unique );
+    errorH1BoundaryVectorUnique = errorH1BoundaryVector;
+    oneVector *= 0;
+    oneVector += 1;
+    errorH1BoundarySquared = errorH1BoundaryVectorUnique.dot ( oneVector );
+
+    if (verbose)
     {
-	std::cout << " l2 error norm " <<  std::sqrt( errorL2Squared )  << std::endl;
-	
-	std::cout << " H1 error norm " <<  sqrt( errorH1Squared ) << std::endl;
-    
-	std::cout << " H1 Gamma error norm " << std::sqrt( errorH1BoundarySquared ) << std::endl;
+        std::cout << " l2 error norm " <<  std::sqrt ( errorL2Squared )  << std::endl;
+
+        std::cout << " H1 error norm " <<  sqrt ( errorH1Squared ) << std::endl;
+
+        std::cout << " H1 Gamma error norm " << std::sqrt ( errorH1BoundarySquared ) << std::endl;
     }
- 
+
     exporter.closeFile();
 
     Real tolerance (1e-5);
-    bool success( false );
+    bool success ( false );
 
-    if ( (  abs ( sqrt(errorL2Squared) - 0.0768669 ) < tolerance )
-	&& (  abs ( sqrt(errorH1Squared) - 1.76249  ) < tolerance )
-	    && ( abs ( sqrt(errorH1BoundarySquared) - 2.35064 ) < tolerance )
-	 )
+    if ( (  abs ( sqrt (errorL2Squared) - 0.0768669 ) < tolerance )
+            && (  abs ( sqrt (errorH1Squared) - 1.76249  ) < tolerance )
+            && ( abs ( sqrt (errorH1BoundarySquared) - 2.35064 ) < tolerance )
+       )
     {
         success = true ;
     }
@@ -577,7 +577,7 @@ int main ( int argc, char** argv )
             std::cout << "End Result: TEST PASSED" << std::endl;
         }
     }
-    
+
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif

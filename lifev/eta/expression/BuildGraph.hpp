@@ -127,9 +127,9 @@ GraphElement < MeshType,
                           const UInt offsetUp = 0,
                           const UInt offsetLeft = 0);
 template < typename MeshType,
-typename TestSpaceType,
-typename SolutionSpaceType,
-typename ExpressionType >
+         typename TestSpaceType,
+         typename SolutionSpaceType,
+         typename ExpressionType >
 GraphElement < MeshType,
              TestSpaceType,
              SolutionSpaceType,

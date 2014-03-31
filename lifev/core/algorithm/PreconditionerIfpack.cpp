@@ -210,7 +210,7 @@ PreconditionerIfpack::createIfpackList ( list_Type&         list,
 
     // New parameters related to ShyLU and parallel subdomain problems
     Int subdomainSize = dataFile ( (section + "/" + subSection + "/subdomain/number_of_processors").data(), 1);
-    list.set("subdomain: number-of-processors", subdomainSize);
+    list.set ("subdomain: number-of-processors", subdomainSize);
 
     // ShyLU parameters
     Teuchos::ParameterList shyluList;
@@ -219,11 +219,11 @@ PreconditionerIfpack::createIfpackList ( list_Type&         list,
     std::string separatorType = dataFile ( (section + "/" + subSection + "/shylu/separator_type").data(), "Wide");
     shyluList.set ("Separator Type", separatorType);
     std::string schurApproxMethod = dataFile ( (section + "/" + subSection + "/shylu/schur_approx_method").data(), "A22AndBlockDiagonals");
-    shyluList.set("Schur Approximation Method", schurApproxMethod);
+    shyluList.set ("Schur Approximation Method", schurApproxMethod);
     double relativeThreshold = dataFile ( (section + "/" + subSection + "/shylu/relative_threshold").data(), 1e-3);
-    shyluList.set("Relative Threshold", relativeThreshold);
+    shyluList.set ("Relative Threshold", relativeThreshold);
     double diagonalFactor = dataFile ( (section + "/" + subSection + "/shylu/diagonal_factor").data(), 0.02);
-    shyluList.set("Diagonal Factor", diagonalFactor);
+    shyluList.set ("Diagonal Factor", diagonalFactor);
     std::string schurComplementSolver = dataFile ( (section + "/" + subSection + "/shylu/schur_complement_solver").data(), "AztecOO-Exact");
     shyluList.set ("Schur Complement Solver", schurComplementSolver);
     std::string schurAmesosSolver = dataFile ( (section + "/" + subSection + "/shylu/schur_amesos_solver").data(), "Amesos_Klu");
@@ -233,25 +233,25 @@ PreconditionerIfpack::createIfpackList ( list_Type&         list,
     Int shyluSymmetry = dataFile ( (section + "/" + subSection + "/shylu/symmetry").data(), 1);
     shyluList.set ("Symmetry", 1);
     Int innerMaxIter = dataFile ( (section + "/" + subSection + "/shylu/inner_solver_iterations").data(), 5);
-	shyluList.set ("Inner Solver MaxIters", innerMaxIter);
+    shyluList.set ("Inner Solver MaxIters", innerMaxIter);
     double innerTol = dataFile ( (section + "/" + subSection + "/shylu/inner_solver_tolerance").data(), 1e-10);
     shyluList.set ("Inner Solver Tolerance", innerTol);
     bool silentSubiterations = dataFile ( (section + "/" + subSection + "/shylu/silent_subiterations").data(), true);
     shyluList.set ("Silent subiterations", silentSubiterations);
     std::string shyluDiagSolver = dataFile ( (section + "/" + subSection + "/shylu/diag_solver").data(), "Amesos_Klu");
-    shyluList.set("Diagonal Block Solver", shyluDiagSolver);
+    shyluList.set ("Diagonal Block Solver", shyluDiagSolver);
     double iqrKrylovDim = dataFile ( (section + "/" + subSection + "/shylu/iqr_krylov_dim").data(), 0.5);
-    shyluList.set("IQR Krylov Dim", iqrKrylovDim);
+    shyluList.set ("IQR Krylov Dim", iqrKrylovDim);
     Int iqrNumIter = dataFile ( (section + "/" + subSection + "/shylu/iqr_num_iter").data(), 0);
-    shyluList.set("IQR Number Iterations", iqrNumIter);
+    shyluList.set ("IQR Number Iterations", iqrNumIter);
     bool iqrScaling = dataFile ( (section + "/" + subSection + "/shylu/iqr_scaling").data(), true);
-    shyluList.set("IQR Scaling", iqrScaling);
+    shyluList.set ("IQR Scaling", iqrScaling);
     std::string iqrInitialPrecType = dataFile ( (section + "/" + subSection + "/shylu/iqr_initial_prec_type").data(), "Amesos");
-    shyluList.set("IQR Initial Prec Type", iqrInitialPrecType);
+    shyluList.set ("IQR Initial Prec Type", iqrInitialPrecType);
     std::string iqrInitialPrecAmesosType = dataFile ( (section + "/" + subSection + "/shylu/iqr_initial_prec_amesos_type").data(), "Amesos_Klu");
-    shyluList.set("IQR Initial Prec Amesos Type", iqrInitialPrecAmesosType);
+    shyluList.set ("IQR Initial Prec Amesos Type", iqrInitialPrecAmesosType);
 
-    list.set("ShyLU list", shyluList);
+    list.set ("ShyLU list", shyluList);
 
     if ( displayList && verbose )
     {

@@ -200,7 +200,7 @@ integrate ( const RequestLoopElement<MeshType>& request,
             const OpenMPParameters& ompParams,
             const UInt offsetUp,
             const UInt offsetLeft)
-            {
+{
     return IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterNeverAdapt>
            (request.mesh(), QRAdapterNeverAdapt (quadrature), testSpace, solutionSpace, expression,
             ompParams, offsetUp, offsetLeft);
@@ -248,7 +248,7 @@ integrate ( const RequestLoopElement<MeshType>& request,
             const ExpressionType& expression,
             const UInt offset = 0);
 template < typename MeshType, typename TestSpaceType, typename ExpressionType>
-IntegrateVectorElement<MeshType, TestSpaceType, ExpressionType,QRAdapterNeverAdapt>
+IntegrateVectorElement<MeshType, TestSpaceType, ExpressionType, QRAdapterNeverAdapt>
 integrate ( const RequestLoopElement<MeshType>& request,
             const QuadratureRule& quadrature,
             const boost::shared_ptr<TestSpaceType>& testSpace,

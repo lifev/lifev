@@ -161,7 +161,7 @@ public:
     */
     template < typename ReturnType, typename vector_type >
     void interpolate ( const FEFunction<MeshType, MapType, ReturnType>* fEFunction,
-		       vector_type& vector, const Real time = 0. );
+                       vector_type& vector, const Real time = 0. );
 
     //! calculate L2 velocity error for given exact velocity function
     //! \param pexact the exact velocity as a function
@@ -775,7 +775,7 @@ template < typename MeshType, typename MapType>
 template < typename ReturnType, typename vector_type>
 void FESpace<MeshType, MapType>::
 interpolate ( const FEFunction<MeshType, MapType, ReturnType>* fEFunction,
-	      vector_type& vector, const Real time )
+              vector_type& vector, const Real time )
 {
 
     // First, we build a "quadrature" that consists in the nodes (0 weight)

@@ -560,7 +560,7 @@ setup ()
         VectorElemental massValue  ( M_FESpace.refFE().nbDof(), 1 );
         extract_vec ( vectorMass, massValue, M_FESpace.refFE(), M_FESpace.dof(), iElem, 0 );
         // TODO: this works only for P0
-	AssemblyElemental::mass ( massValue[ 0 ], matElem, M_FESpace.fe(), 0, 0);
+        AssemblyElemental::mass ( massValue[ 0 ], matElem, M_FESpace.fe(), 0, 0);
 
         /* Put in M the matrix L and L^T, where L and L^T is the Cholesky factorization of M.
            For more details see http://www.netlib.org/lapack/double/dpotrf.f */
@@ -594,7 +594,7 @@ solveOneTimeStep ()
     {
 
         // Update the property of the current element
-        M_FESpace.fe().update ( M_FESpace.mesh()->element(iElem), UPDATE_QUAD_NODES | UPDATE_WDET);
+        M_FESpace.fe().update ( M_FESpace.mesh()->element (iElem), UPDATE_QUAD_NODES | UPDATE_WDET);
 
         // Reconstruct step of the current element
         localReconstruct ( iElem );

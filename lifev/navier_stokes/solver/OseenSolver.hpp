@@ -1228,12 +1228,12 @@ OseenSolver<MeshType, SolverType>::buildSystem()
         chronoStiff.start();
         if ( M_stiffStrain )
             AssemblyElemental::stiff_strain ( 2.0 * M_oseenData->viscosity(),
-                           M_elementMatrixStiff,
-                           M_velocityFESpace.fe() );
+                                              M_elementMatrixStiff,
+                                              M_velocityFESpace.fe() );
         else
             AssemblyElemental::stiff ( M_oseenData->viscosity(),
-                    M_elementMatrixStiff,
-                    M_velocityFESpace.fe(), 0, 0, M_velocityFESpace.fieldDim() );
+                                       M_elementMatrixStiff,
+                                       M_velocityFESpace.fe(), 0, 0, M_velocityFESpace.fieldDim() );
         //stiff_div( 0.5*M_velocityFESpace.fe().diameter(), M_elementMatrixStiff, M_velocityFESpace.fe() );
         chronoStiff.stop();
 
@@ -1242,8 +1242,8 @@ OseenSolver<MeshType, SolverType>::buildSystem()
         {
             chronoMass.start();
             AssemblyElemental::mass ( M_oseenData->density(),
-                   M_elementMatrixMass,
-                   M_velocityFESpace.fe(), 0, 0, M_velocityFESpace.fieldDim() );
+                                      M_elementMatrixMass,
+                                      M_velocityFESpace.fe(), 0, 0, M_velocityFESpace.fieldDim() );
             chronoMass.stop();
         }
 
@@ -1311,10 +1311,10 @@ OseenSolver<MeshType, SolverType>::buildSystem()
             // divergence
             chronoGrad.start();
             AssemblyElemental::grad ( iComponent, 1.0,
-                   M_elementMatrixGradient,
-                   M_velocityFESpace.fe(),
-                   M_pressureFESpace.fe(),
-                   iComponent, 0 );
+                                      M_elementMatrixGradient,
+                                      M_velocityFESpace.fe(),
+                                      M_pressureFESpace.fe(),
+                                      iComponent, 0 );
             chronoGrad.stop();
 
             chronoGradAssemble.start();
@@ -1515,29 +1515,29 @@ updateSystem ( const Real         alpha,
             {
                 // ALE term: - rho div(w) u v
                 AssemblyElemental::mass_divw ( - M_oseenData->density(),
-                            M_wLoc,
-                            M_elementMatrixStiff,
-                            M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
+                                               M_wLoc,
+                                               M_elementMatrixStiff,
+                                               M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
             }
 
             // ALE stab implicit: 0.5 rho div u w v
             AssemblyElemental::mass_divw ( 0.5 * M_oseenData->density(),
-                        M_uLoc,
-                        M_elementMatrixStiff,
-                        M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
+                                           M_uLoc,
+                                           M_elementMatrixStiff,
+                                           M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
 
             // Stabilising term: -rho div(u^n) u v
             if ( M_divBetaUv )
                 AssemblyElemental::mass_divw ( -0.5 * M_oseenData->density(),
-                            M_uLoc,
-                            M_elementMatrixStiff,
-                            M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
+                                               M_uLoc,
+                                               M_elementMatrixStiff,
+                                               M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
 
             // compute local convective terms
             AssemblyElemental::advection ( M_oseenData->density(),
-                        M_elementRightHandSide,
-                        M_elementMatrixStiff,
-                        M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
+                                           M_elementRightHandSide,
+                                           M_elementMatrixStiff,
+                                           M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
 
             // loop on components
             for ( UInt iComponent = 0; iComponent < numVelocityComponent; ++iComponent )

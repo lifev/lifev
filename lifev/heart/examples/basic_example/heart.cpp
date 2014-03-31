@@ -465,15 +465,15 @@ void Heart::computeRhs ( vector_Type& rhs,
 
         //! Computing the current source of the righthand side, repeated
         AssemblyElemental::source (M_heart_fct->stimulus(),
-                elvec_Iapp,
-                electricModel.potentialFESpace().fe(),
-                data.time(),
-                0);
+                                   elvec_Iapp,
+                                   electricModel.potentialFESpace().fe(),
+                                   data.time(),
+                                   0);
         AssemblyElemental::source (M_heart_fct->stimulus(),
-                elvec_Iapp,
-                electricModel.potentialFESpace().fe(),
-                data.time(),
-                1);
+                                   elvec_Iapp,
+                                   electricModel.potentialFESpace().fe(),
+                                   data.time(),
+                                   1);
 
         //! Assembling the righthand side
         for ( UInt i = 0 ; i < electricModel.potentialFESpace().fe().nbFEDof() ; i++ )
@@ -538,14 +538,14 @@ void Heart::computeRhs ( vector_Type& rhs,
 
         //! Computing Iapp
         AssemblyElemental::source (M_heart_fct->stimulus(),
-                elvec_Iapp,
-                electricModel.potentialFESpace().fe(),
-                data.time(), 0);
+                                   elvec_Iapp,
+                                   electricModel.potentialFESpace().fe(),
+                                   data.time(), 0);
         AssemblyElemental::source (M_heart_fct->stimulus(),
-                elvec_Iapp,
-                electricModel.potentialFESpace().fe(),
-                data.time(),
-                1);
+                                   elvec_Iapp,
+                                   electricModel.potentialFESpace().fe(),
+                                   data.time(),
+                                   1);
         UInt totalUDof  = electricModel.potentialFESpace().map().map (Unique)->NumGlobalElements();
 
         for ( UInt iNode = 0 ; iNode < nbNode ; iNode++ )
