@@ -464,7 +464,7 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( 
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
-                parameter ( (* (this->M_vectorsParameters) ) [1]) * dot ( deformationGradientTensor * transpose(grad (phi_j)) * deformationGradientTensor , grad (phi_i) )
+                parameter ( (* (this->M_vectorsParameters) ) [1]) * dot ( deformationGradientTensor * transpose (grad (phi_j) ) * deformationGradientTensor , grad (phi_i) )
               ) >> jacobian;
 
     // //! 6. Stiffness matrix : int { mu * ( ( F * F^T * transpose(dF) ) : \nabla \v ) }

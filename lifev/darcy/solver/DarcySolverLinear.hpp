@@ -1134,7 +1134,7 @@ computeConstantMatrices ( MatrixElemental& elmatMix )
     /* Update the divergence matrix, it is independent of the current element
        thanks to the Piola transform. */
     AssemblyElemental::grad_Hdiv ( static_cast<Real> (1.), elmatMix, M_dualField->getFESpace().fe(),
-                M_primalField->getFESpace().fe(), 0, 1 );
+                                   M_primalField->getFESpace().fe(), 0, 1 );
 
     // Select the correct element which represent ( RT0 \cdot N ) * Hybrid.
     const ReferenceFEHybrid* feRT0VdotNHyb = 0;
@@ -1162,8 +1162,8 @@ computeConstantMatrices ( MatrixElemental& elmatMix )
        TP_VdotN_Hdiv takes two const RefHybridFE& so we must cast a const ReferenceFE&
        to a const RefHybridFE&. The cast of type is static and uses pointers. */
     AssemblyElemental::TP_VdotN_Hdiv ( 1., elmatMix,
-                    *static_cast < const ReferenceFEHybrid* > (& ( M_hybridField->getFESpace().refFE() ) ),
-                    *feRT0VdotNHyb, 0, 2 );
+                                       *static_cast < const ReferenceFEHybrid* > (& ( M_hybridField->getFESpace().refFE() ) ),
+                                       *feRT0VdotNHyb, 0, 2 );
 
 } // computeConstantMatrices
 

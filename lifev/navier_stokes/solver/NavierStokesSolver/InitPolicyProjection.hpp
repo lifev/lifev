@@ -183,10 +183,10 @@ initSimulation ( bcContainerPtr_Type bchandler,
 
         if ( SolverPolicy::preconditioner()->preconditionerType() == "PCD" )
         {
-        	vector_Type beta ( systemMatrix->map(), Repeated );
-        	beta += *solution;
-        	PreconditionerPCD* pcdPtr = dynamic_cast<PreconditionerPCD*> ( SolverPolicy::preconditioner().get() );
-        	pcdPtr->updateBeta ( beta );
+            vector_Type beta ( systemMatrix->map(), Repeated );
+            beta += *solution;
+            PreconditionerPCD* pcdPtr = dynamic_cast<PreconditionerPCD*> ( SolverPolicy::preconditioner().get() );
+            pcdPtr->updateBeta ( beta );
         }
 
         displayer().leaderPrint ( "done\n" );

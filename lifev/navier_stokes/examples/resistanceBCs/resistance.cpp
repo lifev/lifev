@@ -142,7 +142,7 @@ struct Resistance::Private
     static Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
     {
 
-        Real fluxFinal(0.17);
+        Real fluxFinal (0.17);
         Real rampAmpl (0.4);
         Real dt (0.001);
 
@@ -211,27 +211,27 @@ struct Resistance::Private
         Real area (0.0033);
 
         //Parabolic profile
-        Real radius( std::sqrt( area / 3.14159265359 ) );
+        Real radius ( std::sqrt ( area / 3.14159265359 ) );
         Real radiusSquared = radius * radius;
-        Real peak(0);
+        Real peak (0);
         peak = ( 2 * flux ) / ( area );
 
         switch (i)
         {
-        case 0:
-            // Flat profile: flux / area;
-            // return n1 * flux / area;
-            return n1 * std::max( 0.0, peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) );
-        case 1:
-            // Flat profile: flux / area;
-            //return n2 * flux / area;
-            return n2 * std::max( 0.0 , peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) );
-        case 2:
-            // Flat profile: flux / area;
-            // return n3 * flux / area;
-            return n3 * std::max( 0.0, peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) );
-        default:
-            return 0.0;
+            case 0:
+                // Flat profile: flux / area;
+                // return n1 * flux / area;
+                return n1 * std::max ( 0.0, peak * ( (radiusSquared - ( (x - x0) * (x - x0) + (y - y0) * (y - y0) ) ) / radiusSquared) );
+            case 1:
+                // Flat profile: flux / area;
+                //return n2 * flux / area;
+                return n2 * std::max ( 0.0 , peak * ( (radiusSquared - ( (x - x0) * (x - x0) + (y - y0) * (y - y0) ) ) / radiusSquared) );
+            case 2:
+                // Flat profile: flux / area;
+                // return n3 * flux / area;
+                return n3 * std::max ( 0.0, peak * ( (radiusSquared - ( (x - x0) * (x - x0) + (y - y0) * (y - y0) ) ) / radiusSquared) );
+            default:
+                return 0.0;
         }
     }
 
@@ -240,20 +240,20 @@ struct Resistance::Private
     {
         switch (i)
         {
-        case 0:
-            //Flat profile: flux / area;
-            //return n1 * flux / area;
-            return 0;
-        case 1:
-            //Flat profile: flux / area;
-            //return n2 * flux / area;
-            return 0;
-        case 2:
-            // Flat profile: flux / area;
-            // return n3 * flux / area;
-            return 0;
-        default:
-            return 0.0;
+            case 0:
+                //Flat profile: flux / area;
+                //return n1 * flux / area;
+                return 0;
+            case 1:
+                //Flat profile: flux / area;
+                //return n2 * flux / area;
+                return 0;
+            case 2:
+                // Flat profile: flux / area;
+                // return n3 * flux / area;
+                return 0;
+            default:
+                return 0.0;
         }
     }
 
@@ -264,7 +264,7 @@ struct Resistance::Private
 };
 
 Resistance::Resistance ( int argc,
-                     char** argv )
+                         char** argv )
     :
     parameters ( new Private )
 {
@@ -325,9 +325,9 @@ Resistance::run()
     Real resistance = dataFile ( "fluid/physics/resistance", 0.0 );
     Real hydrostatic = dataFile ( "fluid/physics/hydrostatic", 0.0 );
 
-    outFlowBC.initParameters( OUTLET, resistance, hydrostatic, "outlet-3" );
+    outFlowBC.initParameters ( OUTLET, resistance, hydrostatic, "outlet-3" );
 
-    BCFunctionBase resistanceBC( FlowConditions::outPressure0 );
+    BCFunctionBase resistanceBC ( FlowConditions::outPressure0 );
     //cylinder
 
     bcH.addBC ( "Inlet",    INLET,    Essential,   Full,  uIn  , 3 );
@@ -448,7 +448,7 @@ Resistance::run()
     vectorPtr_Type velAndPressure ( new vector_Type (*fluid.solution(), exporter.mapType() ) );
 
     exporter.addVariable ( ExporterData<mesh_Type>::VectorField, "velocity", uFESpacePtr,
-                          velAndPressure, UInt (0) );
+                           velAndPressure, UInt (0) );
 
     exporter.addVariable ( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpacePtr,
                            velAndPressure, UInt (3 * uFESpacePtr->dof().numTotalDof() ) );
@@ -464,10 +464,10 @@ Resistance::run()
     for ( Real time = t0 + dt ; time <= tFinal + dt / 2.; time += dt, iter++)
     {
 
-        std::cout << "Inlet area: " << fluid.area( INLET ) << std::endl;
+        std::cout << "Inlet area: " << fluid.area ( INLET ) << std::endl;
 
         // Updating the Neumann BC for resistance
-        outFlowBC.renewParameters( fluid, *velAndPressure );
+        outFlowBC.renewParameters ( fluid, *velAndPressure );
         // if ( verbose )
         // {
         //     std::cout << std::endl;

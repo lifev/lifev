@@ -953,7 +953,7 @@ void ExporterHDF5<MeshType>::writeVector (const exporterData_Type& dvar)
     // Using auxiliary arrays:
     Real**                                  ArrayOfPointers (new Real*[nDimensions]);
     boost::shared_array< boost::shared_ptr<vector_Type> >
-    		ArrayOfVectors (new boost::shared_ptr<vector_Type>[nDimensions]);
+    ArrayOfVectors (new boost::shared_ptr<vector_Type>[nDimensions]);
 
     Int MyLDA;
 

@@ -150,8 +150,8 @@ AssemblyPolicyNavierStokesPicard< mesh_Type >::assembleSystem ( matrixPtr_Type s
 
     if ( preconditioner->preconditionerType() == "PCD" )
     {
-    	PreconditionerPCD* pcdPtr = dynamic_cast<PreconditionerPCD*> ( preconditioner.get() );
-    	pcdPtr->updateBeta ( beta );
+        PreconditionerPCD* pcdPtr = dynamic_cast<PreconditionerPCD*> ( preconditioner.get() );
+        pcdPtr->updateBeta ( beta );
     }
 }
 

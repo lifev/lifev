@@ -668,9 +668,9 @@ Structure::run3d()
         exporter->postProcess ( dataStructure->dataTime()->time() );
         //exporterCheck->postProcess ( dataStructure->dataTime()->time() );
 
-        cout <<"*********************************************************"<< std::endl;
-        cout <<" solid.disp()[ "<< indexPoint  <<" ] = "<<  solid.displacement()[ indexPoint ]  << std::endl;
-        cout <<"*********************************************************"<< std::endl;
+        cout << "*********************************************************" << std::endl;
+        cout << " solid.disp()[ " << indexPoint  << " ] = " <<  solid.displacement() [ indexPoint ]  << std::endl;
+        cout << "*********************************************************" << std::endl;
 
 
         Real normVect;

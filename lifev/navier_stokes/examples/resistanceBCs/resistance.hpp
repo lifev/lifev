@@ -59,7 +59,7 @@ public:
     //@{
 
     Resistance ( int argc,
-               char** argv );
+                 char** argv );
 
     ~Resistance()
     {}
