@@ -5,7 +5,7 @@
 
 
 [exporter]
-type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
+type       = vtk # hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
 start      = 0
 save       = 1
@@ -30,13 +30,13 @@ mesh_source            = regular_mesh
     [../time_discretization]
     initialtime     = 0.0
     endtime         = 14.945
-    timestep        = 0.01
+    timestep        = 0.0025
 
     BDF_order       = 2
 
     [../space_discretization]
     mesh_dir        = ./
-    mesh_file       = flow_square_coarse.mesh
+    mesh_file       = cylinder_new_longer.mesh #KoobusFarhat.mesh
     mesh_type       = .mesh
 
     verbose         = 0
@@ -57,12 +57,17 @@ mesh_source            = regular_mesh
     steady          = 0
 
     [../prec]
-    prectype                = Ifpack # Ifpack or ML
-    displayList             = false
+    prectype                = ML # Ifpack or ML
+    displayList             = true
 
         [./ML]
-        analyze_smoother        = false
-        default_parameter_list  = DD-ML    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+
+        default_parameter_list  = NSSA  # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+        inc_or_dec              = increasing
+	max_levels              = 3
+        MLOutput                = 10
+        pde_equations           = 4
+        cycle_applications      = 3
 
             [./smoother]
             # smoother type
@@ -71,28 +76,25 @@ mesh_source            = regular_mesh
             # Amesos-Superlu, Amesos-UMFPACK, Amesos-Superludist, Amesos-MUMPS,
             # user-defined, SuperLU, IFPACK-Chebyshev, self, do-nothing,
             # IC, ICT, ILU, ILUT
-            type                    = IFPACK
-            pre_or_post             = pre
-            sweeps                  = 3
-            damping_factor          = 1
+            type            = Gauss-Seidel
+            pre_or_post     = both
+            sweeps          = 3
 
             [../coarse]
-            #type                   = Amesos-UMFPACK
             type                    = Amesos-KLU
             sweeps                  = 1
             pre_or_post             = both
-            max_size                = 200
-
-            [../repartition]
-            enable                  = 1
-            partitioner             = ParMETIS
-            max_min_ration          = 1.3
-            min_per_proc            = 500
-
+ 
+	    [../aggregation]
+            threshold               = 0.01
+            type                    = Uncoupled-MIS      
+      
             [../energy_minimization]
-            enable          = true
-            type            = 3
-            [../]
+            enable                  = true
+
+	    [../repartition]
+            enable                  = true
+            partitioner             = ParMETIS    
 
         # ifpack
         [../ifpack]
