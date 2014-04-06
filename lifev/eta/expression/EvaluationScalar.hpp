@@ -183,12 +183,12 @@ private:
     Real M_value;
 };
 
-/*const flag_Type EvaluationScalar::S_globalUpdateFlag=ET_UPDATE_NONE;
+const flag_Type EvaluationScalar::S_globalUpdateFlag=ET_UPDATE_NONE;
 
 const flag_Type EvaluationScalar::S_testUpdateFlag = ET_UPDATE_NONE;
 
 const flag_Type EvaluationScalar::S_solutionUpdateFlag=ET_UPDATE_NONE;
-*/
+
 
 template <typename VectorType>
 class EvaluationExtractScalar
