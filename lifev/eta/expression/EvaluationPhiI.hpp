@@ -78,13 +78,13 @@ public:
     //@{
 
     //! Flag for the global current FE
-    const static flag_Type S_globalUpdateFlag;
+    const static flag_Type S_globalUpdateFlag = ET_UPDATE_NONE;
 
     //! Flag for the test current FE
-    const static flag_Type S_testUpdateFlag;
+    const static flag_Type S_testUpdateFlag = ET_UPDATE_NONE;
 
     //! Flag for the solution current FE
-    const static flag_Type S_solutionUpdateFlag;
+    const static flag_Type S_solutionUpdateFlag = ET_UPDATE_NONE;
 
     //@}
 
@@ -178,15 +178,6 @@ private:
 };
 
 
-template<UInt testDim>
-const flag_Type EvaluationPhiI<testDim>::S_globalUpdateFlag = ET_UPDATE_NONE;
-
-template<UInt testDim>
-const flag_Type EvaluationPhiI<testDim>::S_testUpdateFlag = ET_UPDATE_NONE;
-
-template<UInt testDim>
-const flag_Type EvaluationPhiI<testDim>::S_solutionUpdateFlag = ET_UPDATE_NONE;
-
 
 //! Evaluation of the basis function phi_i in the case of a scalar FE.
 /*!
@@ -215,13 +206,13 @@ public:
     //@{
 
     //! Flag for the global current FE
-    const static flag_Type S_globalUpdateFlag;
+    const static flag_Type S_globalUpdateFlag = ET_UPDATE_NONE;
 
     //! Flag for the test current FE
-    const static flag_Type S_testUpdateFlag;
+    const static flag_Type S_testUpdateFlag = ET_UPDATE_NONE;
 
     //! Flag for the solution current FE
-    const static flag_Type S_solutionUpdateFlag;
+    const static flag_Type S_solutionUpdateFlag = ET_UPDATE_NONE;
 
     //@}
 
@@ -314,11 +305,6 @@ private:
 
 };
 
-const flag_Type EvaluationPhiI<1>::S_globalUpdateFlag = ET_UPDATE_NONE;
-
-const flag_Type EvaluationPhiI<1>::S_testUpdateFlag = ET_UPDATE_NONE;
-
-const flag_Type EvaluationPhiI<1>::S_solutionUpdateFlag = ET_UPDATE_NONE;
 
 } // Namespace ExpressionAssembly
 

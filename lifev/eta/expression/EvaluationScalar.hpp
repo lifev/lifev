@@ -78,13 +78,13 @@ public:
     //@{
 
     //! Flag for the global current FE
-    const static flag_Type S_globalUpdateFlag;
+    const static flag_Type S_globalUpdateFlag = ET_UPDATE_NONE;
 
     //! Flag for the test current FE
-    const static flag_Type S_testUpdateFlag;
+    const static flag_Type S_testUpdateFlag = ET_UPDATE_NONE;
 
     //! Flag for the solution current FE
-    const static flag_Type S_solutionUpdateFlag;
+    const static flag_Type S_solutionUpdateFlag = ET_UPDATE_NONE;
 
     //@}
 
@@ -183,12 +183,6 @@ private:
     Real M_value;
 };
 
-const flag_Type EvaluationScalar::S_globalUpdateFlag=ET_UPDATE_NONE;
-
-const flag_Type EvaluationScalar::S_testUpdateFlag = ET_UPDATE_NONE;
-
-const flag_Type EvaluationScalar::S_solutionUpdateFlag=ET_UPDATE_NONE;
-
 
 template <typename VectorType>
 class EvaluationExtractScalar
@@ -208,13 +202,13 @@ public:
     //@{
 
     //! Flag for the global current FE
-    const static flag_Type S_globalUpdateFlag;
+    const static flag_Type S_globalUpdateFlag = ET_UPDATE_NONE;
 
     //! Flag for the test current FE
-    const static flag_Type S_testUpdateFlag;
+    const static flag_Type S_testUpdateFlag = ET_UPDATE_NONE;
 
     //! Flag for the solution current FE
-    const static flag_Type S_solutionUpdateFlag;
+    const static flag_Type S_solutionUpdateFlag = ET_UPDATE_NONE;
 
     //@}
 
@@ -321,14 +315,6 @@ private:
 
 };
 
-template< typename VectorType>
-const flag_Type EvaluationExtractScalar<VectorType>::S_globalUpdateFlag = ET_UPDATE_NONE;
-
-template< typename VectorType>
-const flag_Type EvaluationExtractScalar<VectorType>::S_testUpdateFlag = ET_UPDATE_NONE;
-
-template< typename VectorType>
-const flag_Type EvaluationExtractScalar<VectorType>::S_solutionUpdateFlag = ET_UPDATE_NONE;
 
 } // Namespace ExpressionAssembly
 
