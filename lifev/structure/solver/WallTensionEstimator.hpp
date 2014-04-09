@@ -680,7 +680,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement ( void )
     for ( UInt iDOF = 0; iDOF < ( UInt ) M_FESpace->dof().numTotalDof(); ++iDOF )
     {
 
-        if ( M_displacement->blockMap().LID (iDOF) != -1 ) // The Global ID is on the calling processors
+        if ( M_displacement->blockMap().LID ( (int) iDOF) != -1 ) // The Global ID is on the calling processors
         {
             std::vector<Real> dX (3, 0.0);
             std::vector<Real> dY (3, 0.0);
@@ -695,8 +695,8 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement ( void )
             //Extracting the gradient of U on the current DOF
             for ( UInt iComp = 0; iComp < M_FESpace->fieldDim(); ++iComp )
             {
-                Int LIDid = M_displacement->blockMap().LID (iDOF + iComp * dim + M_offset);
-                Int GIDid = M_displacement->blockMap().GID (LIDid);
+                Int LIDid = M_displacement->blockMap().LID ( (int) ( iDOF + iComp * dim + M_offset ) );
+                Int GIDid = M_displacement->blockMap().GID ( LIDid);
                 dX[iComp] = (*grDisplX) (GIDid); // (d_xX,d_yX,d_zX)
                 dY[iComp] = (*grDisplY) (GIDid); // (d_xY,d_yY,d_zY)
                 dZ[iComp] = (*grDisplZ) (GIDid); // (d_xZ,d_yZ,d_zZ)
@@ -742,7 +742,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement ( void )
             //Save the eigenvalues in the global vector
             for ( UInt icoor (0); icoor < M_FESpace->fieldDim(); ++icoor )
             {
-                Int LIDid = M_displacement->blockMap().LID (iDOF + icoor * dim + M_offset);
+                Int LIDid = M_displacement->blockMap().LID ( (int) (iDOF + icoor * dim + M_offset) );
                 Int GIDid = M_displacement->blockMap().GID (LIDid);
                 (*M_globalEigenvalues) (GIDid) = M_eigenvaluesR[icoor];
             }
@@ -897,7 +897,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryCauchyStresses ( void )
     for ( UInt iDOF (0); iDOF < ( UInt ) M_FESpace->dof().numTotalDof(); ++iDOF )
     {
 
-        if ( M_displacement->blockMap().LID (iDOF) != -1 ) // The Global ID is on the calling processors
+        if ( M_displacement->blockMap().LID ( (int) iDOF) != -1 ) // The Global ID is on the calling processors
         {
 
             (*M_sigma).Scale (0.0);
@@ -905,7 +905,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryCauchyStresses ( void )
             //Extracting the gradient of U on the current DOF
             for ( UInt iComp = 0; iComp < M_FESpace->fieldDim(); ++iComp )
             {
-                Int LIDid = M_displacement->blockMap().LID (iDOF + iComp * M_FESpace->dim() + M_offset);
+                Int LIDid = M_displacement->blockMap().LID ( (int) (iDOF + iComp * M_FESpace->dim() + M_offset) );
                 Int GIDid = M_displacement->blockMap().GID (LIDid);
                 (*M_sigma) (iComp, 0) = (*M_sigmaX) (GIDid); // (d_xX,d_yX,d_zX)
                 (*M_sigma) (iComp, 1) = (*M_sigmaY) (GIDid); // (d_xY,d_yY,d_zY)
@@ -929,7 +929,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryCauchyStresses ( void )
             //Save the eigenvalues in the global vector
             for ( UInt icoor = 0; icoor < M_FESpace->fieldDim(); ++icoor )
             {
-                Int LIDid = M_displacement->blockMap().LID (iDOF + icoor * M_FESpace->dim() + M_offset);
+                Int LIDid = M_displacement->blockMap().LID ( (int) (iDOF + icoor * M_FESpace->dim() + M_offset ) );
                 Int GIDid = M_displacement->blockMap().GID (LIDid);
                 (*M_globalEigenvalues) (GIDid) = M_eigenvaluesR[icoor];
             }
