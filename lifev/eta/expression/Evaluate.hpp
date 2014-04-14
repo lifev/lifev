@@ -39,12 +39,14 @@
 #include <lifev/core/LifeV.hpp>
 
 #include <lifev/eta/expression/RequestLoopElement.hpp>
+#include <lifev/eta/expression/RequestLoopFaceID.hpp>
 
 #include <lifev/core/fem/QuadratureRule.hpp>
 #include <lifev/eta/fem/QRAdapterBase.hpp>
 #include <lifev/eta/fem/QRAdapterNeverAdapt.hpp>
 
 #include <lifev/eta/expression/EvaluateNodalExpressionVectorElement.hpp>
+#include <lifev/eta/expression/EvaluateNodalExpressionVectorElementFaceID.hpp>
 
 #include <boost/shared_ptr.hpp>
 
@@ -89,6 +91,17 @@ evaluateNode ( const RequestLoopElement<MeshType>& request,
 {
     return EvaluateNodalExpressionVectorElement<MeshType, SolutionSpaceType, ExpressionType, QRAdapterNeverAdapt>
            (request.mesh(), QRAdapterNeverAdapt (quadrature), solutionSpace, expression);
+}
+
+template < typename MeshType, typename SolutionSpaceType, typename ExpressionType>
+EvaluateNodalExpressionVectorElementFaceID<MeshType, SolutionSpaceType, ExpressionType>
+evaluateNode ( const RequestLoopFaceID<MeshType>& request,
+               const QuadratureBoundary& quadrature,
+               const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+               const ExpressionType& expression)
+{
+    return EvaluateNodalExpressionVectorElementFaceID<MeshType, SolutionSpaceType, ExpressionType>
+        (request.mesh(), request.id(), quadrature, solutionSpace, expression);
 }
 
 

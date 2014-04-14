@@ -79,6 +79,7 @@
 
 #include <lifev/eta/expression/ExpressionHK.hpp>
 #include <lifev/eta/expression/ExpressionMeas.hpp>
+#include <lifev/eta/expression/ExpressionMeasBDCurrentFE.hpp>
 #include <lifev/eta/expression/ExpressionPosition.hpp>
 #include <lifev/eta/expression/ExpressionNormal.hpp>
 
@@ -130,6 +131,7 @@
 
 #include <lifev/eta/expression/EvaluationHK.hpp>
 #include <lifev/eta/expression/EvaluationMeas.hpp>
+#include <lifev/eta/expression/EvaluationMeasBDCurrentFE.hpp>
 #include <lifev/eta/expression/EvaluationPosition.hpp>
 #include <lifev/eta/expression/EvaluationNormal.hpp>
 
@@ -780,6 +782,16 @@ class ExpressionToEvaluation<ExpressionMeas, testDim, solutionDim, spaceDim>
 {
 public:
     typedef EvaluationMeas<spaceDim> evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+template<UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionMeasBDCurrentFE, testDim, solutionDim, spaceDim>
+{
+public:
+    typedef EvaluationMeasBDCurrentFE<spaceDim> evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();

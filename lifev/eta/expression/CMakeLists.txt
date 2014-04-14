@@ -16,6 +16,7 @@ SET(expression_HEADERS
 	expression/EvaluationInterpolateValue.hpp
 	expression/EvaluationMatrix.hpp
 	expression/EvaluationMeas.hpp
+	expression/EvaluationMeasBDCurrentFE.hpp
 	expression/EvaluationOuterProduct.hpp
 	expression/EvaluationPhiI.hpp
 	expression/EvaluationPhiJ.hpp
@@ -57,6 +58,7 @@ SET(expression_HEADERS
 	expression/ExpressionInterpolateValue.hpp
 	expression/ExpressionMatrix.hpp
 	expression/ExpressionMeas.hpp
+	expression/ExpressionMeasBDCurrentFE.hpp
 	expression/ExpressionOuterProduct.hpp
 	expression/ExpressionPhiI.hpp
 	expression/ExpressionPhiJ.hpp
@@ -99,6 +101,7 @@ SET(expression_HEADERS
 	expression/RequestLoopFaceID.hpp
 	expression/Evaluate.hpp
 	expression/EvaluateNodalExpressionVectorElement.hpp
+	expression/EvaluateNodalExpressionVectorElementFaceID.hpp
 	expression/ExpressionVectorFromNonConstantScalar.hpp
 	expression/EvaluationVectorFromNonConstantScalar.hpp
 	expression/ExpressionVectorFromNonConstantMatrix.hpp
