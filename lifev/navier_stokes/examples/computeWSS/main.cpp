@@ -386,7 +386,7 @@ WSS::run3d()
     identity (2, 2) = 1.0;
 
     ExpressionVectorFromNonConstantScalar<ExpressionMeasBDCurrentFE, 3  > vMeas( meas_BDk );
-    evaluateNode( boundary( uETFESpace->mesh(), 1 ),
+    evaluateNode( boundary( uETFESpace->mesh(), 200 ),
                   adaptedBDQuadRule,
                   uETFESpace,
                   dot( vMeas , phi_i )
@@ -434,10 +434,10 @@ WSS::run3d()
 
 	std::cout << "Viscosity: " << dataClass->viscosity( ) << std::endl;
         // Defining expressions
-        evaluateNode( boundary( uETFESpace->mesh(), 1 ),
+        evaluateNode( boundary( uETFESpace->mesh(), 200 ),
                       adaptedBDQuadRule,
                       uETFESpace,
-		      meas_BDk * dot ( value(dynamicViscosity) * ( grad(uETFESpace, *velocity) + transpose(grad(uETFESpace, *velocity)) ) * Nface - 
+		      meas_BDk * dot ( value(dynamicViscosity) * ( grad(uETFESpace, *velocity) + transpose(grad(uETFESpace, *velocity)) ) * Nface -
 				       dot( value(dynamicViscosity) * ( grad(uETFESpace, *velocity) + transpose(grad(uETFESpace, *velocity)) ) * Nface , Nface ) * Nface, phi_i )
                       ) >> WSSvector;
         WSSvector->globalAssemble();
