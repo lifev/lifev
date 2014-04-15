@@ -67,15 +67,15 @@ public:
     //@{
 
     //! Empty Constructor
-    ExpressionMeasBDCurrentFE(const UInt nbQuadPt)
-    : M_nbQuadPt( nbQuadPt ) {}
+    ExpressionMeasBDCurrentFE()
+    : base_Type() {}
 
     //! Copy constructor
     ExpressionMeasBDCurrentFE ( const ExpressionMeasBDCurrentFE& expression)
-    : M_nbQuadPt( expression.M_nbQuadPt ) {}
+    : base_Type() {}
 
     //! Destructor
-    ~ExpressionMeasBDCurrentFE();
+    ~ExpressionMeasBDCurrentFE(){}
 
     //@}
 
@@ -84,19 +84,16 @@ public:
     //@{
 
     //! Display method
-    static void display (std::ostream& out = std::cout);
+  static void display (std::ostream& out = std::cout)
+  {
+    out << "meas_K";
+  }
+
 
     //@}
 
     //! @name Get Methods
     //@{
-
-    //! Getter for the expression that we transpose
-    const UInt nbQuadPtBD() const
-    {
-        return M_nbQuadPt;
-    }
-
 
     //@}
 
@@ -105,21 +102,12 @@ private:
     //! @name Private Methods
     //@{
 
-    //! No default constructor
-    ExpressionMeasBDCurrentFE();
 
     //@}
 
-    // Expression that we transpose
-    UInt M_nbQuadPt;
-
 };
 
-//! Instance to be used in the expressions
-inline ExpressionMeasBDCurrentFE meas_BDk( UInt quadPt )
-{
-    return ExpressionMeasBDCurrentFE( quadPt );
-}
+const ExpressionMeasBDCurrentFE meas_BDk;
 
 } // Namespace ExpressionAssembly
 

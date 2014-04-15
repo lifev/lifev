@@ -38,6 +38,7 @@
 #include <lifev/core/LifeV.hpp>
 
 #include <lifev/eta/fem/ETCurrentFE.hpp>
+#include <lifev/eta/fem/ETCurrentBDFE.hpp>
 #include <lifev/eta/fem/ETCurrentFlag.hpp>
 #include <lifev/core/fem/QuadratureRule.hpp>
 
@@ -89,12 +90,11 @@ public:
 
     //! Copy constructor
     EvaluationMeasBDCurrentFE (const EvaluationMeasBDCurrentFE<spaceDim>& evaluation)
-        : M_valuePtr (evaluation.M_valuePtr), M_nbQuadPt(evaluation.M_nbQuadPt)
+        : M_valuePtr (evaluation.M_valuePtr)
     {}
 
     //! Expression-based constructor
-    explicit EvaluationMeasBDCurrentFE (const ExpressionMeasBDCurrentFE& expression)
-    : M_nbQuadPt(expression.nbQuadPtBD()), M_valuePtr(M_nbQuadPt,0) {}
+    explicit EvaluationMeasBDCurrentFE (const ExpressionMeasBDCurrentFE& expression) {}
 
     //! Destructor
     ~EvaluationMeasBDCurrentFE() {}
@@ -125,7 +125,7 @@ public:
     void setGlobalCFE (const CFEType* globalCFE)
     {
         ASSERT (globalCFE != 0, "Nul pointer to the globalCFE cannot be set");
-        M_valuePtr = (globalCFE->M_measure);
+        M_valuePtr = (globalCFE->M_measure)[0];
     }
 
     //! Setter for the test current FE
@@ -148,19 +148,19 @@ public:
     //! Getter for the value for a value
     return_Type value_q (const UInt& q) const
     {
-        return M_valuePtr[q];
+        return M_valuePtr;
     }
 
     //! Getter for the value for a vector
     return_Type value_qi (const UInt& q, const UInt& /*i*/) const
     {
-        return M_valuePtr[q];
+        return M_valuePtr;
     }
 
     //! Getter for the value for a matrix
     return_Type value_qij (const UInt& q, const UInt& /*i*/, const UInt& /*j*/) const
     {
-        return M_valuePtr[q];
+        return M_valuePtr;
     }
 
     //@}
@@ -168,8 +168,7 @@ public:
 private:
 
     //! Storage for the pointer to the data
-    Real M_nbQuadPt;
-    std::vector< Real> M_valuePtr;
+    Real M_valuePtr;
 
 };
 
