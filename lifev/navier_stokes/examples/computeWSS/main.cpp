@@ -340,7 +340,7 @@ WSS::run3d()
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocityRead",
                               velFESpace, velocityRead, UInt (0) );
 
-    exporter->postProcess ( -0.001 );
+    exporter->postProcess ( 0.0 );
 
     //! =================================================================================
     //! Analysis - Istant or Interval
@@ -348,37 +348,29 @@ WSS::run3d()
 
     MPI_Barrier (MPI_COMM_WORLD);
 
-    //Creating the vector of quadrature points
-    //The weights are determined as the area of the reference element in 2D (0.5)
-    //divided by the number of dof of the quadRule (3 = vertices of the triangle)
+    QuadratureRule fakeQuadratureRule( quadRuleTria3pt );
+
     GeoVector firstPoint(2); Real firstWeight(0.0);
     firstPoint[0] = 0.0; firstPoint[1] = 0.0;; firstWeight = ( 0.5 ) / 3;
-
     QuadraturePoint first( firstPoint, firstWeight );
 
     GeoVector secondPoint(2); Real secondWeight(0.0);
     secondPoint[0] = 1.0; secondPoint[1] = 0.0; secondWeight = ( 0.5 ) / 3;
-
     QuadraturePoint second( secondPoint, secondWeight );
 
     GeoVector thirdPoint(2); Real thirdWeight(0.0);
     thirdPoint[0] = 0.0; thirdPoint[1] = 1.0; thirdWeight = ( 0.5 ) / 3;
-
     QuadraturePoint third( thirdPoint, thirdWeight );
 
-    QuadraturePoint vectorPoints[3];
-    vectorPoints[0] = first;
-    vectorPoints[1] = second;
-    vectorPoints[2] = third;
+    std::vector<GeoVector> coordinates( 3 );
+    coordinates[0] = firstPoint;
+    coordinates[1] = secondPoint;
+    coordinates[2] = thirdPoint;
+    std::vector<Real> weights ( 3 , 1.0 / 6.0 );
 
-    QuadratureRule boundaryQuadratureRule( vectorPoints, 10000, "Quadrature rule for bd",
-                                           TRIANGLE, UInt (3), UInt(1) );
+    fakeQuadratureRule.setPoints(coordinates, weights);
+    QuadratureBoundary adaptedBDQuadRule( buildTetraBDQR( fakeQuadratureRule ) );
 
-    boundaryQuadratureRule.showMe();
-
-    QuadratureBoundary adaptedBDQuadRule(buildTetraBDQR (boundaryQuadratureRule) );
-
-    //boundaryQuadratureRule.showMe();
     using namespace ExpressionAssembly;
 
     // Trying to compute the Jacobian using ET
@@ -393,14 +385,11 @@ WSS::run3d()
     identity (2, 1) = 0.0;
     identity (2, 2) = 1.0;
 
-
-    //ExpressionVectorFromNonConstantScalar<ExpressionMeas, 3  > vMeas( meas_BDk( UInt (3) ) );
-    VectorSmall<3> ones;
-    ones[0]=1;ones[1]=1;ones[2]=1;
-    evaluateNode( boundary( uETFESpace->mesh(), 200 ),
+    ExpressionVectorFromNonConstantScalar<ExpressionMeasBDCurrentFE, 3  > vMeas( meas_BDk );
+    evaluateNode( boundary( uETFESpace->mesh(), 1 ),
                   adaptedBDQuadRule,
                   uETFESpace,
-                  dot( meas_BDk(3) * ones , phi_i )
+                  dot( vMeas , phi_i )
                   ) >> patchAreaVector;
     patchAreaVector->globalAssemble();
 
@@ -413,7 +402,7 @@ WSS::run3d()
         // Reading the solution
         // resetting the element of the vector
         *velocity *= 0.0;
-
+	*WSSvector *= 0.0;
         UInt current(0);
         if( !readType.compare("interval") )
         {
@@ -439,18 +428,29 @@ WSS::run3d()
 
         //Read the variable
         M_importer->readVariable (solutionVel);
-        *velocity = *velocity;
+        *velocityRead = *velocity;
 
-        // Real dynamicViscosity = dataClass->viscosity( );
+        Real dynamicViscosity = dataClass->viscosity( );
+
+	std::cout << "Viscosity: " << dataClass->viscosity( ) << std::endl;
+        // Defining expressions
+        evaluateNode( boundary( uETFESpace->mesh(), 1 ),
+                      adaptedBDQuadRule,
+                      uETFESpace,
+		      meas_BDk * dot ( value(dynamicViscosity) * ( grad(uETFESpace, *velocity) + transpose(grad(uETFESpace, *velocity)) ) * Nface - 
+				       dot( value(dynamicViscosity) * ( grad(uETFESpace, *velocity) + transpose(grad(uETFESpace, *velocity)) ) * Nface , Nface ) * Nface, phi_i )
+                      ) >> WSSvector;
+        WSSvector->globalAssemble();
+        *WSSvector = *WSSvector / *patchAreaVector;
 
         // // Defining expressions
-        // evaluateNode( boundary( uETFESpace->mesh(), 200 ),
-        //               adaptedBDQuadRule,
-        //               uETFESpace,
-        //               ( value(dynamicViscosity)*( ( grad(uETFESpace,*velocity) + transpose(grad(uETFESpace, *velocity)) ) * Nface ) )* phi_i
-        //               ) >> WSSvector;
+        // integrate( boundary( uETFESpace->mesh(), 1 ),
+	// 	   adaptedBDQuadRule,
+	// 	   uETFESpace,
+	// 	   dot ( Nface, phi_i )
+	// 	   ) >> WSSvector;
         // WSSvector->globalAssemble();
-        // *WSSvector = *WSSvector / *patchAreaVector;
+
 
         exporter->postProcess( dataClass->dataTime()->initialTime() + k * dataClass->dataTime()->timeStep() );
     }

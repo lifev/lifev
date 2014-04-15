@@ -20,100 +20,54 @@
 [exporter]
 type       = hdf5 			# hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
-name       = ThreeHundred
-start      = 15
+name       = tryingPost
+start      = 0
 save       = 1
 
 [importer]
-type        = hdf5 #ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
-filename    = correctTa-structured/solidGI-healthy-EXP2-MM-hRes-st-cA-05
-nameField   = s-displacement
+type        = hdf5
+filename    = try
+nameField   = velocity
 analysis    = instant
-iteration   = '1'
+iteration   = '44'
 
-[solid]
+[fluid]
 
-[./physics]
-density   	= 1.2
-material_flag   = 1
-thickness       =  0.1
-
-[../model]
-constitutiveLaw = anisotropic   #isotropic, anisotropic
-young     	= 8.e+6
-poisson   	= 0.49
-bulk		= 1.3333e+8
-alpha 		= 1.0e+5
-gamma		= 1.0
-solidTypeIsotropic 	= exponential		# linearVenantKirchhoff / nonLinearVenantKirchhoff / neoHookean / expoenential
-solidTypeAnisotropic 	= holzapfelGeneralized		# linearVenantKirchhoff / nonLinearVenantKirchhoff / neoHookean / expoenential
-
-[./fibers]
-numberFamilies = 2
-stiffness      = '1e+5 1e+5'
-nonlinearity   = '1.0 1.0'
-stretch        = '1.2697 1.2697'
-smoothness     = 500000
-[./]
-
-[../../time_discretization]
-method          = BDF
-initialtime 	= 0.1
-endtime     	= 0.4
-timestep    	= 0.1
-BDF_order   	= 2
-
-[../space_discretization]
-mesh_type   = .mesh
-mesh_dir  	= ./correctTa-structured/
-mesh_file 	= structuredMeditSolidStraight.mesh
-order     	= P1
-
-[../miscellaneous]
-factor    	= 1
-verbose   	= 1
+    [./problem]
+    # for  cyl3D.2.2.00.mesh
+    Re              = 1
+    D               = 1.
+    H               = 2.
+    centered        = 1
+    initial_sol     = stokes          # stokes, none
 
 
-[../newton]
-maxiter 	= 1
-reltol  	= 1.e-8
+    [../physics]
+    density         = 1.0           # density   [ g / cm^3 ]
+    viscosity       = 0.03          # viscosity [ Poise ]
+    resistance      = 0.00   # resistance  ( 80 mmHg * s / ml ) [ dyn * s / cm^5 ]
+    hydrostatic     = 0.0        # hydrostatic pressure [ dyn / cm^2 ]
 
+    [../time_discretization]
+    initialtime     = 0.001
+    endtime         = 1.2
+    timestep        = 0.001
+    BDF_order       = 1
 
-[../solver]
-solver          = gmres
-scaling         = none
-output          = all 			# none
-conv            = rhs
-max_iter        = 500
-reuse           = true
-max_iter_reuse  = 200
-kspace          = 200
-tol             = 1.e-10    		# AztecOO tolerance
+    [../space_discretization]
+    mesh_dir        = ./
+    mesh_file       = tube20.mesh    
+    mesh_type       = .mesh
 
-[../prec]
-prectype        = Ifpack	 		# Ifpack or ML
-displayList     = true
+    verbose         = 0             # verbose during mesh-reading
+    linearized      = 0
+    diagonalize     = 0 # weight, 0=off. for P2P1 better to be on=1
+    div_beta_u_v    = 1             # 1=on, 0=off
+    vel_order       = P1          # P1, P1Bubble, P2
+    press_order     = P1            # P1, P2
+    stiff_strain    = true            # P1, P2
 
-[./ifpack]
-overlap  	= 2
-
-[./fact]
-ilut_level-of-fill 	= 1
-drop_tolerance          = 1.e-5
-relax_value             = 0
-
-[../amesos]
-solvertype 		=  Amesos_Umfpack 	# Amesos_KLU or Amesos_Umfpack
-
-[../partitioner]
-overlap 		= 2
-
-[../schwarz]
-reordering_type 	= none 			# metis, rcm, none
-filter_singletons 	= true
-
+    [../miscellaneous]
+    verbose         = 1
+    steady          = 0
 [../]
-[../]
-
-
-
