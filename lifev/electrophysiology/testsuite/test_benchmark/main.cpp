@@ -389,6 +389,7 @@ Int main ( Int argc, char** argv )
         solver -> setLumpedMassMatrix(false);
 		solver -> setupMassMatrix();
 		hlmass.reset(new matrix_Type( *(solver -> massMatrixPtr() ) ) );
+		solver -> setFullMassMatrixPtr(hlmass);
 		solver -> setLumpedMassMatrix(lumpedMass);
     }
 
@@ -627,7 +628,7 @@ Int main ( Int argc, char** argv )
 			// matrix as argument  in the solveOneICIStep method.
         	// ---------------------------------------------------------------
 
-			solver -> solveOneICIStep(*hlmass);
+			solver -> solveOneICIStepWithFullMass();
 			chrono.stop();
 			timeReacDiff += chrono.globalDiff( *Comm );
         }
