@@ -1,5 +1,6 @@
 SET(bc_HEADERS
   bc/BCInterface3D.hpp
+  bc/BCInterfaceFSI3D.hpp
   bc/BCInterfaceData3D.hpp
 CACHE INTERNAL "")
 
