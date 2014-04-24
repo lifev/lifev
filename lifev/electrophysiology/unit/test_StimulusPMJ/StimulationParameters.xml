@@ -1,0 +1,21 @@
+<ParameterList> <!-- Stimulation Parameters -->
+    	<Parameter name="applied_total_current" type="double" value="0.8"  />
+    	<Parameter name="applied_current_radius" type="double" value="0.15"  />
+    	<Parameter name="pacing_site_X" type="double" value="0.0"  />
+    	<Parameter name="pacing_site_Y" type="double" value="0.0"  />
+    	<Parameter name="pacing_site_Z" type="double" value="0.0"  />
+    	<Parameter name="starting_time_stimulus" type="double" value="0.0"  />
+   	<Parameter name="duration_stimulus" type="double" value="2"  />
+	<Parameter name="tShortS1S1" type="double" value="30e3"/>
+	<Parameter name="stInt" type="double" value="700.0"/>
+	<Parameter name="dt" type="double" value="0.001"/>
+	<Parameter name="stIntS1S2" type="double" value="350.0"/>
+	<Parameter name="stIntS2S3" type="double" value="250.0"/>
+	<Parameter name="stIntS3S4" type="double" value="150.0"/>
+	<Parameter name="nbStimMax" type="int" value="10"/>
+	<Parameter name="repeatSt" type="int" value="10"/>
+	<Parameter name="pacPro" type="string" value="FCL"/>
+	<Parameter name="pacProType" type="string" value=""/>
+	<Parameter name="PMJ_activation_file" type="string" value="PMJ.txt"  />
+	<Parameter name="PMJ_activation_folder" type="string" value="./"  />
+</ParameterList>
