@@ -346,6 +346,12 @@ public:
         return M_massMatrixPtr;
     }
 
+    //! get the pointer to the mass matrix
+    inline const matrixPtr_Type fullMassMatrixPtr() const
+    {
+        return M_fullMassMatrixPtr;
+    }
+
     //! get the pointer to the stiffness matrix
     inline const matrixPtr_Type stiffnessMatrixPtr() const
     {
@@ -600,6 +606,24 @@ public:
         (* (M_massMatrixPtr) ) = massMatrix;
     }
 
+    //! set the pointer to the full mass matrix
+    /*!
+     @param massMatrixPtr pointer to the mass matrix
+     */
+    inline void setFullMassMatrixPtr (const matrixPtr_Type fullMassMatrixPtr)
+    {
+        this->M_fullMassMatrixPtr = fullMassMatrixPtr;
+    }
+
+    //! set the full mass matrix
+    /*!
+     @param massMatrix  the mass matrix
+     */
+    inline void setFullMassMatrix (const matrix_Type& fullMassMatrix)
+    {
+        (* (M_fullMassMatrixPtr) ) = fullMassMatrix;
+    }
+
     //! set the pointer to the stiffness matrix
     /*!
      @param stiffnessMatrixPtr pointer to the stiffness matrix
@@ -830,7 +854,7 @@ public:
      @param dataFile needed to set up the preconditioner
      @param ionicSize number of equation in the ionic model
      */
-    void setup (GetPot& dataFile, short int ionicSize);
+    virtual void setup (GetPot& dataFile, short int ionicSize);
 
     //! setup method used in the constructor
     /*!
@@ -858,7 +882,7 @@ public:
     /*!
       * Computes the stiffness matrix calling different methods
       */
-    void setupStiffnessMatrix();
+    virtual void setupStiffnessMatrix();
 
     //! create stiffness matrix given a diagonal diffusion tensor
     /*!
@@ -1143,9 +1167,8 @@ public:
      * This method is useful to solve ICI without lumping the mass matrix
      * in fron of the reaction term.
      * Lump the mass matrix, and pass as argument a full mass matrix
-	@param mass mass matrix
      */
-    void computeRhsICI (matrix_Type& mass);
+    void computeRhsICIWithFullMass ();
 
     //!Solve one full step with ionic current interpolation
     /*!
@@ -1159,11 +1182,10 @@ public:
     //! solves using ionic current interpolation
     /*!
      * This method is useful to solve ICI without lumping the mass matrix
-     * in fron of the reaction term.
+     * in front of the reaction term.
      * Lump the mass matrix, and pass as argument a full mass matrix
-	@param mass mass matrix
      */
-    void solveOneICIStep (matrix_Type& mass);
+    void solveOneICIStepWithFullMass ();
 
     //!Solve one full step with state variable interpolation
     /*!
@@ -1197,13 +1219,12 @@ public:
      * \f]
      * where $\mathbf{I}$ is the vector of the ionic currents $I_j = I_{ion}(V_j^n)$
      * This method is useful to solve ICI without lumping the mass matrix
-     * in fron of the reaction term.
+     * in front of the reaction term.
      * Lump the mass matrix, and pass as argument a full mass matrix
 	@param exporter where we want to save the solution
     @param t time at wich we save the solution
-    @param mass mass matrix
 	 */
-    void solveOneICIStep (IOFile_Type& exporter, Real t, matrix_Type& mass);
+    void solveOneICIStepWithFullMass (IOFile_Type& exporter, Real t);
 
     //!Solve one full step with ionic current interpolation  and export the solution
     /*!
@@ -1237,13 +1258,12 @@ public:
     //!Solve the system using ICI from M_initialTime to the M_endTime with time step M_timeStep and export the solution every dt
     /*!
      * This method is useful to solve ICI without lumping the mass matrix
-     * in fron of the reaction term.
+     * in front of the reaction term.
      * Lump the mass matrix, and pass as argument a full mass matrix
 	@param exporter where we want to save the solution
     @param t time at wich we save the solution
-    @param mass mass matrix
 	 */
-    void solveICI (IOFile_Type& exporter, Real dt, matrixPtr_Type mass);
+    void solveICIWithFullMass (IOFile_Type& exporter, Real dt);
 
     //!Solve the using SVI from M_initialTime to the M_endTime with time step M_timeStep and export the solution every dt
     /*!
@@ -1333,42 +1353,57 @@ private:
 	 */
 	void init (ionicModelPtr_Type model);
 
+	//surface to volume ration
     Real M_surfaceVolumeRatio;
-
+    //ionic model
     ionicModelPtr_Type M_ionicModelPtr;
-
+    //Epetra communicator
     commPtr_Type M_commPtr;
+    //partitioned mesh
     meshPtr_Type M_localMeshPtr;
+    //non partitioned mesh
     meshPtr_Type M_fullMeshPtr;
+    //ET finite element space
     ETFESpacePtr_Type M_ETFESpacePtr;
+    //finite element space
     feSpacePtr_Type M_feSpacePtr;
+    //mass matrix
     matrixPtr_Type M_massMatrixPtr;
+    //full mass matrix
+    matrixPtr_Type M_fullMassMatrixPtr;
+    //stiffness matrix
     matrixPtr_Type M_stiffnessMatrixPtr;
+    //mass matrix / timestep + stiffness matrix
     matrixPtr_Type M_globalMatrixPtr;
-
+    //initial time t_0
     Real M_initialTime;
+    //final time t_f
     Real M_endTime;
+    //timestep dt
     Real M_timeStep;
-
+    // conductivity tensor
     VectorSmall<3> M_diffusionTensor;
-
+    //rhs of the potential equation
     vectorPtr_Type M_rhsPtr;
+    //rhs of the potential equation - unique version
     vectorPtr_Type M_rhsPtrUnique;
+    //potential
     vectorPtr_Type M_potentialPtr;
-
+    //linear solver
     linearSolverPtr_Type M_linearSolverPtr;
-
+    //vector of pointers pointing to the potential
+    // and to the other gating variables
     vectorOfPtr_Type M_globalSolution;
+    //vector of pointers pointing to rhs of the potential
+    // and to the ths of the other gating variables
     vectorOfPtr_Type M_globalRhs;
-
+    //order of the elements (P1)
     std::string M_elementsOrder;
-
+    //fiber field
     vectorPtr_Type M_fiberPtr;
-
-    //Create the identity for F
-    matrixSmall_Type M_identity;
-
+    //using lumped mass matrix
     bool            M_lumpedMassMatrix;
+    //verbosity
     bool            M_verbose;
 
 };
@@ -1448,8 +1483,7 @@ ElectroETAMonodomainSolver<Mesh, IonicModel>::ElectroETAMonodomainSolver (
     M_elementsOrder ( solver.M_elementsOrder),
     M_fiberPtr ( new vector_Type (* (solver.M_fiberPtr) ) ) ,
     M_lumpedMassMatrix (solver.M_lumpedMassMatrix),
-    M_verbose (solver.M_verbose),
-    M_identity(solver.M_identity)
+    M_verbose (solver.M_verbose)
 {
     setupGlobalSolution (M_ionicModelPtr->Size() );
     setGlobalSolution (solver.M_globalSolution);
@@ -2003,10 +2037,10 @@ void ElectroETAMonodomainSolver<Mesh, IonicModel>::computeRhsICI()
 }
 
 template<typename Mesh, typename IonicModel>
-void ElectroETAMonodomainSolver<Mesh, IonicModel>::computeRhsICI (matrix_Type& mass)
+void ElectroETAMonodomainSolver<Mesh, IonicModel>::computeRhsICIWithFullMass ()
 {
     M_ionicModelPtr->superIonicModel::computePotentialRhsICI (M_globalSolution,
-                                                              M_globalRhs, mass);
+                                                              M_globalRhs, *M_fullMassMatrixPtr);
     updateRhs();
 }
 
@@ -2031,9 +2065,9 @@ void ElectroETAMonodomainSolver<Mesh, IonicModel>::solveOneICIStep()
 }
 
 template<typename Mesh, typename IonicModel>
-void ElectroETAMonodomainSolver<Mesh, IonicModel>::solveOneICIStep (matrix_Type& mass)
+void ElectroETAMonodomainSolver<Mesh, IonicModel>::solveOneICIStepWithFullMass ()
 {
-    computeRhsICI (mass);
+    computeRhsICIWithFullMass ();
     M_linearSolverPtr->setRightHandSide (M_rhsPtrUnique);
     M_linearSolverPtr->solve (M_potentialPtr);
 }
@@ -2077,10 +2111,10 @@ void ElectroETAMonodomainSolver<Mesh, IonicModel>::solveOneICIStep (
 }
 
 template<typename Mesh, typename IonicModel>
-void ElectroETAMonodomainSolver<Mesh, IonicModel>::solveOneICIStep (
-    IOFile_Type& exporter, Real t, matrix_Type& mass)
+void ElectroETAMonodomainSolver<Mesh, IonicModel>::solveOneICIStepWithFullMass (
+    IOFile_Type& exporter, Real t)
 {
-    solveOneICIStep(mass);
+    solveOneICIStepWithFullMass();
     exportSolution (exporter, t);
 }
 
@@ -2159,13 +2193,13 @@ void ElectroETAMonodomainSolver<Mesh, IonicModel>::solveICI (
 
 
 template<typename Mesh, typename IonicModel>
-void ElectroETAMonodomainSolver<Mesh, IonicModel>::solveICI (
-    IOFile_Type& exporter, Real dt, matrixPtr_Type mass)
+void ElectroETAMonodomainSolver<Mesh, IonicModel>::solveICIWithFullMass (
+    IOFile_Type& exporter, Real dt)
 {
     assert (
         dt >= M_timeStep
         && "Cannot save the solution for step smaller than the timestep!");
-    if (!mass)
+    if (!M_fullMassMatrixPtr)
     {
     	solveICI(exporter, dt);
     }
@@ -2188,11 +2222,11 @@ void ElectroETAMonodomainSolver<Mesh, IonicModel>::solveICI (
                 solveOneStepGatingVariablesFE();
                 if (k % iter == 0)
                 {
-                    solveOneICIStep (exporter, t, *mass);
+                    solveOneICIStepWithFullMass (exporter, t);
                 }
                 else
                 {
-                    solveOneICIStep( *mass );
+                    solveOneICIStepWithFullMass( );
                 }
 
             }
