@@ -52,7 +52,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 //We use this to transform the mesh from [0,1]x[0,1] to [0,5]x[0,5]
-#include <lifev/core/mesh/MeshTransformer.hpp>
+#include <lifev/core/mesh/MeshUtility.hpp>
 
 //We will use the ETAMonodomainSolver
 #include <lifev/electrophysiology/solver/ElectroETAMonodomainSolver.hpp>
