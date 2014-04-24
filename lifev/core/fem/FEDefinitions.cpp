@@ -354,13 +354,16 @@ static const QuadratureRule quad_rule_quad[ NB_QUAD_RULE_QUAD ] =
  *
  *=======================================================================*/
 //! total number of quadrature rules in 3D on tetraedra
-#define NB_QUAD_RULE_TETRA 5
+#define NB_QUAD_RULE_TETRA 6
 //! id of the quadrature rules on tetraedra
 #define QUAD_RULE_TETRA_1PT     1
 #define QUAD_RULE_TETRA_4PT     2
-#define QUAD_RULE_TETRA_5PT     3
-#define QUAD_RULE_TETRA_15PT    4
-#define QUAD_RULE_TETRA_64PT    5
+#define QUAD_RULE_TETRA_4PT_NODAL     3
+#define QUAD_RULE_TETRA_5PT     4
+#define QUAD_RULE_TETRA_15PT    5
+#define QUAD_RULE_TETRA_64PT    6
+
+
 //----------------------------------------------------------------------
 
 static const QuadraturePoint pt_tetra_1pt[ 1 ] =
@@ -383,6 +386,18 @@ static const QuadraturePoint pt_tetra_4pt[ 4 ] =
 const QuadratureRule quadRuleTetra4pt ( pt_tetra_4pt,
                                         QUAD_RULE_TETRA_4PT,
                                         "Quadrature rule 4 points on a tetraedra", TETRA, 4, 2 );
+//----------------------------------------------------------------------
+//Nodal integration for lumping
+static const QuadraturePoint pt_tetra_4pt_nodal[ 4 ] =
+{
+    QuadraturePoint ( 0.0, 0.0, 0.0, 1. / 24. ),
+    QuadraturePoint ( 1.0, 0.0, 0.0, 1. / 24. ),
+    QuadraturePoint ( 0.0, 1.0, 0.0, 1. / 24. ),
+    QuadraturePoint ( 0.0, 0.0, 1.0, 1. / 24. )
+};
+const QuadratureRule quadRuleTetra4ptNodal ( pt_tetra_4pt_nodal,
+                                             QUAD_RULE_TETRA_4PT_NODAL,
+                                             "Quadrature rule 4 points on a tetraedra vertices", TETRA, 4, 1 );
 //----------------------------------------------------------------------
 // 5 points Integration rule for tetraedra (Ref. e.g. Comincioli pag. 236)
 const Real tet5ptx1 = 1. / 6. , tet5ptx2 = 1. / 2., tet5ptx3 = 1. / 4.;
