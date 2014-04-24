@@ -45,8 +45,12 @@
 #include <lifev/bc_interface/1D/bc/BCInterface1D.hpp>
 #endif
 
-#if defined(LIFEV_HAS_FSI) || defined(LIFEV_HAS_NAVIERSTOKES)
+#if defined(LIFEV_HAS_NAVIERSTOKES)
+#if defined(LIFEV_HAS_FSI)
+#include <lifev/bc_interface/3D/bc/BCInterfaceFSI3D.hpp>
+#else
 #include <lifev/bc_interface/3D/bc/BCInterface3D.hpp>
+#endif
 #endif
 
 #include <lifev/multiscale/couplings/MultiscaleCoupling.hpp>
