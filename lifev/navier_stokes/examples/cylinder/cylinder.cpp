@@ -494,9 +494,6 @@ Cylinder::run()
     fluid.setUp (dataFile);
     fluid.buildSystem();
 
-    ASSERT(0!=0,"Fine costruzione parte lineare");
-
-
     MPI_Barrier (MPI_COMM_WORLD);
 
     // Initialization
@@ -580,12 +577,21 @@ Cylinder::run()
         chrono.start();
 
         double alpha = bdf.bdfVelocity().coefficientFirstDerivative ( 0 ) / oseenData->dataTime()->timeStep();
-        //beta = bdf.bdfVelocity().extrapolation(  beta);
-        bdf.bdfVelocity().extrapolation (beta);
+
+        bdf.bdfVelocity().extrapolation (beta); // Extrapolation for the convective term
+
         bdf.bdfVelocity().updateRHSContribution ( oseenData->dataTime()->timeStep() );
-        rhs  = fluid.matrixMass() * bdf.bdfVelocity().rhsContributionFirstDerivative();
+
+        fluid.setVelocityRhs(bdf.bdfVelocity().rhsContributionFirstDerivative());
+
+        if (oseenData->conservativeFormulation() )
+            rhs  = fluid.matrixMass() * bdf.bdfVelocity().rhsContributionFirstDerivative();
 
         fluid.updateSystem ( alpha, beta, rhs );
+
+        if (!oseenData->conservativeFormulation() )
+            rhs  = fluid.matrixMass() * bdf.bdfVelocity().rhsContributionFirstDerivative();
+
         fluid.iterate ( bcH );
 
         bdf.bdfVelocity().shiftRight ( *fluid.solution() );
