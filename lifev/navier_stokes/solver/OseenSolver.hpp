@@ -239,26 +239,26 @@ public:
     //! Update system
     /*!
         @param alpha
-        @param betaVector
+        @param u_star
         @param sourceVector
      */
     virtual void updateSystem ( const Real         alpha,
-                                const vector_Type& betaVector,
-                                const vector_Type& sourceVector );
+                                const vector_Type& u_star,
+                                const vector_Type& rightHandSide );
 
     //! Update system
     /*!
         @param alpha
-        @param betaVector
-        @param sourceVector
+        @param u_star
+        @param rightHandSide
         @param matrix
         @param un
      */
     virtual void updateSystem ( const Real         alpha,
                                 const vector_Type& betaVector,
-                                const vector_Type& sourceVector,
+                                const vector_Type& rightHandSide,
                                 matrixPtr_Type     matrix,
-                                const vector_Type&     un );
+                                const vector_Type& un );
 
     //! Update stabilization term
     /*!

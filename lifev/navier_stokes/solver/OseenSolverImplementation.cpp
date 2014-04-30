@@ -456,7 +456,7 @@ template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceD
 void
 OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::
 updateSystem ( const Real         alpha,
-               const vector_Type& betaVector,
+               const vector_Type& u_star,
                const vector_Type& sourceVector )
 {
     if ( M_matrixNoBC.get() )
@@ -468,7 +468,7 @@ updateSystem ( const Real         alpha,
         M_matrixNoBC.reset ( new matrix_Type ( M_localMap ) );
     }
 
-    updateSystem ( alpha, betaVector, sourceVector, M_matrixNoBC, *M_un );
+    updateSystem ( alpha, u_star, sourceVector, M_matrixNoBC, *M_un );
     if ( alpha != 0. )
     {
         M_matrixNoBC->globalAssemble();
@@ -480,8 +480,8 @@ template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceD
 void
 OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::
 updateSystem ( const Real          alpha,
-		       const vector_Type&  betaVector,
-               const vector_Type&  sourceVector,
+		       const vector_Type&  u_star,
+               const vector_Type&  rightHandSide,
                matrixPtr_Type      matrixNoBC,
                const vector_Type&  un )
 {
@@ -489,7 +489,7 @@ updateSystem ( const Real          alpha,
     LifeChrono chrono;
     chrono.start();
     
-    updateRightHandSide ( sourceVector );
+    updateRightHandSide ( rightHandSide );
     
     chrono.stop();
     M_Displayer.leaderPrintMax ( "done in ", chrono.diff() );
@@ -502,7 +502,7 @@ updateSystem ( const Real          alpha,
     //! managing the convective term : semi-implicit approximation of the convective term
     
     Real normInf;
-    betaVector.normInf ( &normInf );
+    u_star.normInf ( &normInf );
     
     MatrixSmall<3, 3> Eye;
     Eye *= 0.0;
@@ -510,8 +510,18 @@ updateSystem ( const Real          alpha,
     Eye[1][1] = 1;
     Eye[2][2] = 1;
     
-    vector_Type betaVectorRepeated ( betaVector, Repeated );
+    // u_star: extrapolation of the velocity
+    // NOTE:   for ALE formulation it has to be already: extrapolation of fluid velocity - extrapolation of fluid mesh velocity
 
+    vector_Type u_starRepeated ( u_star, Repeated );
+    vector_Type unRepeated ( un, Repeated );
+
+    vector_Type wRepeated ( un, Repeated );
+    wRepeated -= u_starRepeated;
+
+    M_Displayer.leaderPrint ( "  F-  Updating the convective term... " );
+
+    /*
     vector_Type conservativeTerm(un);
     conservativeTerm -= betaVector;
     
@@ -523,11 +533,12 @@ updateSystem ( const Real          alpha,
     *M_conservativeTerm *= 0;
     *M_conservativeTerm += un;
     *M_betaVector -= betaVector;
-    
+    */
     
     M_convectiveMatrix.reset  ( new matrix_block_Type ( M_fespaceUETA->map() | M_fespacePETA->map() | M_fluxMap ) );
     *M_convectiveMatrix *= 0;
     
+    // only if the extrapolation of the velocity differs from zero we update the convective term
     if ( normInf != 0. )
     {
         M_convectiveMatrix.reset  ( new matrix_block_Type ( M_fespaceUETA->map() | M_fespacePETA->map() | M_fluxMap ) );
@@ -541,9 +552,9 @@ updateSystem ( const Real          alpha,
                 M_velocityFESpace.qr(),          // QR
                 M_fespaceUETA,
                 M_fespaceUETA,
-                dot(grad(phi_j) * M_oseenData->density() * value(M_fespaceUETA, betaVector), phi_i)                              // semi-implicit convective term
-                //0.5 * M_oseenData->density() * dot ( value ( Eye ) , grad(M_fespaceUETA, betaVector) ) * dot( phi_j , phi_i )- // consistency term
-                //M_oseenData->density() * dot ( value ( Eye ) , grad(M_fespaceUETA, conservativeTerm) ) * dot( phi_j , phi_i )  // conservative formulation
+                dot(grad(phi_j) * M_oseenData->density() * value(M_fespaceUETA, u_starRepeated), phi_i)                              // semi-implicit convective term
+                + 0.5 * M_oseenData->density() * dot ( value ( Eye ) , grad(M_fespaceUETA, u_starRepeated) ) * dot( phi_j , phi_i )  // consistency term
+                - M_oseenData->density() * dot ( value ( Eye ) , grad(M_fespaceUETA, wRepeated) ) * dot( phi_j , phi_i )             // conservative formulation
                       )
             >> M_convectiveMatrix->block(0,0);
         }
@@ -555,8 +566,8 @@ updateSystem ( const Real          alpha,
                 M_velocityFESpace.qr(),          // QR
                 M_fespaceUETA,
                 M_fespaceUETA,
-                dot(grad(phi_j) * M_oseenData->density() * value(M_fespaceUETA, betaVector), phi_i) +                           // semi-implicit convective term
-                0.5 * M_oseenData->density() * dot ( value ( Eye ) , grad(M_fespaceUETA, betaVector) ) * dot( phi_j , phi_i )   // consistency term
+                dot(grad(phi_j) * M_oseenData->density() * value(M_fespaceUETA, u_starRepeated), phi_i) +                           // semi-implicit convective term
+                0.5 * M_oseenData->density() * dot ( value ( Eye ) , grad(M_fespaceUETA, u_starRepeated) ) * dot( phi_j , phi_i )   // consistency term
                       )
             >> M_convectiveMatrix->block(0,0);
         }
@@ -564,7 +575,8 @@ updateSystem ( const Real          alpha,
         // Stabilising term: -rho div(u^n) u v
         if ( M_divBetaUv )
         {
-            ASSERT(0!=0,"To be coded using ET");
+            ASSERT(0!=0,"If really needed, please code it using ET");
+            // OLD-STYLE assembly:
             // mass_divw ( -0.5 * M_oseenData->density(),
             //           M_uLoc,
             //           M_elementMatrixStiff,
@@ -573,7 +585,7 @@ updateSystem ( const Real          alpha,
     }
     
     if(M_stabilization)
-        computeStabilization(betaVectorRepeated, alpha);
+        computeStabilization(u_starRepeated, alpha);
 
     if ( alpha != 0. )
     {
@@ -694,6 +706,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::updateStabiliza
 	// ATTENTO A CONVERTIRE IL FORMATO MATRICE PER SUPG CHE E' A BLOCCHI
     if ( M_stabilization )
     {
+    	M_matrixStabilization->globalAssemble();
         matrixFull += *M_matrixStabilization;
     }
 
@@ -765,10 +778,10 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::iterate ( bcHan
 
     chrono.start();
     
+    applyBoundaryConditions ( *matrixFull, rightHandSideFull, bcHandler );
+
     matrixFull->globalAssemble();
     
-    applyBoundaryConditions ( *matrixFull, rightHandSideFull, bcHandler );
- 
     chrono.stop();
 
     M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
