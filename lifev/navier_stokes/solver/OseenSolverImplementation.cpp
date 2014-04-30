@@ -519,22 +519,6 @@ updateSystem ( const Real          alpha,
     vector_Type wRepeated ( un, Repeated );
     wRepeated -= u_starRepeated;
 
-    M_Displayer.leaderPrint ( "  F-  Updating the convective term... " );
-
-    /*
-    vector_Type conservativeTerm(un);
-    conservativeTerm -= betaVector;
-    
-    M_betaVector.reset(new vector_Type(betaVector.map(), Repeated));
-    *M_betaVector *= 0;
-    *M_betaVector += betaVector;
-    
-    M_conservativeTerm.reset(new vector_Type(un.map(), Repeated));
-    *M_conservativeTerm *= 0;
-    *M_conservativeTerm += un;
-    *M_betaVector -= betaVector;
-    */
-    
     M_convectiveMatrix.reset  ( new matrix_block_Type ( M_fespaceUETA->map() | M_fespacePETA->map() | M_fluxMap ) );
     *M_convectiveMatrix *= 0;
     
@@ -594,7 +578,7 @@ updateSystem ( const Real          alpha,
     
     *M_convectiveMatrix += *M_matrixStokes;
     M_convectiveMatrix->globalAssemble();
-    
+
     *M_matrixNoBC_block += *M_convectiveMatrix;
     M_matrixNoBC_block->globalAssemble();
     MapEpetra fullMap ( M_velocityFESpace.map() + M_pressureFESpace.map() + M_fluxMap );
@@ -606,27 +590,28 @@ updateSystem ( const Real          alpha,
 
 template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
-OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabilization ( const vector_Type& betaVector, const Real& alpha )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabilization ( const vector_Type& u_star, const Real& alpha )
 {
 	Real normInf;
-	betaVector.normInf ( &normInf );
+	u_star.normInf ( &normInf );
 
 	LifeChrono chrono;
 
 	if ( normInf != 0. )
 	{
-		if( M_oseenData->stabilizationType() == "IP" && ( M_resetStabilization || !M_reuseStabilization || ( M_matrixStabilization.get() == 0 ) ) )
+		if( M_oseenData->stabilizationType() == "IP" /*&& ( M_resetStabilization || !M_reuseStabilization || ( M_matrixStabilization.get() == 0 ) )*/ )
 		{
-			vector_Type betaVectorRepeated ( betaVector, Repeated );
+			vector_Type u_starRepeated ( u_star, Repeated );
 			M_Displayer.leaderPrint ( "  F-  Updating the IP stabilization terms ...     " );
 			chrono.start();
+
 			M_matrixStabilization.reset ( new matrix_Type ( M_localMap ) );
-			M_ipStabilization.apply ( *M_matrixStabilization, betaVectorRepeated, false );
+			M_ipStabilization.apply ( *M_matrixStabilization, u_starRepeated, false );
 			M_matrixStabilization->globalAssemble();
 			M_resetStabilization = false;
 			chrono.stop();
 			M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
-		}
+ 		}
 		else if(M_oseenData->stabilizationType() == "SUPG")
 		{
 
@@ -637,14 +622,14 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabiliz
 			Real alfa = alpha*M_oseenData->dataTime()->timeStep();
 			M_matrixStabilizationET.reset( new matrix_block_Type ( M_fespaceUETA->map() | M_fespacePETA->map() | M_fluxMap ) );
 			*M_matrixStabilizationET *= 0;
-			M_supgStabilization->applySUPG_Matrix_semi_implicit(M_matrixStabilizationET, betaVector, alpha);
+			M_supgStabilization->applySUPG_Matrix_semi_implicit(M_matrixStabilizationET, u_star, alpha);
 			M_matrixStabilization.reset ( new matrix_Type ( M_localMap ) );
 			*M_matrixStabilization += *M_matrixStabilizationET;
 			M_matrixStabilization->globalAssemble();
 
 			M_rhsStabilization.reset(new vector_block_Type( M_velocityFESpace.map() | M_pressureFESpace.map() | M_fluxMap ));
 			*M_rhsStabilization *= 0;
-			M_supgStabilization->applySUPG_RHS_semi_implicit(M_rhsStabilization, betaVector, *M_velocityRhs);
+			M_supgStabilization->applySUPG_RHS_semi_implicit(M_rhsStabilization, u_star, *M_velocityRhs);
 
 			chrono.stop();
 			M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
@@ -660,8 +645,9 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabiliz
 
 			if ( M_resetStabilization || !M_reuseStabilization || ( M_matrixStabilization.get() == 0 ) )
 			{
+				vector_Type u_starUnique ( u_star, Unique );
 				M_matrixStabilization.reset ( new matrix_Type ( M_localMap ) );
-				M_ipStabilization.apply ( *M_matrixStabilization, betaVector, false );
+				M_ipStabilization.apply ( *M_matrixStabilization, u_starUnique, false );
 				M_resetStabilization = false;
 				chrono.stop();
 				M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
@@ -681,7 +667,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabiliz
 			Real alfa = alpha*M_oseenData->dataTime()->timeStep();
 			M_matrixStabilizationET.reset( new matrix_block_Type ( M_fespaceUETA->map() | M_fespacePETA->map() | M_fluxMap ) );
 			*M_matrixStabilizationET *= 0;
-			M_supgStabilization->applySUPG_Matrix_semi_implicit(M_matrixStabilizationET, betaVector, alpha);
+			M_supgStabilization->applySUPG_Matrix_semi_implicit(M_matrixStabilizationET, u_star, alpha);
 
 			M_matrixStabilization.reset ( new matrix_Type ( M_localMap ) );
 			*M_matrixStabilization += *M_matrixStabilizationET;
@@ -689,7 +675,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabiliz
 
 			M_rhsStabilization.reset(new vector_block_Type( M_velocityFESpace.map() | M_pressureFESpace.map() | M_fluxMap ));
 			*M_rhsStabilization *= 0;
-			M_supgStabilization->applySUPG_RHS_semi_implicit(M_rhsStabilization, betaVector, *M_velocityRhs);
+			M_supgStabilization->applySUPG_RHS_semi_implicit(M_rhsStabilization, u_star, *M_velocityRhs);
 
 			chrono.stop();
 			M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
@@ -703,7 +689,6 @@ template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceD
 void
 OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::updateStabilization ( matrix_Type& matrixFull )
 {
-	// ATTENTO A CONVERTIRE IL FORMATO MATRICE PER SUPG CHE E' A BLOCCHI
     if ( M_stabilization )
     {
     	M_matrixStabilization->globalAssemble();
