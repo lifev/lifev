@@ -327,7 +327,51 @@ void IonicMinimalModel::showMe()
     std::cout << "\nwinfstar " <<   M_winfstar    << "\n"  ;
 }
 
+void IonicMinimalModel::computePotentialRhsSVI ( const std::vector<vectorPtr_Type>& v,
+                                                 std::vector<vectorPtr_Type>&        rhs,
+                                                 FESpace<mesh_Type, MapEpetra>&  uFESpace)
+{
+    typedef ETFESpace<mesh_Type, MapEpetra, 3, 1> ETFESpace_Type;
+    typedef boost::shared_ptr<ETFESpace_Type> ETFESpacePtr_Type;
 
+    * (rhs[0]) *= 0.0;
+
+    if (uFESpace.mapPtr() -> commPtr() -> MyPID() == 0)
+    {
+        std::cout << "\nMinimal Model: Assembling SVI using ETA!\n";
+    }
+
+    ETFESpacePtr_Type spaceScalar (
+        new ETFESpace_Type (uFESpace.mesh(), &feTetraP1, uFESpace.mapPtr() -> commPtr()  ) );
+
+    {
+        using namespace ExpressionAssembly;
+
+        boost::shared_ptr<MMTanhFunctor> tanh (new MMTanhFunctor);
+        boost::shared_ptr<MMHFunctor> H (new MMHFunctor);
+        boost::shared_ptr<MMSV> sv (new MMSV);
+
+        BOOST_AUTO_TPL (U, value (spaceScalar, * (v[0] ) ) );
+        BOOST_AUTO_TPL (V, value (spaceScalar, * (v[1] ) ) );
+        BOOST_AUTO_TPL (W, value (spaceScalar, * (v[2] ) ) );
+        BOOST_AUTO_TPL (S, value (spaceScalar, * (v[3] ) ) );
+        BOOST_AUTO_TPL (Iapp, value (spaceScalar, *M_appliedCurrentPtr ) );
+
+
+        BOOST_AUTO_TPL (tauso, M_tauso1 + ( M_tauso2 - M_tauso1 ) * ( 1.0 + eval (tanh, M_kso * ( U - M_uso ) ) ) / 2.0);
+        BOOST_AUTO_TPL (tauo, ( 1.0 - eval (H, U - M_tetao ) ) * M_tauo1 + eval (H, U - M_tetao ) * M_tauo2);
+        BOOST_AUTO_TPL (Jfi, value (-1.0) * V * eval (H, U - M_tetav ) * ( U - M_tetav ) * ( M_uu - U ) / M_taufi);
+        BOOST_AUTO_TPL (Jso,  ( U - M_uo ) * ( 1.0 - eval (H, U - M_tetaw )  ) / tauo + eval (H, U - M_tetaw ) / tauso);
+        BOOST_AUTO_TPL (Jsi, value (-1.0) * eval (H, U - M_tetaw ) * W * S / M_tausi);
+
+        integrate ( elements ( uFESpace.mesh() ),
+        		    uFESpace.qr(),
+                    spaceScalar,
+                    ( Iapp - ( Jfi +  Jso + Jsi )  ) * phi_i )  >> rhs.at (0);
+    }
+
+    rhs.at (0) -> globalAssemble();
+}
 
 }
 

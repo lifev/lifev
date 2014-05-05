@@ -329,7 +329,10 @@ public:
     }
 
 
-
+    //compute SVI with ETA (Yuppi Doo!!!)
+    void computePotentialRhsSVI ( const std::vector<vectorPtr_Type>& v,
+                                  std::vector<vectorPtr_Type>&        rhs,
+                                  FESpace<mesh_Type, MapEpetra>&  uFESpace);
     //inline const short int& Size() const { return M_numberOfEquations; }
     //@}
 
