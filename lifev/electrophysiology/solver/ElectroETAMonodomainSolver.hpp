@@ -206,7 +206,7 @@ public:
      */
     ElectroETAMonodomainSolver();
     
-        //! Constructor
+    //! Constructor
     /*!
      * @param GetPot datafile (for preconditioner)
      * @param boost::shared_ptr<IonicModel>  chosen ionic model pointer
@@ -1177,7 +1177,7 @@ public:
      * \f]
      * where $\mathbf{I}$ is the vector of the ionic currents $I_j = I_{ion}(V_j^n)$
      */
-    void solveOneICIStep();
+    virtual void solveOneICIStep();
 
     //! solves using ionic current interpolation
     /*!
@@ -1353,6 +1353,7 @@ private:
 	 */
 	void init (ionicModelPtr_Type model);
 
+protected:
 	//surface to volume ration
     Real M_surfaceVolumeRatio;
     //ionic model
@@ -1401,6 +1402,8 @@ private:
     std::string M_elementsOrder;
     //fiber field
     vectorPtr_Type M_fiberPtr;
+    //Create the identity matrix I
+    matrixSmall_Type M_identity;
     //using lumped mass matrix
     bool            M_lumpedMassMatrix;
     //verbosity
@@ -1483,7 +1486,8 @@ ElectroETAMonodomainSolver<Mesh, IonicModel>::ElectroETAMonodomainSolver (
     M_elementsOrder ( solver.M_elementsOrder),
     M_fiberPtr ( new vector_Type (* (solver.M_fiberPtr) ) ) ,
     M_lumpedMassMatrix (solver.M_lumpedMassMatrix),
-    M_verbose (solver.M_verbose)
+    M_verbose (solver.M_verbose),
+    M_identity(solver.M_identity)
 {
     setupGlobalSolution (M_ionicModelPtr->Size() );
     setGlobalSolution (solver.M_globalSolution);
@@ -1525,6 +1529,7 @@ ElectroETAMonodomainSolver<Mesh, IonicModel>& ElectroETAMonodomainSolver < Mesh,
     M_elementsOrder = solver.M_elementsOrder;
     setFiber (* (solver.M_fiberPtr) );
     M_verbose = solver.M_verbose;
+    M_identity=solver.M_identity;
 
     return *this;
 }
