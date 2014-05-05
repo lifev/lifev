@@ -68,10 +68,6 @@
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/electrophysiology/util/HeartUtility.hpp>
 
-#include <Teuchos_RCP.hpp>
-#include <Teuchos_ParameterList.hpp>
-#include "Teuchos_XMLParameterListHelpers.hpp"
-
 #include <lifev/eta/fem/ETFESpace.hpp>
 #include <lifev/eta/expression/Integrate.hpp>
 #include <lifev/core/mesh/MeshLoadingUtility.hpp>
@@ -2044,8 +2040,15 @@ void ElectroETAMonodomainSolver<Mesh, IonicModel>::computeRhsICI()
 template<typename Mesh, typename IonicModel>
 void ElectroETAMonodomainSolver<Mesh, IonicModel>::computeRhsICIWithFullMass ()
 {
+	if(M_fullMassMatrixPtr)
+	{
     M_ionicModelPtr->superIonicModel::computePotentialRhsICI (M_globalSolution,
                                                               M_globalRhs, *M_fullMassMatrixPtr);
+	}
+	else
+	{
+		assert(0 && "fullMassMatrix Pointer was not set! Use the computeRhsICI() method!");
+	}
     updateRhs();
 }
 
