@@ -162,13 +162,7 @@ void exportVectorField(boost::shared_ptr<Epetra_Comm> comm,
 // We could have used the ElectroETAMonodomainSolver as physical solver,
 // but in this way, this test is totally independent.
 // ------------------------------------------------------------------------------
-//#include <lifev/electrophysiology/testsuite/test_fibers/DummyPhysicalSolver.hpp>
-//class DummyPhysicalSolver
-//{
-//public:
-//	typedef VectorEpetra 					solution_Type;
-//	typedef boost::shared_ptr<VectorEpetra> solutionPtr_Type;
-//};
+
 Real fzero (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return 0.0;
