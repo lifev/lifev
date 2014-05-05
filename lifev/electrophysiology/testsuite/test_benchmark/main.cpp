@@ -383,8 +383,17 @@ Int main ( Int argc, char** argv )
     }
 
     bool lumpedMass = monodomainList.get ("LumpedMass", true);
+    if(solutionMethod=="L-ICI" && !lumpedMass)
+	{
+    	std::cout << "===============================================\n";
+    	std::cout << "You are using L-ICI without lumping! You can't!\n";
+    	std::cout << "This time I'm fixing it for you ... be careful.\n";
+    	std::cout << "===============================================\n";
+    	solver -> setLumpedMassMatrix(true);
+	}
+
     matrixPtr_Type hlmass;
-    if( lumpedMass )
+    if( lumpedMass && solutionMethod=="ICI")
     { 
         solver -> setLumpedMassMatrix(false);
 		solver -> setupMassMatrix();
