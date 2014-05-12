@@ -68,7 +68,7 @@
 // boundary conditions. We will create a ummy physical solver in order to use it.
 // ------------------------------------------------------------------------------
 #include <lifev/bc_interface/3D/bc/BCInterface3D.hpp>
-#include <lifev/bc_interface/core/solver/DefaultPhysicalSolver.hpp>
+#include <lifev/bc_interface/core/solver/EmptyPhysicalSolver.hpp>
 
 // ------------------------------------------------------------------------------
 //  Usefule utility to load the mesh in one line.
@@ -185,7 +185,7 @@ int main ( int argc, char** argv )
     typedef BCHandler                                      		bc_Type;
     typedef boost::shared_ptr< bc_Type >                   		bcPtr_Type;
 
-    typedef DefaultPhysicalSolver<VectorEpetra>  				physicalSolver_Type;
+    typedef EmptyPhysicalSolver<VectorEpetra>  				physicalSolver_Type;
     typedef BCInterface3D< bc_Type, physicalSolver_Type >   	bcInterface_Type;
 
      typedef boost::shared_ptr< bcInterface_Type >          		bcInterfacePtr_Type;
