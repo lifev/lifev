@@ -1,3 +1,15 @@
+LifeV 3.8.4:
+============
+
+Merged the following branches:
+
+* ETAforStructuralAssemblyAndFSI
+
+* ETAWithOtherDimension https://cmcsforge.epfl.ch/issues/75
+
+* MultiscaleDependenciesFix https://cmcsforge.epfl.ch/issues/79
+
+And ther bug fixes
 
 LifeV 3.8.3:
 ============
