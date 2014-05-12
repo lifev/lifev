@@ -38,7 +38,8 @@
 #define BCInterfaceFunctionParserFSI3D_H 1
 
 // FSI includes
-#include <lifev/fsi/solver/FSIOperator.hpp>
+//#include <lifev/fsi/solver/FSIOperator.hpp>
+class FSIOperator;
 
 // BCInterface includes
 #include <lifev/bc_interface/3D/bc/BCInterfaceData3D.hpp>
