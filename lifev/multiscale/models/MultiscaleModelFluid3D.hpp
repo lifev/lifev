@@ -42,6 +42,12 @@
 #include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/navier_stokes/solver/OseenData.hpp>
 #include <lifev/core/mesh/MeshData.hpp>
+
+#include <lifev/bc_interface/3D/function/fluid/BCInterfaceFunctionParserFluid3D.hpp>
+#include <lifev/bc_interface/3D/function/fluid/BCInterfaceFunctionParserSolverFluid3D.hpp>
+#include <lifev/bc_interface/3D/function/fluid/BCInterfaceFunctionUserDefinedFluid3D.hpp>
+
+
 #include <lifev/bc_interface/3D/bc/BCInterface3D.hpp>
 #include <lifev/core/algorithm/NonLinearAitken.hpp>
 #include <lifev/core/fem/FESpace.hpp>
