@@ -26,24 +26,32 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterface3D class
+ *  @brief File containing the BCInterfaceFunctionUserDefinedSolver class
  *
- *  @date 01-04-2009
- *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @date 04 - 2014
+ *  @author Simone Rossi <simone.rossi@epfl.ch>
  *
- *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
+ *  @maintainer Simone Rossi <simone.rossi@epfl.ch>
  */
 
-#ifndef BCInterfaceFSI3D_H
-#define BCInterfaceFSI3D_H 1
-
+#ifndef BCInterfaceFunctionUserDefinedDefault3D_H
+#define BCInterfaceFunctionUserDefinedDefault3D_H 1
+//! Default Physical Solver
+#include <lifev/bc_interface/core/solver/EmptyPhysicalSolver.hpp>
+#include <lifev/core/fem/BCHandler.hpp>
 // BCInterface includes
-#include <lifev/bc_interface/3D/bc/BCInterface3D.hpp>
+#include <lifev/bc_interface/core/function/BCInterfaceFunctionUserDefined.hpp>
 
-#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionParserFSI3D.hpp>
-#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionParserSolverFSI3D.hpp>
-#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionSolverDefinedFSI3D.hpp>
-#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionUserDefinedFSI3D.hpp>
+namespace LifeV
+{
 
+// ===================================================
+// Methods
+// ===================================================
+template< >
+void
+BCInterfaceFunctionUserDefined< BCHandler, EmptyPhysicalSolver< VectorEpetra > >::assignFunction ( bcBase_Type& base );
 
-#endif /* BCInterface3D_H */
+}// Namespace LifeV
+
+#endif /* BCInterfaceFunctionUserDefinedSolid3D_H */

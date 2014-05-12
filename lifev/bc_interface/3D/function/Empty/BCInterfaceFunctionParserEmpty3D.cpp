@@ -35,7 +35,7 @@
  */
 
 // BCInterface includes
-#include <lifev/bc_interface/3D/function/Default/BCInterfaceFunctionParserDefault3D.hpp>
+#include <lifev/bc_interface/3D/function/Empty/BCInterfaceFunctionParserEmpty3D.hpp>
 
 namespace LifeV
 {
@@ -45,7 +45,7 @@ namespace LifeV
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParser< BCHandler, DefaultPhysicalSolver< VectorEpetra > >::assignFunction ( bcBase_Type& base )
+BCInterfaceFunctionParser< BCHandler, EmptyPhysicalSolver< VectorEpetra > >::assignFunction ( bcBase_Type& base )
 {
     base.setFunction ( functionSelectorTimeSpaceID() );
 }
@@ -55,9 +55,8 @@ BCInterfaceFunctionParser< BCHandler, DefaultPhysicalSolver< VectorEpetra > >::a
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParser< BCHandler, DefaultPhysicalSolver< VectorEpetra > >::setData ( const boost::shared_ptr< BCInterfaceData >& data )
+BCInterfaceFunctionParser< BCHandler, EmptyPhysicalSolver< VectorEpetra > >::setData ( const boost::shared_ptr< BCInterfaceData >& data )
 {
-
 #ifdef HAVE_LIFEV_DEBUG
     debugStream ( 5022 ) << "BCInterfaceFunction::setData" << "\n";
 #endif
@@ -72,7 +71,13 @@ BCInterfaceFunctionParser< BCHandler, DefaultPhysicalSolver< VectorEpetra > >::s
         /*
          * MODE          COMPONENT     FUNCTION      |      COMV.SIZE     ARGUMENTS     INTERFACEFUNCTION
          * ------------------------------------------|---------------------------------------------------
+         *                                           |
+         * COMPONENT     2             x*y*z         |      1             1             function
+         * FULL          3             x*y*z         |      1             1             function
          * FULL          1             x*y*z         |      1             1             function
+         * FULL          3             (y*z,x*z,x*y) |      1             3             functionID
+         * FULL          2             (x,y)         |      1             2             functionID
+         * COMPONENT     '1 3'         (x,y)         |      2             2             functionID
          */
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -83,11 +88,17 @@ BCInterfaceFunctionParser< BCHandler, DefaultPhysicalSolver< VectorEpetra > >::s
         if ( M_parser->countSubstring ( "," ) )
         {
             //Create the ID map
-			// if ( castedData->componentsVector().front() == arguments )  Full
-			for ( ID i ( 0 ); i < castedData->componentsVector().front(); ++i )
-			{
-				M_mapID[i + 1] = i + 1;
-			}
+            if ( castedData->componentsVector().size() > 1 ) // Component
+                for ( ID i ( 0 ); i < static_cast< ID > ( castedData->componentsVector().size() ); ++i )
+                {
+                    M_mapID[castedData->componentsVector() [i]] = i + 1;
+                }
+            else
+                // if ( castedData->componentsVector().front() == arguments )  Full
+                for ( ID i ( 0 ); i < castedData->componentsVector().front(); ++i )
+                {
+                    M_mapID[i + 1] = i + 1;
+                }
         }
     }
     else
@@ -95,6 +106,5 @@ BCInterfaceFunctionParser< BCHandler, DefaultPhysicalSolver< VectorEpetra > >::s
         std::cerr << "!!! ERROR: BCInterface wrong data cast !!!" << std::endl;
     }
 }
-
 
 } // Namespace LifeV

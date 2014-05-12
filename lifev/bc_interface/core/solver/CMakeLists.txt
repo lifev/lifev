@@ -1,5 +1,5 @@
 SET(solver_HEADERS
-  solver/DefaultPhysicalSolver.hpp
+  solver/EmptyPhysicalSolver.hpp
 CACHE INTERNAL "")
 
 SET(function_SOURCES

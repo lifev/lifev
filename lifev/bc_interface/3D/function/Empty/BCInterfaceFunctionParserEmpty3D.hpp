@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterfaceFunctionUserDefinedSolver class
+ *  @brief File containing the BCInterfaceFunctionParserSolver class
  *
  *  @date 04 - 2014
  *  @author Simone Rossi <simone.rossi@epfl.ch>
@@ -34,9 +34,14 @@
  *  @maintainer Simone Rossi <simone.rossi@epfl.ch>
  */
 
+#ifndef BCInterfaceFunctionParserDefault3D_H
+#define BCInterfaceFunctionParserDefault3D_H 1
+//! Default Physical Solver
+#include <lifev/bc_interface/core/solver/EmptyPhysicalSolver.hpp>
 
 // BCInterface includes
-#include <lifev/bc_interface/3D/function/Default/BCInterfaceFunctionUserDefinedDefault3D.hpp>
+#include <lifev/bc_interface/3D/bc/BCInterfaceData3D.hpp>
+#include <lifev/bc_interface/core/function/BCInterfaceFunctionParser.hpp>
 
 namespace LifeV
 {
@@ -46,10 +51,17 @@ namespace LifeV
 // ===================================================
 template< >
 void
-BCInterfaceFunctionUserDefined< BCHandler, DefaultPhysicalSolver< VectorEpetra > >::assignFunction ( bcBase_Type& base )
-{
-    base.setFunction ( functionSelectorTimeSpaceID() );
-}
+BCInterfaceFunctionParser< BCHandler, EmptyPhysicalSolver< VectorEpetra > >::assignFunction ( bcBase_Type& base );
 
-}// Namespace LifeV
+// ===================================================
+// Set Methods
+// ===================================================
+template< >
+void
+BCInterfaceFunctionParser< BCHandler, EmptyPhysicalSolver< VectorEpetra > >::setData ( const boost::shared_ptr< BCInterfaceData >& data );
 
+
+
+} // Namespace LifeV
+
+#endif /* BCInterfaceFunctionParserSolid3D_H */

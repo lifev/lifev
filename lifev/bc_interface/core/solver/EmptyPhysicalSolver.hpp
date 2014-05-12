@@ -26,32 +26,25 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterfaceFunctionUserDefinedSolver class
+ *  @brief File containing  a default physical solver in orde to use the bc interface
  *
  *  @date 04 - 2014
  *  @author Simone Rossi <simone.rossi@epfl.ch>
  *
  *  @maintainer Simone Rossi <simone.rossi@epfl.ch>
  */
+#ifndef EMPTYPHYSICALSOLVER_HPP_
+#define EMPTYPHYSICALSOLVER_HPP_
 
-#ifndef BCInterfaceFunctionUserDefinedDefault3D_H
-#define BCInterfaceFunctionUserDefinedDefault3D_H 1
-//! Default Physical Solver
-#include <lifev/bc_interface/core/solver/DefaultPhysicalSolver.hpp>
-#include <lifev/core/fem/BCHandler.hpp>
-// BCInterface includes
-#include <lifev/bc_interface/core/function/BCInterfaceFunctionUserDefined.hpp>
+#include <boost/shared_ptr.hpp>
+//#include <lifev/core/array/VectorEpetra.hpp>
 
-namespace LifeV
+template < class vector_Type >
+class EmptyPhysicalSolver
 {
+public:
+	typedef boost::shared_ptr<vector_Type> solutionPtr_Type;
+};
 
-// ===================================================
-// Methods
-// ===================================================
-template< >
-void
-BCInterfaceFunctionUserDefined< BCHandler, DefaultPhysicalSolver< VectorEpetra > >::assignFunction ( bcBase_Type& base );
 
-}// Namespace LifeV
-
-#endif /* BCInterfaceFunctionUserDefinedSolid3D_H */
+#endif /* DEFAULTPHYSICALSOLVER_HPP_ */
