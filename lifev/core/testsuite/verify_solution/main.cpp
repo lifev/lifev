@@ -1,8 +1,36 @@
+//@HEADER
 /*
- * VerifySolutions_test.cpp
- *
- *  Created on: May 10, 2014
- *      Author: Simone Deparis
+*******************************************************************************
+
+    Copyright (C) 2014 EPFL, Politecnico di Milano, Emory University
+
+    This file is part of LifeV.
+
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
+*/
+//@HEADER
+
+/*!
+    @file main.cpp
+    @brief This files contains the testsuite for VerifySolutions
+
+    @author Simone Deparis <simone.deparis@epfl.ch>
+    @date 12-05-2014
+    @mantainer Simone Deparis <simone.deparis@epfl.ch>
+
  */
 
 #include <Epetra_ConfigDefs.h>
@@ -85,28 +113,37 @@ int main (int argc, char** argv)
         v3.setCoefficient(globalIndex, 1./(globalIndex+1));
     }
 
+    // Setting the previously computed values of the reference norm of the mean and the correlation matrix.
+    // This is also the output of the Print method.
     Real referenceMeanNorm = 3.41795511063503;
     Epetra_SerialDenseMatrix refM(3,3);
     refM(0,0) = 27.5347957298817; refM(0,1) = -22.0349495350519; refM(0,2) = -5.49984619482986;
     refM(1,0) = -22.0349495350519; refM(1,1) = 27.7940200477885; refM(1,2) = -5.75907051273657;
     refM(2,0) = -5.49984619482986; refM(2,1) = -5.75907051273657; refM(2,2) = 11.2589167075664;
 
-    // Insert vectors into VerifySolution
+    // Instance of the class VerifySolution
     VerifySolutions verify;
-    // Tolerance between the error and the errorKnown
-    const LifeV::Real tolerance ( 1e-8 );
 
+    // Insert vectors into VerifySolution
     verify.PushBack(v1);
     verify.PushBack(v2);
     verify.PushBack(v3);
 
     // Compute the Mean and Correlation matrix
     verify.ComputeCorrelation();
-    verify.Print();
 
+    // Tolerance between the error and the errorKnown
+    const LifeV::Real tolerance ( 1e-8 );
     // Verify that it is the same as pre-computed.
     bool isMeanOk   ( verify.Check( referenceMeanNorm, tolerance ) );
     bool isMatrixOk ( verify.Check( refM, tolerance ) );
+
+    // Print the reference norm of the mean and the correlation matrix as
+    // pseudo c++ code.
+    if (comm->MyPID() == 0)
+    {
+        verify.Print();
+    }
 
     testSuccess = isMeanOk && isMatrixOk;
 

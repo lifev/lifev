@@ -1,8 +1,37 @@
+//@HEADER
 /*
- * VerifySolutions.cpp
- *
- *  Created on: May 10, 2014
- *      Author: Simone Deparis
+*******************************************************************************
+
+    Copyright (C) 2014 EPFL, Politecnico di Milano, Emory University
+
+    This file is part of LifeV.
+
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
+*/
+//@HEADER
+
+/*!
+    @file VerifySolutions.cpp
+    @brief This files contains the description of the VerifySolutions class, which is a helper class for checking results by
+           Computing the mean norm and correlation matrix of vectors
+
+    @author Simone Deparis <simone.deparis@epfl.ch>
+    @date 12-05-2014
+    @mantainer Simone Deparis <simone.deparis@epfl.ch>
+
  */
 
 #include "VerifySolutions.hpp"
@@ -22,41 +51,10 @@ VerifySolutions::~VerifySolutions()
 {
 }
 
-bool VerifySolutions::Check( Epetra_SerialDenseMatrix const& refM, Real tol) const
+void VerifySolutions::PushBack (VectorEpetra const& newVector)
 {
-    if ( refM.M() != M_CorrelationMatrix.M() || refM.N() != M_CorrelationMatrix.N() )
-    {
-        return false;
-    }
 
-    for (int i(0); i < refM.M(); ++i)
-    {
-        for (int j(0); j < refM.M(); ++j)
-        {
-            if ( abs(refM(i,j) - M_CorrelationMatrix(i,j) ) > tol )
-            {
-                std::cout << "Correlation matrix changed" << std::endl;
-                return false;
-            }
-        }
-    }
-
-    std::cout << "Correlation matrix unchanged" << std::endl;
-
-    return true;
-}
-
-bool VerifySolutions::Check( Real referenceMean, Real tol) const
-{
-    if ( abs(referenceMean - M_NormMean) > tol )
-    {
-        std::cout << "Norm of the mean vector changed" << std::endl;
-        return false;
-    }
-
-    std::cout << "Norm of the mean vector unchanged" << std::endl;
-
-    return true;
+    M_VectorList.push_back(newVector);
 }
 
 void VerifySolutions::ComputeCorrelation()
@@ -103,12 +101,42 @@ void VerifySolutions::ComputeCorrelation()
     }
 }
 
-void VerifySolutions::PushBack (VectorEpetra const& newVector)
+bool VerifySolutions::Check( Epetra_SerialDenseMatrix const& refM, Real tol) const
 {
+    if ( refM.M() != M_CorrelationMatrix.M() || refM.N() != M_CorrelationMatrix.N() )
+    {
+        return false;
+    }
 
-    M_VectorList.push_back(newVector);
+    for (int i(0); i < refM.M(); ++i)
+    {
+        for (int j(0); j < refM.M(); ++j)
+        {
+            if ( abs(refM(i,j) - M_CorrelationMatrix(i,j) ) > tol )
+            {
+                std::cout << "Correlation matrix changed" << std::endl;
+                return false;
+            }
+        }
+    }
+
+    std::cout << "Correlation matrix unchanged" << std::endl;
+
+    return true;
 }
 
+bool VerifySolutions::Check( Real referenceMean, Real tol) const
+{
+    if ( abs(referenceMean - M_NormMean) > tol )
+    {
+        std::cout << "Norm of the mean vector changed" << std::endl;
+        return false;
+    }
+
+    std::cout << "Norm of the mean vector unchanged" << std::endl;
+
+    return true;
+}
 
 void VerifySolutions::Print () const
 {
