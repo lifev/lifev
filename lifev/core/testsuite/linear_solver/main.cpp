@@ -115,15 +115,16 @@ public:
 };
 
 
-void printErrors ( const vector_Type& solution, fespacePtr_Type uFESpace, bool verbose )
+void printErrors ( const vector_Type& solution, fespacePtr_Type uFESpace,
+                   Real& uL2Error, Real& uH1Error, bool verbose )
 {
     ExactSol exactU;
 
 
     vector_Type velocity ( solution, Repeated );
-    Real uRelativeError, uL2Error;
+    Real uRelativeError;
     uL2Error = uFESpace->l2Error (exactU, velocity, 0, &uRelativeError );
-    Real uH1RelativeError, uH1Error;
+    Real uH1RelativeError;
     uH1Error = uFESpace->h1Error (exactU, velocity, 0, &uH1RelativeError );
 
     if ( verbose )
@@ -521,19 +522,22 @@ main ( int argc, char** argv )
         {
             std::cout << "AztecOO solver" << std::endl;
         }
-        printErrors ( *solution, uFESpace, verbose );
+        Real uL2AztecOO, uH1AztecOO;
+        printErrors ( *solution, uFESpace, uL2AztecOO, uH1AztecOO, verbose );
 
         if ( verbose )
         {
             std::cout << "Linear solver Belos" << std::endl;
         }
-        printErrors ( *solution2, uFESpace, verbose );
+        Real uL2Belos, uH1Belos;
+        printErrors ( *solution2, uFESpace, uL2Belos, uH1Belos, verbose );
 
         if ( verbose )
         {
             std::cout << "Linear solver AztecOO" << std::endl;
         }
-        printErrors ( *solution3, uFESpace, verbose );
+        Real uL2AztecOO3, uH1AztecOO3;
+        printErrors ( *solution3, uFESpace, uL2AztecOO3, uH1AztecOO3, verbose );
 
         if ( verbose )
         {
@@ -560,6 +564,21 @@ main ( int argc, char** argv )
             if ( verbose )
             {
                 std::cout << "The difference between the two solutions is too large." << std::endl;
+            }
+            if ( verbose )
+            {
+                std::cout << "Test status: FAILED" << std::endl;
+            }
+            return ( EXIT_FAILURE );
+        }
+
+        if (   uL2AztecOO > 4.602e-03 || uH1AztecOO > 3.855e-01
+            || uL2Belos > 4.602e-03 || uH1Belos > 3.855e-01
+            || uL2AztecOO3 > 4.602e-03 || uH1AztecOO3 > 3.855e-01)
+        {
+            if ( verbose )
+            {
+                std::cout << "The error in L2 norm or H1 norm is too large." << std::endl;
             }
             if ( verbose )
             {
