@@ -60,7 +60,6 @@
 #include <lifev/core/algorithm/SolverAztecOO.hpp>
 #include <lifev/core/algorithm/LinearSolver.hpp>
 #include <lifev/core/function/Laplacian.hpp>
-#include "lifev/core/util/VerifySolutions.hpp"
 
 
 #define TEST_TOLERANCE 1e-13
