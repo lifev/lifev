@@ -47,6 +47,9 @@ public:
 
     void PushBack (VectorEpetra const& newVector);
 
+    //! Print Mean and Correlation matrix as c++ lines ready to be inserted into the test.
+    void Print () const;
+
 private:
     Real                     M_NormMean;
     Epetra_SerialDenseMatrix M_CorrelationMatrix;

@@ -7,6 +7,7 @@
 
 #include "VerifySolutions.hpp"
 #include <vector>
+#include <iostream>
 
 namespace LifeV {
 
@@ -34,10 +35,13 @@ bool VerifySolutions::Check( Epetra_SerialDenseMatrix const& refM, Real tol) con
         {
             if ( abs(refM(i,j) - M_CorrelationMatrix(i,j) ) > tol )
             {
+                std::cout << "Correlation matrix changed" << std::endl;
                 return false;
             }
         }
     }
+
+    std::cout << "Correlation matrix unchanged" << std::endl;
 
     return true;
 }
@@ -46,8 +50,12 @@ bool VerifySolutions::Check( Real referenceMean, Real tol) const
 {
     if ( abs(referenceMean - M_NormMean) > tol )
     {
+        std::cout << "Norm of the mean vector changed" << std::endl;
         return false;
     }
+
+    std::cout << "Norm of the mean vector unchanged" << std::endl;
+
     return true;
 }
 
@@ -102,5 +110,27 @@ void VerifySolutions::PushBack (VectorEpetra const& newVector)
 }
 
 
+void VerifySolutions::Print () const
+{
+
+    std::cout.precision(15);
+
+    std::cout << "Real referenceMeanNorm = " << M_NormMean << ";" << std::endl;
+
+    std::cout << "Epetra_SerialDenseMatrix refM("
+              << M_CorrelationMatrix.M() << "," << M_CorrelationMatrix.N() << ");"
+              << std::endl;
+
+    for (int i(0); i < M_CorrelationMatrix.M(); ++i)
+    {
+        for (int j(0); j < M_CorrelationMatrix.M(); ++j)
+        {
+            std::cout << "refM(" << i << "," << j << ") = " << M_CorrelationMatrix(i,j) << "; ";
+        }
+        std::cout << std::endl;
+    }
+
+
+}
 
 } /* namespace LifeV */
