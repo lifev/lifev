@@ -113,6 +113,8 @@ int main (int argc, char** argv)
         v3.setCoefficient(globalIndex, 1./(globalIndex+1));
     }
 
+    //! [Example of use of VerifySolutions]
+
     // Setting the previously computed values of the reference norm of the mean and the correlation matrix.
     // This is also the output of the Print method.
     Real referenceMeanNorm = 3.41795511063503;
@@ -144,6 +146,8 @@ int main (int argc, char** argv)
     {
         verify.Print();
     }
+
+    //! [Example of use of VerifySolutions]
 
     testSuccess = isMeanOk && isMatrixOk;
 

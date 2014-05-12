@@ -55,8 +55,10 @@ namespace LifeV {
  * scalars: (u_i-u , u_j-u) i,j=0,1,... (correlation matrix)
  *
  * Store the correlation matrix and (u,u)_X
- * each entry of the matrix shall be equial to the stored one up to a tolerance.
+ * each entry of the matrix shall be equal to the stored one up to a tolerance.
  *
+ * Example of use taken from \ref ../testsuite/verify_solution/main.cpp
+ * \sinpped ../testsuite/verify_solution/main.cpp Example of use of VerifySolutions
  */
 class VerifySolutions
 {
