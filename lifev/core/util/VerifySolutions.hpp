@@ -46,19 +46,22 @@
 namespace LifeV {
 
 /** This class helps the testsuites in verifying that the solutions
- * Do not change from one execution to the other.
+ * do not change from one execution to the other.
  * We want to check if the solutions are correct between versions.
  * we want to produce a small number of scalars and check they are always the same.
  *
  * Given: u_0, u_1, ...
- * mean: u = mean u_j
- * scalars: (u_i-u , u_j-u) i,j=0,1,... (correlation matrix)
  *
- * Store the correlation matrix and (u,u)_X
+ * mean: u = mean u_j
+ *
+ * correlation matrix: (u_i-u , u_j-u) i,j=0,1,...
+ *
+ * Store the correlation matrix and (u,u)
  * each entry of the matrix shall be equal to the stored one up to a tolerance.
  *
- * Example of use taken from \ref ../testsuite/verify_solution/main.cpp
- * \sinpped ../testsuite/verify_solution/main.cpp Example of use of VerifySolutions
+ * Example of use taken from \ref testsuite/verify_solution/main.cpp
+ *
+ * \snippet testsuite/verify_solution/main.cpp Example of use of VerifySolutions
  */
 class VerifySolutions
 {
@@ -79,7 +82,6 @@ public:
 
     //! Add a vector to the list of stored vectors.
     /*!
-      *  Add a vector to the list of stored vectors.
       *  The vector is copied in a list container.
       * \param newVector vector to be copied and stored
       */
@@ -87,14 +89,12 @@ public:
 
     //! Compute the correlation matrix and norm of the mean.
     /*!
-      *  Compute the correlation matrix and norm of the mean.
       *  This has to be called after all vectors have been PushBack and befor the Checks
       */
     void ComputeCorrelation();
 
     //!  Checks that the current Correlation matrix is the same as the one provided by the user.
     /*!
-      *  Checks that the current Correlation matrix is the same as the one provided by the user.
       *  Usually the reference matrix is computed with a solution set which is known to be correct.
       * \param refM precomputed correlation matrix
       * \param tol Tolerance for checking same results
@@ -103,7 +103,6 @@ public:
 
     //!  Checks that the current norm of the mean of the vectors is the same as the one provided by the user.
     /*!
-      *  Checks that the current norm of the mean of the vectors is the same as the one provided by the user.
       *  Usually the norm of the mean is computed with a solution set which is known to be correct.
       * \param referenceMean precomputed norm of the mean of the vectors
       * \param tol Tolerance for checking same results
