@@ -43,7 +43,8 @@
 
 #include <lifev/core/array/VectorEpetra.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 /** This class helps the testsuites in verifying that the solutions
  * do not change from one execution to the other.
@@ -69,7 +70,7 @@ public:
 
     /*! @name Constructors and destructor
       */
-     //@{
+    //@{
 
     VerifySolutions();
     virtual ~VerifySolutions();
@@ -99,7 +100,7 @@ public:
       * \param refM precomputed correlation matrix
       * \param tol Tolerance for checking same results
       */
-    bool Check( Epetra_SerialDenseMatrix const& refM, Real tol) const;
+    bool Check ( Epetra_SerialDenseMatrix const& refM, Real tol) const;
 
     //!  Checks that the current norm of the mean of the vectors is the same as the one provided by the user.
     /*!
@@ -107,7 +108,7 @@ public:
       * \param referenceMean precomputed norm of the mean of the vectors
       * \param tol Tolerance for checking same results
       */
-    bool Check( Real referenceMean, Real tol) const;
+    bool Check ( Real referenceMean, Real tol) const;
 
     //! Print Mean and Correlation matrix as c++ lines ready to be inserted into the test.
     void Print () const;

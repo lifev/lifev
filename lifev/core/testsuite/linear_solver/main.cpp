@@ -92,11 +92,11 @@ class ExactSol
 public:
     Real operator() (const Real& t , const Real& x, const Real& y, const Real& z, const ID& i ) const
     {
-        return Laplacian::uexact(t, x, y, z, i);
+        return Laplacian::uexact (t, x, y, z, i);
     }
 
     Real grad ( const ID& iCoor, const Real& t, const Real& x, const Real& y,
-                            const Real& z, const ID& i ) const
+                const Real& z, const ID& i ) const
     {
         switch (iCoor)
         {
@@ -573,8 +573,8 @@ main ( int argc, char** argv )
         }
 
         if (   uL2AztecOO > 4.602e-03 || uH1AztecOO > 3.855e-01
-            || uL2Belos > 4.602e-03 || uH1Belos > 3.855e-01
-            || uL2AztecOO3 > 4.602e-03 || uH1AztecOO3 > 3.855e-01)
+                || uL2Belos > 4.602e-03 || uH1Belos > 3.855e-01
+                || uL2AztecOO3 > 4.602e-03 || uH1AztecOO3 > 3.855e-01)
         {
             if ( verbose )
             {

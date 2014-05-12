@@ -83,73 +83,79 @@ int main (int argc, char** argv)
 
     std::cout << "MPI Initialization" << std::endl;
 
-    bool testSuccess(true);
+    bool testSuccess (true);
 
 #endif
     {
 #ifdef EPETRA_MPI
-    boost::shared_ptr<Epetra_Comm>   comm( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+        boost::shared_ptr<Epetra_Comm>   comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
-    boost::shared_ptr<Epetra_Comm>   comm( new Epetra_SerialComm() );
+        boost::shared_ptr<Epetra_Comm>   comm ( new Epetra_SerialComm() );
 #endif
 
-    // Build Distributed linear map based on [0:99]
+        // Build Distributed linear map based on [0:99]
 
-    Int numGlobalElements(100);
-    MapEpetra linearMap(numGlobalElements, 0, comm);
+        Int numGlobalElements (100);
+        MapEpetra linearMap (numGlobalElements, 0, comm);
 
-    // Build Distributed vectors [cos(index)] [sin(index)] [1/(index+1)]
-    VectorEpetra v1(linearMap), v2(linearMap), v3(linearMap);
+        // Build Distributed vectors [cos(index)] [sin(index)] [1/(index+1)]
+        VectorEpetra v1 (linearMap), v2 (linearMap), v3 (linearMap);
 
-    Int numLocalEntries(linearMap.map(Unique)->NumMyElements () );
+        Int numLocalEntries (linearMap.map (Unique)->NumMyElements () );
 
-    Int* globalElements (linearMap.map(Unique)->MyGlobalElements () );
-    Int globalIndex(0);
-    for (int i(0); i < numLocalEntries; ++i)
-    {
-        globalIndex = globalElements[i];
-        v1.setCoefficient(globalIndex, cos(globalIndex));
-        v2.setCoefficient(globalIndex, sin(globalIndex));
-        v3.setCoefficient(globalIndex, 1./(globalIndex+1));
-    }
+        Int* globalElements (linearMap.map (Unique)->MyGlobalElements () );
+        Int globalIndex (0);
+        for (int i (0); i < numLocalEntries; ++i)
+        {
+            globalIndex = globalElements[i];
+            v1.setCoefficient (globalIndex, cos (globalIndex) );
+            v2.setCoefficient (globalIndex, sin (globalIndex) );
+            v3.setCoefficient (globalIndex, 1. / (globalIndex + 1) );
+        }
 
-    //! [Example of use of VerifySolutions]
+        //! [Example of use of VerifySolutions]
 
-    // Setting the previously computed values of the reference norm of the mean and the correlation matrix.
-    // This is also the output of the Print method.
-    Real referenceMeanNorm = 3.41795511063503;
-    Epetra_SerialDenseMatrix refM(3,3);
-    refM(0,0) = 27.5347957298817; refM(0,1) = -22.0349495350519; refM(0,2) = -5.49984619482986;
-    refM(1,0) = -22.0349495350519; refM(1,1) = 27.7940200477885; refM(1,2) = -5.75907051273657;
-    refM(2,0) = -5.49984619482986; refM(2,1) = -5.75907051273657; refM(2,2) = 11.2589167075664;
+        // Setting the previously computed values of the reference norm of the mean and the correlation matrix.
+        // This is also the output of the Print method.
+        Real referenceMeanNorm = 3.41795511063503;
+        Epetra_SerialDenseMatrix refM (3, 3);
+        refM (0, 0) = 27.5347957298817;
+        refM (0, 1) = -22.0349495350519;
+        refM (0, 2) = -5.49984619482986;
+        refM (1, 0) = -22.0349495350519;
+        refM (1, 1) = 27.7940200477885;
+        refM (1, 2) = -5.75907051273657;
+        refM (2, 0) = -5.49984619482986;
+        refM (2, 1) = -5.75907051273657;
+        refM (2, 2) = 11.2589167075664;
 
-    // Instance of the class VerifySolution
-    VerifySolutions verify;
+        // Instance of the class VerifySolution
+        VerifySolutions verify;
 
-    // Insert vectors into VerifySolution
-    verify.PushBack(v1);
-    verify.PushBack(v2);
-    verify.PushBack(v3);
+        // Insert vectors into VerifySolution
+        verify.PushBack (v1);
+        verify.PushBack (v2);
+        verify.PushBack (v3);
 
-    // Compute the Mean and Correlation matrix
-    verify.ComputeCorrelation();
+        // Compute the Mean and Correlation matrix
+        verify.ComputeCorrelation();
 
-    // Tolerance between the error and the errorKnown
-    const LifeV::Real tolerance ( 1e-8 );
-    // Verify that it is the same as pre-computed.
-    bool isMeanOk   ( verify.Check( referenceMeanNorm, tolerance ) );
-    bool isMatrixOk ( verify.Check( refM, tolerance ) );
+        // Tolerance between the error and the errorKnown
+        const LifeV::Real tolerance ( 1e-8 );
+        // Verify that it is the same as pre-computed.
+        bool isMeanOk   ( verify.Check ( referenceMeanNorm, tolerance ) );
+        bool isMatrixOk ( verify.Check ( refM, tolerance ) );
 
-    // Print the reference norm of the mean and the correlation matrix as
-    // pseudo c++ code.
-    if (comm->MyPID() == 0)
-    {
-        verify.Print();
-    }
+        // Print the reference norm of the mean and the correlation matrix as
+        // pseudo c++ code.
+        if (comm->MyPID() == 0)
+        {
+            verify.Print();
+        }
 
-    //! [Example of use of VerifySolutions]
+        //! [Example of use of VerifySolutions]
 
-    testSuccess = isMeanOk && isMatrixOk;
+        testSuccess = isMeanOk && isMatrixOk;
 
     }
 
