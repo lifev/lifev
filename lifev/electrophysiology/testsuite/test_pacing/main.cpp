@@ -89,7 +89,7 @@ Int main ( Int argc, char** argv )
     boost::shared_ptr<Epetra_Comm>  Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
     if ( Comm->MyPID() == 0 )
     {
-        cout << "% using MPI" << endl;
+        std::cout << "% using MPI" << std::endl;
     }
 
     //*********************************************//
@@ -139,7 +139,7 @@ Int main ( Int argc, char** argv )
     Teuchos::ParameterList monodomainList = * ( Teuchos::getParametersFromXmlFile ( "MonodomainSolverParamList.xml" ) );
     if ( Comm->MyPID() == 0 )
     {
-        std::cout << " Done!" << endl;
+        std::cout << " Done!" << std::endl;
     }
 
     //********************************************//
@@ -155,7 +155,7 @@ Int main ( Int argc, char** argv )
     boost::shared_ptr<IonicAlievPanfilov>  model ( new IonicAlievPanfilov() );
     if ( Comm->MyPID() == 0 )
     {
-        std::cout << " Done!" << endl;
+        std::cout << " Done!" << std::endl;
     }
 
 
@@ -216,7 +216,7 @@ Int main ( Int argc, char** argv )
     //********************************************//
     if ( Comm->MyPID() == 0 )
     {
-        cout << "\nSetting fibers:  " ;
+        std::cout << "\nSetting fibers:  " ;
     }
     // This is used only to initialize the pointer in the solver
     // could be replaced with a method "initialize fibers"
@@ -243,7 +243,7 @@ Int main ( Int argc, char** argv )
     }
     if ( Comm->MyPID() == 0 )
     {
-        cout << "Done! \n" ;
+        std::cout << "Done! \n" ;
     }
 
     //********************************************//
@@ -256,14 +256,14 @@ Int main ( Int argc, char** argv )
     //********************************************//
     if ( Comm->MyPID() == 0 )
     {
-        cout << "\nSetup operators:  " ;
+        std::cout << "\nSetup operators:  " ;
     }
     monodomain -> setupLumpedMassMatrix();
     monodomain -> setupStiffnessMatrix();
     monodomain -> setupGlobalMatrix();
     if ( Comm->MyPID() == 0 )
     {
-        cout << "Done! \n" ;
+        std::cout << "Done! \n" ;
     }
 
     //********************************************//
@@ -304,7 +304,7 @@ Int main ( Int argc, char** argv )
     Teuchos::ParameterList pacingList = * ( Teuchos::getParametersFromXmlFile ( pacingListFileName ) );
     if ( Comm->MyPID() == 0 )
     {
-        std::cout << " Done!" << endl;
+        std::cout << " Done!" << std::endl;
     }
 
     pacing.setParameters (pacingList);

@@ -60,7 +60,7 @@ Int main ()
     //********************************************//
     std::cout << "Building Constructor for Mitchell Schaeffer  Model ... ";
     IonicMitchellSchaeffer   model;
-    std::cout << " Done!" << endl;
+    std::cout << " Done!" << std::endl;
 
 
     //********************************************//
@@ -111,7 +111,7 @@ Int main ()
     // Open the file "output.txt" to save the     //
     // solution.                                  //
     //********************************************//
-    string filename = "output.txt";
+    std::string filename = "output.txt";
     std::ofstream output ("output.txt");
 
     //********************************************//

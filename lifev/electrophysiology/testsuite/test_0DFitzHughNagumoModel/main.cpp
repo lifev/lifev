@@ -60,7 +60,6 @@
 #include <lifev/core/LifeV.hpp>
 
 
-using namespace std;
 using namespace LifeV;
 
 
@@ -78,7 +77,7 @@ Int main ( Int argc, char** argv )
     boost::shared_ptr<Epetra_Comm>  Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
     if ( Comm->MyPID() == 0 )
     {
-        std::cout << "% using MPI" << endl;
+        std::cout << "% using MPI" << std::endl;
     }
 
     //********************************************//
@@ -89,7 +88,7 @@ Int main ( Int argc, char** argv )
 
     std::cout << "Importing parameters list...";
     Teuchos::ParameterList FHNParameterList = * ( Teuchos::getParametersFromXmlFile ( "FitzHughNagumoParameters.xml" ) );
-    std::cout << " Done!" << endl;
+    std::cout << " Done!" << std::endl;
 
 
     //********************************************//
@@ -100,7 +99,7 @@ Int main ( Int argc, char** argv )
     //********************************************//
     std::cout << "Building Constructor for Fitz-Hugh Nagumo Model with parameters ... ";
     IonicFitzHughNagumo  model ( FHNParameterList );
-    std::cout << " Done!" << endl;
+    std::cout << " Done!" << std::endl;
 
 
     //********************************************//
@@ -117,14 +116,14 @@ Int main ( Int argc, char** argv )
     Real TF ( FHNParameterList.get ("TF", 300.0) );
     Real dt ( FHNParameterList.get ("dt", 0.01) );
 
-    std::cout << "Time parameters : " << endl;
-    std::cout << "TF = " << TF << endl;
-    std::cout << "dt = " << dt << endl;
+    std::cout << "Time parameters : " << std::endl;
+    std::cout << "TF = " << TF << std::endl;
+    std::cout << "dt = " << dt << std::endl;
 
-    string filename = "test_expeuler.txt";
+    std::string filename = "test_expeuler.txt";
 
 
-    ofstream output (filename.c_str() );
+    std::ofstream output (filename.c_str() );
 
     //********************************************//
     // Time loop starts.                          //
@@ -174,7 +173,7 @@ Real EulerExplicit (Real& dt, const Real& TF, IonicFitzHughNagumo model, const R
     std::vector<Real> rhs ( model.Size(), 0.0);
     Real Iapp;
 
-    std::cout << "Computing using Explicit Euler" << endl;
+    std::cout << "Computing using Explicit Euler" << std::endl;
 
     //********************************************//
     // We record the norm of the solution to      //

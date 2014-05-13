@@ -133,7 +133,7 @@ Int main ( Int argc, char** argv )
     boost::shared_ptr<Epetra_Comm>  Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
     if ( Comm->MyPID() == 0 )
     {
-        std::cout << "% using MPI" << endl;
+        std::cout << "% using MPI" << std::endl;
     }
 
     // ---------------------------------------------------------------
@@ -206,7 +206,7 @@ Int main ( Int argc, char** argv )
     Teuchos::ParameterList monodomainList = * ( Teuchos::getParametersFromXmlFile ( "MonodomainSolverParamList.xml" ) );
     if ( Comm->MyPID() == 0 )
     {
-        std::cout << " Done!" << endl;
+        std::cout << " Done!" << std::endl;
     }
 
     // ---------------------------------------------------------------

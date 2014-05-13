@@ -60,7 +60,7 @@ Int main ()
     //********************************************//
     std::cout << "Building Constructor for Goldbeter Model with parameters ... ";
     IonicGoldbeter  model;
-    std::cout << " Done!" << endl;
+    std::cout << " Done!" << std::endl;
 
 
     //********************************************//
@@ -92,7 +92,7 @@ Int main ()
     //********************************************//
     std::cout << "Initializing rhs..." ;
     std::vector<Real> rhs (model.Size(), 0);
-    std::cout << " Done! "  << endl;
+    std::cout << " Done! "  << std::endl;
 
     //********************************************//
     // Simulation starts on t=0 and ends on t=TF. //
@@ -105,7 +105,7 @@ Int main ()
     // Open the file "output.txt" to save the     //
     // solution.                                  //
     //********************************************//
-    string filename = "output.txt";
+    std::string filename = "output.txt";
     std::ofstream output ("output.txt");
 
     //********************************************//

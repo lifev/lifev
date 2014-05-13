@@ -83,7 +83,7 @@ Int main ( Int argc, char** argv )
     boost::shared_ptr<Epetra_Comm>  Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
     if ( Comm->MyPID() == 0 )
     {
-        cout << "% using MPI" << endl;
+        std::cout << "% using MPI" << std::endl;
     }
 
     //*********************************************//
@@ -134,7 +134,7 @@ Int main ( Int argc, char** argv )
     Teuchos::ParameterList monodomainList = * ( Teuchos::getParametersFromXmlFile ( "MonodomainSolverParamList.xml" ) );
     if ( Comm->MyPID() == 0 )
     {
-        std::cout << " Done!" << endl;
+        std::cout << " Done!" << std::endl;
     }
 
     //********************************************//
@@ -150,7 +150,7 @@ Int main ( Int argc, char** argv )
     boost::shared_ptr<IonicAlievPanfilov>  model ( new IonicAlievPanfilov() );
     if ( Comm->MyPID() == 0 )
     {
-        std::cout << " Done!" << endl;
+        std::cout << " Done!" << std::endl;
     }
 
 
@@ -211,7 +211,7 @@ Int main ( Int argc, char** argv )
 
     if ( Comm->MyPID() == 0 )
     {
-        cout << "\nInitializing potential:  " ;
+        std::cout << "\nInitializing potential:  " ;
     }
 
     Real initialTime = monodomainList.get ("importTime", 0.0);
@@ -219,7 +219,7 @@ Int main ( Int argc, char** argv )
 
     if ( Comm->MyPID() == 0 )
     {
-        cout << "Done! \n" ;
+        std::cout << "Done! \n" ;
     }
 
     //********************************************//
@@ -234,7 +234,7 @@ Int main ( Int argc, char** argv )
 
     if ( Comm->MyPID() == 0 )
     {
-        cout << "\nImporting fibers:  " ;
+        std::cout << "\nImporting fibers:  " ;
     }
 
     VectorSmall<3> fibers;
@@ -245,7 +245,7 @@ Int main ( Int argc, char** argv )
     monodomain -> setupFibers (fibers);
     if ( Comm->MyPID() == 0 )
     {
-        cout << "Done! \n" ;
+        std::cout << "Done! \n" ;
     }
 
     //********************************************//
@@ -260,14 +260,14 @@ Int main ( Int argc, char** argv )
 
     if ( Comm->MyPID() == 0 )
     {
-        cout << "\nSetup operators:  " ;
+        std::cout << "\nSetup operators:  " ;
     }
     monodomain -> setupLumpedMassMatrix();
     monodomain -> setupStiffnessMatrix();
     monodomain -> setupGlobalMatrix();
     if ( Comm->MyPID() == 0 )
     {
-        cout << "Done! \n" ;
+        std::cout << "Done! \n" ;
     }
 
     //********************************************//

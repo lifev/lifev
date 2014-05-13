@@ -165,7 +165,7 @@ Int main ( Int argc, char** argv )
     // Open the file "output.txt" to save the     //
     // solution.                                  //
     //********************************************//
-    string filename = "output.txt";
+    std::string filename = "output.txt";
     std::ofstream output ("output.txt");
 
     std::cout << "Potential: " << states[0] << std::endl;

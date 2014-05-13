@@ -105,7 +105,7 @@ Int main ( Int argc, char** argv )
     //********************************************//
     std::cout << "Initializing rhs..." ;
     std::vector<Real> rhs (ionicModel.Size(), 0);
-    std::cout << " Done! "  << endl;
+    std::cout << " Done! "  << std::endl;
 
     //********************************************//
     // The model needs as external informations   //
