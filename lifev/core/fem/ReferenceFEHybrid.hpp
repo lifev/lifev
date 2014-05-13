@@ -164,7 +164,7 @@ public:
     const CurrentFEManifold& operator[] ( const ID& i ) const
     {
         ASSERT_BD ( i < static_cast<ID> ( M_numberBoundaryFE ) );
-        return *(M_boundaryFEList[ i ]);
+        return * (M_boundaryFEList[ i ]);
     }
 
     //@}
