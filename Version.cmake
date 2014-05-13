@@ -28,12 +28,12 @@
 # for release mode and set the version.
 #
 
-SET(LifeV_VERSION 3.8.3)
+SET(LifeV_VERSION 3.8.4)
 SET(LifeV_MAJOR_VERSION 3)
 SET(LifeV_MINOR_VERSION 8)
-SET(LifeV_MICRO_VERSION 3)
+SET(LifeV_MICRO_VERSION 4)
 SET(LifeV_MAJOR_MINOR_VERSION 30803)
-SET(LifeV_VERSION_STRING "3.8.3")
+SET(LifeV_VERSION_STRING "3.8.4")
 SET(LifeV_ENABLE_DEVELOPMENT_MODE_DEFAULT ON) # Change to 'OFF' for a release
 
 # Used by testing scripts and should not be used elsewhere
