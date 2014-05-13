@@ -37,7 +37,7 @@ int main (int argc, char** argv)
 
     if ( comm -> MyPID() == 0 )
     {
-        cout << "\n\nReading and partitioning the cube mesh without saving the global mesh: ... \n";
+        std::cout << "\n\nReading and partitioning the cube mesh without saving the global mesh: ... \n";
     }
 
     std::string meshName = dataFile ("mesh/mesh_file", "cube4x4.mesh");
@@ -51,7 +51,7 @@ int main (int argc, char** argv)
         MeshUtility::loadMesh ( meshPtr, meshName, meshPath, isPartitioned, meshOrder );
         if ( comm -> MyPID() == 0 )
         {
-            cout << "... DONE! ";
+            std::cout << "... DONE! ";
         }
     }
 
@@ -59,14 +59,14 @@ int main (int argc, char** argv)
         //create the mesh data and read and save both the global mesh and the partitioned mesh
         if ( comm -> MyPID() == 0 )
         {
-            cout << "\n\nReading and partitioning the cube mesh saving the global mesh: ... \n";
+	std::cout << "\n\nReading and partitioning the cube mesh saving the global mesh: ... \n";
         }
         boost::shared_ptr< RegionMesh <LinearTetra> > meshFullPtr ( new RegionMesh <LinearTetra> ( comm ) );
         boost::shared_ptr< RegionMesh <LinearTetra> > meshLocalPtr ( new RegionMesh <LinearTetra> ( comm ) );
         MeshUtility::loadMesh ( meshLocalPtr, meshFullPtr, meshName, meshPath, isPartitioned, "P1" );
         if ( comm -> MyPID() == 0 )
         {
-            cout << "... DONE! ";
+            std::cout << "... DONE! ";
         }
     }
 
@@ -74,7 +74,7 @@ int main (int argc, char** argv)
         //create a 3D structured mesh
         if ( comm -> MyPID() == 0 )
         {
-            cout << "\n\nCreating a structured mesh without saving the full mesh: ... \n";
+            std::cout << "\n\nCreating a structured mesh without saving the full mesh: ... \n";
         }
         boost::shared_ptr< RegionMesh <LinearTetra> > meshStructPtr ( new RegionMesh <LinearTetra> ( comm ) );
         std::vector<Real> l(3, 1.0);
@@ -89,7 +89,7 @@ int main (int argc, char** argv)
 
         if ( comm -> MyPID() == 0 )
         {
-            cout << "... DONE!\n\n ";
+	  std::cout << "... DONE!\n\n ";
         }
     }
 
