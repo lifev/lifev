@@ -149,7 +149,7 @@ Int main ( Int argc, char** argv )
     boost::shared_ptr<Epetra_Comm>  Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
     if ( Comm->MyPID() == 0 )
     {
-        cout << "% using MPI" << endl;
+        std::cout << "% using MPI" << std::endl;
     }
 
     //********************************************//
@@ -190,7 +190,7 @@ Int main ( Int argc, char** argv )
     Teuchos::ParameterList bidomainList = * ( Teuchos::getParametersFromXmlFile ( "BidomainSolverParamList.xml" ) );
     if ( Comm->MyPID() == 0 )
     {
-        std::cout << " Done!" << endl;
+        std::cout << " Done!" << std::endl;
     }
 
     //********************************************//
@@ -206,7 +206,7 @@ Int main ( Int argc, char** argv )
     boost::shared_ptr<IonicMinimalModel>  model ( new IonicMinimalModel() );
     if ( Comm->MyPID() == 0 )
     {
-        std::cout << " Done!" << endl;
+        std::cout << " Done!" << std::endl;
     }
 
 
@@ -247,7 +247,7 @@ Int main ( Int argc, char** argv )
     //********************************************//
     if ( Comm->MyPID() == 0 )
     {
-        cout << "\nInitializing potential:  " ;
+        std::cout << "\nInitializing potential:  " ;
     }
 
     // Initial pacing
@@ -269,7 +269,7 @@ Int main ( Int argc, char** argv )
 
     if ( Comm->MyPID() == 0 )
     {
-        cout << "Done! \n" ;
+        std::cout << "Done! \n" ;
     }
 
     //********************************************//
@@ -308,7 +308,7 @@ Int main ( Int argc, char** argv )
     //********************************************//
     if ( Comm->MyPID() == 0 )
     {
-        cout << "\nImporting fibers:  " ;
+        std::cout << "\nImporting fibers:  " ;
     }
 
     boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > Space3D
@@ -321,14 +321,14 @@ Int main ( Int argc, char** argv )
 
     if ( Comm->MyPID() == 0 )
     {
-        cout << "Done! \n" ;
+        std::cout << "Done! \n" ;
     }
     //********************************************//
     // Create the global matrix: mass + stiffness //
     //********************************************//
     if ( Comm->MyPID() == 0 )
     {
-        cout << "\nSetup operators:  " ;
+        std::cout << "\nSetup operators:  " ;
     }
 
     //splitting -> setupLumpedMassMatrix();
@@ -337,7 +337,7 @@ Int main ( Int argc, char** argv )
     splitting -> setupGlobalMatrix();
     if ( Comm->MyPID() == 0 )
     {
-        cout << "Done! \n" ;
+        std::cout << "Done! \n" ;
     }
 
     //********************************************//
@@ -354,7 +354,7 @@ Int main ( Int argc, char** argv )
     //********************************************//
     if ( Comm->MyPID() == 0 )
     {
-        cout << "\nstart solving:  " ;
+        std::cout << "\nstart solving:  " ;
     }
 
     bidomainSolver_Type::vectorPtr_Type dtVec ( new VectorEpetra ( splitting->feSpacePtr() -> map(), LifeV::Unique ) );
@@ -470,7 +470,7 @@ Int main ( Int argc, char** argv )
         std::cout << "\n\n\nTotal lapsed time : " << chronoinitialsettings.diff() << std::endl;
         std::cout << "Diffusion time : " << timeDiff << std::endl;
         std::cout << "Reaction time : " << timeReac << std::endl;
-        cout << "\nThank you for using ETA_bidomainSolver.\nI hope to meet you again soon!\n All the best for your simulation :P\n  " ;
+        std::cout << "\nThank you for using ETA_bidomainSolver.\nI hope to meet you again soon!\n All the best for your simulation :P\n  " ;
     }
     MPI_Barrier (MPI_COMM_WORLD);
     MPI_Finalize();

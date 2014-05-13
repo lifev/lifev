@@ -111,8 +111,6 @@
 //#include <lifev/eta/expression/ExpressionDot.hpp>
 
 
-using std::cout;
-using std::endl;
 using namespace LifeV;
 
 // Choice of the fibers direction : ||.||=1
@@ -204,7 +202,7 @@ Int main ( Int argc, char** argv )
         boost::shared_ptr<Epetra_Comm>  Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
         if ( Comm->MyPID() == 0 )
         {
-            cout << "% using MPI" << endl;
+            std::cout << "% using MPI" << std::endl;
         }
 
         //********************************************//
@@ -253,7 +251,7 @@ Int main ( Int argc, char** argv )
         Teuchos::ParameterList monodomainList = * ( Teuchos::getParametersFromXmlFile ( "MonodomainSolverParamList.xml" ) );
         if ( Comm->MyPID() == 0 )
         {
-            std::cout << " Done!" << endl;
+            std::cout << " Done!" << std::endl;
         }
 
         //********************************************//
@@ -269,7 +267,7 @@ Int main ( Int argc, char** argv )
         boost::shared_ptr<IonicMinimalModel>  model ( new IonicMinimalModel() );
         if ( Comm->MyPID() == 0 )
         {
-            std::cout << " Done!" << endl;
+            std::cout << " Done!" << std::endl;
         }
 
         //********************************************//
@@ -399,7 +397,7 @@ Int main ( Int argc, char** argv )
         //    //********************************************//
         //    if ( Comm->MyPID() == 0 )
         //    {
-        //        cout << "\nInitializing potential:  " ;
+        //        std::cout << "\nInitializing potential:  " ;
         //    }
         //
         //    splitting-> setPotentialPtr(newSol);
@@ -417,7 +415,7 @@ Int main ( Int argc, char** argv )
         //********************************************//
         if ( Comm->MyPID() == 0 )
         {
-            cout << "\nInitializing potential:  " ;
+            std::cout << "\nInitializing potential:  " ;
         }
         //Compute the potential at t0
 
@@ -442,7 +440,7 @@ Int main ( Int argc, char** argv )
 
         if ( Comm->MyPID() == 0 )
         {
-            cout << "Done! \n" ;
+            std::cout << "Done! \n" ;
         }
 
         //********************************************//
@@ -654,7 +652,7 @@ Int main ( Int argc, char** argv )
         //********************************************//
         if ( Comm->MyPID() == 0 )
         {
-            cout << "\nstart solving:  " ;
+            std::cout << "\nstart solving:  " ;
         }
 
         Real Savedt = monodomainList.get ("saveStep", 0.1);
@@ -782,7 +780,7 @@ Int main ( Int argc, char** argv )
 
         if ( Comm->MyPID() == 0 )
         {
-            cout << "\nThank you for using ETA_MonodomainSolver.\nI hope to meet you again soon!\n All the best for your simulation :P\n  " ;
+            std::cout << "\nThank you for using ETA_MonodomainSolver.\nI hope to meet you again soon!\n All the best for your simulation :P\n  " ;
         }
         MPI_Barrier (MPI_COMM_WORLD);
     }

@@ -189,8 +189,8 @@ inline void importFibersFromTextFile ( boost::shared_ptr<VectorEpetra> fiberVect
         fibers >> fiber_global_vector[i];
         if ( fiber_global_vector[i] == 0 )
         {
-            cout << "\nzero component!!!! \t";
-            cout << "in: " << filePath  + fileName << "\n";
+            std::cout << "\nzero component!!!! \t";
+            std::cout << "in: " << filePath  + fileName << "\n";
 
         }
     }

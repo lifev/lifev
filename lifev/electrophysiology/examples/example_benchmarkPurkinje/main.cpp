@@ -189,7 +189,7 @@ Int main ( Int argc, char** argv )
     boost::shared_ptr<Epetra_Comm>  Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
     if ( Comm->MyPID() == 0 )
     {
-        cout << "% using MPI" << endl;
+        std::cout << "% using MPI" << std::endl;
     }
 
     //*********************************************//
@@ -248,7 +248,7 @@ Int main ( Int argc, char** argv )
     Teuchos::ParameterList monodomainList = * ( Teuchos::getParametersFromXmlFile ( "MonodomainSolverParamList.xml" ) );
     if ( Comm->MyPID() == 0 )
     {
-        std::cout << " Done!" << endl;
+        std::cout << " Done!" << std::endl;
     }
 
     std::string ionic_model ( monodomainList.get ("ionic_model", "minimalModel") );
@@ -295,7 +295,7 @@ Int main ( Int argc, char** argv )
 
     if ( Comm->MyPID() == 0 )
     {
-        std::cout << " Done!" << endl;
+        std::cout << " Done!" << std::endl;
     }
 
     model -> showMe();
@@ -342,7 +342,7 @@ Int main ( Int argc, char** argv )
     //********************************************//
     if ( Comm->MyPID() == 0 )
     {
-        cout << "\nInitializing potential and gating variables:  " ;
+        std::cout << "\nInitializing potential and gating variables:  " ;
     }
 
     // Initial pacing
@@ -352,7 +352,7 @@ Int main ( Int argc, char** argv )
 
     if ( Comm->MyPID() == 0 )
     {
-        cout << "\nDone.  " << std::flush ;
+        std::cout << "\nDone.  " << std::flush ;
     }
 
     //********************************************//
@@ -386,7 +386,7 @@ Int main ( Int argc, char** argv )
     //********************************************//
     if ( Comm->MyPID() == 0 )
     {
-        cout << "\nSetting fibers:  " ;
+        std::cout << "\nSetting fibers:  " ;
     }
 
     VectorSmall<3> fibers;
@@ -397,7 +397,7 @@ Int main ( Int argc, char** argv )
 
     if ( Comm->MyPID() == 0 )
     {
-        cout << "Done! \n" ;
+        std::cout << "Done! \n" ;
     }
 
     //********************************************//
@@ -405,7 +405,7 @@ Int main ( Int argc, char** argv )
     //********************************************//
     if ( Comm->MyPID() == 0 )
     {
-        cout << "\nSetup operators:  " ;
+        std::cout << "\nSetup operators:  " ;
     }
 
     bool lumpedMass = monodomainList.get ("LumpedMass", true);
@@ -423,7 +423,7 @@ Int main ( Int argc, char** argv )
     solver -> setupGlobalMatrix();
     if ( Comm->MyPID() == 0 )
     {
-        cout << "Done! \n" ;
+        std::cout << "Done! \n" ;
     }
 
     //********************************************//
@@ -453,7 +453,7 @@ Int main ( Int argc, char** argv )
     //********************************************//
     if ( Comm->MyPID() == 0 )
     {
-        cout << "\nstart solving:  " ;
+        std::cout << "\nstart solving:  " ;
     }
 
     Real dt = monodomainList.get ("timeStep", 0.1);
