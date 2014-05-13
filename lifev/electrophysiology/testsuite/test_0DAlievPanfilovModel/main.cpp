@@ -62,7 +62,7 @@ Int main ()
 
     std::cout << "Importing parameters list...";
     Teuchos::ParameterList APParameterList = * ( Teuchos::getParametersFromXmlFile ( "AlievPanfilovParameters.xml" ) );
-    std::cout << " Done!" << endl;
+    std::cout << " Done!" << std::endl;
 
 
     //********************************************//
@@ -73,7 +73,7 @@ Int main ()
     //********************************************//
     std::cout << "Building Constructor for AlievPanfilov Model with parameters ... ";
     IonicAlievPanfilov  model ( APParameterList );
-    std::cout << " Done!" << endl;
+    std::cout << " Done!" << std::endl;
 
 
     //********************************************//
@@ -93,7 +93,7 @@ Int main ()
     //********************************************//
     std::cout << "Initializing solution vector...";
     std::vector<Real> unknowns (model.Size(), 0);
-    std::cout << " Done!" << endl;
+    std::cout << " Done!" << std::endl;
 
     //********************************************//
     // Initialize the rhs to 0. The rhs is the    //
@@ -104,7 +104,7 @@ Int main ()
     //********************************************//
     std::cout << "Initializing rhs..." ;
     std::vector<Real> rhs (model.Size(), 0);
-    std::cout << " Done! "  << endl;
+    std::cout << " Done! "  << std::endl;
 
     //********************************************//
     // The model needs as external informations   //
