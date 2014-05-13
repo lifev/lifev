@@ -114,17 +114,17 @@ Int main ( Int argc, char** argv )
     // Some typedefs                              //
     //********************************************//
 
-    typedef RegionMesh<LinearTetra>                         			mesh_Type;
+    typedef RegionMesh<LinearTetra>                                     mesh_Type;
 
-    typedef IonicMinimalModel											ionicModel_Type;
+    typedef IonicMinimalModel                                           ionicModel_Type;
 
-    typedef ElectroETAMonodomainSolver< mesh_Type, ionicModel_Type > 	monodomainSolver_Type;
+    typedef ElectroETAMonodomainSolver< mesh_Type, ionicModel_Type >    monodomainSolver_Type;
 
     typedef boost::shared_ptr< monodomainSolver_Type >                  monodomainSolverPtr_Type;
 
-    typedef VectorEpetra                                               	vector_Type;
+    typedef VectorEpetra                                                vector_Type;
 
-    typedef boost::shared_ptr<vector_Type>                             	vectorPtr_Type;
+    typedef boost::shared_ptr<vector_Type>                              vectorPtr_Type;
 
     //********************************************//
     // Import parameters from an xml list. Use    //
@@ -192,7 +192,7 @@ Int main ( Int argc, char** argv )
     // Initialize the solution                    //
     //********************************************//
     monodomain -> setInitialConditions();
-	ElectrophysiologyUtility::setValueOnBoundary( *(monodomain -> potentialPtr() ), monodomain -> fullMeshPtr(), 1.0, 5 );
+    ElectrophysiologyUtility::setValueOnBoundary ( * (monodomain -> potentialPtr() ), monodomain -> fullMeshPtr(), 1.0, 5 );
 
 
     //********************************************//
@@ -214,9 +214,9 @@ Int main ( Int argc, char** argv )
     // At least, in case of misuse, the fibers will not be zero
     // and the signal may propagate.
     monodomain -> setupFibers();
-    std::string fiberFile(monodomainList.get ("solid_fiber_file", ""));
-    std::string fiberField(monodomainList.get ("solid_fiber_field", ""));
-    ElectrophysiologyUtility::importVectorField(monodomain -> fiberPtr(),  fiberFile,  fiberField, monodomain -> localMeshPtr() );
+    std::string fiberFile (monodomainList.get ("solid_fiber_file", "") );
+    std::string fiberField (monodomainList.get ("solid_fiber_field", "") );
+    ElectrophysiologyUtility::importVectorField (monodomain -> fiberPtr(),  fiberFile,  fiberField, monodomain -> localMeshPtr() );
 
     if ( Comm->MyPID() == 0 )
     {
@@ -226,7 +226,7 @@ Int main ( Int argc, char** argv )
     //********************************************//
     // Saving Fiber direction to file             //
     //********************************************//
-    monodomain -> exportFiberDirection(problemFolder);
+    monodomain -> exportFiberDirection (problemFolder);
 
     //********************************************//
     // Create the global matrix: mass + stiffness //
@@ -266,46 +266,46 @@ Int main ( Int argc, char** argv )
     //********************************************//
     // Loop over time solving with L-ICI          //
     //********************************************//
-	int loop = 0;
-	for (Real t = monodomain -> initialTime(); t < TF;)
+    int loop = 0;
+    for (Real t = monodomain -> initialTime(); t < TF;)
     {
-	    //********************************************//
-	    // Set the applied current from the pacing    //
-		// protocol                                   //
-	    //********************************************//
-		loop++;
+        //********************************************//
+        // Set the applied current from the pacing    //
+        // protocol                                   //
+        //********************************************//
+        loop++;
         t += dt;
 
-	    //********************************************//
-	    // Solve the monodomain equations.            //
-	    //********************************************//
+        //********************************************//
+        // Solve the monodomain equations.            //
+        //********************************************//
 
         monodomain -> solveOneStepGatingVariablesFE();
         monodomain -> solveOneSVIStep();
 
         //********************************************//
-		// Exporting the solution.                    //
-		//********************************************//
-        if(loop % iter == 0 )
-		{
-			if ( Comm->MyPID() == 0 )
-			{
-				std::cout << "\ntime = " << t;
-			}
-			exporter.postProcess (t);
-		}
+        // Exporting the solution.                    //
+        //********************************************//
+        if (loop % iter == 0 )
+        {
+            if ( Comm->MyPID() == 0 )
+            {
+                std::cout << "\ntime = " << t;
+            }
+            exporter.postProcess (t);
+        }
     }
 
     //********************************************//
-	// Close the exporter                         //
-	//********************************************//
+    // Close the exporter                         //
+    //********************************************//
 
     exporter.closeFile();
 
 
     //********************************************//
-	// Check if the test failed                   //
-	//********************************************//
+    // Check if the test failed                   //
+    //********************************************//
     Real newSolutionNorm = monodomain -> potentialPtr() -> norm2();
 
     monodomain.reset();
@@ -313,10 +313,10 @@ Int main ( Int argc, char** argv )
     MPI_Finalize();
 
 
-    Real err = std::abs (newSolutionNorm - solutionNorm) / std::abs(solutionNorm);
+    Real err = std::abs (newSolutionNorm - solutionNorm) / std::abs (solutionNorm);
     if ( err > 1e-8 )
     {
-    	std::cout << std::setprecision(20) << "\nTest Failed: " <<  err <<"\n" << "\nSolution Norm: " <<  newSolutionNorm << "\n";
+        std::cout << std::setprecision (20) << "\nTest Failed: " <<  err << "\n" << "\nSolution Norm: " <<  newSolutionNorm << "\n";
         return EXIT_FAILURE; // Norm of solution did not match
     }
     else

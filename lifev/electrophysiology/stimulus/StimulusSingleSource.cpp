@@ -26,7 +26,7 @@
 /*!
  @file
  @brief Class for applying cardiac stimulus represented by
-	a current at a single point with a given time and duration
+    a current at a single point with a given time and duration
 
  @date 02-2014
  @author Simone Palamara <palamara.simone@gmail.com>
@@ -66,7 +66,7 @@ Real StimulusSingleSource::appliedCurrent ( const Real& t, const Real& x, const 
     Real distance = std::sqrt ( (x - M_pacingSite_X) * (x - M_pacingSite_X) + (y - M_pacingSite_Y) * (y - M_pacingSite_Y) + (z - M_pacingSite_Z) * (z - M_pacingSite_Z) );
     if (distance <= M_radius && t >= ( M_startingTimeStimulus ) && t <= ( M_startingTimeStimulus + M_StimDuration ) )
     {
-       current += M_totalCurrent / volumeOfBall;
+        current += M_totalCurrent / volumeOfBall;
     }
     return current;
 

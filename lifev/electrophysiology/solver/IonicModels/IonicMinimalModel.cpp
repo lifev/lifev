@@ -261,7 +261,7 @@ void IonicMinimalModel::computeGatingVariablesWithRushLarsen ( std::vector<Real>
 {
     std::cout << "\n\nRush Larsen method, for minimal model not implemented!!!\n";
     std::cout << "\n\nI will use Forward Euler!!!\n";
-    std::vector<Real> rhs(3,0.0);
+    std::vector<Real> rhs (3, 0.0);
     computeGatingRhs ( v, rhs );
     v[1] += dt * rhs[0];
     v[2] += dt * rhs[1];
@@ -365,7 +365,7 @@ void IonicMinimalModel::computePotentialRhsSVI ( const std::vector<vectorPtr_Typ
         BOOST_AUTO_TPL (Jsi, value (-1.0) * eval (H, U - M_tetaw ) * W * S / M_tausi);
 
         integrate ( elements ( uFESpace.mesh() ),
-        		    uFESpace.qr(),
+                    uFESpace.qr(),
                     spaceScalar,
                     ( Iapp - ( Jfi +  Jso + Jsi )  ) * phi_i )  >> rhs.at (0);
     }

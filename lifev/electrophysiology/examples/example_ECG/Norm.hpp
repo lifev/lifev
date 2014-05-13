@@ -47,9 +47,9 @@ class Norm
 public:
     static Real f ( const Real& t, const Real& x, const Real& y,
                     const Real& z, const ID& i );
-//    {
-//        return  sqrt ( (x - M_xPosition) * (x - M_xPosition) + (y - M_yPosition) * (y - M_yPosition) + (z - M_zPosition) * (z - M_zPosition) ) ;
-//    }
+    //    {
+    //        return  sqrt ( (x - M_xPosition) * (x - M_xPosition) + (y - M_yPosition) * (y - M_yPosition) + (z - M_zPosition) * (z - M_zPosition) ) ;
+    //    }
 
     static inline void setPosition ( const Real& xPosition, const Real& yPosition, const Real& zPosition )
     {

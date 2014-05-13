@@ -171,8 +171,8 @@ void loadMesh (  boost::shared_ptr< RegionMeshType >& meshLocal,
  */
 template< typename RegionMeshType>
 void loadPartitionedMesh ( boost::shared_ptr< RegionMeshType >& /*meshLocal*/,
-                               const std::string& /*meshName*/,
-                               const std::string& /*resourcesPath*/ )
+                           const std::string& /*meshName*/,
+                           const std::string& /*resourcesPath*/ )
 {
 #ifdef HAVE_MPI
     boost::shared_ptr<Epetra_Comm> Comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
@@ -207,11 +207,11 @@ void loadPartitionedMesh ( boost::shared_ptr< RegionMeshType >& /*meshLocal*/,
  */
 template< typename RegionMeshType>
 void loadMesh ( boost::shared_ptr< RegionMeshType >& meshLocal,
-                    boost::shared_ptr< RegionMeshType >& meshFull ,
-                    const std::string& meshName,
-                    const std::string& resourcesPath = "./",
-                    bool isPartitioned = false,
-                    const std::string& meshOrder = "P1" )
+                boost::shared_ptr< RegionMeshType >& meshFull ,
+                const std::string& meshName,
+                const std::string& resourcesPath = "./",
+                bool isPartitioned = false,
+                const std::string& meshOrder = "P1" )
 {
     if (isPartitioned)
     {
@@ -260,12 +260,12 @@ void loadMesh ( boost::shared_ptr< RegionMeshType >& meshLocal,
  */
 template< typename RegionMeshType >
 void loadStructuredMesh ( boost::shared_ptr< RegionMeshType >& mesh,
-                              boost::shared_ptr< RegionMeshType >& meshFull,
-                              markerID_Type regionFlag,
-                              const std::vector<UInt>& m,
-                              bool verbose = false,
-                              const std::vector<Real>& l = std::vector<Real> (3, 1),
-                              const std::vector<Real>& t = std::vector<Real> (3, 0) )
+                          boost::shared_ptr< RegionMeshType >& meshFull,
+                          markerID_Type regionFlag,
+                          const std::vector<UInt>& m,
+                          bool verbose = false,
+                          const std::vector<Real>& l = std::vector<Real> (3, 1),
+                          const std::vector<Real>& t = std::vector<Real> (3, 0) )
 {
 #ifdef HAVE_MPI
     boost::shared_ptr<Epetra_Comm> Comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
@@ -294,7 +294,7 @@ void loadStructuredMesh ( boost::shared_ptr< RegionMeshType >& mesh,
                         l[0], l[1], l[2],
                         t[0], t[1], t[2] );
     }
-    MeshUtility::printMeshInfos( fullMesh );
+    MeshUtility::printMeshInfos ( fullMesh );
     meshBuildChrono.stop();
     displayer.leaderPrint ("Building time: ", meshBuildChrono.diff(), " s.\n");
 
@@ -328,11 +328,11 @@ void loadStructuredMesh ( boost::shared_ptr< RegionMeshType >& mesh,
  */
 template< typename RegionMeshType>
 void loadStructuredMesh ( boost::shared_ptr< RegionMeshType >& mesh,
-                              markerID_Type regionFlag,
-                              const std::vector<UInt> m,
-                              bool verbose = false,
-                              const std::vector<Real>& l = std::vector<Real> (3, 1),
-                              const std::vector<Real>& t = std::vector<Real> (3, 0) )
+                          markerID_Type regionFlag,
+                          const std::vector<UInt> m,
+                          bool verbose = false,
+                          const std::vector<Real>& l = std::vector<Real> (3, 1),
+                          const std::vector<Real>& t = std::vector<Real> (3, 0) )
 {
     boost::shared_ptr< RegionMeshType > tmpMeshFull;
     loadStructuredMesh ( mesh, tmpMeshFull, regionFlag, m, verbose, l, t );

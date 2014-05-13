@@ -50,8 +50,8 @@ IonicFitzHughNagumo::IonicFitzHughNagumo()    :
     M_Eta1  ( 4.4 ),
     M_Eta2  ( 0.012 ),
     M_Eta3  ( 1.),
-	M_Eta   (M_Eta2 / M_Vp),
-	M_Gamma (M_Eta2 * M_Eta3)
+    M_Eta   (M_Eta2 / M_Vp),
+    M_Gamma (M_Eta2* M_Eta3)
 
 {
     M_restingConditions.at (0) = 1e-8;
@@ -150,7 +150,7 @@ Real IonicFitzHughNagumo::computeLocalPotentialRhs ( const std::vector<Real>& v)
 
 std::vector< std::vector<Real> > IonicFitzHughNagumo::getJac (const std::vector<Real>& v, Real /*h*/)
 {
-	std::vector< std::vector<Real> > J (2, std::vector<Real> (2, 0.0) );
+    std::vector< std::vector<Real> > J (2, std::vector<Real> (2, 0.0) );
     J[0][0] = - ( M_G / ( M_Vth * M_Vp ) ) * ( M_Vth * ( M_Vp - 2.0 * v[0] ) + v[0] * ( 3.0 * v[0] - 2.0 * M_Vp ) ) - M_Eta1 * v[1];
     J[0][1] = -M_Eta1 * v[0];
     J[1][0] = M_Eta;

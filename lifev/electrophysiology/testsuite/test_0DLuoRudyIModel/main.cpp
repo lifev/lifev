@@ -72,7 +72,7 @@ Int main ( Int argc, char** argv )
     Epetra_MpiComm Comm (MPI_COMM_WORLD);
     if ( Comm.MyPID() == 0 )
     {
-    	std::cout << "% using MPI" << std::endl;
+        std::cout << "% using MPI" << std::endl;
     }
 
 
@@ -155,7 +155,7 @@ Int main ( Int argc, char** argv )
         iter++;
         //********************************************//
         // Compute the applied current. This is a     //
-    	// simple switch.                             //
+        // simple switch.                             //
         //********************************************//
         if ( t > 3 && t < 5 )
         {
@@ -172,7 +172,7 @@ Int main ( Int argc, char** argv )
         //********************************************//
         ionicModel.setAppliedCurrent (Iapp);
         ionicModel.computeRhs ( states, rhs);
-        ionicModel.addAppliedCurrent(rhs);
+        ionicModel.addAppliedCurrent (rhs);
 
         //********************************************//
         // Use forward Euler method to advance the    //
@@ -224,11 +224,11 @@ Int main ( Int argc, char** argv )
     MPI_Finalize();
     Real returnValue;
 
-    Real err = std::abs (SolutionTestNorm - SolutionNorm) / std::abs(SolutionTestNorm);
-    std::cout << std::setprecision(20) << "\nError: " << err << "\nSolution norm: " << SolutionNorm << "\n";
+    Real err = std::abs (SolutionTestNorm - SolutionNorm) / std::abs (SolutionTestNorm);
+    std::cout << std::setprecision (20) << "\nError: " << err << "\nSolution norm: " << SolutionNorm << "\n";
     if ( err > 1e-12 )
     {
-    	std::cout << "\nTest Failed!\n";
+        std::cout << "\nTest Failed!\n";
         returnValue = EXIT_FAILURE; // Norm of solution did not match
     }
     else

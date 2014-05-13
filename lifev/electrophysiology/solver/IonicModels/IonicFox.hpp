@@ -28,11 +28,11 @@
   @file IonicFoxModel
   @brief Ionic model based on Fox model.
 
-	Ionic model as in
+    Ionic model as in
 
-	Fox, Jeffrey J., Jennifer L. McHarg, and Robert F. Gilmour Jr.
-	"Ionic mechanism of electrical alternans."
-	American Journal of Physiology-Heart and Circulatory Physiology 51.2 (2002): H516.
+    Fox, Jeffrey J., Jennifer L. McHarg, and Robert F. Gilmour Jr.
+    "Ionic mechanism of electrical alternans."
+    American Journal of Physiology-Heart and Circulatory Physiology 51.2 (2002): H516.
 
   @date 04-2013
   @author Marie Dupraz <dupraz.marie@gmail.com>

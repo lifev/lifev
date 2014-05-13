@@ -152,8 +152,8 @@ Int main ( Int argc, char** argv )
     MPI_Finalize();
 
     Real returnValue;
-    Real err = std::abs (valueToTest - SolutionTestNorm) / std::abs(SolutionTestNorm);
-    std::cout << std::setprecision(20) << "\nError: " << err << "\nSolution norm: " << valueToTest << "\n";
+    Real err = std::abs (valueToTest - SolutionTestNorm) / std::abs (SolutionTestNorm);
+    std::cout << std::setprecision (20) << "\nError: " << err << "\nSolution norm: " << valueToTest << "\n";
     if ( err > 1e-12 )
     {
         returnValue = EXIT_FAILURE; // Norm of solution did not match
@@ -204,7 +204,7 @@ Real EulerExplicit (Real& dt, const Real& TF, IonicFitzHughNagumo model, const R
         // Compute the rhs using the model equations  //
         //********************************************//
         model.computeRhs ( unknowns, rhs);
-        model.addAppliedCurrent(rhs);
+        model.addAppliedCurrent (rhs);
 
         //********************************************//
         // Use forward Euler method to advance the    //

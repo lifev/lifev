@@ -91,7 +91,7 @@ template<typename Mesh> inline void appliedCurrentClosestPointWithinRadius (std:
     Int ids;
     for ( UInt i (0); i < n; i++)
     {
-        int iGID = appliedCurrentVector -> blockMap().GID ( static_cast<EpetraInt_Type>(i) );
+        int iGID = appliedCurrentVector -> blockMap().GID ( static_cast<EpetraInt_Type> (i) );
         Real px = fullMesh -> point ( iGID ).x();
         Real py = fullMesh -> point ( iGID ).y();
         Real pz = fullMesh -> point ( iGID ).z();
@@ -134,7 +134,7 @@ template<typename Mesh> inline void appliedCurrentPointsWithinRadius (std::vecto
     std::vector<UInt> ids;
     for ( UInt i (0); i < n; i++)
     {
-        int iGID = appliedCurrentVector -> blockMap().GID ( static_cast<EpetraInt_Type>(i) );
+        int iGID = appliedCurrentVector -> blockMap().GID ( static_cast<EpetraInt_Type> (i) );
         Real px = fullMesh -> point ( iGID ).x();
         Real py = fullMesh -> point ( iGID ).y();
         Real pz = fullMesh -> point ( iGID ).z();
@@ -171,7 +171,7 @@ template<typename Mesh> inline UInt findClosestPoint (std::vector<Real>& point, 
     Int ids;
     for ( UInt i (0); i < n; i++)
     {
-        Int iGID = vec -> blockMap().GID ( static_cast<EpetraInt_Type>(i) );
+        Int iGID = vec -> blockMap().GID ( static_cast<EpetraInt_Type> (i) );
         Real px = fullMesh -> point ( iGID ).x();
         Real py = fullMesh -> point ( iGID ).y();
         Real pz = fullMesh -> point ( iGID ).z();
@@ -213,9 +213,9 @@ template<typename Mesh> inline void allIdsPointsWithGivenFlag (std::vector<ID>& 
 {
     for ( Int j (0); j < vec->epetraVector().MyLength() ; ++j )
     {
-        if ( fullMesh -> point ( vec->blockMap().GID ( static_cast<EpetraInt_Type>(j) ) ).markerID() == flag )
+        if ( fullMesh -> point ( vec->blockMap().GID ( static_cast<EpetraInt_Type> (j) ) ).markerID() == flag )
         {
-            containerIds.push_back (vec->blockMap().GID ( static_cast<EpetraInt_Type>(j) ) );
+            containerIds.push_back (vec->blockMap().GID ( static_cast<EpetraInt_Type> (j) ) );
         }
     }
 }
@@ -311,7 +311,7 @@ template<typename Type> inline void applyCurrentGivenSetOfPoints (std::vector<Ty
 {
     for (int i (0); i < container.size(); i++)
     {
-        Int lrow = appliedCurrentVector ->blockMap().LID ( static_cast<EpetraInt_Type>(container[i]) );
+        Int lrow = appliedCurrentVector ->blockMap().LID ( static_cast<EpetraInt_Type> (container[i]) );
         if (lrow >= 0)
         {
             appliedCurrentVector -> operator [] ( container[i] ) = valueAppliedCurrent;
@@ -336,7 +336,7 @@ template<typename Type> inline void applyCurrentGivenSetOfPoints (std::vector<Ty
         if (activationTime[i] <= currentTime)
         {
             shiftVector[i] += 1;
-            Int lrow = appliedCurrentVector ->blockMap().LID ( static_cast<EpetraInt_Type>(container[i]) );
+            Int lrow = appliedCurrentVector ->blockMap().LID ( static_cast<EpetraInt_Type> (container[i]) );
             if (lrow >= 0)
             {
                 appliedCurrentVector -> operator [] ( container[i] ) = valueAppliedCurrent[shiftVector[i]] / 85.7;
@@ -344,7 +344,7 @@ template<typename Type> inline void applyCurrentGivenSetOfPoints (std::vector<Ty
         }
         else
         {
-            Int lrow = appliedCurrentVector ->blockMap().LID ( static_cast<EpetraInt_Type>(container[i]) );
+            Int lrow = appliedCurrentVector ->blockMap().LID ( static_cast<EpetraInt_Type> (container[i]) );
             if (lrow >= 0)
             {
                 appliedCurrentVector -> operator [] ( container[i] ) = 0;

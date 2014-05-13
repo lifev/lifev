@@ -28,11 +28,11 @@
   @file IonicLuoRudyI
   @brief Ionic model Luo-Rudy I
 
-	model as in
-	Luo, Ching-hsing, and Yoram Rudy.
-	"A model of the ventricular cardiac action potential.
-	Depolarization, repolarization, and their interaction."
-	Circulation research 68.6 (1991): 1501-1526.
+    model as in
+    Luo, Ching-hsing, and Yoram Rudy.
+    "A model of the ventricular cardiac action potential.
+    Depolarization, repolarization, and their interaction."
+    Circulation research 68.6 (1991): 1501-1526.
 
   @date 01-2013
   @author Simone Rossi <simone.rossi@epfl.ch>

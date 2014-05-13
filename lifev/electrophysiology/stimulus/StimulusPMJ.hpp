@@ -92,7 +92,7 @@ public:
     void setPMJAddJunction ( Real x, Real y, Real z, Real time, Real duration );
     inline void setProblemFolder ( std::string problemFolder )
     {
-        M_problemFolder=problemFolder;
+        M_problemFolder = problemFolder;
     }
 
     inline void setRadius ( Real r )
@@ -107,13 +107,13 @@ public:
         M_totalCurrent = I;
     }
 
-	void setParameters (list_Type&  list)
-	{
-		this->setRadius( list.get ("applied_current_radius", 0.2) );
-		this->setTotalCurrent( list.get ("applied_total_current", 1.0) );
-		this->setProblemFolder ( list.get ("PMJ_activation_folder", "./") );
-		this->setPMJFromFile( M_problemFolder + list.get ("PMJ_activation_file", "PMJ_activation.txt") );
-	}
+    void setParameters (list_Type&  list)
+    {
+        this->setRadius ( list.get ("applied_current_radius", 0.2) );
+        this->setTotalCurrent ( list.get ("applied_total_current", 1.0) );
+        this->setProblemFolder ( list.get ("PMJ_activation_folder", "./") );
+        this->setPMJFromFile ( M_problemFolder + list.get ("PMJ_activation_file", "PMJ_activation.txt") );
+    }
 
     //@}
 

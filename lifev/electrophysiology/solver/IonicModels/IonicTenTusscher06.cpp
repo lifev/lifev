@@ -49,8 +49,8 @@ IonicTenTusscher06::IonicTenTusscher06()  :
     super       (  19 , 18  ),
     flag        ( MCell )
 {
-	//Membrane capacitance
-	M_membraneCapacitance = 2.0;// In the paper they give it as 2 but in their code I cannot find it
+    //Membrane capacitance
+    M_membraneCapacitance = 2.0;// In the paper they give it as 2 but in their code I cannot find it
 
     //External concentrations
     Ko = 5.4;
@@ -189,43 +189,43 @@ IonicTenTusscher06::IonicTenTusscher06()  :
     //Rprime
     M_restingConditions.at (18) = 1.0;
 
-//	M_restingConditions.at(0) = -86.2;
-//	//m
-//	M_restingConditions.at(1) = 0.00165;
-//	//h
-//	M_restingConditions.at(2) = 0.749;
-//	//j
-//	M_restingConditions.at(3) = 0.6788;
-//	//d
-//	M_restingConditions.at(4) = 3.288e-5;
-//	//f
-//	M_restingConditions.at(5) = 0.7026;
-//	//f2
-//	M_restingConditions.at(6) = 0.9526;
-//	//fCass
-//	M_restingConditions.at(7) = 1.0;
-//	//r
-//	M_restingConditions.at(8) = 2.347e-8;
-//	//s
-//	M_restingConditions.at(9) = 0.999998;
-//	//Xr1
-//	M_restingConditions.at(10) = 0.0165;
-//	//Xr2
-//	M_restingConditions.at(11) = 0.473;
-//	//Xs
-//	M_restingConditions.at(12) =  0.0174;
-//	//Nai
-//	M_restingConditions.at(13) = 7.67;
-//	//Ki
-//	M_restingConditions.at(14) = 138.3;
-//	//Cai
-//	M_restingConditions.at(15) = 0.00007;
-//	//Cass
-//	M_restingConditions.at(16) = 0.00007;
-//	//Casr
-//	M_restingConditions.at(17) = 1.3;
-//	//Rprime
-//	M_restingConditions.at(18) = 0.8978;
+    //  M_restingConditions.at(0) = -86.2;
+    //  //m
+    //  M_restingConditions.at(1) = 0.00165;
+    //  //h
+    //  M_restingConditions.at(2) = 0.749;
+    //  //j
+    //  M_restingConditions.at(3) = 0.6788;
+    //  //d
+    //  M_restingConditions.at(4) = 3.288e-5;
+    //  //f
+    //  M_restingConditions.at(5) = 0.7026;
+    //  //f2
+    //  M_restingConditions.at(6) = 0.9526;
+    //  //fCass
+    //  M_restingConditions.at(7) = 1.0;
+    //  //r
+    //  M_restingConditions.at(8) = 2.347e-8;
+    //  //s
+    //  M_restingConditions.at(9) = 0.999998;
+    //  //Xr1
+    //  M_restingConditions.at(10) = 0.0165;
+    //  //Xr2
+    //  M_restingConditions.at(11) = 0.473;
+    //  //Xs
+    //  M_restingConditions.at(12) =  0.0174;
+    //  //Nai
+    //  M_restingConditions.at(13) = 7.67;
+    //  //Ki
+    //  M_restingConditions.at(14) = 138.3;
+    //  //Cai
+    //  M_restingConditions.at(15) = 0.00007;
+    //  //Cass
+    //  M_restingConditions.at(16) = 0.00007;
+    //  //Casr
+    //  M_restingConditions.at(17) = 1.3;
+    //  //Rprime
+    //  M_restingConditions.at(18) = 0.8978;
 
 
 }
@@ -754,7 +754,7 @@ void IonicTenTusscher06::solveOneStep (std::vector<Real>& v, Real dt)
 }
 
 
-void IonicTenTusscher06::showCurrents(std::vector<Real>& v)
+void IonicTenTusscher06::showCurrents (std::vector<Real>& v)
 {
     Real V = v[0];
     Real m = v[1];
@@ -774,26 +774,26 @@ void IonicTenTusscher06::showCurrents(std::vector<Real>& v)
     Real Cai = v[15];
     Real CaSS = v[16];
 
-	showCurrents( V,  m,  h,  j,  d,  f,  f2,  fcass, r,  s,  xr1,  xr2,  xs,  Nai,  Ki, Cai,  CaSS);
+    showCurrents ( V,  m,  h,  j,  d,  f,  f2,  fcass, r,  s,  xr1,  xr2,  xs,  Nai,  Ki, Cai,  CaSS);
 }
 
-void IonicTenTusscher06::showCurrents(Real V, Real m, Real h, Real j, Real d, Real f, Real f2, Real fcass,
-        Real r, Real s, Real xr1, Real xr2, Real xs, Real Nai, Real Ki,
-        Real Cai, Real CaSS)
+void IonicTenTusscher06::showCurrents (Real V, Real m, Real h, Real j, Real d, Real f, Real f2, Real fcass,
+                                       Real r, Real s, Real xr1, Real xr2, Real xs, Real Nai, Real Ki,
+                                       Real Cai, Real CaSS)
 {
-	   std::cout << "\nIKr = "   << IKr (V, xr1, xr2, Ki);
-	   std::cout << "\nIKs = "   << IKs (V, xs, Ki, Nai);
-	   std::cout << "\nIK1 = "   << IK1 (V, Ki);
-	   std::cout << "\nIto = "   << Ito (V, r, s, Ki);
-	   std::cout << "\nINa = "   << INa (V, m, h, j, Nai);
-	   std::cout << "\nIbNa = "  << IbNa (V, Nai);
-	   std::cout << "\nICaL = "  << ICaL (V, d, f, f2, fcass, CaSS);
-	   std::cout << "\nIbCa = "  << IbCa (V, Cai);
-	   std::cout << "\nINaK = "  << INaK (V, Nai);
-	   std::cout << "\nINaCa = " << INaCa (V, Nai, Cai);
-	   std::cout << "\nIpCa = "  << IpCa (Cai);
-	   std::cout << "\nIKpK = "  << IpK (V, Ki);
-	   std::cout << "\n";
+    std::cout << "\nIKr = "   << IKr (V, xr1, xr2, Ki);
+    std::cout << "\nIKs = "   << IKs (V, xs, Ki, Nai);
+    std::cout << "\nIK1 = "   << IK1 (V, Ki);
+    std::cout << "\nIto = "   << Ito (V, r, s, Ki);
+    std::cout << "\nINa = "   << INa (V, m, h, j, Nai);
+    std::cout << "\nIbNa = "  << IbNa (V, Nai);
+    std::cout << "\nICaL = "  << ICaL (V, d, f, f2, fcass, CaSS);
+    std::cout << "\nIbCa = "  << IbCa (V, Cai);
+    std::cout << "\nINaK = "  << INaK (V, Nai);
+    std::cout << "\nINaCa = " << INaCa (V, Nai, Cai);
+    std::cout << "\nIpCa = "  << IpCa (Cai);
+    std::cout << "\nIKpK = "  << IpK (V, Ki);
+    std::cout << "\n";
 }
 
 

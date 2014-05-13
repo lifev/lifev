@@ -95,23 +95,23 @@ public:
 
     typedef boost::shared_ptr<VectorEpetra>         vectorPtr_Type;
 
-    typedef boost::shared_ptr<VectorElemental>  	elvecPtr_Type;
+    typedef boost::shared_ptr<VectorElemental>      elvecPtr_Type;
 
     typedef RegionMesh<LinearTetra>                 mesh_Type;
 
-    typedef MatrixEpetra<Real> 						matrix_Type;
+    typedef MatrixEpetra<Real>                      matrix_Type;
 
-    typedef boost::shared_ptr<matrix_Type> 			matrixPtr_Type;
+    typedef boost::shared_ptr<matrix_Type>          matrixPtr_Type;
 
-    typedef FESpace<mesh_Type, MapEpetra> 			feSpace_Type;
+    typedef FESpace<mesh_Type, MapEpetra>           feSpace_Type;
 
-    typedef boost::shared_ptr<feSpace_Type> 		feSpacePtr_Type;
+    typedef boost::shared_ptr<feSpace_Type>         feSpacePtr_Type;
 
-    typedef boost::function <Real (const Real& t,
-    							   const Real& x,
-    							   const Real& y,
-    							   const Real& z,
-    							   const ID& i) > 	function_Type;
+    typedef boost::function < Real (const Real& t,
+                                    const Real& x,
+                                    const Real& y,
+                                    const Real& z,
+                                    const ID& i) >   function_Type;
     //@}
 
     //! @name Constructors & Destructor
@@ -153,54 +153,54 @@ public:
     //@{
 
     //! returns the number of equations of the ionic model
-	/*!
-	 * @param
-	 */
+    /*!
+     * @param
+     */
     inline const short int Size() const
     {
         return M_numberOfEquations;
     }
 
     //! returns the number of gating variables in the ionic model
-	/*!
-	 * @param
-	 */
+    /*!
+     * @param
+     */
     inline const short int numberOfGatingVariables() const
     {
         return M_numberOfGatingVariables;
     }
 
     //! returns the value of the membrane capacitance in the model
-	/*!
-	 * @param
-	 */
+    /*!
+     * @param
+     */
     inline const Real membraneCapacitance() const
     {
         return M_membraneCapacitance;
     }
 
     //! returns the value of the applied current in the model/point
-	/*!
-	 * @param
-	 */
+    /*!
+     * @param
+     */
     inline const Real appliedCurrent() const
     {
         return M_appliedCurrent;
     }
 
     //! returns the pointer to the applied current FE vector in the 3D case
-	/*!
-	 * @param
-	 */
+    /*!
+     * @param
+     */
     inline vectorPtr_Type appliedCurrentPtr()
     {
         return M_appliedCurrentPtr;
     }
 
     //! returns the vector with the resting values of the variables in the ionic model
-	/*!
-	 * @param
-	 */
+    /*!
+     * @param
+     */
     inline const std::vector<Real> restingConditions() const
     {
         return M_restingConditions;
@@ -208,44 +208,44 @@ public:
 
     //! returns the function describing the pacing protocol for the ionic model
     /*!
-	 * @param
-	 */
+     * @param
+     */
     inline const function_Type pacaingProtocol() const
     {
         return M_pacingProtocol;
     }
 
     //! set the membrane capacitance in the ionic model
-	/*!
-	 * @param p membrane capacitance
-	 */
+    /*!
+     * @param p membrane capacitance
+     */
     inline void setMembraneCapacitance ( const Real p )
     {
         M_membraneCapacitance = p;
     }
 
     //! set the applied current in the ionic model/point
-	/*!
-	 * @param p applied current magnitude
-	 */
+    /*!
+     * @param p applied current magnitude
+     */
     inline void setAppliedCurrent (const Real p)
     {
         M_appliedCurrent = p;
     }
 
     //! set the pointer to the applied current in the 3D ionic model
-	/*!
-	 * @param p applied current magnitude
-	 */
+    /*!
+     * @param p applied current magnitude
+     */
     inline void setAppliedCurrentPtr (const vectorPtr_Type p)
     {
         this->M_appliedCurrentPtr = p;
     }
 
     //! set the pointer to the applied current in the 3D ionic model
-	/*!
-	 * @param p applied current magnitude
-	 */
+    /*!
+     * @param p applied current magnitude
+     */
     inline void setAppliedCurrent (const vector_Type& p)
     {
         M_appliedCurrentPtr.reset ( new vector_Type ( p ) );
@@ -255,11 +255,11 @@ public:
     /*!
      *  This method is a wrapper of the interpolation method from the FESpace class
      */
-	/*!
-	 * @param f boost function f(t,x,y,x,ID)
-	 * @param feSpacePtr pointer to the finite element space on which we interpolate
-	 * @param time time at which we evaluate the boost function f
-	 */
+    /*!
+     * @param f boost function f(t,x,y,x,ID)
+     * @param feSpacePtr pointer to the finite element space on which we interpolate
+     * @param time time at which we evaluate the boost function f
+     */
     inline void setAppliedCurrentFromFunction (function_Type& f, feSpacePtr_Type feSpacePtr,
                                                Real time = 0.0)
     {
@@ -273,11 +273,11 @@ public:
     /*!
      *  This method is a wrapper of the interpolation method from the FESpace class
      */
-	/*!
-	 * @param stimulus pacing protocol defined as ElectroStimulus boost function f(t,x,y,x,ID)
-	 * @param feSpacePtr pointer to the finite element space on which we interpolate
-	 * @param time time at which we evaluate the boost function f
-	 */
+    /*!
+     * @param stimulus pacing protocol defined as ElectroStimulus boost function f(t,x,y,x,ID)
+     * @param feSpacePtr pointer to the finite element space on which we interpolate
+     * @param time time at which we evaluate the boost function f
+     */
     inline void setAppliedCurrentFromElectroStimulus ( ElectroStimulus& stimulus, feSpacePtr_Type feSpacePtr, Real time = 0.0)
     {
 
@@ -291,8 +291,8 @@ public:
 
     //! Set the pacing protocol as boost function
     /*!
-	 * @param pacingProtocol  boost function defining the pacing protocol
-	 */
+     * @param pacingProtocol  boost function defining the pacing protocol
+     */
     inline void setPacingProtocol ( function_Type pacingProtocol )
     {
         M_pacingProtocol = pacingProtocol;
@@ -300,55 +300,55 @@ public:
 
     //! Set component of the resting conditions
     /*!
-	 * @param value value of the resting condition
-	 * @param j number of the component to be changed
-	 */
-    inline void setRestingCondtions(Real value, int j)
+     * @param value value of the resting condition
+     * @param j number of the component to be changed
+     */
+    inline void setRestingCondtions (Real value, int j)
     {
-    	M_restingConditions[j] = value;
+        M_restingConditions[j] = value;
     }
 
     //! Set resting conditions
     /*!
-	 * @param restingCondition values of the resting condition
-	 */
-    inline void setRestingCondtions(std::vector<Real>& restingConditions)
+     * @param restingCondition values of the resting condition
+     */
+    inline void setRestingCondtions (std::vector<Real>& restingConditions)
     {
-    	M_restingConditions = restingConditions;
+        M_restingConditions = restingConditions;
     }
 
     //! Simple wrapper to add the applied current
-	/*!
-	 * @param rhs right hand side of the voltage equation
-	 */
-    inline void addAppliedCurrent(Real& rhs)
+    /*!
+     * @param rhs right hand side of the voltage equation
+     */
+    inline void addAppliedCurrent (Real& rhs)
     {
-    	rhs += M_appliedCurrent;
+        rhs += M_appliedCurrent;
     }
 
     //! Simple wrapper to add the applied current
-	/*!
-	 * @param rhs right hand side of the ionic model (in a point)
-	 */
-    inline void addAppliedCurrent(std::vector<Real>& rhs)
+    /*!
+     * @param rhs right hand side of the ionic model (in a point)
+     */
+    inline void addAppliedCurrent (std::vector<Real>& rhs)
     {
-    	rhs[0] += M_appliedCurrent;
+        rhs[0] += M_appliedCurrent;
     }
 
     //@}
 
     //! This methods computes the Jacobian numerically
-	/*!
-	 * @param v vector of pointers to the  state variables vectors
-	 * @param h differentiation step
-	 */
+    /*!
+     * @param v vector of pointers to the  state variables vectors
+     * @param h differentiation step
+     */
     virtual matrix_Type getJac (const vector_Type& v, Real h = 1.0e-8);
 
     //! This methods computes the Jacobian numerically
-	/*!
-	 * @param v vector of  the  state variables
-	 * @param h differentiation step
-	 */
+    /*!
+     * @param v vector of  the  state variables
+     * @param h differentiation step
+     */
     virtual std::vector< std::vector<Real> > getJac (const std::vector<Real>& v, Real h = 1.0e-8);
 
     //! This methods computes the right hand side of the gating variables in the 3D case
@@ -356,10 +356,10 @@ public:
      *  In 3D the gating variables are still treated nodewise (that is, as a local 0D system)
      *  It computes the right hand side of all  state variables except for the voltage equation.
      */
-	/*!
-	 * @param v vector of pointers to the  state variables vectors
-	 * @param rhs vector of pointers to the right hand side vectors of each variable
-	 */
+    /*!
+     * @param v vector of pointers to the  state variables vectors
+     * @param rhs vector of pointers to the right hand side vectors of each variable
+     */
     virtual void computeGatingRhs ( const std::vector<vectorPtr_Type>& v, std::vector<vectorPtr_Type>& rhs );
 
     //! This methods computes the right hand side of the state variables that are not gating variables in the 3D case
@@ -368,76 +368,76 @@ public:
      *  In 3D the non gating variables are still treated nodewise (that is, as a local 0D system).
      *  It computes the right hand side of all non gating  state variables except for the voltage equation.
      */
-	/*!
-	 * @param v vector of pointers to the  state variables vectors
-	 * @param rhs vector of pointers to the right hand side vectors of each variable
-	 */
+    /*!
+     * @param v vector of pointers to the  state variables vectors
+     * @param rhs vector of pointers to the right hand side vectors of each variable
+     */
     virtual void computeNonGatingRhs ( const std::vector<vectorPtr_Type>& v, std::vector<vectorPtr_Type>& rhs );
 
     //! Compute the new value of the gating variables in 3D with the Rush Larsen method specified in the 0D version of the ionic model
     /*!
      *  This method wraps the 0D model to be used in 3D
      */
-	/*!
-	 * @param v vector of pointers to the  state variables vectors
-	 * @param dt time step
-	 */
+    /*!
+     * @param v vector of pointers to the  state variables vectors
+     * @param dt time step
+     */
     virtual void computeGatingVariablesWithRushLarsen ( std::vector<vectorPtr_Type>& v, const Real dt );
 
     //! Compute the right hand side of the ionic model in 3D
     /*!
      *  This method wraps the 0D model to be used in 3D
      */
-	/*!
-	 * @param v vector of pointers to the  state variables vectors
-	 * @param rhs vector of right hand side state variables
-	 */
+    /*!
+     * @param v vector of pointers to the  state variables vectors
+     * @param rhs vector of right hand side state variables
+     */
     virtual void computeRhs ( const std::vector<vectorPtr_Type>& v, std::vector<vectorPtr_Type>& rhs );
 
     //! Compute the right hand side of the voltage equation linearly interpolating the ionic currents
-	/*!
-	 * @param v vector of pointers to the  state variables vectors
-	 * @param rhs vector of right hand side state variables
-	 * @param massMatrix mass matrix of the monodomain system (may be lumped)
-	 */
+    /*!
+     * @param v vector of pointers to the  state variables vectors
+     * @param rhs vector of right hand side state variables
+     * @param massMatrix mass matrix of the monodomain system (may be lumped)
+     */
     virtual void computePotentialRhsICI ( const std::vector<vectorPtr_Type>& v,
                                           std::vector<vectorPtr_Type>&        rhs,
                                           matrix_Type&                        massMatrix );
 
     //! Compute the right hand side of the voltage equation using SVI
-	/*!
-	 * @param v vector of pointers to the  state variables vectors
-	 * @param rhs vector of right hand side state variables
-	 * @param uFESpace finite element space of the voltage
+    /*!
+     * @param v vector of pointers to the  state variables vectors
+     * @param rhs vector of right hand side state variables
+     * @param uFESpace finite element space of the voltage
 
-	 */
+     */
     virtual void computePotentialRhsSVI ( const std::vector<vectorPtr_Type>& v,
                                           std::vector<vectorPtr_Type>&        rhs,
                                           FESpace<mesh_Type, MapEpetra>&  uFESpace );
 
     //! Compute the right hand side of the voltage equation using SVI   specifying the quadrature rule
-	/*!
-	 * @param v vector of pointers to the  state variables vectors
-	 * @param rhs vector of right hand side state variables
-	 * @param uFESpace finite element space of the voltage
-	 * @param qr quadrature rule for the integration
-	 */
+    /*!
+     * @param v vector of pointers to the  state variables vectors
+     * @param rhs vector of right hand side state variables
+     * @param uFESpace finite element space of the voltage
+     * @param qr quadrature rule for the integration
+     */
     virtual void computePotentialRhsSVI ( const std::vector<vectorPtr_Type>& v,
                                           std::vector<vectorPtr_Type>&        rhs,
                                           FESpace<mesh_Type, MapEpetra>&  uFESpace,
                                           const QuadratureRule& qr );
 
     //! Initialize the ionic model with a given vector of state variable (0D version)
-	/*!
-	 * @param v vector of state variables initial conditions
-	 */
+    /*!
+     * @param v vector of state variables initial conditions
+     */
     virtual void initialize ( std::vector<Real>& v );
 
     //initialize with given conditions
     //! Initialize the ionic model in 3D with a given vector of state variable vector pointers
-	/*!
-	 * @param v vector of state variables initial conditions
-	 */
+    /*!
+     * @param v vector of state variables initial conditions
+     */
     virtual void initialize ( std::vector<vectorPtr_Type>& v );
 
 
@@ -445,9 +445,9 @@ public:
     //@{
 
     //! Assignment operator
-	/*!
-	 * @param Ionic ionic model
-	 */
+    /*!
+     * @param Ionic ionic model
+     */
     ElectroIonicModel& operator= ( const ElectroIonicModel& Ionic );
 
     //@}
@@ -459,16 +459,16 @@ public:
     /////////////////////////////////////////////////////////////
 
     //! This methods contains the actual evaluation of the rhs of all state variables except for the voltage equation (0D version)
-	/*!
-	 * @param v vector of state variables including the voltage (with n elements)
-	 * @param rhs vector of right hand side state variables excluding the voltage (with n-1 elements)
-	 */
+    /*!
+     * @param v vector of state variables including the voltage (with n elements)
+     * @param rhs vector of right hand side state variables excluding the voltage (with n-1 elements)
+     */
     virtual void computeGatingRhs ( const std::vector<Real>& v, std::vector<Real>& rhs ) = 0;
 
     //! This methods contains the actual evaluation of the rhs of the voltage equation only (0D version)
-	/*!
-	 * @param v vector of state variables including the voltage (with n elements)
-	 */
+    /*!
+     * @param v vector of state variables including the voltage (with n elements)
+     */
     virtual Real computeLocalPotentialRhs ( const std::vector<Real>& v ) = 0;
 
     //! This methods contains the actual evaluation of the rhs of all state variablesin the model (0D version)
@@ -476,26 +476,26 @@ public:
      *  Although this method can just wrap the  computeGatingRhs ( const std::vector<Real>& v, std::vector<Real>& rhs ) and
      *  the computeLocalPotentialRhs ( const std::vector<Real>& v ) methods, for efficiency it may be better to duplicate the code.
      */
-	/*!
-	 * @param v vector of state variables including the voltage (with n elements)
-	 * @param rhs vector of right hand side state variables including the voltage (with n elements)
-	 */
+    /*!
+     * @param v vector of state variables including the voltage (with n elements)
+     * @param rhs vector of right hand side state variables including the voltage (with n elements)
+     */
     virtual void computeRhs ( const std::vector<Real>& v, std::vector<Real>& rhs) = 0;
 
     //! This methods shows the parameters of the ionic model
-	/*!
-	 * @param
-	 */
+    /*!
+     * @param
+     */
     virtual void showMe() = 0;
 
     //! This methods contains the actual evaluation of the rhs of the voltage equation only (0D version)
     /*!
      *  Overload this method in order to solve the ionic model with the Rush-Larsen method in the monodomain solver
      */
-	/*!
-	 * @param v vector of state variables
-	 * @param dt time step of the simulation
-	 */
+    /*!
+     * @param v vector of state variables
+     * @param dt time step of the simulation
+     */
     virtual void computeGatingVariablesWithRushLarsen ( std::vector<Real>& /*v*/, const Real /*dt*/ ) {}
 
 
@@ -503,10 +503,10 @@ public:
     /*!
      *  This method should be used together with the Rush-Larsen time advancing scheme
      */
-	/*!
-	 * @param v vector of state variables including the voltage (with n elements)
-	 * @param rhs vector of right hand side state variables excluding the voltage and the gating variables (with n-g-1 elements)
-	 */
+    /*!
+     * @param v vector of state variables including the voltage (with n elements)
+     * @param rhs vector of right hand side state variables excluding the voltage and the gating variables (with n-g-1 elements)
+     */
     virtual void computeNonGatingRhs ( const std::vector<Real>& v, std::vector<Real>& rhs )
     {
         if (M_numberOfGatingVariables == 0 )

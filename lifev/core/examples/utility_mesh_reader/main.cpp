@@ -59,7 +59,7 @@ int main (int argc, char** argv)
         //create the mesh data and read and save both the global mesh and the partitioned mesh
         if ( comm -> MyPID() == 0 )
         {
-	std::cout << "\n\nReading and partitioning the cube mesh saving the global mesh: ... \n";
+            std::cout << "\n\nReading and partitioning the cube mesh saving the global mesh: ... \n";
         }
         boost::shared_ptr< RegionMesh <LinearTetra> > meshFullPtr ( new RegionMesh <LinearTetra> ( comm ) );
         boost::shared_ptr< RegionMesh <LinearTetra> > meshLocalPtr ( new RegionMesh <LinearTetra> ( comm ) );
@@ -77,19 +77,19 @@ int main (int argc, char** argv)
             std::cout << "\n\nCreating a structured mesh without saving the full mesh: ... \n";
         }
         boost::shared_ptr< RegionMesh <LinearTetra> > meshStructPtr ( new RegionMesh <LinearTetra> ( comm ) );
-        std::vector<Real> l(3, 1.0);
-		std::vector<Real> t(3, 0.0);
+        std::vector<Real> l (3, 1.0);
+        std::vector<Real> t (3, 0.0);
         MeshUtility::loadStructuredMesh  ( meshStructPtr,
-                                              1,
-                                              std::vector<UInt> (3, 5),
-                                              true,
-                                              l,
-                                              t );
+                                           1,
+                                           std::vector<UInt> (3, 5),
+                                           true,
+                                           l,
+                                           t );
 
 
         if ( comm -> MyPID() == 0 )
         {
-	  std::cout << "... DONE!\n\n ";
+            std::cout << "... DONE!\n\n ";
         }
     }
 

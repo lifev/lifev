@@ -297,11 +297,11 @@ Int main ( Int argc, char** argv )
 
         meshPtr_Type fullMeshPtr ( new mesh_Type ( Comm ) );
 
-        std::vector<Real> meshDim(3,0);
+        std::vector<Real> meshDim (3, 0);
         meshDim[0] =  monodomainList.get ("meshDim_X", 10 );
         meshDim[1] =  monodomainList.get ("meshDim_Y", 10 );
         meshDim[2] =  monodomainList.get ("meshDim_Z", 10 );
-        std::vector<Real> domain(3,0);
+        std::vector<Real> domain (3, 0);
         domain[0] =  monodomainList.get ("domain_X", 1. );
         domain[1] =  monodomainList.get ("domain_Y", 1. );
         domain[2] =  monodomainList.get ("domain_Z", 1. );

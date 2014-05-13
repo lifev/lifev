@@ -301,8 +301,8 @@ void IonicFox::computeRhs (const   std::vector<Real>&  v, std::vector<Real>& rhs
 
 void IonicFox::computeNonGatingRhs ( const std::vector<Real>&  v, std::vector<Real>& rhs )
 {
-//    std::vector<Real> subSysCaRhs   ( computeLocalSubSysCaRhs (v) );
-//    std::copy ( subSysCaRhs.begin(), subSysCaRhs.end() - 1, rhs.begin() + M_numberOfGatingVariables );
+    //    std::vector<Real> subSysCaRhs   ( computeLocalSubSysCaRhs (v) );
+    //    std::copy ( subSysCaRhs.begin(), subSysCaRhs.end() - 1, rhs.begin() + M_numberOfGatingVariables );
     std::vector<Real> gatingRhs     ( computeLocalGatingRhs (v) );
     std::vector<Real> subSysCaRhs   ( computeLocalSubSysCaRhs (v) );
 
@@ -312,11 +312,11 @@ void IonicFox::computeNonGatingRhs ( const std::vector<Real>&  v, std::vector<Re
 
 Real IonicFox::computeLocalPotentialRhs ( const std::vector<Real>& v )
 {
-    std::vector<Real> fastNa (fastINa (v));
-    std::vector<Real> rapidK (rapidIK (v));
-    std::vector<Real> slowK  (slowIK  (v));
-    std::vector<Real> transOutK(transOutIK (v));
-    std::vector<Real> subSysCaRHS (computeLocalSubSysCaRhs (v));
+    std::vector<Real> fastNa (fastINa (v) );
+    std::vector<Real> rapidK (rapidIK (v) );
+    std::vector<Real> slowK  (slowIK  (v) );
+    std::vector<Real> transOutK (transOutIK (v) );
+    std::vector<Real> subSysCaRHS (computeLocalSubSysCaRhs (v) );
     Real INa = fastNa[0];
     Real IKr = rapidK[0];
     Real IKs = slowK[0];

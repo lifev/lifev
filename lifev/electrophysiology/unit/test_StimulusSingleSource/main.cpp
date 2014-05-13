@@ -73,7 +73,7 @@ using namespace LifeV;
 Int main ( Int argc, char** argv )
 {
 
-//    bool verbose = false;
+    //    bool verbose = false;
 
     //! Initializing Epetra communicator
     MPI_Init (&argc, &argv);
@@ -89,35 +89,35 @@ Int main ( Int argc, char** argv )
     Teuchos::ParameterList stimulusList = * ( Teuchos::getParametersFromXmlFile ( stimulus_datafile_name ) );
 
     StimulusSingleSource stimulus;
-     stimulus.setParameters ( stimulusList );
+    stimulus.setParameters ( stimulusList );
     if ( Comm->MyPID() == 0 )
     {
         stimulus.showMe();
     }
 
-    Real DeltaX,DeltaY,DeltaZ,DeltaT;
+    Real DeltaX, DeltaY, DeltaZ, DeltaT;
     DeltaX = 1000;
     DeltaY = 1000;
     DeltaZ = 1000;
     DeltaT = 1000;
 
-   if ( Comm->MyPID() == 0 )
+    if ( Comm->MyPID() == 0 )
     {
-        std::cerr<<"Starting test"<<std::endl;
+        std::cerr << "Starting test" << std::endl;
     }
- Teuchos::ScalarTraits<Real>::seedrandom (time (NULL) );
-    for(ID i=0;i<100;i++)
+    Teuchos::ScalarTraits<Real>::seedrandom (time (NULL) );
+    for (ID i = 0; i < 100; i++)
     {
-	Real x,y,z,t;
-	x = (Teuchos::ScalarTraits<Real>::random() + stimulusList.get ( "pacing_site_X", 1.0 ) )*DeltaX;
-	y = (Teuchos::ScalarTraits<Real>::random() + stimulusList.get ( "pacing_site_Y", 1.0 ) )*DeltaY;
-	z = (Teuchos::ScalarTraits<Real>::random() + stimulusList.get ( "pacing_site_Z", 1.0 ) )*DeltaZ;
-	t = (Teuchos::ScalarTraits<Real>::random() + 1.0 )*DeltaX;
+        Real x, y, z, t;
+        x = (Teuchos::ScalarTraits<Real>::random() + stimulusList.get ( "pacing_site_X", 1.0 ) ) * DeltaX;
+        y = (Teuchos::ScalarTraits<Real>::random() + stimulusList.get ( "pacing_site_Y", 1.0 ) ) * DeltaY;
+        z = (Teuchos::ScalarTraits<Real>::random() + stimulusList.get ( "pacing_site_Z", 1.0 ) ) * DeltaZ;
+        t = (Teuchos::ScalarTraits<Real>::random() + 1.0 ) * DeltaX;
         stimulus.appliedCurrent (  t,  x,  y,  z,  i );
     }
-   if ( Comm->MyPID() == 0 )
+    if ( Comm->MyPID() == 0 )
     {
-        std::cerr<<"Ending test"<<std::endl;
+        std::cerr << "Ending test" << std::endl;
     }
 
     MPI_Barrier (MPI_COMM_WORLD);

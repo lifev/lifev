@@ -139,9 +139,9 @@ void IonicHodgkinHuxley::computeGatingRhs ( const   std::vector<Real>&  v,
 void IonicHodgkinHuxley::computeRhs ( const   std::vector<Real>&  v,
                                       std::vector<Real>& rhs )
 {
-	std::vector<Real> tmpRhs(this->Size()-1, 0.0);
-	computeGatingRhs(v, tmpRhs);
-    rhs[0] = computeLocalPotentialRhs(v);
+    std::vector<Real> tmpRhs (this->Size() - 1, 0.0);
+    computeGatingRhs (v, tmpRhs);
+    rhs[0] = computeLocalPotentialRhs (v);
     rhs[1] = tmpRhs[0];
     rhs[2] = tmpRhs[1];
     rhs[3] = tmpRhs[2];

@@ -95,7 +95,7 @@ public:
 
     virtual void setParameters (list_Type&  list)
     {
-	
+
     }
 
     virtual void showMe ()

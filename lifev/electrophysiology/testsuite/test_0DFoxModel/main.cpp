@@ -107,11 +107,11 @@ Int main ( Int argc, char** argv )
 
     //********************************************//
     // Initialize the solution with the default   //
-    // values									  //
+    // values                                     //
     //********************************************//
     cout << "Initializing solution vector...";
     std::vector<Real> unknowns (model.Size(), 0 );
-    model.initialize(unknowns);
+    model.initialize (unknowns);
     cout << " Done!" << endl;
 
     //********************************************//
@@ -169,7 +169,7 @@ Int main ( Int argc, char** argv )
 
         //********************************************//
         // Compute the applied current. This is a     //
-    	// simple switch.                             //
+        // simple switch.                             //
         //********************************************//
         if ( t >= timeSt && t <= timeSt + 1.0 )
         {
@@ -191,7 +191,7 @@ Int main ( Int argc, char** argv )
         //********************************************//
         model.setAppliedCurrent (Iapp);
         model.computeRhs ( unknowns, rhs );
-        model.addAppliedCurrent(rhs);
+        model.addAppliedCurrent (rhs);
 
 
         //********************************************//
@@ -239,12 +239,12 @@ Int main ( Int argc, char** argv )
     //! Finalizing Epetra communicator
     MPI_Finalize();
     Real returnValue;
-    Real err = std::abs (SolutionTestNorm - SolutionNorm) / std::abs(SolutionTestNorm);
-    std::cout << std::setprecision(20) << "\nError: " << err << "\nSolution norm: " << SolutionNorm << "\n";
+    Real err = std::abs (SolutionTestNorm - SolutionNorm) / std::abs (SolutionTestNorm);
+    std::cout << std::setprecision (20) << "\nError: " << err << "\nSolution norm: " << SolutionNorm << "\n";
     if ( err > 1e-12 )
 
     {
-    	std::cout << "\nTest Failed!\n";
+        std::cout << "\nTest Failed!\n";
         returnValue = EXIT_FAILURE; // Norm of solution did not match
     }
     else

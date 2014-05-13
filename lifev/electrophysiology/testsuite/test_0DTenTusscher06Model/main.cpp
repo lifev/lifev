@@ -81,7 +81,7 @@ Int main ( Int argc, char** argv )
     Epetra_MpiComm Comm (MPI_COMM_WORLD);
     if ( Comm.MyPID() == 0 )
     {
-    	std::cout << "% using MPI" << std::endl;
+        std::cout << "% using MPI" << std::endl;
     }
 
     //********************************************//
@@ -104,7 +104,7 @@ Int main ( Int argc, char** argv )
 
     //********************************************//
     // Initialize the solution with the default   //
-    // values									  //
+    // values                                     //
     //********************************************//
     std::cout << "Initializing solution vector...";
     std::vector<Real> states (ionicModel.restingConditions() );
@@ -172,13 +172,13 @@ Int main ( Int argc, char** argv )
     int iter (0);
 
 
-    std::vector<Real> v(states);
+    std::vector<Real> v (states);
     for ( Real t = 0; t < TF; )
     {
 
         //********************************************//
         // Compute the applied current. This is a     //
-    	// simple switch.                             //
+        // simple switch.                             //
         //********************************************//
         if ( t > 50 && t < 52 )
         {
@@ -195,9 +195,9 @@ Int main ( Int argc, char** argv )
         //********************************************//
         // Compute the rhs using the model equations  //
         //********************************************//
-        ionicModel.setAppliedCurrent(Iapp);
-        rhs[0] = ionicModel.computeLocalPotentialRhs(states);
-        ionicModel.addAppliedCurrent(rhs);
+        ionicModel.setAppliedCurrent (Iapp);
+        rhs[0] = ionicModel.computeLocalPotentialRhs (states);
+        ionicModel.addAppliedCurrent (rhs);
 
         ionicModel.computeGatingVariablesWithRushLarsen ( states, dt);
         states[0] = states[0]  + dt * rhs[0]; //This should be divided by the membrane capacitance  ionicModel.membraneCapacitance();
@@ -245,12 +245,12 @@ Int main ( Int argc, char** argv )
 
     Real returnValue;
 
-    Real err = std::abs (SolutionTestNorm - SolutionNorm) / std::abs(SolutionTestNorm);
-    std::cout << std::setprecision(20) << "\nError: " << err << "\nSolution norm: " << SolutionNorm << "\n";
+    Real err = std::abs (SolutionTestNorm - SolutionNorm) / std::abs (SolutionTestNorm);
+    std::cout << std::setprecision (20) << "\nError: " << err << "\nSolution norm: " << SolutionNorm << "\n";
     if ( err > 1e-12 )
     {
-    	std::cout << "\nTest Failed!\n";
-    	returnValue = EXIT_FAILURE; // Norm of solution did not match
+        std::cout << "\nTest Failed!\n";
+        returnValue = EXIT_FAILURE; // Norm of solution did not match
     }
     else
     {

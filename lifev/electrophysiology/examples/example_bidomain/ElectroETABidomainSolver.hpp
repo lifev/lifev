@@ -832,7 +832,7 @@ public:
     void inline partitionMesh (std::string meshName, std::string meshPath)
     {
         MeshUtility::loadMesh (M_localMeshPtr, M_fullMeshPtr, meshName,
-                                       meshPath);
+                               meshPath);
     }
     //! given a boost function initialize the transmembrane potential
     void inline setPotentialFromFunctionTrans (function_Type& f, Real time = 0.0)
@@ -872,9 +872,9 @@ public:
      */
     void inline updateRhs()
     {
-    	blockVectorPtr_Type tmp( new blockVector_Type( *M_rhsPtrUnique ) );
-    	M_massMatrixPtr -> multiply(false, (*M_potentialGlobalPtr) * (M_ionicModelPtr -> membraneCapacitance() / (M_timeStep) ), *tmp );
-    	(*M_rhsPtrUnique) += (*tmp);
+        blockVectorPtr_Type tmp ( new blockVector_Type ( *M_rhsPtrUnique ) );
+        M_massMatrixPtr -> multiply (false, (*M_potentialGlobalPtr) * (M_ionicModelPtr -> membraneCapacitance() / (M_timeStep) ), *tmp );
+        (*M_rhsPtrUnique) += (*tmp);
     }
 
     //! Solves one diffusion step using the BDF2 scheme
@@ -942,7 +942,7 @@ public:
                              int format = 0)
     {
         ElectrophysiologyUtility::importFibersFromTextFile (M_fiberPtr, fibersFile,
-                                                directory, format);
+                                                            directory, format);
     }
     //! Solves the gating variables with forward Euler
     void solveOneStepGatingVariablesFE();

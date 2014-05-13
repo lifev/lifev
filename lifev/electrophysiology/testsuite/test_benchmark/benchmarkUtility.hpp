@@ -70,9 +70,11 @@
 // In LifeV namespace we create the benchmarkUtility namespace
 // ---------------------------------------------------------------
 
-namespace LifeV{
+namespace LifeV
+{
 
-namespace BenchmarkUtility{
+namespace BenchmarkUtility
+{
 
 
 // ---------------------------------------------------------------
@@ -82,20 +84,20 @@ namespace BenchmarkUtility{
 typedef ElectroIonicModel                                        ionicModel_Type;
 typedef boost::shared_ptr<ionicModel_Type>                       ionicModelPtr_Type;
 typedef boost::function < Real (const Real& t,
-                                 const Real& x,
-                                 const Real& y,
-                                 const Real& z,
-                                 const ID&   i ) >   function_Type;
+                                const Real& x,
+                                const Real& y,
+                                const Real& z,
+                                const ID&   i ) >   function_Type;
 
 // ---------------------------------------------------------------
 // This function is used to choose among the ionic models with an
 // if among the ionic model names.
 // ---------------------------------------------------------------
 
-Real chooseIonicModel(ionicModelPtr_Type& model, std::string ionic_model, Epetra_Comm& Comm )
+Real chooseIonicModel (ionicModelPtr_Type& model, std::string ionic_model, Epetra_Comm& Comm )
 {
-	Real activationThreshold(0.95);
-	bool ionicModelSet = false;
+    Real activationThreshold (0.95);
+    bool ionicModelSet = false;
     if ( Comm.MyPID() == 0 )
     {
         std::cout << "Constructing the ionic model ... !"; // << std::endl;
@@ -137,7 +139,7 @@ Real chooseIonicModel(ionicModelPtr_Type& model, std::string ionic_model, Epetra
         model.reset ( new IonicFox() );
         if ( Comm.MyPID() == 0 )
         {
-//            assert(0 && "Fox model is not properly working in 3D."); //TO DO: Fix It!
+            //            assert(0 && "Fox model is not properly working in 3D."); //TO DO: Fix It!
         }
     }
 
@@ -146,7 +148,7 @@ Real chooseIonicModel(ionicModelPtr_Type& model, std::string ionic_model, Epetra
         std::cout << " Done!" << std::endl;
     }
 
-    assert(ionicModelSet  && "Ionic model not specified.");
+    assert (ionicModelSet  && "Ionic model not specified.");
 
     model -> showMe();
 
@@ -256,7 +258,7 @@ Real PacingProtocol ( const Real& t, const Real& x, const Real& y, const Real& z
 // This function is used to set the external stimulus
 // ---------------------------------------------------------------
 
-void setStimulus(function_Type& f, std::string ionic_model)
+void setStimulus (function_Type& f, std::string ionic_model)
 {
     if (ionic_model == "MinimalModel" || ionic_model == "AlievPanfilov")
     {

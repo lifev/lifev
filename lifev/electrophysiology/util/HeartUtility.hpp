@@ -75,7 +75,7 @@ namespace ElectrophysiologyUtility
  * @param fileName    Name of the HDF5 file to read from
  * @param localMesh   Pointer to the mesh
  */
-template<typename Mesh> inline void importFibers (  boost::shared_ptr<VectorEpetra> fiberVector, const std::string& fileName, boost::shared_ptr< Mesh > localMesh, const std::string& filePath="./" )
+template<typename Mesh> inline void importFibers (  boost::shared_ptr<VectorEpetra> fiberVector, const std::string& fileName, boost::shared_ptr< Mesh > localMesh, const std::string& filePath = "./" )
 {
     typedef Mesh                                                                          mesh_Type;
     typedef ExporterData<mesh_Type>                                                       exporterData_Type;
@@ -136,7 +136,7 @@ template<typename Mesh> inline void importScalarField (  boost::shared_ptr<Vecto
  * @param fieldName   Name of the vector field in the HDF5 file
  * @param localMesh   Pointer to the mesh
  */
-template<typename Mesh> inline void importVectorField (  boost::shared_ptr<VectorEpetra> vector, const std::string& fileName, const std::string& fieldName, boost::shared_ptr< Mesh > localMesh  ,const std::string & postDir="./")
+template<typename Mesh> inline void importVectorField (  boost::shared_ptr<VectorEpetra> vector, const std::string& fileName, const std::string& fieldName, boost::shared_ptr< Mesh > localMesh  , const std::string& postDir = "./")
 {
     typedef Mesh                                                                         mesh_Type;
     typedef ExporterData<mesh_Type>                                                      exporterData_Type;
@@ -442,7 +442,7 @@ inline void normalize ( VectorEpetra& vector )
  * @param fiberVector    VectorEpetra object for storing the vector field
  * @param fiberDirection Direction of fiber vectors as a VectorSmall
  */
-inline void addNoiseToFibers ( VectorEpetra& fiberVector, Real magnitude = 0.01,  std::vector<bool> component =  std::vector<bool>(3,true) )
+inline void addNoiseToFibers ( VectorEpetra& fiberVector, Real magnitude = 0.01,  std::vector<bool> component =  std::vector<bool> (3, true) )
 {
     int n1 = fiberVector.epetraVector().MyLength();
     int d1 = n1 / 3;
@@ -452,33 +452,33 @@ inline void addNoiseToFibers ( VectorEpetra& fiberVector, Real magnitude = 0.01,
 
     for ( int l (0); l < d1; l++)
     {
-        if(component[0])
+        if (component[0])
         {
-			i = fiberVector.blockMap().GID (l);
-			fiberVector [i] += magnitude * (0.01 * ( (std::rand() % 100 ) -50.0 ) );
+            i = fiberVector.blockMap().GID (l);
+            fiberVector [i] += magnitude * (0.01 * ( (std::rand() % 100 ) - 50.0 ) );
         }
-        if(component[1])
+        if (component[1])
         {
-			j = fiberVector.blockMap().GID (l + d1);
-			fiberVector [j] += magnitude * (0.01 * ( (std::rand() % 100 ) -50.0 ) );
+            j = fiberVector.blockMap().GID (l + d1);
+            fiberVector [j] += magnitude * (0.01 * ( (std::rand() % 100 ) - 50.0 ) );
         }
-        if(component[2])
+        if (component[2])
         {
-			k = fiberVector.blockMap().GID (l + 2 * d1);
-			fiberVector [k] += magnitude * (0.01 * ( (std::rand() % 100 ) - 50.0 ) );
+            k = fiberVector.blockMap().GID (l + 2 * d1);
+            fiberVector [k] += magnitude * (0.01 * ( (std::rand() % 100 ) - 50.0 ) );
         }
     }
 
-    ElectrophysiologyUtility::normalize(fiberVector);
+    ElectrophysiologyUtility::normalize (fiberVector);
 }
 
 
 
 typedef boost::function < Real (const Real&  t,
-                                 const Real&  x,
-                                 const Real&  y,
-                                 const Real&  z,
-                                 const ID&    i ) >   function_Type;
+                                const Real&  x,
+                                const Real&  y,
+                                const Real&  z,
+                                const ID&    i ) >   function_Type;
 template<typename Mesh> inline void setFibersFromFunction (  boost::shared_ptr<VectorEpetra> vector, boost::shared_ptr< Mesh > localMesh, function_Type f)
 {
     typedef Mesh                                                                         mesh_Type;

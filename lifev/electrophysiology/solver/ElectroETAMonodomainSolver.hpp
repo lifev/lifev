@@ -99,98 +99,98 @@ public:
     //! @name Type definitions
     //@{
 
-	//! Mesh
-    typedef Mesh 														mesh_Type;
+    //! Mesh
+    typedef Mesh                                                        mesh_Type;
 
-    typedef boost::shared_ptr<mesh_Type>                    			meshPtr_Type;
+    typedef boost::shared_ptr<mesh_Type>                                meshPtr_Type;
 
     //! Distributed vector // For parallel usage
-    typedef VectorEpetra 												vector_Type;
+    typedef VectorEpetra                                                vector_Type;
 
-    typedef boost::shared_ptr<VectorEpetra> 							vectorPtr_Type;
+    typedef boost::shared_ptr<VectorEpetra>                             vectorPtr_Type;
 
-    typedef vector_Type													solution_Type;
+    typedef vector_Type                                                 solution_Type;
 
-    typedef vectorPtr_Type												solutionPtr_Type;
+    typedef vectorPtr_Type                                              solutionPtr_Type;
 
-    typedef std::vector<vectorPtr_Type> 								vectorOfPtr_Type;
+    typedef std::vector<vectorPtr_Type>                                 vectorOfPtr_Type;
 
     //! Distributed Matrix // For parallel usage
-    typedef MatrixEpetra<Real> 											matrix_Type;
+    typedef MatrixEpetra<Real>                                          matrix_Type;
 
-    typedef boost::shared_ptr<matrix_Type> 								matrixPtr_Type;
+    typedef boost::shared_ptr<matrix_Type>                              matrixPtr_Type;
 
     //! Communicator to exchange informations among processes
-    typedef Epetra_Comm 												comm_Type;
+    typedef Epetra_Comm                                                 comm_Type;
 
-    typedef boost::shared_ptr<comm_Type> 								commPtr_Type;
+    typedef boost::shared_ptr<comm_Type>                                commPtr_Type;
 
     //! Expression template  scalar finite element space
     //! To be used in the expression assembly namespace
-    typedef ETFESpace<mesh_Type, MapEpetra, 3, 1> 						ETFESpace_Type;
+    typedef ETFESpace<mesh_Type, MapEpetra, 3, 1>                       ETFESpace_Type;
 
-    typedef boost::shared_ptr<ETFESpace<mesh_Type, MapEpetra, 3, 1> > 	ETFESpacePtr_Type;
+    typedef boost::shared_ptr<ETFESpace<mesh_Type, MapEpetra, 3, 1> >   ETFESpacePtr_Type;
 
     //! Expression template vectorial finite element space
     //! To be used in the expression assembly namespace
-    typedef ETFESpace<mesh_Type, MapEpetra, 3, 3> 						ETFESpaceVectorial_Type;
+    typedef ETFESpace<mesh_Type, MapEpetra, 3, 3>                       ETFESpaceVectorial_Type;
 
-    typedef boost::shared_ptr<ETFESpaceVectorial_Type> 					ETFESpaceVectorialPtr_Type;
+    typedef boost::shared_ptr<ETFESpaceVectorial_Type>                  ETFESpaceVectorialPtr_Type;
 
     //! Finite element space
-    typedef FESpace<mesh_Type, MapEpetra> 								feSpace_Type;
+    typedef FESpace<mesh_Type, MapEpetra>                               feSpace_Type;
 
-    typedef boost::shared_ptr<feSpace_Type> 							feSpacePtr_Type;
+    typedef boost::shared_ptr<feSpace_Type>                             feSpacePtr_Type;
 
     //! Linear Solver
-    typedef LinearSolver 												linearSolver_Type;
+    typedef LinearSolver                                                linearSolver_Type;
 
-    typedef boost::shared_ptr<LinearSolver> 							linearSolverPtr_Type;
+    typedef boost::shared_ptr<LinearSolver>                             linearSolverPtr_Type;
 
     //! Exporter to save the solution
-    typedef Exporter<mesh_Type> 										IOFile_Type;
+    typedef Exporter<mesh_Type>                                         IOFile_Type;
 
-    typedef boost::shared_ptr<IOFile_Type> 								IOFilePtr_Type;
+    typedef boost::shared_ptr<IOFile_Type>                              IOFilePtr_Type;
 
     //! Exporter data
-    typedef ExporterData<mesh_Type> 									IOData_Type;
+    typedef ExporterData<mesh_Type>                                     IOData_Type;
 
-    typedef ExporterEnsight<mesh_Type> 									ensightIOFile_Type;
+    typedef ExporterEnsight<mesh_Type>                                  ensightIOFile_Type;
 
 #ifdef HAVE_HDF5
-    typedef ExporterHDF5< mesh_Type > 									hdf5IOFile_Type;
+    typedef ExporterHDF5< mesh_Type >                                   hdf5IOFile_Type;
 #endif
 
     //! Preconditioner
-    typedef LifeV::Preconditioner 										basePrec_Type;
+    typedef LifeV::Preconditioner                                       basePrec_Type;
 
-    typedef boost::shared_ptr<basePrec_Type> 							basePrecPtr_Type;
+    typedef boost::shared_ptr<basePrec_Type>                            basePrecPtr_Type;
 
     //! MultiLevel Preconditioner
-    typedef LifeV::PreconditionerML 									prec_Type;
+    typedef LifeV::PreconditionerML                                     prec_Type;
 
-    typedef boost::shared_ptr<prec_Type> 								precPtr_Type;
+    typedef boost::shared_ptr<prec_Type>                                precPtr_Type;
 
     //! Ionic model
-    typedef IonicModel 													ionicModel_Type;
+    typedef IonicModel                                                  ionicModel_Type;
 
     //! Base class of the ionic model
-    typedef ElectroIonicModel 											superIonicModel;
+    typedef ElectroIonicModel                                           superIonicModel;
 
-    typedef boost::shared_ptr<ionicModel_Type> 							ionicModelPtr_Type;
+    typedef boost::shared_ptr<ionicModel_Type>                          ionicModelPtr_Type;
 
     //! xml list to read parameters
-    typedef Teuchos::ParameterList 										list_Type;
+    typedef Teuchos::ParameterList                                      list_Type;
 
     //! boost function
-    typedef boost::function <Real (const Real& t,
-    							   const Real& x,
-    							   const Real& y,
-    							   const Real& z,
-    							   const ID&   i) > 					function_Type;
+    typedef boost::function < Real (const Real& t,
+                                    const Real& x,
+                                    const Real& y,
+                                    const Real& z,
+                                    const ID&   i) >                     function_Type;
 
     //! 3x3 matrix
-    typedef MatrixSmall<3, 3> 											matrixSmall_Type;
+    typedef MatrixSmall<3, 3>                                           matrixSmall_Type;
 
     //@}
 
@@ -201,7 +201,7 @@ public:
     /*!
      */
     ElectroETAMonodomainSolver();
-    
+
     //! Constructor
     /*!
      * @param GetPot datafile (for preconditioner)
@@ -555,7 +555,7 @@ public:
     {
         this->M_ETFESpacePtr = ETFESpacePtr;
     }
-    
+
     //! set the scalar ETA fe space
     /*!
      @param  ETFESpace  scalar ETA fe space
@@ -573,7 +573,7 @@ public:
     {
         this->M_feSpacePtr = feSpacePtr;
     }
-    
+
     //! set the fe space
     /*!
      @param feSpace the  fe space
@@ -592,7 +592,7 @@ public:
     {
         this->M_massMatrixPtr = massMatrixPtr;
     }
-    
+
     //! set the mass matrix
     /*!
      @param massMatrix  the mass matrix
@@ -628,7 +628,7 @@ public:
     {
         this->M_stiffnessMatrixPtr = stiffnessMatrixPtr;
     }
-    
+
     //! set the stiffness matrix
     /*!
      @param stiffnessMatrix  the stiffness matrix
@@ -647,7 +647,7 @@ public:
     {
         this->M_globalMatrixPtr = globalMatrixPtr;
     }
-    
+
     //! set the global matrix
     /*!
      @param globalMatrix the global matrix
@@ -666,7 +666,7 @@ public:
     {
         this->M_rhsPtr = rhsPtr;
     }
-    
+
     //! set the right hand side
     /*!
      @param rhs  the right hand side
@@ -686,7 +686,7 @@ public:
         this->M_rhsPtrUnique = rhsPtrUnique;
         this->M_globalRhs.at (0) = M_rhsPtrUnique;
     }
-    
+
     //! set the unique version of the right hand side
     /*!
      @param rhsPtrUnique  the  unique version of the right hand side
@@ -723,7 +723,7 @@ public:
     {
         M_ionicModelPtr->setAppliedCurrentPtr (appliedCurrentPtr);
     }
-    
+
     //! set the applied current vector
     /*!
      @param appliedCurrent   the applied current vector
@@ -741,7 +741,7 @@ public:
     {
         this->M_linearSolverPtr = linearSolverPtr;
     }
-    
+
     //! set the linear solver
     /*!
      @param linearSolver the linear solver
@@ -759,7 +759,7 @@ public:
     {
         this->M_globalSolution = globalSolution;
     }
-    
+
     //! set the vectors of unknowns:  containing the transmembrane potential (at 0) and the gating variables
     /*!
      @param p vector of pointers containing the transmembrane potential (at 0) and the gating variables
@@ -789,7 +789,7 @@ public:
      */
     inline void setVariablePtr (const vector_Type& gatingVariable, int j)
     {
-        *(M_globalSolution.at (j)) = gatingVariable;
+        * (M_globalSolution.at (j) ) = gatingVariable;
     }
 
     //! set the vector of pointers containing the rhs for the transmembrane potential (at 0) and the gating variables
@@ -1132,7 +1132,7 @@ public:
      @param fibersFile name of the file with the fibers
      @param directory folder in which we have the file for the fibers
      @param format format in which fibers are saved
-	*
+    *
     * format 0 = fibers saved as (fx, fy, fz) in each row
     *
     * format 1 = fibers saved as fx in each row for all the mesh
@@ -1143,7 +1143,7 @@ public:
                              int format = 0)
     {
         ElectrophysiologyUtility::importFibersFromTextFile (M_fiberPtr, fibersFile,
-                                                directory, format);
+                                                            directory, format);
     }
 
     //! Solves the gating variables with forward Euler
@@ -1203,7 +1203,7 @@ public:
      * A\mathbf{V}^{n+1} = \left( \frac{M}{\Delta t} + K(\mathbf{f}) \right)\mathbf{V}^{n+1} =\frac{M}{\Delta t} \mathbf{V}^n+M\mathbf{I},
      * \f]
      * where $\mathbf{I}$ is the vector of the ionic currents $I_j = I_{ion}(V_j^n)$
-	@param exporter where we want to save the solution
+    @param exporter where we want to save the solution
     @param t time at wich we save the solution
      */
     void solveOneICIStep (IOFile_Type& exporter, Real t);
@@ -1217,9 +1217,9 @@ public:
      * This method is useful to solve ICI without lumping the mass matrix
      * in front of the reaction term.
      * Lump the mass matrix, and pass as argument a full mass matrix
-	@param exporter where we want to save the solution
+    @param exporter where we want to save the solution
     @param t time at wich we save the solution
-	 */
+     */
     void solveOneICIStepWithFullMass (IOFile_Type& exporter, Real t);
 
     //!Solve one full step with ionic current interpolation  and export the solution
@@ -1227,26 +1227,26 @@ public:
      * \f[
      * A\mathbf{V}^{n+1} = \left( \frac{M}{\Delta t} + K(\mathbf{f}) \right)\mathbf{V}^{n+1} =\frac{M}{\Delta t} \mathbf{V}^n+\mathbf{I}_{ion}(\mathbf{V}^n).
      * \f]
-   	@param exporter where we want to save the solution
+    @param exporter where we want to save the solution
     @param t time at wich we save the solution
      */
     void solveOneSVIStep (IOFile_Type& exporter, Real t);
 
     //! solve system using ICI from M_initialTime to the M_endTime with time step M_timeStep and export the solution
     /*!
-   	@param exporter where we want to save the solution
+    @param exporter where we want to save the solution
      */
     void solveICI (IOFile_Type& exporter);
 
     //! solve system using SVI from M_initialTime to the M_endTime with time step M_timeStep and export the solution
     /*!
-   	@param exporter where we want to save the solution
+    @param exporter where we want to save the solution
      */
     void solveSVI (IOFile_Type& exporter);
 
     //!Solve the system using ICI from M_initialTime to the M_endTime with time step M_timeStep and export the solution every dt
     /*!
-   	@param exporter where we want to save the solution
+    @param exporter where we want to save the solution
     @param t time at wich we save the solution
      */
     void solveICI (IOFile_Type& exporter, Real dt);
@@ -1256,33 +1256,33 @@ public:
      * This method is useful to solve ICI without lumping the mass matrix
      * in front of the reaction term.
      * Lump the mass matrix, and pass as argument a full mass matrix
-	@param exporter where we want to save the solution
+    @param exporter where we want to save the solution
     @param t time at wich we save the solution
-	 */
+     */
     void solveICIWithFullMass (IOFile_Type& exporter, Real dt);
 
     //!Solve the using SVI from M_initialTime to the M_endTime with time step M_timeStep and export the solution every dt
     /*!
-   	@param exporter where we want to save the solution
+    @param exporter where we want to save the solution
     @param t time at wich we save the solution
      */
     void solveSVI (IOFile_Type& exporter, Real dt);
 
     //! Generates a file where the fiber direction is saved
     /*!
-   	@param postDir directory in which we save the fibers
+    @param postDir directory in which we save the fibers
      */
     void exportFiberDirection (std::string postDir = "./");
 
     //! save the fiber direction into the given exporter
     /*!
-   	@param exporter where we want to save the solution
+    @param exporter where we want to save the solution
      */
     void exportFiberDirection (IOFile_Type& exporter);
 
     //! Save the solution in the exporter
     /*!
-   	@param exporter where we want to save the solution
+    @param exporter where we want to save the solution
     @param t time at wich we save the solution
      */
     void inline exportSolution (IOFile_Type& exporter, Real t)
@@ -1292,7 +1292,7 @@ public:
 
     //! Importer: lead a solution from an hdf5 file
     /*!
-   	@param prefix name of the hdf5 file to import
+    @param prefix name of the hdf5 file to import
     @param postDir folder where the file to import is
     @param time  time at wich we want to import the solution
      */
@@ -1308,7 +1308,7 @@ public:
     /*!
      * The activationTimeVector is required to be initialized with negative values
      *
-   	@param activationTimeVector vector where we register the activation time
+    @param activationTimeVector vector where we register the activation time
     @param time  time at which we are
     @param threshold value for which we consider activation
      */
@@ -1317,7 +1317,7 @@ public:
     //! set the verbosity
     /*!
      *
-   	@param verbose show additional output
+    @param verbose show additional output
      */
     void setVerbosity (bool verbose);
 
@@ -1333,24 +1333,24 @@ private:
 
     //! initialization in constructor
     /*!
-   	@param comm epetra communicator
+    @param comm epetra communicator
      */
     void init (commPtr_Type comm);
 
- 	//! initialization in constructor
+    //! initialization in constructor
     /*!
-   	@param meshPtr pointer to the mesh
+    @param meshPtr pointer to the mesh
      */
     void init (meshPtr_Type meshPtr);
- 
+
     //! initialization in constructor
-	/*!
-	@param model pointer to the ionic model
-	 */
-	void init (ionicModelPtr_Type model);
+    /*!
+    @param model pointer to the ionic model
+     */
+    void init (ionicModelPtr_Type model);
 
 protected:
-	//surface to volume ration
+    //surface to volume ration
     Real M_surfaceVolumeRatio;
     //ionic model
     ionicModelPtr_Type M_ionicModelPtr;
@@ -1462,12 +1462,12 @@ template<typename Mesh, typename IonicModel>
 ElectroETAMonodomainSolver<Mesh, IonicModel>::ElectroETAMonodomainSolver (
     const ElectroETAMonodomainSolver& solver) :
     M_surfaceVolumeRatio (solver.M_surfaceVolumeRatio),
-    M_ionicModelPtr (new IonicModel(*solver.M_ionicModelPtr)),
+    M_ionicModelPtr (new IonicModel (*solver.M_ionicModelPtr) ),
     M_commPtr (solver.M_commPtr),
     M_localMeshPtr ( solver.M_localMeshPtr),
     M_fullMeshPtr (solver.M_fullMeshPtr),
-    M_ETFESpacePtr ( new ETFESpace_Type(*solver.M_ETFESpacePtr)),
-    M_feSpacePtr ( new feSpace_Type(*solver.M_feSpacePtr)),
+    M_ETFESpacePtr ( new ETFESpace_Type (*solver.M_ETFESpacePtr) ),
+    M_feSpacePtr ( new feSpace_Type (*solver.M_feSpacePtr) ),
     M_massMatrixPtr ( new matrix_Type (* (solver.M_massMatrixPtr) ) ),
     M_stiffnessMatrixPtr ( new matrix_Type (* (solver.M_stiffnessMatrixPtr) ) ),
     M_globalMatrixPtr ( new matrix_Type (* (solver.M_globalMatrixPtr) ) ),
@@ -1483,7 +1483,7 @@ ElectroETAMonodomainSolver<Mesh, IonicModel>::ElectroETAMonodomainSolver (
     M_fiberPtr ( new vector_Type (* (solver.M_fiberPtr) ) ) ,
     M_lumpedMassMatrix (solver.M_lumpedMassMatrix),
     M_verbose (solver.M_verbose),
-    M_identity(solver.M_identity)
+    M_identity (solver.M_identity)
 {
     setupGlobalSolution (M_ionicModelPtr->Size() );
     setGlobalSolution (solver.M_globalSolution);
@@ -1525,7 +1525,7 @@ ElectroETAMonodomainSolver<Mesh, IonicModel>& ElectroETAMonodomainSolver < Mesh,
     M_elementsOrder = solver.M_elementsOrder;
     setFiber (* (solver.M_fiberPtr) );
     M_verbose = solver.M_verbose;
-    M_identity=solver.M_identity;
+    M_identity = solver.M_identity;
 
     return *this;
 }
@@ -1671,25 +1671,25 @@ void ElectroETAMonodomainSolver<Mesh, IonicModel>::setupMassMatrix()
 {
     if (M_lumpedMassMatrix)
     {
-		setupLumpedMassMatrix();
+        setupLumpedMassMatrix();
     }
     else
     {
-		*M_massMatrixPtr *= 0.0;
-		if (M_verbose && M_localMeshPtr->comm()->MyPID() == 0)
-		{
-			std::cout << "\nETA Monodomain Solver: Setting up mass matrix";
-		}
+        *M_massMatrixPtr *= 0.0;
+        if (M_verbose && M_localMeshPtr->comm()->MyPID() == 0)
+        {
+            std::cout << "\nETA Monodomain Solver: Setting up mass matrix";
+        }
 
-		{
-			using namespace ExpressionAssembly;
+        {
+            using namespace ExpressionAssembly;
 
-			integrate (elements (M_localMeshPtr), M_feSpacePtr->qr(),
-					   M_ETFESpacePtr, M_ETFESpacePtr, phi_i * phi_j)
-					>> M_massMatrixPtr;
+            integrate (elements (M_localMeshPtr), M_feSpacePtr->qr(),
+                       M_ETFESpacePtr, M_ETFESpacePtr, phi_i * phi_j)
+                    >> M_massMatrixPtr;
 
-		}
-		M_massMatrixPtr->globalAssemble();
+        }
+        M_massMatrixPtr->globalAssemble();
     }
 }
 
@@ -1698,27 +1698,27 @@ void ElectroETAMonodomainSolver<Mesh, IonicModel>::setupLumpedMassMatrix()
 {
 
     M_lumpedMassMatrix = true;
-	*M_massMatrixPtr *= 0.0;
-	if (M_verbose && M_localMeshPtr->comm()->MyPID() == 0)
-	{
-		std::cout << "\nETA Monodomain Solver: Setting up lumped mass matrix";
-	}
-	{
-		using namespace ExpressionAssembly;
+    *M_massMatrixPtr *= 0.0;
+    if (M_verbose && M_localMeshPtr->comm()->MyPID() == 0)
+    {
+        std::cout << "\nETA Monodomain Solver: Setting up lumped mass matrix";
+    }
+    {
+        using namespace ExpressionAssembly;
 
-		integrate (elements (M_localMeshPtr), quadRuleTetra4ptNodal,
-				   M_ETFESpacePtr, M_ETFESpacePtr, phi_i * phi_j)
-				>> M_massMatrixPtr;
+        integrate (elements (M_localMeshPtr), quadRuleTetra4ptNodal,
+                   M_ETFESpacePtr, M_ETFESpacePtr, phi_i * phi_j)
+                >> M_massMatrixPtr;
 
-	}
-	M_massMatrixPtr->globalAssemble();
+    }
+    M_massMatrixPtr->globalAssemble();
 }
 
 
 template<typename Mesh, typename IonicModel>
 void ElectroETAMonodomainSolver<Mesh, IonicModel>::setupStiffnessMatrix()
 {
-	setupStiffnessMatrix (M_diffusionTensor);
+    setupStiffnessMatrix (M_diffusionTensor);
 }
 
 template<typename Mesh, typename IonicModel>
@@ -2024,8 +2024,8 @@ void ElectroETAMonodomainSolver<Mesh, IonicModel>::solveOneStepGatingVariablesRL
     int offset = M_ionicModelPtr->numberOfGatingVariables() + 1;
     for (int i = offset; i < M_ionicModelPtr->Size(); i++)
     {
-    	*(M_globalRhs[i]) *= M_timeStep;
-    	* (M_globalSolution[i]) += *(M_globalRhs[i]);
+        * (M_globalRhs[i]) *= M_timeStep;
+        * (M_globalSolution[i]) += * (M_globalRhs[i]);
     }
 }
 
@@ -2040,27 +2040,27 @@ void ElectroETAMonodomainSolver<Mesh, IonicModel>::computeRhsICI()
 template<typename Mesh, typename IonicModel>
 void ElectroETAMonodomainSolver<Mesh, IonicModel>::computeRhsICIWithFullMass ()
 {
-	if(M_fullMassMatrixPtr)
-	{
-    M_ionicModelPtr->superIonicModel::computePotentialRhsICI (M_globalSolution,
-                                                              M_globalRhs, *M_fullMassMatrixPtr);
-	}
-	else
-	{
-		assert(0 && "fullMassMatrix Pointer was not set! Use the computeRhsICI() method!");
-	}
+    if (M_fullMassMatrixPtr)
+    {
+        M_ionicModelPtr->superIonicModel::computePotentialRhsICI (M_globalSolution,
+                                                                  M_globalRhs, *M_fullMassMatrixPtr);
+    }
+    else
+    {
+        assert (0 && "fullMassMatrix Pointer was not set! Use the computeRhsICI() method!");
+    }
     updateRhs();
 }
 
 template<typename Mesh, typename IonicModel>
 void ElectroETAMonodomainSolver<Mesh, IonicModel>::computeRhsSVI()
 {
-	if (M_verbose && M_commPtr -> MyPID() == 0)
-	{
-		std::cout << "\nETA Monodomain Solver: updating rhs with SVI";
-	}
-	M_ionicModelPtr->superIonicModel::computePotentialRhsSVI (M_globalSolution,
-															  M_globalRhs, (*M_feSpacePtr) );
+    if (M_verbose && M_commPtr -> MyPID() == 0)
+    {
+        std::cout << "\nETA Monodomain Solver: updating rhs with SVI";
+    }
+    M_ionicModelPtr->superIonicModel::computePotentialRhsSVI (M_globalSolution,
+                                                              M_globalRhs, (*M_feSpacePtr) );
     updateRhs();
 }
 
@@ -2209,7 +2209,7 @@ void ElectroETAMonodomainSolver<Mesh, IonicModel>::solveICIWithFullMass (
         && "Cannot save the solution for step smaller than the timestep!");
     if (!M_fullMassMatrixPtr)
     {
-    	solveICI(exporter, dt);
+        solveICI (exporter, dt);
     }
     else
     {

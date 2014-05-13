@@ -28,10 +28,10 @@
   @file IonicNoblePurkinje
   @brief Ionic model of Noble for Purkinje cells
 
-	Model as in
-	Keener, James, and James Sneyd.
-	Mathematical Physiology: I: Cellular Physiology. Vol. 1.
-	Springer, 2010.
+    Model as in
+    Keener, James, and James Sneyd.
+    Mathematical Physiology: I: Cellular Physiology. Vol. 1.
+    Springer, 2010.
 
   @date 01-2013
   @author Simone Rossi <simone.rossi@epfl.ch>

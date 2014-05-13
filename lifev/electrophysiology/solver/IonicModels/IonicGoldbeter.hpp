@@ -30,10 +30,10 @@
   refer to the cytosolic calcium concentration, whereas the gating variable
    represents the sarcoplasmic calcium concentration
 
-	Model as in
-	Goldbeter, Albert, GENEVItVE Dupont, and Michael J. Berridge.
-	"Minimal model for signal-induced Ca2+ oscillations and for their frequency encoding through protein phosphorylation."
-	Proceedings of the National Academy of Sciences 87.4 (1990): 1461-1465.
+    Model as in
+    Goldbeter, Albert, GENEVItVE Dupont, and Michael J. Berridge.
+    "Minimal model for signal-induced Ca2+ oscillations and for their frequency encoding through protein phosphorylation."
+    Proceedings of the National Academy of Sciences 87.4 (1990): 1461-1465.
 
   @date 09-2013
 

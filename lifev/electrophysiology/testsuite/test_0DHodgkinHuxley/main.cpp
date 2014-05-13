@@ -78,7 +78,7 @@ Int main ( Int argc, char** argv )
     // model from Hodgkin Huxley model.           //
     //********************************************//
     std::cout << "Building Constructor for Hodgkin Huxley Model with parameters ... ";
-    IonicHodgkinHuxley  ionicModel(parameterList);
+    IonicHodgkinHuxley  ionicModel (parameterList);
     std::cout << " Done!" << std::endl;
 
     //********************************************//
@@ -89,11 +89,11 @@ Int main ( Int argc, char** argv )
 
     //********************************************//
     // Initialize the solution with the default   //
-    // values									  //
+    // values                                     //
     //********************************************//
     std::cout << "Initializing solution vector...";
     std::vector<Real> states (ionicModel.Size(), 0);
-    ionicModel.initialize(states);
+    ionicModel.initialize (states);
     std::cout << " Done!" << std::endl;
 
     //********************************************//
@@ -145,7 +145,7 @@ Int main ( Int argc, char** argv )
     {
         //********************************************//
         // Compute the applied current. This is a     //
-    	// simple switch.                             //
+        // simple switch.                             //
         //********************************************//
         if ( t > 20.5 && t < 21 )
         {
@@ -165,12 +165,12 @@ Int main ( Int argc, char** argv )
         {
             ionicModel.computeGatingVariablesWithRushLarsen (states, dt);
             Real RHS = ionicModel.computeLocalPotentialRhs ( states);
-            ionicModel.addAppliedCurrent(RHS);
+            ionicModel.addAppliedCurrent (RHS);
             //********************************************//
             // Use forward Euler method to advance the    //
             // solution in time.                          //
             //********************************************//
-			states[0] = states[0]  + dt * (RHS);
+            states[0] = states[0]  + dt * (RHS);
         }
         else
         {
@@ -222,11 +222,11 @@ Int main ( Int argc, char** argv )
     //********************************************//
     Real returnValue;
 
-    Real err = std::abs (SolutionTestNorm - SolutionNorm) / std::abs(SolutionTestNorm);
-    std::cout << std::setprecision(20) << "\nError: " << err << "\nSolution norm: " << SolutionNorm << "\n";
+    Real err = std::abs (SolutionTestNorm - SolutionNorm) / std::abs (SolutionTestNorm);
+    std::cout << std::setprecision (20) << "\nError: " << err << "\nSolution norm: " << SolutionNorm << "\n";
     if ( err > 1e-12 )
     {
-    	std::cout << "\nTest Failed!\n";
+        std::cout << "\nTest Failed!\n";
         returnValue = EXIT_FAILURE; // Norm of solution did not match
     }
     else

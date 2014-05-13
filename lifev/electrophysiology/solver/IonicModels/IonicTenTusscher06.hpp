@@ -47,7 +47,7 @@
     Therefore I consider all the variables except for the
     potential as gating variable and use the specific
     method in their original code to make it work.
-	Therefore the number of gating variable is augmented.
+    Therefore the number of gating variable is augmented.
 
   @contributors
   @mantainer Simone Rossi <simone.rossi@epfl.ch>
@@ -1187,10 +1187,10 @@ public:
     //! Display information about the model
     void showMe();
 
-    void showCurrents(std::vector<Real>& v);
+    void showCurrents (std::vector<Real>& v);
     void showCurrents (Real V, Real m, Real h, Real j, Real d, Real f, Real f2, Real fcass,
-                      Real r, Real s, Real xr1, Real xr2, Real xs, Real Nai, Real Ki,
-                      Real Cai, Real CaSS);
+                       Real r, Real s, Real xr1, Real xr2, Real xs, Real Nai, Real Ki,
+                       Real Cai, Real CaSS);
 
     void solveOneStep (std::vector<Real>& v, Real dt);
     //! Solves the ionic model
@@ -1203,7 +1203,10 @@ public:
         Endo, Epi, MCell
     };
 
-    inline WallFlag getFlag(){ return flag; }
+    inline WallFlag getFlag()
+    {
+        return flag;
+    }
 
 
 private:

@@ -127,7 +127,7 @@ IonicGoldbeter& IonicGoldbeter::operator= ( const IonicGoldbeter& model )
 // ===================================================
 //Only sarcoplasmic calcium
 void IonicGoldbeter::computeGatingRhs (    const   std::vector<Real>&  v,
-                                                          std::vector<Real>& rhs )
+                                           std::vector<Real>& rhs )
 {
 
     Real dr = M_nu2 * std::pow ( v[0], 2.0) / (M_k2 + std::pow (v[0], 2.0) ) - M_nu3 * std::pow (v[0], 4.0) * std::pow (v[1], 2.0) /
@@ -139,7 +139,7 @@ void IonicGoldbeter::computeGatingRhs (    const   std::vector<Real>&  v,
 
 //Both cytosolic (V) and sarcoplasmic calcium (r)
 void IonicGoldbeter::computeRhs (    const   std::vector<Real>&  v,
-                                                    std::vector<Real>& rhs )
+                                     std::vector<Real>& rhs )
 {
 
     Real dr = M_nu2 * std::pow (v[0], 2.0) / (M_k2 + std::pow (v[0], 2.0) ) - M_nu3 * std::pow (v[0], 4.0) * std::pow (v[1], 2.0) /

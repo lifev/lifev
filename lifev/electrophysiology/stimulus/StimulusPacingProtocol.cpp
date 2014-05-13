@@ -48,7 +48,7 @@ StimulusPacingProtocol::StimulusPacingProtocol() :
     M_pacingSite_Y ( 0 ),
     M_pacingSite_Z ( 0 ),
     M_numberStimulus ( 0 ),
-    M_nbStimMax(-1)
+    M_nbStimMax (-1)
 {
 }
 
@@ -99,7 +99,7 @@ Real StimulusPacingProtocol::fixedCycleLength ( const Real& t )
             current = M_stimulusAmplitude;
             if ( t + M_dt >=  M_startingTimeStimulus + M_stimulusDuration )
             {
-            	std::cout << "\nUpdating the stimulus interval";
+                std::cout << "\nUpdating the stimulus interval";
                 M_numberStimulus++;
                 M_startingTimeStimulus = M_startingTimeStimulus + M_stimulusInterval;
             }
@@ -319,7 +319,7 @@ Real StimulusPacingProtocol::appliedCurrent ( const Real& t, const Real& x, cons
     Real distance = std::sqrt ( (x - M_pacingSite_X) * (x - M_pacingSite_X) + (y - M_pacingSite_Y) * (y - M_pacingSite_Y) + (z - M_pacingSite_Z) * (z - M_pacingSite_Z) );
     if (distance <= M_radius )
     {
-       current += pacingProtocolChoice( t ) / volumeOfBall;
+        current += pacingProtocolChoice ( t ) / volumeOfBall;
     }
     return current;
 

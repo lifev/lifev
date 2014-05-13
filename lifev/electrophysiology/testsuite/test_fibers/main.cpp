@@ -120,19 +120,19 @@ using namespace LifeV;
 // We typedef some common type we will frequently
 // ---------------------------------------------------------------
 
-typedef RegionMesh<LinearTetra>                        		mesh_Type;
-typedef boost::shared_ptr< mesh_Type >                 		meshPtr_Type;
+typedef RegionMesh<LinearTetra>                             mesh_Type;
+typedef boost::shared_ptr< mesh_Type >                      meshPtr_Type;
 
-typedef MatrixEpetra<Real>                             		matrix_Type;
-typedef boost::shared_ptr< matrix_Type >               		matrixPtr_Type;
+typedef MatrixEpetra<Real>                                  matrix_Type;
+typedef boost::shared_ptr< matrix_Type >                    matrixPtr_Type;
 
-typedef VectorEpetra                                   		vector_Type;
-typedef boost::shared_ptr< vector_Type >               		vectorPtr_Type;
+typedef VectorEpetra                                        vector_Type;
+typedef boost::shared_ptr< vector_Type >                    vectorPtr_Type;
 
 
 
-typedef FESpace< mesh_Type, MapEpetra >					    fespace_Type;
-typedef boost::shared_ptr<fespace_Type >				    fespacePtr_Type;
+typedef FESpace< mesh_Type, MapEpetra >                     fespace_Type;
+typedef boost::shared_ptr<fespace_Type >                    fespacePtr_Type;
 
 
 // ---------------------------------------------------------------
@@ -147,14 +147,14 @@ typedef boost::shared_ptr<fespace_Type >				    fespacePtr_Type;
 // files. To avoid code repetition, I created this function
 // that exports the requested vecotr fields.
 // ---------------------------------------------------------------
-void createListFromGetPot(Teuchos::ParameterList& solverList, const GetPot& dataFile);
-void exportVectorField(boost::shared_ptr<Epetra_Comm> comm,
-		               meshPtr_Type mesh,
-		               fespacePtr_Type fespace,
-		               vectorPtr_Type vector,
-		               std::string postDir,
-		               std::string outputName,
-		               std::string hdf5name);
+void createListFromGetPot (Teuchos::ParameterList& solverList, const GetPot& dataFile);
+void exportVectorField (boost::shared_ptr<Epetra_Comm> comm,
+                        meshPtr_Type mesh,
+                        fespacePtr_Type fespace,
+                        vectorPtr_Type vector,
+                        std::string postDir,
+                        std::string outputName,
+                        std::string hdf5name);
 
 
 // ------------------------------------------------------------------------------
@@ -171,9 +171,9 @@ Real fzero (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real&
 int main ( int argc, char** argv )
 {
 
-// ---------------------------------------------------------------
-//  In parallel? Yes, we dare!!!
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    //  In parallel? Yes, we dare!!!
+    // ---------------------------------------------------------------
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
@@ -182,14 +182,14 @@ int main ( int argc, char** argv )
     boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
-    typedef BCHandler                                      		bc_Type;
-    typedef boost::shared_ptr< bc_Type >                   		bcPtr_Type;
+    typedef BCHandler                                           bc_Type;
+    typedef boost::shared_ptr< bc_Type >                        bcPtr_Type;
 
-    typedef EmptyPhysicalSolver<VectorEpetra>  				physicalSolver_Type;
-    typedef BCInterface3D< bc_Type, physicalSolver_Type >   	bcInterface_Type;
+    typedef EmptyPhysicalSolver<VectorEpetra>               physicalSolver_Type;
+    typedef BCInterface3D< bc_Type, physicalSolver_Type >       bcInterface_Type;
 
-     typedef boost::shared_ptr< bcInterface_Type >          		bcInterfacePtr_Type;
-     typedef MeshUtility::MeshTransformer<mesh_Type>        		meshTransformer_Type;
+    typedef boost::shared_ptr< bcInterface_Type >                  bcInterfacePtr_Type;
+    typedef MeshUtility::MeshTransformer<mesh_Type>                meshTransformer_Type;
 
     //*************************************************************//
     // We create, as usual, the output folder where
@@ -232,8 +232,8 @@ int main ( int argc, char** argv )
     // mesh we are going to create the fibers on.
     //*************************************************************//
 
-    std::string meshName = dataFile( "problem/space_discretization/mesh_file", "" );
-    std::string meshPath = dataFile( "problem/space_discretization/mesh_dir", "./" );
+    std::string meshName = dataFile ( "problem/space_discretization/mesh_file", "" );
+    std::string meshPath = dataFile ( "problem/space_discretization/mesh_dir", "./" );
 
     //*************************************************************//
     // Here we create a pointer to the mesh and then we load it.
@@ -260,7 +260,7 @@ int main ( int argc, char** argv )
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > uSpace
     ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPart, &feTetraP1, Comm) );
 
-    fespacePtr_Type uFESpace( new FESpace< mesh_Type, MapEpetra > (meshPart, "P1", 1, Comm) );
+    fespacePtr_Type uFESpace ( new FESpace< mesh_Type, MapEpetra > (meshPart, "P1", 1, Comm) );
 
     fespacePtr_Type vectorFESpace ( new FESpace< mesh_Type, MapEpetra > (meshPart, "P1", 3, Comm) );
 
@@ -281,8 +281,8 @@ int main ( int argc, char** argv )
                      uSpace,
                      uSpace,
                      dot ( grad (phi_i) , grad (phi_j) )
-        )
-        >> systemMatrix;
+                  )
+                >> systemMatrix;
     }
 
     systemMatrix->globalAssemble();
@@ -309,7 +309,7 @@ int main ( int argc, char** argv )
     bcInterfacePtr_Type                     BC ( new bcInterface_Type() );
     BC->createHandler();
     BC->fillHandler ( data_file_name, "problem" );
-    BC->handler()->bcUpdate( *uFESpace->mesh(), uFESpace->feBd(), uFESpace->dof() );
+    BC->handler()->bcUpdate ( *uFESpace->mesh(), uFESpace->feBd(), uFESpace->dof() );
 
     //**********************************************************//
     //  We are going to solve the laplace equation with an
@@ -339,18 +339,18 @@ int main ( int argc, char** argv )
     // You can see the actual implementation at the end of the
     // test.
     //**********************************************************//
-	Teuchos::ParameterList solverList;
-	createListFromGetPot(solverList, dataFile);
+    Teuchos::ParameterList solverList;
+    createListFromGetPot (solverList, dataFile);
 
-	LinearSolver linearSolver;
-	linearSolver.setCommunicator (Comm);
+    LinearSolver linearSolver;
+    linearSolver.setCommunicator (Comm);
     linearSolver.setParameters ( solverList );
-	linearSolver.setPreconditioner ( precPtr );
+    linearSolver.setPreconditioner ( precPtr );
 
     //*************************************************************//
-	// We are going to solve the laplace equation. The right hand
-	// is zero!
-	//*************************************************************//
+    // We are going to solve the laplace equation. The right hand
+    // is zero!
+    //*************************************************************//
     vectorPtr_Type rhs (new vector_Type ( uSpace -> map() ) );
     *rhs *= 0.0;
     rhs -> globalAssemble();
@@ -459,9 +459,9 @@ int main ( int argc, char** argv )
     // so that if you want to change the mesh/geoemtry you don't have
     // to recompile
     //*************************************************************//
-    Real cx = dataFile("problem/centerline_x", 0.0);
-    Real cy = dataFile("problem/centerline_y", 0.0);
-    Real cz = dataFile("problem/centerline_z", 1.0);
+    Real cx = dataFile ("problem/centerline_x", 0.0);
+    Real cy = dataFile ("problem/centerline_y", 0.0);
+    Real cz = dataFile ("problem/centerline_z", 1.0);
 
 
     //*************************************************************//
@@ -529,8 +529,8 @@ int main ( int argc, char** argv )
     // We first read from the data file the angle of rotation we
     // want to impose on the endocardium and on the epicardium.
     //*************************************************************//
-    Real epi_angle = dataFile("problem/epi_angle", -60.0);
-    Real endo_angle = dataFile("problem/endo_angle", 60.0);
+    Real epi_angle = dataFile ("problem/epi_angle", -60.0);
+    Real endo_angle = dataFile ("problem/endo_angle", 60.0);
 
     for ( int l (0); l < d; l++)
     {
@@ -624,15 +624,15 @@ int main ( int argc, char** argv )
     // to know if we want to import the computed fields in other
     // simulations
     //*************************************************************//
-    std::string outputFiberFileName = dataFile("problem/output_fiber_filename", "FiberDirection");
-    std::string fiberHDF5Name = dataFile("problem/hdf5_fiber_name", "fibers");
+    std::string outputFiberFileName = dataFile ("problem/output_fiber_filename", "FiberDirection");
+    std::string fiberHDF5Name = dataFile ("problem/hdf5_fiber_name", "fibers");
 
     std::string outputSheetsFileName = dataFile ("problem/output_sheets_filename", "SheetsDirection");
-    std::string sheetsHDF5Name = dataFile("problem/hdf5_sheets_name", "sheets");
+    std::string sheetsHDF5Name = dataFile ("problem/hdf5_sheets_name", "sheets");
 
-    exportVectorField(Comm, meshPart, vectorFESpace, rbFiber, problemFolder, outputFiberFileName, fiberHDF5Name );
-    exportVectorField(Comm, meshPart, vectorFESpace, rbSheet, problemFolder, outputSheetsFileName, sheetsHDF5Name );
-    exportVectorField(Comm, meshPart, vectorFESpace, projection, problemFolder, "Projection", "projection" );
+    exportVectorField (Comm, meshPart, vectorFESpace, rbFiber, problemFolder, outputFiberFileName, fiberHDF5Name );
+    exportVectorField (Comm, meshPart, vectorFESpace, rbSheet, problemFolder, outputSheetsFileName, sheetsHDF5Name );
+    exportVectorField (Comm, meshPart, vectorFESpace, projection, problemFolder, "Projection", "projection" );
 
 
     //*************************************************************//
@@ -647,9 +647,9 @@ int main ( int argc, char** argv )
     MPI_Finalize();
 #endif
 
-    Real err = std::abs (normF - normS) / std::abs(normS);
-	std::cout << std::setprecision(20) << "\nError: " <<  err << "\nFiber Norm: " <<  normF << "\n";
-	std::cout << std::setprecision(20) << "Sheet Norm: " <<  normS << "\n";
+    Real err = std::abs (normF - normS) / std::abs (normS);
+    std::cout << std::setprecision (20) << "\nError: " <<  err << "\nFiber Norm: " <<  normF << "\n";
+    std::cout << std::setprecision (20) << "Sheet Norm: " <<  normS << "\n";
     if ( err > 1e-13 )
     {
         return EXIT_FAILURE; // Norm of solution did not match
@@ -664,48 +664,48 @@ int main ( int argc, char** argv )
 //
 //Read the parameters from a datafile and
 // put them in a Teuchos:ParameterList
-void createListFromGetPot(Teuchos::ParameterList& solverList, const GetPot& dataFile)
+void createListFromGetPot (Teuchos::ParameterList& solverList, const GetPot& dataFile)
 {
-	std::string solverName   = dataFile( "problem/solver/solver_name", "AztecOO");
-	std::string solver       = dataFile( "problem/solver/solver", "gmres");
-	std::string conv         = dataFile( "problem/solver/conv", "rhs");
-	std::string scaling      = dataFile( "problem/solver/scaling", "none");
-	std::string output       = dataFile( "problem/solver/output", "all");
-	Int maxIter              = dataFile( "problem/solver/max_iter", 200);
-	Int maxIterForReuse      = dataFile( "problem/solver/max_iter_reuse", 250);
-	Int kspace               = dataFile( "problem/solver/kspace", 100);
-	Int orthog               = dataFile( "problem/solver/orthog", 0);
-	Int auxvec               = dataFile( "problem/solver/aux_vec", 0);
-	double tol               = dataFile( "problem/solver/tol", 1e-10);
-	bool reusePreconditioner = dataFile( "problem/solver/reuse", true);
-	bool quitOnFailure       = dataFile( "problem/solver/quit", false);
-	bool silent              = dataFile( "problem/solver/silent", false);
+    std::string solverName   = dataFile ( "problem/solver/solver_name", "AztecOO");
+    std::string solver       = dataFile ( "problem/solver/solver", "gmres");
+    std::string conv         = dataFile ( "problem/solver/conv", "rhs");
+    std::string scaling      = dataFile ( "problem/solver/scaling", "none");
+    std::string output       = dataFile ( "problem/solver/output", "all");
+    Int maxIter              = dataFile ( "problem/solver/max_iter", 200);
+    Int maxIterForReuse      = dataFile ( "problem/solver/max_iter_reuse", 250);
+    Int kspace               = dataFile ( "problem/solver/kspace", 100);
+    Int orthog               = dataFile ( "problem/solver/orthog", 0);
+    Int auxvec               = dataFile ( "problem/solver/aux_vec", 0);
+    double tol               = dataFile ( "problem/solver/tol", 1e-10);
+    bool reusePreconditioner = dataFile ( "problem/solver/reuse", true);
+    bool quitOnFailure       = dataFile ( "problem/solver/quit", false);
+    bool silent              = dataFile ( "problem/solver/silent", false);
 
-	solverList.set("Solver Type", solverName);
-	solverList.set("Maximum Iterations", maxIter);
-	solverList.set("Max Iterations For Reuse", maxIterForReuse);
-	solverList.set("Reuse Preconditioner", reusePreconditioner);
-	solverList.set("Quit On Failure", quitOnFailure);
-	solverList.set("Silent", silent);
-	solverList.sublist("Solver: Operator List").sublist("Trilinos: AztecOO List").set("solver", solver);
-	solverList.sublist("Solver: Operator List").sublist("Trilinos: AztecOO List").set("conv", conv);
-	solverList.sublist("Solver: Operator List").sublist("Trilinos: AztecOO List").set("scaling", scaling);
-	solverList.sublist("Solver: Operator List").sublist("Trilinos: AztecOO List").set("output", output);
-	solverList.sublist("Solver: Operator List").sublist("Trilinos: AztecOO List").set("tol", tol);
-	solverList.sublist("Solver: Operator List").sublist("Trilinos: AztecOO List").set("max_iter", maxIter);
-	solverList.sublist("Solver: Operator List").sublist("Trilinos: AztecOO List").set("kspace", kspace);
-	solverList.sublist("Solver: Operator List").sublist("Trilinos: AztecOO List").set("orthog", orthog);
-	solverList.sublist("Solver: Operator List").sublist("Trilinos: AztecOO List").set("aux_vec", auxvec);;
+    solverList.set ("Solver Type", solverName);
+    solverList.set ("Maximum Iterations", maxIter);
+    solverList.set ("Max Iterations For Reuse", maxIterForReuse);
+    solverList.set ("Reuse Preconditioner", reusePreconditioner);
+    solverList.set ("Quit On Failure", quitOnFailure);
+    solverList.set ("Silent", silent);
+    solverList.sublist ("Solver: Operator List").sublist ("Trilinos: AztecOO List").set ("solver", solver);
+    solverList.sublist ("Solver: Operator List").sublist ("Trilinos: AztecOO List").set ("conv", conv);
+    solverList.sublist ("Solver: Operator List").sublist ("Trilinos: AztecOO List").set ("scaling", scaling);
+    solverList.sublist ("Solver: Operator List").sublist ("Trilinos: AztecOO List").set ("output", output);
+    solverList.sublist ("Solver: Operator List").sublist ("Trilinos: AztecOO List").set ("tol", tol);
+    solverList.sublist ("Solver: Operator List").sublist ("Trilinos: AztecOO List").set ("max_iter", maxIter);
+    solverList.sublist ("Solver: Operator List").sublist ("Trilinos: AztecOO List").set ("kspace", kspace);
+    solverList.sublist ("Solver: Operator List").sublist ("Trilinos: AztecOO List").set ("orthog", orthog);
+    solverList.sublist ("Solver: Operator List").sublist ("Trilinos: AztecOO List").set ("aux_vec", auxvec);;
 }
 
 //Export vector to file using HDF5 exporter
-void exportVectorField(boost::shared_ptr<Epetra_Comm> comm,
-		               meshPtr_Type mesh,
-		               fespacePtr_Type fespace,
-		               vectorPtr_Type vector,
-		               std::string postDir,
-		               std::string outputName,
-		               std::string hdf5name)
+void exportVectorField (boost::shared_ptr<Epetra_Comm> comm,
+                        meshPtr_Type mesh,
+                        fespacePtr_Type fespace,
+                        vectorPtr_Type vector,
+                        std::string postDir,
+                        std::string outputName,
+                        std::string hdf5name)
 {
     ExporterHDF5< mesh_Type > exporter;
     exporter.setMeshProcId ( mesh, comm -> MyPID() );

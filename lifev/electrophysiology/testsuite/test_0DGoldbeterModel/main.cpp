@@ -94,7 +94,7 @@ Int main ()
     std::vector<Real> rhs (model.Size(), 0);
     std::cout << " Done! "  << endl;
 
-   //********************************************//
+    //********************************************//
     // Simulation starts on t=0 and ends on t=TF. //
     // The timestep is given by dt                //
     //********************************************//
@@ -157,8 +157,8 @@ Int main ()
     output.close();
 
     Real returnValue;
-    Real err = std::abs (SolutionTestNorm - SolutionNorm) / std::abs(SolutionTestNorm);
-    std::cout << std::setprecision(20) << "\nError: " << err << "\nSolution norm: " << SolutionNorm << "\n";
+    Real err = std::abs (SolutionTestNorm - SolutionNorm) / std::abs (SolutionTestNorm);
+    std::cout << std::setprecision (20) << "\nError: " << err << "\nSolution norm: " << SolutionNorm << "\n";
     if ( err > 1e-12 )
     {
         returnValue = EXIT_FAILURE; // Norm of solution did not match
