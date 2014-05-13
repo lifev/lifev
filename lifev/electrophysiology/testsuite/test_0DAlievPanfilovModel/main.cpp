@@ -123,7 +123,7 @@ Int main ()
     // Open the file "output.txt" to save the     //
     // solution.                                  //
     //********************************************//
-    string filename = "output.txt";
+    std::string filename = "output.txt";
     std::ofstream output ("output.txt");
 
     //********************************************//
