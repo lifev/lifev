@@ -742,8 +742,8 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement ( void )
             //Save the eigenvalues in the global vector
             for ( UInt icoor (0); icoor < M_FESpace->fieldDim(); ++icoor )
             {
-                Int LIDid = M_displacement->blockMap().LID ( static_cast<EpetraInt_Type>(iDOF + icoor * dim + M_offset) );
-                Int GIDid = M_displacement->blockMap().GID ( static_cast<EpetraInt_Type>(LIDid) );
+                Int LIDid = M_displacement->blockMap().LID ( static_cast<EpetraInt_Type> (iDOF + icoor * dim + M_offset) );
+                Int GIDid = M_displacement->blockMap().GID ( static_cast<EpetraInt_Type> (LIDid) );
                 (*M_globalEigenvalues) (GIDid) = M_eigenvaluesR[icoor];
             }
 
@@ -897,7 +897,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryCauchyStresses ( void )
     for ( UInt iDOF (0); iDOF < ( UInt ) M_FESpace->dof().numTotalDof(); ++iDOF )
     {
 
-        if ( M_displacement->blockMap().LID ( static_cast<EpetraInt_Type>(iDOF) ) != -1 ) // The Global ID is on the calling processors
+        if ( M_displacement->blockMap().LID ( static_cast<EpetraInt_Type> (iDOF) ) != -1 ) // The Global ID is on the calling processors
         {
 
             (*M_sigma).Scale (0.0);
@@ -906,7 +906,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryCauchyStresses ( void )
             for ( UInt iComp = 0; iComp < M_FESpace->fieldDim(); ++iComp )
             {
                 Int LIDid = M_displacement->blockMap().LID ( static_cast<EpetraInt_Type> (iDOF + iComp * M_FESpace->dim() + M_offset) );
-                Int GIDid = M_displacement->blockMap().GID (static_cast<EpetraInt_Type>(LIDid) );
+                Int GIDid = M_displacement->blockMap().GID (static_cast<EpetraInt_Type> (LIDid) );
                 (*M_sigma) (iComp, 0) = (*M_sigmaX) (GIDid); // (d_xX,d_yX,d_zX)
                 (*M_sigma) (iComp, 1) = (*M_sigmaY) (GIDid); // (d_xY,d_yY,d_zY)
                 (*M_sigma) (iComp, 2) = (*M_sigmaZ) (GIDid); // (d_xZ,d_yZ,d_zZ)
@@ -930,7 +930,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryCauchyStresses ( void )
             for ( UInt icoor = 0; icoor < M_FESpace->fieldDim(); ++icoor )
             {
                 Int LIDid = M_displacement->blockMap().LID ( static_cast<EpetraInt_Type> (iDOF + icoor * M_FESpace->dim() + M_offset ) );
-                Int GIDid = M_displacement->blockMap().GID (static_cast<EpetraInt_Type>(LIDid));
+                Int GIDid = M_displacement->blockMap().GID (static_cast<EpetraInt_Type> (LIDid) );
                 (*M_globalEigenvalues) (GIDid) = M_eigenvaluesR[icoor];
             }
         }
