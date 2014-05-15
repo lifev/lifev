@@ -1,3 +1,9 @@
+LifeV 3.8.5:
+============
+
+* Fixed dependicies of Navier-Stokes example to ETA
+* ETA is now in production
+
 LifeV 3.8.4:
 ============
 
