@@ -859,7 +859,7 @@ public:
      @param dataFile needed to set up the preconditioner
      @param ionicSize number of equation in the ionic model
      */
-    void setup (std::string meshName, std::string meshPath, GetPot& dataFile,
+    virtual void setup (std::string meshName, std::string meshPath, GetPot& dataFile,
                 short int ionicSize);
 
     //! create mass matrix
