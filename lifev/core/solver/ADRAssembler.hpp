@@ -192,7 +192,7 @@ public:
     ADRAssembler();
 
     //! Destructor
-    virtual ~ADRAssembler() {};
+    virtual ~ADRAssembler() {}
 
     //@}
 
@@ -274,6 +274,15 @@ public:
       than in the upper left block.
      */
     void addDiffusion (matrix_ptrType matrix, const Real& coefficient, const UInt& offsetLeft, const UInt& offsetUp);
+
+    //! Add the stiff strain in the standard block
+    void addStiffStrain (matrix_ptrType& matrix, const Real& coefficient = 1.0)
+    {
+        addStiffStrain (matrix, coefficient, 0, 0);
+    };
+
+    //! Add the stiff strain using the given offsets
+    void addStiffStrain (matrix_ptrType& matrix, const Real& coefficient, const UInt& offsetLeft, const UInt& offsetUp);
 
     //! Assembly for the right hand side (mass) with f given in vectorial form.
     /*!
@@ -522,7 +531,7 @@ addMass (matrix_ptrType matrix, const Real& coefficient, const UInt& offsetLeft,
     for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
     {
         // Update the mass current FE
-        M_massCFE->update ( M_fespace->mesh()->element (iterElement), UPDATE_PHI | UPDATE_WDET );
+        M_massCFE->update ( M_fespace->mesh()->element (iterElement), UPDATE_WDET );
 
         // Clean the local matrix
         M_localMass->zero();
@@ -582,8 +591,7 @@ addAdvection (matrix_ptrType matrix, const vector_type& beta, const UInt& offset
     for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
     {
         // Update the advection current FEs
-        M_advCFE->update ( M_fespace->mesh()->element (iterElement), UPDATE_PHI | UPDATE_DPHI | UPDATE_WDET );
-        M_advBetaCFE->update (M_fespace->mesh()->element (iterElement), UPDATE_PHI );
+        M_advCFE->update ( M_fespace->mesh()->element (iterElement), UPDATE_DPHI | UPDATE_WDET );
 
         // Clean the local matrix
         M_localAdv->zero();
@@ -656,6 +664,54 @@ addDiffusion (matrix_ptrType matrix, const Real& coefficient, const UInt& offset
     M_diffusionAssemblyChrono.stop();
 }
 
+template< typename mesh_type, typename matrix_type, typename vector_type>
+void
+ADRAssembler<mesh_type, matrix_type, vector_type>::
+addStiffStrain (matrix_ptrType& matrix, const Real& coefficient, const UInt& offsetLeft, const UInt& offsetUp)
+{
+    ASSERT (M_fespace != 0, "No FE space for assembling the stiff strain.");
+    ASSERT (offsetLeft + M_fespace->dof().numTotalDof() * (M_fespace->fieldDim() ) <=
+            UInt (matrix->matrixPtr()->NumGlobalCols() ),
+            " The matrix is too small (columns) for the assembly of the stiff strain");
+    ASSERT (offsetUp + M_fespace->dof().numTotalDof() * (M_fespace->fieldDim() ) <=
+            UInt (matrix->matrixPtr()->NumGlobalRows() ),
+            " The matrix is too small (rows) for the assembly of the stiff strain");
+
+    // Some constants
+    const UInt nbElements (M_fespace->mesh()->numElements() );
+    const UInt fieldDim (M_fespace->fieldDim() );
+    const UInt nbTotalDof (M_fespace->dof().numTotalDof() );
+
+    // Loop over the elements
+    for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
+    {
+        // Update the diffusion current FE
+        M_diffCFE->update ( M_fespace->mesh()->element (iterElement), UPDATE_DPHI | UPDATE_WDET );
+
+        // Clean the local matrix
+        M_localDiff->zero();
+
+        // local stiffness
+        AssemblyElemental::stiffStrain (*M_localDiff, *M_diffCFE, 2.0 * coefficient, fieldDim);
+
+        // Assembly
+        for (UInt iFieldDim (0); iFieldDim < fieldDim; ++iFieldDim)
+        {
+            for (UInt jFieldDim (0); jFieldDim < fieldDim; ++jFieldDim)
+            {
+                assembleMatrix ( *matrix,
+                                 *M_localDiff,
+                                 *M_diffCFE,
+                                 *M_diffCFE,
+                                 M_fespace->dof(),
+                                 M_fespace->dof(),
+                                 iFieldDim, jFieldDim,
+                                 iFieldDim * nbTotalDof + offsetUp, jFieldDim * nbTotalDof + offsetLeft);
+            }
+        }
+    }
+}
+
 template<typename mesh_type, typename matrix_type, typename vector_type>
 void
 ADRAssembler< mesh_type, matrix_type, vector_type>::
@@ -688,7 +744,7 @@ addMassRhs (vector_type& rhs, const vector_type& f)
     for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
-        M_massRhsCFE->update ( M_fespace->mesh()->element (iterElement), UPDATE_PHI | UPDATE_WDET );
+        M_massRhsCFE->update ( M_fespace->mesh()->element (iterElement), UPDATE_WDET );
 
         // Clean the local matrix
         M_localMassRhs->zero();
@@ -768,7 +824,7 @@ addMassRhs (vector_type& rhs, const function_type& f, const Real& t)
     for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
-        M_massRhsCFE->update ( M_fespace->mesh()->element (iterElement), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET );
+        M_massRhsCFE->update ( M_fespace->mesh()->element (iterElement), UPDATE_QUAD_NODES | UPDATE_WDET );
 
         // Clean the local matrix
         M_localMassRhs->zero();

@@ -196,6 +196,9 @@ typedef uint32_type ID;
 //! bit-flag with up to 32 different flags
 typedef uint32_type flag_Type;
 
+//! Epetra int type (can be int or long long, accordingly to release notes)
+typedef int EpetraInt_Type; // 32-bit (long long for 64-bit indices)
+
 //! flag related free functions and functors
 namespace Flag
 {
@@ -213,6 +216,12 @@ inline bool testAllSet ( flag_Type const& inputFlag, flag_Type const& refFlag )
 inline bool testOneSet ( flag_Type const& inputFlag, flag_Type const& refFlag )
 {
     return inputFlag  & refFlag;
+}
+
+//! returns false if at least one flag set in refFlag is set in inputFlag
+inline bool testOneNotSet ( flag_Type const& inputFlag, flag_Type const& refFlag )
+{
+    return ! (inputFlag & refFlag);
 }
 
 //! turns on the refFlag active bits in inputFlag

@@ -79,7 +79,6 @@
 #include <lifev/core/fem/BCVector.hpp>
 #include <lifev/core/fem/BCFunction.hpp>
 
-
 namespace LifeV
 {
 
@@ -618,7 +617,8 @@ public:
      */
     bool isUDep() const;
 
-
+    //!< Copy content of M_idSet into M_idVector, clear M_idSet
+    void copyIdSetIntoIdVector();
     //@}
 private:
 
@@ -650,8 +650,6 @@ private:
 
     bool M_finalized; //!< True, when M_idVector is finalized
 
-    //!< Copy content of M_idSet into M_idVector, clear M_idSet
-    void copyIdSetIntoIdVector();
 };
 
 

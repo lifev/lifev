@@ -46,8 +46,6 @@ License along with this library; if not, see <http://www.gnu.org/licenses/>
 #include <limits>
 #include <stdexcept>
 
-using namespace std;
-
 // macros for defining actions on an out-of-bound reference
 #define MATRIX_SMALL_DIMENSION_CHECK_NO_CHECK 0
 #define MATRIX_SMALL_DIMENSION_CHECK_ASSERT 1
@@ -121,7 +119,7 @@ public:
     }
 
     //! Import from a vector
-    MatrixSmall (const vector< vector<Real> >& matrix)
+    MatrixSmall (const std::vector< std::vector<Real> >& matrix)
     {
         // check if dimensions are correct
         bool isDim2Appropriate = true;
@@ -615,16 +613,16 @@ public:
 
     //! @name Output stream operator overload
     //@{
-    friend ostream& operator<< ( ostream& out, MatrixSmall<Dim1, Dim2> const& matrix )
+    friend std::ostream& operator<< ( std::ostream& out, MatrixSmall<Dim1, Dim2> const& matrix )
     {
-        out << "(" << endl ;
+        out << "(" << std::endl ;
         for ( UInt i = 0; i < Dim1; i++ )
         {
             for ( UInt j = 0; j < Dim2; j++ )
             {
                 out << matrix.M_coords[i][j] << " ";
             }
-            out << endl;
+            out << std::endl;
         }
         out << ")";
         return (out);

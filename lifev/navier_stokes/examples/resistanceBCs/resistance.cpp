@@ -210,28 +210,28 @@ struct ResistanceTest::Private
         Real area (0.195);
 
         //Parabolic profile
-	Real radius( std::sqrt( area / 3.14159265359 ) );
+        Real radius ( std::sqrt ( area / 3.14159265359 ) );
 
         Real radiusSquared = radius * radius;
-        Real peak(0);
+        Real peak (0);
         peak = ( 2 * flux ) / ( area );
 
         switch (i)
         {
-        case 0:
-            // Flat profile: flux / area;
-            // return n1 * flux / area;
-            return n1 * std::max( 0.0, peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) );
-        case 1:
-            // Flat profile: flux / area;
-            //return n2 * flux / area;
-            return n2 * std::max( 0.0 , peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) );
-        case 2:
-            // Flat profile: flux / area;
-            // return n3 * flux / area;
-            return n3 * std::max( 0.0, peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) );
-        default:
-            return 0.0;
+            case 0:
+                // Flat profile: flux / area;
+                // return n1 * flux / area;
+                return n1 * std::max ( 0.0, peak * ( (radiusSquared - ( (x - x0) * (x - x0) + (y - y0) * (y - y0) ) ) / radiusSquared) );
+            case 1:
+                // Flat profile: flux / area;
+                //return n2 * flux / area;
+                return n2 * std::max ( 0.0 , peak * ( (radiusSquared - ( (x - x0) * (x - x0) + (y - y0) * (y - y0) ) ) / radiusSquared) );
+            case 2:
+                // Flat profile: flux / area;
+                // return n3 * flux / area;
+                return n3 * std::max ( 0.0, peak * ( (radiusSquared - ( (x - x0) * (x - x0) + (y - y0) * (y - y0) ) ) / radiusSquared) );
+            default:
+                return 0.0;
         }
     }
 
@@ -240,20 +240,20 @@ struct ResistanceTest::Private
     {
         switch (i)
         {
-        case 0:
-            //Flat profile: flux / area;
-            //return n1 * flux / area;
-            return 0;
-        case 1:
-            //Flat profile: flux / area;
-            //return n2 * flux / area;
-            return 0;
-        case 2:
-            // Flat profile: flux / area;
-            // return n3 * flux / area;
-            return 0;
-        default:
-            return 0.0;
+            case 0:
+                //Flat profile: flux / area;
+                //return n1 * flux / area;
+                return 0;
+            case 1:
+                //Flat profile: flux / area;
+                //return n2 * flux / area;
+                return 0;
+            case 2:
+                // Flat profile: flux / area;
+                // return n3 * flux / area;
+                return 0;
+            default:
+                return 0.0;
         }
     }
 
@@ -263,8 +263,8 @@ struct ResistanceTest::Private
 
 };
 
-ResistanceTest::ResistanceTest ( int argc,
-                     char** argv )
+Resistance::Resistance ( int argc,
+                         char** argv )
     :
     parameters ( new Private )
 {
@@ -313,6 +313,27 @@ ResistanceTest::run()
     //    int save = dataFile("fluid/miscellaneous/save", 1);
 
     bool verbose = (parameters->comm->MyPID() == 0);
+
+    // Boundary conditions
+    BCHandler bcH;
+    BCFunctionBase uIn   (  Private::aneurismFluxInVectorial );
+    BCFunctionBase uZero (  Private::zeroBCF );
+
+    FlowConditions outFlowBC;
+
+    // Read the resistance and hydrostatic pressure from data file
+    Real resistance = dataFile ( "fluid/physics/resistance", 0.0 );
+    Real hydrostatic = dataFile ( "fluid/physics/hydrostatic", 0.0 );
+
+    outFlowBC.initParameters ( OUTLET, resistance, hydrostatic, "outlet-3" );
+
+    BCFunctionBase resistanceBC ( FlowConditions::outPressure0 );
+    //cylinder
+
+    bcH.addBC ( "Inlet",    INLET,    Essential,   Full,  uIn  , 3 );
+    bcH.addBC ( "Wall",     WALL,     Essential,   Full,  uZero, 3 );
+
+    bcH.addBC ( "Outlet",   OUTLET,   Natural,     Normal, resistanceBC );
 
     // Lagrange multiplier for flux BCs
     int numLM = 0;
@@ -460,7 +481,7 @@ ResistanceTest::run()
     vectorPtr_Type velAndPressure ( new vector_Type (*fluid.solution(), exporter.mapType() ) );
 
     exporter.addVariable ( ExporterData<mesh_Type>::VectorField, "velocity", uFESpacePtr,
-                          velAndPressure, UInt (0) );
+                           velAndPressure, UInt (0) );
 
     exporter.addVariable ( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpacePtr,
                            velAndPressure, UInt (3 * uFESpacePtr->dof().numTotalDof() ) );
@@ -476,8 +497,10 @@ ResistanceTest::run()
     for ( Real time = t0 + dt ; time <= tFinal + dt / 2.; time += dt, iter++)
     {
 
+        std::cout << "Inlet area: " << fluid.area ( INLET ) << std::endl;
+
         // Updating the Neumann BC for resistance
-        outFlowBC.renewParameters( fluid, *velAndPressure );
+        outFlowBC.renewParameters ( fluid, *velAndPressure );
         // if ( verbose )
         // {
         //     std::cout << std::endl;

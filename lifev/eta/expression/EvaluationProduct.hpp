@@ -127,7 +127,7 @@ public:
     }
 
     //! Display method
-    static void display (ostream& out = std::cout )
+    static void display (std::ostream& out = std::cout )
     {
         EvaluationLType::display (out);
         out << " * ";

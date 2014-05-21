@@ -81,7 +81,7 @@ public:
     /*!
       @param mapType Specify whether the map is Unique or Repeated
      */
-    VectorEpetra ( const MapEpetraType& mapType = Unique );
+    explicit VectorEpetra ( const MapEpetraType& mapType = Unique, const combineMode_Type combineMode = Add );
 
     //! Constructor - Using Maps
     /*!
@@ -89,7 +89,9 @@ public:
       @param map Map to be used to split the vector between the processors
       @param mapType Specify wether the map is Unique or Repeated
      */
-    VectorEpetra ( const MapEpetra& map, const MapEpetraType& mapType = Unique );
+    explicit VectorEpetra ( const MapEpetra& map,
+                            const MapEpetraType& mapType = Unique,
+                            const combineMode_Type combineMode = Add );
 
     //! Constructor - Using Maps
     /*!
@@ -97,8 +99,9 @@ public:
       @param mapPtr Pointer to the map which has to be used to split the vector between the processors
       @param mapType Specify wether the map is Unique or Repeated
      */
-    VectorEpetra ( const boost::shared_ptr< MapEpetra >& mapPtr,
-                   const MapEpetraType& mapType = Unique );
+    explicit VectorEpetra ( const boost::shared_ptr< MapEpetra >& mapPtr,
+                            const MapEpetraType& mapType = Unique,
+                            const combineMode_Type combineMode = Add );
 
     //! Copy constructor
     /*!
@@ -132,7 +135,8 @@ public:
      */
     VectorEpetra ( const Epetra_MultiVector& vector,
                    const boost::shared_ptr< MapEpetra > map,
-                   const MapEpetraType& mapType );
+                   const MapEpetraType& mapType,
+                   const combineMode_Type combineMode = Add );
 
     //! Copy constructor
     /*!
@@ -144,7 +148,7 @@ public:
     VectorEpetra ( const VectorEpetra& vector, const Int& reduceToProc );
 
     //! Destructor
-    ~VectorEpetra() {}
+    virtual ~VectorEpetra() {}
 
     //@}
 
@@ -327,62 +331,62 @@ public:
       Return a vector containing 1 where vector elements are == scalar
       @param scalar Value for the comparison.
      */
-    VectorEpetra operator== ( const Real& scalar );
+    VectorEpetra operator== ( const Real& scalar ) const;
 
     //! Inequality operator
     /*!
       Return a vector containing 1 where vector elements are != scalar
       @param scalar Value for the comparison.
      */
-    VectorEpetra operator!= ( const Real& scalar );
+    VectorEpetra operator!= ( const Real& scalar ) const;
 
     //! Less than operator
     /*!
       Return a vector containing 1 where vector elements are < scalar
       @param scalar Value for the comparison.
      */
-    VectorEpetra operator< ( const Real& scalar );
+    VectorEpetra operator< ( const Real& scalar ) const;
 
     //! Greater than operator
     /*!
       Return a vector containing 1 where vector elements are > scalar
       @param scalar Value for the comparison.
      */
-    VectorEpetra operator> ( const Real& scalar );
+    VectorEpetra operator> ( const Real& scalar ) const;
 
     //! Less than or equal to operator
     /*!
       Return a vector containing 1 where vector elements are <= scalar
       @param scalar Value for the comparison.
      */
-    VectorEpetra operator<= ( const Real& scalar );
+    VectorEpetra operator<= ( const Real& scalar ) const;
 
     //! Greater than or equal to operator
     /*!
       Return a vector containing 1 where vector elements are >= scalar
       @param scalar Value for the comparison.
      */
-    VectorEpetra operator>= ( const Real& scalar );
+    VectorEpetra operator>= ( const Real& scalar ) const;
 
     //! Logical AND operator
     /*!
       Return a vector containing one where both elements are != zero
       @param vector Vector for the logical comparison.
      */
-    VectorEpetra operator&& ( const VectorEpetra& vector );
+    VectorEpetra operator&& ( const VectorEpetra& vector ) const;
 
     //! Logical OR operator
     /*!
       Return a vector containing one where one of the elements is != zero
       @param vector Vector for the logical comparison.
      */
-    VectorEpetra operator|| ( const VectorEpetra& vector );
+    VectorEpetra operator|| ( const VectorEpetra& vector ) const;
 
     //! Logical NOT operator
     /*!
       Return a vector containing one where the vector is equal to zero
      */
-    VectorEpetra operator! ( void );
+    VectorEpetra operator! ( void ) const;
 
     //@}
 
@@ -405,9 +409,20 @@ public:
        with a the given operation
        @param mode Combining mode used to gather the data
     */
-    Int globalAssemble ( combineMode_Type mode = Add )
+    Int globalAssemble ( combineMode_Type mode )
     {
         return M_epetraVector->GlobalAssemble ( mode );
+    }
+
+    //! Assemble the vector
+    /*!
+       Specialization of the globalAssemble ( combineMode_Type mode )
+       that uses M_combineMode as default value
+    */
+
+    Int globalAssemble ()
+    {
+        return M_epetraVector->GlobalAssemble ( M_combineMode );
     }
 
     //! Return the local Id of a global row

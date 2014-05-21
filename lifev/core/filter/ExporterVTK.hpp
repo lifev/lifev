@@ -113,6 +113,7 @@ public:
     typedef MeshType                          mesh_Type;
     typedef Exporter<mesh_Type>               super;
     typedef typename super::meshPtr_Type      meshPtr_Type;
+    typedef typename super::commPtr_Type      commPtr_Type;
     typedef typename super::feSpacePtr_Type   feSpacePtr_Type;
     typedef typename super::exporterData_Type exporterData_Type;
     typedef typename super::feTypeToDataIdMap_Type::iterator
@@ -188,9 +189,12 @@ public:
     virtual void import (const Real& Tstart);
 
     //! temporary: the method should work form the Exporter class
-    void exportPID ( boost::shared_ptr<MeshType> /*mesh*/, boost::shared_ptr<Epetra_Comm> /*comm*/ )
+    void exportPID (  meshPtr_Type /*meshPart*/, commPtr_Type comm, const bool /*binaryFormat*/ = false )
     {
-        std::cerr << "  X-  exportPID is not working with VTK (missing P0 element support)" << std::endl;
+        if ( !comm->MyPID() )
+        {
+            std::cerr << "  X-  exportPID is not working with VTK" << std::endl;
+        }
     }
 
     //! Set data from file.
@@ -484,7 +488,7 @@ void ExporterVTK<MeshType>::postProcess (const Real& time)
     this->computePostfix();
 
     std::size_t found ( this->M_postfix.find ( "*" ) );
-    if ( found == string::npos )
+    if ( found == std::string::npos )
     {
         if (this->M_procId == 0)
         {
@@ -879,7 +883,7 @@ ExporterVTK<MeshType>::readBinaryData ( const std::string& line, std::vector<Rea
     std::stringstream decodedData, dataToBeDecoded;
     dataToBeDecoded.str ("");
     std::string decodedDataString;
-    UInt sizeOfFloat ( 0 ), sizeOfVector ( values.size() ), lengthOfRawData;
+    UInt sizeOfFloat ( 0 ), sizeOfVector ( values.size() );
 
     switch ( numBits )
     {
@@ -896,8 +900,6 @@ ExporterVTK<MeshType>::readBinaryData ( const std::string& line, std::vector<Rea
             break;
     }
 
-    lengthOfRawData = sizeOfVector * sizeOfFloat + sizeof (int32_type);
-
     // assign the block of char to a stringstream (to convert it into a string)
     dataToBeDecoded.write ( line.c_str(), line.size() );
 
@@ -906,8 +908,10 @@ ExporterVTK<MeshType>::readBinaryData ( const std::string& line, std::vector<Rea
     decodedDataString = base64_decode ( dataToBeDecoded.str() );
     decodedData.str ( decodedDataString );
 
+#ifdef HAVE_LIFEV_DEBUG
+    UInt lengthOfRawData = sizeOfVector * sizeOfFloat + sizeof (int32_type);
     ASSERT ( lengthOfRawData == decodedDataString.size(), "unexpected line length" );
-
+#endif
 
     // the first value in the string is the size of the subsequent bunch of data
     int32_type* inputInt = new int32_type;

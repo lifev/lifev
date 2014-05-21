@@ -33,7 +33,6 @@ each time step and with the BDF method!!
 
 \date 2005-04-16
 */
-#undef HAVE_HDF5
 #ifdef TWODIM
 #error test_structure cannot be compiled in 2D
 #endif
@@ -110,7 +109,7 @@ public:
 
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_type;
     //Exporters Typedefs
-    typedef typename LifeV::Exporter<mesh_Type >                  filter_Type;
+    typedef LifeV::Exporter<mesh_Type >                           filter_Type;
     typedef boost::shared_ptr<filter_Type >                       filterPtr_Type;
 
     typedef LifeV::ExporterEmpty<mesh_Type >                      emptyExporter_Type;
@@ -232,7 +231,7 @@ Structure::Structure ( int                                   argc,
     parameters ( new Private() )
 {
     GetPot command_line (argc, argv);
-    string data_file_name = command_line.follow ("data", 2, "-f", "--file");
+    std::string data_file_name = command_line.follow ("data", 2, "-f", "--file");
     GetPot dataFile ( data_file_name );
     parameters->data_file_name = data_file_name;
 
@@ -288,7 +287,9 @@ Structure::run3d()
     boost::shared_ptr<MeshPartitioner<mesh_Type> > meshPart;
     boost::shared_ptr<mesh_Type> pointerToMesh;
 
+#ifdef LIFEV_HAS_HDF5
     if ( ! (partitioningMesh.compare ("no") ) )
+#endif
     {
         boost::shared_ptr<mesh_Type > fullMeshPtr (new mesh_Type ( ( parameters->comm ) ) );
         //Creating a new mesh from scratch
@@ -300,19 +301,20 @@ Structure::run3d()
 
         pointerToMesh = meshPart->meshPartition();
     }
+#ifdef LIFEV_HAS_HDF5
     else
     {
         //Creating a mesh object from a partitioned mesh
         const std::string partsFileName (dataFile ("partitioningOffline/hdf5_file_name", "NO_DEFAULT_VALUE.h5") );
 
         boost::shared_ptr<Epetra_MpiComm> mpiComm =
-            boost::dynamic_pointer_cast<Epetra_MpiComm>(parameters->comm);
+            boost::dynamic_pointer_cast<Epetra_MpiComm> (parameters->comm);
         PartitionIO<mesh_Type> partitionIO (partsFileName, mpiComm);
 
         partitionIO.read (pointerToMesh);
 
     }
-
+#endif
 
     std::string dOrder =  dataFile ( "solid/space_discretization/order", "P1");
 
@@ -441,7 +443,7 @@ main ( int argc, char** argv )
     boost::shared_ptr<Epetra_MpiComm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
     if ( Comm->MyPID() == 0 )
     {
-        cout << "% using MPI" << endl;
+        std::cout << "% using MPI" << std::endl;
     }
 #else
     boost::shared_ptr<Epetra_SerialComm> Comm ( new Epetra_SerialComm() );

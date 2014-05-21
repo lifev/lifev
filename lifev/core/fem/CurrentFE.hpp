@@ -126,9 +126,6 @@ namespace LifeV
     <th> UPDATE_QUAD_NODES </th> <th> Update everything needed to know the position of the quadrature nodes in the current cell </th>
    </tr>
    <tr>
-    <th> UPDATE_PHI </th> <th> Update everything needed to know the values of the basis functions in the quadrature nodes (in the current cell) </th>
-   </tr>
-   <tr>
     <th> UPDATE_DPHI </th> <th>  Update everything needed to know the values of the derivatives of the basis functions in the quadrature nodes (in the current cell) </th>
    </tr>
    <tr>
@@ -140,31 +137,28 @@ namespace LifeV
 
   </table>
 
+  Note: in the old versions there was also the flag UPDATE_PHI. This flag (together with UPDATE_ONLY_PHI) has been removed, since the values of the basis functions in the quadrature nodes are always the same, so they do not need to be updated.
   Besides this usual flags, there are a couple of "primitive" flags, that update only a particular element in the currentFE structure. Be sure to know what you are doing before using them.
 
 */
 
 const flag_Type UPDATE_ONLY_CELL_NODES (1);
 const flag_Type UPDATE_ONLY_QUAD_NODES (2);
-const flag_Type UPDATE_ONLY_PHI (4);
-const flag_Type UPDATE_ONLY_DPHI_GEO_MAP (8);
-const flag_Type UPDATE_ONLY_JACOBIAN (16);
-const flag_Type UPDATE_ONLY_T_INVERSE_JACOBIAN (32);
-const flag_Type UPDATE_ONLY_W_DET_JACOBIAN (64);
-const flag_Type UPDATE_ONLY_DPHI_REF (128);
-const flag_Type UPDATE_ONLY_DPHI (256);
-const flag_Type UPDATE_ONLY_D2PHI_REF (512);
-const flag_Type UPDATE_ONLY_D2PHI (1024);
-const flag_Type UPDATE_ONLY_PHI_VECT (2048);
-const flag_Type UPDATE_ONLY_DIV_PHI_REF (4096);
-const flag_Type UPDATE_ONLY_DET_JACOBIAN (8192);
+const flag_Type UPDATE_ONLY_DPHI_GEO_MAP (4);
+const flag_Type UPDATE_ONLY_JACOBIAN (8);
+const flag_Type UPDATE_ONLY_T_INVERSE_JACOBIAN (16);
+const flag_Type UPDATE_ONLY_W_DET_JACOBIAN (32);
+const flag_Type UPDATE_ONLY_DPHI_REF (64);
+const flag_Type UPDATE_ONLY_DPHI (128);
+const flag_Type UPDATE_ONLY_D2PHI_REF (256);
+const flag_Type UPDATE_ONLY_D2PHI (512);
+const flag_Type UPDATE_ONLY_PHI_VECT (1024);
+const flag_Type UPDATE_ONLY_DIV_PHI_REF (2048);
+const flag_Type UPDATE_ONLY_DET_JACOBIAN (4096);
 
 
 const flag_Type UPDATE_QUAD_NODES (UPDATE_ONLY_CELL_NODES
                                    | UPDATE_ONLY_QUAD_NODES);
-
-const flag_Type UPDATE_PHI (UPDATE_ONLY_PHI
-                            | UPDATE_ONLY_CELL_NODES);
 
 const flag_Type UPDATE_DPHI (UPDATE_ONLY_CELL_NODES
                              | UPDATE_ONLY_DPHI_GEO_MAP
@@ -581,9 +575,6 @@ protected:
     //! Update the location of the quadrature in the current cell.
     void computeQuadNodes();
 
-    //! Compute the values of the basis functions in the quadrature nodes
-    void computePhi();
-
     //! Compute the values of the derivatives of the mapping in the quadrature nodes
     void computeDphiGeometricMap();
 
@@ -657,6 +648,7 @@ protected:
     boost::multi_array<Real, 2> M_divPhiRef;
 
     // Check
+
     bool M_cellNodesUpdated;
     bool M_quadNodesUpdated;
 

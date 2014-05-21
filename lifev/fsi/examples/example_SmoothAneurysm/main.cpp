@@ -306,7 +306,7 @@ public:
         {
             restartFSI (data_file);
         }
-        else if( !restartType.compare ("vectors") )
+        else if ( !restartType.compare ("vectors") )
         {
             initializeWithVectors( );
 
@@ -314,7 +314,7 @@ public:
             M_fluidDisp.reset     ( new vector_Type ( M_fsi->FSIOper()->mmFESpace().map(), LifeV::Unique ) );
             M_solidDisp.reset ( new vector_Type ( M_fsi->FSIOper()->dFESpace().map(), LifeV::Unique ) );
             //        M_solidVel.reset ( new vector_Type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
-            M_WS.reset ( new vector_Type(  M_fsi->FSIOper()->dFESpace().map(), LifeV::Unique ));
+            M_WS.reset ( new vector_Type (  M_fsi->FSIOper()->dFESpace().map(), LifeV::Unique ) );
 
         }
         else
@@ -325,7 +325,7 @@ public:
             M_fluidDisp.reset     ( new vector_Type ( M_fsi->FSIOper()->mmFESpace().map(), LifeV::Unique ) );
             M_solidDisp.reset ( new vector_Type ( M_fsi->FSIOper()->dFESpace().map(), LifeV::Unique ) );
             //        M_solidVel.reset ( new vector_Type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
-            M_WS.reset ( new vector_Type(  M_fsi->FSIOper()->dFESpace().map(), LifeV::Unique ));
+            M_WS.reset ( new vector_Type (  M_fsi->FSIOper()->dFESpace().map(), LifeV::Unique ) );
         }
 
 
@@ -404,6 +404,7 @@ public:
         // of the linear system
         Real hydrostatic = data_file ("fluid/physics/hydrostatic", 0.0);
 
+
         //R1.initParameters( OUTLET, resistance, hydrostatic, "outlet-3" );
         //FC2.initParameters ( *M_fsi->FSIOper(),  OUTLET);
 
@@ -456,7 +457,7 @@ public:
         LifeV::UInt tol ( M_fsi->FSIOper()->solidTimeAdvance()->size() );
 
         vectorPtr_Type solution ( new vector_Type ( (*M_fsi->FSIOper()->couplingVariableMap() ) ) );
-        vector_Type fluidSolution( M_fsi->FSIOper()->fluid().getMap(), LifeV::Unique );
+        vector_Type fluidSolution ( M_fsi->FSIOper()->fluid().getMap(), LifeV::Unique );
         fluidSolution *= 0.0;
 
         M_fsi->FSIOper()->extrapolation ( *solution );
@@ -468,6 +469,7 @@ public:
             M_data->timeDataALE()->updateTime();
 
             fluidSolution = *M_velAndPressure;
+
 
             //R1.renewParameters( M_fsi->FSIOper()->fluid(), fluidSolution, M_data->dataFluid()->dataTime()->time() );
             //FC2.renewParameters ( *M_fsi, OUTLET, fluidSolution );
@@ -544,7 +546,7 @@ struct FSIChecker
     FSIChecker ( GetPot const& _data_file,
                  boost::shared_ptr<Epetra_Comm> comm ) :
         data_file ( _data_file ),
-        communicator( comm )
+        communicator ( comm )
     {}
 
     void operator() ()

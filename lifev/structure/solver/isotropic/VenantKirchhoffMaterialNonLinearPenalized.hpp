@@ -931,8 +931,8 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeLocalFirstPiola
     Real trCiso (0.0);
     trCiso = std::pow (invariants[3], - (2.0 / 3.0) ) * invariants[0];
 
-    Real firstCoef( 0.0 );
-    firstCoef = std::pow (invariants[3], - (2.0 / 3.0) ) * ( ( lambda / 2.0 ) * trCiso - (3.0/2.0) * lambda - mu);
+    Real firstCoef ( 0.0 );
+    firstCoef = std::pow (invariants[3], - (2.0 / 3.0) ) * ( ( lambda / 2.0 ) * trCiso - (3.0 / 2.0) * lambda - mu);
     firstTerm.Scale ( firstCoef );
 
     Epetra_SerialDenseMatrix secondTerm (this->M_dispFESpace->fieldDim(), this->M_dispFESpace->fieldDim() );
@@ -943,12 +943,12 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeLocalFirstPiola
     rightCauchyC.Multiply ('T', 'N', 1.0, tensorF, tensorF, 0.0); //see Epetra_SerialDenseMatrix
     secondTerm.Multiply ('N', 'N', 1.0, tensorF, rightCauchyC, 0.0);
 
-    Real trCsquared(0.0);
-    trCsquared = rightCauchyC(0,0) * rightCauchyC(0,0) + rightCauchyC(0,1) * rightCauchyC(0,1) + rightCauchyC(0,2) * rightCauchyC(0,2) +
-        rightCauchyC(1,0) * rightCauchyC(1,0) + rightCauchyC(1,1) * rightCauchyC(1,1) + rightCauchyC(1,2) * rightCauchyC(1,2) +
-        rightCauchyC(2,0) * rightCauchyC(2,0) + rightCauchyC(2,1) * rightCauchyC(2,1) + rightCauchyC(2,2) * rightCauchyC(2,2);
+    Real trCsquared (0.0);
+    trCsquared = rightCauchyC (0, 0) * rightCauchyC (0, 0) + rightCauchyC (0, 1) * rightCauchyC (0, 1) + rightCauchyC (0, 2) * rightCauchyC (0, 2) +
+                 rightCauchyC (1, 0) * rightCauchyC (1, 0) + rightCauchyC (1, 1) * rightCauchyC (1, 1) + rightCauchyC (1, 2) * rightCauchyC (1, 2) +
+                 rightCauchyC (2, 0) * rightCauchyC (2, 0) + rightCauchyC (2, 1) * rightCauchyC (2, 1) + rightCauchyC (2, 2) * rightCauchyC (2, 2);
 
-    Real scaleFactor(0.0);
+    Real scaleFactor (0.0);
     scaleFactor = - trCsquared / 3.0;
 
     Epetra_SerialDenseMatrix secondCofactorF (cofactorF);
@@ -956,10 +956,10 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeLocalFirstPiola
 
     secondTerm += secondCofactorF;
 
-    Real secondCoef( 0.0 );
+    Real secondCoef ( 0.0 );
     secondCoef = mu * std::pow (invariants[3], - (4.0 / 3.0) );
 
-    secondTerm.Scale( secondCoef );
+    secondTerm.Scale ( secondCoef );
 
     //Computing the second term (volumetric part) J*(bulk/2)(J-1+(1/J)*ln(J))F^{-T}
     Epetra_SerialDenseMatrix thirdTerm (cofactorF);

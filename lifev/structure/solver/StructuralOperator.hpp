@@ -541,7 +541,7 @@ public:
     //! Set the data fields with the Getpot data file for preconditioners and solver
     void setDataFromGetPot ( const GetPot& dataFile );
 
-    void setTimeAdvance( const timeAdvancePtr_Type& timeAdvancePtr )
+    void setTimeAdvance ( const timeAdvancePtr_Type& timeAdvancePtr )
     {
         M_timeAdvance = timeAdvancePtr;
     }

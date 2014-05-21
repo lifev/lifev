@@ -123,7 +123,7 @@ public:
 
     //! create interface map
     //void createInterfaceMap ( vectorPtr_type checkVector, meshPtr_type& mesh , const DOF& dof);
-    void createInterfaceMap( std::map<ID, ID> const& locDofMap , const DOF& dof );
+    void createInterfaceMap ( std::map<ID, ID> const& locDofMap , const DOF& dof );
 
     //! run test
     void run();

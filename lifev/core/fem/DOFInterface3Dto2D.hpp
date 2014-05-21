@@ -337,8 +337,6 @@ updateFaceConnections ( const MeshType& mesh1, const markerID_Type& flag1 )
 
     markerID_Type marker1;
 
-    typedef typename MeshType::FaceShape GeoBShape; // Shape of the faces
-
     ID fcounter = 0;  //! Face on the interface counter
 
     //! Loop on boundary faces on mesh1

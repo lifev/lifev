@@ -103,7 +103,9 @@ public:
     //@{
 
     //! Constructor with the monolithic map
-    VectorEpetraStructured ( const map_type& map, const mapType_type& mapType = Unique );
+    explicit VectorEpetraStructured ( const map_type& map,
+                                      const mapType_type& mapType = Unique,
+                                      const combineMode_Type combineMode = Add );
 
     //! Construction with a vector of map
     /*!
@@ -111,7 +113,9 @@ public:
       vector. The monolithic map and vectors are also built by concatenating the different maps
       in the vector.
      */
-    VectorEpetraStructured ( const mapVector_type& mapVector, const mapType_type& mapType = Unique );
+    explicit VectorEpetraStructured ( const mapVector_type& mapVector,
+                                      const mapType_type& mapType = Unique,
+                                      const combineMode_Type combineMode = Add );
 
     //! Copy constructor
     VectorEpetraStructured ( const VectorEpetraStructured& vector );
@@ -120,7 +124,9 @@ public:
     VectorEpetraStructured ( const VectorEpetraStructured& vector, const mapType_type& mapType );
 
     //! Copy constructor with specified map type and combine mode
-    VectorEpetraStructured ( const VectorEpetraStructured& vector, const mapType_type& mapType, const combine_type& combineMode );
+    VectorEpetraStructured ( const VectorEpetraStructured& vector,
+                             const mapType_type& mapType,
+                             const combine_type& combineMode );
 
     //! Destructor
     ~VectorEpetraStructured() {}

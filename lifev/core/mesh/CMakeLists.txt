@@ -19,6 +19,13 @@ SET(mesh_HEADERS
   mesh/RegionMesh1DStructured.hpp
   mesh/MeshChecks.hpp
   mesh/MeshElementMarked.hpp
+  mesh/GraphCutterBase.hpp
+  mesh/GraphCutterZoltan.hpp
+  mesh/GraphCutterParMETIS.hpp
+  mesh/GraphUtil.hpp
+  mesh/MeshPartitionTool.hpp
+  mesh/MeshPartBuilder.hpp
+  mesh/NeighborMarker.hpp
   mesh/RegionMesh2DStructured.hpp
 CACHE INTERNAL "")
 

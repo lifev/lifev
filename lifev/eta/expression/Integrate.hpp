@@ -38,6 +38,8 @@
 
 #include <lifev/core/LifeV.hpp>
 
+#include <lifev/core/util/OpenMPParameters.hpp>
+
 #include <lifev/eta/expression/RequestLoopElement.hpp>
 #include <lifev/eta/expression/RequestLoopVolumeID.hpp>
 #include <lifev/eta/expression/RequestLoopFaceID.hpp>
@@ -85,6 +87,11 @@ namespace ExpressionAssembly
   This class is an helper function to instantiate the class
   for performing an integration, here to assemble a matrix
   with a loop on the elements.
+
+  This function is repeated 4 times:
+  versions with and without QR adapter
+  versions with and without Offset
+
  */
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
 IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>
@@ -92,10 +99,21 @@ integrate ( const RequestLoopElement<MeshType>& request,
             const QRAdapterBase<QRAdapterType>& qrAdapterBase,
             const boost::shared_ptr<TestSpaceType>& testSpace,
             const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-            const ExpressionType& expression)
+            const ExpressionType& expression,
+            const UInt offsetUp = 0,
+            const UInt offsetLeft = 0);
+template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
+IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>
+integrate ( const RequestLoopElement<MeshType>& request,
+            const QRAdapterBase<QRAdapterType>& qrAdapterBase,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+            const ExpressionType& expression,
+            const UInt offsetUp,
+            const UInt offsetLeft)
 {
     return IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>
-           (request.mesh(), qrAdapterBase.implementation(), testSpace, solutionSpace, expression);
+           (request.mesh(), qrAdapterBase.implementation(), testSpace, solutionSpace, expression, offsetUp, offsetLeft);
 }
 
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
@@ -104,11 +122,91 @@ integrate ( const RequestLoopElement<MeshType>& request,
             const QuadratureRule& quadrature,
             const boost::shared_ptr<TestSpaceType>& testSpace,
             const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-            const ExpressionType& expression)
+            const ExpressionType& expression,
+            const UInt offsetUp = 0,
+            const UInt offsetLeft = 0);
+template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
+IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterNeverAdapt>
+integrate ( const RequestLoopElement<MeshType>& request,
+            const QuadratureRule& quadrature,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+            const ExpressionType& expression,
+            const UInt offsetUp,
+            const UInt offsetLeft)
 {
     return IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterNeverAdapt>
-           (request.mesh(), QRAdapterNeverAdapt (quadrature), testSpace, solutionSpace, expression);
+           (request.mesh(), QRAdapterNeverAdapt (quadrature), testSpace, solutionSpace, expression, offsetUp, offsetLeft);
 }
+
+//! Integrate function for matricial expressions (multi-threaded path)
+/*!
+  @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+
+  This class is an helper function to instantiate the class
+  for performing an integration, here to assemble a matrix
+  with a loop on the elements.
+
+  This is an overload of the integrate function for matrices, which
+  uses multiple threads to do assembly
+
+  This function is repeated 4 times:
+  versions with and without QR adapter
+  versions with and without Offset
+
+ */
+template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
+IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>
+integrate ( const RequestLoopElement<MeshType>& request,
+            const QRAdapterBase<QRAdapterType>& qrAdapterBase,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+            const ExpressionType& expression,
+            const OpenMPParameters& ompParams,
+            const UInt offsetUp = 0,
+            const UInt offsetLeft = 0);
+template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
+IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>
+integrate ( const RequestLoopElement<MeshType>& request,
+            const QRAdapterBase<QRAdapterType>& qrAdapterBase,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+            const ExpressionType& expression,
+            const OpenMPParameters& ompParams,
+            const UInt offsetUp,
+            const UInt offsetLeft)
+{
+    return IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterNeverAdapt>
+           (request.mesh(), qrAdapterBase.implementation(), testSpace, solutionSpace, expression,
+            ompParams, offsetUp, offsetLeft);
+}
+template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
+IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterNeverAdapt>
+integrate ( const RequestLoopElement<MeshType>& request,
+            const QuadratureRule& quadrature,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+            const ExpressionType& expression,
+            const OpenMPParameters& ompParams,
+            const UInt offsetUp = 0,
+            const UInt offsetLeft = 0);
+template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
+IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterNeverAdapt>
+integrate ( const RequestLoopElement<MeshType>& request,
+            const QuadratureRule& quadrature,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+            const ExpressionType& expression,
+            const OpenMPParameters& ompParams,
+            const UInt offsetUp,
+            const UInt offsetLeft)
+{
+    return IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterNeverAdapt>
+           (request.mesh(), QRAdapterNeverAdapt (quadrature), testSpace, solutionSpace, expression,
+            ompParams, offsetUp, offsetLeft);
+}
+
+
 
 //! Integrate function for vectorial expressions
 /*!
@@ -117,16 +215,29 @@ integrate ( const RequestLoopElement<MeshType>& request,
   This class is an helper function to instantiate the class
   for performing an integration, here to assemble a vector
   with a loop on the elements.
+
+  This function is repeated 4 times:
+  versions with and without QR adapter
+  versions with and without Offset
+
  */
 template < typename MeshType, typename TestSpaceType, typename ExpressionType, typename QRAdapterType>
 IntegrateVectorElement<MeshType, TestSpaceType, ExpressionType, QRAdapterType>
 integrate ( const RequestLoopElement<MeshType>& request,
             const QRAdapterBase<QRAdapterType>& qrAdapterBase,
             const boost::shared_ptr<TestSpaceType>& testSpace,
-            const ExpressionType& expression)
+            const ExpressionType& expression,
+            const UInt offset = 0);
+template < typename MeshType, typename TestSpaceType, typename ExpressionType, typename QRAdapterType>
+IntegrateVectorElement<MeshType, TestSpaceType, ExpressionType, QRAdapterType>
+integrate ( const RequestLoopElement<MeshType>& request,
+            const QRAdapterBase<QRAdapterType>& qrAdapterBase,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const ExpressionType& expression,
+            const UInt offset)
 {
     return IntegrateVectorElement<MeshType, TestSpaceType, ExpressionType, QRAdapterType>
-           (request.mesh(), qrAdapterBase.implementation(), testSpace, expression);
+           (request.mesh(), qrAdapterBase.implementation(), testSpace, expression, offset);
 }
 
 template < typename MeshType, typename TestSpaceType, typename ExpressionType>
@@ -134,10 +245,18 @@ IntegrateVectorElement<MeshType, TestSpaceType, ExpressionType, QRAdapterNeverAd
 integrate ( const RequestLoopElement<MeshType>& request,
             const QuadratureRule& quadrature,
             const boost::shared_ptr<TestSpaceType>& testSpace,
-            const ExpressionType& expression)
+            const ExpressionType& expression,
+            const UInt offset = 0);
+template < typename MeshType, typename TestSpaceType, typename ExpressionType>
+IntegrateVectorElement<MeshType, TestSpaceType, ExpressionType, QRAdapterNeverAdapt>
+integrate ( const RequestLoopElement<MeshType>& request,
+            const QuadratureRule& quadrature,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const ExpressionType& expression,
+            const UInt offset)
 {
     return IntegrateVectorElement<MeshType, TestSpaceType, ExpressionType, QRAdapterNeverAdapt>
-           (request.mesh(), QRAdapterNeverAdapt (quadrature), testSpace, expression);
+           (request.mesh(), QRAdapterNeverAdapt (quadrature), testSpace, expression, offset);
 }
 
 //! Integrate function for benchmark expressions
@@ -147,6 +266,10 @@ integrate ( const RequestLoopElement<MeshType>& request,
   This class is an helper function to instantiate the class
   for performing an integration, here to assemble a benchmark
   with a loop on the elements.
+
+  This function is repeated 2 times:
+  versions with and without QR adapter
+
  */
 template < typename MeshType, typename ExpressionType, typename QRAdapterType>
 IntegrateValueElement<MeshType, ExpressionType, QRAdapterType>

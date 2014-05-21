@@ -447,7 +447,7 @@ inline ::LifeV::Assert makeAssert ( const char* expr)
 #else
 
 // defaults
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
 #define LIFEV_SMART_ASSERT_DEBUG
 #else
 #undef LIFEV_SMART_ASSERT_DEBUG

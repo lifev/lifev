@@ -204,8 +204,8 @@ IntegrateVectorFaceID (const boost::shared_ptr<MeshType>& mesh,
         M_globalCFE[i] = new ETCurrentBDFE<3> (geometricMapFromMesh<MeshType>()
                                                , M_quadratureBoundary.qr (i) );
         M_testCFE[i] = new ETCurrentFE<3, TestSpaceType::field_dim> (testSpace->refFE()
-                                                                      , testSpace->geoMap()
-                                                                      , M_quadratureBoundary.qr (i) );
+                                                                     , testSpace->geoMap()
+                                                                     , M_quadratureBoundary.qr (i) );
     }
 
     // Set the tangent on the different faces
@@ -272,8 +272,8 @@ IntegrateVectorFaceID ( const IntegrateVectorFaceID < MeshType, TestSpaceType, E
         M_globalCFE[i] = new ETCurrentBDFE<3> (geometricMapFromMesh<MeshType>()
                                                , M_quadratureBoundary.qr (i) );
         M_testCFE[i] = new ETCurrentFE<3, TestSpaceType::field_dim> (M_testSpace->refFE()
-                                                                      , M_testSpace->geoMap()
-                                                                      , M_quadratureBoundary.qr (i) );
+                                                                     , M_testSpace->geoMap()
+                                                                     , M_quadratureBoundary.qr (i) );
     }
 
     // Set the tangent on the different faces

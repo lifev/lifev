@@ -102,7 +102,7 @@ public:
     typedef LifeV::RegionMesh<LinearTetra>                              mesh_Type;
 
     // Filters
-    typedef typename LifeV::Exporter<mesh_Type  >                                filter_Type;
+    typedef LifeV::Exporter<mesh_Type  >                                filter_Type;
     typedef boost::shared_ptr< LifeV::Exporter<mesh_Type  > >           filterPtr_Type;
 
     typedef LifeV::ExporterEmpty<mesh_Type >                            emptyFilter_Type;
@@ -590,28 +590,28 @@ Structure::run3d()
         }
         else if ( !dataStructure->solidTypeIsotropic().compare("linearVenantKirchhoff") ) // LE
         {
-            dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type> ( Private::displacementLinearElastic ),
-                                   *solidDisp, 0.0 );
+            dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( Private::displacementLinearElastic ),
+                                    *solidDisp, 0.0 );
         }
         else if ( !dataStructure->solidTypeIsotropic().compare("nonLinearVenantKirchhoff") ) // SVK
         {
-            dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type> ( Private::displacementVenantKirchhoff ),
-                                   *solidDisp, 0.0 );
+            dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( Private::displacementVenantKirchhoff ),
+                                    *solidDisp, 0.0 );
         }
         else if ( !dataStructure->solidTypeIsotropic().compare("nonLinearVenantKirchhoffPenalized") ) // SVKP
         {
-            dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type> ( Private::displacementVenantKirchhoffPenalized ),
-                                   *solidDisp, 0.0 );
+            dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( Private::displacementVenantKirchhoffPenalized ),
+                                    *solidDisp, 0.0 );
         }
         else if ( !dataStructure->solidTypeIsotropic().compare("neoHookean") ) // NH
         {
-            dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type> ( Private::displacementNeoHookean ),
-                                   *solidDisp, 0.0 );
+            dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( Private::displacementNeoHookean ),
+                                    *solidDisp, 0.0 );
         }
         else
         {
-            dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type> ( Private::displacementSecondOrderExponential ),
-                                   *solidDisp, 0.0 );
+            dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( Private::displacementSecondOrderExponential ),
+                                    *solidDisp, 0.0 );
         }
 
         solidOperator.computeCauchyStressTensor( solidDisp, fakeQuadratureRule, sigma_1, sigma_2, sigma_3 );
@@ -687,6 +687,7 @@ Structure::run3d()
                 CheckResultTensions ( solid->principalStresses().norm2(), vectorEigenvalues->norm2()  );
             }
         }
+
         else if ( !dataStructure->solidTypeIsotropic().compare("linearVenantKirchhoff") ) // LE
         {
             checkLinearElastic( solid->principalStresses().norm2(), vectorEigenvalues->norm2() );

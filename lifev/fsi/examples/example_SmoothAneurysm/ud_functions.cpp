@@ -62,17 +62,21 @@ Real fZero (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real&
 
 Real outerWallPressure (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& z, const ID& /*i*/)
 {
-    Real highestPressure( - ( 13330 - 113305 ) );
-    Real pressure(0);
+    Real highestPressure ( - ( 13330 - 113305 ) );
+    Real pressure (0);
     Real totalTime = 0.8;
     Real halfTime = totalTime / 2.0;
 
-    Real a = ( highestPressure / 2 ) * ( 1/ ( halfTime * halfTime ) );
+    Real a = ( highestPressure / 2 ) * ( 1 / ( halfTime * halfTime ) );
 
     if ( t <= totalTime )
+    {
         pressure = ( highestPressure / totalTime ) * t;
+    }
     else
+    {
         pressure = highestPressure;
+    }
 
     // if ( t <= 0.8 )
     // {
@@ -127,10 +131,14 @@ Real p0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*
 
 Real E (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    if( t <= 0.4 )
+    if ( t <= 0.4 )
+    {
         return -10000000 * ( t - 0.4 );
+    }
     else
+    {
         return 0.0;
+    }
 
     return 0.0;
 
@@ -220,15 +228,15 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
     Real dt (0.001);
 
     if ( t <= activeRamp )
-      {
+    {
         fluxFinal = ( 0.1747 / activeRamp ) * t; // 0.033 cm
-      }
+    }
     else if ( t > activeRamp  && t <= rampAmpl )
-      {
-    	fluxFinal = ( 0.1747 );
-      }
+    {
+        fluxFinal = ( 0.1747 );
+    }
     else
-      {
+    {
 
 
         // We change the flux for our geometry
@@ -265,7 +273,7 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
         }
 
         fluxFinal =  (flux * areaFactor * unitFactor);
-      }
+    }
 
     std::cout << "Flux that is imposed" << fluxFinal << std::endl;
 
@@ -288,27 +296,27 @@ Real aneurismFluxInVectorial (const Real&  t, const Real& x, const Real& y, cons
     //Real area (0.013684);   // 0.066 cm
 
     //Parabolic profile
-    Real radius(0.033);
+    Real radius (0.033);
     Real radiusSquared = radius * radius;
-    Real peak(0);
+    Real peak (0);
     peak = ( 2 * flux ) / ( area );
 
     switch (i)
     {
-    case 0:
-        // Flat profile: flux / area;
-        // return n1 * flux / area;
-        return n1 * ( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) ) ;
-    case 1:
-        // Flat profile: flux / area;
-        //return n2 * flux / area;
-        return n2 * ( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) ) ;
-    case 2:
-        // Flat profile: flux / area;
-        //return n3 * flux / area;
-        return n3 * ( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) ) ;
-    default:
-        return 0.0;
+        case 0:
+            // Flat profile: flux / area;
+            // return n1 * flux / area;
+            return n1 * ( peak * ( (radiusSquared - ( (x - x0) * (x - x0) + (y - y0) * (y - y0) ) ) / radiusSquared) ) ;
+        case 1:
+            // Flat profile: flux / area;
+            //return n2 * flux / area;
+            return n2 * ( peak * ( (radiusSquared - ( (x - x0) * (x - x0) + (y - y0) * (y - y0) ) ) / radiusSquared) ) ;
+        case 2:
+            // Flat profile: flux / area;
+            //return n3 * flux / area;
+            return n3 * ( peak * ( (radiusSquared - ( (x - x0) * (x - x0) + (y - y0) * (y - y0) ) ) / radiusSquared) ) ;
+        default:
+            return 0.0;
     }
 }
 

@@ -189,7 +189,11 @@ private:
     std::vector<matrix_Type> M_matrixVector; // \todo temporary, should be avoided
     int M_overlapLevel;
     std::string M_precType;
+#ifdef HAVE_IFPACK_DYNAMIC_FACTORY
+    Ifpack_DynamicFactory M_factory;
+#else
     Ifpack M_factory;
+#endif
 
     //@}
 };

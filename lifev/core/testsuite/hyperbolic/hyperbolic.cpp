@@ -331,7 +331,7 @@ hyperbolic::hyperbolic ( int argc,
 Real
 hyperbolic::run()
 {
-    typedef RegionMesh<LinearTetra>                     RegionMesh;
+    typedef RegionMesh<LinearTetra, neighborMarkerCommon_Type> RegionMesh;
     typedef SolverAztecOO                               solver_type;
     typedef HyperbolicSolver< RegionMesh, solver_type > hyper;
     typedef hyper::vector_Type                          vector_type;
@@ -389,11 +389,9 @@ hyperbolic::run()
 
     // Partition the mesh using ParMetis
     boost::shared_ptr<RegionMesh> meshPtr;
-    MeshPartitioner<RegionMesh>::GhostEntityDataMap_Type ghostDataMap;
     {
         MeshPartitioner< RegionMesh >  meshPart ( fullMeshPtr, Members->comm );
         meshPtr = meshPart.meshPartition();
-        ghostDataMap = meshPart.ghostDataMap();
     }
 
     // Stop chronoReadAndPartitionMesh
@@ -473,6 +471,8 @@ hyperbolic::run()
                                                     1,
                                                     Members->comm ) );
 
+    GhostHandler<RegionMesh> ghost ( fullMeshPtr, meshPtr, feSpacePtr->mapPtr(), Members->comm );
+
     // Stop chronoFiniteElementSpace
     chronoFiniteElementSpace.stop();
 
@@ -487,6 +487,7 @@ hyperbolic::run()
     // Instantiation of the HyperbolicSolver class
     hyper hyperbolicSolver ( dataHyperbolic,
                              *feSpacePtr,
+                             ghost.ghostMapOnElementsFV(),
                              Members->comm );
 
     // Stop chronoProblem
@@ -616,9 +617,6 @@ hyperbolic::run()
 
         // Start chronoTimeStep for measure the time for the current time step
         chronoTimeStep.start();
-
-        // update ghost values from neighboring processes
-        hyperbolicSolver.updateGhostValues ( ghostDataMap );
 
         // Check if the time step is consistent, i.e. if innerTimeStep + currentTime < endTime.
         if ( dataHyperbolic.dataTime()->isLastTimeStep() )

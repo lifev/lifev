@@ -102,7 +102,7 @@ public:
     typedef LifeV::RegionMesh<LinearTetra>                              mesh_Type;
 
     // Filters
-    typedef typename LifeV::Exporter<mesh_Type  >                       filter_Type;
+    typedef LifeV::Exporter<mesh_Type  >                       filter_Type;
     typedef boost::shared_ptr< LifeV::Exporter<mesh_Type  > >           filterPtr_Type;
 
     typedef LifeV::ExporterEmpty<mesh_Type >                            emptyFilter_Type;
@@ -226,7 +226,7 @@ void
 Structure::run3d()
 {
     // General typedefs
-    typedef typename StructuralOperator<mesh_Type >::vector_Type vector_Type;
+    typedef StructuralOperator<mesh_Type >::vector_Type vector_Type;
     typedef boost::shared_ptr<vector_Type>                        vectorPtr_Type;
     typedef FESpace< mesh_Type, MapEpetra >                       solidFESpace_Type;
     typedef boost::shared_ptr<solidFESpace_Type>                  solidFESpacePtr_Type;
