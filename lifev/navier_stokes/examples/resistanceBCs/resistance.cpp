@@ -263,7 +263,7 @@ struct ResistanceTest::Private
 
 };
 
-Resistance::Resistance ( int argc,
+ResistanceTest::ResistanceTest ( int argc,
                          char** argv )
     :
     parameters ( new Private )
@@ -313,27 +313,6 @@ ResistanceTest::run()
     //    int save = dataFile("fluid/miscellaneous/save", 1);
 
     bool verbose = (parameters->comm->MyPID() == 0);
-
-    // Boundary conditions
-    BCHandler bcH;
-    BCFunctionBase uIn   (  Private::aneurismFluxInVectorial );
-    BCFunctionBase uZero (  Private::zeroBCF );
-
-    FlowConditions outFlowBC;
-
-    // Read the resistance and hydrostatic pressure from data file
-    Real resistance = dataFile ( "fluid/physics/resistance", 0.0 );
-    Real hydrostatic = dataFile ( "fluid/physics/hydrostatic", 0.0 );
-
-    outFlowBC.initParameters ( OUTLET, resistance, hydrostatic, "outlet-3" );
-
-    BCFunctionBase resistanceBC ( FlowConditions::outPressure0 );
-    //cylinder
-
-    bcH.addBC ( "Inlet",    INLET,    Essential,   Full,  uIn  , 3 );
-    bcH.addBC ( "Wall",     WALL,     Essential,   Full,  uZero, 3 );
-
-    bcH.addBC ( "Outlet",   OUTLET,   Natural,     Normal, resistanceBC );
 
     // Lagrange multiplier for flux BCs
     int numLM = 0;

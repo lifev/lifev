@@ -58,7 +58,7 @@ public:
      */
     //@{
 
-    Resistance ( int argc,
+    ResistanceTest ( int argc,
                  char** argv );
 
     ~ResistanceTest()
