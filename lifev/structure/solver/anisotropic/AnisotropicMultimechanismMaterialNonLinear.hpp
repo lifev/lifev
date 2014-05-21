@@ -88,9 +88,9 @@ public:
                       const UInt nTotDof,
                       const UInt offset) const
     {
-        Int LIDx = M_selectionVector->blockMap().LID( i );
-        Int LIDy = M_selectionVector->blockMap().LID( i + nTotDof + offset );
-        Int LIDz = M_selectionVector->blockMap().LID( i + 2 * nTotDof + offset );
+        Int LIDx = M_selectionVector->blockMap().LID( static_cast<EpetraInt_Type>(i) );
+        Int LIDy = M_selectionVector->blockMap().LID( static_cast<EpetraInt_Type>(i + nTotDof + offset) );
+        Int LIDz = M_selectionVector->blockMap().LID( static_cast<EpetraInt_Type>(i + 2 * nTotDof + offset) );
 
         /*
            Note: the selectionVector of this functor has the same map the
@@ -150,9 +150,9 @@ public:
                       const UInt nTotDof,
                       const UInt offset ) const
     {
-        Int LIDx = M_selectionVector.blockMap().LID( i );
-        Int LIDy = M_selectionVector.blockMap().LID( i + nTotDof + offset );
-        Int LIDz = M_selectionVector.blockMap().LID( i + 2 * nTotDof + offset );
+        Int LIDx = M_selectionVector.blockMap().LID( static_cast<EpetraInt_Type>(i) );
+        Int LIDy = M_selectionVector.blockMap().LID( static_cast<EpetraInt_Type>(i + nTotDof + offset) );
+        Int LIDz = M_selectionVector.blockMap().LID( static_cast<EpetraInt_Type>(i + 2 * nTotDof + offset) );
 
         /*
            Note: the selectionVector of this functor is the same as the

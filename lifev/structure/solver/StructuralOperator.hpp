@@ -1505,9 +1505,9 @@ void StructuralOperator<Mesh>::colorMesh ( vector_Type& meshColors )
                 //Extract the global ID of the x-component of the field
                 UInt globalIDofDOF = this->M_dispFESpace->dof().localToGlobalMap ( eleID, iloc );
 
-                if ( meshColors.blockMap().LID (globalIDofDOF) != -1 ) // The Global ID is on the calling processors
+                if ( meshColors.blockMap().LID (static_cast<EpetraInt_Type>(globalIDofDOF)) != -1 ) // The Global ID is on the calling processors
                 {
-                    Int LIDid = meshColors.blockMap().LID ( globalIDofDOF );
+                    Int LIDid = meshColors.blockMap().LID ( static_cast<EpetraInt_Type>(globalIDofDOF) );
                     Int GIDid = meshColors.blockMap().GID ( LIDid );
                     meshColors[ GIDid ] = marker;
 
@@ -1555,7 +1555,7 @@ void StructuralOperator<Mesh>::computePrincipalTensions( vectorPtr_Type sigma_1,
   */
   for ( UInt iDOF = 0; iDOF < ( UInt ) M_dispFESpace->dof().numTotalDof(); ++iDOF )
     {
-      if( sigma_1->blockMap().LID( iDOF ) != -1 )
+        if( sigma_1->blockMap().LID( static_cast<EpetraInt_Type>(iDOF) ) != -1 )
 	{
 	  // Given the local ID we get the GID of the vector.
 	  Int GIDnode = sigma_1->blockMap().GID( iDOF );
@@ -1596,12 +1596,12 @@ void StructuralOperator<Mesh>::computePrincipalTensions( vectorPtr_Type sigma_1,
 	  // Filling the matrix
 	  for (UInt j (0); j < nDimensions; j++)
 	    {
-	      Int LIDid = sigma_1->blockMap().LID (iDOF + j * M_dispFESpace->dof().numTotalDof() + M_offset);
-	      Int GIDid = sigma_1->blockMap().GID (LIDid);
+            Int LIDid = sigma_1->blockMap().LID (static_cast<EpetraInt_Type>(iDOF + j * M_dispFESpace->dof().numTotalDof() + M_offset));
+            Int GIDid = sigma_1->blockMap().GID (LIDid);
 
-	      A[ nDimensions * j ]     = (*sigma_1)( GIDid );
-	      A[ nDimensions * j + 1 ] = (*sigma_2)( GIDid );
-	      A[ nDimensions * j + 2 ] = (*sigma_3)( GIDid );
+            A[ nDimensions * j ]     = (*sigma_1)( GIDid );
+            A[ nDimensions * j + 1 ] = (*sigma_2)( GIDid );
+            A[ nDimensions * j + 2 ] = (*sigma_3)( GIDid );
 	    }
 
 	  lapack.GEEV (JOBVL, JOBVR, Dim, A /*cauchy*/, Dim, &WR[0], &WI[0], VL, LDVL, VR, LDVR, WORK, LWORK, &INFO);
@@ -1628,8 +1628,8 @@ void StructuralOperator<Mesh>::computePrincipalTensions( vectorPtr_Type sigma_1,
 	  // Putting the real eigenvalues in the right place
 	  for( UInt m(0); m < nDimensions; m++ )
 	    {
-	      Int LIDid = vectorEigenvalues->blockMap().LID (iDOF + m * M_dispFESpace->dof().numTotalDof() + M_offset);
-	      Int GIDid = vectorEigenvalues->blockMap().GID (LIDid);
+            Int LIDid = vectorEigenvalues->blockMap().LID (static_cast<EpetraInt_Type>(iDOF + m * M_dispFESpace->dof().numTotalDof() + M_offset));
+            Int GIDid = vectorEigenvalues->blockMap().GID (LIDid);
 
 	      (*vectorEigenvalues)( GIDid ) = eigenvalues[ m ];
 	    }

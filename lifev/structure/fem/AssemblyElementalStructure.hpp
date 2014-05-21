@@ -103,7 +103,7 @@ void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, Ma
     // We loop over the local ID on the processors of the originVector
     for( UInt i(0); i < nTotDof; ++i )
     {
-        if( originVector.blockMap().LID( i ) != -1 ) // The i-th dof is on the processor
+        if( originVector.blockMap().LID( static_cast<EpetraInt_Type>(i) ) != -1 ) // The i-th dof is on the processor
         {
             // We look at the functor to see if the condition is satified
             bool variable = functor( i, nTotDof, offset );
@@ -113,7 +113,7 @@ void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, Ma
                 // At the first time we insert the value and then we "close" the cell
                 for ( UInt iComp = 0; iComp < dispFESpace->fieldDim(); ++iComp )
                 {
-                    Int LIDid = originVector.blockMap().LID (i + iComp * dim + offset);
+                    Int LIDid = originVector.blockMap().LID (static_cast<EpetraInt_Type>(i + iComp * dim + offset));
                     Int GIDid = originVector.blockMap().GID (LIDid);
 
                     if( (*statusVector)( GIDid ) != 1.0 )
@@ -143,7 +143,7 @@ void saveBooleanVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshT
     // We loop over the local ID on the processors of the originVector
     for( UInt i(0); i < nTotDof; ++i )
     {
-        if( originVector->blockMap().LID( i ) != -1 ) // The i-th dof is on the processor
+        if( originVector->blockMap().LID( static_cast<EpetraInt_Type>(i) ) != -1 ) // The i-th dof is on the processor
         {
             // We look at the functor to see if the condition is satified
             bool variable = functor( i, nTotDof, offset );
@@ -153,7 +153,7 @@ void saveBooleanVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshT
                 // At the first time we insert the value and then we "close" the cell
                 for ( UInt iComp = 0; iComp < dispFESpace->fieldDim(); ++iComp )
                 {
-                    Int LIDid = originVector->blockMap().LID (i + iComp * dim + offset);
+                    Int LIDid = originVector->blockMap().LID (static_cast<EpetraInt_Type>(i + iComp * dim + offset));
                     Int GIDid = originVector->blockMap().GID (LIDid);
 
                     (*saveVector)( GIDid ) = 1.0;
