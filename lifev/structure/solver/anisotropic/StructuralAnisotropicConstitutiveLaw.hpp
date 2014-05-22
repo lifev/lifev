@@ -31,7 +31,6 @@
  *  @version 1.0
  *  @date 01-01-2010
  *  @author Paolo Tricerri
- *  @author Gianmarco Mengaldo
  *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
  */
 
@@ -328,7 +327,7 @@ public:
     //! Get the Stiffness matrix
     virtual matrixPtr_Type const stiffMatrix() const = 0;
 
-    //! Get the Stiffness matrix
+    //! Get the Stiffness vector
     virtual vectorPtr_Type const stiffVector() const = 0;
 
     //! Getters specific for the multi-mechanism model
@@ -336,15 +335,12 @@ public:
     virtual vectorPtr_Type const selectionCriterion( const UInt i ) const = 0;
 
     //! Get the activation displacement
-    //! Get the Stiffness matrix
     virtual vectorPtr_Type const activationDisplacement( const UInt i ) const = 0;
 
     //! Get the activation displacement
-    //! Get the Stiffness matrix
     virtual vectorPtr_Type const activatedUnitFiber( const UInt i ) const = 0;
 
     //! Get the activation displacement
-    //! Get the Stiffness matrix
     virtual vectorPtr_Type const activatedDeterminant( const UInt i ) const = 0;
 
     virtual void apply ( const vector_Type& sol, vector_Type& res,

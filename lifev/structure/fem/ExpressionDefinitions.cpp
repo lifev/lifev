@@ -104,7 +104,6 @@ namespace LifeV
 
 
     // Constructors for anisotropic laws
-#ifdef ENABLE_ANISOTROPIC_LAW
     interpolatedValue_Type interpolateFiber( const boost::shared_ptr< ETFESpace_Type > dispETFESpace,
 					     const vector_Type& fiberVector)
     {
@@ -138,7 +137,6 @@ namespace LifeV
       return isochoricStretch_Type( Jel, I_4ith );
     }
 
-#endif
   } //! End namespace ExpressionDefinitions
 
 
@@ -150,7 +148,6 @@ namespace LifeV
   //! that are needed for the distributed model making use of the previous namespaces already
   //! defined.
 
-#ifdef ENABLE_ANISOTROPIC_LAW
   namespace ExpressionDistributedModel
   {
     using namespace ExpressionAssembly;
@@ -509,7 +506,6 @@ namespace LifeV
       return activeTestGradient_Type ( gradTest, FAminus1 );
     }
   }// end namespace ExpressionDistributedModel
-#endif
 
 } //! End namespace LifeV
 #endif

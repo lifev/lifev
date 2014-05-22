@@ -403,7 +403,7 @@ public:
     {
         return M_constitutiveLaw;
     }
-#ifdef ENABLE_ANISOTROPIC_LAW
+
     const std::string& solidTypeAnisotropic()
     {
         return M_solidTypeAnisotropic;
@@ -448,7 +448,6 @@ public:
     {
         return M_toleranceActivation;
     }
-#endif
 
 
 
@@ -512,7 +511,6 @@ private:
 
     std::string            M_solidTypeIsotropic;
     std::string            M_constitutiveLaw;
-#ifdef ENABLE_ANISOTROPIC_LAW
     std::string            M_solidTypeAnisotropic;
     UInt                   M_numberFibers;
     vectorParameters_Type  M_stiffnessParametersFibers;
@@ -522,7 +520,6 @@ private:
     Real                   M_epsilon;
     std::string            M_fiberActivation;
     Real                   M_toleranceActivation;
-#endif
     std::string            M_lawType;
     bool                   M_useExactJacobian;
 

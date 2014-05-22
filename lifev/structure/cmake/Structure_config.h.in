@@ -1,5 +1,5 @@
 /* Define to disable the anisotropic folder */
-#cmakedefine ENABLE_ANISOTROPIC_LAW
+//#cmakedefine ENABLE_ANISOTROPIC_LAW
 
 /* Define to color mesh according to marker */
 #cmakedefine COLORING_MESH

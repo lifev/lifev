@@ -7,12 +7,6 @@ ADD_SUBDIRECTORIES(
   time_advance_ii
   principalTensions
   structuralsolver
+  anisotropicLaw
+  evaluateNodalETA
   )
-
-
-IF(ENABLE_ANISOTROPIC_LAW)
-  ADD_SUBDIRECTORIES(
-    anisotropicLaw
-    evaluateNodalETA
-    )
-ENDIF()

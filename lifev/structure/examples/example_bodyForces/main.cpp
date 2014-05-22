@@ -266,7 +266,6 @@ Structure::run3d()
     listOfFiberDirections_Type fiberDirections;
     fibersDirectionList setOfFiberFunctions;
 
-#ifdef ENABLE_ANISOTROPIC_LAW
     if( !dataStructure->constitutiveLaw().compare("anisotropic") )
     {
         // Setting the fibers
@@ -282,7 +281,6 @@ Structure::run3d()
 
         setOfFiberFunctions.setupFiberDefinitions( dataStructure->numberFibersFamilies( ) );
     }
-#endif
 
     std::string timeAdvanceMethod =  dataFile ( "solid/time_discretization/method", "BDF");
 
@@ -355,8 +353,6 @@ Structure::run3d()
         solid.setSourceTerm( bodyTerm );
     }
 
-
-#ifdef ENABLE_ANISOTROPIC_LAW
     if( !dataStructure->constitutiveLaw().compare("anisotropic") )
     {
         // Setting the vector of fibers functions
@@ -381,7 +377,6 @@ Structure::run3d()
         //! 3.b Setting the fibers in the abstract class of Anisotropic materials
         solid.material()->anisotropicLaw()->setupFiberDirections( pointerToVectorOfFamilies );
     }
-#endif
 
     //! 4. Building system using TimeAdvance class
     double timeAdvanceCoefficient = timeAdvance->coefficientSecondDerivative ( 0 ) / (dataStructure->dataTime()->timeStep() * dataStructure->dataTime()->timeStep() );
@@ -478,7 +473,6 @@ Structure::run3d()
 
     *imposedSolution = *analyticDispl;
 
-#ifdef ENABLE_ANISOTROPIC_LAW
     if( !dataStructure->constitutiveLaw().compare("anisotropic") )
     {
         // Adding the fibers vectors
@@ -501,7 +495,6 @@ Structure::run3d()
             *(fiberDirections[ k-1 ]) = solid.material()->anisotropicLaw()->ithFiberVector( k );
         }
     }
-#endif
 
     exporter->postProcess ( 0 );
     exporterCheck->postProcess ( 0 );

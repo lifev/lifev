@@ -146,7 +146,6 @@ typedef ExpressionProduct<
 
 
   // Typedefs for anisotropic laws
-#ifdef ENABLE_ANISOTROPIC_LAW
   typedef  ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3>   interpolatedValue_Type;
 
   typedef  ExpressionInterpolateValue<MeshType, MapEpetra, 3, 1>   interpolatedScalarValue_Type;
@@ -176,8 +175,6 @@ typedef ExpressionProduct<
       ExpressionOuterProduct<
 	ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3 >, ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3 > > > > isochoricStretch_Type;
 
-#endif
-
 //@}
 
  deformationGradient_Type deformationGradient( const boost::shared_ptr< ETFESpace_Type > dispETFESpace,
@@ -202,7 +199,6 @@ typedef ExpressionProduct<
   isochoricTrace_Type isochoricTrace( const powerExpression_Type Jel, const traceTensor_Type I );
 
 // Constructors for anisotropic laws
-#ifdef ENABLE_ANISOTROPIC_LAW
   interpolatedValue_Type interpolateFiber( const boost::shared_ptr< ETFESpace_Type > dispETFESpace,
 					  const vector_Type& fiberVector);
 
@@ -217,7 +213,6 @@ typedef ExpressionProduct<
   stretch_Type fiberStretch( const rightCauchyGreenTensor_Type C, const outerProduct_Type M);
 
   isochoricStretch_Type isochoricFourthInvariant( const powerExpression_Type Jel, const stretch_Type I_4ith);
-#endif
 } //! End namespace ExpressionDefinitions
 
 
@@ -229,7 +224,6 @@ typedef ExpressionProduct<
 //! that are needed for the distributed model making use of the previous namespaces already
 //! defined.
 
-#ifdef ENABLE_ANISOTROPIC_LAW
 namespace ExpressionDistributedModel
 {
 using namespace ExpressionAssembly;
@@ -586,7 +580,6 @@ rightCauchyGreenMultiMechanism_Type activationRightCauchyGreen( const Expression
  activeTestGradient_Type activatedTestGradient(const ExpressionDphiI gradTest,
 					       const ExpressionDefinitions::inverseTensor_Type FAminus1);
 }// end namespace ExpressionDistributedModel
-#endif
 
 } //! End namespace LifeV
 #endif

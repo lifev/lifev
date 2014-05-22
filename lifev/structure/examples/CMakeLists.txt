@@ -8,6 +8,13 @@ ADD_SUBDIRECTORIES(
   example_tractionWithSymmetry
   example_partitionMesh
   example_computationNorm
+  example_checkingFibersDirection
+  example_computePrincipalTensions
+  example_bodyForces
+  example_anisotropicTraction
+  example_multimechanismTraction
+  example_evaluateActivationMultimechanism
+  example_evaluatingScalarVectorialTensorialQuantitiesUsingETA
 )
 
 IF(EXPORTVECTORS_DEBUG)
@@ -25,18 +32,5 @@ ENDIF()
 IF(COMPUTATION_JACOBIAN)
   ADD_SUBDIRECTORIES(
     example_computingJacobian
-)
-ENDIF()
-
-
-IF(ENABLE_ANISOTROPIC_LAW)
-  ADD_SUBDIRECTORIES(
-    example_checkingFibersDirection
-    example_computePrincipalTensions
-    example_bodyForces
-    example_anisotropicTraction
-    example_multimechanismTraction
-    example_evaluateActivationMultimechanism
-    example_evaluatingScalarVectorialTensorialQuantitiesUsingETA
 )
 ENDIF()
