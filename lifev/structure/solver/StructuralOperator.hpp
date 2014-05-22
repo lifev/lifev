@@ -68,9 +68,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 
-#ifdef COMPUTATION_JACOBIAN
 #include <Epetra_SerialDenseMatrix.h>
-#endif
+
 
 //Linear Solver includes
 #include <Teuchos_ParameterList.hpp>
@@ -226,12 +225,10 @@ public:
     typedef TimeAdvance< vector_Type >                                  timeAdvance_Type;
     typedef boost::shared_ptr< timeAdvance_Type >                       timeAdvancePtr_Type;
 
-#ifdef COMPUTATION_JACOBIAN
     typedef Epetra_SerialDenseMatrix                     matrixSerialDense_Type;
     typedef boost::shared_ptr<matrixSerialDense_Type>    matrixSerialDensePtr_Type;
     typedef std::vector<LifeV::Real>                     vectorInvariants_Type;
     typedef boost::shared_ptr<vectorInvariants_Type>     vectorInvariantsPtr_Type;
-#endif
 
 
     // Source term
@@ -452,15 +449,12 @@ public:
     */
   void computeMatrix ( matrixPtr_Type& stiff, const vector_Type& sol, Real const& factor, const UInt iter );
 
-
-#ifdef COMPUTATION_JACOBIAN
     //! compute the value of the determinant of F in all the volumes of the mesh
     /*!
       \param displacement the solution at a certain time
       \return the vector with the values for J
     */
     void jacobianDistribution ( vectorPtr_Type displacement, vector_Type& jacobianDistribution );
-#endif
 
 
     //! compute the value of the determinant of F in all the volumes of the mesh
@@ -544,7 +538,6 @@ public:
         M_timeAdvance = timeAdvancePtr;
     }
 
-#ifdef COMPUTATION_JACOBIAN
     //! constructPatchAreaVector: This method build the patch area vector used in the reconstruction process
     /*!
       \param NONE
@@ -557,7 +550,6 @@ public:
       \param elvecTens VectorElemental over which the reconstruction is applied
     */
     void reconstructElementaryVector ( VectorElemental& elVecSigma, vector_Type& patchArea, UInt nVol );
-#endif
 
     //@}
 
@@ -645,7 +637,6 @@ public:
         return *M_linearSolver;
     }
 
-#ifdef EXPORTVECTORS
     //! Get the right hand. The member rhsCopy is used for Debug purposes!
     vector_Type& rhsCopy()
     {
@@ -655,7 +646,6 @@ public:
     {
         return *M_residualCopy;
     }
-#endif
 
     vector_Type& bodyForce()
     {
@@ -803,10 +793,8 @@ protected:
     //! right  hand  side displacement
     vectorPtr_Type                       M_rhs;
 
-#ifdef EXPORTVECTORS
     vectorPtr_Type                       M_rhsCopy;
     vectorPtr_Type                       M_residualCopy;
-#endif
 
     //! right  hand  side
     vectorPtr_Type                       M_rhsNoBC;
@@ -859,11 +847,10 @@ protected:
     //! Map between markers and volumes on the mesh
     mapMarkerIndexesPtr_Type             M_mapMarkersIndexes;
 
-#ifdef COMPUTATION_JACOBIAN
     //! Elementary matrix for the tensor F
     matrixSerialDensePtr_Type            M_deformationF;
     vectorInvariants_Type                M_invariants;
-#endif
+
 
     timeAdvancePtr_Type                  M_timeAdvance;
 };
@@ -885,10 +872,8 @@ StructuralOperator<Mesh>::StructuralOperator( ) :
     M_disp                       ( ),
     M_rhsNoBC                    ( ),
     M_bodyForceVector            ( ),
-#ifdef EXPORTVECTORS
     M_rhsCopy                    ( ),
     M_residualCopy               ( ),
-#endif
     M_residual_d                 ( ),
     M_out_iter                   ( ),
     M_out_res                    ( ),
@@ -903,10 +888,8 @@ StructuralOperator<Mesh>::StructuralOperator( ) :
     M_offset                     ( 0 ),
     M_rescaleFactor              ( 1. ),
     M_material                   ( ),
-#ifdef COMPUTATION_JACOBIAN
     M_deformationF               ( ),
     M_invariants                 ( ),
-#endif
     M_mapMarkersVolumes          ( ),
     M_mapMarkersIndexes          ( ),
     M_timeAdvance                ( )
@@ -937,10 +920,10 @@ StructuralOperator<Mesh>::setup (boost::shared_ptr<data_Type>        data,
     setup ( data, dFESpace, dETFESpace, comm, dFESpace->mapPtr(), (UInt) 0 );
 
     M_rhs.reset                        ( new vector_Type (*M_localMap) );
-#ifdef EXPORTVECTORS
+
     M_rhsCopy.reset                    ( new vector_Type (*M_localMap) );
     M_residualCopy.reset               ( new vector_Type (*M_localMap) );
-#endif
+
     M_rhsNoBC.reset                    ( new vector_Type (*M_localMap) );
     M_bodyForceVector.reset            ( new vector_Type (*M_localMap) );
     M_linearSolver.reset               ( new LinearSolver ( comm ) );
@@ -1273,7 +1256,7 @@ void StructuralOperator<Mesh>::computeMatrix ( matrixPtr_Type& stiff, const vect
     M_Displayer->leaderPrintMax ("done in ", chrono.diff() );
 }
 
-#ifdef COMPUTATION_JACOBIAN
+
 
 template <typename Mesh>
 void StructuralOperator<Mesh>::jacobianDistribution ( vectorPtr_Type displacement, vector_Type& jacobianDistribution )
@@ -1471,7 +1454,6 @@ StructuralOperator<Mesh >::reconstructElementaryVector ( VectorElemental& elVecD
     }
 }
 
-#endif
 
 template <typename Mesh>
 void StructuralOperator<Mesh>::colorMesh ( vector_Type& meshColors )
@@ -1660,14 +1642,12 @@ StructuralOperator<Mesh>::evalResidual ( vector_Type& residual, const vector_Typ
 
             bcManageVector ( *M_rhs, *M_dispFESpace->mesh(), M_dispFESpace->dof(), *M_BCh, M_dispFESpace->feBd(),  M_data->dataTime()->time(), 1.0 );
 
-#ifdef EXPORTVECTORS
+
             //To export for check
             M_rhsCopy = M_rhs;
             // std::string nameFile="residualAfterBC";
             // M_rhs->spy(nameFile);
-            // int n;
-            // std::cin >> n;
-#endif
+
         }
 
         bcManageMatrix ( matrixFull, *M_dispFESpace->mesh(), M_dispFESpace->dof(), *M_BCh, M_dispFESpace->feBd(), 1.0 );
@@ -1690,13 +1670,12 @@ StructuralOperator<Mesh>::evalResidual ( vector_Type& residual, const vector_Typ
         M_Displayer->leaderPrintMax ("done in ", chrono.diff() );
     }
 
-#ifdef EXPORTVECTORS
+    // Debug purpose. In production you should not export such vectors
     if ( iter == 0 )
     {
         *M_residualCopy = residual;
         M_rhsCopy = M_rhs;
     }
-#endif
 }
 
 template <typename Mesh>

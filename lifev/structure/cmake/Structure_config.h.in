@@ -5,7 +5,7 @@
 //#cmakedefine COLORING_MESH
 
 /* Define to compute jacobian */
-#cmakedefine COMPUTATION_JACOBIAN
+//#cmakedefine COMPUTATION_JACOBIAN
 
 /* Define to export of vectors for debug purposes */
-#cmakedefine EXPORTVECTORS
+//#cmakedefine EXPORTVECTORS
