@@ -170,12 +170,12 @@ void loadMesh (  boost::shared_ptr< RegionMeshType >& meshLocal,
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
  */
 template< typename RegionMeshType>
-void loadPartitionedMesh ( boost::shared_ptr< RegionMeshType >& /*meshLocal*/,
-                           const std::string& /*meshName*/,
-                           const std::string& /*resourcesPath*/ )
+void loadPartitionedMesh ( boost::shared_ptr< RegionMeshType >& meshLocal,
+                           const std::string& meshName,
+                           const std::string& resourcesPath )
 {
 #ifdef HAVE_MPI
-    boost::shared_ptr<Epetra_Comm> Comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+    boost::shared_ptr<Epetra_MpiComm> Comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
     boost::shared_ptr<Epetra_Comm> Comm ( new Epetra_SerialComm );
 #endif
