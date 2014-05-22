@@ -1292,7 +1292,7 @@ inline ElectroIonicModel* createIonicTenTusscher06()
 
 namespace
 {
-static bool register_IonicMinimalModel = ElectroIonicModel::IonicModelFactory::instance().registerProduct ("TenTusscher06", &createIonicTenTusscher06 );
+static bool register_IonicTenTusscher06 = ElectroIonicModel::IonicModelFactory::instance().registerProduct ("TenTusscher06", &createIonicTenTusscher06 );
 }
 
 }
