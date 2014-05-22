@@ -18,13 +18,29 @@
 
 
 [exporter]
-modifiedMesh = variableThicknessDifferentMarkers.mesh
+modifiedMesh = 4proc.mesh
+name = 4proc
+type = hdf5
+
 
 [solid]
-[./space_discretization]
+
+[./physics]
+material_flag   = '1 2' # the two flags that will be in the modified mesh please
+
+[../model]
+contitutiveLaw = isotropic
+young     	= '0.0 0.0'
+poisson   	= '0.0 0.0'
+bulk		= '0.0 0.0'
+alpha 		= '0.0 0.0'
+gamma		= '0.0 0.0'
+solidTypeIsotropic 	= exponential
+
+[../space_discretization]
 mesh_dir  	= ./
 mesh_type   = .mesh
-mesh_file 	= solidBLVariableThickness.mesh
+mesh_file 	= solidHalfThorus.mesh
 order     	= P1
 
 

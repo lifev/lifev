@@ -3,16 +3,12 @@ INCLUDE(TribitsAddExecutableAndTest)
 INCLUDE(AddSubdirectories)
 
 ADD_SUBDIRECTORIES(
-  example_InflationExtension
-  example_CookMembrane
-  example_tractionWithSymmetry
   example_partitionMesh
   example_computationNorm
   example_checkingFibersDirection
   example_computePrincipalTensions
   example_bodyForces
   example_anisotropicTraction
-  example_multimechanismTraction
   example_evaluateActivationMultimechanism
   example_evaluatingScalarVectorialTensorialQuantitiesUsingETA
 )

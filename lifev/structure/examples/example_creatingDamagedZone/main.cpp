@@ -31,7 +31,10 @@
    and change their flag using the MeshUtility features.
    Now the elements for which the flag is changed to 2 are the ones
    belonging to the intersection of the computational domain and the sphere
-   defined by its center and radius.
+   defined by its center and
+
+   I have always executed the example in serial since the regionmesh object that
+   I pass to the elementlist function is the unpartitioned object.
 
    \date 2005-04-16
  */
@@ -68,7 +71,21 @@
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 #include <lifev/core/filter/MeshWriter.hpp>
 
+#include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
+#include <lifev/structure/solver/StructuralOperator.hpp>
+
+#include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
+
+
+#include <lifev/core/filter/ExporterEnsight.hpp>
+#ifdef HAVE_HDF5
+#include <lifev/core/filter/ExporterHDF5.hpp>
+#endif
+#include <lifev/core/filter/ExporterEmpty.hpp>
+
 #include <iostream>
+
 
 
 using namespace LifeV;
@@ -277,11 +294,35 @@ Structure::run2d()
 void
 Structure::run3d()
 {
+    typedef StructuralOperator<mesh_Type >::vector_Type                 vector_Type;
+    typedef boost::shared_ptr<vector_Type>                              vectorPtr_Type;
+    typedef FESpace< mesh_Type, MapEpetra >                             solidFESpace_Type;
+    typedef boost::shared_ptr<solidFESpace_Type>                        solidFESpacePtr_Type;
+    typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >       solidETFESpace_Type;
+    typedef boost::shared_ptr<solidETFESpace_Type>                      solidETFESpacePtr_Type;
+
+    typedef LifeV::RegionMesh<LinearTetra>                              mesh_Type;
+
+    // Filters
+    typedef LifeV::Exporter<mesh_Type  >                       filter_Type;
+    typedef boost::shared_ptr< LifeV::Exporter<mesh_Type  > >           filterPtr_Type;
+
+    typedef LifeV::ExporterEmpty<mesh_Type >                            emptyFilter_Type;
+    typedef boost::shared_ptr<emptyFilter_Type>                         emptyFilterPtr_Type;
+    typedef LifeV::ExporterEnsight<mesh_Type >                          ensightFilter_Type;
+    typedef boost::shared_ptr<ensightFilter_Type>                       ensightFilterPtr_Type;
+
+#ifdef HAVE_HDF5
+    typedef LifeV::ExporterHDF5<mesh_Type >                             hdf5Filter_Type;
+    typedef boost::shared_ptr<hdf5Filter_Type>                          hdf5FilterPtr_Type;
+#endif
 
     bool verbose = (parameters->comm->MyPID() == 0);
 
     //! dataElasticStructure
     GetPot dataFile ( parameters->data_file_name.c_str() );
+    boost::shared_ptr<StructuralConstitutiveLawData> dataStructure (new StructuralConstitutiveLawData( ) );
+    dataStructure->setup (dataFile);
 
     MeshData             meshData;
     meshData.setup (dataFile, "solid/space_discretization");
@@ -289,7 +330,7 @@ Structure::run3d()
     boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr (new RegionMesh<LinearTetra> ( ( parameters->comm ) ) );
     readMesh (*fullMeshPtr, meshData);
 
-    fullMeshPtr->showMe( );
+    //fullMeshPtr->showMe( );
 
     if (verbose)
     {
@@ -297,8 +338,8 @@ Structure::run3d()
     }
 
     //Geometrical Infos on the sphere
-    Vector3D center (0.138, 0.0, 0.195);
-    Real     radius (0.06);
+    Vector3D center (0.138, 0.0, 0.138);
+    Real     radius (0.1);
 
     //Count how many volumes are in the sphere
     //Create the Predicate
@@ -319,7 +360,75 @@ Structure::run3d()
     std::string const nameExportMesh =  dataFile ( "exporter/modifiedMesh", "damagedMesh");
     MeshWriter::writeMeshMedit<RegionMesh<LinearTetra> > ( nameExportMesh , *fullMeshPtr );
 
+
+    // Exporting the mesh to check region with changed flag
+    MeshPartitioner< mesh_Type > meshPart ( fullMeshPtr, parameters->comm );
+
+    std::string dOrder =  dataFile ( "solid/space_discretization/order", "P1");
+    solidFESpacePtr_Type dFESpace ( new solidFESpace_Type (meshPart, dOrder, 3, parameters->comm) );
+    solidETFESpacePtr_Type dETFESpace ( new solidETFESpace_Type (meshPart, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
+
+    //! 1. Constructor of the class to compute the tensions
+    StructuralOperator<RegionMesh<LinearTetra> >  solid;
+
+    //! face BChandler object
+    boost::shared_ptr<BCHandler> BCh ( new BCHandler() );
+
+    //! 2. Its setup
+    solid.setup (dataStructure,
+                 dFESpace,
+                 dETFESpace,
+                 BCh,
+                 parameters->comm);
+
+    //! 6. Post-processing setting
+    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
+
+    std::string const exporterType =  dataFile ( "exporter/type", "hdf5");
+    std::string const nameExporter =  dataFile ( "exporter/name", "");
+
+#ifdef HAVE_HDF5
+    if (exporterType.compare ("hdf5") == 0)
+    {
+        exporter.reset ( new hdf5Filter_Type ( dataFile, nameExporter ) );
+    }
+    else
+#endif
+    {
+        if (exporterType.compare ("none") == 0)
+        {
+            exporter.reset ( new emptyFilter_Type ( dataFile, meshPart.meshPartition(), nameExporter, parameters->comm->MyPID() ) ) ;
+        }
+
+        else
+        {
+            exporter.reset ( new ensightFilter_Type ( dataFile, meshPart.meshPartition(), nameExporter, parameters->comm->MyPID() ) ) ;
+        }
+    }
+
+    exporter->setMeshProcId (dFESpace->mesh(), dFESpace->map().comm().MyPID() );
+
+    vectorPtr_Type meshColors ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "colors", dFESpace, meshColors, UInt (0) );
+
+    exporter->postProcess ( 0.0 );
     MPI_Barrier (MPI_COMM_WORLD);
+
+    //color the mesh according to the marker of the volume
+    solid.colorMesh ( *meshColors );
+
+    exporter->postProcess ( 1000.0 );
+
+    //Closing files
+    exporter->closeFile();
+
+    if (verbose )
+    {
+        std::cout << "finished" << std::endl;
+    }
+
+    MPI_Barrier (MPI_COMM_WORLD);
+
 }
 
 
