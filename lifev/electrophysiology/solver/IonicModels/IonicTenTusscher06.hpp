@@ -114,208 +114,208 @@ public:
     //@{
 
     //parameters getters and setters
-    inline const Real  getknak() const
+    inline  Real  getknak() const
     {
         return knak;
     }
-    inline const Real  getKmNa() const
+    inline  Real  getKmNa() const
     {
         return KmNa;
     }
-    inline const Real  getKmK() const
+    inline  Real  getKmK() const
     {
         return KmK;
     }
-    inline const Real  getknaca() const
+    inline  Real  getknaca() const
     {
         return knaca;
     }
-    inline const Real  getKmNai() const
+    inline  Real  getKmNai() const
     {
         return KmNai;
     }
-    inline const Real  getKmCa() const
+    inline  Real  getKmCa() const
     {
         return KmCa;
     }
-    inline const Real  getksat() const
+    inline  Real  getksat() const
     {
         return ksat;
     }
-    inline const Real  getn() const
+    inline  Real  getn() const
     {
         return n;
     }
 
 
-    inline const Real  getKo() const
+    inline  Real  getKo() const
     {
         return Ko;
     }
-    inline const Real  getCao() const
+    inline  Real  getCao() const
     {
         return Cao;
     }
-    inline const Real  getNao() const
+    inline  Real  getNao() const
     {
         return Nao;
     }
 
 
-    inline const Real  getBufc() const
+    inline  Real  getBufc() const
     {
         return Bufc;
     }
-    inline const Real  getKbufc() const
+    inline  Real  getKbufc() const
     {
         return Kbufc;
     }
-    inline const Real  getBufsr() const
+    inline  Real  getBufsr() const
     {
         return Bufsr;
     }
-    inline const Real  getKbufsr() const
+    inline  Real  getKbufsr() const
     {
         return Kbufsr;
     }
-    inline const Real  getBufss() const
+    inline  Real  getBufss() const
     {
         return Bufss;
     }
-    inline const Real  getKbufss() const
+    inline  Real  getKbufss() const
     {
         return Kbufss;
     }
 
-    inline const Real  getVmaxup() const
+    inline  Real  getVmaxup() const
     {
         return Vmaxup;
     }
-    inline const Real  getKup() const
+    inline  Real  getKup() const
     {
         return Kup;
     }
-    inline const Real  getVrel() const
+    inline  Real  getVrel() const
     {
         return Vrel;
     }
-    inline const Real  getk1_() const
+    inline  Real  getk1_() const
     {
         return k1_;
     }
-    inline const Real  getk2_() const
+    inline  Real  getk2_() const
     {
         return k2_;
     }
-    inline const Real  getk3() const
+    inline  Real  getk3() const
     {
         return k3;
     }
-    inline const Real  getk4() const
+    inline  Real  getk4() const
     {
         return k4;
     }
-    inline const Real  getEC() const
+    inline  Real  getEC() const
     {
         return EC;
     }
-    inline const Real  getmaxsr() const
+    inline  Real  getmaxsr() const
     {
         return maxsr;
     }
-    inline const Real  getminsr() const
+    inline  Real  getminsr() const
     {
         return minsr;
     }
-    inline const Real  getVleak() const
+    inline  Real  getVleak() const
     {
         return Vleak;
     }
-    inline const Real  getVxfer() const
+    inline  Real  getVxfer() const
     {
         return Vxfer;
     }
 
 
-    inline const Real  getpKNa() const
+    inline  Real  getpKNa() const
     {
         return pKNa;
     }
 
 
-    inline const Real  getRTONF() const
+    inline  Real  getRTONF() const
     {
         return RTONF;
     }
-    inline const Real  getF() const
+    inline  Real  getF() const
     {
         return F;
     }
-    inline const Real  getR() const
+    inline  Real  getR() const
     {
         return R;
     }
-    inline const Real  getT() const
+    inline  Real  getT() const
     {
         return T;
     }
 
 
-    inline const Real  getGkr() const
+    inline  Real  getGkr() const
     {
         return Gkr;
     }
-    inline const Real  getGks() const
+    inline  Real  getGks() const
     {
         return Gks;
     }
-    inline const Real  getGK1() const
+    inline  Real  getGK1() const
     {
         return GK1;
     }
-    inline const Real  getGto() const
+    inline  Real  getGto() const
     {
         return Gto;
     }
-    inline const Real  getGNa() const
+    inline  Real  getGNa() const
     {
         return GNa;
     }
-    inline const Real  getGbNa() const
+    inline  Real  getGbNa() const
     {
         return GbNa;
     }
-    inline const Real  getGCaL() const
+    inline  Real  getGCaL() const
     {
         return GCaL;
     }
-    inline const Real  getGbCa() const
+    inline  Real  getGbCa() const
     {
         return GbCa;
     }
-    inline const Real  getGpCa() const
+    inline  Real  getGpCa() const
     {
         return GpCa;
     }
-    inline const Real  getKpCa() const
+    inline  Real  getKpCa() const
     {
         return KpCa;
     }
-    inline const Real  getGpK() const
+    inline  Real  getGpK() const
     {
         return GpK;
     }
 
 
-    inline const Real  getVc() const
+    inline  Real  getVc() const
     {
         return Vc;
     }
-    inline const Real  getVsr() const
+    inline  Real  getVsr() const
     {
         return Vsr;
     }
-    inline const Real  getVss() const
+    inline  Real  getVss() const
     {
         return Vss;
     }
