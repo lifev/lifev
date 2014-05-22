@@ -27,9 +27,12 @@
    \file main.cpp
    \author Paolo Tricerri <paolo.tricerri@epfl.ch>
 
+   This example shows how to select portion of the computational domain
+   and change their flag using the MeshUtility features.
+   Now the elements for which the flag is changed to 2 are the ones
+   belonging to the intersection of the computational domain and the sphere
+   defined by its center and radius.
 
-   Attention: At the moment the restart works only if the solution is saved at
-   each time step
    \date 2005-04-16
  */
 #undef HAVE_HDF5
