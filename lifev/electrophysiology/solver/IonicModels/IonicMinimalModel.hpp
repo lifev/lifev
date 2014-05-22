@@ -412,6 +412,18 @@ private:
 
 
 
+inline ElectroIonicModel* createIonicMinimalModel()
+{
+    return new IonicMinimalModel();
+}
+
+namespace
+{
+static bool register_IonicMinimalModel = ElectroIonicModel::IonicModelFactory::instance().registerProduct ("MinimalModel", &createIonicMinimalModel );
+}
+
+
+
 class MMTanhFunctor
 {
 public:

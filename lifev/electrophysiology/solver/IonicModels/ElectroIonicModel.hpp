@@ -77,10 +77,19 @@
 #include <lifev/core/array/VectorElemental.hpp>
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
+
+#include <lifev/core/util/Factory.hpp>
+#include <lifev/core/util/FactorySingleton.hpp>
+
+
 #include <lifev/electrophysiology/stimulus/ElectroStimulus.hpp>
 
 #include <boost/bind.hpp>
 #include <boost/ref.hpp>
+
+#include <Teuchos_RCP.hpp>
+#include <Teuchos_ParameterList.hpp>
+#include "Teuchos_XMLParameterListHelpers.hpp"
 
 namespace LifeV
 {
@@ -112,6 +121,9 @@ public:
                                     const Real& y,
                                     const Real& z,
                                     const ID& i) >   function_Type;
+
+    typedef FactorySingleton<Factory<ElectroIonicModel, std::string> >  IonicModelFactory;
+
     //@}
 
     //! @name Constructors & Destructor
@@ -151,6 +163,12 @@ public:
 
     //! @name Methods
     //@{
+
+    //! setup the parameters of the ionic model from an xml file
+    /*!
+     * @param parameterList Teuchos parameter list
+     */
+    virtual void setup( Teuchos::ParameterList& parameterList) { }
 
     //! returns the number of equations of the ionic model
     /*!

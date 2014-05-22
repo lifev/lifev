@@ -38,9 +38,9 @@
 #include <lifev/electrophysiology/solver/IonicModels/IonicAlievPanfilov.hpp>
 
 
-#include <Teuchos_RCP.hpp>
-#include <Teuchos_ParameterList.hpp>
-#include "Teuchos_XMLParameterListHelpers.hpp"
+//#include <Teuchos_RCP.hpp>
+//#include <Teuchos_ParameterList.hpp>
+//#include "Teuchos_XMLParameterListHelpers.hpp"
 
 namespace LifeV
 {
@@ -63,11 +63,7 @@ IonicAlievPanfilov::IonicAlievPanfilov()    :
 IonicAlievPanfilov::IonicAlievPanfilov ( Teuchos::ParameterList& parameterList   )   :
     super       ( 2 )
 {
-    M_mu1       =  parameterList.get ("mu1", 0.12);
-    M_mu2       =  parameterList.get ("mu2", 0.3);
-    M_k         =  parameterList.get ("k", 8.0);
-    M_a         =  parameterList.get ("a", 0.1);
-    M_epsilon   =  parameterList.get ("epsilon", 0.01);
+	setup ( parameterList );
 
     M_restingConditions.at (0) = 0.0;
     M_restingConditions.at (1) = 0.16;
@@ -103,7 +99,14 @@ IonicAlievPanfilov& IonicAlievPanfilov::operator= ( const IonicAlievPanfilov& mo
     return      *this;
 }
 
-
+void IonicAlievPanfilov::setup ( Teuchos::ParameterList& parameterList )
+{
+    M_mu1       =  parameterList.get ("mu1", 0.12);
+    M_mu2       =  parameterList.get ("mu2", 0.3);
+    M_k         =  parameterList.get ("k", 8.0);
+    M_a         =  parameterList.get ("a", 0.1);
+    M_epsilon   =  parameterList.get ("epsilon", 0.01);
+}
 // ===================================================
 //! Methods
 // ===================================================

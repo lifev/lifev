@@ -188,6 +188,19 @@ private:
 
 }; // class IonicMitchellSchaeffer
 
+
+
+inline ElectroIonicModel* createIonicMitchellSchaeffer()
+{
+    return new IonicMitchellSchaeffer();
+}
+
+namespace
+{
+static bool register_IonicMitchellSchaeffer = ElectroIonicModel::IonicModelFactory::instance().registerProduct ("MitchellSchaeffer", &createIonicMitchellSchaeffer );
+}
+
+
 }
 
 #endif

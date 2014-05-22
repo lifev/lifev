@@ -168,6 +168,7 @@ public:
         this->M_Gamma   = M_Eta2 * M_Eta3;
     }
 
+    void setup ( Teuchos::ParameterList& parameterList );
     //Compute the rhs on a single node or for the 0D case
     //this is to make visible the computeRhs defined in the base class, otherwise it is hidden by the ones defined here
     using ElectroIonicModel::computeRhs;
@@ -205,6 +206,16 @@ private:
 
 }; // class IonicFitzHughNagumo
 
+
+inline ElectroIonicModel* createIonicFitzHughNagumo()
+{
+    return new IonicFitzHughNagumo();
+}
+
+namespace
+{
+static bool register_IonicFitzHughNagumo = ElectroIonicModel::IonicModelFactory::instance().registerProduct ("FitzHughNagumo", &createIonicFitzHughNagumo );
+}
 
 }
 

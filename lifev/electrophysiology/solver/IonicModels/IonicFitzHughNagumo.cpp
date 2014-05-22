@@ -61,14 +61,7 @@ IonicFitzHughNagumo::IonicFitzHughNagumo()    :
 IonicFitzHughNagumo::IonicFitzHughNagumo ( Teuchos::ParameterList& parameterList   )   :
     super       ( 2 )
 {
-    M_G     =   parameterList.get ("G", 1.5);
-    M_Vth   =   parameterList.get ("Vth", 13.);
-    M_Vp    =   parameterList.get ("Vp", 100.);
-    M_Eta1  =   parameterList.get ("Eta1", 4.4);
-    M_Eta2  =   parameterList.get ("Eta2", 0.012);
-    M_Eta3  =   parameterList.get ("Eta3", 1.);
-    M_Eta   =   M_Eta2 / M_Vp;
-    M_Gamma =   M_Eta2 * M_Eta3;
+	setup ( parameterList );
 
     M_restingConditions.at (0) = 1e-8;
     M_restingConditions.at (1) = 0.3;
@@ -113,6 +106,19 @@ IonicFitzHughNagumo& IonicFitzHughNagumo::operator= ( const IonicFitzHughNagumo&
 // ===================================================
 //! Methods
 // ===================================================
+void IonicFitzHughNagumo::setup ( Teuchos::ParameterList& parameterList )
+{
+    M_G     =   parameterList.get ("G", 1.5);
+    M_Vth   =   parameterList.get ("Vth", 13.);
+    M_Vp    =   parameterList.get ("Vp", 100.);
+    M_Eta1  =   parameterList.get ("Eta1", 4.4);
+    M_Eta2  =   parameterList.get ("Eta2", 0.012);
+    M_Eta3  =   parameterList.get ("Eta3", 1.);
+    M_Eta   =   M_Eta2 / M_Vp;
+    M_Gamma =   M_Eta2 * M_Eta3;
+}
+
+
 //Only gating variables
 void IonicFitzHughNagumo::computeGatingRhs (    const   std::vector<Real>&  v,
                                                 std::vector<Real>& rhs )

@@ -48,9 +48,7 @@
 #include <lifev/electrophysiology/solver/IonicModels/ElectroIonicModel.hpp>
 
 
-#include <Teuchos_RCP.hpp>
-#include <Teuchos_ParameterList.hpp>
-#include "Teuchos_XMLParameterListHelpers.hpp"
+
 
 namespace LifeV
 {
@@ -145,7 +143,7 @@ public:
     }
 
 
-    // inline const short int& Size() const { return M_numberOfEquations; }
+    void setup ( Teuchos::ParameterList& parameterList );
     //@}
 
     //! @name Methods
@@ -193,6 +191,17 @@ private:
 
 }; // class IonicAlievPanfilov
 
+
+
+inline ElectroIonicModel* createIonicAlievPanfilov()
+{
+    return new IonicAlievPanfilov();
+}
+
+namespace
+{
+static bool register_IonicAlievPanfilov = ElectroIonicModel::IonicModelFactory::instance().registerProduct ("AlievPanfilov", &createIonicAlievPanfilov );
+}
 
 }
 
