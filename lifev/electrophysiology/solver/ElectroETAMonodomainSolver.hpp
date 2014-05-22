@@ -177,7 +177,7 @@ public:
     //! Base class of the ionic model
     typedef ElectroIonicModel                                           superIonicModel;
 
-    typedef boost::shared_ptr<ionicModel_Type>                          ionicModelPtr_Type;
+    typedef boost::shared_ptr<superIonicModel>                          ionicModelPtr_Type;
 
     //! xml list to read parameters
     typedef Teuchos::ParameterList                                      list_Type;
@@ -1741,12 +1741,9 @@ void ElectroETAMonodomainSolver<Mesh, IonicModel>::setupStiffnessMatrix (
     {
         using namespace ExpressionAssembly;
 
-        BOOST_AUTO_TPL (I, value (M_identity) );
-        BOOST_AUTO_TPL (f0, value (spaceVectorial, *M_fiberPtr) );
-        BOOST_AUTO_TPL (D,
-                        value (sigmat) * I
-                        + (value (sigmal) - value (sigmat) )
-                        * outerProduct (f0, f0) );
+        auto I = value(M_identity);
+        auto f0 = value (spaceVectorial, *M_fiberPtr);
+        auto D = value (sigmat) * I + (value (sigmal) - value (sigmat) ) * outerProduct (f0, f0);
 
         integrate (elements (M_localMeshPtr), M_feSpacePtr->qr(), M_ETFESpacePtr,
                    M_ETFESpacePtr,
@@ -2294,8 +2291,8 @@ template<typename Mesh, typename IonicModel>
 void ElectroETAMonodomainSolver<Mesh, IonicModel>::init()
 {
     M_linearSolverPtr.reset (new LinearSolver() );
-    M_globalSolution = * (new vectorOfPtr_Type() );
-    M_globalRhs = * (new vectorOfPtr_Type() );
+    M_globalSolution = vectorOfPtr_Type();
+    M_globalRhs = vectorOfPtr_Type();
 
     M_identity (0, 0) = 1.0;
     M_identity (0, 1) = 0.0;
