@@ -45,23 +45,6 @@
 
 namespace LifeV
 {
-
-//Body Forces
-Real f (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
-Real InternalPressure (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
-Real fzero_scalar (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
-
-// Initial displacement and velocity
-Real d0 (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
-Real w0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
-Real a0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
-
-//Boundary Conditions
-Real bcZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/);
-Real bcNonZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/);
-Real smoothPressure(const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i);
-Real bcNonZeroSecondOrderExponential (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/);
-
 Real sphereIndicatorFunction ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
 Real thetaFunction ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
 Real thetaRotationFunction ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);

@@ -26,8 +26,11 @@
 /**
    \file main.cpp
 
-   This example shows how to set up the fiber fields on a gemoetry of torus and
-   idealized aneurysm. 
+   This exampleis meant to help people checking if their analytical definition
+   of the collagen fibers families in the computational domain is correct.
+
+   Successfully used for cube, cylinder, torus, idealized aneurysm
+
    \author Paolo Tricerri <paolo.tricerri@epfl.ch>
    \date 1861-03-17
  */
@@ -344,7 +347,7 @@ Structure::run3d()
 	std::ostringstream number;
 	number << ( k );
 	familyNumber = number.str();
-	
+
 	// Name of the function to create
 	std::string creationString = family + familyNumber;
 	exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationString, dFESpace, fiberDirections[ k-1 ], UInt (0) );
@@ -387,7 +390,7 @@ Structure::run3d()
 
     exporter->postProcess ( 0.0 );
     cout.precision(16);
-    
+
     MPI_Barrier (MPI_COMM_WORLD);
 }
 
