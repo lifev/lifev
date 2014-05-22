@@ -2,7 +2,7 @@
 //#cmakedefine ENABLE_ANISOTROPIC_LAW
 
 /* Define to color mesh according to marker */
-#cmakedefine COLORING_MESH
+//#cmakedefine COLORING_MESH
 
 /* Define to compute jacobian */
 #cmakedefine COMPUTATION_JACOBIAN

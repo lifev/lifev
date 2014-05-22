@@ -463,14 +463,12 @@ public:
 #endif
 
 
-#ifdef COLORING_MESH
     //! compute the value of the determinant of F in all the volumes of the mesh
     /*!
       \param displacement the solution at a certain time
       \return the vector with the values for J
     */
     void colorMesh ( vector_Type& meshColors );
-#endif
 
     //! Compute the three columns of the Cauchy stress tensor
     /*!
@@ -982,9 +980,7 @@ StructuralOperator<Mesh>::setup (boost::shared_ptr<data_Type>        data,
     M_mapMarkersVolumes.reset ( new mapMarkerVolumes_Type() );
     M_mapMarkersIndexes.reset ( new mapMarkerIndexes_Type() );
 
-#ifdef COLORING_MESH
     this->setupMapMarkersVolumes();
-#endif
 }
 
 
@@ -1477,8 +1473,6 @@ StructuralOperator<Mesh >::reconstructElementaryVector ( VectorElemental& elVecD
 
 #endif
 
-
-#ifdef COLORING_MESH
 template <typename Mesh>
 void StructuralOperator<Mesh>::colorMesh ( vector_Type& meshColors )
 {
@@ -1518,8 +1512,6 @@ void StructuralOperator<Mesh>::colorMesh ( vector_Type& meshColors )
 
     }
 }
-
-#endif
 
 template <typename Mesh>
 void StructuralOperator<Mesh>::computeCauchyStressTensor( const vectorPtr_Type disp,
