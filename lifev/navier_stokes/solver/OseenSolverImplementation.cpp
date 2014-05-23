@@ -299,7 +299,8 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::setUp ( const G
     	}
     	else if (M_oseenData->stabilizationType() == "SUPG")
     	{
-
+    		int vel_order = dataFile ( "fluid/space_discretization/vel_order", 1 );
+    		M_supgStabilization->setConstant ( vel_order );
     		M_supgStabilization->setETvelocitySpace(M_fespaceUETA);
     		M_supgStabilization->setETpressureSpace(M_fespacePETA);
     		M_supgStabilization->setCommunicator(M_velocityFESpace.map().commPtr());
@@ -602,7 +603,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabiliz
 		if( M_oseenData->stabilizationType() == "IP" /*&& ( M_resetStabilization || !M_reuseStabilization || ( M_matrixStabilization.get() == 0 ) )*/ )
 		{
 			vector_Type u_starRepeated ( u_star, Repeated );
-			M_Displayer.leaderPrint ( "  F-  Updating the IP stabilization terms ...     " );
+			M_Displayer.leaderPrint ( "  F-  Updating the IP stabilization terms ... " );
 			chrono.start();
 
 			M_matrixStabilization.reset ( new matrix_Type ( M_localMap ) );
@@ -615,7 +616,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabiliz
 		else if(M_oseenData->stabilizationType() == "SUPG")
 		{
 
-			M_Displayer.leaderPrint ( "  F-  Updating the SUPG stabilization terms ...     " );
+			M_Displayer.leaderPrint ( "  F-  Updating the SUPG stabilization terms ... " );
 			chrono.start();
 
 			// TIpically here alpha is already divided by the timestep, but I want to use the actual alfa, so I multiply
@@ -640,7 +641,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabiliz
 	{
 		if (M_oseenData->stabilizationType() == "IP")
 		{
-			M_Displayer.leaderPrint ( "  F-  Updating the IP stabilization terms ...     " );
+			M_Displayer.leaderPrint ( "  F-  Updating the IP stabilization terms ... " );
 			chrono.start();
 
 			if ( M_resetStabilization || !M_reuseStabilization || ( M_matrixStabilization.get() == 0 ) )
@@ -660,7 +661,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabiliz
 		else if(M_oseenData->stabilizationType() == "SUPG")
 		{
 
-			M_Displayer.leaderPrint ( "  F-  Updating the SUPG stabilization terms ...     " );
+			M_Displayer.leaderPrint ( "  F-  Updating the SUPG stabilization terms ... " );
 			chrono.start();
 
 			// TIpically here alpha is already divided by the timestep, but I want to use the actual alfa, so I multiply

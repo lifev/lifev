@@ -22,13 +22,13 @@ save       = 1
 
 
     [../physics]
-    density         = 1.0           # density   [kg/m^3]
-    viscosity       = 0.03          # viscosity [kg/m/s]
+    density         = 1000.0     # density   [kg/m^3]
+    viscosity       = 1.0          # viscosity [kg/m/s]
 
     [../time_discretization]
     initialtime     = 0.
-    endtime         = 0.3
-    timestep        = 0.01
+    endtime         = 10
+    timestep        = 0.1
     BDF_order       = 1
 
     [../space_discretization]
@@ -40,12 +40,12 @@ save       = 1
     linearized      = 0
     diagonalize     = 0             # weight, 0=off. for P2P1 better to be on=1
     div_beta_u_v    = 1             # 1=on, 0=off
-    vel_order       = P1            # P1, P1Bubble, P2
+    vel_order       = P1Bubble            # P1, P1Bubble, P2
     press_order     = P1            # P1, P2
 
 	[../stabilization]
-	use             = true
-	method          = IP	        # possible choices: IP, SUPG
+	use             = false
+	method          = SUPG	        # possible choices: IP, SUPG
 	
 	[../ipstab]
     gammaBeta       = 0.125
@@ -59,7 +59,7 @@ save       = 1
     steady          = 0
 
     [../prec]
-    prectype                = ML # Ifpack or ML
+    prectype                = Ifpack # Ifpack or ML
     displayList             = true
 
         [./ML]

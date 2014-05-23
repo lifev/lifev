@@ -165,6 +165,9 @@ public:
     template <typename VectorType, typename VectorBlockType >
     void applySUPG_RHS_semi_implicit( VectorBlockType& rhs, const VectorType& velocityExtrapolated, const VectorType& velocityRhs);
 
+    //! Set the constant C_I for the supg
+    void setConstant (const int & value);
+
     //! Set the fluid density
     void setDensity (const Real & density) { M_density = density;}
 
@@ -221,8 +224,7 @@ template<typename MeshType, typename MapType, UInt SpaceDim>
 StabilizationSUPG<MeshType, MapType, SpaceDim>::StabilizationSUPG(FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
 																  FESpace<mesh_Type, MapEpetra>&  pressureFESpace):
 M_uFESpace (velocityFESpace),
-M_pFESpace (pressureFESpace),
-M_C_I (60)
+M_pFESpace (pressureFESpace)
 {
 }
 
@@ -230,7 +232,18 @@ M_C_I (60)
 // Methods
 //=============================================================================
 
-// applyVMS_semi_implicit
+template<typename MeshType, typename MapType, UInt SpaceDim>
+void StabilizationSUPG<MeshType, MapType, SpaceDim>::setConstant(const int & value)
+{
+	if ( value == 1 )
+		M_C_I = 30;
+	else if ( value == 2 )
+		M_C_I = 60;
+	else
+		ASSERT(0!=0, "Please implement a suitable value for M_C_I for your velocity FE order");
+}
+
+// applySUPG_semi_implicit
 template<typename MeshType, typename MapType, UInt SpaceDim>
 template <typename MatrixBlockType, typename VectorType>
 void StabilizationSUPG<MeshType, MapType, SpaceDim>::applySUPG_Matrix_semi_implicit( MatrixBlockType& matrix,

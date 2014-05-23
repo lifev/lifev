@@ -193,7 +193,7 @@ struct Cylinder::Private
 
     double Um_2d() const
     {
-        return 3 * Ubar() / 2;
+        return 90 *3 * Ubar() / 2;
     }
 
 
@@ -286,9 +286,12 @@ struct Cylinder::Private
                       const ID&   id ) const
     {
         double r = std::sqrt (x * x + y * y);
+        Real x0 (0);
+        Real y0 (0);
 
         if (id == 2)
         {
+        	//return  2.0 *  ( r*r - ( (x - x0) * (x - x0) + (y - y0) * (y - y0) ) ) / (r*r);
             return Um_2d() * 2 * ( (D / 2.) * (D / 2.) - r * r);
         }
 
