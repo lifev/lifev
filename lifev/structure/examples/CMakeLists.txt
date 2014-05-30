@@ -11,6 +11,5 @@ ADD_SUBDIRECTORIES(
   example_bodyForces
   example_checkigForceTerm
   example_anisotropicTraction
-  example_evaluateActivationMultimechanism
   example_evaluatingScalarVectorialTensorialQuantitiesUsingETA
 )
