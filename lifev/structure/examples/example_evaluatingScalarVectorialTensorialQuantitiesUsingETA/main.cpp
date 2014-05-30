@@ -47,6 +47,7 @@
 
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
+#include <lifev/core/filter/PartitionIO.hpp>
 
 #include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
@@ -244,19 +245,47 @@ Structure::run3d()
     MeshData             meshData;
     meshData.setup (dataFile, "solid/space_discretization");
 
-    boost::shared_ptr<mesh_Type > fullMeshPtr (new RegionMesh<LinearTetra> ( ( parameters->comm ) ) );
-    readMesh (*fullMeshPtr, meshData);
+    //Loading a partitoned mesh or reading a new one
+    const std::string partitioningMesh = dataFile ( "partitioningOffline/loadMesh", "no");
 
-    MeshPartitioner< mesh_Type > meshPart ( fullMeshPtr, parameters->comm );
+    //Creation of pointers
+    boost::shared_ptr<MeshPartitioner<mesh_Type> > meshPart;
+    boost::shared_ptr<mesh_Type> pointerToMesh;
+
+    if ( ! (partitioningMesh.compare ("no") ) )
+    {
+        boost::shared_ptr<mesh_Type > fullMeshPtr (new mesh_Type ( ( parameters->comm ) ) );
+        //Creating a new mesh from scratch
+        MeshData             meshData;
+        meshData.setup (dataFile, "solid/space_discretization");
+        readMesh (*fullMeshPtr, meshData);
+
+        meshPart.reset ( new MeshPartitioner<mesh_Type> (fullMeshPtr, parameters->comm ) );
+
+        pointerToMesh = meshPart->meshPartition();
+    }
+    else
+    {
+        //Creating a mesh object from a partitioned mesh
+        const std::string partsFileName (dataFile ("partitioningOffline/hdf5_file_name", "NO_DEFAULT_VALUE.h5") );
+
+        boost::shared_ptr<Epetra_MpiComm> mpiComm =
+            boost::dynamic_pointer_cast<Epetra_MpiComm>(parameters->comm);
+        PartitionIO<mesh_Type> partitionIO (partsFileName, mpiComm);
+
+        partitionIO.read (pointerToMesh);
+
+    }
+
 
     //! Functional spaces - needed for the computations of the gradients
     std::string dOrder =  dataFile ( "solid/space_discretization/order", "P1");
-    solidFESpacePtr_Type dFESpace ( new solidFESpace_Type (meshPart, dOrder, 3, parameters->comm) );
-    solidETFESpacePtr_Type dETFESpace ( new solidETFESpace_Type (meshPart, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
+    solidFESpacePtr_Type dFESpace ( new solidFESpace_Type (pointerToMesh, dOrder, 3, parameters->comm) );
+    solidETFESpacePtr_Type dETFESpace ( new solidETFESpace_Type (pointerToMesh, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
 
     //! Scalar ETFEspace to evaluate scalar quantities
-    solidFESpacePtr_Type dScalarFESpace ( new solidFESpace_Type (meshPart, dOrder, 1, parameters->comm) );
-    scalarETFESpacePtr_Type dScalarETFESpace ( new scalarETFESpace_Type (meshPart, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
+    solidFESpacePtr_Type dScalarFESpace ( new solidFESpace_Type (pointerToMesh, dOrder, 1, parameters->comm) );
+    scalarETFESpacePtr_Type dScalarETFESpace ( new scalarETFESpace_Type (pointerToMesh, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
 
     // Setting the fibers
     vectorFiberFunctionPtr_Type pointerToVectorOfFamilies( new vectorFiberFunction_Type( ) );
@@ -375,12 +404,12 @@ Structure::run3d()
     {
         if (exporterType.compare ("none") == 0)
         {
-            exporter.reset ( new emptyFilter_Type ( dataFile, meshPart.meshPartition(), nameExporter, parameters->comm->MyPID() ) ) ;
+            exporter.reset ( new emptyFilter_Type ( dataFile, pointerToMesh, nameExporter, parameters->comm->MyPID() ) ) ;
         }
 
         else
         {
-            exporter.reset ( new ensightFilter_Type ( dataFile, meshPart.meshPartition(), nameExporter, parameters->comm->MyPID() ) ) ;
+            exporter.reset ( new ensightFilter_Type ( dataFile, pointerToMesh, nameExporter, parameters->comm->MyPID() ) ) ;
         }
     }
     exporter->setMeshProcId (dFESpace->mesh(), dFESpace->map().comm().MyPID() );
