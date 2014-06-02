@@ -166,6 +166,7 @@ struct Cylinder::Private
     double      H;   /**< height and width of the domain (in m) */
     double      D;   /**< diameter of the cylinder (in m) */
     bool        centered; /**< true if the cylinder is at the origin */
+    bool        inflowFlux;
 
     std::string initial_sol;
 
@@ -178,6 +179,16 @@ struct Cylinder::Private
     double Ubar() const
     {
         return nu * Re / D;
+    }
+
+    /**
+     * get if the inflow BC is a flux
+     *
+     * @return the bool variable: true if using the flux as inflow BC, false means using Dirichlet BC at the inflow
+     */
+    bool useInflowFlux() const
+    {
+    	return inflowFlux;
     }
 
     /**
@@ -196,6 +207,10 @@ struct Cylinder::Private
         return 90 *3 * Ubar() / 2;
     }
 
+    double fluxFunction (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+    {
+        return -0.1;
+    }
 
     /**
      * u3d 3D velocity profile.
@@ -230,6 +245,13 @@ struct Cylinder::Private
         fct_Type f;
         f = boost::bind (&Cylinder::Private::u3d, this, _1, _2, _3, _4, _5);
         return f;
+    }
+
+    fct_Type getFlux()
+    {
+    	fct_Type f;
+    	f = boost::bind (&Cylinder::Private::fluxFunction, this, _1, _2, _3, _4, _5);
+    	return f;
     }
 
     /**
@@ -286,8 +308,6 @@ struct Cylinder::Private
                       const ID&   id ) const
     {
         double r = std::sqrt (x * x + y * y);
-        Real x0 (0);
-        Real y0 (0);
 
         if (id == 2)
         {
@@ -345,6 +365,8 @@ Cylinder::Cylinder ( int argc,
     d->D           =               dataFile ( "fluid/problem/D", 1. );
     d->centered    = (bool)        dataFile ( "fluid/problem/centered", 0 );
     d->initial_sol = (std::string) dataFile ( "fluid/problem/initial_sol", "stokes");
+    d->inflowFlux  =  (bool) dataFile( "fluid/miscellaneous/useInflowFlux", false );
+
     std::cout << d->initial_sol << std::endl;
 
 
@@ -395,19 +417,23 @@ Cylinder::run()
     BCFunctionBase uIn  (  d->getU_2d() );
     BCFunctionBase uOne (  d->getU_one() );
     BCFunctionBase uPois (  d->getU_pois() );
-
+    BCFunctionBase uflux (  d->getFlux() );
 
     //BCFunctionBase unormal(  d->get_normal() );
 
     //cylinder
 
-    bcH.addBC ( "Inlet",    INLET,    Essential,     Full,     uPois  , 3 );
-    bcH.addBC ( "Ringin",   RINGIN,   Essential,     Full,     uZero  , 3 );
-    bcH.addBC ( "Ringout",  RINGOUT,  Essential,     Full,     uZero  , 3 );
-    bcH.addBC ( "Outlet",   OUTLET,   Natural,     Full,     uZero, 3 );
-    bcH.addBC ( "Wall",     WALL,     Essential,   Full,     uZero, 3 );
+    if (d->useInflowFlux()==true)
+    	bcH.addBC ( "Inlet", INLET, Flux,      Normal, uflux);
+    else
+    	bcH.addBC ( "Inlet", INLET, Essential, Full,   uPois, 3 );
 
-    int numLM = 0;
+    bcH.addBC ( "Ringin",   RINGIN,   EssentialEdges, Full,     uZero, 3 );
+    bcH.addBC ( "Ringout",  RINGOUT,  EssentialEdges, Full,     uZero, 3 );
+    bcH.addBC ( "Outlet",   OUTLET,   Natural,        Full,     uZero, 3 );
+    bcH.addBC ( "Wall",     WALL,     Essential,      Full,     uZero, 3 );
+
+    int numLM = 1;
 
     boost::shared_ptr<OseenData> oseenData (new OseenData() );
     oseenData->setup ( dataFile );
@@ -419,10 +445,9 @@ Cylinder::run()
     readMesh (*fullMeshPtr, meshData);
 
     boost::shared_ptr<mesh_Type> meshPtr;
-    {
-        MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, d->comm);
-        meshPtr = meshPart.meshPartition();
-    }
+    MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, d->comm);
+    meshPtr = meshPart.meshPartition();
+
     if (verbose)
     {
         std::cout << std::endl;
@@ -465,7 +490,10 @@ Cylinder::run()
     UInt totalVelDof   = uFESpacePtr->map().map (Unique)->NumGlobalElements();
     UInt totalPressDof = pFESpacePtr->map().map (Unique)->NumGlobalElements();
 
+    if (d->useInflowFlux()==true)
+    	bcH.setOffset ("Inlet", totalVelDof + totalPressDof);
 
+    bcH.bcUpdate ( *meshPart.meshPartition(), uFESpacePtr->feBd(), uFESpacePtr->dof() );
 
     if (verbose)
     {
@@ -481,12 +509,11 @@ Cylinder::run()
         std::cout << "Calling the fluid constructor ... ";
     }
 
-    bcH.setOffset ( "Inlet", totalVelDof + totalPressDof - 1 );
-
     OseenSolver< mesh_Type > fluid (oseenData,
                                     *uFESpacePtr,
                                     *pFESpacePtr,
                                     d->comm, numLM);
+
     MapEpetra fullMap (fluid.getMap() );
 
     if (verbose)

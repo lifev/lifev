@@ -22,14 +22,14 @@ save       = 1
 
 
     [../physics]
-    density         = 1000.0     # density   [kg/m^3]
-    viscosity       = 1.0          # viscosity [kg/m/s]
+    density         = 1.2     # density   [kg/m^3]
+    viscosity       = 0.035   # viscosity [kg/m/s]
 
     [../time_discretization]
     initialtime     = 0.
-    endtime         = 10
-    timestep        = 0.1
-    BDF_order       = 1
+    endtime         = 0.5
+    timestep        = 0.01
+    BDF_order       = 2
 
     [../space_discretization]
     mesh_dir        = ./
@@ -40,11 +40,11 @@ save       = 1
     linearized      = 0
     diagonalize     = 0             # weight, 0=off. for P2P1 better to be on=1
     div_beta_u_v    = 1             # 1=on, 0=off
-    vel_order       = P1Bubble            # P1, P1Bubble, P2
+    vel_order       = P1            # P1, P1Bubble, P2
     press_order     = P1            # P1, P2
 
 	[../stabilization]
-	use             = false
+	use             = true
 	method          = SUPG	        # possible choices: IP, SUPG
 	
 	[../ipstab]
@@ -57,9 +57,10 @@ save       = 1
     [../miscellaneous]
     verbose         = 1
     steady          = 0
+    useInflowFlux   = false
 
     [../prec]
-    prectype                = Ifpack # Ifpack or ML
+    prectype                = ML # Ifpack or ML
     displayList             = true
 
         [./ML]

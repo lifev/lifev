@@ -674,6 +674,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabiliz
 			*M_matrixStabilization += *M_matrixStabilizationET;
 			M_matrixStabilization->globalAssemble();
 
+			// comment because if steady simulation this is not needed
 			M_rhsStabilization.reset(new vector_block_Type( M_velocityFESpace.map() | M_pressureFESpace.map() | M_fluxMap ));
 			*M_rhsStabilization *= 0;
 			M_supgStabilization->applySUPG_RHS_semi_implicit(M_rhsStabilization, u_star, *M_velocityRhs);
