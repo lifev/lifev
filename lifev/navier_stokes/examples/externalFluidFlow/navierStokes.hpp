@@ -42,6 +42,7 @@
 #include <lifev/core/filter/ExporterVTK.hpp>
 #include <lifev/core/filter/ExporterEmpty.hpp>
 #include <lifev/core/mesh/MeshUtility.hpp>
+#include <lifev/core/filter/PartitionIO.hpp>
 
 using namespace LifeV;
 
@@ -247,44 +248,72 @@ NavierStokes::run()
     
     if (verbose)
         std::cout << "[Loading the mesh]" << std::endl;
-    
-    boost::shared_ptr<mesh_Type > fullMeshPtr ( new mesh_Type ( M_data->comm ) );
-    
+
     Int geoDimensions = mesh_Type::S_geoDimensions;
-    MeshData meshData;
-    meshData.setup (dataFile, "fluid/space_discretization");
-    readMesh (*fullMeshPtr, meshData);
     
-    if (verbose) std::cout << "Mesh source: file("
-        << meshData.meshDir() << meshData.meshFile() << ")" << std::endl;
-    
-    if ( verbose )
-    {
-        std::cout << "Mesh size max : " << MeshUtility::MeshStatistics::computeSize ( *fullMeshPtr ).maxH << std::endl;
-    }
-    
-    if ( verbose )
-    {
-        std::cout << "Mesh size mean : " << MeshUtility::MeshStatistics::computeSize ( *fullMeshPtr ).meanH << std::endl;
-    }
+    /*
+     * 	Handling offline/online mesh partitioning - BEGIN -
+     */
 
+    bool offlinePartio = dataFile ("offline_partitioner/useOfflinePartitionedMesh", false);
 
-    if ( verbose )
-    {
-        std::cout << "Mesh size min : " << MeshUtility::MeshStatistics::computeSize ( *fullMeshPtr ).minH << std::endl;
-    }
-    
-    if (verbose)
-        std::cout << "Partitioning the mesh ... " << std::flush;
-    
     boost::shared_ptr<mesh_Type > localMeshPtr;
+
+    if ( offlinePartio )
+    {
+    	const std::string partsFileName (dataFile ("offline_partitioner/hdf5_file_name", "name.h5") );
+
+    	if(verbose)
+    		std::cout<< "   -- Loading a mesh which was already partitioned" << std::endl;
+
+    	if (verbose)
+    		std::cout << "   -- Partitioned mesh file: " << partsFileName << std::endl;
+
+    	boost::shared_ptr<Epetra_MpiComm> comm = boost::dynamic_pointer_cast<Epetra_MpiComm>(M_data->comm);
+
+    	PartitionIO<mesh_Type > partitionIO (partsFileName, comm);
+    	partitionIO.read (localMeshPtr);
+    }
+    else
+    {
+        boost::shared_ptr<mesh_Type > fullMeshPtr ( new mesh_Type ( M_data->comm ) );
+
+        MeshData meshData;
+        meshData.setup (dataFile, "fluid/space_discretization");
+        readMesh (*fullMeshPtr, meshData);
+
+        if (verbose) std::cout << "Mesh source: file("
+            << meshData.meshDir() << meshData.meshFile() << ")" << std::endl;
+
+        if ( verbose )
+        {
+            std::cout << "Mesh size max : " << MeshUtility::MeshStatistics::computeSize ( *fullMeshPtr ).maxH << std::endl;
+        }
+
+        if ( verbose )
+        {
+            std::cout << "Mesh size mean : " << MeshUtility::MeshStatistics::computeSize ( *fullMeshPtr ).meanH << std::endl;
+        }
+
+
+        if ( verbose )
+        {
+            std::cout << "Mesh size min : " << MeshUtility::MeshStatistics::computeSize ( *fullMeshPtr ).minH << std::endl;
+        }
+
+        if (verbose)
+            std::cout << "Partitioning the mesh ... " << std::flush;
+
+        MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, M_data->comm);
+        localMeshPtr = meshPart.meshPartition();
+
+        fullMeshPtr.reset(); //Freeing the global mesh to save memory
+    }
     
-    MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, M_data->comm);
-    localMeshPtr = meshPart.meshPartition();
-    
-    fullMeshPtr.reset(); //Freeing the global mesh to save memory
-    
-    
+    /*
+     * 	Handling offline/online mesh partitioning - END -
+     */
+
     if (verbose)
         std::cout << std::endl << "[Creating the FE spaces]" << std::endl;
     

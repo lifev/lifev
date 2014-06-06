@@ -3,6 +3,12 @@
 #      Data file for RossEthierSteinman test case
 #-------------------------------------------------
 
+* #offline partitioner details
+[offline_partitioner]
+useOfflinePartitionedMesh = true                  # true for loading an already partitioned mesh, false to partition the mesh online
+num_parts = 6                                     # must be the same of the number of parts when we partioned offline the mesh
+hdf5_file_name = cylinder_offlinePartitioned.h5   # file generated running test partion_io (main_write) - REQUIRED - 
+io_class = new                                    # possibilities: old or new, use new
 
 [exporter]
 type       = vtk # hdf5 (if library compiled with hdf5 support) or ensight
@@ -36,7 +42,7 @@ mesh_source            = regular_mesh
 
     [../space_discretization]
     mesh_dir        = ./
-    mesh_file       = cylinder_new_longer.mesh #KoobusFarhat.mesh
+    mesh_file       = cylinder.mesh #KoobusFarhat.mesh
     mesh_type       = .mesh
 
     verbose         = 0
