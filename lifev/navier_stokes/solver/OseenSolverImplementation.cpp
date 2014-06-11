@@ -551,8 +551,8 @@ updateSystem ( const Real          alpha,
                 M_velocityFESpace.qr(),          // QR
                 M_fespaceUETA,
                 M_fespaceUETA,
-                dot(grad(phi_j) * M_oseenData->density() * value(M_fespaceUETA, u_starRepeated), phi_i) +                           // semi-implicit convective term
-                0.5 * M_oseenData->density() * dot ( value ( Eye ) , grad(M_fespaceUETA, u_starRepeated) ) * dot( phi_j , phi_i )   // consistency term
+                dot( M_oseenData->density() * value(M_fespaceUETA, u_starRepeated)*grad(phi_j), phi_i) // semi-implicit convective term
+                //+ 0.5 * M_oseenData->density() * dot ( value ( Eye ) , grad(M_fespaceUETA, u_starRepeated) ) * dot( phi_j , phi_i )   // consistency term
                       )
             >> M_convectiveMatrix->block(0,0);
         }

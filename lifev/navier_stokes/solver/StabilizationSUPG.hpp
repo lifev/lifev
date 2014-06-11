@@ -319,7 +319,7 @@ void StabilizationSUPG<MeshType, MapType, SpaceDim>::applySUPG_RHS_semi_implicit
 			elements(M_uFESpace.mesh()),
 			M_uFESpace.qr(),
 			M_fespaceUETA,
-			TAU_M*value(M_density*M_density)*dot( grad(phi_i)*value(M_fespaceUETA, velocityExtrapolated), value(M_fespaceUETA, velocityRhs))
+			TAU_M*value(M_density*M_density)*dot( value(M_fespaceUETA, velocityExtrapolated)*grad(phi_i), value(M_fespaceUETA, velocityRhs))
 	)
 	>> rhs->block(0);
 

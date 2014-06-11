@@ -133,9 +133,7 @@ Real inflowFunction(const Real& t, const Real& /*x*/, const Real& /*y*/, const R
 {
     if (i == 0)
     {
-        Real ux = 0.1;              // flat velocity profile
-        //Real perturb = 0.1 * ux * ( 2.0 * ( ( double( rand( ) ) / RAND_MAX ) - 0.5 ) );
-        //ux += perturb;
+        Real ux = 22.0;              // flat velocity profile
         return (1 * ux * t/0.15 * (t < 0.15) + 1 * ux * (t >= 0.15));
     }
     else
@@ -374,9 +372,9 @@ NavierStokes::run()
     BCHandler bcH;
 
     bcH.addBC( "Outflow",        3, Natural,   Full,      uZero,   3 );
-    bcH.addBC( "Inflow",         2, Essential, Full,      uInflow, 3 );
-    bcH.addBC( "WallUpDown",     4, Essential, Component, uZero,   yComp );
-    bcH.addBC( "Cylinder",       6, Essential, Full,      uZero,   3 );
+    bcH.addBC( "Inflow",         1, Essential, Full,      uInflow, 3 );
+    bcH.addBC( "WallUpDown",     2, Essential, Component, uZero,   yComp );
+    bcH.addBC( "Cylinder",       4, Essential, Full,      uZero,   3 );
     bcH.addBC( "WallLeftRight",  5, Essential, Component, uZero,   zComp );
 
     // If we change the FE we have to update the BCHandler (internal data)
@@ -385,11 +383,11 @@ NavierStokes::run()
     BCFunctionBase uOne( oneFunction );
     
     BCHandler bcHDrag;
-    bcHDrag.addBC( "Cylinderr",   6, Essential, Component, uOne,   xComp ); // ATTENTO CAMBIA A SECONDA DEL FLAG DEL CILINDRO
+    bcHDrag.addBC( "Cylinderr",   4, Essential, Component, uOne,   xComp ); // ATTENTO CAMBIA A SECONDA DEL FLAG DEL CILINDRO
     bcHDrag.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
     
     BCHandler bcHLift;
-    bcHLift.addBC( "Cylinderr",   6, Essential, Component, uOne,   yComp ); // ATTENTO CAMBIA A SECONDA DEL FLAG DEL CILINDRO
+    bcHLift.addBC( "Cylinderr",   4, Essential, Component, uOne,   yComp ); // ATTENTO CAMBIA A SECONDA DEL FLAG DEL CILINDRO
     bcHLift.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
     
     // +-----------------------------------------------+
@@ -525,19 +523,19 @@ NavierStokes::run()
         
         fluid.setVelocityRhs(bdf.bdfVelocity().rhsContributionFirstDerivative());
         
-        if (oseenData->conservativeFormulation() )
+        //if (oseenData->conservativeFormulation() )
             rhs  = fluid.matrixMass() * bdf.bdfVelocity().rhsContributionFirstDerivative();
         
         fluid.updateSystem ( alpha, beta, rhs );
         
-        if (!oseenData->conservativeFormulation() )
-            rhs  = fluid.matrixMass() * bdf.bdfVelocity().rhsContributionFirstDerivative();
+        //if (!oseenData->conservativeFormulation() )
+        //    rhs  = fluid.matrixMass() * bdf.bdfVelocity().rhsContributionFirstDerivative();
         
         fluid.iterate ( bcH );
         
         Real velInfty = (1 * 22 * time/0.15 * (time < 0.15) + 1 * 22 * (time >= 0.15));
         
-        AerodynamicCoefficients = fluid.computeDrag(1, bcHDrag, bcHLift, velInfty, 0.25*fluid.area(6) );
+        AerodynamicCoefficients = fluid.computeDrag(1, bcHDrag, bcHLift, velInfty, 0.25*fluid.area(4) );
         
         if ( verbose && M_exportCoeff )
         {
