@@ -80,6 +80,7 @@
 #include <lifev/navier_stokes/testsuite/basic_test/pExactFunctor.hpp>
 
 #include <lifev/navier_stokes/solver/StabilizationSUPG.hpp>
+#include <lifev/navier_stokes/solver/StabilizationVMSLES.hpp>
 
 #include <list>
 
@@ -571,7 +572,7 @@ public:
      */
     void setVelocityRhs( const vector_Type& velocityRHS )
     {
-    	M_velocityRhs.reset(new vector_Type(velocityRHS.map(), Unique));
+    	M_velocityRhs.reset(new vector_Type(velocityRHS.map(), Repeated));
     	*M_velocityRhs *= 0;
     	*M_velocityRhs += velocityRHS;
     }
@@ -913,6 +914,9 @@ protected:
 
     vectorPtr_Type                 M_velocityRhs;
 
+    vectorPtr_Type                 M_velocityPreviousTimestep;
+    vectorPtr_Type                 M_pressurePreviousTimestep;
+    
     //! Linear solver
     linearSolverPtr_Type           M_linearSolver;
 
@@ -951,6 +955,9 @@ protected:
 
     // SUPG stabilization
     boost::shared_ptr<StabilizationSUPG<mesh_Type, map_Type, SpaceDim > > M_supgStabilization;
+    
+    // VMSLES stabilization
+    boost::shared_ptr<StabilizationVMSLES<mesh_Type, map_Type, SpaceDim > > M_VMSLESStabilization;
 
     //! Elementary matrices and vectors
     MatrixElemental                        M_elementMatrixStiff;            // velocity Stokes

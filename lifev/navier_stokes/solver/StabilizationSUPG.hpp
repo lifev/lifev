@@ -276,8 +276,8 @@ void StabilizationSUPG<MeshType, MapType, SpaceDim>::applySUPG_Matrix_semi_impli
 	integrate(
 			elements(M_uFESpace.mesh()),
 			M_uFESpace.qr(),
-			M_fespaceUETA, // test  w -> phi_j
-			M_fespacePETA, // trial p -> phi_i
+			M_fespaceUETA, // test  w -> phi_i
+			M_fespacePETA, // trial p -> phi_j
 			TAU_M*value(M_density)*dot( value(M_fespaceUETA, velocityExtrapolated)*grad(phi_i), grad(phi_j) )
 	) >> matrix->block(0,1);
 
