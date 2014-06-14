@@ -30,7 +30,7 @@ mesh_source            = regular_mesh
     conservativeFormulation = false
     
     [./physics]
-    density         = 1000          # density
+    density         = 1000       # density
     viscosity       = 1          # viscosity
 
     [../time_discretization]
@@ -38,7 +38,7 @@ mesh_source            = regular_mesh
     endtime         = 14.945
     timestep        = 0.01
 
-    BDF_order       = 2
+    BDF_order       = 2 
 
     [../space_discretization]
     mesh_dir        = ./
@@ -51,12 +51,12 @@ mesh_source            = regular_mesh
     div_beta_u_v    = 0 # 1=on, 0=off
     FE_number       = 1
     vel_order       = P1
-    pres_order      = P1 
+    pres_order      = P1
     stiff_strain    = true
     
 	[../stabilization]
 	use             = true
-	method          = SUPG	  # other possible choices: IP, VMS
+	method          = VMSLES	  # other possible choices: IP, SUPG, VMSLES
 
     [../miscellaneous]
     verbose         = 1
