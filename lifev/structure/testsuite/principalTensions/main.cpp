@@ -721,7 +721,7 @@ Structure::run3d()
     }
     else
     {
-        std::cout << "we are still working idiot! " << std::endl;
+        std::cout << "Work in progress! " << std::endl;
     }
 
     if (verbose )
