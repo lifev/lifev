@@ -205,7 +205,7 @@ public:
     }
 
     //! Display method
-    static void display (ostream& out = std::cout)
+    static void display (std::ostream& out = std::cout)
     {
         out << "interpolated[ " << FieldDim << " ][ " << SpaceDim << " ]";
     }
@@ -450,7 +450,7 @@ public:
     }
 
     //! Display method
-    static void display (ostream& out = std::cout)
+    static void display (std::ostream& out = std::cout)
     {
         out << "interpolated[ " << SpaceDim << " ]";
     }
@@ -712,7 +712,7 @@ public:
     }
 
     //! Display method
-    static void display (ostream& out = std::cout)
+    static void display (std::ostream& out = std::cout)
     {
         out << "interpolated[ " << 3 << " ]";
     }

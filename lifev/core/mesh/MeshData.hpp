@@ -45,15 +45,17 @@
 
 #include <string>
 #include <ostream>
-#include <lifev/core/filter/GetPot.hpp>
+
+#include <Teuchos_ParameterList.hpp>
+
 #include <lifev/core/LifeV.hpp>
-
+#include <lifev/core/filter/GetPot.hpp>
 #include <lifev/core/filter/ImporterMesh2D.hpp>
-
 #include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/core/filter/ImporterMesh3D.hpp>
 #include <lifev/core/mesh/RegionMesh3DStructured.hpp>
 #include <lifev/core/filter/ParserINRIAMesh.hpp>
+#include <lifev/core/filter/ParserGmsh.hpp>
 #include <lifev/core/mesh/ConvertBareMesh.hpp>
 
 namespace LifeV
@@ -104,6 +106,16 @@ public:
      @param section file section
      */
     void setup ( const GetPot& dataFile, const std::string& section );
+
+    //! Set all members using a Teuchos ParameterList
+    /*!
+      @param meshParameters Teuchos ParameterList containing:
+             - meshDir [string] location of mesh file
+             - meshFile [string] the name of the mesh file
+             - order [string] the order of the mesh (P1, P2)
+             - verbose [bool] verbosity level
+     */
+    void setup ( const Teuchos::ParameterList& meshParameters);
 
     //! Display the values
     virtual void showMe ( std::ostream& output = std::cout ) const;
@@ -185,7 +197,25 @@ void readMesh ( RegionMesh<LinearTriangle, MC>& mesh, const MeshData& data )
 
     if ( data.meshType() == ".msh" )
     {
-        readFreeFemFile ( mesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
+        std::ifstream ifile;
+        ifile.open ( ( data.meshDir() + data.meshFile() ).c_str() );
+        ASSERT (ifile.is_open(), "Error! Unable to read mesh file.\n");
+
+        // Checking whether it is Gmsh or FreeFem mesh format
+        if (ifile.get() == '$')
+        {
+            // Gmsh files start with '$MeshFormat'
+            ifile.close();
+            BareMesh<LinearTriangle> bareMesh;
+            MeshIO::ReadGmshFile (data.meshDir() + data.meshFile(), bareMesh, 0, data.verbose() );
+            convertBareMesh ( bareMesh, mesh, data.verbose() );
+        }
+        else
+        {
+            // If not Gmsh format, it must be FreeFem
+            ifile.close();
+            readFreeFemFile ( mesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
+        }
     }
     else
     {

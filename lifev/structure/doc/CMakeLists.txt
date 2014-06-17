@@ -1,6 +1,6 @@
 
 SET(TEX_FILES
-  StructuralSolver
+  documentation
 )
 
 CONFIGURE_FILE(ltxcompile.cmake

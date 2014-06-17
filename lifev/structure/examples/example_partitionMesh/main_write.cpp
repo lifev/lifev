@@ -28,12 +28,13 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
     @file
     @brief Test for PartitionIO class - cut and write
 
-    @author Radu Popescu <radu.popescu@epfl.ch>
-    @maintainer Radu Popescu <radu.popescu@epfl.ch>
+    @author Paolo Tricerri <paolo.tricerri@epfl.ch>
+    @maintainer Paolo Tricerri <paolo.tricerri@epfl.ch>
     @date 10-05-2012
 
     Partition a mesh using a single (MPI) process and save mesh parts
-    to an HDF5 file.
+    to an HDF5 file. The example is very similar to the testsuite/offline_partitionin_io
+    but it reads the infos it needs from data file instead of having some hardcoded variables.
  */
 
 #include <lifev/core/LifeV.hpp>
@@ -43,8 +44,17 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Epetra_config.h"
 
-#ifdef HAVE_HDF5
-#ifdef HAVE_MPI
+#ifndef LIFEV_HAS_HDF5
+
+#warning warning you should reconfigure LifeV with  -D TPL_ENABLE_HDF5:BOOL=ON
+
+#endif // od ifndef LIFEV_HAS_HDF5
+
+#ifndef HAVE_MPI
+
+#warning warning you should reconfigure LifeV with  -D TPL_ENABLE_MPI:BOOL=ON
+
+#else
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -65,12 +75,12 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace LifeV;
 
-#endif /* HAVE_MPI */
-#endif /* HAVE_HDF5 */
+#endif // of ifndef LIFEV_HAS_MPI
+
 
 int main (int argc, char** argv)
 {
-#ifdef HAVE_HDF5
+#ifdef LIFEV_HAS_HDF5
 #ifdef HAVE_MPI
 
     typedef RegionMesh<LinearTetra> mesh_Type;
@@ -124,7 +134,7 @@ int main (int argc, char** argv)
     // Write mesh parts to HDF5 container
 
     boost::shared_ptr<Epetra_MpiComm> mpiComm =
-        boost::dynamic_pointer_cast<Epetra_MpiComm>(comm);
+        boost::dynamic_pointer_cast<Epetra_MpiComm> (comm);
     PartitionIO<mesh_Type> partitionIO (stringFileName, mpiComm);
 
     partitionIO.write (meshPart.meshPartitions() );
@@ -136,9 +146,9 @@ int main (int argc, char** argv)
     return (EXIT_FAILURE);
 #endif /* HAVE_MPI */
 #else
-    std::cout << "This test needs HDF5 to run. Aborting." << std::endl;
+    std::cout << "This test needs HDF5 enabled in LifeV to run. Aborting." << std::endl;
     return (EXIT_FAILURE);
-#endif /* HAVE_HDF5 */
+#endif /* LIFEV_HAS_HDF5 */
 
     return (EXIT_SUCCESS);
 }

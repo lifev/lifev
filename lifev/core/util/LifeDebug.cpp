@@ -361,7 +361,7 @@ void DebugStream::detachAll()
 {
 }
 
-#ifndef NDEBUG_OLD
+#ifdef HAVE_LIFEV_DEBUG
 DebugStream
 Debug ( int area, DebugStream::stprintf func )
 {

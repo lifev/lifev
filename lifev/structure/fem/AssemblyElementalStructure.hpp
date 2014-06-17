@@ -53,10 +53,12 @@
 
 #include <lifev/core/LifeV.hpp>
 
+#include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/fem/CurrentFEManifold.hpp>
 #include <lifev/core/fem/CurrentFE.hpp>
 #include <lifev/core/fem/DOF.hpp>
 
+#include <lifev/core/array/VectorEpetra.hpp>
 
 #include <boost/shared_ptr.hpp>
 
@@ -79,6 +81,87 @@ typedef boost::numeric::ublas::zero_matrix<Real> ZeroMatrix;
 */
 namespace AssemblyElementalStructure
 {
+
+//! Save displacement according to a functor
+/*!
+  @param FE  the finite element space
+  @param fct the functor for the saving
+  @param originVector the vector from which the values are taken
+  @param saveVector the vector from which the values are saved
+*/
+template<typename FunctorType, typename MeshType, typename MapType>
+void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, MapType> > dispFESpace,
+                                    const FunctorType functor,
+                                    const VectorEpetra& originVector,
+                                    const boost::shared_ptr<VectorEpetra> statusVector,
+                                    const boost::shared_ptr<VectorEpetra> saveVector,
+                                    const UInt offset)
+{
+    UInt dim = dispFESpace->dim();
+    UInt nTotDof = dispFESpace->dof().numTotalDof();
+
+    // We loop over the local ID on the processors of the originVector
+    for( UInt i(0); i < nTotDof; ++i )
+    {
+        if( originVector.blockMap().LID( static_cast<EpetraInt_Type>(i) ) != -1 ) // The i-th dof is on the processor
+        {
+            // We look at the functor to see if the condition is satified
+            bool variable = functor( i, nTotDof, offset );
+
+            if ( variable )
+            {
+                // At the first time we insert the value and then we "close" the cell
+                for ( UInt iComp = 0; iComp < dispFESpace->fieldDim(); ++iComp )
+                {
+                    Int LIDid = originVector.blockMap().LID (static_cast<EpetraInt_Type>(i + iComp * dim + offset));
+                    Int GIDid = originVector.blockMap().GID (LIDid);
+
+                    if( (*statusVector)( GIDid ) != 1.0 )
+                    {
+                        // Saving the value
+                        (*saveVector)( GIDid ) = originVector( GIDid );
+
+                        // Saying it has been saved at that point
+                        (*statusVector) ( GIDid ) = 1.0;
+                    }
+                }
+            }
+        }
+    }
+}
+
+template<typename FunctorType, typename MeshType, typename MapType>
+void saveBooleanVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, MapType> > dispFESpace,
+                                           const FunctorType& functor,
+                                           const boost::shared_ptr<VectorEpetra> originVector,
+                                           boost::shared_ptr<VectorEpetra> saveVector,
+                                           const UInt offset)
+{
+    UInt dim = dispFESpace->dim();
+    UInt nTotDof = dispFESpace->dof().numTotalDof();
+
+    // We loop over the local ID on the processors of the originVector
+    for( UInt i(0); i < nTotDof; ++i )
+    {
+        if( originVector->blockMap().LID( static_cast<EpetraInt_Type>(i) ) != -1 ) // The i-th dof is on the processor
+        {
+            // We look at the functor to see if the condition is satified
+            bool variable = functor( i, nTotDof, offset );
+
+            if ( variable )
+            {
+                // At the first time we insert the value and then we "close" the cell
+                for ( UInt iComp = 0; iComp < dispFESpace->fieldDim(); ++iComp )
+                {
+                    Int LIDid = originVector->blockMap().LID (static_cast<EpetraInt_Type>(i + iComp * dim + offset));
+                    Int GIDid = originVector->blockMap().GID (LIDid);
+
+                    (*saveVector)( GIDid ) = 1.0;
+                }
+            }
+        }
+    }
+}
 
 //! Gradient of the displacement on the local element
 /*!

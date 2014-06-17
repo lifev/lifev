@@ -38,6 +38,7 @@
 #include <lifev/core/algorithm/LinearSolver.hpp>
 #include <lifev/core/algorithm/PreconditionerIfpack.hpp>
 #include <lifev/core/algorithm/PreconditionerML.hpp>
+#include <lifev/core/util/WallClock.hpp>
 
 namespace LifeV
 {
@@ -132,7 +133,7 @@ LinearSolver::solve ( vectorPtr_Type solutionPtr )
     M_solverOperator->resetStatus();
 
     // Solve the linear system
-    LifeChrono chrono;
+    WallClock chrono;
     chrono.start();
 
     M_solverOperator->ApplyInverse ( M_rhs->epetraVector(), solutionPtr->epetraVector() );
@@ -276,7 +277,7 @@ LinearSolver::setPreconditionerFromGetPot ( const GetPot& dataFile, const std::s
 void
 LinearSolver::buildPreconditioner()
 {
-    LifeChrono chrono;
+    WallClock chrono;
     Real condest ( -1 );
 
     if ( M_preconditioner )
@@ -611,5 +612,68 @@ LinearSolver::hasConverged() const
 // ===================================================
 // Private Methods
 // ===================================================
+
+
+
+// ===================================================
+// External functions
+// ===================================================
+
+namespace defaultParameterLists
+{
+Teuchos::ParameterList
+belosParameterList()
+{
+    Teuchos::ParameterList defaultList;
+    defaultList.set ( "Reuse Preconditioner"    , false );
+    defaultList.set ( "Max Iterations For Reuse", 80 );
+    defaultList.set ( "Quit On Failure"         , false );
+    defaultList.set ( "Silent"                  , false );
+    defaultList.set ( "Solver Type"             , "Belos" );
+
+    Teuchos::ParameterList& operatorList = defaultList.sublist ( "Solver: Operator List" );
+    operatorList.set ( "Solver Manager Type", "BlockGmres" );
+    operatorList.set ( "Preconditioner Side", "Right" );
+
+    Teuchos::ParameterList& defaultBelos = operatorList.sublist ( "Trilinos: Belos List" );
+    defaultBelos.set ( "Flexible Gmres"       , false );
+    defaultBelos.set ( "Convergence Tolerance", 1e-6 );
+    defaultBelos.set ( "Maximum Iterations"   , 200 );
+    defaultBelos.set ( "Output Frequency"     , 1 );
+    defaultBelos.set ( "Block Size"           , 1 );
+    defaultBelos.set ( "Num Blocks"           , 200 );
+    defaultBelos.set ( "Maximum Restarts"     , 0 );
+    defaultBelos.set ( "Output Style"         , 1 );
+    defaultBelos.set ( "Verbosity"            , 35 );
+
+    return defaultList;
+}
+
+Teuchos::ParameterList
+aztecOOParameterList()
+{
+    Teuchos::ParameterList defaultList;
+    defaultList.set ( "Reuse Preconditioner"    , false );
+    defaultList.set ( "Max Iterations For Reuse", 80 );
+    defaultList.set ( "Quit On Failure"         , false );
+    defaultList.set ( "Silent"                  , false );
+    defaultList.set ( "Solver Type"             , "AztecOO" );
+
+    Teuchos::ParameterList& operatorList = defaultList.sublist ( "Solver: Operator List" );
+
+    Teuchos::ParameterList& defaultAztecOO = operatorList.sublist ( "Trilinos: AztecOO List" );
+    defaultAztecOO.set ( "solver"  , "gmres" );
+    defaultAztecOO.set ( "conv"    , "rhs" );
+    defaultAztecOO.set ( "scaling" , "none" );
+    defaultAztecOO.set ( "output"  , "all" );
+    defaultAztecOO.set ( "tol"     , 1e-6 );
+    defaultAztecOO.set ( "max_iter", 200 );
+    defaultAztecOO.set ( "kspace"  , 200 );
+    defaultAztecOO.set ( "orthog"  , 0 );
+    defaultAztecOO.set ( "aux_vec" , 0 );
+
+    return defaultList;
+}
+}
 
 } // namespace LifeV

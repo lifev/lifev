@@ -74,6 +74,7 @@ public:
     typedef std::map<UInt, Real>                   materialContainer_Type;
     typedef materialContainer_Type::const_iterator materialContainerIterator_Type;
     typedef std::vector<UInt>                      vectorFlags_Type;
+    typedef std::vector<Real>                      vectorParameters_Type;
 
     //@}
 
@@ -275,6 +276,48 @@ public:
         return M_thickness;
     }
 
+    //! Get solid thickness
+    /*!
+     * @return Solid thickness
+     */
+    const UInt maxSubIterationNumber() const
+    {
+        return M_maxSubIterationNumber;
+    }
+    //! Get solid thickness
+    /*!
+     * @return Solid thickness
+     */
+    const Real absoluteTolerance() const
+    {
+        return M_absoluteTolerance;
+    }
+    //! Get solid reltol newton
+    /*!
+     * @return Solid reltol newton
+     */
+    const Real relativeTolerance() const
+    {
+        return M_relativeTolerance;
+    }
+    //! Get solid etamax
+    /*!
+     * @return Solid etamax
+     */
+    const Real errorTolerance() const
+    {
+        return M_errorTolerance;
+    }
+    //! Get solid nonLinear Line Search ofr Newton
+    /*!
+     * @return nonLinearLineSearch
+     */
+    const UInt NonLinearLineSearch() const
+    {
+        return M_NonLinearLineSearch;
+    }
+
+
     //! Get solid poisson coefficient
     /*!
      * @param material material ID (1 by default)
@@ -342,14 +385,71 @@ public:
         return M_verbose;
     }
 
-    //! Get solid type
+    //! Get isotropic law
     /*!
-     * @return solid type
+     * @return solid type isotropic
      */
-    const std::string& solidType()
+    const std::string& solidTypeIsotropic()
     {
-        return M_solidType;
+        return M_solidTypeIsotropic;
     }
+
+    //! Get anisotropic law
+    /*!
+     * @return solid type anisotropic
+     */
+
+    const std::string& constitutiveLaw()
+    {
+        return M_constitutiveLaw;
+    }
+
+    const std::string& solidTypeAnisotropic()
+    {
+        return M_solidTypeAnisotropic;
+    }
+
+    const UInt numberFibersFamilies()
+    {
+        return M_numberFibers;
+    }
+
+    const Real ithStiffnessFibers( const UInt i )
+    {
+        return M_stiffnessParametersFibers[ i ];
+    }
+
+    const Real ithNonlinearityFibers( const UInt i )
+    {
+        return M_nonlinearityParametersFibers[ i ];
+    }
+
+    const Real ithCharacteristicStretch( const UInt i )
+    {
+        return M_characteristicStretch[ i ];
+    }
+
+    const Real ithDistributionFibers( const UInt i )
+    {
+        return M_distributionParametersFibers[ i ];
+    }
+
+    const Real smoothness( void )
+    {
+        return M_epsilon;
+    }
+
+    const std::string fiberActivation( void )
+    {
+        return M_fiberActivation;
+    }
+
+    const Real toleranceActivation( void )
+    {
+        return M_toleranceActivation;
+    }
+
+
 
     //! Get law type
     /*!
@@ -409,11 +509,27 @@ private:
     //! Miscellaneous
     UInt                   M_verbose; // temporal output verbose
 
-    std::string            M_solidType;
+    std::string            M_solidTypeIsotropic;
+    std::string            M_constitutiveLaw;
+    std::string            M_solidTypeAnisotropic;
+    UInt                   M_numberFibers;
+    vectorParameters_Type  M_stiffnessParametersFibers;
+    vectorParameters_Type  M_nonlinearityParametersFibers;
+    vectorParameters_Type  M_characteristicStretch;
+    vectorParameters_Type  M_distributionParametersFibers;
+    Real                   M_epsilon;
+    std::string            M_fiberActivation;
+    Real                   M_toleranceActivation;
     std::string            M_lawType;
     bool                   M_useExactJacobian;
 
     vectorFlags_Type       M_vectorMaterialFlags;
+
+    UInt                   M_maxSubIterationNumber;
+    Real                   M_absoluteTolerance;
+    Real                   M_relativeTolerance;
+    Real                   M_errorTolerance;
+    UInt                   M_NonLinearLineSearch;
 };
 
 } // end namespace LifeV

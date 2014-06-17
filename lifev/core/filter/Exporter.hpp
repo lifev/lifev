@@ -270,7 +270,9 @@ public:
     //! @name Public typedefs
     //@{
     typedef MeshType                                    mesh_Type;
-    typedef boost::shared_ptr<mesh_Type>                meshPtr_Type;
+    typedef boost::shared_ptr<MeshType>                 meshPtr_Type;
+    typedef Epetra_Comm                                 comm_Type;
+    typedef boost::shared_ptr<comm_Type>                commPtr_Type;
     typedef ExporterData<mesh_Type>                     exporterData_Type;
     typedef typename exporterData_Type::vector_Type     vector_Type;
     typedef typename exporterData_Type::vectorPtr_Type  vectorPtr_Type;
@@ -353,7 +355,7 @@ public:
     virtual void readVariable (exporterData_Type& dvar);
 
     //! Export the Processor ID as P0 variable
-    virtual void exportPID ( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm );
+    virtual void exportPID ( meshPtr_Type& mesh, commPtr_Type& comm, const bool binaryFormat = false );
 
     //! Export the region marker ID as P0 variable
     void exportRegionMarkerID ( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm  );
@@ -690,7 +692,7 @@ void Exporter<MeshType>::exportFlags ( boost::shared_ptr<MeshType> mesh, boost::
 }
 
 template <typename MeshType>
-void Exporter<MeshType>::exportPID ( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm )
+void Exporter<MeshType>::exportPID ( meshPtr_Type& mesh, commPtr_Type& comm, bool const binaryFormat )
 {
     // TODO: use FESpace M_spacemap for generality
     const ReferenceFE* refFEPtr;
@@ -718,15 +720,34 @@ void Exporter<MeshType>::exportPID ( boost::shared_ptr<MeshType> mesh, boost::sh
     feSpacePtr_Type PID_FESpacePtr ( new feSpace_Type ( mesh, *refFEPtr, dummyQR, dummyQR, 1, comm ) );
 
     vectorPtr_Type PIDData ( new vector_Type ( PID_FESpacePtr->map() ) );
+    *PIDData = 0.;
 
-    for ( UInt iElem ( 0 ); iElem < mesh->numElements(); ++iElem )
+    std::string name;
+
+    if ( binaryFormat )
     {
-        const ID globalElem = mesh->element (iElem).id();
-        (*PIDData) [ globalElem ] = comm->MyPID();
+        name = "PIDbinary";
+        for ( UInt iElem ( 0 ); iElem < mesh->numElements(); ++iElem )
+        {
+            const ID globalElem = mesh->element (iElem).id();
+            Int PIDValue = 1;
+            PIDValue <<= comm->MyPID();
+            PIDData->sumIntoGlobalValues ( globalElem, PIDValue );
+        }
+        PIDData->globalAssemble();
+    }
+    else
+    {
+        name = "PID";
+        for ( UInt iElem ( 0 ); iElem < mesh->numElements(); ++iElem )
+        {
+            const ID globalElem = mesh->element (iElem).id();
+            (*PIDData) [ globalElem ] = comm->MyPID();
+        }
     }
 
     addVariable ( exporterData_Type::ScalarField,
-                  "PID",
+                  name,
                   PID_FESpacePtr,
                   PIDData,
                   0,

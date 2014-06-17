@@ -183,7 +183,7 @@ void MonolithicBlockMatrix::createInterfaceMap ( const MapEpetra& interfaceMap ,
     //UInt solidDim=M_dFESpace->map().map(Unique)->NumGlobalElements()/nDimensions;
     for (l = 0, ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
     {
-        if (interfaceMap.map (Unique)->LID (ITrow->second /*+ dim*solidDim*/) >= 0)
+        if (interfaceMap.map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second /*+ dim*solidDim*/) ) >= 0)
         {
             (*M_numerationInterface) [ITrow->second /*+ dim*solidDim*/ ] = l + (int) (numInterfaceDof[pid] / nDimensions) /*+ dim*localInterface*/      ;
             //                                    (*M_numerationInterfaceInt)[ITrow->second /*+ dim*solidDim*/ ]=l+1+ (int)(M_numInterfaceDof[pid]/nDimensions)/*+ dim*localInterface*/      ;
@@ -202,7 +202,7 @@ void MonolithicBlockMatrix::createInterfaceMap ( const MapEpetra& interfaceMap ,
     {
         for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
         {
-            if (interfaceMap.map (Unique)->LID (ITrow->second) >= 0)
+            if (interfaceMap.map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second) ) >= 0)
             {
                 couplingVector.push_back ( (*M_numerationInterface) (ITrow->second /*+ dim * solidDim*/) + dim * M_interface );
                 //couplingVector.push_back((*M_numerationInterfaceInt)[ITrow->second /*+ dim * solidDim*/]+ dim * M_interface );
@@ -231,11 +231,13 @@ void MonolithicBlockMatrix::applyBoundaryConditions (const Real& time, vectorPtr
 
 void MonolithicBlockMatrix::applyBoundaryConditions (const Real& time, vectorPtr_Type& rhs, const UInt block)
 {
+
     bcManage ( *M_globalMatrix , *rhs, *super_Type::M_FESpace[block]->mesh(), super_Type::M_FESpace[block]->dof(), *super_Type::M_bch[block], super_Type::M_FESpace[block]->feBd(), 1., time);
 }
 
 void MonolithicBlockMatrix::applyBoundaryConditions (const Real& time, const UInt block)
 {
+
     bcManageMatrix ( *M_globalMatrix , *super_Type::M_FESpace[block]->mesh(), super_Type::M_FESpace[block]->dof(), *super_Type::M_bch[block], super_Type::M_FESpace[block]->feBd(), 1., time);
 }
 

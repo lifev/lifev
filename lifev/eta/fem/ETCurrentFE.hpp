@@ -550,7 +550,7 @@ private:
     // Storage for the laplacian
     array2D_Type M_laplacian;
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     // Debug informations, defined only if the code
     // is compiled in debug mode. These booleans store the
     // information about what the last call to "update"
@@ -564,6 +564,7 @@ private:
     bool M_isDetJacobianUpdated;
     bool M_isInverseJacobianUpdated;
     bool M_isWDetUpdated;
+    bool M_isPhiUpdated;
     bool M_isDphiUpdated;
     bool M_isD2phiUpdated;
     bool M_isLaplacianUpdated;
@@ -623,7 +624,7 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadrat
     M_d2phi(),
     M_laplacian()
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     , M_isCellNodeUpdated (false),
     M_isDiameterUpdated (false),
     M_isMeasureUpdated (false),
@@ -768,7 +769,7 @@ update (const elementType& element, const flag_Type& flag)
     ASSERT (M_geometricMap != 0, "No geometric mapping for the update");
     ASSERT (M_quadratureRule != 0, "No quadrature rule for the update");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     // Reset all the flags to false
     M_isCellNodeUpdated = false;
     M_isDiameterUpdated = false;
@@ -980,6 +981,10 @@ setupInternalConstants()
         }
     }
 
+#ifdef HAVE_LIFEV_DEBUG
+    M_isDphiUpdated = true;
+#endif
+
     // PHI MAP
     M_phiMap.resize (M_nbQuadPt);
     for (UInt q (0); q < M_nbQuadPt; ++q)
@@ -1120,7 +1125,7 @@ updateQuadNode (const UInt& iQuadPt)
     ASSERT (M_isCellNodeUpdated, "Cell must be updated to compute the quadrature node position");
 
     // Set the check boolean
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isQuadNodeUpdated = true;
 #endif
 
@@ -1145,7 +1150,7 @@ updateJacobian (const UInt& iQuadPt)
     ASSERT (M_isCellNodeUpdated, "Cell must be updated to compute the jacobian");
 
     // Set the check boolean
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isJacobianUpdated = true;
 #endif
 
@@ -1172,7 +1177,7 @@ updateWDet (const UInt& iQuadPt)
 {
     ASSERT (M_isDetJacobianUpdated, "Determinant of the jacobian must be updated to compute WDet");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isWDetUpdated = true;
 #endif
 
@@ -1188,7 +1193,7 @@ updateDphi (const UInt& iQuadPt)
     ASSERT (M_isInverseJacobianUpdated,
             "Inverse jacobian must be updated to compute the derivative of the basis functions");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isDphiUpdated = true;
 #endif
 
@@ -1289,7 +1294,7 @@ ETCurrentFE<spaceDim, 1>::
 updateCellNode (const ElementType& element)
 {
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isCellNodeUpdated = true;
 #endif
 
@@ -1310,7 +1315,7 @@ void
 ETCurrentFE<spaceDim, 1>::
 updateCellNode (const std::vector<VectorSmall<spaceDim> >& ptsCoordinates)
 {
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isCellNodeUpdated = true;
 #endif
 
@@ -1332,7 +1337,7 @@ updateDiameter()
 {
     ASSERT (M_isCellNodeUpdated, "Cell must be updated to compute the diameter");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isDiameterUpdated = true;
 #endif
 
@@ -1362,7 +1367,7 @@ updateMeasure()
 {
     ASSERT (M_isWDetUpdated, "Wdet must be updated to compute the measure");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isMeasureUpdated = true;
 #endif
 

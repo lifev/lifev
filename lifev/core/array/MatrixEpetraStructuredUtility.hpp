@@ -92,7 +92,7 @@ void copyBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
                 && ( static_cast<UInt> (srcRowElement) <= srcBlock.lastRowIndex() ) )
         {
             // Get the data of the row
-            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID (srcRowElement);
+            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID ( static_cast<EpetraInt_Type> (srcRowElement) );
             srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView (srcRow, numSrcEntries, srcValues, srcIndices);
 
             std::vector<Int> destIndices (numSrcEntries);
@@ -284,7 +284,7 @@ void createDiagBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
         if ( (srcRowElement >= srcBlock.firstRowIndex() + indexBase) && (srcRowElement <= srcBlock.lastRowIndex() + indexBase) )
         {
             // Get the data of the row
-            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID (srcRowElement);
+            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID ( static_cast<EpetraInt_Type> (srcRowElement) );
             srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView (srcRow, numSrcEntries, srcValues, srcIndices);
 
             UInt diagIndex = srcRowElement - srcBlock.firstRowIndex();
@@ -371,7 +371,7 @@ void createInvDiagBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
         if ( (srcRowElement >= srcBlock.firstRowIndex() + indexBase) && (srcRowElement <= srcBlock.lastRowIndex() + indexBase) )
         {
             // Get the data of the row
-            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID (srcRowElement);
+            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID ( static_cast<EpetraInt_Type> (srcRowElement) );
             srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView (srcRow, numSrcEntries, srcValues, srcIndices);
 
             UInt diagIndex = srcRowElement - srcBlock.firstRowIndex();
@@ -462,7 +462,7 @@ void createInvSquaredDiagBlock ( const MatrixEpetraStructuredView<DataType>& src
         if ( (srcRowElement >= srcBlock.firstRowIndex() + indexBase) && (srcRowElement <= srcBlock.lastRowIndex() + indexBase) )
         {
             // Get the data of the row
-            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID (srcRowElement);
+            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID ( static_cast<EpetraInt_Type> (srcRowElement) );
             srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView (srcRow, numSrcEntries, srcValues, srcIndices);
 
             UInt diagIndex = srcRowElement - srcBlock.firstRowIndex();
@@ -480,7 +480,7 @@ void createInvSquaredDiagBlock ( const MatrixEpetraStructuredView<DataType>& src
                     // ZERO ON DIAGONAL TEST
                     ASSERT ( srcValues[j] != 0, "You cannot ask for inverse squared diagonal block when there are zeros on the diagonal" );
 
-                    diagValue = 1 / sqrt (srcValues[j]);
+                    diagValue = 1 / std::sqrt (srcValues[j]);
                     j = numSrcEntries; //Exit the loop
                 }
             }
@@ -554,7 +554,7 @@ void createUpperTriangularBlock ( const MatrixEpetraStructuredView<DataType>& sr
         if ( (srcRowElement >= srcBlock.firstRowIndex() ) && (srcRowElement <= srcBlock.lastRowIndex() ) )
         {
             // Get the data of the row
-            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID (srcRowElement);
+            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID ( static_cast<EpetraInt_Type> (srcRowElement) );
             srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView (srcRow, numSrcEntries, srcValues, srcIndices);
 
             std::vector<Int> destIndices (numSrcEntries);
@@ -647,7 +647,7 @@ void createLowerTriangularBlock ( const MatrixEpetraStructuredView<DataType>& sr
         if ( (srcRowElement >= srcBlock.firstRowIndex() ) && (srcRowElement <= srcBlock.lastRowIndex() ) )
         {
             // Get the data of the row
-            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID (srcRowElement);
+            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID ( static_cast<EpetraInt_Type> (srcRowElement) );
             srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView (srcRow, numSrcEntries, srcValues, srcIndices);
 
             std::vector<Int> destIndices (numSrcEntries);
@@ -739,7 +739,7 @@ void createLumpedBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
         if ( (srcRowElement >= srcBlock.firstRowIndex() + indexBase) && (srcRowElement <= srcBlock.lastRowIndex() + indexBase) )
         {
             // Get the data of the row
-            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID (srcRowElement);
+            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID ( static_cast<EpetraInt_Type> (srcRowElement) );
             srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView (srcRow, numSrcEntries, srcValues, srcIndices);
 
             Int diagIndex = srcRowElement - srcBlock.firstRowIndex();
@@ -825,7 +825,7 @@ void createInvLumpedBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock
         if ( (srcRowElement >= srcBlock.firstRowIndex() + indexBase) && (srcRowElement <= srcBlock.lastRowIndex() + indexBase) )
         {
             // Get the data of the row
-            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID (srcRowElement);
+            srcRow = srcBlock.matrixPtr()->matrixPtr()->LRID ( static_cast<EpetraInt_Type> (srcRowElement) );
             srcBlock.matrixPtr()->matrixPtr()->ExtractMyRowView (srcRow, numSrcEntries, srcValues, srcIndices);
 
             Int diagIndex = srcRowElement - srcBlock.firstRowIndex();

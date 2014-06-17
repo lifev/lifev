@@ -304,7 +304,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryDispla
     LifeChrono chrono;
 
     this->M_displayer->leaderPrint (" \n*********************************\n  ");
-    this->M_displayer->leaderPrint ("   Performing the analysis recovering the displacement..., ", this->M_dataMaterial->solidType() );
+    this->M_displayer->leaderPrint ("   Performing the analysis recovering the displacement..., ", this->M_dataMaterial->solidTypeIsotropic() );
     this->M_displayer->leaderPrint (" \n*********************************\n  ");
 
     solutionVectPtr_Type grDisplX ( new solutionVect_Type (* (this->M_FESpace->mapPtr() ) ) );
@@ -413,7 +413,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryEigenv
     LifeChrono chrono;
 
     this->M_displayer->leaderPrint (" \n*********************************\n  ");
-    this->M_displayer->leaderPrint ("   Performing the analysis recovering the tensions..., ", this->M_dataMaterial->solidType() );
+    this->M_displayer->leaderPrint ("   Performing the analysis recovering the tensions..., ", this->M_dataMaterial->solidTypeIsotropic() );
     this->M_displayer->leaderPrint (" \n*********************************\n  ");
 
     solutionVect_Type patchArea (* (this->M_displacement), Unique, Add);
@@ -560,7 +560,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryCauchy
     for ( UInt iDOF = 0; iDOF < ( UInt ) this->M_FESpace->dof().numTotalDof(); iDOF++ )
     {
 
-        if ( this->M_displacement->blockMap().LID (iDOF) != -1 ) // The Global ID is on the calling processors
+        if ( this->M_displacement->blockMap().LID ( static_cast<EpetraInt_Type> (iDOF) ) != -1 ) // The Global ID is on the calling processors
         {
 
             (* (this->M_sigma) ).Scale (0.0);
@@ -568,8 +568,8 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryCauchy
             //Extracting the gradient of U on the current DOF
             for ( UInt iComp = 0; iComp < this->M_FESpace->fieldDim(); ++iComp )
             {
-                Int LIDid = this->M_displacement->blockMap().LID (iDOF + iComp * dim + this->M_offset);
-                Int GIDid = this->M_displacement->blockMap().GID (LIDid);
+                Int LIDid = this->M_displacement->blockMap().LID ( static_cast<EpetraInt_Type> (iDOF + iComp * dim + this->M_offset ) );
+                Int GIDid = this->M_displacement->blockMap().GID (static_cast<EpetraInt_Type> (LIDid) );
                 (* (this->M_sigma) ) (iComp, 0) = (*this->M_sigmaX) (GIDid); // (d_xX,d_yX,d_zX)
                 (* (this->M_sigma) ) (iComp, 1) = (*this->M_sigmaY) (GIDid); // (d_xY,d_yY,d_zY)
                 (* (this->M_sigma) ) (iComp, 2) = (*this->M_sigmaZ) (GIDid); // (d_xZ,d_yZ,d_zZ)
@@ -592,8 +592,8 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryCauchy
             //Save the eigenvalues in the global vector
             for ( UInt icoor = 0; icoor < this->M_FESpace->fieldDim(); ++icoor )
             {
-                Int LIDid = this->M_displacement->blockMap().LID (iDOF + icoor * dim + this->M_offset);
-                Int GIDid = this->M_displacement->blockMap().GID (LIDid);
+                Int LIDid = this->M_displacement->blockMap().LID ( static_cast<EpetraInt_Type> (iDOF + icoor * dim + this->M_offset) );
+                Int GIDid = this->M_displacement->blockMap().GID (static_cast<EpetraInt_Type> (LIDid) );
                 (* (this->M_globalEigenvalues) ) (GIDid) = this->M_eigenvaluesR[icoor];
             }
 
@@ -647,7 +647,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::constructGlobalStressVector()
     this->M_FESpace->setQuadRule (fakeQuadratureRule);
 
     this->M_displayer->leaderPrint (" \n*********************************\n  ");
-    this->M_displayer->leaderPrint ("   Performing the analysis recovering the Cauchy stresses..., ", this->M_dataMaterial->solidType() );
+    this->M_displayer->leaderPrint ("   Performing the analysis recovering the Cauchy stresses..., ", this->M_dataMaterial->solidTypeIsotropic() );
     this->M_displayer->leaderPrint (" \n*********************************\n  ");
 
     UInt totalDof = this->M_FESpace->dof().numTotalDof();

@@ -1,0 +1,105 @@
+//@HEADER
+/*
+ *******************************************************************************
+
+ Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+ Copyright (C) 2010, 2011, 2012 EPFL, Politecnico di Milano, Emory University
+
+ This file is part of LifeV.
+
+ LifeV is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ LifeV is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+ *******************************************************************************
+ */
+//@HEADER
+/*!
+ @file
+ @brief Graph cutter base class (abstract)
+
+ @date 06-02-2013
+ @author Radu Popescu <radu.popescu@epfl.ch>
+ */
+
+#ifndef GRAPH_CUTTER_BASE_H
+#define GRAPH_CUTTER_BASE_H 1
+
+#include <boost/shared_ptr.hpp>
+#include <Epetra_Comm.h>
+#include <Teuchos_ParameterList.hpp>
+
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/mesh/GraphUtil.hpp>
+
+namespace LifeV
+{
+
+using namespace GraphUtil;
+
+//! Graph cutter base class (abstract)
+/*!
+ @author Radu Popescu <radu.popescu@epfl.ch>
+ */
+template<typename MeshType>
+class GraphCutterBase
+{
+public:
+    //! @name Public Types
+    //@{
+    typedef Teuchos::ParameterList pList_Type;
+    //@}
+
+    //! @name Constructor & Destructor
+    //@{
+    //! Default constructor
+    GraphCutterBase()
+    {
+    }
+
+    //! Destructor
+    virtual ~GraphCutterBase()
+    {
+    }
+    //@}
+
+    //! @name Public methods
+    //@{
+    //! Performs the graph partitioning
+    virtual Int run() = 0;
+    //@}
+
+    //! @name Get Methods
+    //@{
+    //! Get a pointer to one of the partitions
+    virtual const idListPtr_Type& getPart (const UInt i) const = 0;
+    virtual idListPtr_Type& getPart (const UInt i) = 0;
+
+    //! Get the entire partitioned graph, wrapped in a smart pointer
+    virtual const idTablePtr_Type getGraph() const = 0;
+
+    //! Return the number of parts
+    virtual const UInt numParts() const = 0;
+    //@}
+
+private:
+    //! @name Private methods
+    //@{
+    //! Set values for all the parameters, with default values where needed
+    virtual void setParameters (pList_Type& parameters) = 0;
+
+    //@}
+};
+
+} // Namespace LifeV
+
+#endif // GRAPH_CUTTER_BASE_H

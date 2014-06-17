@@ -66,11 +66,11 @@
 
 using namespace LifeV;
 
-const int INLET       = 2;
+const int INLET       = 3;
 const int WALL        = 200;
-const int OUTLET      = 3;
-const int RINGIN      = 20;
-const int RINGOUT     = 30;
+const int OUTLET      = 2;
+const int RINGIN      = 30;
+const int RINGOUT     = 20;
 
 
 void
@@ -115,7 +115,7 @@ postProcessFluxesPressures ( OseenSolver< RegionMesh<LinearTetra> >& nssolver,
 }
 
 
-struct Resistance::Private
+struct ResistanceTest::Private
 {
     Private() :
         nu (1),
@@ -142,55 +142,54 @@ struct Resistance::Private
     static Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
     {
 
-        Real fluxFinal(0.17);
-        Real rampAmpl (0.4);
+        Real fluxFinal(0.0);
+        Real rampAmpl (0.2);
         Real dt (0.001);
 
-        // if ( t <= rampAmpl )
-        // {
-        //     fluxFinal = ( 0.09503 / rampAmpl) * t;
-        // }
-        // else
-        // {
+        if ( t <= rampAmpl )
+        {
+            fluxFinal = ( 0.09403 / rampAmpl) * t;
+        }
+        else
+        {
 
 
-        //     // We change the flux for our geometry
-        //     const Real pi   = 3.141592653589793;
-        //     const Real area = 0.0034212; // BigMesh
+            // We change the flux for our geometry
+            const Real pi   = 3.141592653589793;
+            const Real area = 0.1950; // BigMesh
 
-        //     const Real areaFactor = area / ( 0.195 * 0.195 * pi);
-        //     //const Real Average = (48.21 * pow (area, 1.84) ) * 60; //Mean Cebral's Flux per minut
+            const Real areaFactor = area / ( 0.195 * 0.195 * pi);
+            //const Real Average = (48.21 * pow (area, 1.84) ) * 60; //Mean Cebral's Flux per minut
 
-        //     // Unit conversion from ml/min to cm^3/s
-        //     const Real unitFactor = 1. / 60.;
+            // Unit conversion from ml/min to cm^3/s
+            const Real unitFactor = 1. / 60.;
 
-        //     // T is the period of the cardiac cycle
-        //     const Real T          = 0.8;
+            // T is the period of the cardiac cycle
+            const Real T          = 0.8;
 
-        //     // a0 is the average VFR (the value is taken from Karniadakis p970)
-        //     const Real a0         = 255;
-        //     //const Real volumetric = Average / a0; //VolumetricFactor per minut
+            // a0 is the average VFR (the value is taken from Karniadakis p970)
+            const Real a0         = 255;
+            //const Real volumetric = Average / a0; //VolumetricFactor per minut
 
-        //     // Fourrier
-        //     const Int M (7);
-        //     const Real a[M] = { -0.152001, -0.111619, 0.043304, 0.028871, 0.002098, -0.027237, -0.000557};
-        //     const Real b[M] = { 0.129013, -0.031435, -0.086106, 0.028263, 0.010177, 0.012160, -0.026303};
+            // Fourrier
+            const Int M (7);
+            const Real a[M] = { -0.152001, -0.111619, 0.043304, 0.028871, 0.002098, -0.027237, -0.000557};
+            const Real b[M] = { 0.129013, -0.031435, -0.086106, 0.028263, 0.010177, 0.012160, -0.026303};
 
-        //     Real flux (0);
-        //     //      const Real xi(2*pi*t/T);
-        //     const Real xi (2 * pi * (t - rampAmpl + dt) / T);
+            Real flux (0);
+            //      const Real xi(2*pi*t/T);
+            const Real xi (2 * pi * (t - rampAmpl + dt) / T);
 
-        //     flux = a0;
-        //     Int k (1);
-        //     for (; k <= M ; ++k)
-        //     {
-        //         flux += a0 * (a[k - 1] * cos (k * xi) + b[k - 1] * sin (k * xi) );
-        //     }
+            flux = a0;
+            Int k (1);
+            for (; k <= M ; ++k)
+            {
+                flux += a0 * (a[k - 1] * cos (k * xi) + b[k - 1] * sin (k * xi) );
+            }
 
-        //     //return - (flux * areaFactor * unitFactor);
-        //     fluxFinal =  (flux * areaFactor * unitFactor);
-        //     fluxFinal = fluxFinal - 20 * area;
-        // }
+            //return - (flux * areaFactor * unitFactor);
+            fluxFinal =  (flux * areaFactor * unitFactor);
+        }
 
         return fluxFinal;
 
@@ -198,40 +197,41 @@ struct Resistance::Private
 
     static Real aneurismFluxInVectorial (const Real&  t, const Real& x, const Real& y, const Real& z, const ID& i)
     {
-        Real n1 (0.0);
-        Real n2 (0.0);
-        Real n3 (1.0);
+        Real n1 (-0.67463);
+        Real n2 (-0.19861);
+        Real n3 (-0.71094);
 
-        Real x0 (0.0);
-        Real y0 (0.0);
-
+        Real x0 (6.752113);
+        Real y0 (9.398349);
+        Real z0 (18.336601);
 
         Real flux (fluxFunctionAneurysm (t, x, y, z, i) );
 
-        Real area (0.0033);
+        Real area (0.195);
 
         //Parabolic profile
-        Real radius( std::sqrt( area / 3.14159265359 ) );
+        Real radius ( std::sqrt ( area / 3.14159265359 ) );
+
         Real radiusSquared = radius * radius;
-        Real peak(0);
+        Real peak (0);
         peak = ( 2 * flux ) / ( area );
 
         switch (i)
         {
-        case 0:
-            // Flat profile: flux / area;
-            // return n1 * flux / area;
-            return n1 * std::max( 0.0, peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) );
-        case 1:
-            // Flat profile: flux / area;
-            //return n2 * flux / area;
-            return n2 * std::max( 0.0 , peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) );
-        case 2:
-            // Flat profile: flux / area;
-            // return n3 * flux / area;
-            return n3 * std::max( 0.0, peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) );
-        default:
-            return 0.0;
+            case 0:
+                // Flat profile: flux / area;
+                // return n1 * flux / area;
+                return n1 * std::max ( 0.0, peak * ( (radiusSquared - ( (x - x0) * (x - x0) + (y - y0) * (y - y0) ) ) / radiusSquared) );
+            case 1:
+                // Flat profile: flux / area;
+                //return n2 * flux / area;
+                return n2 * std::max ( 0.0 , peak * ( (radiusSquared - ( (x - x0) * (x - x0) + (y - y0) * (y - y0) ) ) / radiusSquared) );
+            case 2:
+                // Flat profile: flux / area;
+                // return n3 * flux / area;
+                return n3 * std::max ( 0.0, peak * ( (radiusSquared - ( (x - x0) * (x - x0) + (y - y0) * (y - y0) ) ) / radiusSquared) );
+            default:
+                return 0.0;
         }
     }
 
@@ -240,20 +240,20 @@ struct Resistance::Private
     {
         switch (i)
         {
-        case 0:
-            //Flat profile: flux / area;
-            //return n1 * flux / area;
-            return 0;
-        case 1:
-            //Flat profile: flux / area;
-            //return n2 * flux / area;
-            return 0;
-        case 2:
-            // Flat profile: flux / area;
-            // return n3 * flux / area;
-            return 0;
-        default:
-            return 0.0;
+            case 0:
+                //Flat profile: flux / area;
+                //return n1 * flux / area;
+                return 0;
+            case 1:
+                //Flat profile: flux / area;
+                //return n2 * flux / area;
+                return 0;
+            case 2:
+                // Flat profile: flux / area;
+                // return n3 * flux / area;
+                return 0;
+            default:
+                return 0.0;
         }
     }
 
@@ -263,8 +263,8 @@ struct Resistance::Private
 
 };
 
-Resistance::Resistance ( int argc,
-                     char** argv )
+ResistanceTest::ResistanceTest ( int argc,
+                         char** argv )
     :
     parameters ( new Private )
 {
@@ -298,7 +298,7 @@ Resistance::Resistance ( int argc,
 }
 
 void
-Resistance::run()
+ResistanceTest::run()
 
 {
     typedef RegionMesh<LinearTetra>               mesh_Type;
@@ -313,27 +313,6 @@ Resistance::run()
     //    int save = dataFile("fluid/miscellaneous/save", 1);
 
     bool verbose = (parameters->comm->MyPID() == 0);
-
-    // Boundary conditions
-    BCHandler bcH;
-    BCFunctionBase uIn   (  Private::aneurismFluxInVectorial );
-    BCFunctionBase uZero (  Private::zeroBCF );
-
-    FlowConditions outFlowBC;
-
-    // Read the resistance and hydrostatic pressure from data file
-    Real resistance = dataFile ( "fluid/physics/resistance", 0.0 );
-    Real hydrostatic = dataFile ( "fluid/physics/hydrostatic", 0.0 );
-
-    outFlowBC.initParameters( OUTLET, resistance, hydrostatic, "outlet-3" );
-
-    BCFunctionBase resistanceBC( FlowConditions::outPressure0 );
-    //cylinder
-
-    bcH.addBC ( "Inlet",    INLET,    Essential,   Full,  uIn  , 3 );
-    bcH.addBC ( "Wall",     WALL,     Essential,   Full,  uZero, 3 );
-
-    bcH.addBC ( "Outlet",   OUTLET,   Natural,     Normal, resistanceBC );
 
     // Lagrange multiplier for flux BCs
     int numLM = 0;
@@ -386,6 +365,38 @@ Resistance::run()
     UInt totalVelDof   = uFESpacePtr->map().map (Unique)->NumGlobalElements();
     UInt totalPressDof = pFESpacePtr->map().map (Unique)->NumGlobalElements();
 
+    // Boundary conditions
+    BCHandler bcH;
+    BCFunctionBase uIn   (  Private::aneurismFluxInVectorial );
+    BCFunctionBase uZero (  Private::zeroBCF );
+
+    FlowConditions outFlowBC;
+
+    // Read the resistance and hydrostatic pressure from data file
+    Real resistance = dataFile ( "fluid/physics/resistance", 0.0 );
+    Real hydrostatic = dataFile ( "fluid/physics/hydrostatic", 0.0 );
+
+    // outFlowBC.initParameters( OUTLET, resistance, hydrostatic, "outlet-3" );
+
+    vectorPtr_Type resistanceImplicit;
+    resistanceImplicit.reset( new vector_Type( uFESpacePtr->map(), Repeated ) );
+    resistanceImplicit->epetraVector().PutScalar(0.0);
+
+    BCVector resistanceBCdefinition;
+    resistanceBCdefinition.setRhsVector( *resistanceImplicit, uFESpacePtr->dof().numTotalDof(), 1 );
+    resistanceBCdefinition.setResistanceCoeff( 600000.0 );
+
+
+    // Explicit Resistance BC
+    //BCFunctionBase resistanceBC( FlowConditions::outPressure0 );
+    //cylinder
+
+    bcH.addBC ( "Inlet",    INLET,    Essential,   Full,  uIn  , 3 );
+    bcH.addBC ( "Wall",     WALL,     Essential,   Full,  uZero, 3 );
+
+    // Explicit Resistance BC
+    // bcH.addBC ( "Outlet",   OUTLET,   Natural,     Normal, resistanceBC );
+    bcH.addBC ( "Outlet",   OUTLET,   Resistance, Full, resistanceBCdefinition, 3 );
 
 
     if (verbose)
@@ -418,6 +429,7 @@ Resistance::run()
     // Setting up the utility for post-processing
     fluid.setupPostProc( );
 
+    std::cout << "Inlet area: " << fluid.area( INLET ) << std::endl;
     fluid.buildSystem();
 
     MPI_Barrier (MPI_COMM_WORLD);
@@ -448,7 +460,7 @@ Resistance::run()
     vectorPtr_Type velAndPressure ( new vector_Type (*fluid.solution(), exporter.mapType() ) );
 
     exporter.addVariable ( ExporterData<mesh_Type>::VectorField, "velocity", uFESpacePtr,
-                          velAndPressure, UInt (0) );
+                           velAndPressure, UInt (0) );
 
     exporter.addVariable ( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpacePtr,
                            velAndPressure, UInt (3 * uFESpacePtr->dof().numTotalDof() ) );
@@ -464,10 +476,10 @@ Resistance::run()
     for ( Real time = t0 + dt ; time <= tFinal + dt / 2.; time += dt, iter++)
     {
 
-        std::cout << "Inlet area: " << fluid.area( INLET ) << std::endl;
+        std::cout << "Inlet area: " << fluid.area ( INLET ) << std::endl;
 
         // Updating the Neumann BC for resistance
-        outFlowBC.renewParameters( fluid, *velAndPressure );
+        outFlowBC.renewParameters ( fluid, *velAndPressure );
         // if ( verbose )
         // {
         //     std::cout << std::endl;

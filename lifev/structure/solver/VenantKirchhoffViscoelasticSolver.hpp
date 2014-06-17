@@ -677,20 +677,20 @@ buildSystem (matrix_ptrtype matrSystem, const Real& xi)
         this->M_elmatM->zero();
 
         // building stiffness matrix
-        stiff_strain (   2 * M_data->mu (marker), *this->M_elmatK, this->M_FESpace->fe() );
-        stiff_div   ( M_data->lambda (marker), *this->M_elmatK, M_FESpace->fe() );
+        AssemblyElemental::stiff_strain (   2 * M_data->mu (marker), *this->M_elmatK, this->M_FESpace->fe() );
+        AssemblyElemental::stiff_div   ( M_data->lambda (marker), *this->M_elmatK, M_FESpace->fe() );
 
         this->M_elmatC->mat() = this->M_elmatK->mat();
 
         // mass*xi to compute mass+stiff
 
-        mass ( xi * M_data->rho(), *this->M_elmatM, this->M_FESpace->fe(), 0, 0, nDimensions );
+        AssemblyElemental::mass ( xi * M_data->rho(), *this->M_elmatM, this->M_FESpace->fe(), 0, 0, nDimensions );
 
         this->M_elmatC->mat() += this->M_elmatM->mat();
 
         //mass
         this->M_elmatM->zero();
-        mass (M_data->rho(), *this->M_elmatM, this->M_FESpace->fe(), 0, 0, nDimensions );
+        AssemblyElemental::mass (M_data->rho(), *this->M_elmatM, this->M_FESpace->fe(), 0, 0, nDimensions );
 
         assembleMatrix ( *M_matrLinearStiffness,
                          *this->M_elmatC,
@@ -748,9 +748,9 @@ buildDamping (matrix_ptrtype damping, const Real& alpha)
 
         this->M_elmatD->zero();
 
-        stiff_strain ( 2.0 * M_data->mu (marker) * gamma , *this->M_elmatD, this->M_FESpace->fe() );
-        stiff_div   ( M_data->lambda (marker) * gamma, *this->M_elmatD, this->M_FESpace->fe() );
-        mass ( beta * M_data->rho(), *this->M_elmatD, this->M_FESpace->fe(), 0, 0);
+        AssemblyElemental::stiff_strain ( 2.0 * M_data->mu (marker) * gamma , *this->M_elmatD, this->M_FESpace->fe() );
+        AssemblyElemental::stiff_div   ( M_data->lambda (marker) * gamma, *this->M_elmatD, this->M_FESpace->fe() );
+        AssemblyElemental::mass ( beta * M_data->rho(), *this->M_elmatD, this->M_FESpace->fe(), 0, 0);
 
         assembleMatrix ( *damping,
                          *this->M_elmatD,

@@ -43,6 +43,7 @@
 #include <lifev/eta/expression/ExpressionDivI.hpp>
 #include <lifev/eta/expression/ExpressionDivJ.hpp>
 #include <lifev/eta/expression/ExpressionMinusTransposed.hpp>
+#include <lifev/eta/expression/ExpressionInverse.hpp>
 #include <lifev/eta/expression/ExpressionDeterminant.hpp>
 #include <lifev/eta/expression/ExpressionTrace.hpp>
 
@@ -51,6 +52,10 @@
 #include <lifev/eta/expression/ExpressionSubstraction.hpp>
 #include <lifev/eta/expression/ExpressionProduct.hpp>
 #include <lifev/eta/expression/ExpressionPower.hpp>
+#include <lifev/eta/expression/ExpressionSquareRoot.hpp>
+#include <lifev/eta/expression/ExpressionCubicRoot.hpp>
+#include <lifev/eta/expression/ExpressionArcTan.hpp>
+#include <lifev/eta/expression/ExpressionDerivativeArcTan.hpp>
 #include <lifev/eta/expression/ExpressionLogarithm.hpp>
 #include <lifev/eta/expression/ExpressionExponential.hpp>
 #include <lifev/eta/expression/ExpressionDot.hpp>
@@ -59,6 +64,7 @@
 #include <lifev/eta/expression/ExpressionExtract1.hpp>
 #include <lifev/eta/expression/ExpressionExtract2.hpp>
 #include <lifev/eta/expression/ExpressionTranspose.hpp>
+#include <lifev/eta/expression/ExpressionNormalize.hpp>
 #include <lifev/eta/expression/ExpressionSymmetricTensor.hpp>
 #include <lifev/eta/expression/ExpressionOuterProduct.hpp>
 
@@ -73,10 +79,14 @@
 
 #include <lifev/eta/expression/ExpressionHK.hpp>
 #include <lifev/eta/expression/ExpressionMeas.hpp>
+#include <lifev/eta/expression/ExpressionMeasBDCurrentFE.hpp>
 #include <lifev/eta/expression/ExpressionPosition.hpp>
 #include <lifev/eta/expression/ExpressionNormal.hpp>
 
 #include <lifev/eta/expression/ExpressionIfCrossed.hpp>
+#include <lifev/eta/expression/ExpressionVectorFromNonConstantScalar.hpp>
+#include <lifev/eta/expression/ExpressionVectorFromNonConstantMatrix.hpp>
+#include <lifev/eta/expression/ExpressionPatchArea.hpp>
 
 #include <lifev/eta/expression/ExpressionScalarToVector.hpp>
 #include <lifev/eta/expression/ExpressionLaplacianPhiJ.hpp>
@@ -88,6 +98,7 @@
 #include <lifev/eta/expression/EvaluationDivI.hpp>
 #include <lifev/eta/expression/EvaluationDivJ.hpp>
 #include <lifev/eta/expression/EvaluationMinusTransposed.hpp>
+#include <lifev/eta/expression/EvaluationInverse.hpp>
 #include <lifev/eta/expression/EvaluationDeterminant.hpp>
 #include <lifev/eta/expression/EvaluationTrace.hpp>
 
@@ -96,6 +107,10 @@
 #include <lifev/eta/expression/EvaluationSubstraction.hpp>
 #include <lifev/eta/expression/EvaluationProduct.hpp>
 #include <lifev/eta/expression/EvaluationPower.hpp>
+#include <lifev/eta/expression/EvaluationSquareRoot.hpp>
+#include <lifev/eta/expression/EvaluationCubicRoot.hpp>
+#include <lifev/eta/expression/EvaluationArcTan.hpp>
+#include <lifev/eta/expression/EvaluationDerivativeArcTan.hpp>
 #include <lifev/eta/expression/EvaluationLogarithm.hpp>
 #include <lifev/eta/expression/EvaluationExponential.hpp>
 #include <lifev/eta/expression/EvaluationDot.hpp>
@@ -104,6 +119,7 @@
 #include <lifev/eta/expression/EvaluationExtract1.hpp>
 #include <lifev/eta/expression/EvaluationExtract2.hpp>
 #include <lifev/eta/expression/EvaluationTranspose.hpp>
+#include <lifev/eta/expression/EvaluationNormalize.hpp>
 #include <lifev/eta/expression/EvaluationSymmetricTensor.hpp>
 #include <lifev/eta/expression/EvaluationOuterProduct.hpp>
 
@@ -118,10 +134,14 @@
 
 #include <lifev/eta/expression/EvaluationHK.hpp>
 #include <lifev/eta/expression/EvaluationMeas.hpp>
+#include <lifev/eta/expression/EvaluationMeasBDCurrentFE.hpp>
 #include <lifev/eta/expression/EvaluationPosition.hpp>
 #include <lifev/eta/expression/EvaluationNormal.hpp>
 
 #include <lifev/eta/expression/EvaluationIfCrossed.hpp>
+#include <lifev/eta/expression/EvaluationPatchArea.hpp>
+#include <lifev/eta/expression/EvaluationVectorFromNonConstantScalar.hpp>
+#include <lifev/eta/expression/EvaluationVectorFromNonConstantMatrix.hpp>
 
 #include <lifev/eta/expression/EvaluationScalarToVector.hpp>
 #include <lifev/eta/expression/EvaluationLaplacianPhiJ.hpp>
@@ -156,6 +176,8 @@ namespace ExpressionAssembly
 template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
 class ExpressionToEvaluation
 {
+public:
+    typedef typename Expression::evaluation_Type evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();
@@ -292,6 +314,23 @@ private:
     ~ExpressionToEvaluation();
 };
 
+// Specialized for normalization
+template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation <
+    ExpressionNormalize<Expression>
+    , testDim
+    , solutionDim
+    , spaceDim >
+{
+public:
+    typedef EvaluationNormalize <
+    typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
 // Specialized for symmetric expression
 template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
 class ExpressionToEvaluation <
@@ -344,6 +383,23 @@ private:
     ~ExpressionToEvaluation();
 };
 
+// Specialized for the inverse
+template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation <
+    ExpressionInverse<Expression>
+    , testDim
+    , solutionDim
+    , spaceDim >
+{
+public:
+    typedef EvaluationInverse <
+    typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
 
 // Specialized for determinant
 template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
@@ -374,6 +430,44 @@ class ExpressionToEvaluation <
 public:
     typedef EvaluationTrace <
     typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+// Specialized for vector from non constant scalar fields
+template<typename Expression, UInt FEFieldDim, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation <
+  ExpressionVectorFromNonConstantScalar<Expression, FEFieldDim>
+    , testDim
+    , solutionDim
+    , spaceDim >
+{
+public:
+    typedef EvaluationVectorFromNonConstantScalar <
+  typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type,
+  FEFieldDim
+    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+
+// Specialized for vector from non constant scalar fields
+template<typename Expression, UInt FESpaceDim, UInt FEFieldDim, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation <
+  ExpressionVectorFromNonConstantMatrix<Expression, FESpaceDim, FEFieldDim>
+    , testDim
+    , solutionDim
+    , spaceDim >
+{
+public:
+    typedef EvaluationVectorFromNonConstantMatrix<
+  typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type,
+  FESpaceDim,
+  FEFieldDim
     > evaluation_Type;
 private:
     ExpressionToEvaluation();
@@ -432,6 +526,19 @@ class ExpressionToEvaluation <
 {
 public:
     typedef EvaluationInterpolateValue<MeshType, MapType, FESpaceDim, FEFieldDim> evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+
+// Specialized for a patch area expression
+template<typename MeshType, typename MapType, UInt FESpaceDim, UInt FEFieldDim, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation <
+    ExpressionPatchArea<MeshType, MapType, FESpaceDim, FEFieldDim>, testDim, solutionDim, spaceDim >
+{
+public:
+    typedef EvaluationPatchArea<MeshType, MapType, FESpaceDim, FEFieldDim> evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();
@@ -543,6 +650,75 @@ private:
     ~ExpressionToEvaluation();
 };
 
+// Specialized for the square root
+template<typename ExpressionBase, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionSquareRoot<ExpressionBase>, testDim, solutionDim, spaceDim>
+{
+public:
+    typedef EvaluationSquareRoot <
+    typename ExpressionToEvaluation<ExpressionBase, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+// Specialized for the cubic root
+template<typename ExpressionBase, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionCubicRoot<ExpressionBase>, testDim, solutionDim, spaceDim>
+{
+public:
+    typedef EvaluationCubicRoot <
+    typename ExpressionToEvaluation<ExpressionBase, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+
+// Specialized for the isochoric change of variable in the structure module
+template<typename ExpressionBase, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionIsochoricChangeOfVariable<ExpressionBase>, testDim, solutionDim, spaceDim>
+{
+public:
+    typedef EvaluationIsochoricChangeOfVariable <
+    typename ExpressionToEvaluation<ExpressionBase, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+
+// Specialized for the atan
+template<typename ExpressionBase, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionArcTan<ExpressionBase>, testDim, solutionDim, spaceDim>
+{
+public:
+    typedef EvaluationArcTan <
+    typename ExpressionToEvaluation<ExpressionBase, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+
+// Specialized for the atan
+template<typename ExpressionBase, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionDerivativeArcTan<ExpressionBase>, testDim, solutionDim, spaceDim>
+{
+public:
+    typedef EvaluationDerivativeArcTan <
+    typename ExpressionToEvaluation<ExpressionBase, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+
 // Specialized for a logarithm
 template<typename ExpressionBase, UInt testDim, UInt solutionDim, UInt spaceDim>
 class ExpressionToEvaluation<ExpressionLogarithm<ExpressionBase>, testDim, solutionDim, spaceDim>
@@ -642,6 +818,16 @@ class ExpressionToEvaluation<ExpressionMeas, testDim, solutionDim, spaceDim>
 {
 public:
     typedef EvaluationMeas<spaceDim> evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+template<UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionMeasBDCurrentFE, testDim, solutionDim, spaceDim>
+{
+public:
+    typedef EvaluationMeasBDCurrentFE<spaceDim> evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();

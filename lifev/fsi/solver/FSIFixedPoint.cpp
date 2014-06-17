@@ -352,8 +352,8 @@ void FSIFixedPoint::registerMyProducts( )
 {
     FSIFactory_Type::instance().registerProduct ( "fixedPoint", &createFP );
 
-    solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct ( "linearVenantKirchhoff", &createVenantKirchhoffLinear );
-    solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct ( "nonLinearVenantKirchhoff", &createVenantKirchhoffNonLinear );
+    solid_Type::material_Type::isotropicLaw_Type::StructureIsotropicMaterialFactory::instance().registerProduct ( "linearVenantKirchhoff", &createVenantKirchhoffLinear );
+    solid_Type::material_Type::isotropicLaw_Type::StructureIsotropicMaterialFactory::instance().registerProduct ( "nonLinearVenantKirchhoff", &createVenantKirchhoffNonLinear );
 
 }
 

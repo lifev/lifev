@@ -87,13 +87,15 @@
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 
 //Materials
-#include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
-#include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
-#include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
-#include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialLinear.hpp>
+#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/NeoHookeanMaterialNonLinear.hpp>
 
-#include <lifev/structure/solver/VenantKirchhoffMaterialNonLinearPenalized.hpp>
-#include <lifev/structure/solver/SecondOrderExponentialMaterialNonLinear.hpp>
+#include <lifev/eta/fem/ETFESpace.hpp>
+
+#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinearPenalized.hpp>
+#include <lifev/structure/solver/isotropic/SecondOrderExponentialMaterialNonLinear.hpp>
 
 namespace LifeV
 {
@@ -617,8 +619,9 @@ WallTensionEstimator<Mesh >::setup ( const dataPtr_Type& dataMaterial,
     M_eigenvaluesI.resize ( M_FESpace->fieldDim() );
 
     // Materials
-    M_material.reset ( material_Type::StructureMaterialFactory::instance().createObject ( M_dataMaterial->solidType() ) );
-    M_material->setup ( M_FESpace, feSpaceET, M_FESpace->mapPtr(), M_offset, M_dataMaterial, M_displayer );
+    M_material.reset( new material_Type() );
+    M_material->setup ( feSpace, feSpaceET, M_FESpace->mapPtr(), M_offset, M_dataMaterial, M_displayer );
+
 }
 
 template <typename Mesh>
@@ -671,16 +674,16 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement ( void )
 
     LifeChrono chrono;
 
-    M_displayer->leaderPrint (" \n*********************************\n  ");
-    M_displayer->leaderPrint ("   Performing the analysis recovering the displacement..., ", M_dataMaterial->solidType() );
-    M_displayer->leaderPrint (" \n*********************************\n  ");
+    this->M_displayer->leaderPrint (" \n*********************************\n  ");
+    this->M_displayer->leaderPrint ("   Performing the analysis recovering the displacement..., ");
+    this->M_displayer->leaderPrint (" \n*********************************\n  ");
 
     chrono.start();
 
     for ( UInt iDOF = 0; iDOF < ( UInt ) M_FESpace->dof().numTotalDof(); ++iDOF )
     {
 
-        if ( M_displacement->blockMap().LID (iDOF) != -1 ) // The Global ID is on the calling processors
+        if ( M_displacement->blockMap().LID ( static_cast<EpetraInt_Type> (iDOF) ) != -1 ) // The Global ID is on the calling processors
         {
             std::vector<Real> dX (3, 0.0);
             std::vector<Real> dY (3, 0.0);
@@ -695,8 +698,8 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement ( void )
             //Extracting the gradient of U on the current DOF
             for ( UInt iComp = 0; iComp < M_FESpace->fieldDim(); ++iComp )
             {
-                Int LIDid = M_displacement->blockMap().LID (iDOF + iComp * dim + M_offset);
-                Int GIDid = M_displacement->blockMap().GID (LIDid);
+                Int LIDid = M_displacement->blockMap().LID ( static_cast<EpetraInt_Type> ( ( iDOF + iComp * dim + M_offset ) ) );
+                Int GIDid = M_displacement->blockMap().GID ( static_cast<EpetraInt_Type> (LIDid) );
                 dX[iComp] = (*grDisplX) (GIDid); // (d_xX,d_yX,d_zX)
                 dY[iComp] = (*grDisplY) (GIDid); // (d_xY,d_yY,d_zY)
                 dZ[iComp] = (*grDisplZ) (GIDid); // (d_xZ,d_yZ,d_zZ)
@@ -742,8 +745,8 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement ( void )
             //Save the eigenvalues in the global vector
             for ( UInt icoor (0); icoor < M_FESpace->fieldDim(); ++icoor )
             {
-                Int LIDid = M_displacement->blockMap().LID (iDOF + icoor * dim + M_offset);
-                Int GIDid = M_displacement->blockMap().GID (LIDid);
+                Int LIDid = M_displacement->blockMap().LID ( static_cast<EpetraInt_Type> (iDOF + icoor * dim + M_offset) );
+                Int GIDid = M_displacement->blockMap().GID ( static_cast<EpetraInt_Type> (LIDid) );
                 (*M_globalEigenvalues) (GIDid) = M_eigenvaluesR[icoor];
             }
 
@@ -788,9 +791,9 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryEigenvalues ( void )
     //Set the new quadrature rule
     M_FESpace->setQuadRule (fakeQuadratureRule);
 
-    M_displayer->leaderPrint (" \n*********************************\n  ");
-    M_displayer->leaderPrint ("   Performing the analysis recovering the tensions..., ", M_dataMaterial->solidType() );
-    M_displayer->leaderPrint (" \n*********************************\n  ");
+    this->M_displayer->leaderPrint (" \n*********************************\n  ");
+    this->M_displayer->leaderPrint ("   Performing the analysis recovering the tensions..., " );
+    this->M_displayer->leaderPrint (" \n*********************************\n  ");
 
     UInt totalDof = M_FESpace->dof().numTotalDof();
     VectorElemental dk_loc (M_FESpace->fe().nbFEDof(), M_FESpace->fieldDim() );
@@ -897,7 +900,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryCauchyStresses ( void )
     for ( UInt iDOF (0); iDOF < ( UInt ) M_FESpace->dof().numTotalDof(); ++iDOF )
     {
 
-        if ( M_displacement->blockMap().LID (iDOF) != -1 ) // The Global ID is on the calling processors
+        if ( M_displacement->blockMap().LID ( static_cast<EpetraInt_Type> (iDOF) ) != -1 ) // The Global ID is on the calling processors
         {
 
             (*M_sigma).Scale (0.0);
@@ -905,8 +908,8 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryCauchyStresses ( void )
             //Extracting the gradient of U on the current DOF
             for ( UInt iComp = 0; iComp < M_FESpace->fieldDim(); ++iComp )
             {
-                Int LIDid = M_displacement->blockMap().LID (iDOF + iComp * M_FESpace->dim() + M_offset);
-                Int GIDid = M_displacement->blockMap().GID (LIDid);
+                Int LIDid = M_displacement->blockMap().LID ( static_cast<EpetraInt_Type> (iDOF + iComp * M_FESpace->dim() + M_offset) );
+                Int GIDid = M_displacement->blockMap().GID (static_cast<EpetraInt_Type> (LIDid) );
                 (*M_sigma) (iComp, 0) = (*M_sigmaX) (GIDid); // (d_xX,d_yX,d_zX)
                 (*M_sigma) (iComp, 1) = (*M_sigmaY) (GIDid); // (d_xY,d_yY,d_zY)
                 (*M_sigma) (iComp, 2) = (*M_sigmaZ) (GIDid); // (d_xZ,d_yZ,d_zZ)
@@ -929,8 +932,8 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryCauchyStresses ( void )
             //Save the eigenvalues in the global vector
             for ( UInt icoor = 0; icoor < M_FESpace->fieldDim(); ++icoor )
             {
-                Int LIDid = M_displacement->blockMap().LID (iDOF + icoor * M_FESpace->dim() + M_offset);
-                Int GIDid = M_displacement->blockMap().GID (LIDid);
+                Int LIDid = M_displacement->blockMap().LID ( static_cast<EpetraInt_Type> (iDOF + icoor * M_FESpace->dim() + M_offset ) );
+                Int GIDid = M_displacement->blockMap().GID (static_cast<EpetraInt_Type> (LIDid) );
                 (*M_globalEigenvalues) (GIDid) = M_eigenvaluesR[icoor];
             }
         }
@@ -1045,6 +1048,10 @@ WallTensionEstimator<Mesh >::constructGlobalStressVector ()
 
     //Creating a copy of the FESpace
     feSpace_Type fakeFESpace ( M_FESpace->mesh(), M_FESpace->refFE(), M_FESpace->qr(), M_FESpace->bdQr(), 3, M_FESpace->map().commPtr() );
+
+    this->M_displayer->leaderPrint (" \n*********************************\n  ");
+    this->M_displayer->leaderPrint ("   Performing the analysis recovering the Cauchy stresses..., ");
+    this->M_displayer->leaderPrint (" \n*********************************\n  ");
 
     //Set the new quadrature rule
     fakeFESpace.setQuadRule (fakeQuadratureRule);

@@ -80,14 +80,14 @@ public:
      */
     //@{
     //! default constructor.
-    MatrixEpetraStructured ( const MapEpetra& map, int numEntries = 50 );
+    MatrixEpetraStructured ( const MapEpetra& map, int numEntries = 50, bool ignoreNonLocalValues = false );
 
     //! Block constructor
     /*!
     This is the most complete constructor, as it builds the whole block
     structure of the matrix, using the maps stored in the vector.
     */
-    MatrixEpetraStructured ( const MapVector<MapEpetra>& vector, int numEntries = 50 );
+    MatrixEpetraStructured ( const MapVector<MapEpetra>& vector, int numEntries = 50, bool ignoreNonLocalValues = false );
 
     //! Casting constructor
     MatrixEpetraStructured ( const MatrixEpetra<DataType>& matrix );
@@ -205,8 +205,8 @@ private:
 // Constructors & Destructor
 // ===================================================
 template <typename DataType>
-MatrixEpetraStructured<DataType>::MatrixEpetraStructured ( const MapEpetra& map, int numEntries ) :
-    MatrixEpetra<DataType> ( map, numEntries ),
+MatrixEpetraStructured<DataType>::MatrixEpetraStructured ( const MapEpetra& map, int numEntries, bool ignoreNonLocalValues ) :
+    MatrixEpetra<DataType> ( map, numEntries, ignoreNonLocalValues ),
     M_blockStructure ( map )
 {
 
@@ -215,7 +215,7 @@ MatrixEpetraStructured<DataType>::MatrixEpetraStructured ( const MapEpetra& map,
 
 
 template <typename DataType>
-MatrixEpetraStructured<DataType>::MatrixEpetraStructured ( const MapVector<MapEpetra>& vector, int numEntries ) :
+MatrixEpetraStructured<DataType>::MatrixEpetraStructured ( const MapVector<MapEpetra>& vector, int numEntries, bool ignoreNonLocalValues ) :
     MatrixEpetra<DataType> ( typename MatrixEpetra<DataType>::matrix_ptrtype() ), M_blockStructure ( vector )
 {
     ASSERT ( vector.nbMap() > 0 , "Map vector empty, impossible to construct a MatrixBlockMonolithicEpetra!" );
@@ -223,7 +223,7 @@ MatrixEpetraStructured<DataType>::MatrixEpetraStructured ( const MapVector<MapEp
     MapEpetra myMap ( vector.totalMap() );
 
     this->mapPtr().reset ( new MapEpetra ( myMap ) );
-    this->matrixPtr().reset ( new typename MatrixEpetra<DataType>::matrix_type ( Copy, *myMap.map ( Unique ), numEntries, false ) );
+    this->matrixPtr().reset ( new typename MatrixEpetra<DataType>::matrix_type ( Copy, *myMap.map ( Unique ), numEntries, ignoreNonLocalValues ) );
 }
 
 

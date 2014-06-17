@@ -184,15 +184,18 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
 
 ** # physical data for the solid
    [./physics]
-   solidType = linearVenantKirchhoff ## available choices: exponential, neoHookean, nonLinearVenantKirchhoff, linearVenantKirchhoff
-   lawType   = linear
    material_flag = 1                 #the mesh flag of the structure volume
    density   = 1.2
-   young     = 4.0E6
-   poisson   = 0.45
-   bulk      = 1e7
-   alpha     = 2.5e6            # the parameter at the exponent for the exponential model
-   gamma     = 1                # parameter for the exponential model
+   thickness = 0.1
+
+   [../model]
+   constitutiveLaw     = isotropic
+   young     		= 4.e+6
+   poisson   		= 0.45
+   bulk	         	= 1e+7
+   alpha 		= 2.5e+6
+   gamma		= 1.0
+   solidTypeIsotropic 	= linearVenantKirchhoff 		# linearVenantKirchhoff / nonLinearVenantKirchhoff / neoHookean / exponential
 
 ** #time discretization
    [../time_discretization]

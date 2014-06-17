@@ -176,6 +176,7 @@ public:
     */
     HyperbolicSolver ( const data_Type&          dataFile,
                        FESpace<Mesh, MapEpetra>& fESpace,
+                       MapEpetra&                ghostMap,
                        bchandler_Type&           bcHandler,
                        commPtr_Type&             comm );
 
@@ -187,6 +188,7 @@ public:
     */
     HyperbolicSolver ( const data_Type&          dataFile,
                        FESpace<Mesh, MapEpetra>& fESpace,
+                       MapEpetra&                ghostMap,
                        commPtr_Type&             comm );
 
     //! Virtual destructor.
@@ -205,9 +207,6 @@ public:
 
     //! Compute the global CFL condition.
     Real CFL();
-
-    //! Get solution values across subdomain interfaces.
-    void updateGhostValues ( typename MeshPartitioner<Mesh>::GhostEntityDataMap_Type& ghostDataMap );
 
     //@}
 
@@ -269,8 +268,8 @@ public:
     inline void setSolution ( const vectorPtr_Type& solution )
     {
         // Set both the final step solution and beginning step solution.
-        M_u    = solution;
-        M_uOld = solution;
+        *M_u    = *solution;
+        *M_uOld = *solution;
     }
 
     //@}
@@ -404,9 +403,6 @@ protected:
     //! Vector of all local mass matrices, possibly with mass function.
     std::vector<MatrixElemental>  M_elmatMass;
 
-    //! Ghost data container
-    ghostDataMap_Type M_ghostDataMap;
-
 private:
 
     //! @name Private Constructors
@@ -436,6 +432,7 @@ template< typename Mesh, typename SolverType >
 HyperbolicSolver< Mesh, SolverType >::
 HyperbolicSolver ( const data_Type&          dataFile,
                    FESpace<Mesh, MapEpetra>& fESpace,
+                   MapEpetra&                ghostMap,
                    bchandler_Type&           bcHandler,
                    commPtr_Type&             comm ) :
     // Parallel stuff.
@@ -455,8 +452,8 @@ HyperbolicSolver ( const data_Type&          dataFile,
     // Algebraic stuff.
     M_rhs             ( new vector_Type ( M_localMap ) ),
     M_u               ( new vector_Type ( M_FESpace.map(), Repeated ) ),
-    M_uOld            ( new vector_Type ( M_FESpace.map(), Repeated ) ),
-    M_globalFlux      ( new vector_Type ( M_FESpace.map(), Repeated ) ),
+    M_uOld            ( new vector_Type ( ghostMap, Repeated ) ),
+    M_globalFlux      ( new vector_Type ( ghostMap, Repeated ) ),
     // Local matrices and vectors.
     M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
     M_elmatMass       ( )
@@ -472,6 +469,7 @@ template< typename Mesh, typename SolverType >
 HyperbolicSolver< Mesh, SolverType >::
 HyperbolicSolver ( const data_Type&          dataFile,
                    FESpace<Mesh, MapEpetra>& fESpace,
+                   MapEpetra&                ghostMap,
                    commPtr_Type&             comm ) :
     // Parallel stuff.
     M_me              ( comm->MyPID() ),
@@ -490,8 +488,8 @@ HyperbolicSolver ( const data_Type&          dataFile,
     // Algebraic stuff.
     M_rhs             ( new vector_Type ( M_localMap ) ),
     M_u               ( new vector_Type ( M_FESpace.map(), Repeated ) ),
-    M_uOld            ( new vector_Type ( M_FESpace.map(), Repeated ) ),
-    M_globalFlux      ( new vector_Type ( M_FESpace.map(), Repeated ) ),
+    M_uOld            ( new vector_Type ( ghostMap, Repeated ) ),
+    M_globalFlux      ( new vector_Type ( ghostMap, Repeated ) ),
     // Local matrices and vectors.
     M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
     M_elmatMass       ( )
@@ -562,7 +560,7 @@ setup ()
         VectorElemental massValue  ( M_FESpace.refFE().nbDof(), 1 );
         extract_vec ( vectorMass, massValue, M_FESpace.refFE(), M_FESpace.dof(), iElem, 0 );
         // TODO: this works only for P0
-        mass ( massValue[ 0 ], matElem, M_FESpace.fe(), 0, 0);
+        AssemblyElemental::mass ( massValue[ 0 ], matElem, M_FESpace.fe(), 0, 0);
 
         /* Put in M the matrix L and L^T, where L and L^T is the Cholesky factorization of M.
            For more details see http://www.netlib.org/lapack/double/dpotrf.f */
@@ -588,7 +586,6 @@ void
 HyperbolicSolver< Mesh, SolverType >::
 solveOneTimeStep ()
 {
-
     // Total number of elements in the mesh
     const UInt meshNumberOfElements ( M_FESpace.mesh()->numElements() );
 
@@ -597,8 +594,7 @@ solveOneTimeStep ()
     {
 
         // Update the property of the current element
-        M_FESpace.fe().update ( M_FESpace.mesh()->element ( iElem ),
-                                UPDATE_QUAD_NODES | UPDATE_WDET | UPDATE_PHI );
+        M_FESpace.fe().update ( M_FESpace.mesh()->element (iElem), UPDATE_QUAD_NODES | UPDATE_WDET);
 
         // Reconstruct step of the current element
         localReconstruct ( iElem );
@@ -621,11 +617,17 @@ solveOneTimeStep ()
     // Assemble the global hybrid vector.
     M_globalFlux->globalAssemble();
 
+    // alternative: instead of modifying M_globalFlux.map, we can make a local copy with the correct map
+    //    // this is needed since M_uOld.map != M_globalFlux.map
+    //    vector_Type fluxCopy ( M_uOld->map() );
+    //    fluxCopy = *M_globalFlux;
+
     // Update the value of the solution
     (*M_u) = (*M_uOld) - M_data.dataTime()->timeStep() * (*M_globalFlux);
+    //    *M_u = *M_uOld - M_data.dataTime()->timeStep() * fluxCopy;
 
     // Clean the vector of fluxes
-    M_globalFlux.reset ( new vector_Type ( M_FESpace.map(), Repeated ) );
+    M_globalFlux.reset ( new vector_Type ( M_uOld->map(), Repeated ) );
 
     // Update the solution at previous time step
     *M_uOld = *M_u;
@@ -648,8 +650,7 @@ CFL()
     for ( UInt iElem (0); iElem < meshNumberOfElements; ++iElem )
     {
         // Update the property of the current element
-        M_FESpace.fe().update ( M_FESpace.mesh()->element ( iElem ),
-                                UPDATE_QUAD_NODES | UPDATE_WDET | UPDATE_PHI );
+        M_FESpace.fe().update ( M_FESpace.mesh()->element (iElem), UPDATE_QUAD_NODES | UPDATE_WDET);
 
         // Volumetric measure of the current element
         const Real K ( M_FESpace.fe().measure() );
@@ -695,7 +696,8 @@ CFL()
             else if ( Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), EntityFlags::SUBDOMAIN_INTERFACE ) )
             {
                 // TODO: this works only for P0 elements
-                rightValue[ 0 ] = M_ghostDataMap[ iGlobalFace ];
+                // but extract_vec works only with lids while RightElement is a gid
+                rightValue[ 0 ] = (*M_uOld) [ rightElement ];
             }
             else // Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), PHYSICAL_BOUNDARY )
             {
@@ -759,81 +761,6 @@ CFL()
 
 } //CFL
 
-template< typename Mesh, typename SolverType >
-void
-HyperbolicSolver< Mesh, SolverType >::
-updateGhostValues ( typename MeshPartitioner<Mesh>::GhostEntityDataMap_Type& ghostDataMap )
-{
-
-    // fill send buffer
-    buffer_Type sendBuffer;
-
-    // TODO: move this to a const reference
-    typename MeshPartitioner<Mesh>::GhostEntityDataMap_Type::const_iterator procIt  = ghostDataMap.begin();
-    typename MeshPartitioner<Mesh>::GhostEntityDataMap_Type::const_iterator procEnd = ghostDataMap.end();
-    typename MeshPartitioner<Mesh>::GhostEntityDataContainer_Type::const_iterator dataIt;
-    typename MeshPartitioner<Mesh>::GhostEntityDataContainer_Type::const_iterator dataEnd;
-    for ( ; procIt != procEnd; ++procIt )
-    {
-        std::vector<Real> valueList ( sendBuffer[ procIt->first ] );
-
-        dataEnd = procIt->second.end();
-        for ( dataIt = procIt->second.begin(); dataIt != dataEnd; ++dataIt )
-        {
-            ID elementId ( M_FESpace.mesh()->faceElement ( dataIt->localFacetId, 0 ) );
-
-            VectorElemental ghostValue  ( M_FESpace.refFE().nbDof(), 1 );
-            extract_vec ( *M_uOld, ghostValue, M_FESpace.refFE(), M_FESpace.dof(), elementId, 0 );
-            // TODO: this works only for P0
-            sendBuffer[ procIt->first ].push_back ( ghostValue[ 0 ] );
-        }
-    }
-
-    // organize recvBuffer
-    buffer_Type recvBuffer ( sendBuffer );
-
-    // send data
-    MPI_Status status;
-    for ( Int proc = 0; proc < M_displayer.comm()->NumProc(); proc++ )
-    {
-        if ( proc != M_displayer.comm()->MyPID() )
-        {
-            MPI_Send ( &sendBuffer[ proc ][ 0 ], sendBuffer[ proc ].size(), MPI_DOUBLE, proc, M_displayer.comm()->MyPID() + 1000 * proc, ( boost::dynamic_pointer_cast <Epetra_MpiComm> (M_displayer.comm() ) )->Comm() );
-            MPI_Recv ( &recvBuffer[ proc ][ 0 ], recvBuffer[ proc ].size(), MPI_DOUBLE, proc, proc + 1000 * M_displayer.comm()->MyPID(), ( boost::dynamic_pointer_cast <Epetra_MpiComm> (M_displayer.comm() ) )->Comm(), &status );
-        }
-
-    }
-
-    // store data in the M_ghostDataMap member
-    for ( buffer_Type::const_iterator procIt = recvBuffer.begin(); procIt != recvBuffer.end(); ++procIt )
-    {
-        UInt count ( 0 );
-        for ( ghostDataContainer_Type::const_iterator dataIt = procIt->second.begin(); dataIt != procIt->second.end(); ++dataIt, count++ )
-        {
-            ID ghostFaceId = ghostDataMap[ procIt->first ][ count ].localFacetId;
-            M_ghostDataMap[ ghostFaceId ] = *dataIt;
-        }
-    }
-
-
-    // DEBUG
-    //    std::ofstream outf ( ( "hype." + boost::lexical_cast<std::string> ( M_displayer.comm()->MyPID() ) + ".out" ).c_str() );
-    //    outf << M_uOld->epetraVector() << std::endl << std::endl;
-    //
-    //    for ( buffer_Type::const_iterator procIt = recvBuffer.begin(); procIt != recvBuffer.end(); ++procIt )
-    //    {
-    //        outf << "proc " << procIt->first << " size " << recvBuffer[ procIt->first ].size() << std::endl;
-    //        UInt count ( 0 );
-    //        for ( procData_Type::const_iterator dataIt = procIt->second.begin(); dataIt != procIt->second.end(); ++dataIt, count++ )
-    //        {
-    //            ID ghostFaceId = ghostDataMap[ procIt->first ][ count ].localFacetId;
-    //            ID elementId ( M_FESpace.mesh()->faceElement( ghostFaceId, 0 ) );
-    //            outf << "lid " << elementId << " " << "gid " << ghostDataMap[ procIt->first ][ count ].ghostElementLocalId << " " << *dataIt << std::endl;
-    //        }
-    //    }
-
-} // updateGhostValues
-
 // ===================================================
 // Set Methods
 // ===================================================
@@ -845,14 +772,17 @@ HyperbolicSolver< Mesh, SolverType >::
 setInitialSolution ( const Function_Type& initialSolution )
 {
 
+    // interpolation must be done on a Unique map
+    vector_Type uUnique ( M_u->map(), Unique );
+
     // Interpolate the initial solution.
     M_FESpace.interpolate ( initialSolution,
-                            *M_uOld,
+                            uUnique,
                             M_data.dataTime()->initialTime() );
 
-    // Update the solution
-    *M_u = *M_uOld;
-
+    // Update the solutions
+    *M_uOld = uUnique;
+    *M_u    = uUnique;
 } // setInitialSolution
 
 // ===================================================
@@ -948,7 +878,8 @@ localEvolve ( const UInt& iElem )
         else if ( Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), EntityFlags::SUBDOMAIN_INTERFACE ) )
         {
             // TODO: this works only for P0 elements
-            rightValue[ 0 ] = M_ghostDataMap[ iGlobalFace ];
+            //            rightValue[ 0 ] = M_ghostDataMap[ iGlobalFace ];
+            rightValue[ 0 ] = (*M_uOld) [ rightElement ];
         }
         else // Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), PHYSICAL_BOUNDARY )
         {

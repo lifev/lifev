@@ -102,11 +102,9 @@ CurrentFE::CurrentFE ( const ReferenceFE& refFE, const GeometricMap& geoMap, con
             {
                 for (UInt iterFEDim (0); iterFEDim < M_refFE->feDim(); ++iterFEDim)
                 {
-
                     M_phi[iterNode][iterFEDim][iterQuad] = M_refFE->phi ( iterNode, iterFEDim,
                                                                           M_quadRule->quadPointCoor (iterQuad) );
                 }
-                M_phiUpdated = true;
             }
 
             // --- DIV ---
@@ -114,7 +112,6 @@ CurrentFE::CurrentFE ( const ReferenceFE& refFE, const GeometricMap& geoMap, con
             {
                 M_divPhiRef[iterNode][iterQuad] = M_refFE->divPhi (iterNode,
                                                                    M_quadRule->quadPointCoor (iterQuad) );
-                M_divPhiRefUpdated = true;
             };
 
 
@@ -126,7 +123,6 @@ CurrentFE::CurrentFE ( const ReferenceFE& refFE, const GeometricMap& geoMap, con
                     M_dphiRef[iterNode][icoor][iterQuad] = M_refFE->dPhi ( iterNode,
                                                                            icoor,
                                                                            M_quadRule->quadPointCoor (iterQuad) );
-                    M_dphiRefUpdated = true;
                 };
 
                 // --- D2PHI
@@ -138,7 +134,6 @@ CurrentFE::CurrentFE ( const ReferenceFE& refFE, const GeometricMap& geoMap, con
                                                                                         icoor, jcoor,
                                                                                         M_quadRule->quadPointCoor (iterQuad) );
                     }
-                    M_d2phiRefUpdated = true;
                 }
             }
         }
@@ -152,6 +147,10 @@ CurrentFE::CurrentFE ( const ReferenceFE& refFE, const GeometricMap& geoMap, con
         }
     }
 
+    M_phiUpdated = true;
+    M_dphiRefUpdated = true;
+    M_divPhiRefUpdated = true;
+    M_d2phiRefUpdated = true;
     M_dphiGeometricMapUpdated = true;
 }
 
@@ -580,37 +579,7 @@ void CurrentFE::barycenter ( Real& x, Real& y, Real& z ) const
     x = 0.0;
     y = 0.0;
     z = 0.0;
-    /*
-        switch ( M_nbLocalCoor )
-        {
-            case 1:    // 1D
-                for ( UInt i (0); i < M_nbGeoNode ; ++i)
-                {
-                    x += M_cellNodes[i][0];
-                }
-                break;
-            case 2:    // 2D
-                for ( UInt i (0); i < M_nbGeoNode ; ++i)
-                {
-                    x += M_cellNodes[i][0];
-                    y += M_cellNodes[i][1];
-                }
-                break;
-            case 3:    // 3D
-                for ( UInt i (0); i < M_nbGeoNode ; ++i)
-                {
-                    x += M_cellNodes[i][0];
-                    y += M_cellNodes[i][1];
-                    z += M_cellNodes[i][2];
-                }
-                break;
-            default:
-                ERROR_MSG ( "Dimension (M_nbLocalCoor): only 1, 2 or 3!" );
-                break;
-        }
-    */
-    // Note: since in diameter/diameter2 we are considering all the 3 components
-    //       of the cell nodes, why not doing it here too?
+
     for (UInt iNode (0); iNode < M_nbGeoNode; ++iNode)
     {
         x += M_cellNodes[iNode][0];
@@ -684,35 +653,6 @@ void CurrentFE::coorMap ( Real& x, Real& y, Real& z,
     x = 0.0;
     y = 0.0;
     z = 0.0;
-    /*
-        switch ( M_nbLocalCoor )
-        {
-            case 1:    // 1D
-                for ( UInt i(0); i < M_nbGeoNode; ++i )
-                {
-                    x += M_cellNodes[i][0]* M_geoMap->phi( i, xi, eta, zeta );
-                }
-                break;
-            case 2:    // 2D
-                for ( UInt i(0); i < M_nbGeoNode; ++i )
-                {
-                    x += M_cellNodes[i][0] * M_geoMap->phi( i, xi, eta, zeta );
-                    y += M_cellNodes[i][1] * M_geoMap->phi( i, xi, eta, zeta );
-                }
-                break;
-            case 3:    // 3D
-                for ( UInt i(0); i < M_nbGeoNode; ++i )
-                {
-                    x += M_cellNodes[i][0] * M_geoMap->phi( i, xi, eta, zeta );
-                    y += M_cellNodes[i][1] * M_geoMap->phi( i, xi, eta, zeta );
-                    z += M_cellNodes[i][2] * M_geoMap->phi( i, xi, eta, zeta );
-                }
-                break;
-            default:
-                ERROR_MSG( "Dimension (M_nbLocalCoor): only 1, 2 or 3!" );
-                break;
-        }
-    */
 
     // Note: we assume (already in the constructor) that the 2nd dimension of
     // M_cellNodes is nDimensions, that is 3. If in the future nDimensions!=3
@@ -838,7 +778,6 @@ void CurrentFE::setQuadRule (const QuadratureRule& newQuadRule)
                     M_phi[iterNode][iterFEDim][iterQuad] = M_refFE->phi ( iterNode, iterFEDim,
                                                                           M_quadRule->quadPointCoor (iterQuad) );
                 }
-                M_phiUpdated = true;
             }
 
             // --- DIV ---
@@ -846,7 +785,6 @@ void CurrentFE::setQuadRule (const QuadratureRule& newQuadRule)
             {
                 M_divPhiRef[iterNode][iterQuad] = M_refFE->divPhi (iterNode,
                                                                    M_quadRule->quadPointCoor (iterQuad) );
-                M_divPhiRefUpdated = true;
             }
 
             for ( UInt icoor (0); icoor < M_nbLocalCoor; ++icoor )
@@ -857,7 +795,6 @@ void CurrentFE::setQuadRule (const QuadratureRule& newQuadRule)
                     M_dphiRef[iterNode][icoor][iterQuad] = M_refFE->dPhi ( iterNode,
                                                                            icoor,
                                                                            M_quadRule->quadPointCoor (iterQuad) );
-                    M_dphiRefUpdated = true;
                 }
 
                 // --- D2PHI ---
@@ -869,7 +806,6 @@ void CurrentFE::setQuadRule (const QuadratureRule& newQuadRule)
                                                                                         icoor, jcoor,
                                                                                         M_quadRule->quadPointCoor (iterQuad) );
                     }
-                    M_d2phiRefUpdated = true;
                 }
             }
         }
@@ -883,8 +819,11 @@ void CurrentFE::setQuadRule (const QuadratureRule& newQuadRule)
         }
     }
 
+    M_phiUpdated = true;
+    M_dphiRefUpdated = true;
+    M_divPhiRefUpdated = true;
+    M_d2phiRefUpdated = true;
     M_dphiGeometricMapUpdated = true;
-
 }
 
 void CurrentFE::computeCellNodes ( const std::vector< std::vector<Real> >& pts)
@@ -911,21 +850,6 @@ void CurrentFE::computeQuadNodes()
         }
     }
     M_quadNodesUpdated = true;
-}
-
-void CurrentFE::computePhi()
-{
-    for (UInt iterQuad (0); iterQuad < M_nbQuadPt ; ++iterQuad)
-    {
-        for (UInt iterNode (0); iterNode < M_nbNode; ++iterNode)
-        {
-            for (UInt iterFEDim (0); iterFEDim < M_refFE->feDim(); ++iterFEDim)
-            {
-                M_phi[iterNode][iterFEDim][iterQuad] = M_refFE->phi ( iterNode, iterFEDim,
-                                                                      M_quadRule->quadPointCoor (iterQuad) );
-            }
-        }
-    }
 }
 
 void CurrentFE::computeDphiGeometricMap()
@@ -1214,7 +1138,6 @@ void CurrentFE::computeD2phi()
 void CurrentFE::computePhiVect()
 {
     ASSERT (M_detJacobianUpdated, "Missing update: detJacobian");
-    ASSERT (M_phiUpdated, "Missing update: phi");
 
     Real sum (0.);
     for ( UInt ig (0); ig < M_nbQuadPt; ++ig )

@@ -433,7 +433,7 @@ void HeartMonodomainSolver<Mesh, SolverType>::buildSystem()
                 }
                 else
                 {
-                    stiff ( M_data.diffusivity(), M_stiffnessElementaryMatrix,  M_uFESpace.fe(), 0, 0 );
+                    AssemblyElemental::stiff ( M_data.diffusivity(), M_stiffnessElementaryMatrix,  M_uFESpace.fe(), 0, 0 );
                 }
                 break;
 
@@ -513,7 +513,7 @@ void HeartMonodomainSolver<Mesh, SolverType>::buildSystem()
         chronoStiff.stop();
 
         chronoMass.start();
-        mass ( 1., M_massElementaryMatrix, M_uFESpace.fe(), 0, 0 );
+        AssemblyElemental::mass ( 1., M_massElementaryMatrix, M_uFESpace.fe(), 0, 0 );
         chronoMass.stop();
 
 

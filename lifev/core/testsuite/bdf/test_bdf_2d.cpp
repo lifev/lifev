@@ -123,11 +123,8 @@ test_bdf::test_bdf (int argc, char** argv) :
 // ===================================================
 void test_bdf::run()
 {
-
     //Useful typedef
-    typedef SolverAztecOO solver_type;
     typedef VectorEpetra vector_type;
-    typedef boost::shared_ptr<vector_type> vector_ptrtype;
 
     // Reading from data file
     GetPot dataFile (Members->data_file_name.c_str() );
@@ -192,7 +189,7 @@ void test_bdf::run()
     {
         feSpacePtr->fe().updateJac (feSpacePtr->mesh()->element (iVol) );
         elmat.zero();
-        mass (1., elmat, feSpacePtr->fe(), 0, 0);
+        AssemblyElemental::mass (1., elmat, feSpacePtr->fe(), 0, 0);
         assembleMatrix (matM, elmat, feSpacePtr->fe(), feSpacePtr->fe(), feSpacePtr->dof(),
                         feSpacePtr->dof(), 0, 0, 0, 0);
     }
@@ -285,8 +282,8 @@ void test_bdf::run()
         {
             feSpacePtr->fe().updateFirstDerivQuadPt (feSpacePtr->mesh()->element (i) );
             elmat.zero();
-            mass (coeff + s, elmat, feSpacePtr->fe() );
-            stiff (visc, elmat, feSpacePtr->fe() );
+            AssemblyElemental::mass (coeff + s, elmat, feSpacePtr->fe() );
+            AssemblyElemental::stiff (visc, elmat, feSpacePtr->fe() );
             assembleMatrix (*matA_ptr, elmat, feSpacePtr->fe(), feSpacePtr->fe(),
                             feSpacePtr->dof(), feSpacePtr->dof(), 0, 0, 0, 0);
         }

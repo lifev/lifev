@@ -14,6 +14,7 @@ ADD_SUBDIRECTORIES(
   linear_solver_preconditioner
   matrix_epetra_structured_framework
   mesh
+  repeated_mesh
   region_marker_id
   template_test
   vector_container
@@ -21,7 +22,7 @@ ADD_SUBDIRECTORIES(
 
 IF(TPL_ENABLE_HDF5)
     ADD_SUBDIRECTORIES(
-        partition_io
+        offline_partition_io
         )
 ENDIF()
 
