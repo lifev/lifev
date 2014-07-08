@@ -25,11 +25,14 @@ start      = 0
 save       = 1
 
 [importer]
-type        = hdf5
-filename    = fluidGI-healthy-EXP1-hRes-Last
-nameField   = f-velocity
-analysis    = instant
-iteration   = '150'
+type        		= hdf5
+filename    		= result
+nameFieldVelocity   = velocity
+nameFieldPressure   = pressure
+analysis    		= interval
+iteration   		= '1'
+iterationStart 		= '1'
+iterationEnd 		= '445'
 
 [fluid]
 
@@ -43,27 +46,27 @@ iteration   = '150'
 
 
     [../physics]
-    density         = 1.0           # density   [ g / cm^3 ]
-    viscosity       = 0.035          # viscosity [ Poise ]
-    resistance      = 0.00   # resistance  ( 80 mmHg * s / ml ) [ dyn * s / cm^5 ]
-    hydrostatic     = 0.0        # hydrostatic pressure [ dyn / cm^2 ]
+    density         = 1000          # density   [ g / cm^3 ]
+    viscosity       = 1             # viscosity [ Poise ]
+    resistance      = 0.00          # resistance  ( 80 mmHg * s / ml ) [ dyn * s / cm^5 ]
+    hydrostatic     = 0.0           # hydrostatic pressure [ dyn / cm^2 ]
 
     [../time_discretization]
-    initialtime     = 0.195
-    endtime         = 0.196
-    timestep        = 0.001
+    initialtime     = 0.01
+    endtime         = 4.45
+    timestep        = 0.01
     BDF_order       = 1
 
     [../space_discretization]
     mesh_dir        = ./
-    mesh_file       = fluidShort.mesh
+    mesh_file       = flow_square_coarse.mesh
     mesh_type       = .mesh
 
     verbose         = 0             # verbose during mesh-reading
     linearized      = 0
     diagonalize     = 0 # weight, 0=off. for P2P1 better to be on=1
     div_beta_u_v    = 1             # 1=on, 0=off
-    vel_order       = P1Bubble          # P1, P1Bubble, P2
+    vel_order       = P1            # P1, P1Bubble, P2
     press_order     = P1            # P1, P2
     stiff_strain    = true            # P1, P2
 

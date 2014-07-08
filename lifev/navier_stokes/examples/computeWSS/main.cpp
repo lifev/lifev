@@ -237,11 +237,16 @@ WSS::run3d()
 
     wssFESpacePtr_Type velFESpace ( new wssFESpace_Type (meshPart, dataClass->uOrder() , 3, parameters->comm) );
 
+    wssFESpacePtr_Type pressureFESpace ( new wssFESpace_Type (meshPart, "P1" , 1, parameters->comm) );
+
     // This FESpace is to have the nice quadrature rule
     wssFESpacePtr_Type quadFESpace ( new wssFESpace_Type (meshPart, dataClass->uOrder() , 2, parameters->comm) );
 
     vectorialETFESpacePtr_Type uETFESpace ( new vectorialETFESpace_Type (meshPart, & (velFESpace->refFE() ),
                                                                          & (velFESpace->fe().geoMap() ), parameters->comm) );
+
+    scalarETFESpacePtr_Type pETFESpace ( new scalarETFESpace_Type (meshPart, & (pressureFESpace->refFE() ),
+                                                                             & (pressureFESpace->fe().geoMap() ), parameters->comm) );
 
     //! 3. Creation of the importers to read the solution (u,p)
     std::string const filename    = dataFile ( "importer/filename", "noNameFile");
@@ -325,11 +330,19 @@ WSS::run3d()
     vectorPtr_Type velocity;
     vectorPtr_Type velocityRead;
 
+    vectorPtr_Type pressure;
+    vectorPtr_Type pressureRead;
+
     vectorPtr_Type WSSvector;
 
+
     patchAreaVector.reset ( new vector_Type ( uETFESpace->map() ) );
+
     velocity.reset( new vector_Type( velFESpace->map() ) );
     velocityRead.reset( new vector_Type( velFESpace->map() ) );
+
+    pressure.reset( new vector_Type( pressureFESpace->map() ) );
+    pressureRead.reset( new vector_Type( pressureFESpace->map() ) );
 
     WSSvector.reset ( new vector_Type ( uETFESpace->map() ) );
 
@@ -340,7 +353,12 @@ WSS::run3d()
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocityRead",
                               velFESpace, velocityRead, UInt (0) );
 
+    // Debug purposes
+    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, "pressureRead",
+    		pressureFESpace, pressureRead, UInt (0) );
+
     exporter->postProcess ( 0.0 );
+
 
     //! =================================================================================
     //! Analysis - Istant or Interval
@@ -349,6 +367,9 @@ WSS::run3d()
     MPI_Barrier (MPI_COMM_WORLD);
 
     QuadratureRule fakeQuadratureRule( quadRuleTria3pt );
+
+    // setto regola di quad in cui i npdi sono i dof del triangolo
+    // NB: vale per P1 e P1Bolla. Per P2 devi cambiare la quadratura (area e' uguale ma cambiano i nodi)
 
     GeoVector firstPoint(2); Real firstWeight(0.0);
     firstPoint[0] = 0.0; firstPoint[1] = 0.0;; firstWeight = ( 0.5 ) / 3;
@@ -386,14 +407,15 @@ WSS::run3d()
     identity (2, 2) = 1.0;
 
     ExpressionVectorFromNonConstantScalar<ExpressionMeasBDCurrentFE, 3  > vMeas( meas_BDk );
-    evaluateNode( boundary( uETFESpace->mesh(), 200 ),
+    evaluateNode( boundary( uETFESpace->mesh(), 4 ),
                   adaptedBDQuadRule,
                   uETFESpace,
                   dot( vMeas , phi_i )
                   ) >> patchAreaVector;
-    patchAreaVector->globalAssemble();
+    patchAreaVector->globalAssemble(); // vettore con patch area
 
-    std::string const nameField =  dataFile ( "importer/nameField", "f-velocity");
+    std::string const nameField         =  dataFile ( "importer/nameFieldVelocity", "velocity"); // metti qll che vuoi
+    std::string const nameFieldPressure =  dataFile ( "importer/nameFieldPressure", "pressure"); // metti qll che vuoi
     UInt i,k;
 
     for( i=0,k =0; i < numberOfSol; i++, k++ )
@@ -402,11 +424,12 @@ WSS::run3d()
         // Reading the solution
         // resetting the element of the vector
         *velocity *= 0.0;
+        *pressure *= 0.0;
 	*WSSvector *= 0.0;
         UInt current(0);
         if( !readType.compare("interval") )
         {
-            current = i + start;
+            current = i + start; // metti fattore molt. davanti a i per leggere ogni 10 ad esempio
         }
         else
         {
@@ -421,24 +444,28 @@ WSS::run3d()
 
         std::cout << "Current reading: " << iterationString << std::endl;
 
-        /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
+        //!Definition of the ExporterData, used to load the solution inside the previously defined vectors
         LifeV::ExporterData<mesh_Type> solutionVel  (LifeV::ExporterData<mesh_Type>::VectorField,nameField + "." + iterationString,
                                                      velFESpace, velocity, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
+        LifeV::ExporterData<mesh_Type> solutionPres  (LifeV::ExporterData<mesh_Type>::ScalarField,nameFieldPressure + "." + iterationString,
+                                                             pressureFESpace, pressure, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
         //Read the variable
         M_importer->readVariable (solutionVel);
+        M_importer->readVariable (solutionPres);
         *velocityRead = *velocity;
+        *pressureRead = *pressure;
 
         Real dynamicViscosity = dataClass->viscosity( );
 
 	std::cout << "Viscosity: " << dataClass->viscosity( ) << std::endl;
         // Defining expressions
-        evaluateNode( boundary( uETFESpace->mesh(), 200 ),
+        evaluateNode( boundary( uETFESpace->mesh(), 4 ), //flag faccia
                       adaptedBDQuadRule,
                       uETFESpace,
-		      meas_BDk * dot ( value(dynamicViscosity) * ( grad(uETFESpace, *velocity) + transpose(grad(uETFESpace, *velocity)) ) * Nface -
-				       dot( value(dynamicViscosity) * ( grad(uETFESpace, *velocity) + transpose(grad(uETFESpace, *velocity)) ) * Nface , Nface ) * Nface, phi_i )
+		      meas_BDk * dot ( value(dynamicViscosity) * ( grad(uETFESpace, *velocity) + transpose(grad(uETFESpace, *velocity) ) ) * Nface -
+		    		  value(pETFESpace, *pressure) * Nface, phi_i )
                       ) >> WSSvector;
         WSSvector->globalAssemble();
         *WSSvector = *WSSvector / *patchAreaVector;
@@ -454,7 +481,6 @@ WSS::run3d()
 
         exporter->postProcess( dataClass->dataTime()->initialTime() + k * dataClass->dataTime()->timeStep() );
     }
-
 
     if (verbose )
     {

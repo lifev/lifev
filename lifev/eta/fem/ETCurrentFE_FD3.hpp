@@ -456,7 +456,7 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadrat
     M_d2phiReferenceFE(),
     M_d2phi(),
     M_laplacian()
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     , M_isCellNodeUpdated (false),
     M_isQuadNodeUpdated (false),
     M_isJacobianUpdated (false),
@@ -1113,7 +1113,7 @@ void ETCurrentFE<spaceDim, fieldDim>::updateD2phi (const UInt& iQuadPt)
     ASSERT (M_isInverseJacobianUpdated,
             "Inverse jacobian must be updated to compute the derivative of the basis functions" );
     
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isD2phiUpdated = true;
 #endif
     
@@ -1153,7 +1153,7 @@ void ETCurrentFE<spaceDim, fieldDim>::updateLaplacian (const UInt& iQuadPt)
     ASSERT ( M_isD2phiUpdated,
             "Basis function second derivatives must be updated to compute the laplacian" );
     
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isLaplacianUpdated = true;
 #endif
     
