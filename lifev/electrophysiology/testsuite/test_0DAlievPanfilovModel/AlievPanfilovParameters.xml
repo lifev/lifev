@@ -1,0 +1,10 @@
+<!-- Model Parameters -->
+<ParameterList name="Aliev Panfilov: Parameter list">
+	<Parameter name="mu1" type="double" value="0.12"/>
+	<Parameter name="mu2" type="double" value="0.3"/>
+	<Parameter name="k" type="double" value="8.0"  />
+	<Parameter name="a" type="double" value="0.1"  />
+	<Parameter name="epsilon" type="double" value="0.01"  />
+</ParameterList>
+
+	

@@ -1,0 +1,55 @@
+<ParameterList>	<!-- LinearSolver parameters -->
+    <Parameter name="surfaceVolumeRatio" type="double" value="1400.0"/>
+    <Parameter name="membraneCapacitance" type="double" value="1.0"/>
+    <Parameter name="k" type="double" value="8.0"  />
+    <Parameter name="a" type="double" value="0.1"  />
+    <Parameter name="epsilon" type="double" value="0.01"  />
+    <Parameter name="timeStep" type="double" value="0.01"  />
+    <Parameter name="endTime" type="double" value="1.0"  />
+    <Parameter name="saveStep" type="double" value="1.0"  />
+    <Parameter name="meth" type="int" value="0"  />
+    <Parameter name="longitudinalDiffusionIntra" type="double" value="1.7"  />
+    <Parameter name="transversalDiffusionIntra" type="double" value ="0.19"  />
+    <Parameter name="longitudinalDiffusionExtra" type="double" value="6.2"  />
+    <Parameter name="transversalDiffusionExtra" type="double" value ="2.4"  />
+    <Parameter name="elementsOrder" type="string" value="P1"  />
+    <Parameter name="mesh_name" type="string" value="benchmark_05mm.mesh"  />
+    <Parameter name="mesh_path" type="string" value="./"  />
+    <Parameter name="fibers_X" type="double" value="0.0"  />
+    <Parameter name="fibers_Y" type="double" value="0.0"  />
+    <Parameter name="fibers_Z" type="double" value="1.0"  />
+    <Parameter name="format" type="int" value="1"  />
+    <Parameter name="LumpedMass" type="bool" value="false" />
+
+
+    <Parameter name="Reuse Preconditioner" type="bool" value="true"/>
+    <Parameter name="Max Iterations For Reuse" type="int" value="80"/>
+    <Parameter name="Quit On Failure" type="bool" value="false"/>
+    <Parameter name="Silent" type="bool" value="true"/>
+	<Parameter name="Solver Type" type="string" value="AztecOO"/>
+	<Parameter name="OutputFile" type="string" value="Splitting1"/>
+	<Parameter name="OutputTimeSteps" type="string" value="TimeSteps1"/>
+	
+	<!-- Operator specific parameters (AztecOO) -->
+	<ParameterList name="Solver: Operator List">
+
+		<!-- Trilinos parameters -->
+		<ParameterList name="Trilinos: AztecOO List">
+    		<Parameter name="solver" type="string" value="gmres"/>
+	    	<Parameter name="conv" type="string" value="rhs"/>
+    		<Parameter name="scaling" type="string" value="none"/>
+	    	<Parameter name="output" type="string" value="none"/>
+    		<Parameter name="tol" type="double" value="1.e-7"/>
+	    	<Parameter name="max_iter" type="int" value="200"/>
+    		<Parameter name="kspace" type="int" value="100"/>
+    		<!-- az_aztec_defs.h -->
+    		<!-- #define AZ_classic 0 /* Does double classic */ -->
+	    	<Parameter name="orthog" type="int" value="0"/>
+	    	<!-- az_aztec_defs.h -->
+	    	<!-- #define AZ_resid 0 -->
+    		<Parameter name="aux_vec" type="int" value="0"/>
+    	</ParameterList>
+    </ParameterList>
+</ParameterList>
+
+

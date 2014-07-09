@@ -39,6 +39,7 @@
 
 // FSI includes
 #include <lifev/fsi/solver/FSIOperator.hpp>
+//class FSIOperator;
 
 // BCInterface includes
 #include <lifev/bc_interface/3D/bc/BCInterfaceData3D.hpp>

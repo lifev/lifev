@@ -5,7 +5,7 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
 TRIBITS_ADD_EXECUTABLE(
   NavierStokesFramework
-  SOURCES main.cpp NavierStokesCavity.cpp NavierStokesEthierSteinman.cpp MeshUtility.cpp
+  SOURCES main.cpp NavierStokesCavity.cpp NavierStokesEthierSteinman.cpp
   COMM serial mpi
 )
 

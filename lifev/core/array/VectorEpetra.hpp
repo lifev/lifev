@@ -755,6 +755,11 @@ public:
         return * ( M_epetraMap->map ( M_mapType ) );
     }
 
+
+    inline void setMapType (MapEpetraType type)
+    {
+        M_mapType = type;
+    }
     //! Return the size of the vector
     Int size() const;
 
@@ -821,3 +826,4 @@ VectorEpetra operator* ( const VectorEpetra::data_type& scalar, const VectorEpet
 } // end namespace LifeV
 
 #endif
+

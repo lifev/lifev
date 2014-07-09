@@ -62,6 +62,11 @@
 #endif
 
 #include <lifev/core/algorithm/NonLinearRichardson.hpp>
+
+#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionParserFSI3D.hpp>
+#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionParserSolverFSI3D.hpp>
+#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionSolverDefinedFSI3D.hpp>
+#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionUserDefinedFSI3D.hpp>
 #include <lifev/bc_interface/3D/bc/BCInterface3D.hpp>
 
 #include <lifev/fsi/solver/FSIMonolithic.hpp>
