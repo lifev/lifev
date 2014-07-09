@@ -17,6 +17,7 @@ ADD_SUBDIRECTORIES(
   repeated_mesh
   region_marker_id
   template_test
+  verify_solution
   vector_container
 )
 

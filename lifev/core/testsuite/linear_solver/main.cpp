@@ -61,6 +61,7 @@
 #include <lifev/core/algorithm/LinearSolver.hpp>
 #include <lifev/core/function/Laplacian.hpp>
 
+
 #define TEST_TOLERANCE 1e-13
 
 using namespace LifeV;
@@ -86,11 +87,46 @@ typedef boost::function < Real ( Real const&,
                                  UInt const& ) > function_Type;
 }
 
-void printErrors ( const vector_Type& solution, fespacePtr_Type uFESpace, bool verbose )
+class ExactSol
 {
+public:
+    Real operator() (const Real& t , const Real& x, const Real& y, const Real& z, const ID& i ) const
+    {
+        return Laplacian::uexact (t, x, y, z, i);
+    }
+
+    Real grad ( const ID& iCoor, const Real& t, const Real& x, const Real& y,
+                const Real& z, const ID& i ) const
+    {
+        switch (iCoor)
+        {
+            case 0:
+                return Laplacian::duexactdx ( t, x, y, z, i );
+            case 1:
+                return Laplacian::duexactdy ( t, x, y, z, i );
+            case 2:
+                return Laplacian::duexactdz ( t, x, y, z, i );
+            default:
+                return 0;
+        }
+        return 0;
+    }
+
+};
+
+
+void printErrors ( const vector_Type& solution, fespacePtr_Type uFESpace,
+                   Real& uL2Error, Real& uH1Error, bool verbose )
+{
+    ExactSol exactU;
+
+
     vector_Type velocity ( solution, Repeated );
-    Real uRelativeError, uL2Error;
-    uL2Error = uFESpace->l2Error (Laplacian::uexact, velocity, 0, &uRelativeError );
+    Real uRelativeError;
+    uL2Error = uFESpace->l2Error (exactU, velocity, 0, &uRelativeError );
+    Real uH1RelativeError;
+    uH1Error = uFESpace->h1Error (exactU, velocity, 0, &uH1RelativeError );
+
     if ( verbose )
     {
         std::cout << "Velocity" << std::endl;
@@ -102,6 +138,14 @@ void printErrors ( const vector_Type& solution, fespacePtr_Type uFESpace, bool v
     if ( verbose )
     {
         std::cout << "  Relative error: " << uRelativeError << std::endl;
+    }
+    if ( verbose )
+    {
+        std::cout << "  H1 error      : " << uH1Error << std::endl;
+    }
+    if ( verbose )
+    {
+        std::cout << "  Relative error: " << uH1RelativeError << std::endl;
     }
 }
 
@@ -468,23 +512,32 @@ main ( int argc, char** argv )
         solutionsDiff2 -= *solution3;
         Real solutionsDiffNorm2 = solutionsDiff2.norm2();
 
+
+        // +-----------------------------------------------+
+        // |             Reporting                         |
+        // +-----------------------------------------------+
+
+
         if ( verbose )
         {
             std::cout << "AztecOO solver" << std::endl;
         }
-        printErrors ( *solution, uFESpace, verbose );
+        Real uL2AztecOO, uH1AztecOO;
+        printErrors ( *solution, uFESpace, uL2AztecOO, uH1AztecOO, verbose );
 
         if ( verbose )
         {
             std::cout << "Linear solver Belos" << std::endl;
         }
-        printErrors ( *solution2, uFESpace, verbose );
+        Real uL2Belos, uH1Belos;
+        printErrors ( *solution2, uFESpace, uL2Belos, uH1Belos, verbose );
 
         if ( verbose )
         {
             std::cout << "Linear solver AztecOO" << std::endl;
         }
-        printErrors ( *solution3, uFESpace, verbose );
+        Real uL2AztecOO3, uH1AztecOO3;
+        printErrors ( *solution3, uFESpace, uL2AztecOO3, uH1AztecOO3, verbose );
 
         if ( verbose )
         {
@@ -511,6 +564,21 @@ main ( int argc, char** argv )
             if ( verbose )
             {
                 std::cout << "The difference between the two solutions is too large." << std::endl;
+            }
+            if ( verbose )
+            {
+                std::cout << "Test status: FAILED" << std::endl;
+            }
+            return ( EXIT_FAILURE );
+        }
+
+        if (   uL2AztecOO > 4.602e-03 || uH1AztecOO > 3.855e-01
+                || uL2Belos > 4.602e-03 || uH1Belos > 3.855e-01
+                || uL2AztecOO3 > 4.602e-03 || uH1AztecOO3 > 3.855e-01)
+        {
+            if ( verbose )
+            {
+                std::cout << "The error in L2 norm or H1 norm is too large." << std::endl;
             }
             if ( verbose )
             {
