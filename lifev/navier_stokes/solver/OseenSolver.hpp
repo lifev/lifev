@@ -512,6 +512,14 @@ public:
                      const Real& velocityInfty,
                      const Real& Area);
     
+    //! Compute the drag
+    /*!
+        @param bcHandler bcHandlerDrag containing the boundary conditions for the drag.
+		@param bcHandler bcHandlerLift containing the boundary conditions for the lift.
+        @return          Forces
+    */
+    VectorSmall<2> computeForces ( bcHandler_Type& bcHandlerDrag, bcHandler_Type& bcHandlerLift );
+
     //! Get the Lagrange multiplier related to a flux imposed on a given part of the boundary
     /*!
      *  @param uh1error value of the h1 norm of the velocity error

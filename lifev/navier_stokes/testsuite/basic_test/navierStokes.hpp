@@ -637,7 +637,7 @@ NavierStokes<MeshType, Problem>::run()
             // Building the mesh from the source
             if(M_meshSource == RegularMesh) 
             {
-                    regularMesh3D( *fullMeshPtr, 1, mElem, mElem, mElem, false, 1.0, 1.0, 1.0, -1.0,  -1.0,  -1.0);
+                    regularMesh3D( *fullMeshPtr, 1, mElem, mElem, mElem, false, 2.0, 2.0, 2.0, -1.0, -1.0, -1.0);
 
                     if (verbose) std::cout << "Mesh source: regular mesh("
                                            << mElem << "x" << mElem << "x" << mElem << ")" << std::endl;
