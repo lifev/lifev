@@ -1,0 +1,118 @@
+#-------------------------------------------------
+#      Data file for RossEthierSteinman test case
+#      Davide Forti
+#-------------------------------------------------
+
+[exporter]
+    type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
+    multimesh  = false
+    start      = 0
+    save       = 1
+
+[fluid]
+    conservativeFormulation = false
+    
+    [./physics]
+        density         = 1     # density
+        viscosity       = 0.01  # viscosity
+
+    [../time_discretization]
+        initialtime     = 0.0
+        endtime         = 0.001
+        timestep        = 0.00001
+        BDF_order       = 1
+    
+    [../problem]
+        a               = 1
+        d               = 1
+        
+    [../space_discretization]
+        mesh_dir          = ./
+        mesh_file         = n16.mesh
+        mesh_type         = .mesh
+
+        vel_order         = P1Bubble
+        pres_order        = P1
+        stiff_strain      = false
+    
+	[../stabilization]
+        use             = false
+        method          = IP	  # other possible choices: IP, SUPG, VMSLES
+
+    [../prec]
+        prectype        = Ifpack # Ifpack or ML
+        displayList     = true
+    
+    [../solver]
+        solver          = gmres
+        scaling         = none
+        output          = all # none
+        conv            = rhs
+        max_iter        = 1800
+        reuse           = true
+        max_iter_reuse  = 80
+        kspace          = 100
+        tol             = 1e-6    # AztecOO tolerance
+
+        [./ML]
+
+            default_parameter_list  = NSSA  # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+            inc_or_dec              = increasing
+            max_levels              = 3
+            MLOutput                = 10
+            pde_equations           = 4
+            cycle_applications      = 3
+
+            [./smoother]
+                type            = Gauss-Seidel
+                pre_or_post     = both
+                sweeps          = 3
+
+            [../coarse]
+                type                    = Amesos-KLU
+                sweeps                  = 1
+                pre_or_post             = both
+ 
+            [../aggregation]
+                threshold               = 0.01
+                type                    = Uncoupled-MIS
+      
+            [../energy_minimization]
+                enable                  = true
+
+            [../repartition]
+                enable                  = true
+                partitioner             = ParMETIS
+            
+            [../]
+
+        # ifpack
+        [../ifpack]
+            overlap     = 2
+
+            [./fact]
+                ilut_level-of-fill            = 1
+                drop_tolerance                = 1.e-5
+                relax_value                   = 0
+
+            [../amesos]
+                solvertype =  Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+
+            [../partitioner]
+                overlap = 2
+
+            [../schwarz]
+                reordering_type = none #metis, rcm, none
+                filter_singletons = true
+
+        [../]
+    [../]
+
+    [../ipstab]
+        gammaBeta  = 0.7
+        gammaDiv   = 0.7
+        gammaPress = 0.7
+        max_iter_reuse  = 60
+        
+        
+        
