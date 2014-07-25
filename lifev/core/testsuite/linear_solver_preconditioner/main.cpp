@@ -205,7 +205,12 @@ main ( int argc, char** argv )
         {
             std::cout << "Partitioning the mesh ... " << std::endl;
         }
-        MeshPartitioner< mesh_Type >   meshPart ( fullMeshPtr, Comm );
+
+        meshPtr_Type meshPtr;
+        {
+            MeshPartitioner< mesh_Type >   meshPart ( fullMeshPtr, Comm );
+            meshPtr = meshPart.meshPartition();
+        }
         fullMeshPtr.reset(); //Freeing the global mesh to save memory
 
         // +-----------------------------------------------+
@@ -224,7 +229,7 @@ main ( int argc, char** argv )
         {
             std::cout << "Building the velocity FE space ... " << std::flush;
         }
-        fespacePtr_Type uFESpace ( new fespace_Type ( meshPart, uOrder, geoDim, Comm ) );
+        fespacePtr_Type uFESpace ( new fespace_Type ( meshPtr, uOrder, geoDim, Comm ) );
         if ( verbose )
         {
             std::cout << "ok." << std::endl;

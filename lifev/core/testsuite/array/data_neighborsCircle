@@ -1,0 +1,32 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Davide Forti <davide.forti@epfl.ch>
+#           Date: 28-12-2012
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### DATA FILE #####################################################################################
+###################################################################################################
+
+[space_discretization]
+mesh_dir      = ./                    # the directory where the mesh file is
+mesh_file     = square_unstructured.msh
+mesh_type     = .msh
+mesh_faces    = all
+verbose       = 0                     # verbose during mesh-reading
+# 0 -> tetra, 1 -> hexa
+element_shape = 0
+[../]
+
+[exporter]
+type       = hdf5
+folder     = ./
+multimesh  = false
+start      = 0
+save       = 1
+file_name  = Neighbors
+[../]

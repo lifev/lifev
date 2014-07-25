@@ -38,16 +38,15 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-
 #include <Epetra_config.h>
+
+#include<lifev/core/LifeV.hpp>
 
 #ifdef LIFEV_HAS_HDF5
 #ifdef HAVE_MPI
 
 #include <Epetra_MpiComm.h>
 
-
-#include<lifev/core/LifeV.hpp>
 #include <lifev/core/filter/HDF5IO.hpp>
 
 namespace LifeV

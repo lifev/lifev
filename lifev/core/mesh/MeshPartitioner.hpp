@@ -51,32 +51,13 @@
 #include <lifev/core/util/Switch.hpp>
 #include <lifev/core/mesh/MeshElementMarked.hpp>
 #include <lifev/core/util/LifeDebug.hpp>
+#include <lifev/core/fem/DOF.hpp>
+#include <lifev/core/mesh/MeshEntity.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
+#include <lifev/core/array/GhostHandler.hpp>
 
 namespace LifeV
 {
-
-
-struct GhostEntityData
-{
-    //! ID in the current sub-domain of the facet.
-    ID localFacetId;
-
-    //! ID of element that faces the local one on the other sub-domain.
-    ID ghostElementLocalId;
-
-    //! Position on the ghost element.
-    UInt ghostElementPosition;
-
-    friend std::ostream& operator<< ( std::ostream& out, GhostEntityData const& ged );
-}; // struct AdjacentEntityData
-
-inline std::ostream& operator<< ( std::ostream& out, GhostEntityData const& ged )
-{
-    out << "ghostEntityData: localFacet " << ged.localFacetId
-        << " - ghostElem "               << ged.ghostElementLocalId
-        << " - ghostPos "                << ged.ghostElementPosition << " ";
-    return out;
-}
 
 /*!
   @brief Class that handles mesh partitioning
@@ -98,17 +79,11 @@ public:
     // Make the template's type available to the outside
     typedef MeshType mesh_Type;
     typedef boost::shared_ptr<MeshType> meshPtr_Type;
-    typedef std::vector<std::vector<Int> > graph_Type;
+    typedef std::vector<Int> idList_Type;
+    typedef std::vector<idList_Type> graph_Type;
     typedef boost::shared_ptr<graph_Type> graphPtr_Type;
     typedef std::vector<meshPtr_Type> partMesh_Type;
     typedef boost::shared_ptr<partMesh_Type> partMeshPtr_Type;
-
-    //! Container for the ghost data
-    typedef std::vector < GhostEntityData > GhostEntityDataContainer_Type;
-
-    //! Map processor -> container for the ghost data
-    typedef std::map < UInt,  GhostEntityDataContainer_Type > GhostEntityDataMap_Type;
-
     //@}
     //! \name Constructors & Destructors
     //@{
@@ -156,6 +131,7 @@ public:
                        boost::shared_ptr<Epetra_Comm>& comm,
                        Epetra_Map* interfaceMap = 0,
                        Epetra_Map* interfaceMapRep = 0 );
+
 
     //! To be used with the new constructor.
     /*!
@@ -205,9 +181,12 @@ public:
     */
     void doPartitionMesh();
 
+    //! Initialize M_entityPID
+    void fillEntityPID();
+
     // Next method should be renamed and become a regular method
     //! Return a pointer to the mesh partition with rank k
-    const meshPtr_Type&      getPartition (Int k)    const
+    const meshPtr_Type& LIFEV_DEPRECATED ( getPartition (Int k) const )
     {
         return (*M_meshPartitions) [k];
     }
@@ -225,7 +204,7 @@ public:
     const std::vector<Int>&  vertexDistribution()   const
     {
         return M_vertexDistribution;
-    };
+    }
     //! Return a const pointer to M_meshPartitions[0] - for parallel
     const meshPtr_Type&      meshPartition()        const
     {
@@ -259,11 +238,17 @@ public:
     {
         return M_comm;
     }
-    //! Return the ghost data
-    const GhostEntityDataMap_Type& ghostDataMap()  const
+    //@}
+
+    //! @name Set methos
+    //@{
+
+    //! Set M_buildOverlappingPartitions
+    void setPartitionOverlap ( UInt const overlap )
     {
-        return M_ghostDataMap;
+        M_partitionOverlap = overlap;
     }
+
     //@}
 
 private:
@@ -353,12 +338,6 @@ private:
       M_meshPartitions.
     */
     void constructFacets();
-    //! Mark ghost entities
-    /*!
-      mark all elements and points that are connected to SUBDOMAIN_INTERFACE flagged points
-      as GHOST_ENTITY
-    */
-    void markGhostEntities();
     //! Final setup of local mesh
     /*!
       Updates the partitioned mesh object data members after adding the mesh
@@ -366,6 +345,14 @@ private:
       Updates M_meshPartitions.
     */
     void finalSetup();
+
+    //! Mark ghost entities
+    /*!
+      Mark all ghost entities that have been added for overlapping partitions
+      with the EntityFlags::GHOST flag in order to properly build the dof
+      map in DOF::GlobalElements().
+    */
+    void markGhostEntities();
 
     //@}
     //! Private Data Members
@@ -402,9 +389,17 @@ private:
     std::vector<Int>                     M_graphVertexLocations;
     graphPtr_Type                        M_elementDomains;
     bool                                 M_serialMode; // how to tell if running serial partition mode
+    UInt                                 M_partitionOverlap;
 
-    //! Map for the ghost data
-    GhostEntityDataMap_Type M_ghostDataMap;
+    //! Store ownership for each entity, subdivided by entity type
+    struct EntityPIDList
+    {
+        idList_Type elements;
+        idList_Type facets;
+        idList_Type ridges;
+        idList_Type points;
+    } M_entityPID;
+
     //@}
 }; // class MeshPartitioner
 
@@ -450,6 +445,7 @@ init ()
     M_nBoundaryFacets.resize ( M_numPartitions );
     M_elementDomains.reset ( new graph_Type );
     M_serialMode = false;
+    M_partitionOverlap = 0;
 
     /*
       Sets element parameters (nodes, faces, ridges and number of nodes on each
@@ -612,14 +608,11 @@ void MeshPartitioner<MeshType>::doPartitionMesh()
     constructFacets();
 
     // ******************
-    // mark ghost entities
-    // ******************
-    markGhostEntities();
-
-    // ******************
     // final setup
     // ******************
     finalSetup();
+
+    markGhostEntities();
 }
 
 template<typename MeshType>
@@ -695,12 +688,12 @@ void MeshPartitioner<MeshType>::findRepeatedFacesFSI()
                 count = 0;
                 for (Int ipoint = 0; ipoint < static_cast<Int> (M_facetVertices); ++ipoint) // vertex-based dofs
                 {
-                    myFacetRep = ( (M_interfaceMap->LID (M_originalMesh->facet (facet).point (ipoint).id() )
+                    myFacetRep = ( (M_interfaceMap->LID ( static_cast<EpetraInt_Type> (M_originalMesh->facet (facet).point (ipoint).id() ) )
                                     /* first is fluid */ == -1) &&
-                                   (M_interfaceMapRep->LID (M_originalMesh->facet (facet).point (ipoint).id() )
+                                   (M_interfaceMapRep->LID ( static_cast<EpetraInt_Type> (M_originalMesh->facet (facet).point (ipoint).id() ) )
                                     /* first is fluid */ != -1) );
                     myFacet = myFacet ||
-                              (M_interfaceMap->LID (M_originalMesh->facet (facet).point (ipoint).id() ) != -1);
+                              (M_interfaceMap->LID ( static_cast<EpetraInt_Type> (M_originalMesh->facet (facet).point (ipoint).id() ) ) != -1);
                     if (myFacetRep)
                     {
                         ++count;
@@ -1364,6 +1357,8 @@ void MeshPartitioner<MeshType>::constructFacets()
             }
 
             // true if we are on a subdomain border
+            ID ghostElem = ( localElem1 == NotAnId ) ? elem1 : elem2;
+
             if ( !boundary && ( localElem1 == NotAnId || localElem2 == NotAnId ) )
             {
                 // set the flag for faces on the subdomain border
@@ -1374,35 +1369,6 @@ void MeshPartitioner<MeshType>::constructFacets()
                     (*M_meshPartitions) [i]->point ( pf->point ( pointOnFacet ).localId() ).setFlag ( EntityFlags::SUBDOMAIN_INTERFACE );
                 }
 
-                // build GhostEntityData
-                GhostEntityData ghostFacet;
-                ghostFacet.localFacetId = pf->localId();
-
-                // set the ghostElem to be searched on other subdomains
-                ID ghostElem = ( localElem1 == NotAnId ) ? elem1 : elem2;
-                // find which process holds the facing element
-                Int ghostProc ( M_me );
-                for ( Int proc = 0; proc < M_comm->NumProc(); proc++ )
-                {
-                    if ( proc != M_me )
-                    {
-                        std::vector<Int>::const_iterator ghostIt =
-                            std::find ( (*M_elementDomains) [ proc ].begin(), (*M_elementDomains) [ proc ].end(), ghostElem );
-                        if ( ghostIt != ( (*M_elementDomains) [ proc ] ).end() )
-                        {
-                            // we have found the proc storing the element
-                            ghostProc = proc;
-                            // we can get its local id
-                            ghostFacet.ghostElementLocalId = *ghostIt;
-                            // TODO: the local facet id is the same of the original mesh ?!
-                            ghostFacet.ghostElementPosition = M_originalMesh->facet (*is).secondAdjacentElementPosition();
-                            break;
-                        }
-                    }
-                }
-                // check that the ghost element is found on another proc ( this test is acceptable only for online partitioning )
-                ASSERT ( ghostProc != M_me || M_serialMode, "ghost facet not found" );
-                M_ghostDataMap[ ghostProc ].push_back ( ghostFacet );
             }
 
             // if this process does not own either of the adjacent elements
@@ -1413,110 +1379,36 @@ void MeshPartitioner<MeshType>::constructFacets()
             // This can lead to a wrong treatment of the dofPerFace (in 2D of the dofPerRidge, as occurred
             // with P2)
 
-            // NEW CODE
             ASSERT ( (localElem1 != NotAnId) || (localElem2 != NotAnId), "A hanging facet in mesh partitioner!");
 
-            if (localElem1 == NotAnId)
+            if ( localElem1 == NotAnId )
             {
                 pf->firstAdjacentElementIdentity()  = localElem2;
                 pf->firstAdjacentElementPosition()  = M_originalMesh->facet (*is).secondAdjacentElementPosition();
-                pf->secondAdjacentElementIdentity() = NotAnId;
+                pf->secondAdjacentElementIdentity() = ghostElem;
                 pf->secondAdjacentElementPosition() = NotAnId;
                 pf->reversePoints();
+            }
+            else if ( localElem2 == NotAnId )
+            {
+                pf->firstAdjacentElementIdentity()  = localElem1;
+                pf->firstAdjacentElementPosition()  = M_originalMesh->facet (*is).firstAdjacentElementPosition();
+                pf->secondAdjacentElementIdentity() = ghostElem;
+                pf->secondAdjacentElementPosition() = NotAnId;
             }
             else
             {
                 pf->firstAdjacentElementIdentity()  = localElem1;
                 pf->firstAdjacentElementPosition()  = M_originalMesh->facet (*is).firstAdjacentElementPosition();
                 pf->secondAdjacentElementIdentity() = localElem2;
-                pf->secondAdjacentElementPosition() =
-                    localElem2 != NotAnId ?
-                    M_originalMesh->facet (*is).secondAdjacentElementPosition() :
-                    NotAnId;
-
+                pf->secondAdjacentElementPosition() = M_originalMesh->facet (*is).secondAdjacentElementPosition();
             }
-            // END NEW CODE
-            /* OLD CODE
-
-            if ((localElem1 == NotAnId) && !boundary)
-            {
-                pf->firstAdjacentElementIdentity() = localElem2;
-                pf->firstAdjacentElementPosition() = M_originalMesh->facet(*is).secondAdjacentElementPosition();
-            }
-            else
-            {
-                pf->firstAdjacentElementIdentity() = localElem1;
-                pf->firstAdjacentElementPosition() = M_originalMesh->facet(*is).firstAdjacentElementPosition();
-            }
-
-            if ((localElem2 == NotAnId) && !boundary)
-            {
-                pf->secondAdjacentElementIdentity() = localElem1;
-                pf->secondAdjacentElementPosition() = M_originalMesh->facet(*is).firstAdjacentElementPosition();
-            }
-            else
-            {
-                pf->secondAdjacentElementIdentity()  = localElem2;
-                pf->secondAdjacentElementPosition() = M_originalMesh->facet(*is).secondAdjacentElementPosition();
-            }
-
-            */
 
         }
         (*M_meshPartitions) [i]->setLinkSwitch ("HAS_ALL_FACETS");
         (*M_meshPartitions) [i]->setLinkSwitch ("FACETS_HAVE_ADIACENCY");
     }
 
-    // DEBUG
-    //    std::ofstream fout ( ("ghostfaces" + boost::lexical_cast<std::string>( M_me ) + ".out").c_str() );
-    //
-    //    fout << "partition " << M_me << std::endl;
-    //    for ( GhostEntityDataMap_Type::iterator pIt = M_ghostDataMap.begin(); pIt != M_ghostDataMap.end(); ++pIt )
-    //    {
-    //        fout << "proc " << pIt->first << std::endl;
-    //        for ( UInt i = 0; i < pIt->second.size(); i++ )
-    //        {
-    //            fout << pIt->second[i] << std::endl;
-    //        }
-    //        fout << std::endl;
-    //    }
-    //    ASSERT ( 0, "DEBUG abort" );
-}
-
-template<typename MeshType>
-void MeshPartitioner<MeshType>::markGhostEntities()
-{
-    // TODO to be removed
-    /*
-    for (UInt i = 0; i < M_numPartitions; ++i)
-    {
-        // loop on all elements to find which one has a point on the subdomain interface
-        for ( UInt kVol = 0; kVol < (*M_meshPartitions)[i]->volumeList.size(); kVol++ )
-        {
-            typename mesh_Type::volume_Type & volume = (*M_meshPartitions)[i]->volumeList[ kVol ];
-            bool connectedToSubdomainInterface ( false );
-            // check if this volume is connected to a point on SUBDOMAIN_INTERFACE
-            for ( UInt jPoint = 0; jPoint < MeshType::volume_Type::S_numLocalPoints; jPoint++ )
-            {
-                if ( Flag::testOneSet( volume.point ( jPoint ).flag(), EntityFlags::SUBDOMAIN_INTERFACE ) )
-                {
-                    connectedToSubdomainInterface = true; break;
-                }
-            }
-
-            // flag all points (not flagged as SUBDOMAIN_INTERFACE) and the volume as GHOST_ENTITY
-            if ( connectedToSubdomainInterface )
-            {
-                volume.setFlag ( EntityFlags::GHOST_ENTITY );
-                for ( UInt jPoint = 0; jPoint < MeshType::volume_Type::S_numLocalPoints; jPoint++ )
-                {
-                    if ( !Flag::testOneSet( volume.point ( jPoint ).flag(), EntityFlags::SUBDOMAIN_INTERFACE ) )
-                        (*M_meshPartitions)[i]->point( volume.point ( jPoint ).localId() ).setFlag ( EntityFlags::GHOST_ENTITY );
-                }
-            }
-        }
-    }
-    */
 }
 
 template<typename MeshType>
@@ -1611,6 +1503,13 @@ void MeshPartitioner<MeshType>::execute()
     debugStream (4000) << M_me << " has " << (*M_elementDomains) [M_me].size() << " elements.\n";
 #endif
 
+    fillEntityPID ();
+    if ( M_partitionOverlap > 0 )
+    {
+        GhostHandler<mesh_Type> gh ( M_originalMesh, M_comm );
+        gh.extendGraphFE ( M_elementDomains, M_entityPID.points, M_partitionOverlap );
+    }
+
     doPartitionMesh();
 
     // ***************************************
@@ -1624,6 +1523,106 @@ void MeshPartitioner<MeshType>::execute()
     // not needed anymore
     // ***************************************
     cleanUp();
+}
+
+template<typename MeshType>
+void MeshPartitioner<MeshType>::fillEntityPID ()
+{
+    Int numParts = (M_numPartitions > 1) ? M_numPartitions : M_comm->NumProc();
+
+    // initialize entity PIDs to 0
+    M_entityPID.points.resize   ( M_originalMesh->numPoints(),   0 );
+    M_entityPID.elements.resize ( M_originalMesh->numElements(), 0 );
+    M_entityPID.facets.resize   ( M_originalMesh->numFacets(),   0 );
+    M_entityPID.ridges.resize   ( M_originalMesh->numRidges(),   0 );
+
+    // check: parallel algorithm seems to be slower for this
+    // p = 0 can be skipped since M_entityPID is already initialized at that value
+    for ( Int p = 1; p < numParts; p++ )
+    {
+        for ( UInt e = 0; e < (*M_elementDomains) [ p ].size(); e++ )
+        {
+            // point block
+            for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
+            {
+                const ID& pointID = M_originalMesh->element ( (*M_elementDomains) [ p ][ e ] ).point ( k ).id();
+                // pointPID should be the maximum between the procs that own it
+                M_entityPID.points[ pointID ] = std::max ( M_entityPID.points[ pointID ], p );
+            }
+
+            // elem block
+            const ID& elemID = M_originalMesh->element ( (*M_elementDomains) [ p ][ e ] ).id();
+            // at his stage each element belongs to a single partition, overlap is not yet done.
+            M_entityPID.elements[ elemID ] = p;
+
+            // facet block
+            for ( UInt k = 0; k < mesh_Type::element_Type::S_numFacets; k++ )
+            {
+                const ID& facetID = M_originalMesh->facet ( M_originalMesh->localFacetId ( elemID, k ) ).id();
+                // facetPID should be the maximum between the proc that own it
+                M_entityPID.facets[ facetID ] = std::max ( M_entityPID.facets[ facetID ], p );
+            }
+
+            // ridge block
+            for ( UInt k = 0; k < mesh_Type::element_Type::S_numRidges; k++ )
+            {
+                const ID& ridgeID = M_originalMesh->ridge ( M_originalMesh->localRidgeId ( elemID, k ) ).id();
+                // ridgePID should be the maximum between the proc that own it
+                M_entityPID.ridges[ ridgeID ] = std::max ( M_entityPID.ridges[ ridgeID ], p );
+            }
+        }
+    }
+}
+
+template<typename MeshType>
+void MeshPartitioner<MeshType>::markGhostEntities()
+{
+    // mark ghost entities by each partition as described in M_entityPID
+    //@todo: does not work for offline partitioning!
+    //M_entityPID or flags should be exported and read back to make it work
+    for (UInt i = 0; i < M_numPartitions; ++i)
+    {
+        Int const procId = (M_numPartitions > 1) ? i : M_me;
+        for ( UInt e = 0; e < (*M_meshPartitions) [ i ]->numElements(); e++ )
+        {
+            typename MeshType::element_Type& element = (*M_meshPartitions) [ i ]->element ( e );
+            if ( M_entityPID.elements[ element.id() ] != static_cast<UInt> ( procId ) )
+            {
+                element.setFlag ( EntityFlags::GHOST );
+            }
+        }
+
+        for ( UInt f = 0; f < (*M_meshPartitions) [ i ]->numFacets(); f++ )
+        {
+            typename MeshType::facet_Type& facet = (*M_meshPartitions) [ i ]->facet ( f );
+            if ( M_entityPID.facets[ facet.id() ] != static_cast<UInt> ( procId ) )
+            {
+                facet.setFlag ( EntityFlags::GHOST );
+            }
+        }
+
+        for ( UInt r = 0; r < (*M_meshPartitions) [ i ]->numRidges(); r++ )
+        {
+            typename MeshType::ridge_Type& ridge = (*M_meshPartitions) [ i ]->ridge ( r );
+            if ( M_entityPID.ridges[ ridge.id() ] != static_cast<UInt> ( procId ) )
+            {
+                ridge.setFlag ( EntityFlags::GHOST );
+            }
+        }
+
+        for ( UInt p = 0; p < (*M_meshPartitions) [ i ]->numPoints(); p++ )
+        {
+            typename MeshType::point_Type& point = (*M_meshPartitions) [ i ]->point ( p );
+            if ( M_entityPID.points[ point.id() ] != static_cast<UInt> ( procId ) )
+            {
+                point.setFlag ( EntityFlags::GHOST );
+            }
+        }
+    }
+    clearVector ( M_entityPID.elements );
+    clearVector ( M_entityPID.facets );
+    clearVector ( M_entityPID.ridges );
+    clearVector ( M_entityPID.points );
 }
 
 template<typename MeshType>

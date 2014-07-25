@@ -450,7 +450,6 @@ void bodyForces (VectorElemental& localForce,
                  const function_Type& fun,
                  const Real& t,
                  const UInt& fieldDim);
-}
 
 //----------------------------------------------------------------------
 //
@@ -1092,6 +1091,8 @@ for \f$ w \in H(div, K) \f$ and \f$ g \f$ a constant vector.
 void source_Hdiv ( const Vector& source , VectorElemental& elvec, const CurrentFE& dualFE, int iblock = 0 );
 
 //!@}
+
+} // end namespace AssemblyElemental
 
 } // namespace LifeV
 #endif

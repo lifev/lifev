@@ -50,7 +50,7 @@ updateDetJacobian (const UInt& iQuadPt)
 {
     ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its determinant");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isDetJacobianUpdated = true;
 #endif
 
@@ -65,7 +65,7 @@ updateDetJacobian (const UInt& iQuadPt)
 {
     ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its determinant");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isDetJacobianUpdated = true;
 #endif
 
@@ -81,7 +81,7 @@ updateDetJacobian (const UInt& iQuadPt)
 {
     ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its determinant");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isDetJacobianUpdated = true;
 #endif
 
@@ -103,7 +103,7 @@ updateInverseJacobian (const UInt& iQuadPt)
     ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its inverse");
     ASSERT (M_isDetJacobianUpdated, "The determinant of the jacobian must be updated to compute its inverse");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isInverseJacobianUpdated = true;
 #endif
 
@@ -119,7 +119,7 @@ updateInverseJacobian (const UInt& iQuadPt)
     ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its inverse");
     ASSERT (M_isDetJacobianUpdated, "The determinant of the jacobian must be updated to compute its inverse");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isInverseJacobianUpdated = true;
 #endif
 
@@ -139,7 +139,7 @@ updateInverseJacobian (const UInt& iQuadPt)
     ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its inverse");
     ASSERT (M_isDetJacobianUpdated, "The determinant of the jacobian must be updated to compute its inverse");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isInverseJacobianUpdated = true;
 #endif
 
@@ -185,7 +185,7 @@ updateDetJacobian (const UInt& iQuadPt)
 {
     ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its determinant");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isDetJacobianUpdated = true;
 #endif
 
@@ -199,7 +199,7 @@ updateDetJacobian (const UInt& iQuadPt)
 {
     ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its determinant");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isDetJacobianUpdated = true;
 #endif
 
@@ -214,7 +214,7 @@ updateDetJacobian (const UInt& iQuadPt)
 {
     ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its determinant");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isDetJacobianUpdated = true;
 #endif
 
@@ -237,7 +237,7 @@ updateInverseJacobian (const UInt& iQuadPt)
     ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its inverse");
     ASSERT (M_isDetJacobianUpdated, "The determinant of the jacobian must be updated to compute its inverse");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isInverseJacobianUpdated = true;
 #endif
 
@@ -253,7 +253,7 @@ updateInverseJacobian (const UInt& iQuadPt)
     ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its inverse");
     ASSERT (M_isDetJacobianUpdated, "The determinant of the jacobian must be updated to compute its inverse");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isInverseJacobianUpdated = true;
 #endif
 
@@ -273,7 +273,7 @@ updateInverseJacobian (const UInt& iQuadPt)
     ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its inverse");
     ASSERT (M_isDetJacobianUpdated, "The determinant of the jacobian must be updated to compute its inverse");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isInverseJacobianUpdated = true;
 #endif
 
@@ -319,7 +319,7 @@ updateDetJacobian (const UInt& iQuadPt)
 {
     ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its determinant");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isDetJacobianUpdated = true;
 #endif
 
@@ -333,7 +333,7 @@ updateDetJacobian (const UInt& iQuadPt)
 {
     ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its determinant");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isDetJacobianUpdated = true;
 #endif
 
@@ -348,7 +348,7 @@ updateDetJacobian (const UInt& iQuadPt)
 {
     ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its determinant");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isDetJacobianUpdated = true;
 #endif
 
@@ -371,7 +371,7 @@ updateInverseJacobian (const UInt& iQuadPt)
     ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its inverse");
     ASSERT (M_isDetJacobianUpdated, "The determinant of the jacobian must be updated to compute its inverse");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isInverseJacobianUpdated = true;
 #endif
 
@@ -387,7 +387,7 @@ updateInverseJacobian (const UInt& iQuadPt)
     ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its inverse");
     ASSERT (M_isDetJacobianUpdated, "The determinant of the jacobian must be updated to compute its inverse");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isInverseJacobianUpdated = true;
 #endif
 
@@ -407,7 +407,7 @@ updateInverseJacobian (const UInt& iQuadPt)
     ASSERT (M_isJacobianUpdated, "Jacobian must be updated to compute its inverse");
     ASSERT (M_isDetJacobianUpdated, "The determinant of the jacobian must be updated to compute its inverse");
 
-#ifndef NDEBUG
+#ifdef HAVE_LIFEV_DEBUG
     M_isInverseJacobianUpdated = true;
 #endif
 

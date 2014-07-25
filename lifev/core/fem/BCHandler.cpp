@@ -187,6 +187,13 @@ BCHandler::addBC ( const bcName_Type& name,
 }
 
 void
+BCHandler::addBC ( const BCBase& bcBase )
+{
+    M_bcList.push_back ( bcBase );
+    std::sort ( M_bcList.begin(), M_bcList.end() );
+}
+
+void
 BCHandler::modifyBC ( bcName_Type const& name, BCFunctionBase const& bcFunction )
 {
     BCBase* bcBasePtr = findBC ( name );

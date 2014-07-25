@@ -109,9 +109,6 @@ namespace LifeV
     <th> ET_UPDATE_QUAD_NODES </th> <th> Update everything needed to know the position of the quadrature nodes in the current cell </th>
    </tr>
    <tr>
-    <th> ET_UPDATE_PHI </th> <th> Update everything needed to know the values of the basis functions in the quadrature nodes (in the current cell) </th>
-   </tr>
-   <tr>
     <th> ET_UPDATE_DPHI </th> <th>  Update everything needed to know the values of the derivatives of the basis functions in the quadrature nodes (in the current cell) </th>
    </tr>
    <tr>
@@ -123,6 +120,7 @@ namespace LifeV
 
   </table>
 
+  Note: in the old versions there was also the flag UPDATE_PHI. This flag has been removed, since the values of the basis functions in the quadrature nodes are always the same, so they do not need to be updated.
   Besides this usual flags, there are a couple of "primitive" flags, that update only a particular element in the currentFE structure. Be sure to know what you are doing before using them.
 
 */
@@ -188,9 +186,6 @@ const flag_Type ET_UPDATE_ALL (4096 - 1);
 // Flag for the quadrature nodes in the current cell
 const flag_Type ET_UPDATE_QUAD_NODE (ET_UPDATE_ONLY_CELL_NODE
                                      | ET_UPDATE_ONLY_QUAD_NODE);
-
-// Flag for the values of the basis functions
-const flag_Type ET_UPDATE_PHI (ET_UPDATE_ONLY_CELL_NODE);
 
 // Flag for the gradient of the basis functions
 const flag_Type ET_UPDATE_DPHI (ET_UPDATE_ONLY_CELL_NODE

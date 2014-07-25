@@ -54,6 +54,7 @@ public:
     typedef Exporter<MeshType> super;
     typedef typename super::meshPtr_Type  meshPtr_Type;
     typedef typename super::vectorPtr_Type vectorPtr_Type;
+    typedef typename super::commPtr_Type commPtr_Type;
     //@}
 
     //! @name Constructors
@@ -66,7 +67,7 @@ public:
     //! @name Public methods
     //@{
     void postProcess (const Real& /*time*/) {}
-    void exportPID ( boost::shared_ptr<MeshType> /*mesh*/, boost::shared_ptr<Epetra_Comm> /*comm*/ ) {}
+    void exportPID ( meshPtr_Type /*meshPart*/, commPtr_Type /*comm*/, const bool /*binaryFormat*/ = false ) {}
     void exportRegionMarkerID ( boost::shared_ptr<MeshType> /*mesh*/, boost::shared_ptr<Epetra_Comm> /*comm*/  ) {}
     UInt importFromTime ( const Real& /*time*/ )
     {

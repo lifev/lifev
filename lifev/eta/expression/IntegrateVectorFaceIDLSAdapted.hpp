@@ -83,9 +83,9 @@ public:
 
     //! Type of the Evaluation
     typedef typename ExpressionToEvaluation < ExpressionType,
-					      TestSpaceType::field_dim,
-					      0,
-					      3 >::evaluation_Type evaluation_Type;
+            TestSpaceType::field_dim,
+            0,
+            3 >::evaluation_Type evaluation_Type;
 
     typedef LevelSetBDQRAdapter<LSFESpaceType, LSVectorType> BDQRAdapter_Type;
 

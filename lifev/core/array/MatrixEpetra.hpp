@@ -44,6 +44,7 @@
 
 #include <Epetra_MpiComm.h>
 #include <Epetra_FECrsMatrix.h>
+#include <Epetra_FECrsGraph.h>
 #include <EpetraExt_MatrixMatrix.h>
 #include <EpetraExt_Transpose_RowMatrix.h>
 #include <EpetraExt_RowMatrixOut.h>
@@ -98,12 +99,19 @@ public:
      */
     MatrixEpetra ( const MapEpetra& map, const Epetra_CrsGraph& graph, bool ignoreNonLocalValues = false );
 
+    //! Constructor from a FE graph
+    /*!
+      @param map Row map. The column map will be defined in MatrixEpetra<DataType>::GlobalAssemble(...,...)
+      @param graph A sparse compressed row FE graph.
+     */
+    MatrixEpetra ( const MapEpetra& map, const Epetra_FECrsGraph& graph, bool ignoreNonLocalValues = false);
+
     //! Constructor for square and rectangular matrices
     /*!
       @param map Row map. The column map will be defined in MatrixEpetra<DataType>::GlobalAssemble(...,...)
       @param numEntries The average number of entries for each row.
      */
-    MatrixEpetra ( const MapEpetra& map, Int numEntries = 50 );
+    MatrixEpetra ( const MapEpetra& map, Int numEntries = 50, bool ignoreNonLocalValues = false );
 
     //! Copy Constructor
     /*!
@@ -136,7 +144,7 @@ public:
     MatrixEpetra ( const MapEpetra& map, matrix_ptrtype crsMatrixPtr);
 
     //! Destructor
-    ~MatrixEpetra() {};
+    virtual ~MatrixEpetra() {}
 
     //@}
 
@@ -149,6 +157,12 @@ public:
       @param matrix matrix to be added to the current matrix
      */
     MatrixEpetra& operator += ( const MatrixEpetra& matrix );
+
+    //! Subtraction operator
+    /*!
+      @param matrix matrix to be subtracted to the current matrix
+     */
+    MatrixEpetra& operator -= ( const MatrixEpetra& matrix );
 
     //! Assignment operator
     /*!
@@ -349,6 +363,9 @@ public:
     Int globalAssemble ( const boost::shared_ptr<const MapEpetra>& domainMap,
                          const boost::shared_ptr<const MapEpetra>& rangeMap );
 
+    //! Fill complete of a square matrix with default domain and range map
+    Int fillComplete();
+
     //! insert the given value into the diagonal
     /*!
       Pay intention that this will add values to the diagonal,
@@ -425,6 +442,12 @@ public:
      */
     Real normInf() const;
 
+    //! Compute the frobenius norm of the global matrix
+    /*!
+      @return norm Frobenius
+     */
+    Real normFrobenius() const;
+
     //@}
 
 
@@ -472,6 +495,21 @@ public:
                              DataType* const* const localValues,
                              Int format = Epetra_FECrsMatrix::COLUMN_MAJOR );
 
+    //! Add a set of values to the corresponding set of coefficient in the closed matrix
+    /*!
+      @param numRows Number of rows into the list given in "localValues"
+      @param numColumns Number of columns into the list given in "localValues"
+      @param rowIndices List of row indices
+      @param columnIndices List of column indices
+      @param localValues 2D array containing the coefficient related to "rowIndices" and "columnIndices"
+      @param format Format of the matrix (Epetra_FECrsMatrix::COLUMN_MAJOR or Epetra_FECrsMatrix::ROW_MAJOR)
+     */
+    void sumIntoCoefficients ( Int const numRows, Int const numColumns,
+                               std::vector<Int> const& rowIndices,
+                               std::vector<Int> const& columnIndices,
+                               DataType* const* const localValues,
+                               Int format = Epetra_FECrsMatrix::COLUMN_MAJOR );
+
     //! Add a value at a coefficient of the matrix
     /*!
       @param row Row index of the value to be added
@@ -494,6 +532,12 @@ public:
 
     //! @name Get Methods
     //@{
+
+    //! Return the fill-complete status of the Epetra_FECrsMatrix
+    bool filled() const
+    {
+        return M_epetraCrs->Filled();
+    }
 
     //! Return the shared_pointer of the Epetra_FECrsMatrix
     matrix_ptrtype& matrixPtr()
@@ -594,9 +638,17 @@ MatrixEpetra<DataType>::MatrixEpetra ( const MapEpetra& map, const Epetra_CrsGra
 }
 
 template <typename DataType>
-MatrixEpetra<DataType>::MatrixEpetra ( const MapEpetra& map, Int numEntries ) :
+MatrixEpetra<DataType>::MatrixEpetra ( const MapEpetra& map, const Epetra_FECrsGraph& graph, bool ignoreNonLocalValues) :
     M_map       ( new MapEpetra ( map ) ),
-    M_epetraCrs ( new matrix_type ( Copy, *M_map->map ( Unique ), numEntries, false) )
+    M_epetraCrs ( new matrix_type ( Copy, graph, ignoreNonLocalValues) )
+{
+
+}
+
+template <typename DataType>
+MatrixEpetra<DataType>::MatrixEpetra ( const MapEpetra& map, Int numEntries, bool ignoreNonLocalValues ) :
+    M_map       ( new MapEpetra ( map ) ),
+    M_epetraCrs ( new matrix_type ( Copy, *M_map->map ( Unique ), numEntries, ignoreNonLocalValues) )
 {
 
 }
@@ -656,6 +708,15 @@ MatrixEpetra<DataType>&
 MatrixEpetra<DataType>::operator += ( const MatrixEpetra& matrix )
 {
     EpetraExt::MatrixMatrix::Add ( *matrix.matrixPtr(), false, 1., *this->matrixPtr(), 1. );
+
+    return *this;
+}
+
+template <typename DataType>
+MatrixEpetra<DataType>&
+MatrixEpetra<DataType>::operator -= ( const MatrixEpetra& matrix )
+{
+    EpetraExt::MatrixMatrix::Add ( *matrix.matrixPtr(), false, 1., *this->matrixPtr(), -1. );
 
     return *this;
 }
@@ -742,7 +803,7 @@ void MatrixEpetra<DataType>::removeZeros()
 
         for ( Int i (0); i < tmp->NumGlobalRows(); ++i )
         {
-            row = tmp->LRID ( i );
+            row = tmp->LRID ( static_cast<EpetraInt_Type> (i) );
             // Check if the row belong to this process
             if (row == -1)
             {
@@ -956,10 +1017,10 @@ void MatrixEpetra<DataType>::diagonalize ( UInt const row,
     const Epetra_Map& colMap ( M_epetraCrs->ColMap() );
 
 
-    Int myCol = colMap.LID ( row + offset );
+    Int myCol = colMap.LID ( static_cast<EpetraInt_Type> (row + offset) );
 
     // row: if r is mine, zero out values
-    Int myRow = rowMap.LID ( row + offset );
+    Int myRow = rowMap.LID ( static_cast<EpetraInt_Type> (row + offset) );
 
     if ( myRow >= 0 )  // I have this row
     {
@@ -1023,7 +1084,7 @@ void MatrixEpetra<DataType>::diagonalize ( std::vector<UInt> rVec,
 
     for ( Int ii = 0; ii < (Int) rVec.size(); ++ii )
     {
-        Int lID = rowMap.LID (rVec[ii]);
+        Int lID = rowMap.LID ( static_cast<EpetraInt_Type> (rVec[ii]) );
         if ( ! ( lID < 0 ) )
         {
 
@@ -1195,7 +1256,7 @@ void MatrixEpetra<DataType>::diagonalize ( UInt const row,
     const Epetra_Map& colMap ( M_epetraCrs->ColMap() );
 
 
-    Int myCol = colMap.LID ( row + offset );
+    Int myCol = colMap.LID ( static_cast<EpetraInt_Type> (row + offset) );
 
 #ifdef EPETRAMATRIX_SYMMETRIC_DIAGONALIZE
     if ( myCol >= 0 )  // I have this column
@@ -1211,7 +1272,7 @@ void MatrixEpetra<DataType>::diagonalize ( UInt const row,
 #endif
 
     // row: if r is mine, zero out values
-    Int myRow = rowMap.LID ( row + offset );
+    Int myRow = rowMap.LID ( static_cast<EpetraInt_Type> (row + offset) );
 
     if ( myRow >= 0 )  // I have this row
     {
@@ -1346,6 +1407,18 @@ Int MatrixEpetra<DataType>::globalAssemble()
 }
 
 template <typename DataType>
+Int MatrixEpetra<DataType>::fillComplete()
+{
+    if ( !M_epetraCrs->Filled() )
+    {
+        insertZeroDiagonal();
+    }
+    M_domainMap = M_map;
+    M_rangeMap  = M_map;
+    return  M_epetraCrs->FillComplete();
+}
+
+template <typename DataType>
 Int MatrixEpetra<DataType>::globalAssemble ( const boost::shared_ptr<const MapEpetra>& domainMap,
                                              const boost::shared_ptr<const MapEpetra>& rangeMap )
 {
@@ -1437,6 +1510,11 @@ Real MatrixEpetra<DataType>::normInf() const
     return M_epetraCrs->NormInf();
 }
 
+template <typename DataType>
+Real MatrixEpetra<DataType>::normFrobenius() const
+{
+    return M_epetraCrs->NormFrobenius();
+}
 
 // ===================================================
 // Set Methods
@@ -1505,6 +1583,29 @@ addToCoefficients ( Int const numRows, Int const numColumns,
                :
                M_epetraCrs->InsertGlobalValues ( numRows, &rowIndices[0], numColumns,
                                                  &columnIndices[0], localValues, format );
+
+    std::stringstream errorMessage;
+    errorMessage << " error in matrix insertion [addToCoefficients] " << ierr
+                 << " when inserting in (" << rowIndices[0] << ", " << columnIndices[0] << ")" << std::endl;
+    ASSERT ( ierr >= 0, errorMessage.str() );
+
+}
+
+template <typename DataType>
+void MatrixEpetra<DataType>::
+sumIntoCoefficients ( Int const numRows, Int const numColumns,
+                      std::vector<Int> const& rowIndices, std::vector<Int> const& columnIndices,
+                      DataType* const* const localValues,
+                      Int format )
+{
+    Int ierr;
+#ifdef LIFEV_MT_CRITICAL_UPDATES
+    #pragma omp critical
+#endif
+    {
+        ierr = M_epetraCrs->SumIntoGlobalValues ( numRows, &rowIndices[0], numColumns,
+                                                  &columnIndices[0], localValues, format );
+    }
 
     std::stringstream errorMessage;
     errorMessage << " error in matrix insertion [addToCoefficients] " << ierr

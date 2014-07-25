@@ -156,6 +156,8 @@ namespace ExpressionAssembly
 template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
 class ExpressionToEvaluation
 {
+public:
+    typedef typename Expression::evaluation_Type evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();

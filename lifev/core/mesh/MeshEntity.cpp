@@ -29,8 +29,6 @@ std::string name ( const flag_Type& flag )
             return "CUTTED";
         case VERTEX:
             return "VERTEX";
-        case GHOST_ENTITY:
-            return "GHOST_ENTITY";
         default:
             return "FLAG_NOT_FOUND";
     }

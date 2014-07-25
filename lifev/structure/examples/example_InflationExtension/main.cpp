@@ -33,7 +33,6 @@ each time step and with the BDF method!!
 
 \date 2005-04-16
 */
-#undef HAVE_HDF5
 #ifdef TWODIM
 #error test_structure cannot be compiled in 2D
 #endif
@@ -82,9 +81,7 @@ each time step and with the BDF method!!
 
 #include <lifev/core/filter/Exporter.hpp>
 #include <lifev/core/filter/ExporterEnsight.hpp>
-#ifdef HAVE_HDF5
 #include <lifev/core/filter/ExporterHDF5.hpp>
-#endif
 #include <lifev/core/filter/ExporterEmpty.hpp>
 
 #include <iostream>
@@ -133,7 +130,7 @@ public:
 
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_type;
     //Exporters Typedefs
-    typedef typename LifeV::Exporter<mesh_Type >                  filter_Type;
+    typedef LifeV::Exporter<mesh_Type >                           filter_Type;
     typedef boost::shared_ptr<filter_Type >                       filterPtr_Type;
 
     typedef LifeV::ExporterEmpty<mesh_Type >                      emptyExporter_Type;
@@ -244,76 +241,88 @@ struct Structure::Private
 
     }
 
-    static Real smoothPressure(const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i)
+    static Real smoothPressure (const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i)
     {
-        Real radius = std::sqrt( x*x + y*y );
-        Real pressure( 0 );
-        Real highestPressure( 199950 );
+        Real radius = std::sqrt ( x * x + y * y );
+        Real pressure ( 0 );
+        Real highestPressure ( 199950 );
         Real totalTime = 4.5;
         Real halfTime = totalTime / 2.0;
 
-        Real a = ( highestPressure / 2 ) * ( 1/ ( halfTime * halfTime ) );
+        Real a = ( highestPressure / 2 ) * ( 1 / ( halfTime * halfTime ) );
 
         if ( t <= halfTime )
-            pressure = a * t*t;
+        {
+            pressure = a * t * t;
+        }
 
         if ( t > halfTime )
-            pressure = - a * (t - totalTime)*(t - totalTime) + highestPressure;
+        {
+            pressure = - a * (t - totalTime) * (t - totalTime) + highestPressure;
+        }
 
         switch (i)
         {
-        case 0:
-            return  pressure *  ( x / radius ) ;
-            break;
-        case 1:
-            return  pressure *  ( y / radius ) ;
-            break;
-        case 2:
-            return 0.0;
-            break;
+            case 0:
+                return  pressure *  ( x / radius ) ;
+                break;
+            case 1:
+                return  pressure *  ( y / radius ) ;
+                break;
+            case 2:
+                return 0.0;
+                break;
 
         }
         return 0;
 
     }
 
-    static Real mergingPressures(const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i)
+    static Real mergingPressures (const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i)
     {
-        Real radius = std::sqrt( x*x + y*y );
-        Real pressure( 0 );
+        Real radius = std::sqrt ( x * x + y * y );
+        Real pressure ( 0 );
 
-        Real highestPressure( 199950 );
+        Real highestPressure ( 199950 );
 
         Real totalTime = 9.0;
         Real halfTime = totalTime / 2.0;
         Real quarterTime = halfTime / 2.0;
 
-        Real aA = ( highestPressure / 2 ) * ( 1/ ( quarterTime * quarterTime ) );
-        Real aD = ( 2 * highestPressure ) * ( 1/ ( halfTime * halfTime ) );
+        Real aA = ( highestPressure / 2 ) * ( 1 / ( quarterTime * quarterTime ) );
+        Real aD = ( 2 * highestPressure ) * ( 1 / ( halfTime * halfTime ) );
 
         if ( t <= quarterTime )
-            pressure = aA * t*t;
+        {
+            pressure = aA * t * t;
+        }
 
         if ( t > quarterTime && t <= halfTime )
-            pressure = - aA * (t - halfTime)*(t - halfTime) + highestPressure;
+        {
+            pressure = - aA * (t - halfTime) * (t - halfTime) + highestPressure;
+        }
 
         if ( t > halfTime && t <= 3 * quarterTime )
-            pressure = - aD * (t - halfTime)*(t - halfTime) + highestPressure;
+        {
+            pressure = - aD * (t - halfTime) * (t - halfTime) + highestPressure;
+        }
 
         if ( t > 3 * quarterTime && t <= 4 * quarterTime )
-            pressure = aD * (t - totalTime)*(t - totalTime);
+        {
+            pressure = aD * (t - totalTime) * (t - totalTime);
+        }
 
         switch (i)
         {
-        case 0:
-            return  pressure *  ( x / radius ) ;
-            break;
-        case 1:
-            return  pressure *  ( y / radius ) ;
-            break;
-        case 2:
-            return 0.0;
-            break;
+            case 0:
+                return  pressure *  ( x / radius ) ;
+                break;
+            case 1:
+                return  pressure *  ( y / radius ) ;
+                break;
+            case 2:
+                return 0.0;
+                break;
 
         }
         return 0;
@@ -393,7 +402,9 @@ Structure::run3d()
     boost::shared_ptr<MeshPartitioner<mesh_Type> > meshPart;
     boost::shared_ptr<mesh_Type> pointerToMesh;
 
+#ifdef LIFEV_HAS_HDF5
     if ( ! (partitioningMesh.compare ("no") ) )
+#endif
     {
         boost::shared_ptr<mesh_Type > fullMeshPtr (new mesh_Type ( ( parameters->comm ) ) );
         //Creating a new mesh from scratch
@@ -405,20 +416,21 @@ Structure::run3d()
 
         pointerToMesh = meshPart->meshPartition();
     }
+#ifdef LIFEV_HAS_HDF5
     else
     {
         //Creating a mesh object from a partitioned mesh
         const std::string partsFileName (dataFile ("partitioningOffline/hdf5_file_name", "NO_DEFAULT_VALUE.h5") );
 
         boost::shared_ptr<Epetra_MpiComm> mpiComm =
-            boost::dynamic_pointer_cast<Epetra_MpiComm>(parameters->comm);
+            boost::dynamic_pointer_cast<Epetra_MpiComm> (parameters->comm);
         PartitionIO<mesh_Type> partitionIO (partsFileName, mpiComm);
 
 
         partitionIO.read (pointerToMesh);
 
     }
-
+#endif
 
     std::string dOrder =  dataFile ( "solid/space_discretization/order", "P1");
 
@@ -710,10 +722,10 @@ Structure::run3d()
 
     //! 6. Setting the pillow saving for restart
     UInt tol = dataStructure->dataTimeAdvance()->orderBDF() + 1;
-    UInt saveEvery = dataFile( "exporter/saveEvery", 1);
-    UInt r(0);
-    UInt d(0);
-    UInt iter(0);
+    UInt saveEvery = dataFile ( "exporter/saveEvery", 1);
+    UInt r (0);
+    UInt d (0);
+    UInt iter (0);
 
     //! =============================================================================
     //! Temporal loop
@@ -767,10 +779,10 @@ Structure::run3d()
         r = iter % saveEvery;
         d = iter - r;
 
-        if ( (iter - d) <= tol || ( (std::floor(d/saveEvery) + 1)*saveEvery - iter ) <= tol )
+        if ( (iter - d) <= tol || ( (std::floor (d / saveEvery) + 1) *saveEvery - iter ) <= tol )
         {
-            exporterSolid->postProcess( time );
-            exporterCheck->postProcess( time );
+            exporterSolid->postProcess ( time );
+            exporterCheck->postProcess ( time );
         }
 
         //!--------------------------------------------------------------------------------------------------

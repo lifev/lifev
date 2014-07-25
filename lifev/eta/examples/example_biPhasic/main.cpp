@@ -65,6 +65,7 @@
 
 #include <lifev/core/fem/BCHandler.hpp>
 #include <lifev/core/fem/BCManage.hpp>
+#include <lifev/core/fem/FESpace.hpp>
 #include <lifev/eta/fem/ETFESpace.hpp>
 
 #include <lifev/core/fem/GradientRecovery.hpp>
@@ -1758,5 +1759,3 @@ int main ( int argc, char** argv )
 
     return ( EXIT_SUCCESS );
 }
-
-

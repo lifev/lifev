@@ -52,7 +52,7 @@
         reuse           = true
         max_iter_reuse  = 80
         kspace          = 100
-        tol             = 1e-6    # AztecOO tolerance
+        tol             = 1e-11    # AztecOO tolerance
 
         [./ML]
 

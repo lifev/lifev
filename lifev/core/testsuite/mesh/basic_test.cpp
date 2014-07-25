@@ -57,7 +57,7 @@
 #include <lifev/core/filter/ImporterMesh3D.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/core/mesh/MeshElementBare.hpp>
-#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/array/EnumMapEpetra.hpp>
 
 // A dummy class to imitate a VectorEpetra
 class dummyVect:

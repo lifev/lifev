@@ -1,0 +1,39 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University      
+#
+#      Author(s): Name Surname <name.surname@epfl.ch>
+#           Date: 00-00-0000
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### DATA FILE #####################################################################################
+###################################################################################################
+#-------------------------------------------------
+#      Data file for a hyperbolic problem
+#-------------------------------------------------
+
+    [ghost]
+    overlap = 2 
+
+    [space_discretization]
+    mesh_dir      = ./ # the directory where the mesh file is
+    mesh_file     = mesh_ghosthandler.msh
+    mesh_type     = .msh
+    mesh_faces    = all
+    verbose       = 0                        # verbose during mesh-reading
+    # 0 -> tetra, 1 -> hexa
+    element_shape = 0
+    [../]
+
+    [exporter]
+    type       = hdf5
+    folder     = ./
+    multimesh  = false
+    start      = 0
+    save       = 1
+    file_name  = GH 
+    [../]
+

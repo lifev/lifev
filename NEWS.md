@@ -1,3 +1,66 @@
+LifeV 3.8.5:
+============
+
+* Fixed dependicies of Navier-Stokes example to ETA
+* ETA is now in production
+
+LifeV 3.8.4:
+============
+
+Merged the following branches:
+
+* ETAforStructuralAssemblyAndFSI
+
+* ETAWithOtherDimension https://cmcsforge.epfl.ch/issues/75
+
+* MultiscaleDependenciesFix https://cmcsforge.epfl.ch/issues/79
+
+And ther bug fixes
+
+LifeV 3.8.3:
+============
+
+Merged the following branches:
+
+* PrecomputedGraphETA https://cmcsforge.epfl.ch/issues/82
+
+* defaultParamList https://cmcsforge.epfl.ch/issues/112
+
+* NSM_preconditioners https://cmcsforge.epfl.ch/issues/111
+
+* 20111024_GhostMapEpetra https://cmcsforge.epfl.ch/issues/18
+
+
+LifeV 3.8.1:
+============
+
+Bugfix in Version.cmake
+
+Replacing the value of LifeV_MAJOR_MINOR_VERSIION from
+030800 to 30800 to avoid it being interpreted as an octal value.
+This CMake variable is only used in Config_config.h.in
+
+
+LifeV 3.8.0:
+============
+The cmake module has been merged into LifeV. It is not necessary any more
+to dowload it separately.
+Before pulling the new version you have to remove completely the cmake directory.
+
+
+Merged the following branches:
+
+* InstallScriptUpdate https://cmcsforge.epfl.ch/issues/107
+
+* static_graph
+
+* 201308_templateNSSolver
+
+Also:
+
+* removed a bunch of warnings: unused typedefs, deprecated methods, variables used only in debug (in which case we use the LIFEV_UNUSED macro)
+
+
 LifeV 3.6.2:
 ============
 

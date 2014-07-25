@@ -61,6 +61,10 @@
 namespace LifeV
 {
 
+template < typename MeshType, typename MapType, typename ReturnType >
+class FEFunction;
+
+
 
 //! FESpace - Short description here please!
 /*!
@@ -155,8 +159,9 @@ public:
       @param vector Interpolated function
       @param time Time in the interpolation
     */
-    template < typename FEFunctionType, typename vector_Type >
-    void interpolate ( const FEFunctionType* fEFunction, vector_Type& vector, const Real time = 0. );
+    template < typename ReturnType, typename vector_type >
+    void interpolate ( const FEFunction<MeshType, MapType, ReturnType>* fEFunction,
+                       vector_type& vector, const Real time = 0. );
 
     //! calculate L2 velocity error for given exact velocity function
     //! \param pexact the exact velocity as a function
@@ -767,9 +772,10 @@ FESpace<MeshType, MapType>::interpolate ( const function_Type& fct,
 }
 
 template < typename MeshType, typename MapType>
-template < typename FEFunctionType, typename vector_Type >
+template < typename ReturnType, typename vector_type>
 void FESpace<MeshType, MapType>::
-interpolate ( const FEFunctionType* fEFunction, vector_Type& vector, const Real time )
+interpolate ( const FEFunction<MeshType, MapType, ReturnType>* fEFunction,
+              vector_type& vector, const Real time )
 {
 
     // First, we build a "quadrature" that consists in the nodes (0 weight)
@@ -785,7 +791,7 @@ interpolate ( const FEFunctionType* fEFunction, vector_Type& vector, const Real 
     const UInt numberLocalDof ( M_dof->numLocalDof() );
 
     // Storage for the values
-    typename FEFunctionType::point_Type point;
+    typename FEFunction<MeshType, MapType, ReturnType>::point_Type point;
     std::vector<Real> nodalValues (numberLocalDof, 0);
     std::vector<Real> FEValues (numberLocalDof, 0);
 
@@ -887,7 +893,7 @@ FESpace<MeshType, MapType>::l2ScalarProduct ( const function_Type& fct, vector_t
 
     for ( UInt iVol = 0; iVol < this->mesh()->numElements(); iVol++ )
     {
-        this->fe().update ( this->mesh()->element ( iVol ), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET );
+        this->fe().update ( this->mesh()->element ( iVol ), UPDATE_QUAD_NODES | UPDATE_WDET );
 
         Real f, x, y, z;
 
@@ -936,7 +942,7 @@ FESpace<MeshType, MapType>::l20Error ( const function_Type& fexact,
 
     for ( UInt iVol = 0; iVol < this->mesh()->numElements(); iVol++ )
     {
-        this->fe().update ( this->mesh()->element ( iVol ), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET );
+        this->fe().update ( this->mesh()->element ( iVol ), UPDATE_QUAD_NODES | UPDATE_WDET );
 
         normU += elementaryDifferenceL2NormSquare ( vec, fexact, this->fe(), this->dof(), time, M_fieldDim );
 
@@ -987,23 +993,26 @@ FESpace<MeshType, MapType>::l2Error ( const function_Type&    fexact,
 
     for ( UInt iVol  = 0; iVol < this->mesh()->numElements(); iVol++ )
     {
-        //this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
-
-        // CurrentFE newFE(this->fe().refFE(),this->fe().geoMap(),quadRuleTetra64pt);
-        this->fe().update (this->mesh()->element ( iVol ),  UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET);
-
-        normU += elementaryDifferenceL2NormSquare ( vec, fexact,
-                                                    this->fe(),
-                                                    //newFE,
-                                                    this->dof(),
-                                                    time,
-                                                    M_fieldDim );
-        if (relError)
+        if ( this->mesh()->element ( iVol ).isOwned() )
         {
-            sumExact += elementaryFctL2NormSquare ( fexact,
-                                                    this->fe(),
-                                                    time,
-                                                    M_fieldDim );
+            //this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
+
+            // CurrentFE newFE(this->fe().refFE(),this->fe().geoMap(),quadRuleTetra64pt);
+            this->fe().update (this->mesh()->element ( iVol ),  UPDATE_QUAD_NODES | UPDATE_WDET);
+
+            normU += elementaryDifferenceL2NormSquare ( vec, fexact,
+                                                        this->fe(),
+                                                        //newFE,
+                                                        this->dof(),
+                                                        time,
+                                                        M_fieldDim );
+            if (relError)
+            {
+                sumExact += elementaryFctL2NormSquare ( fexact,
+                                                        this->fe(),
+                                                        time,
+                                                        M_fieldDim );
+            }
         }
     }
 
@@ -1036,7 +1045,7 @@ FESpace<MeshType, MapType>::l2NormFunction ( const function& f, const Real time)
     //
     for ( UInt ielem = 0; ielem < this->mesh()->numElements(); ielem++ )
     {
-        this->fe().update ( this->mesh()->element ( ielem ),  UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET  );
+        this->fe().update ( this->mesh()->element ( ielem ),  UPDATE_QUAD_NODES | UPDATE_WDET  );
 
         sumExact += elementaryFctL2NormSquare ( f, this->fe(), time, M_fieldDim );
     }
@@ -1072,7 +1081,7 @@ FESpace<MeshType, MapType>:: l2ErrorWeighted (const function_Type&    exactSolut
 
     for (UInt iVol (0); iVol < this->mesh()->numElements(); ++iVol)
     {
-        this->fe().update (this->mesh()->element (iVol), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET);
+        this->fe().update (this->mesh()->element (iVol), UPDATE_QUAD_NODES | UPDATE_WDET);
 
         for (UInt iQuad (0); iQuad < this->fe().nbQuadPt(); ++iQuad)
         {
@@ -1183,7 +1192,7 @@ FESpace<MeshType, MapType>::l2Norm ( const vector_type& vec)
     for ( UInt ielem = 0; ielem < this->mesh()->numElements(); ielem++ )
     {
         //UInt elem = M_FESpace.mesh()->element( ielem ).id();
-        this->fe().update ( this->mesh()->element ( ielem ), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET );
+        this->fe().update ( this->mesh()->element ( ielem ), UPDATE_QUAD_NODES | UPDATE_WDET );
         //
         norm += elementaryL2NormSquare ( vec, this->fe(), this->dof(), nbComp );
     }
@@ -1246,7 +1255,7 @@ feInterpolateValue (const ID& elementID, const vector_type& solutionVector, cons
     }
 
     // Make sur everything is up to date
-    M_fe->update ( M_mesh->element ( elementID ), UPDATE_PHI);
+    M_fe->update ( M_mesh->element ( elementID ), UPDATE_ONLY_CELL_NODES);
 
     // Map the point back to the ref FE
     Real hat_x (0);
@@ -1302,7 +1311,7 @@ FESpace<MeshType, MapType>::
 feInterpolateValueLocal (const ID& elementID, const vector_type& solutionVector, const point_type& pt ) const
 {
     // Make sur everything is up to date
-    M_fe->update ( M_mesh->element ( elementID ), UPDATE_PHI);
+    M_fe->update ( M_mesh->element ( elementID ), UPDATE_ONLY_CELL_NODES);
 
     // Map the point back to the ref FE
     Real hat_x (0);
@@ -1657,7 +1666,7 @@ FESpace<MeshType, MapType>::setSpace ( const std::string& space, UInt dimension 
 {
     switch (dimension)
     {
-        // 1D case
+            // 1D case
         case 1:
             switch ( M_spaceMap[space] )
             {
@@ -1677,7 +1686,7 @@ FESpace<MeshType, MapType>::setSpace ( const std::string& space, UInt dimension 
                     M_bdQr  = &quadRuleNode1pt;
                     break;
 
-                // In 1D, P1Bubble are "somehow" equivalent to P2, so just use those (same pattern, same dimension of the system).
+                    // In 1D, P1Bubble are "somehow" equivalent to P2, so just use those (same pattern, same dimension of the system).
                 case P1Bubble :
                 case P2 :
                     M_refFE = &feSegP2;
@@ -1697,7 +1706,7 @@ FESpace<MeshType, MapType>::setSpace ( const std::string& space, UInt dimension 
             }
             break;
 
-        // 2D case
+            // 2D case
         case 2:
             switch ( M_spaceMap[space] )
             {
@@ -1741,7 +1750,7 @@ FESpace<MeshType, MapType>::setSpace ( const std::string& space, UInt dimension 
             }
             break;
 
-        // 3D case
+            // 3D case
         case 3:
             switch ( M_spaceMap[space] )
             {
@@ -1793,9 +1802,9 @@ FESpace<MeshType, MapType>::setSpace ( const std::string& space, UInt dimension 
             }
             break;
 
-        // Other dimensions not supported
+            // Other dimensions not supported
         default:
-            ERROR_MSG("Error! This dimension is not supported by LifeV.\n");
+            ERROR_MSG ("Error! This dimension is not supported by LifeV.\n");
     }
 }
 
@@ -1843,10 +1852,12 @@ createMap (const commPtr_Type& commptr)
 {
     // Against dummies
     ASSERT_PRE (this->M_dof->numTotalDof() > 0, " Cannot create FeSpace with no degrees of freedom");
+
     // get globalElements list from DOF
-    std::vector<Int> myGlobalElements ( this->M_dof->globalElements ( *this->M_mesh ) );
+    typename MapType::mapData_Type mapData = this->M_dof->createMapData ( *this->M_mesh );
     // Create the map
-    MapType map ( -1, myGlobalElements.size(), &myGlobalElements[0], commptr );
+    MapType map ( mapData, commptr );
+
     // Store the map. If more than one field is present the map is
     // duplicated by offsetting the DOFs
     for ( UInt ii = 0; ii < M_fieldDim; ++ii )
@@ -2081,7 +2092,7 @@ RT0ToP0Interpolate (const FESpace<mesh_Type, map_Type>& OriginalSpace,
         Vector3D barCurrentFE, barRefFE, Jac;
 
         // Update the current element of the P0 vector space.
-        M_fe->update (this->mesh()->element (elemId), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET);
+        M_fe->update (this->mesh()->element (elemId), UPDATE_QUAD_NODES | UPDATE_WDET);
 
         // Store the number of local DoF
         const UInt nDof (OriginalSpace.dof().numLocalDof() );

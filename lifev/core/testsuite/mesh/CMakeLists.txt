@@ -20,6 +20,7 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(mesh_testmesh
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/core/data/mesh/mesh++
 )
 
+
 TRIBITS_ADD_EXECUTABLE_AND_TEST(
   BareMesh
   SOURCES test_baremesh.cpp
@@ -75,3 +76,5 @@ TRIBITS_ADD_EXECUTABLE_AND_TEST(
   NUM_MPI_PROCS 1
   COMM serial mpi
 )
+
+ADD_SUBDIRECTORY(mesh_partition_tool)

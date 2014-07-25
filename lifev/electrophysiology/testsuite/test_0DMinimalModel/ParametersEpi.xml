@@ -1,0 +1,33 @@
+<!-- Model Parameters -->
+<ParameterList name="Minimal model: Parameter list">
+	<Parameter name="uo" type="double" value="0.0"/>
+	<Parameter name="uu" type="double" value="1.55"/>
+	<Parameter name="tetav" type="double" value="0.30"/>
+	<Parameter name="tetaw" type="double" value="0.130"/>
+	<Parameter name="tetavm" type="double" value="0.006"/>
+	<Parameter name="tetao" type="double" value="0.006"/>
+	<Parameter name="tauv1" type="double" value="60.0"/>
+	<Parameter name="tauv2" type="double" value="1150"/>
+	<Parameter name="tauvp" type="double" value="1.4506"/>
+	<Parameter name="tauw1" type="double" value="60.0"/>
+	<Parameter name="tauw2" type="double" value="15.0"/>
+	<Parameter name="kw" type="double" value="65.0"/>
+	<Parameter name="uw" type="double" value="0.03"/>
+	<Parameter name="tauwp" type="double" value="200.0"/>
+	<Parameter name="taufi" type="double" value="0.11"/>
+	<Parameter name="tauo1" type="double" value="400.0"/>
+	<Parameter name="tauo2" type="double" value="6.0"/>
+	<Parameter name="tauso1" type="double" value="30.0181"/>
+	<Parameter name="tauso2" type="double" value="0.9957"/>
+	<Parameter name="kso" type="double" value="2.0458"/>
+	<Parameter name="uso" type="double" value="0.65"/>
+	<Parameter name="taus1" type="double" value="2.7342"/>
+	<Parameter name="taus2" type="double" value="16.0"/>
+	<Parameter name="ks" type="double" value="2.0994"/>
+	<Parameter name="us" type="double" value="0.9087"/>
+	<Parameter name="tausi" type="double" value="1.8875"/>
+	<Parameter name="tauwinf" type="double" value="0.07"/>
+	<Parameter name="winfstar" type="double" value="0.94"/>
+</ParameterList>
+
+	
