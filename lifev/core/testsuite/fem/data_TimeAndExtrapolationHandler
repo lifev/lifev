@@ -1,0 +1,4 @@
+[mesh_fluid]
+    mesh_dir   = ./
+    mesh_file  = tube20.mesh
+    mesh_type  = .mesh

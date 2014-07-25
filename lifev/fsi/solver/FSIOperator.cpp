@@ -173,7 +173,7 @@ FSIOperator::setDataFile ( const GetPot& dataFile )
     M_aleOrder               =  dataFile ( "fluid/space_discretization/ale_order", "P1");
     M_solidTimeAdvanceMethod =  dataFile ( "solid/time_discretization/method", "BDF");
     M_ALETimeAdvanceMethod   = dataFile ("mesh_motion/time_discretization/method", "BDF");
-    M_structureNonLinear     = M_data->dataSolid()->solidType().compare ("linearVenantKirchhoff");
+    M_structureNonLinear     = M_data->dataSolid()->lawType().compare ("linear");
     this->setupTimeAdvance ( dataFile );
 }
 

@@ -138,16 +138,20 @@ useExactJacobian = true # always false for linear structure model. Otherwise it 
 rescaleFactor    = 1.0  # this factor can be used to rescale the structure block
 
     [./physics]
-    solidType        = linearVenantKirchhoff # linearVenantKirchhoff, nonLinearVenantKirchhoff, exponential, neoHookean
-    lawType          = linear
     material_flag    = 1
     #externalPressure = 0
     #density          = 1.2
     #young            = 4.0E6
     #poisson          = 0.48
-    bulk             = 1e7
-    alpha            = 2.5e6
-    gamma            = 1
+
+    [../model]
+    constitutiveLaw = isotropic
+    young     		= 4.e+6
+    poisson   		= 0.48
+    bulk	        = 1e+7
+    alpha 		    = 2.5e+6
+    gamma		    = 1.0
+    solidTypeIsotropic 	= linearVenantKirchhoff 		# linearVenantKirchhoff / nonLinearVenantKirchhoff / neoHookean / exponential
 
     [../time_discretization]
     method           = BDF            # Newmark, BDF

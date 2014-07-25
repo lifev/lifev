@@ -304,7 +304,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryDispla
     LifeChrono chrono;
 
     this->M_displayer->leaderPrint (" \n*********************************\n  ");
-    this->M_displayer->leaderPrint ("   Performing the analysis recovering the displacement..., ", this->M_dataMaterial->solidType() );
+    this->M_displayer->leaderPrint ("   Performing the analysis recovering the displacement..., ", this->M_dataMaterial->solidTypeIsotropic() );
     this->M_displayer->leaderPrint (" \n*********************************\n  ");
 
     solutionVectPtr_Type grDisplX ( new solutionVect_Type (* (this->M_FESpace->mapPtr() ) ) );
@@ -413,7 +413,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryEigenv
     LifeChrono chrono;
 
     this->M_displayer->leaderPrint (" \n*********************************\n  ");
-    this->M_displayer->leaderPrint ("   Performing the analysis recovering the tensions..., ", this->M_dataMaterial->solidType() );
+    this->M_displayer->leaderPrint ("   Performing the analysis recovering the tensions..., ", this->M_dataMaterial->solidTypeIsotropic() );
     this->M_displayer->leaderPrint (" \n*********************************\n  ");
 
     solutionVect_Type patchArea (* (this->M_displacement), Unique, Add);
@@ -647,7 +647,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::constructGlobalStressVector()
     this->M_FESpace->setQuadRule (fakeQuadratureRule);
 
     this->M_displayer->leaderPrint (" \n*********************************\n  ");
-    this->M_displayer->leaderPrint ("   Performing the analysis recovering the Cauchy stresses..., ", this->M_dataMaterial->solidType() );
+    this->M_displayer->leaderPrint ("   Performing the analysis recovering the Cauchy stresses..., ", this->M_dataMaterial->solidTypeIsotropic() );
     this->M_displayer->leaderPrint (" \n*********************************\n  ");
 
     UInt totalDof = this->M_FESpace->dof().numTotalDof();

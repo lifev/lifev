@@ -456,7 +456,6 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadrat
     M_d2phiReferenceFE(),
     M_d2phi(),
     M_laplacian()
-
 #ifdef HAVE_LIFEV_DEBUG
     , M_isCellNodeUpdated (false),
     M_isQuadNodeUpdated (false),

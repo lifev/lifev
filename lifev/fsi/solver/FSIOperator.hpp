@@ -63,13 +63,18 @@
 #include <lifev/core/algorithm/NonLinearAitken.hpp>
 
 #include <lifev/structure/solver/StructuralOperator.hpp>
-#include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
-#include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
-#include <lifev/structure/solver/VenantKirchhoffMaterialNonLinearPenalized.hpp>
-#include <lifev/structure/solver/SecondOrderExponentialMaterialNonLinear.hpp>
-#include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
-#include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
-#include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
+
+#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialLinear.hpp>
+#include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/NeoHookeanMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinearPenalized.hpp>
+#include <lifev/structure/solver/isotropic/SecondOrderExponentialMaterialNonLinear.hpp>
+
+#ifdef ENABLE_ANISOTROPIC_LAW
+#include <lifev/structure/solver/anisotropic/HolzapfelMaterialNonLinear.hpp>
+#include <lifev/structure/solver/anisotropic/HolzapfelGeneralizedMaterialNonLinear.hpp>
+#endif
 
 #include <lifev/core/fem/DOFInterface3Dto3D.hpp>
 #include <lifev/core/fem/DOFInterface3Dto2D.hpp>
@@ -324,33 +329,46 @@ public:
 
     //!@name Factory Methods
     //@{
-    static StructuralConstitutiveLaw< FSIOperator::mesh_Type >*    createVenantKirchhoffLinear()
+    static StructuralIsotropicConstitutiveLaw< FSIOperator::mesh_Type >*    createVenantKirchhoffLinear()
     {
         return new VenantKirchhoffMaterialLinear< FSIOperator::mesh_Type >();
     }
 
-    static StructuralConstitutiveLaw< FSIOperator::mesh_Type >*    createVenantKirchhoffNonLinear()
+    static StructuralIsotropicConstitutiveLaw< FSIOperator::mesh_Type >*    createVenantKirchhoffNonLinear()
     {
         return new VenantKirchhoffMaterialNonLinear< FSIOperator::mesh_Type >();
     }
-    static StructuralConstitutiveLaw< FSIOperator::mesh_Type >*    createExponentialMaterialNonLinear()
+    static StructuralIsotropicConstitutiveLaw< FSIOperator::mesh_Type >*    createExponentialMaterialNonLinear()
     {
         return new ExponentialMaterialNonLinear< FSIOperator::mesh_Type >();
     }
 
-    static StructuralConstitutiveLaw< FSIOperator::mesh_Type >*    createNeoHookeanMaterialNonLinear()
+    static StructuralIsotropicConstitutiveLaw< FSIOperator::mesh_Type >*    createNeoHookeanMaterialNonLinear()
     {
         return new NeoHookeanMaterialNonLinear< FSIOperator::mesh_Type >();
     }
-    static StructuralConstitutiveLaw< FSIOperator::mesh_Type >*    createVenantKirchhoffNonLinearPenalized()
+    static StructuralIsotropicConstitutiveLaw< FSIOperator::mesh_Type >*    createVenantKirchhoffNonLinearPenalized()
     {
         return new VenantKirchhoffMaterialNonLinearPenalized< FSIOperator::mesh_Type >();
     }
 
-    static StructuralConstitutiveLaw< FSIOperator::mesh_Type >*    createSecondOrderExponentialMaterialNonLinear()
+    static StructuralIsotropicConstitutiveLaw< FSIOperator::mesh_Type >*    createSecondOrderExponentialMaterialNonLinear()
     {
         return new SecondOrderExponentialMaterialNonLinear< FSIOperator::mesh_Type >();
     }
+
+#ifdef ENABLE_ANISOTROPIC_LAW
+    static StructuralAnisotropicConstitutiveLaw< FSIOperator::mesh_Type >*  createHolzapfelMaterialNonLinear()
+    {
+        return new HolzapfelMaterialNonLinear<MeshType >();
+    }
+    static StructuralAnisotropicConstitutiveLaw< FSIOperator::mesh_Type >*  createHolzapfelGeneralizedMaterialNonLinear()
+    {
+        return new HolzapfelGeneralizedMaterialNonLinear<MeshType >();
+    }
+
+
+#endif
 
 
     //@}

@@ -1143,6 +1143,36 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::lagrangeMultipl
 
 template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 VectorSmall<2> 
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeForces ( bcHandler_Type& bcHandlerDrag,
+                                                                               	 bcHandler_Type& bcHandlerLift )
+{
+    vector_Type onesOnBodyDrag(M_localMap, Unique);
+    onesOnBodyDrag *= 0;
+
+    vector_Type onesOnBodyLift(M_localMap, Unique);
+    onesOnBodyLift *= 0;
+
+    bcManageRhs ( onesOnBodyDrag, *M_velocityFESpace.mesh(), M_velocityFESpace.dof(),  bcHandlerDrag, M_velocityFESpace.feBd(), 1., 0.);
+    bcManageRhs ( onesOnBodyLift, *M_velocityFESpace.mesh(), M_velocityFESpace.dof(),  bcHandlerLift, M_velocityFESpace.feBd(), 1., 0.);
+
+    Real drag (0.0);
+    Real lift (0.0);
+
+    drag = M_residual->dot(onesOnBodyDrag);
+    lift = M_residual->dot(onesOnBodyLift);
+
+    M_Displayer.leaderPrint ( "  F-  Value of the drag:          ", drag );
+    M_Displayer.leaderPrint ( "  F-  Value of the lift:          ", lift );
+
+    VectorSmall<2> Forces;
+    Forces[0] = drag;
+    Forces[1] = lift;
+
+    return Forces;
+}
+
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
+VectorSmall<2>
 OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeDrag ( const markerID_Type&  flag,
                                                                                bcHandler_Type& bcHandlerDrag,
                                                                                bcHandler_Type& bcHandlerLift,
@@ -1171,11 +1201,16 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeDrag ( c
     drag = M_residual->dot(onesOnBodyDrag);
     lift = M_residual->dot(onesOnBodyLift);
     
+    M_Displayer.leaderPrint ( "  F-  Value of the drag:          ", drag );
+    M_Displayer.leaderPrint ( "  F-  Value of the lift:          ", lift );
+
+    M_Displayer.leaderPrint ( "\n\n" );
+
     drag /= (0.5*M_oseenData->density()*velocityInfty*velocityInfty*Area);
     lift /= (0.5*M_oseenData->density()*velocityInfty*velocityInfty*Area);
     
-    M_Displayer.leaderPrint ( "  F-  Value of the drag:          ", drag );
-    M_Displayer.leaderPrint ( "  F-  Value of the lift:          ", lift );
+    M_Displayer.leaderPrint ( "  F-  Value of the drag coefficient:          ", drag );
+    M_Displayer.leaderPrint ( "  F-  Value of the lift coefficient:          ", lift );
                              
     VectorSmall<2> Coefficients;
     Coefficients[0] = drag;

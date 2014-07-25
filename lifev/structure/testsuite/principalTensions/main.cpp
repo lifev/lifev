@@ -57,6 +57,7 @@
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 
 #include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
+#include <lifev/structure/solver/StructuralOperator.hpp>
 
 #include <lifev/structure/solver/WallTensionEstimator.hpp>
 #include <lifev/structure/solver/WallTensionEstimatorData.hpp>
@@ -109,6 +110,10 @@ public:
     typedef LifeV::ExporterEnsight<mesh_Type >                          ensightFilter_Type;
     typedef boost::shared_ptr<ensightFilter_Type>                       ensightFilterPtr_Type;
 
+    typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >       solidETFESpace_Type;
+    typedef boost::shared_ptr<solidETFESpace_Type>                      solidETFESpacePtr_Type;
+
+
 #ifdef HAVE_HDF5
     typedef LifeV::ExporterHDF5<mesh_Type >                             hdf5Filter_Type;
     typedef boost::shared_ptr<hdf5Filter_Type>                          hdf5FilterPtr_Type;
@@ -134,12 +139,12 @@ public:
     }
     void CheckResultDisplacement (const Real tensNorm);
     void CheckResultEigenvalues (const Real tensNorm);
-    void CheckResultTensions (const Real tensNorm);
-    void checkLinearElastic (const Real tensNorm);
-    void checkVenantKirchhoff (const Real tensNorm);
-    void checkVenantKirchhoffPenalized (const Real tensNorm);
-    void checkNeoHookean (const Real tensNorm);
-    void check2ndOrderExponential (const Real tensNorm);
+  void CheckResultTensions (const Real tensNorm,const Real testETA);
+    void checkLinearElastic (const Real tensNorm,const Real testETA);
+    void checkVenantKirchhoff (const Real tensNorm,const Real testETA);
+    void checkVenantKirchhoffPenalized (const Real tensNorm,const Real testETA);
+    void checkNeoHookean (const Real tensNorm,const Real testETA);
+    void check2ndOrderExponential (const Real tensNorm,const Real testETA);
     void resultCorrect ( void );
     //@}
 
@@ -185,13 +190,13 @@ struct Structure::Private
         switch (i)
         {
             case 0:
-                return - 0.01837 * ( x - 0.5 );
+                return - 0.018374999999251 * ( x - 0.5 );
                 break;
             case 1:
-                return  0.0749999 / 2.0  * ( y );
+                return  0.074999999996944 / 2.0  * ( y );
                 break;
             case 2:
-                return - 0.01837  * ( z + 0.5  );
+                return - 0.018374999999251  * ( z + 0.5  );
                 break;
             default:
                 ERROR_MSG ("This entry is not allowed: ud_functions.hpp");
@@ -281,7 +286,6 @@ struct Structure::Private
         }
     }
 
-
     std::string data_file_name;
 
     boost::shared_ptr<Epetra_Comm>     comm;
@@ -332,6 +336,10 @@ Structure::run3d()
     typedef boost::shared_ptr<solidETFESpace_Type>                      solidETFESpacePtr_Type;
 
 
+    //! BChandler use to create the StructuralOperator object
+    boost::shared_ptr<BCHandler> BCh ( new BCHandler() );
+
+
     bool verbose = (parameters->comm->MyPID() == 0);
 
     //! dataElasticStructure for parameters
@@ -360,6 +368,25 @@ Structure::run3d()
     solidETFESpacePtr_Type dETFESpace ( new solidETFESpace_Type (meshPart, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
 
 
+    // Building a quadrature rule to evaluate tensions
+    QuadratureRule fakeQuadratureRule;
+
+    Real refElemArea (0); //area of reference element
+    //compute the area of reference element
+    for (UInt iq = 0; iq < dFESpace->qr().nbQuadPt(); iq++)
+    {
+        refElemArea += dFESpace->qr().weight (iq);
+    }
+
+    Real wQuad (refElemArea / dFESpace->refFE().nbDof() );
+
+    //Setting the quadrature Points = DOFs of the element and weight = 1
+    std::vector<GeoVector> coords = dFESpace->refFE().refCoor();
+    std::vector<Real> weights (dFESpace->fe().nbFEDof(), wQuad);
+    fakeQuadratureRule.setDimensionShape ( shapeDimension (dFESpace->refFE().shape() ), dFESpace->refFE().shape() );
+    fakeQuadratureRule.setPoints (coords, weights);
+
+
     if (verbose)
     {
         std::cout << std::endl;
@@ -372,6 +399,9 @@ Structure::run3d()
     //! 1. Constructor of the class to compute the tensions
     boost::shared_ptr<WallTensionEstimator< mesh_Type > >  solid ( new WallTensionEstimator< mesh_Type >() );
 
+    // 1.1 Creating the solid object one
+    StructuralOperator< RegionMesh<LinearTetra> > solidOperator;
+
     //! 2. Its setup
     solid->setup (dataStructure,
                   tensionData,
@@ -379,6 +409,13 @@ Structure::run3d()
                   dETFESpace,
                   parameters->comm,
                   marker);
+
+    //! 2. Setup of the structuralSolver
+    solidOperator.setup (dataStructure,
+			 dFESpace,
+			 dETFESpace,
+			 BCh,
+			 parameters->comm);
 
     //! 3. Creation of the importers to read the displacement field
     std::string const filename    = tensionData->nameFile();
@@ -444,6 +481,51 @@ Structure::run3d()
 
     vectorPtr_Type solidTensions ( new vector_Type (solid->principalStresses(),  M_exporter->mapType() ) );
 
+    vectorPtr_Type sigma_1;
+    vectorPtr_Type sigma_2;
+    vectorPtr_Type sigma_3;
+
+    // Debug vectors
+    // vectorPtr_Type dX_1;
+    // vectorPtr_Type dX_2;
+    // vectorPtr_Type dX_3;
+
+    vectorPtr_Type patchAreaVector;
+    vectorPtr_Type vectorEigenvalues;
+
+
+    sigma_1.reset( new vector_Type( dFESpace->map() ) );
+    sigma_2.reset( new vector_Type( dFESpace->map() ) );
+    sigma_3.reset( new vector_Type( dFESpace->map() ) );
+
+    // dX_1.reset( new vector_Type( dFESpace->map() ) );
+    // dX_2.reset( new vector_Type( dFESpace->map() ) );
+    // dX_3.reset( new vector_Type( dFESpace->map() ) );
+
+    patchAreaVector.reset ( new vector_Type ( dETFESpace->map() ) );
+    vectorEigenvalues.reset( new vector_Type( dFESpace->map() ) );
+
+    {
+      using namespace ExpressionAssembly;
+
+      ExpressionVectorFromNonConstantScalar<ExpressionMeas, 3  > vMeas( meas_K );
+      evaluateNode( elements ( dETFESpace->mesh() ),
+		    fakeQuadratureRule,
+		    dETFESpace,
+		    dot( vMeas , phi_i )
+		    ) >> patchAreaVector;
+      patchAreaVector->globalAssemble();
+    }
+
+    // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "sigma1", dFESpace, sigma_1, UInt (0) );
+    // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "sigma2", dFESpace, sigma_2, UInt (0) );
+    // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "sigma3", dFESpace, sigma_3, UInt (0) );
+
+    // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "dX1", dFESpace, dX_1, UInt (0) );
+    // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "dX2", dFESpace, dX_2, UInt (0) );
+    // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "dX3", dFESpace, dX_3, UInt (0) );
+
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "eigenvalues", dFESpace, vectorEigenvalues, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "vonMises", dFESpace, solidTensions, UInt (0) );
     M_exporter->postProcess ( 0.0 );
 
@@ -497,7 +579,7 @@ Structure::run3d()
         LifeV::Real startTime = tensionData->initialTime (0);
 
         // In the case of Exponential law we are checking the three ways
-        if ( !dataStructure->solidType().compare ("exponential") )
+        if( !dataStructure->solidTypeIsotropic().compare("exponential") )
         {
             /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
             LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, solid->dFESpacePtr(), solidDisp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
@@ -506,22 +588,22 @@ Structure::run3d()
             M_importer->readVariable (solutionDispl);
             M_importer->closeFile();
         }
-        else if ( !dataStructure->solidType().compare ("linearVenantKirchhoff") ) // LE
+        else if ( !dataStructure->solidTypeIsotropic().compare("linearVenantKirchhoff") ) // LE
         {
             dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( Private::displacementLinearElastic ),
                                     *solidDisp, 0.0 );
         }
-        else if ( !dataStructure->solidType().compare ("nonLinearVenantKirchhoff") ) // SVK
+        else if ( !dataStructure->solidTypeIsotropic().compare("nonLinearVenantKirchhoff") ) // SVK
         {
             dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( Private::displacementVenantKirchhoff ),
                                     *solidDisp, 0.0 );
         }
-        else if ( !dataStructure->solidType().compare ("nonLinearVenantKirchhoffPenalized") ) // SVKP
+        else if ( !dataStructure->solidTypeIsotropic().compare("nonLinearVenantKirchhoffPenalized") ) // SVKP
         {
             dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( Private::displacementVenantKirchhoffPenalized ),
                                     *solidDisp, 0.0 );
         }
-        else if ( !dataStructure->solidType().compare ("neoHookean") ) // NH
+        else if ( !dataStructure->solidTypeIsotropic().compare("neoHookean") ) // NH
         {
             dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( Private::displacementNeoHookean ),
                                     *solidDisp, 0.0 );
@@ -532,7 +614,14 @@ Structure::run3d()
                                     *solidDisp, 0.0 );
         }
 
+        solidOperator.computeCauchyStressTensor( solidDisp, fakeQuadratureRule, sigma_1, sigma_2, sigma_3 );
+        // Concluding reconstruction
+        *sigma_1 = *sigma_1 / *patchAreaVector;
+        *sigma_2 = *sigma_2 / *patchAreaVector;
+        *sigma_3 = *sigma_3 / *patchAreaVector;
 
+        // Computing eigenvalues
+        solidOperator.computePrincipalTensions( sigma_1, sigma_2, sigma_3, vectorEigenvalues );
 
         // //Create and exporter to check importing
         // std::string expVerFile = "verificationDisplExporter";
@@ -545,7 +634,6 @@ Structure::run3d()
         // exporter.postProcess (0.0);
         // *vectVer = *solidDisp;
         // exporter.postProcess (startTime);
-
 
         //Set the current solution as the displacement vector to use
         solid->setDisplacement (*solidDisp);
@@ -567,8 +655,13 @@ Structure::run3d()
         //Extracting the tensions
         std::cout << std::endl;
         std::cout << "Norm of the tension vector: " << solid->principalStresses().norm2() << std::endl;
+        std::cout << "Norm of the vector eigenvalues: " << vectorEigenvalues->norm2() << std::endl;
 
-        *solidTensions = solid->principalStresses();
+        // *dX_1 = solid->gradientX();
+        // *dX_2 = solid->gradientY();
+        // *dX_3 = solid->gradientZ();
+
+
         M_exporter->postProcess ( startTime );
 
         if (verbose )
@@ -578,7 +671,7 @@ Structure::run3d()
 
         returnValue = EXIT_FAILURE;
 
-        if ( !dataStructure->solidType().compare ("exponential") )
+        if( !dataStructure->solidTypeIsotropic().compare("exponential") )
         {
             ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
             if ( !tensionData->recoveryVariable().compare ("displacement")  )
@@ -591,31 +684,30 @@ Structure::run3d()
             }
             else
             {
-                CheckResultTensions ( solid->principalStresses().norm2()  );
+                CheckResultTensions ( solid->principalStresses().norm2(), vectorEigenvalues->norm2()  );
             }
         }
-        else if ( !dataStructure->solidType().compare ("linearVenantKirchhoff") ) // LE
+
+        else if ( !dataStructure->solidTypeIsotropic().compare("linearVenantKirchhoff") ) // LE
         {
-            checkLinearElastic ( solid->principalStresses().norm2() );
+            checkLinearElastic( solid->principalStresses().norm2(), vectorEigenvalues->norm2() );
         }
-        else if ( !dataStructure->solidType().compare ("nonLinearVenantKirchhoff") ) // SVK
+        else if ( !dataStructure->solidTypeIsotropic().compare("nonLinearVenantKirchhoff") ) // SVK
         {
-            checkVenantKirchhoff ( solid->principalStresses().norm2() );
+            checkVenantKirchhoff( solid->principalStresses().norm2(), vectorEigenvalues->norm2() );
         }
-        else if ( !dataStructure->solidType().compare ("nonLinearVenantKirchhoffPenalized") ) // SVKP
+        else if ( !dataStructure->solidTypeIsotropic().compare("nonLinearVenantKirchhoffPenalized") ) // SVKP
         {
-            checkVenantKirchhoffPenalized ( solid->principalStresses().norm2() );
+            checkVenantKirchhoffPenalized( solid->principalStresses().norm2(), vectorEigenvalues->norm2() );
         }
-        else if ( !dataStructure->solidType().compare ("neoHookean") ) // NH
+        else if ( !dataStructure->solidTypeIsotropic().compare("neoHookean") ) // NH
         {
-            checkNeoHookean ( solid->principalStresses().norm2() );
+            checkNeoHookean( solid->principalStresses().norm2(), vectorEigenvalues->norm2() );
         }
         else
         {
-            check2ndOrderExponential ( solid->principalStresses().norm2() );
+            check2ndOrderExponential( solid->principalStresses().norm2(), vectorEigenvalues->norm2() );
         }
-
-
         ///////// END OF CHECK
 
         //Closing files
@@ -657,54 +749,58 @@ void Structure::CheckResultEigenvalues (const Real tensNorm)
     }
 }
 
-void Structure::CheckResultTensions (const Real tensNorm)
+void Structure::CheckResultTensions (const Real tensNorm, const Real testETA)
 {
-    if ( ( ( std::fabs (tensNorm - 4.67086e6) / 4.67086e6) <= 1e-5 ) )
+  if ( ( ( std::fabs (tensNorm - 4.67086e6) / 4.67086e6) <= 1e-5 ) &&
+       ( std::fabs ( testETA - 4.67086e6) / 4.67086e6) <= 1e-5 )
     {
         this->resultCorrect( );
     }
 }
 
-void Structure::checkLinearElastic (const Real tensNorm)
+void Structure::checkLinearElastic (const Real tensNorm, const Real testETA)
 {
-    if ( ( ( std::fabs (tensNorm - 4.69045e+6) / 4.69045e+6) <= 1e-5 ) )
+  if ( ( ( std::fabs (tensNorm - 4.5e+6) / 4.5e+6) <= 1e-5 ) && ( ( std::fabs (testETA - 4.5e+6) / 4.5e+6) <= 1e-5 ) )
     {
         this->resultCorrect( );
     }
 }
 
-void Structure::checkVenantKirchhoff (const Real tensNorm)
+void Structure::checkVenantKirchhoff (const Real tensNorm, const Real testETA)
 {
-    if ( ( ( std::fabs (tensNorm - 4.66588e+6) / 4.66588e+6) <= 1e-5 ) )
+    if ( ( ( std::fabs (tensNorm - 4.66588e+6) / 4.66588e+6) <= 1e-5 ) &&
+	 ( ( std::fabs (testETA - 4.66588e+6) / 4.66588e+6) <= 1e-5 ) )
     {
         this->resultCorrect( );
     }
 }
 
-void Structure::checkVenantKirchhoffPenalized (const Real tensNorm)
+void Structure::checkVenantKirchhoffPenalized (const Real tensNorm, const Real testETA)
 {
-    if ( ( ( std::fabs (tensNorm - 4.65222e+6) / 4.65222e+6) <= 1e-5 ) )
+    if ( ( ( std::fabs (tensNorm - 4.65222e+6) / 4.65222e+6) <= 1e-5 ) &&
+	 ( ( std::fabs (testETA - 4.65222e+6) / 4.65222e+6) <= 1e-5 ) )
     {
         this->resultCorrect( );
     }
 }
 
-void Structure::checkNeoHookean (const Real tensNorm)
+void Structure::checkNeoHookean (const Real tensNorm, const Real testETA)
 {
-    if ( ( ( std::fabs (tensNorm - 4.67165e+6) / 4.67165e+6) <= 1e-5 ) )
+    if ( ( ( std::fabs (tensNorm - 4.67165e+6) / 4.67165e+6) <= 1e-5 ) &&
+	 ( ( std::fabs (testETA - 4.67165e+6) / 4.67165e+6) <= 1e-5 ) )
     {
         this->resultCorrect( );
     }
 }
 
-void Structure::check2ndOrderExponential (const Real tensNorm)
+void Structure::check2ndOrderExponential (const Real tensNorm, const Real testETA)
 {
-    if ( ( ( std::fabs (tensNorm - 1.17608e+6) / 1.17608e+6) <= 1e-5 ) )
+    if ( ( ( std::fabs (testETA - 1.17608e+6) / 1.17608e+6) <= 1e-5 ) &&
+	 ( ( std::fabs (tensNorm - 1.17608e+6) / 1.17608e+6) <= 1e-5 ) )
     {
         this->resultCorrect( );
     }
 }
-
 
 void Structure::resultCorrect ( void )
 {

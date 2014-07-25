@@ -1,0 +1,110 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Library
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Umberto Villa <uvilla@emory.edu>
+#                 Tiziano Passerini <tiziano@mathcs.emory.edu>
+#           Date: 10-12-2010
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### TESTSUITE: STRUCTURE MECHANICS ################################################################
+###################################################################################################
+#-------------------------------------------------
+#      Data file for Structure Solver
+#-------------------------------------------------
+
+
+[exporter]
+type       = hdf5 			# hdf5 (if library compiled with hdf5 support) or ensight
+multimesh  = false
+start      = 0
+save       = 1
+
+[solid]
+
+[./physics]
+density   	= 1.2
+material_flag   = 101
+bodyForce   = false
+
+[../model]
+constitutiveLaw = isotropic
+young     	= 226144
+poisson   	= 0.48
+bulk		= 5e+7
+alpha 		= 2.684564e+6
+gamma		= 1.0
+solidTypeIsotropic 	= neoHookean		# linearVenantKirchhoff / nonLinearVenantKirchhoff / neoHookean / expoenential
+solidTypeAnisotropic = holzapfel
+
+[./fibers]
+numberFamilies  = 2
+stiffness       = '9.996e+6 9.996e+6'
+nonlinearity    = '524.6 524.6'
+smoothness      = 1000
+[./]
+
+
+[../../time_discretization]
+method          = BDF
+initialtime 	= 0.
+endtime     	= 5.0
+timestep    	= 0.05
+BDF_order   	= 2
+
+[../space_discretization]
+mesh_type = .mesh
+mesh_dir  	= ./
+mesh_file 	= cubeY8.mesh
+order     	= P1
+
+[../miscellaneous]
+factor    	= 1
+verbose   	= 1
+
+[../newton]
+maxiter 	= 1
+reltol  	= 1.e-8
+
+[../solver]
+solver          = gmres
+scaling         = none
+output          = all 			# none
+conv            = rhs
+max_iter        = 500
+reuse           = true
+max_iter_reuse  = 200
+kspace          = 200
+tol             = 1.e-10    		# AztecOO tolerance
+
+[../prec]
+prectype        = Ifpack	 		# Ifpack or ML
+displayList     = true
+xmlName         = xmlParameters.xml
+
+[./ifpack]
+overlap  	= 2
+
+[./fact]
+ilut_level-of-fill 	= 1
+drop_tolerance          = 1.e-5
+relax_value             = 0
+
+[../amesos]
+solvertype 		=  Amesos_Umfpack 	# Amesos_KLU or Amesos_Umfpack
+
+[../partitioner]
+overlap 		= 2
+
+[../schwarz]
+reordering_type 	= none 			# metis, rcm, none
+filter_singletons 	= true
+
+[../]
+[../]
+
+
+

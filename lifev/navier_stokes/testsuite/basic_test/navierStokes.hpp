@@ -637,7 +637,11 @@ NavierStokes<MeshType, Problem>::run()
             // Building the mesh from the source
             if(M_meshSource == RegularMesh) 
             {
+<<<<<<< HEAD
                     regularMesh3D( *fullMeshPtr, 2, mElem, mElem, mElem, false, 1.0, 1.0, 1.0, -1.0,  -1.0,  -1.0);
+=======
+                    regularMesh3D( *fullMeshPtr, 1, mElem, mElem, mElem, false, 1.0, 1.0, 1.0, -1.0, -1.0, -1.0);
+>>>>>>> abd306c90f4f09542f45a61f25bd6d947bbf6a25
 
                     if (verbose) std::cout << "Mesh source: regular mesh("
                                            << mElem << "x" << mElem << "x" << mElem << ")" << std::endl;
@@ -1004,17 +1008,17 @@ NavierStokes<MeshType, Problem>::run()
                 fluid.getDisplayer().leaderPrint ("norm rhs  ", rhs.norm2() );
                 fluid.getDisplayer().leaderPrint ("\n");
 
-                if (oseenData->conservativeFormulation() )
-                {
+//                if (oseenData->conservativeFormulation() )
+//                {
                     rhs  = fluid.matrixMass() * bdf.bdfVelocity().rhsContributionFirstDerivative();
-                }
+//                }
 
                 fluid.updateSystem ( alpha, beta, rhs );
 
-                if (!oseenData->conservativeFormulation() )
-                {
-                    rhs  = fluid.matrixMass() * bdf.bdfVelocity().rhsContributionFirstDerivative();
-                }
+//                if (!oseenData->conservativeFormulation() )
+//                {
+//                    rhs  = fluid.matrixMass() * bdf.bdfVelocity().rhsContributionFirstDerivative();
+//                }
 
                 fluid.iterate ( bcH );
 

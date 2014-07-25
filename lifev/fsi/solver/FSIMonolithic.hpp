@@ -230,6 +230,8 @@ public:
             M_BCh_u = M_BCh_flux;
         }
         M_BCh_flux.reset();
+
+
     }
 
 #ifdef HAVE_TRILINOS_ANASAZI
@@ -340,6 +342,7 @@ public:
     void setFluidBC     ( const fluidBchandlerPtr_Type& bc_fluid )
     {
         super_Type::setFluidBC (bc_fluid);
+
         if (M_BChs.size() )
         {
             UInt nfluxes (M_BChs[1]->numberOfBCWithType (Flux) );
@@ -355,6 +358,7 @@ public:
             M_monolithicMatrix->setConditions (M_BChs);
             M_precPtr->setConditions (M_BChs);
         }
+
     }
 
 

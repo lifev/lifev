@@ -11,31 +11,31 @@ start      = 0
 save       = 1
 
 [NavierStokes]
-initialization         = interpolation #projection   # initialization (L2 projection) or interpolation
+initialization         = projection #projection   # initialization (L2 projection) or interpolation
 export_norms           = true
 export_exact_solutions = true
 test                   = accuracy
 accuracy_tolerance     = 0.09
-mesh_source            = regular_mesh
+mesh_source            = file
 
 [fluid]
 
-    conservativeFormulation = true
+    conservativeFormulation = false
     
     [./physics]
     density         = 1.0          # density
-    viscosity       = .01          # viscosity
+    viscosity       = 0.01          # viscosity
 
     [../time_discretization]
     initialtime     = 0.0
     endtime         = 0.0001
     timestep        = 0.00001
 
-    BDF_order       = 2
+    BDF_order       = 1
 
     [../space_discretization]
     mesh_dir        = ./
-    mesh_file       = cube4x4.mesh
+    mesh_file       = n4.mesh
     mesh_type       = .mesh
     mesh_size       = 16
 
@@ -137,5 +137,5 @@ mesh_source            = regular_mesh
     a = 1.57
     d = 0.78
     sigma = 0
-    neumannList = 1
-    dirichletList = 2,3,4,5,6
+    neumannList = 2
+    dirichletList = 1,3,4,5,6
