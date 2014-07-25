@@ -46,6 +46,7 @@
 
 // Include for boundary conditions
 #include "functions.hpp"
+#include "AnalyticalSolution.hpp"
 
 using namespace LifeV;
 
@@ -115,6 +116,7 @@ void NavierStokes::run()
     // Loading the mesh //
     //////////////////////
     
+    /*
     MeshData meshData;
     meshPtr_Type fullMeshPtr ( new mesh_Type ( M_comm ) );
     meshData.setup (*M_dataFile, "fluid/space_discretization");
@@ -123,8 +125,14 @@ void NavierStokes::run()
     }
     readMesh (*fullMeshPtr, meshData);
     
-//    meshPtr_Type fullMeshPtr ( new mesh_Type ( M_comm ) );
-//    regularMesh3D( *fullMeshPtr, 1, 8, 8, 8, false, 2.0, 2.0, 2.0, -1.0,  -1.0,  -1.0);
+
+    if (verbose){
+    	std::cout << "\n[Mesh size max : " << MeshUtility::MeshStatistics::computeSize ( *fullMeshPtr ).maxH << " ]\n";
+    }
+    */
+
+    meshPtr_Type fullMeshPtr ( new mesh_Type ( M_comm ) );
+    regularMesh3D( *fullMeshPtr, 1, 16, 16, 16, false, 2.0, 2.0, 2.0, -1.0,  -1.0,  -1.0);
     
     ///////////////////////////
     // Partitioning the mesh //
@@ -171,12 +179,12 @@ void NavierStokes::run()
     if (verbose)
         std::cout << "\n[Setting boundary conditions ] \n";
     
-    bcH.addBC( "S", 5, Essential, Full, u_dirichlet, 3 );
+    bcH.addBC( "S", 2, Essential, Full, u_dirichlet, 3 );
     bcH.addBC( "S", 1, Essential, Full, u_dirichlet, 3 );
     bcH.addBC( "S", 3, Essential, Full, u_dirichlet, 3 );
     bcH.addBC( "S", 4, Essential, Full, u_dirichlet, 3 );
     bcH.addBC( "S", 6, Essential, Full, u_dirichlet, 3 );
-    bcH.addBC( "S", 2, Natural,   Full, u_neumann,   3 );
+    bcH.addBC( "S", 5, Natural,   Full, u_neumann,   3 );
     bcH.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
     
     //////////////////////////
@@ -273,6 +281,8 @@ void NavierStokes::run()
     
     Real time = t0 + dt;
     
+    Real L2ErrorVelocity, H1ErrorVelocity, L2ErrorPressure;
+
     for ( ; time <= tFinal + dt / 2.; time += dt, iter++){
         
         if (verbose)
@@ -285,6 +295,8 @@ void NavierStokes::run()
         
         // update the right hand side term
         bdf.bdfVelocity().updateRHSContribution(dt);
+
+        fluid.setVelocityRhs(bdf.bdfVelocity().rhsContributionFirstDerivative());
 
         // compute the right hand side, it contains just the term associated to the previous timesteps
         // CAUTION: the vector bdf.bdfVelocity().rhsContributionFirstDerivative() is already divided by the timestep
@@ -306,6 +318,33 @@ void NavierStokes::run()
         pFESpace->interpolate ( static_cast<typename feSpace_Type::function_Type> ( exactPressure ), *exactPressPtr, time );
         uFESpace->interpolate ( static_cast<typename feSpace_Type::function_Type> ( exactVelocity ), *exactVelPtr, time );
         
+        //////////////////////////////
+        // Evaluation of the errors //
+        //////////////////////////////
+
+        vector_Type uComputed ( uFESpace->map() , Repeated );
+        uComputed.subset( *fluid.solution() );
+
+        vector_Type pComputed ( pFESpace->map() , Repeated );
+        pComputed.subset( *fluid.solution(), uFESpace->dim() *uFESpace->fieldDim());
+
+        AnalyticalSolution solutionAnal;
+
+        // compute l2 norm of the error for the velocity
+        L2ErrorVelocity = uFESpace->l2Error(exactVelocity, uComputed, time);
+
+        // compute h1 norm of the error for the velocity
+        H1ErrorVelocity = uFESpace->h1Error(solutionAnal,  uComputed, time);
+
+        // compute l2 norm of the error for the pressure
+        L2ErrorPressure = pFESpace->l20Error(exactPressure, pComputed, time);
+
+        if (verbose){
+        	std::cout << "\n  [L2 error velocity = " << L2ErrorVelocity << " ] \n";
+        	std::cout << "\n  [H1 error velocity = " << H1ErrorVelocity << " ] \n";
+        	std::cout << "\n  [L2 error pressure = " << L2ErrorPressure << " ] \n\n";
+        }
+
         // postprocessing
         exporter->postProcess ( time );
     
