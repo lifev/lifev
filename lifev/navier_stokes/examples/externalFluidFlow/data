@@ -26,7 +26,7 @@ mesh_source            = regular_mesh
 
 [fluid]
 
-    export_coefficients = true
+    export_coefficients = true  
     conservativeFormulation = false
     
     [./physics]
@@ -56,7 +56,7 @@ mesh_source            = regular_mesh
     
 	[../stabilization]
 	use             = true
-	method          = VMSLES	  # other possible choices: IP, SUPG, VMSLES
+	method          = SUPG	  # other possible choices: IP, SUPG, VMSLES
 
     [../miscellaneous]
     verbose         = 1
@@ -65,12 +65,23 @@ mesh_source            = regular_mesh
     [../prec]
     prectype                = ML # Ifpack or ML
     displayList             = true
+    
+    [../solver]
+    solver          = gmres
+    scaling         = none
+    output          = all # none
+    conv            = rhs
+    max_iter        = 1800
+    reuse           = true
+    max_iter_reuse  = 80
+    kspace          = 100
+    tol             = 1e-8    # AztecOO tolerance
 
         [./ML]
 
         default_parameter_list  = NSSA  # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
         inc_or_dec              = increasing
-	max_levels              = 3
+	    max_levels              = 3
         MLOutput                = 10
         pde_equations           = 4
         cycle_applications      = 3
@@ -123,17 +134,6 @@ mesh_source            = regular_mesh
 
             [../]
         [../]
-
-    [../solver]
-    solver          = gmres
-    scaling         = none
-    output          = all # none
-    conv            = rhs
-    max_iter        = 1800
-    reuse           = true
-    max_iter_reuse  = 80
-    kspace          = 100
-    tol             = 1.e-12    # AztecOO tolerance
 
     [../ipstab]
     gammaBeta  = 0.7

@@ -190,6 +190,7 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
       M_supgStabilization      (new StabilizationSUPG<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace)),
       M_VMSLESStabilization    (new StabilizationVMSLES<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace))
 {
+    ASSERT(0!=0,"ENTERING IN THE MONOLITHIC CONSTRUCTOR");
     // if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
     {
         M_ipStabilization.setFeSpaceVelocity (M_velocityFESpace);
@@ -416,7 +417,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::buildSystem()
 		{
 			integrate(
 					elements(M_fespaceUETA->mesh()),
-					M_velocityFESpace.qr(),
+					quadRuleTetra64pt,
 					M_fespaceUETA,
 					M_fespaceUETA,
 					M_oseenData->density() * dot(phi_i, phi_j)
@@ -433,7 +434,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::buildSystem()
         {
             integrate(
                     elements(M_fespaceUETA->mesh()),
-                    M_velocityFESpace.qr(),
+                    quadRuleTetra64pt,
                     M_fespaceUETA,
                     M_fespaceUETA,
                     M_oseenData->viscosity() * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) )
@@ -443,17 +444,17 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::buildSystem()
         {
             integrate(
                     elements(M_fespaceUETA->mesh()),
-                    M_velocityFESpace.qr(),
+                    quadRuleTetra64pt,
                     M_fespaceUETA,
                     M_fespaceUETA,
-                    M_oseenData->viscosity() * dot( grad(phi_i), grad(phi_j) )
+                    M_oseenData->viscosity() * dot( grad(phi_i) , grad(phi_j) + transpose(grad(phi_j)) )
             ) >> M_matrixStokes->block(0,0);
         }
 		
 
 		integrate(
 				elements(M_fespaceUETA->mesh()),
-				M_velocityFESpace.qr(),
+				quadRuleTetra64pt,
 				M_fespaceUETA,
 				M_fespacePETA,
 				value(-1.0) * phi_j * div(phi_i)
@@ -461,7 +462,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::buildSystem()
 
 		integrate(
 				elements(M_fespaceUETA->mesh()),
-				M_velocityFESpace.qr(),
+				quadRuleTetra64pt,
 				M_fespacePETA,
 				M_fespaceUETA,
 				phi_i * div(phi_j)
@@ -478,9 +479,9 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::buildSystem()
 template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
 OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::
-updateSystem ( const Real         alpha,
+updateSystem ( const Real         alphaOverTimestep,
                const vector_Type& u_star,
-               const vector_Type& sourceVector )
+               const vector_Type& rightHandSide )
 {
     if ( M_matrixNoBC.get() )
     {
@@ -491,8 +492,8 @@ updateSystem ( const Real         alpha,
         M_matrixNoBC.reset ( new matrix_Type ( M_localMap ) );
     }
 
-    updateSystem ( alpha, u_star, sourceVector, M_matrixNoBC, *M_un );
-    if ( alpha != 0. )
+    updateSystem ( alphaOverTimestep, u_star, rightHandSide, M_matrixNoBC, *M_un );
+    if ( alphaOverTimestep != 0. )
     {
         M_matrixNoBC->globalAssemble();
     }
@@ -502,20 +503,20 @@ updateSystem ( const Real         alpha,
 template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
 OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::
-updateSystem ( const Real          alpha,
+updateSystem ( const Real          alphaOverTimestep,
 		       const vector_Type&  u_star,
                const vector_Type&  rightHandSide,
                matrixPtr_Type      matrixNoBC,
                const vector_Type&  un )
 {
-    M_Displayer.leaderPrint ( "  F-  Updating mass term on right hand side... " );
+    M_Displayer.leaderPrint ( "  F-  Setting the right hand side ..." );
     LifeChrono chrono;
     chrono.start();
     
     updateRightHandSide ( rightHandSide );
     
     chrono.stop();
-    M_Displayer.leaderPrintMax ( "done in ", chrono.diff() );
+    M_Displayer.leaderPrintMax ( "          done in ", chrono.diff() );
     
     M_matrixNoBC_block.reset(new matrix_block_Type(M_fespaceUETA->map() | M_fespacePETA->map() | M_fluxMap));
     
@@ -535,13 +536,8 @@ updateSystem ( const Real          alpha,
     
     // u_star: extrapolation of the velocity
     // NOTE:   for ALE formulation it has to be already: extrapolation of fluid velocity - extrapolation of fluid mesh velocity
-
     vector_Type u_starRepeated ( u_star, Repeated );
-    vector_Type unRepeated ( un, Repeated );
-
-    vector_Type wRepeated ( un, Repeated );
-    wRepeated -= u_starRepeated;
-
+    
     M_convectiveMatrix.reset  ( new matrix_block_Type ( M_fespaceUETA->map() | M_fespacePETA->map() | M_fluxMap ) );
     *M_convectiveMatrix *= 0;
     
@@ -559,9 +555,9 @@ updateSystem ( const Real          alpha,
                 M_velocityFESpace.qr(),          // QR
                 M_fespaceUETA,
                 M_fespaceUETA,
-                dot(grad(phi_j) * M_oseenData->density() * value(M_fespaceUETA, u_starRepeated), phi_i)                              // semi-implicit convective term
+                dot(grad(phi_j) * M_oseenData->density() * value(M_fespaceUETA, u_starRepeated), phi_i)   // semi-implicit convective term
                 + 0.5 * M_oseenData->density() * dot ( value ( Eye ) , grad(M_fespaceUETA, u_starRepeated) ) * dot( phi_j , phi_i )  // consistency term
-                - M_oseenData->density() * dot ( value ( Eye ) , grad(M_fespaceUETA, wRepeated) ) * dot( phi_j , phi_i )             // conservative formulation
+                // - M_oseenData->density() * dot ( value ( Eye ) , grad(M_fespaceUETA, wRepeated) ) * dot( phi_j , phi_i )             // conservative formulation
                       )
             >> M_convectiveMatrix->block(0,0);
         }
@@ -569,13 +565,12 @@ updateSystem ( const Real          alpha,
         {
             using namespace ExpressionAssembly;
             integrate(
-                elements(M_fespaceUETA->mesh()), // Mesh
-                M_velocityFESpace.qr(),          // QR
-                M_fespaceUETA,
-                M_fespaceUETA,
-                dot( M_oseenData->density() * value(M_fespaceUETA, u_starRepeated)*grad(phi_j), phi_i) // semi-implicit convective term
-                //+ 0.5 * M_oseenData->density() * dot ( value ( Eye ) , grad(M_fespaceUETA, u_starRepeated) ) * dot( phi_j , phi_i )   // consistency term
-                      )
+                        elements(M_fespaceUETA->mesh()), // Mesh
+                        quadRuleTetra64pt,               // Quadrature rule
+                        M_fespaceUETA,
+                        M_fespaceUETA,
+                        dot( M_oseenData->density() * value(M_fespaceUETA, u_starRepeated)*grad(phi_j), phi_i) // semi-implicit treatment of the convective term
+                     )
             >> M_convectiveMatrix->block(0,0);
         }
         
@@ -592,11 +587,11 @@ updateSystem ( const Real          alpha,
     }
     
     if(M_stabilization)
-        computeStabilization(u_starRepeated, alpha);
+        computeStabilization(u_starRepeated, alphaOverTimestep);
 
-    if ( alpha != 0. )
+    if ( alphaOverTimestep != 0. )
     {
-        *M_matrixNoBC_block += (*M_velocityMatrixMass) * alpha;
+        *M_matrixNoBC_block += (*M_velocityMatrixMass) * alphaOverTimestep;
     }
     
     *M_convectiveMatrix += *M_matrixStokes;
@@ -836,6 +831,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::iterate ( bcHan
     matrixPtr_Type matrixFull ( new matrix_Type ( M_velocityFESpace.map() + M_pressureFESpace.map() + M_fluxMap ) );
 
     updateStabilization ( *matrixFull );
+    
     getFluidMatrix ( *matrixFull );
 
     vector_Type rightHandSideFull ( *M_rightHandSideNoBC );
@@ -847,7 +843,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::iterate ( bcHan
             rightHandSideFull += *M_rhsStabilization;
         }
     }
-
+    
     chrono.stop();
 
     M_Displayer.leaderPrintMax ( "done in ", chrono.diff() );
@@ -860,6 +856,8 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::iterate ( bcHan
     applyBoundaryConditions ( *matrixFull, rightHandSideFull, bcHandler );
 
     matrixFull->globalAssemble();
+    
+    matrixFull->spy("matriceP2P1");
     
     chrono.stop();
 

@@ -5,10 +5,10 @@
 
 
 [exporter]
-type       = vtk # hdf5 (if library compiled with hdf5 support) or ensight or vtk
+type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight or vtk
 multimesh  = false
 start      = 0
-save       = 5
+save       = 1
 
 [NavierStokes]
 initialization         = interpolation #projection   # initialization (L2 projection) or interpolation
@@ -28,8 +28,8 @@ mesh_source            = regular_mesh
 
     [../time_discretization]
     initialtime     = 0.0
-    endtime         = 0.01
-    timestep        = 0.001
+    endtime         = 0.0001
+    timestep        = 0.00001
 
     BDF_order       = 2
 
@@ -37,7 +37,7 @@ mesh_source            = regular_mesh
     mesh_dir        = ./
     mesh_file       = cube4x4.mesh
     mesh_type       = .mesh
-    mesh_size       = 4
+    mesh_size       = 16
 
     verbose         = 0
     linearized      = 0
@@ -45,19 +45,19 @@ mesh_source            = regular_mesh
     div_beta_u_v    = 0 # 1=on, 0=off
     FE_number       = 1
     vel_order       = P2
-    press_order     = P2
+    press_order     = P1
     stiff_strain    = true
     
 	[../stabilization]
-	use             = true
-	method          = SUPG	  # other possible choices: IP, VMS
+	use             = false
+	method          = VMS	  # other possible choices: IP, VMS
 
     [../miscellaneous]
     verbose         = 1
     steady          = 0
 
     [../prec]
-    prectype                = Ifpack # Ifpack or ML
+    prectype                = ML # Ifpack or ML
     displayList             = false
 
         [./ML]
@@ -134,8 +134,8 @@ mesh_source            = regular_mesh
     max_iter_reuse  = 60
 
     [../problem]
-    #a = 1.57
-    #d = 0.78
+    a = 1.57
+    d = 0.78
     sigma = 0
     neumannList = 1
     dirichletList = 2,3,4,5,6

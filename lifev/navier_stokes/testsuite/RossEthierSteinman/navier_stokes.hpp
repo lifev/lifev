@@ -171,12 +171,12 @@ void NavierStokes::run()
     if (verbose)
         std::cout << "\n[Setting boundary conditions ] \n";
     
-    bcH.addBC( "S5", 5, Essential, Full, u_dirichlet, 3 );
-    bcH.addBC( "S2", 2, Essential, Full, u_dirichlet, 3 );
-    bcH.addBC( "S3", 3, Essential, Full, u_dirichlet, 3 );
-    bcH.addBC( "S4", 4, Essential, Full, u_dirichlet, 3 );
-    bcH.addBC( "S6", 6, Essential, Full, u_dirichlet, 3 );
-    bcH.addBC( "S1", 1, Natural,   Full, u_neumann,   3 );
+    bcH.addBC( "S", 5, Essential, Full, u_dirichlet, 3 );
+    bcH.addBC( "S", 1, Essential, Full, u_dirichlet, 3 );
+    bcH.addBC( "S", 3, Essential, Full, u_dirichlet, 3 );
+    bcH.addBC( "S", 4, Essential, Full, u_dirichlet, 3 );
+    bcH.addBC( "S", 6, Essential, Full, u_dirichlet, 3 );
+    bcH.addBC( "S", 2, Natural,   Full, u_neumann,   3 );
     bcH.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
     
     //////////////////////////

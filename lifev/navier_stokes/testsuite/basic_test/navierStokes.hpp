@@ -637,7 +637,7 @@ NavierStokes<MeshType, Problem>::run()
             // Building the mesh from the source
             if(M_meshSource == RegularMesh) 
             {
-                    regularMesh3D( *fullMeshPtr, 1, mElem, mElem, mElem, false, 1.0, 1.0, 1.0, -1.0,  -1.0,  -1.0);
+                    regularMesh3D( *fullMeshPtr, 2, mElem, mElem, mElem, false, 1.0, 1.0, 1.0, -1.0,  -1.0,  -1.0);
 
                     if (verbose) std::cout << "Mesh source: regular mesh("
                                            << mElem << "x" << mElem << "x" << mElem << ")" << std::endl;
@@ -661,14 +661,15 @@ NavierStokes<MeshType, Problem>::run()
             }
             
             if (verbose)
-            {
                 std::cout << "Partitioning the mesh ... " << std::flush;
-            }
+            
+            
             boost::shared_ptr<mesh_Type > localMeshPtr;
-            {
-                MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, M_data->comm);
-                localMeshPtr = meshPart.meshPartition();
-            }
+        
+            MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, M_data->comm);
+            localMeshPtr = meshPart.meshPartition();
+            
+            
             fullMeshPtr.reset(); //Freeing the global mesh to save memory
 
             // +-----------------------------------------------+

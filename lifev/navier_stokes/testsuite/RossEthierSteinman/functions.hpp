@@ -150,7 +150,7 @@ namespace LifeV
         // Caution: accordingly to what is done in the driver navier_stokes.hpp, here I assume that the normal of the Neumann face
         //          is the one whose outward normal unit vector is n = [ 0; 0; 1 ].
         
-        Real n[3] = {0.0, 0.0, -1.0};
+        Real n[3] = {0.0, -1.0, 0.0};
         
         Real out = 0.0;
         

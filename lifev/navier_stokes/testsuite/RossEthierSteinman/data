@@ -28,10 +28,10 @@
         
     [../space_discretization]
         mesh_dir          = ./
-        mesh_file         = n16.mesh
+        mesh_file         = n8.mesh
         mesh_type         = .mesh
 
-        vel_order         = P1Bubble
+        vel_order         = P2
         pres_order        = P1
         stiff_strain      = false
     

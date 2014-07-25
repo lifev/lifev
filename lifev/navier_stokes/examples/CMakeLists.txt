@@ -10,5 +10,6 @@ ADD_SUBDIRECTORIES(
   externalFluidFlow
   oseen_assembler
   resistanceBCs
+  externalFluidFlow4cyls
 )
 
