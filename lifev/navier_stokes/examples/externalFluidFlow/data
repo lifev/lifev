@@ -36,13 +36,13 @@ mesh_source            = regular_mesh
     [../time_discretization]
     initialtime     = 0.0
     endtime         = 14.945
-    timestep        = 0.01
+    timestep        = 0.0025
 
     BDF_order       = 2 
 
     [../space_discretization]
     mesh_dir        = ./
-    mesh_file       = flow_square_coarse.mesh
+    mesh_file       = cylinder_new_longer.mesh
     mesh_type       = .mesh
 
     verbose         = 0

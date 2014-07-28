@@ -322,7 +322,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::setUp ( const G
     		M_supgStabilization->setTimeStep(M_oseenData->dataTime()->timeStep());
 
     	}
-    	else if (M_oseenData->stabilizationType() == "SUPG")
+    	else if (M_oseenData->stabilizationType() == "SUPGVMS")
     	{
     		int vel_order = dataFile ( "fluid/space_discretization/vel_order", 1 );
     		M_supgVmsStabilization->setConstant ( vel_order );
