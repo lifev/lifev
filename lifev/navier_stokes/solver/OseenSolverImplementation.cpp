@@ -432,7 +432,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::buildSystem()
 		{
 			integrate(
 					elements(M_fespaceUETA->mesh()),
-					quadRuleTetra64pt,
+					M_velocityFESpace.qr(),
 					M_fespaceUETA,
 					M_fespaceUETA,
 					M_oseenData->density() * dot(phi_i, phi_j)
@@ -449,7 +449,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::buildSystem()
         {
             integrate(
                     elements(M_fespaceUETA->mesh()),
-                    quadRuleTetra64pt,
+                    M_velocityFESpace.qr(),
                     M_fespaceUETA,
                     M_fespaceUETA,
                     M_oseenData->viscosity() * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) )
@@ -459,7 +459,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::buildSystem()
         {
             integrate(
                     elements(M_fespaceUETA->mesh()),
-                    quadRuleTetra64pt,
+                    M_velocityFESpace.qr(),
                     M_fespaceUETA,
                     M_fespaceUETA,
                     M_oseenData->viscosity() * dot( grad(phi_i) , grad(phi_j) + transpose(grad(phi_j)) )
@@ -469,7 +469,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::buildSystem()
 
 		integrate(
 				elements(M_fespaceUETA->mesh()),
-				quadRuleTetra64pt,
+				M_velocityFESpace.qr(),
 				M_fespaceUETA,
 				M_fespacePETA,
 				value(-1.0) * phi_j * div(phi_i)
@@ -477,7 +477,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::buildSystem()
 
 		integrate(
 				elements(M_fespaceUETA->mesh()),
-				quadRuleTetra64pt,
+				M_pressureFESpace.qr(),
 				M_fespacePETA,
 				M_fespaceUETA,
 				phi_i * div(phi_j)
@@ -581,7 +581,7 @@ updateSystem ( const Real          alphaOverTimestep,
             using namespace ExpressionAssembly;
             integrate(
                         elements(M_fespaceUETA->mesh()), // Mesh
-                        quadRuleTetra64pt,               // Quadrature rule
+                        M_velocityFESpace.qr(),               // Quadrature rule
                         M_fespaceUETA,
                         M_fespaceUETA,
                         dot( M_oseenData->density() * value(M_fespaceUETA, u_starRepeated)*grad(phi_j), phi_i) // semi-implicit treatment of the convective term

@@ -56,7 +56,7 @@ mesh_source            = regular_mesh
     
 	[../stabilization]
 	use             = true
-	method          = SUPGVMS	  # other possible choices: IP, SUPG, VMSLES, SUPGVMS
+	method          = SUPG	  # other possible choices: IP, SUPG, VMSLES, SUPGVMS
 
     [../miscellaneous]
     verbose         = 1
@@ -66,17 +66,6 @@ mesh_source            = regular_mesh
     prectype                = ML # Ifpack or ML
     displayList             = true
     
-    [../solver]
-    solver          = gmres
-    scaling         = none
-    output          = all # none
-    conv            = rhs
-    max_iter        = 1800
-    reuse           = true
-    max_iter_reuse  = 80
-    kspace          = 100
-    tol             = 1e-8    # AztecOO tolerance
-
         [./ML]
 
         default_parameter_list  = NSSA  # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
@@ -113,6 +102,7 @@ mesh_source            = regular_mesh
             enable                  = true
             partitioner             = ParMETIS    
 
+
         # ifpack
         [../ifpack]
         overlap     = 2
@@ -135,6 +125,17 @@ mesh_source            = regular_mesh
             [../]
         [../]
 
+	[../solver]
+    solver          = gmres
+    scaling         = none
+    output          = all # none
+    conv            = rhs
+    max_iter        = 1800
+    reuse           = true
+    max_iter_reuse  = 80
+    kspace          = 100
+    tol             = 1e-8    # AztecOO tolerance
+    
     [../ipstab]
     gammaBeta  = 0.7
     gammaDiv   = 0.7
