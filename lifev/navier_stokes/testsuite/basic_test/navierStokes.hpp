@@ -641,6 +641,10 @@ NavierStokes<MeshType, Problem>::run()
 
                     if (verbose) std::cout << "Mesh source: regular mesh("
                                            << mElem << "x" << mElem << "x" << mElem << ")" << std::endl;
+                
+                if (verbose){
+                        std::cout << "\n[Mesh size max : " << MeshUtility::MeshStatistics::computeSize ( *fullMeshPtr ).maxH << " ]\n";
+                }
             }
             else if(M_meshSource == File)
             {

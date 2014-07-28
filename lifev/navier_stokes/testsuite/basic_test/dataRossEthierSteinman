@@ -11,12 +11,12 @@ start      = 0
 save       = 1
 
 [NavierStokes]
-initialization         = projection #projection   # initialization (L2 projection) or interpolation
+initialization         = interpolation #projection   # initialization (L2 projection) or interpolation
 export_norms           = true
 export_exact_solutions = true
-test                   = accuracy
+test                   = space_convergence
 accuracy_tolerance     = 0.09
-mesh_source            = file
+mesh_source            = regular_mesh
 
 [fluid]
 
@@ -25,10 +25,11 @@ mesh_source            = file
     [./physics]
     density         = 1.0          # density
     viscosity       = 0.01          # viscosity
+    flag_strain     = 1
 
     [../time_discretization]
     initialtime     = 0.0
-    endtime         = 0.0001
+    endtime         = 0.0002
     timestep        = 0.00001
 
     BDF_order       = 1
@@ -37,32 +38,36 @@ mesh_source            = file
     mesh_dir        = ./
     mesh_file       = cube4x4.mesh
     mesh_type       = .mesh
-    mesh_size       = 16
+    mesh_size       = 6 
 
     verbose         = 0
     linearized      = 0
-    diagonalize     = 1 # weight, 0=off
+    diagonalize     = 0 # weight, 0=off
     div_beta_u_v    = 0 # 1=on, 0=off
     FE_number       = 1
-    vel_order       = P2
+    vel_order       = P1
     press_order     = P1
-    stiff_strain    = true
+    stiff_strain    = false
     
 	[../stabilization]
-	use             = false
-	method          = VMS	  # other possible choices: IP, VMS
+	use             = true
+	method          = SUPG	  # other possible choices: IP, VMS
 
     [../miscellaneous]
     verbose         = 1
     steady          = 0
 
     [../prec]
-    prectype                = ML # Ifpack or ML
+    prectype                = ML  # Ifpack or ML
     displayList             = false
 
         [./ML]
-        analyze_smoother        = false
-        default_parameter_list  = DD-ML    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+        default_parameter_list  = NSSA  # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+        inc_or_dec              = increasing
+	    max_levels              = 3
+        MLOutput                = 10
+        pde_equations           = 4
+        cycle_applications      = 3
 
             [./smoother]
             # smoother type
@@ -71,28 +76,26 @@ mesh_source            = file
             # Amesos-Superlu, Amesos-UMFPACK, Amesos-Superludist, Amesos-MUMPS,
             # user-defined, SuperLU, IFPACK-Chebyshev, self, do-nothing,
             # IC, ICT, ILU, ILUT
-            type                    = IFPACK
-            pre_or_post             = pre
-            sweeps                  = 3
-            damping_factor          = 1
+            type            = Gauss-Seidel
+            pre_or_post     = both
+            sweeps          = 3
 
             [../coarse]
-            #type                   = Amesos-UMFPACK
             type                    = Amesos-KLU
             sweeps                  = 1
             pre_or_post             = both
-            max_size                = 200
-
-            [../repartition]
-            enable                  = 1
-            partitioner             = ParMETIS
-            max_min_ration          = 1.3
-            min_per_proc            = 500
-
+ 
+	    [../aggregation]
+            threshold               = 0.01
+            type                    = Uncoupled-MIS      
+      
             [../energy_minimization]
-            enable          = true
-            type            = 3
-            [../]
+            enable                  = true
+
+	    [../repartition]
+            enable                  = true
+            partitioner             = ParMETIS 
+        [../]
 
         # ifpack
         [../ifpack]
