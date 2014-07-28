@@ -56,7 +56,7 @@ mesh_source            = regular_mesh
     
 	[../stabilization]
 	use             = true
-	method          = SUPG	  # other possible choices: IP, SUPG, VMSLES
+	method          = SUPGVMS	  # other possible choices: IP, SUPG, VMSLES, SUPGVMS
 
     [../miscellaneous]
     verbose         = 1

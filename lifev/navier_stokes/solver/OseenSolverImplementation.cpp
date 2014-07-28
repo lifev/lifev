@@ -124,6 +124,7 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
       M_fespaceUETA            ( new ETFESpace_velocity(M_velocityFESpace.mesh(), &(M_velocityFESpace.refFE()), communicator)),
       M_fespacePETA            ( new ETFESpace_pressure(M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator)),
       M_supgStabilization      (new StabilizationSUPG<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace)),
+      M_supgVmsStabilization   (new StabilizationSUPGVMS<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace)),
       M_VMSLESStabilization    (new StabilizationVMSLES<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace))
 {
     *M_solution *= 0;
@@ -188,6 +189,7 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
       M_fespaceUETA            ( new ETFESpace_velocity(M_velocityFESpace.mesh(), &(M_velocityFESpace.refFE()), communicator)),
       M_fespacePETA            ( new ETFESpace_pressure(M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator)),
       M_supgStabilization      (new StabilizationSUPG<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace)),
+      M_supgVmsStabilization   (new StabilizationSUPGVMS<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace)),
       M_VMSLESStabilization    (new StabilizationVMSLES<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace))
 {
     ASSERT(0!=0,"ENTERING IN THE MONOLITHIC CONSTRUCTOR");
@@ -251,6 +253,7 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
       M_fespaceUETA            ( new ETFESpace_velocity(M_velocityFESpace.mesh(), &(M_velocityFESpace.refFE()), communicator)),
       M_fespacePETA            ( new ETFESpace_pressure(M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator)),
       M_supgStabilization      (new StabilizationSUPG<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace)),
+      M_supgVmsStabilization   (new StabilizationSUPGVMS<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace)),
       M_VMSLESStabilization    (new StabilizationVMSLES<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace))
 {
     *M_solution *= 0;
@@ -317,6 +320,18 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::setUp ( const G
     		M_supgStabilization->setDensity(M_oseenData->density());
     		M_supgStabilization->setViscosity(M_oseenData->viscosity());
     		M_supgStabilization->setTimeStep(M_oseenData->dataTime()->timeStep());
+
+    	}
+    	else if (M_oseenData->stabilizationType() == "SUPG")
+    	{
+    		int vel_order = dataFile ( "fluid/space_discretization/vel_order", 1 );
+    		M_supgVmsStabilization->setConstant ( vel_order );
+    		M_supgVmsStabilization->setETvelocitySpace(M_fespaceUETA);
+    		M_supgVmsStabilization->setETpressureSpace(M_fespacePETA);
+    		M_supgVmsStabilization->setCommunicator(M_velocityFESpace.map().commPtr());
+    		M_supgVmsStabilization->setDensity(M_oseenData->density());
+    		M_supgVmsStabilization->setViscosity(M_oseenData->viscosity());
+    		M_supgVmsStabilization->setTimeStep(M_oseenData->dataTime()->timeStep());
 
     	}
         else if (M_oseenData->stabilizationType() == "VMSLES")
@@ -653,6 +668,29 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabiliz
 			M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
 
 		}
+		else if(M_oseenData->stabilizationType() == "SUPGVMS")
+		{
+
+			M_Displayer.leaderPrint ( "  F-  Updating the SUPG-VMS stabilization terms ... " );
+			chrono.start();
+
+			// TIpically here alpha is already divided by the timestep, but I want to use the actual alfa, so I multiply
+			Real alfa = alpha*M_oseenData->dataTime()->timeStep();
+			M_matrixStabilizationET.reset( new matrix_block_Type ( M_fespaceUETA->map() | M_fespacePETA->map() | M_fluxMap ) );
+			*M_matrixStabilizationET *= 0;
+			M_supgVmsStabilization->applySUPGVMS_Matrix_semi_implicit(M_matrixStabilizationET, u_star, alpha);
+			M_matrixStabilization.reset ( new matrix_Type ( M_localMap ) );
+			*M_matrixStabilization += *M_matrixStabilizationET;
+			M_matrixStabilization->globalAssemble();
+
+			M_rhsStabilization.reset(new vector_block_Type( M_velocityFESpace.map() | M_pressureFESpace.map() | M_fluxMap ));
+			*M_rhsStabilization *= 0;
+			M_supgVmsStabilization->applySUPGVMS_RHS_semi_implicit(M_rhsStabilization, u_star, *M_velocityRhs);
+
+			chrono.stop();
+			M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
+
+		}
         else if(M_oseenData->stabilizationType() == "VMSLES")
 		{
             
@@ -728,6 +766,31 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabiliz
 			M_rhsStabilization.reset(new vector_block_Type( M_velocityFESpace.map() | M_pressureFESpace.map() | M_fluxMap ));
 			*M_rhsStabilization *= 0;
 			M_supgStabilization->applySUPG_RHS_semi_implicit(M_rhsStabilization, u_star, *M_velocityRhs);
+
+			chrono.stop();
+			M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
+
+		}
+		else if(M_oseenData->stabilizationType() == "SUPGVMS")
+		{
+
+			M_Displayer.leaderPrint ( "  F-  Updating the SUPG-VMS stabilization terms ... " );
+			chrono.start();
+
+			// TIpically here alpha is already divided by the timestep, but I want to use the actual alfa, so I multiply
+			Real alfa = alpha*M_oseenData->dataTime()->timeStep();
+			M_matrixStabilizationET.reset( new matrix_block_Type ( M_fespaceUETA->map() | M_fespacePETA->map() | M_fluxMap ) );
+			*M_matrixStabilizationET *= 0;
+			M_supgVmsStabilization->applySUPGVMS_Matrix_semi_implicit(M_matrixStabilizationET, u_star, alpha);
+
+			M_matrixStabilization.reset ( new matrix_Type ( M_localMap ) );
+			*M_matrixStabilization += *M_matrixStabilizationET;
+			M_matrixStabilization->globalAssemble();
+
+			// comment because if steady simulation this is not needed
+			M_rhsStabilization.reset(new vector_block_Type( M_velocityFESpace.map() | M_pressureFESpace.map() | M_fluxMap ));
+			*M_rhsStabilization *= 0;
+			M_supgVmsStabilization->applySUPGVMS_RHS_semi_implicit(M_rhsStabilization, u_star, *M_velocityRhs);
 
 			chrono.stop();
 			M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
@@ -838,7 +901,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::iterate ( bcHan
 
     if(M_stabilization)
     {
-        if(M_oseenData->stabilizationType() == "SUPG" || M_oseenData->stabilizationType() == "VMSLES" )
+        if(M_oseenData->stabilizationType() == "SUPG" || M_oseenData->stabilizationType() == "SUPGVMS" || M_oseenData->stabilizationType() == "VMSLES" )
         {
             rightHandSideFull += *M_rhsStabilization;
         }
@@ -856,9 +919,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::iterate ( bcHan
     applyBoundaryConditions ( *matrixFull, rightHandSideFull, bcHandler );
 
     matrixFull->globalAssemble();
-    
-    matrixFull->spy("matriceP2P1");
-    
+
     chrono.stop();
 
     M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );

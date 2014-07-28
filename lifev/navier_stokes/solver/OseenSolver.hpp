@@ -80,6 +80,7 @@
 #include <lifev/navier_stokes/testsuite/basic_test/pExactFunctor.hpp>
 
 #include <lifev/navier_stokes/solver/StabilizationSUPG.hpp>
+#include <lifev/navier_stokes/solver/StabilizationSUPGVMS.hpp>
 #include <lifev/navier_stokes/solver/StabilizationVMSLES.hpp>
 
 #include <list>
@@ -964,6 +965,9 @@ protected:
     // SUPG stabilization
     boost::shared_ptr<StabilizationSUPG<mesh_Type, map_Type, SpaceDim > > M_supgStabilization;
     
+    // SUPGVMS stabilization
+    boost::shared_ptr<StabilizationSUPGVMS<mesh_Type, map_Type, SpaceDim > > M_supgVmsStabilization;
+
     // VMSLES stabilization
     boost::shared_ptr<StabilizationVMSLES<mesh_Type, map_Type, SpaceDim > > M_VMSLESStabilization;
 
