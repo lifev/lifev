@@ -16,6 +16,6 @@ ADD_SUBDIRECTORIES(
   oseen_assembler
   resistanceBCs
   computeWSS
-  computeAeroCoeff
+  #computeAeroCoeff
 )
 ENDIF()
