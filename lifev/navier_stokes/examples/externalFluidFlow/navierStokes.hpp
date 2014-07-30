@@ -436,12 +436,20 @@ NavierStokes::run()
     
     oseenData->dataTime()->setTime (t0);
     
-    std::vector<vectorPtr_Type> solutionStencil;
-    solutionStencil.resize ( bdf.bdfVelocity().size() );
+    std::vector<vectorPtr_Type> solutionStencilVelocity;
+    solutionStencilVelocity.resize ( bdf.bdfVelocity().size() );
     for ( UInt i(0); i < bdf.bdfVelocity().size() ; ++i)
-        solutionStencil[ i ] = fluid.solution();
-    
-    bdf.bdfVelocity().setInitialCondition (solutionStencil);
+    	solutionStencilVelocity[ i ] = fluid.solution();
+
+    std::vector<vectorPtr_Type> solutionStencilPressure;
+    vectorPtr_Type pressure ( new vector_Type(pFESpace->map() ) );
+    *pressure *= 0;
+    solutionStencilPressure.resize ( bdf.bdfPressure().size() );
+    for ( UInt i(0); i < bdf.bdfPressure().size() ; ++i)
+    	solutionStencilPressure[ i ] = pressure;
+
+    bdf.bdfVelocity().setInitialCondition (solutionStencilVelocity);
+    bdf.bdfPressure().setInitialCondition (solutionStencilPressure);
     
     boost::shared_ptr< Exporter<mesh_Type > > exporter;
     
@@ -519,18 +527,25 @@ NavierStokes::run()
         
         bdf.bdfVelocity().extrapolation (beta); // Extrapolation for the convective term
         
+        *pressure *= 0;
+        bdf.bdfPressure().extrapolation (*pressure); // Extrapolation for the LES terms
+        pressure->spy("pressureExtrapolated");
+
+
         bdf.bdfVelocity().updateRHSContribution ( oseenData->dataTime()->timeStep() );
         
+        bdf.bdfPressure().updateRHSContribution ( oseenData->dataTime()->timeStep() );
+
+
         fluid.setVelocityRhs(bdf.bdfVelocity().rhsContributionFirstDerivative());
         
-        //if (oseenData->conservativeFormulation() )
-            rhs  = fluid.matrixMass() * bdf.bdfVelocity().rhsContributionFirstDerivative();
+        fluid.setPressureExtrapolated(*pressure);
+        
+        
+        rhs  = fluid.matrixMass() * bdf.bdfVelocity().rhsContributionFirstDerivative();
         
         fluid.updateSystem ( alpha, beta, rhs );
-        
-        //if (!oseenData->conservativeFormulation() )
-        //    rhs  = fluid.matrixMass() * bdf.bdfVelocity().rhsContributionFirstDerivative();
-        
+
         fluid.iterate ( bcH );
         
         Real velInfty = (1 * 22 * time/0.15 * (time < 0.15) + 1 * 22 * (time >= 0.15));
@@ -544,7 +559,11 @@ NavierStokes::run()
             << AerodynamicCoefficients[1] << "\n" << std::flush;
         }
         
+        vector_Type computedPressure(pFESpace->map());
+        computedPressure.subset(*fluid.solution(), pressureOffset );
+
         bdf.bdfVelocity().shiftRight ( *fluid.solution() );
+        bdf.bdfPressure().shiftRight ( computedPressure );
         
         // Exporting the solution
         *velAndPressure = *fluid.solution();
