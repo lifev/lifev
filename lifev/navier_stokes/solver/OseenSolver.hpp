@@ -586,6 +586,17 @@ public:
     	*M_velocityRhs += velocityRHS;
     }
 
+    //! Set the velocity to be used by the stabilizations
+    /*!
+       	@param velocityRHS
+     */
+    void setPressureExtrapolated( const vector_Type& pressureExtrapolated )
+    {
+    	M_pressureExtrapolated.reset(new vector_Type(pressureExtrapolated.map(), Repeated));
+    	*M_pressureExtrapolated *= 0;
+    	*M_pressureExtrapolated += pressureExtrapolated;
+    }
+
     //! Set
     /*!
      @param recomputeMatrix
@@ -924,8 +935,11 @@ protected:
     vectorPtr_Type                 M_velocityRhs;
 
     vectorPtr_Type                 M_velocityPreviousTimestep;
+
     vectorPtr_Type                 M_pressurePreviousTimestep;
     
+    vectorPtr_Type 				   M_pressureExtrapolated;
+
     //! Linear solver
     linearSolverPtr_Type           M_linearSolver;
 

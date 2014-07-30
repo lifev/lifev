@@ -121,6 +121,7 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
 	  M_un                     ( new vector_Type (M_localMap) ),
       M_velocityPreviousTimestep (new vector_Type (M_velocityFESpace.map()) ),
       M_pressurePreviousTimestep (new vector_Type (M_pressureFESpace.map()) ),
+      M_pressureExtrapolated   ( new vector_Type (M_pressureFESpace.map() ) ),
       M_fespaceUETA            ( new ETFESpace_velocity(M_velocityFESpace.mesh(), &(M_velocityFESpace.refFE()), communicator)),
       M_fespacePETA            ( new ETFESpace_pressure(M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator)),
       M_supgStabilization      (new StabilizationSUPG<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace)),
@@ -186,6 +187,7 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
 	  M_un                     ( /*new vector_Type(M_localMap)*/ ),
       M_velocityPreviousTimestep (new vector_Type (M_velocityFESpace.map()) ),
       M_pressurePreviousTimestep (new vector_Type (M_pressureFESpace.map()) ),
+      M_pressureExtrapolated   ( new vector_Type (M_pressureFESpace.map() ) ),
       M_fespaceUETA            ( new ETFESpace_velocity(M_velocityFESpace.mesh(), &(M_velocityFESpace.refFE()), communicator)),
       M_fespacePETA            ( new ETFESpace_pressure(M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator)),
       M_supgStabilization      (new StabilizationSUPG<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace)),
@@ -250,6 +252,7 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
 	  M_un                     ( new vector_Type (M_localMap) ),
       M_velocityPreviousTimestep (new vector_Type (M_velocityFESpace.map()) ),
       M_pressurePreviousTimestep (new vector_Type (M_pressureFESpace.map()) ),
+      M_pressureExtrapolated   ( new vector_Type (M_pressureFESpace.map() ) ),
       M_fespaceUETA            ( new ETFESpace_velocity(M_velocityFESpace.mesh(), &(M_velocityFESpace.refFE()), communicator)),
       M_fespacePETA            ( new ETFESpace_pressure(M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator)),
       M_supgStabilization      (new StabilizationSUPG<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace)),
@@ -704,8 +707,8 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabiliz
 			M_VMSLESStabilization->applyVMSLES_Matrix_semi_implicit(M_matrixStabilizationET,
                                                                     u_star,
                                                                     alpha,
-                                                                    *M_velocityPreviousTimestep,
-                                                                    *M_pressurePreviousTimestep);
+                                                                    *M_pressureExtrapolated,
+                                                                    *M_velocityRhs);
             
 			M_matrixStabilization.reset ( new matrix_Type ( M_localMap ) );
 			*M_matrixStabilization += *M_matrixStabilizationET;
@@ -717,8 +720,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabiliz
                                                                  u_star,
                                                                  *M_velocityRhs,
                                                                  alpha,
-                                                                 *M_velocityPreviousTimestep,
-                                                                 *M_pressurePreviousTimestep);
+                                                                 *M_pressureExtrapolated);
             
 			chrono.stop();
 			M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
@@ -807,10 +809,10 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabiliz
 			M_matrixStabilizationET.reset( new matrix_block_Type ( M_fespaceUETA->map() | M_fespacePETA->map() | M_fluxMap ) );
 			*M_matrixStabilizationET *= 0;
 			M_VMSLESStabilization->applyVMSLES_Matrix_semi_implicit(M_matrixStabilizationET,
-                                                                    u_star,
-                                                                    alpha,
-                                                                    *M_velocityPreviousTimestep,
-                                                                    *M_pressurePreviousTimestep);
+                    												u_star,
+                    												alpha,
+                    												*M_pressureExtrapolated,
+                    												*M_velocityRhs);
             
 			M_matrixStabilization.reset ( new matrix_Type ( M_localMap ) );
 			*M_matrixStabilization += *M_matrixStabilizationET;
@@ -819,12 +821,11 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabiliz
 			// comment because if steady simulation this is not needed
 			M_rhsStabilization.reset(new vector_block_Type( M_velocityFESpace.map() | M_pressureFESpace.map() | M_fluxMap ));
 			*M_rhsStabilization *= 0;
-			M_VMSLESStabilization->applyVMSLES_RHS_semi_implicit(M_rhsStabilization,
-                                                                 u_star,
-                                                                 *M_velocityRhs,
-                                                                 alpha,
-                                                                 *M_velocityPreviousTimestep,
-                                                                 *M_pressurePreviousTimestep);
+			M_VMSLESStabilization->applyVMSLES_RHS_semi_implicit( M_rhsStabilization,
+                    											  u_star,
+                    											  *M_velocityRhs,
+                    											  alpha,
+                    											  *M_pressureExtrapolated );
             
 			chrono.stop();
 			M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
