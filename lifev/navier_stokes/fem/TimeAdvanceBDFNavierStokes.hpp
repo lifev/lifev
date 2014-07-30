@@ -155,7 +155,7 @@ void
 TimeAdvanceBDFNavierStokes<VectorType>::setup ( const UInt order )
 {
     M_bdfVelocity.setup ( order, 1 );
-    M_bdfPressure.setup ( std::max ( UInt ( 1 ), order - 1 ), 1 );
+    M_bdfPressure.setup ( order, 1 );
 }
 
 // ===================================================
