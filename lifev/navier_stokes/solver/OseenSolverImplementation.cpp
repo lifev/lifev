@@ -873,9 +873,6 @@ void OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::updateSour
     M_rightHandSideNoBC += rhs;
 }
 
-
-
-
 template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
 OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::iterate ( bcHandler_Type& bcHandler )

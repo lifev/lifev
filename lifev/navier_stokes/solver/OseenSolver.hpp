@@ -312,6 +312,26 @@ public:
     //! Set up post processing
     void setupPostProc( );
 
+    //! Get the fluid matrix and the fluid right hand side. Called by the FSIMonolithic class when assembling the fluid block
+    void getMatrixAndRhs( matrixPtr_Type& matrixFull, vectorPtr_Type& rhsFull)
+    {
+    	// Matrix
+    	matrixFull.reset( new matrix_Type ( M_velocityFESpace.map() + M_pressureFESpace.map() + M_fluxMap ) );
+    	updateStabilization ( *matrixFull );
+    	getFluidMatrix ( *matrixFull );
+    	matrixFull->globalAssemble();
+
+    	// Right hand side
+    	rhsFull.reset( new vector_Type (*M_rightHandSideNoBC) );
+    	if(M_stabilization)
+    	{
+    		if(M_oseenData->stabilizationType() == "SUPG" || M_oseenData->stabilizationType() == "SUPGVMS" || M_oseenData->stabilizationType() == "VMSLES" )
+    		{
+    			*rhsFull += *M_rhsStabilization;
+    		}
+    	}
+    }
+
     //! Compute area on a boundary face with given flag
     /*!
         @param  flag
