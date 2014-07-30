@@ -234,10 +234,16 @@ FSISolver::setData ( const dataPtr_Type& data )
 void
 FSISolver::setup ( void )
 {
+	// Calling the method in the FSIMonolithicGE or FSIMonolithicGI classes
+	// Here the constructor for the fluid and structure objects are introduced
     M_oper->setupFluidSolid();
 
+    // Calling the method in the FSIMonolithicGE or FSIMonolithicGI classes
+    // Here the method setUp for the fluid is called and also the parameters of the solver are set
+    // Here the HarmonicExtension is setup and the matrix is built
     M_oper->setupSystem();
 
+    // Calling the method in the FSIMonolithic class that build the constant terms for the structure
     M_oper->buildSystem();
 }
 
@@ -353,15 +359,14 @@ FSISolver::iterate ( vectorPtr_Type& solution )
     debugStream ( 6220 ) << "Solving FSI at time " << M_data->dataFluid()->dataTime()->time() << " with FSI: " << M_data->method()  << "\n";
     debugStream ( 6220 ) << "============================================================\n";
 
-    // Update the system
+    // Update the system, call the method of the class FSIMonolithic that multiplies by zero the rhs and reset the stabilization of the fluid
     M_oper->updateSystem( );
 
     // The initial guess for the Newton method is received from outside.
     // For instance, it can be the solution at the previous time or an extrapolation
     vector_Type lambda ( *solution );
 
-
-    // the newton solver
+    // the newton solver. Calling the evalResidual and solveJac methods of the FSIMonolithicGE or FSIMonolithicGI classes
     UInt maxiter = M_data->maxSubIterationNumber();
     UInt status = NonLinearRichardson ( lambda,
                                         *M_oper,

@@ -80,8 +80,8 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension (FSIOperator& _oper)
 
     FSISolver::fluidBchandlerPtr_Type BCh_he (new FSIOperator::fluidBchandler_Type );
 
-    BCh_he->addBC ("Edges", INOUTEDGE, Essential, Full, bcf,   3);
-    BCh_he->addBC ("Edges", INEDGE, Essential, Full, bcf,   3);
+    BCh_he->addBC ("Edges", INOUTEDGE, EssentialEdges, Full, bcf,   3);
+    BCh_he->addBC ("Edges", INEDGE,    Essential, Full, bcf,   3);
     BCh_he->addBC ("Base",  INLET,     Essential, Full, bcf,   3);
 
     if (_oper.data().method() == "monolithicGE")
@@ -89,7 +89,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension (FSIOperator& _oper)
         debugStream (10000) << "FSIMonolithic GCE harmonic extension\n";
         FSIMonolithicGE* MOper = dynamic_cast<FSIMonolithicGE*> (&_oper);
         MOper->setStructureDispToHarmonicExtension (_oper.lambdaFluidRepeated() );
-        BCh_he->addBC ("Interface", SOLIDINTERFACE, Essential, Full,
+        BCh_he->addBC ("Interface", SOLIDINTERFACE, EssentialVertices, Full,
                        *MOper->bcvStructureDispToHarmonicExtension(), 3);
     }
     else if (_oper.data().method() == "monolithicGI")
@@ -106,15 +106,8 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFlux (bool /*isOpen=true*/)
     FSIOperator::fluidBchandlerPtr_Type BCh_fluid ( new FSIOperator::fluidBchandler_Type );
 
     BCFunctionBase flow_3 (fluxFunction);
+
     BCFunctionBase bcf      (fZero);
-    //uncomment  to use fluxes
-
-    //  BCh_fluid->addBC("InFlow" , INLET,  Flux, Normal, flow_3);
-    //   if(!isOpen)
-    //       BCh_fluid->addBC("InFlow" , INLET,  Flux,   Normal, bcf);
-
-    //uncomment  to use fluxes
-    BCh_fluid->addBC ("InFlow" , INLET,  Flux, Normal, flow_3);
 
     return BCh_fluid;
 }
@@ -131,22 +124,18 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid (FSIOperator& _oper, boo
 
     FSIOperator::fluidBchandlerPtr_Type BCh_fluid ( new FSIOperator::fluidBchandler_Type );
 
-    BCFunctionBase bcf      (fZero);
-    BCFunctionBase in_flow  (/*uInterpolated*/u2normal/*aortaPhisPress*/);
-    //    BCFunctionBase out_flow (fZero);
-    //BCFunctionBase in_flow  (LumpedHeart::outPressure);
+    BCFunctionBase inflowVelocity (parabolicInflow);
 
-    BCFunctionBase out_press (FlowConditions::outPressure0);
-    BCFunctionBase bcfw0 (w0);
+    BCFunctionBase doNothing (fZero);
 
-    if (!isOpen)
-    {
-        BCh_fluid->addBC ("InFlow" , INLET,  Natural, Full, bcf, 3);
-    }
+    // Parabolic (in space) inflow profile, constant in time
+    BCh_fluid->addBC ("InFlow" , INLET,  Essential, Full, inflowVelocity, 3);
 
+    // Parabolic (in space) inflow profile, constant in time
+    BCh_fluid->addBC ("Edges" , INOUTEDGE,  EssentialVertices, Full, doNothing, 3);
 
-    BCh_fluid->addBC ("OutFlow", OUTLET,  Natural,  Normal, out_press);
-    //BCh_fluid->addBC("OutFlow", INOUTEDGE,  EssentialEdges,  Full, bcf,3);
+    // Homogeneous Neumann at the outflow
+    BCh_fluid->addBC ("OutFlow", OUTLET,  Natural,  Normal, doNothing);
 
     return BCh_fluid;
 }
@@ -165,15 +154,9 @@ FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid (FSIOperator& _oper)
 
     BCFunctionBase bcf (fZero);
 
+    // Rings clamped
     BCh_solid->addBC ("Top",   RING, Essential, Full, bcf,  3);
     BCh_solid->addBC ("Base",  RING2, Essential, Full, bcf,  3);
-
-    aortaVelIn::S_timestep = _oper.dataFluid()->dataTime()->timeStep();
-    BCFunctionBase hyd (fZero);
-    BCFunctionBase young (E);
-    //robin condition on the outer wall
-    _oper.setRobinOuterWall (hyd, young);
-    BCh_solid->addBC ("OuterWall", OUTERWALL, Robin, Normal, _oper.bcfRobinOuterWall() );
 
     return BCh_solid;
 }

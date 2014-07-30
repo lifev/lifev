@@ -154,18 +154,21 @@ public:
         std::cout << "register MonolithicGI : " << FSIMonolithicGI::S_register << std::endl;
 
         M_data = dataPtr_Type ( new data_Type() );
+
+        // Read the datafile and fill the FSIData object
         M_data->setup ( data_file );
-        //M_data->dataSolid()->setTimeData( M_data->dataFluid()->dataTime() ); //Same TimeData for fluid & solid
-        //M_data->showMe();
 
         M_fsi = fsi_solver_ptr ( new FSISolver( ) );
         MPI_Barrier ( MPI_COMM_WORLD );
 
+        // Pass the FSIData object to the FSISolver.
         M_fsi->setData ( M_data );
-        M_fsi->FSIOper()->setDataFile ( data_file ); //TO BE REMOVED!
+
+        // Here some data (like the info regarding the time-asdvancing scheme are set in the FSIoperator).
+        // When calling this method the fluid and the structure meshes are loaded
+        M_fsi->FSIOper()->setDataFile ( data_file );
 
         // Setting FESpace and DOF
-
         std::string  fluidMeshPartitioned    =  data_file ( "problem/fluidMeshPartitioned", "none" );
         std::string  solidMeshPartitioned    =  data_file ( "problem/solidMeshPartitioned", "none" );
 #ifdef HAVE_HDF5
@@ -184,8 +187,16 @@ public:
         else
 #endif
         {
+        	// Partitioning the fluid and the structure meshes
             M_fsi->FSIOper( )->partitionMeshes( );
+
+            // Creating the finite element spaces for fluid velocity and pressure, structure displacement and for the ALE
+            // CAUTION: calling also the method setupFEspace of the class FSIMonolithic
             M_fsi->FSIOper( )->setupFEspace( );
+
+            // Here the DOFtoDOF connections at the interface are built. The interface map is created as well
+            // CAUTION: calling the method setupDOF of the class FSIMonolithic
+            // CAUTION: here also the nonpartitioned meshes are deleted
             M_fsi->FSIOper( )->setupDOF( );
         }
 
@@ -196,7 +207,11 @@ public:
 #ifdef DEBUG
         debugStream ( 10000 ) << "Setting up the BC \n";
 #endif
+
+        // Check if there is a flux: if yes a row and a column in the matrix have to be added
         M_fsi->setFluidBC ( BCh_monolithicFlux ( true ) );
+
+        // Loading BCs for the structure
         M_fsi->setSolidBC ( BCh_monolithicSolid ( *M_fsi->FSIOper( ) ) );
 
         M_fsi->setup();
@@ -239,6 +254,7 @@ public:
         // load using ensight/hdf5
         M_saveEvery = data_file ("exporter/saveEvery", 1);
 
+        // Calling the method initializeMonolithicOperator in the class FSIMonolithic that initializes the timeadvance classes
         M_fsi->initializeMonolithicOperator();
 
         M_velAndPressure.reset ( new vector_Type ( M_fsi->FSIOper()->fluid().getMap(), M_exporterFluid->mapType() ) );
@@ -264,10 +280,7 @@ public:
         M_exporterSolid->addVariable ( ExporterData<FSIOperator::mesh_Type>::VectorField, "s-displacement",
                                        M_fsi->FSIOper()->dFESpacePtr(), M_solidDisp, UInt (0) );
 
-        //M_fsi->FSIOper()->fluid().setupPostProc(); //this has to be called if we want to initialize the postProcess
-
         FC0.initParameters ( *M_fsi->FSIOper(), 3);
-        LH.initParameters ( *M_fsi->FSIOper(), "dataHM");
 
         M_data->dataFluid()->dataTime()->setInitialTime ( M_Tstart );
         M_data->dataFluid()->dataTime()->setTime ( M_data->dataFluid()->dataTime()->initialTime() );
@@ -283,48 +296,22 @@ public:
     int
     run()
     {
+        // Timer of the whole temporal loop - without initialization
         boost::timer _overall_timer;
 
+        // Iterations (number of timesteps)
         LifeV::UInt iter = 1;
-        //LifeV::UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->offset();
-
-        dynamic_cast<LifeV::FSIMonolithic*> (M_fsi->FSIOper().get() )->enableStressComputation (1);
-
-        bool valveIsOpen = true;
 
         vectorPtr_Type solution ( new vector_Type ( (*M_fsi->FSIOper()->couplingVariableMap() ) ) );
 
         M_fsi->FSIOper()->extrapolation ( *solution );
 
+
+
         for ( ; M_data->dataFluid()->dataTime()->canAdvance(); M_data->dataFluid()->dataTime()->updateTime(), M_data->dataSolid()->dataTime()->updateTime(), ++iter)
         {
-            //Return value for the testsuite
-            M_returnValue = EXIT_FAILURE;
-
-            LifeV::Real flux = M_fsi->FSIOper()->fluid().flux (2, M_fsi->displacement() );
-            if ( valveIsOpen)
-            {
-                if ( iter == 3 /*flux < -100*/)
-                {
-                    valveIsOpen = false;
-                    M_fsi->setFluidBC (BCh_monolithicFluid (*M_fsi->FSIOper(), valveIsOpen) );
-                    //M_fsi->FSIOper()->BCh_fluid()->substituteBC( (const LifeV::bcFlag_Type) 2, bcf,  LifeV::Essential, LifeV::Full, (const LifeV::UInt) 3);
-                }
-            }
-            // close the valve
-            else
-            {
-                if (false && M_fsi->FSIOper()->fluid().pressure (2, M_fsi->displacement() ) < LifeV::LumpedHeart::M_pressure )
-                {
-                    valveIsOpen = true;
-                    M_fsi->setFluidBC (BCh_monolithicFluid (*M_fsi->FSIOper(), valveIsOpen) );
-                    //M_fsi->FSIOper()->BCh_fluid()->substituteBC( (const LifeV::bcFlag_Type) 2, bcf,  LifeV::Natural, LifeV::Full, 3);
-                }
-            }
-
-            int flag = 2;
-            FC0.renewParameters ( *M_fsi, 3 );
-            LH.renewParameters ( *M_fsi->FSIOper(), flag, M_data->dataFluid()->dataTime()->time(), flux );
+            // int flag = 2;
+            // FC0.renewParameters ( *M_fsi, 3 );
 
             boost::timer _timer;
 
@@ -354,14 +341,14 @@ public:
                       << M_fsi->displacement().norm2() << "\n";
 
             //     ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-            if (!M_data->method().compare ("monolithicGI") )
-            {
-                checkCEResult (M_data->dataFluid()->dataTime()->time() );
-            }
-            else
-            {
-                checkGCEResult (M_data->dataFluid()->dataTime()->time() );
-            }
+//            if (!M_data->method().compare ("monolithicGI") )
+//            {
+//                checkCEResult (M_data->dataFluid()->dataTime()->time() );
+//            }
+//            else
+//            {
+//                checkGCEResult (M_data->dataFluid()->dataTime()->time() );
+//            }
 
         }
 
