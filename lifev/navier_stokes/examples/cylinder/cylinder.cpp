@@ -404,7 +404,7 @@ Cylinder::run()
     //
     GetPot dataFile ( d->data_file_name );
 
-    //    int save = dataFile("fluid/miscellaneous/save", 1);
+    int save = dataFile("fluid/miscellaneous/save", 1);
 
     bool verbose = (d->comm->MyPID() == 0);
 
@@ -614,25 +614,20 @@ Cylinder::run()
 
         fluid.setVelocityRhs(bdf.bdfVelocity().rhsContributionFirstDerivative());
 
-        if (oseenData->conservativeFormulation() )
-            rhs  = fluid.matrixMass() * bdf.bdfVelocity().rhsContributionFirstDerivative();
+        rhs  = fluid.matrixMass() * bdf.bdfVelocity().rhsContributionFirstDerivative();
 
         fluid.updateSystem ( alpha, beta, rhs );
-
-        if (!oseenData->conservativeFormulation() )
-            rhs  = fluid.matrixMass() * bdf.bdfVelocity().rhsContributionFirstDerivative();
 
         fluid.iterate ( bcH );
 
         bdf.bdfVelocity().shiftRight ( *fluid.solution() );
 
-        //         if (((iter % save == 0) || (iter == 1 )))
-        //         {
+        if (((iter % save == 0) || (iter == 1 )))
+        {
         *velAndPressure = *fluid.solution();
         ensight.postProcess ( time );
-        //         }
-        //         postProcessFluxesPressures(fluid, bcH, time, verbose);
-
+        }
+        // postProcessFluxesPressures(fluid, bcH, time, verbose);
 
         MPI_Barrier (MPI_COMM_WORLD);
 

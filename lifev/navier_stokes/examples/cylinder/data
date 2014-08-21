@@ -10,7 +10,7 @@ save       = 1
 
 [fluid]
 
-	conservativeFormulation = true
+	conservativeFormulation = false
     
     [./problem]
     # for  cyl3D.2.2.00.mesh
@@ -29,7 +29,7 @@ save       = 1
     initialtime     = 0.
     endtime         = 0.5
     timestep        = 0.01
-    BDF_order       = 2
+    BDF_order       = 1
 
     [../space_discretization]
     mesh_dir        = ./
