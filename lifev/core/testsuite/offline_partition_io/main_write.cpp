@@ -29,6 +29,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
     @brief Test for PartitionIO class - cut and write
 
     @author Radu Popescu <radu.popescu@epfl.ch>
+    @contributor Davide Forti <davide.forti@epfl.ch>
     @maintainer Radu Popescu <radu.popescu@epfl.ch>
     @date 10-05-2012
 
@@ -53,6 +54,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/mesh/MeshPartitionTool.hpp>
 #include <lifev/core/filter/PartitionIO.hpp>
 #include <lifev/core/mesh/RegionMesh3DStructured.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
 
 using namespace LifeV;
 
@@ -82,28 +84,39 @@ int main (int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    GetPot cl (argc, argv);
-    const UInt numElements = cl.follow (9, "--num-elem");
-    const Int numParts = cl.follow (3, "--num-parts");
-    // partitionerType should be MeshPartitioner, MeshPartitionTool_ParMETIS or
-    // MeshPartitionTool_Zoltan
-    const std::string partitionerType = cl.follow ("MeshPartitioner",
-                                                   "--partitioner-type");
-    std::string partsFile;
-    partsFile.reserve (50);
-    partsFile += "cube_";
-    partsFile += partitionerType;
-    partsFile += ".h5";
+    GetPot command_line (argc, argv);
+    string data_file_name = command_line.follow ("data", 2, "-f", "--file");
+    GetPot dataFile ( data_file_name );
 
-    std::cout << "Number of elements in mesh: " << numElements << std::endl;
-    std::cout << "Number of parts: " << numParts << std::endl;
-    std::cout << "Mesh partitioner type: " << partitionerType << std::endl;
-    std::cout << "Name of HDF5 container: " << partsFile << std::endl;
+    const std::string meshType = dataFile ("mesh_type/type", "regular");
+
+    // partitionerType should be MeshPartitioner, MeshPartitionTool_ParMETIS or MeshPartitionTool_Zoltan
+    const std::string partitionerType = dataFile ("offline_partitioner/partitioner_type", "MeshPartitionTool_ParMETIS");
+    const Int  numParts = dataFile ("offline_partitioner/num_parts", 8);
 
     meshPtr_Type fullMeshPtr (new mesh_Type ( comm ) );
     meshPartsPtr_Type meshPartPtr;
-    regularMesh3D (*fullMeshPtr, 1, numElements, numElements, numElements,
-                   false, 2.0, 2.0, 2.0, -1.0, -1.0, -1.0);
+
+    if ( meshType == "file" )
+    {
+    	MeshData meshData;
+    	meshData.setup(dataFile, "mesh");
+    	readMesh(*fullMeshPtr, meshData);
+    }
+    else if( meshType == "regular" )
+    {
+    	const UInt numElements = dataFile ("regular_mesh/num_elements", 4);
+    	std::cout << "Number of elements in mesh: " << numElements << std::endl;
+    	regularMesh3D (*fullMeshPtr, 1, numElements, numElements, numElements,
+    			        false, 2.0, 2.0, 2.0, -1.0, -1.0, -1.0);
+    }
+    else
+    {
+    	std::cout << "This test needs to be run "
+    	          << "given a mesh of type regular of file. Aborting."
+    	          << std::endl;
+    	return EXIT_FAILURE;
+    }
 
     if (partitionerType == "MeshPartitioner")
     {
@@ -150,6 +163,19 @@ int main (int argc, char** argv)
 
     // delete the RegionMesh object
     fullMeshPtr.reset();
+
+    std::string partsFile;
+    partsFile.reserve (50);
+    partsFile += dataFile ("output_mesh/name", "meshPartitioned");
+    partsFile += "_";
+    partsFile += partitionerType;
+    partsFile += ".h5";
+
+    std::cout << "Number of parts: " << numParts << std::endl;
+    std::cout << "Mesh partitioner type: " << partitionerType << std::endl;
+    std::cout << "Name of HDF5 container: " << partsFile << std::endl;
+
+
 
     // Write mesh parts to HDF5 container
     {
