@@ -1,0 +1,32 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Davide Forti
+#           Date: 22-08-2014
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### DATA FILE #####################################################################################
+###################################################################################################
+
+[mesh_type]
+type = file # regular for the structured 3d cube, file for reading the mesh from file
+
+[regular_mesh]
+num_elements = 9 # number of elements if using the mesh_type = regular option
+
+[mesh]
+mesh_type   = .mesh
+mesh_dir    = ./
+mesh_file   = tube20.mesh
+order       = P1
+
+[offline_partitioner]
+num_parts         = 4 # the whole mesh will be split into num_parts parts
+partitioner_type  = MeshPartitionTool_ParMETIS # other possible choices are: MeshPartitionTool_ParMETIS, MeshPartitionTool_Zoltan
+
+[output_mesh]
+name = tube20_4_
