@@ -3,7 +3,6 @@ INCLUDE(TribitsAddExecutableAndTest)
 INCLUDE(AddSubdirectories)
 
 ADD_SUBDIRECTORIES(
-#  multirate
   adr_assembler
   array
   bdf
@@ -18,12 +17,13 @@ ADD_SUBDIRECTORIES(
   repeated_mesh
   region_marker_id
   template_test
+  veryfy_solution
   vector_container
  )
 
 IF(TPL_ENABLE_HDF5)
     ADD_SUBDIRECTORIES(
-        partition_io
+        offline_partition_io
         )
 ENDIF()
 
