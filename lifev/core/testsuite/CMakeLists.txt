@@ -17,7 +17,7 @@ ADD_SUBDIRECTORIES(
   repeated_mesh
   region_marker_id
   template_test
-  veryfy_solution
+  verify_solution
   vector_container
  )
 
