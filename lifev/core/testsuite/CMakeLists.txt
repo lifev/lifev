@@ -4,7 +4,21 @@ INCLUDE(AddSubdirectories)
 
 ADD_SUBDIRECTORIES(
 #  multirate
-  hyperbolic 
+  adr_assembler
+  array
+  bdf
+  fe_function
+  fem
+  filter
+  hyperbolic
+  linear_solver
+  linear_solver_preconditioner
+  matrix_epetra_structured_framework
+  mesh
+  repeated_mesh
+  region_marker_id
+  template_test
+  vector_container
  )
 
 IF(TPL_ENABLE_HDF5)
