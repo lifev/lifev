@@ -1,0 +1,64 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Name Surname <name.surname@epfl.ch>
+#           Date: 00-00-0000
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### DATA FILE #####################################################################################
+###################################################################################################
+#-------------------------------------------------
+#      Data file for a multirate problem
+#-------------------------------------------------
+
+[exporter]
+    type       = hdf5
+    folder     = ./
+    multimesh  = false   # actually we export also the displacement
+    start      = 0
+    save       = 1
+    file_name  = ConcentrationNew
+[../]
+
+[multirate]
+
+    [./space_discretization]
+        mesh_dir      = ./ # the directory where the mesh file is
+        mesh_file     = square20x20.msh
+        mesh_type     = structured #.msh
+        mesh_faces    = all
+        verbose       = 0                        # verbose during mesh-reading
+        # 0 -> tetra, 1 -> hexa
+        element_shape = 0
+
+        # For structured mesh
+        nx = 128
+        ny = 1
+        lx = 1
+        ly = 0.5
+    [../]
+
+    [./time_discretization]
+        initialtime   = 0.
+        endtime       = 1.
+    [../]
+
+    [./flux]
+        CFL_compute = true
+        CFL_relax = 0.9
+        CFL_frozen = 1
+    [../]
+
+    [./miscellaneous]
+        verbose       = 2
+    [../]
+
+    [../inflow]
+        tol = 1e-10
+    [../]
+
+[../]

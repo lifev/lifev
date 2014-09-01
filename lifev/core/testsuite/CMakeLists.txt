@@ -3,27 +3,13 @@ INCLUDE(TribitsAddExecutableAndTest)
 INCLUDE(AddSubdirectories)
 
 ADD_SUBDIRECTORIES(
-  adr_assembler
-  array
-  bdf
-  fe_function
-  fem
-  filter
-  hyperbolic
-  linear_solver
-  linear_solver_preconditioner
-  matrix_epetra_structured_framework
-  mesh
-  repeated_mesh
-  region_marker_id
-  template_test
-  verify_solution
-  vector_container
-)
+  multirate
+  hyperbolic 
+ )
 
 IF(TPL_ENABLE_HDF5)
     ADD_SUBDIRECTORIES(
-        offline_partition_io
+        partition_io
         )
 ENDIF()
 

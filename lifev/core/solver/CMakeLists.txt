@@ -4,6 +4,7 @@ SET(solver_HEADERS
   solver/ADRAssembler.hpp
   solver/HyperbolicSolver.hpp
   solver/HyperbolicData.hpp
+  solver/MultirateSolver.hpp
 CACHE INTERNAL "")
 
 SET(solver_SOURCES
