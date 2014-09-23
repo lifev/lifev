@@ -389,7 +389,7 @@ private:
 // ==============
 
 template<typename MeshType>
-MapEpetraType const ExporterHDF5<MeshType>::MapType (Repeated);
+MapEpetraType const ExporterVTK<MeshType>::MapType (Repeated);
 
 // ==============
 // Constructors

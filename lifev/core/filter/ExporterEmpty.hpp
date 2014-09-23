@@ -105,7 +105,7 @@ private:
 // ======================
 
 template<typename MeshType>
-MapEpetraType const ExporterHDF5<MeshType>::MapType (Unique);
+MapEpetraType const ExporterEmpty<MeshType>::MapType (Unique);
 
 
 // ======================

@@ -304,7 +304,7 @@ private:
 // ==============
 
 template<typename MeshType>
-MapEpetraType const ExporterHDF5<MeshType>::MapType (Repeated);
+MapEpetraType const ExporterEnsight<MeshType>::MapType (Repeated);
 
 // ==============
 // Constructors
