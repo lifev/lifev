@@ -45,6 +45,9 @@
 #include "../importExport/RossEthierSteinmanDec.hpp"
 #include "../importExport/TestImportExport.hpp"
 
+#include <lifev/core/filter/ExporterVTK.hpp>
+typedef LifeV::ExporterVTK<TestImportExport::mesh_Type> exporter_Type;
+
 using namespace LifeV;
 
 int
@@ -88,7 +91,6 @@ main ( int argc, char** argv )
 
     bool passed (false);
 
-    typedef ExporterVTK<mesh_Type> exporter_Type;
     passed = testImportExport.run<exporter_Type, exporter_Type > ( command_line, "import" );
 
     // ----- End of test calls -----

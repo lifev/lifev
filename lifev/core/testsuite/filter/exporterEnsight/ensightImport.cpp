@@ -44,6 +44,8 @@
 #include <lifev/core/LifeV.hpp>
 #include "../importExport/RossEthierSteinmanDec.hpp"
 #include "../importExport/TestImportExport.hpp"
+#include <lifev/core/filter/ExporterEnsight.hpp>
+typedef LifeV::ExporterEnsight<TestImportExport::mesh_Type> exporter_Type;
 
 using namespace LifeV;
 
@@ -88,7 +90,6 @@ main ( int argc, char** argv )
 
     bool passed (false);
 
-    typedef ExporterEnsight<mesh_Type> exporter_Type;
     passed = testImportExport.run<exporter_Type, exporter_Type > ( command_line, "import" );
 
     // ----- End of test calls -----
