@@ -44,8 +44,7 @@
 #include <lifev/core/util/Displayer.hpp>
 #include <lifev/core/util/LifeChrono.hpp>
 #include <lifev/core/fem/TimeData.hpp>
-#include <lifev/core/filter/ExporterVTK.hpp>
-#include <lifev/core/filter/ExporterEnsight.hpp>
+#include <lifev/core/filter/Exporter.hpp>
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 #include <lifev/navier_stokes/function/Womersley.hpp>
@@ -61,22 +60,22 @@
 #endif
 
 
-// Object type definitions
-typedef LifeV::RegionMesh<LifeV::LinearTetra>         mesh_Type;
-typedef LifeV::RossEthierSteinmanUnsteadyDec          problem_Type;
-typedef LifeV::FESpace< mesh_Type, LifeV::MapEpetra > feSpace_Type;
-typedef boost::shared_ptr<feSpace_Type>               feSpacePtr_Type;
-typedef boost::shared_ptr<Epetra_Comm>                commPtr_Type;
-typedef LifeV::Exporter<mesh_Type >::vectorPtr_Type   vectorPtr_Type;
-typedef boost::function < LifeV::Real ( LifeV::Real const&,
-                                        LifeV::Real const&,
-                                        LifeV::Real const&,
-                                        LifeV::Real const&,
-                                        LifeV::UInt const& ) > function_Type;
-
 class TestImportExport
 {
 public:
+
+  // Object type definitions
+  typedef LifeV::RegionMesh<LifeV::LinearTetra>         mesh_Type;
+  typedef LifeV::RossEthierSteinmanUnsteadyDec          problem_Type;
+  typedef LifeV::FESpace< mesh_Type, LifeV::MapEpetra > feSpace_Type;
+  typedef boost::shared_ptr<feSpace_Type>               feSpacePtr_Type;
+  typedef boost::shared_ptr<Epetra_Comm>                commPtr_Type;
+  typedef LifeV::Exporter<mesh_Type >::vectorPtr_Type   vectorPtr_Type;
+  typedef boost::function < LifeV::Real ( LifeV::Real const&,
+					  LifeV::Real const&,
+					  LifeV::Real const&,
+					  LifeV::Real const&,
+					  LifeV::UInt const& ) > function_Type;
 
     TestImportExport ( const commPtr_Type& commPtr );
 
@@ -324,7 +323,7 @@ TestImportExport::run ( GetPot& commandLine, const std::string& testString )
     for ( UInt iVec (0); iVec < M_vectorImportedPtr.size(); ++iVec )
     {
         M_vectorImportedPtr[iVec].reset (
-            new Exporter<mesh_Type >::vector_Type   ( M_vectorFESpacePtr->map(), Repeated ) );
+            new Exporter<mesh_Type >::vector_Type   ( M_vectorFESpacePtr->map(), ExporterType::MapType ) );
 
         importerPtr->addVariable ( ExporterData<mesh_Type>::VectorField, M_vectorName[iVec],
                                    M_vectorFESpacePtr, M_vectorImportedPtr[iVec], UInt (0),
@@ -334,7 +333,7 @@ TestImportExport::run ( GetPot& commandLine, const std::string& testString )
     for ( UInt iScal (0); iScal < M_scalarImportedPtr.size(); ++iScal )
     {
         M_scalarImportedPtr[iScal].reset (
-            new Exporter<mesh_Type >::vector_Type   ( M_scalarFESpacePtr->map(), Repeated ) );
+            new Exporter<mesh_Type >::vector_Type   ( M_scalarFESpacePtr->map(), ExporterType::MapType ) );
         importerPtr->addVariable ( ExporterData<mesh_Type>::ScalarField, M_scalarName[iScal],
                                    M_scalarFESpacePtr, M_scalarImportedPtr[iScal], UInt (0),
                                    ExporterData<mesh_Type>::UnsteadyRegime,
@@ -388,22 +387,22 @@ TestImportExport::exportLoop ( const boost::shared_ptr< ImporterType >& importer
     for ( UInt iVec (0); iVec < vectorImportedPtrSize; ++iVec )
     {
         M_vectorInterpolantPtr[iVec].reset (
-            new Exporter<mesh_Type >::vector_Type   ( M_vectorFESpacePtr->map(), Repeated ) );
+            new Exporter<mesh_Type >::vector_Type   ( M_vectorFESpacePtr->map(), ExporterType::MapType ) );
         exporterPtr->addVariable ( ExporterData<mesh_Type>::VectorField, M_vectorName[iVec],
                                    M_vectorFESpacePtr, M_vectorInterpolantPtr[iVec], UInt (0) );
     }
     for ( UInt iScal (0); iScal < scalarImportedPtrSize; ++iScal )
     {
         M_scalarInterpolantPtr[iScal].reset (
-            new Exporter<mesh_Type >::vector_Type   ( M_scalarFESpacePtr->map(), Repeated ) );
+            new Exporter<mesh_Type >::vector_Type   ( M_scalarFESpacePtr->map(), ExporterType::MapType ) );
         exporterPtr->addVariable ( ExporterData<mesh_Type>::ScalarField, M_scalarName[iScal],
                                    M_scalarFESpacePtr, M_scalarInterpolantPtr[iScal], UInt (0) );
     }
 
     //exporterPtr->postProcess( 0 );
 
-    Exporter<mesh_Type >::vector_Type vectorDiff ( M_vectorFESpacePtr->map(), Repeated );
-    Exporter<mesh_Type >::vector_Type scalarDiff ( M_scalarFESpacePtr->map(), Repeated );
+    Exporter<mesh_Type >::vector_Type vectorDiff ( M_vectorFESpacePtr->map(), ExporterType::MapType );
+    Exporter<mesh_Type >::vector_Type scalarDiff ( M_scalarFESpacePtr->map(), ExporterType::MapType );
 
     for ( ; M_timeData.canAdvance(); M_timeData.updateTime() )
     {
