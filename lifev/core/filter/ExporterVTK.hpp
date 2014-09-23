@@ -121,6 +121,12 @@ public:
     typedef const typename exporterData_Type::WhereEnum& where_Type;
     //@}
 
+    //! @name Static members
+
+    //! returns the type of the map to use for the VectorEpetra
+    static MapEpetraType const MapType;
+    //@}
+
     //! @name Constructors & Destructor
     //@{
 
@@ -382,6 +388,9 @@ private:
 // Implementation
 // ==============
 
+template<typename MeshType>
+MapEpetraType const ExporterHDF5<MeshType>::MapType (Repeated);
+
 // ==============
 // Constructors
 // ==============
@@ -598,7 +607,7 @@ void ExporterVTK<MeshType>::import (const Real& /*time*/)
 template<typename MeshType>
 MapEpetraType ExporterVTK<MeshType>::mapType() const
 {
-    return Repeated;
+    return MapType;
 }
 
 
