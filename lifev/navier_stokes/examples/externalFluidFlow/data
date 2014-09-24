@@ -5,16 +5,23 @@
 
 * #offline partitioner details
 [offline_partitioner]
-useOfflinePartitionedMesh = false                  # true for loading an already partitioned mesh, false to partition the mesh online
-num_parts = 6                                     # must be the same of the number of parts when we partioned offline the mesh
-hdf5_file_name = cylinder_offlinePartitioned.h5   # file generated running test partion_io (main_write) - REQUIRED - 
-io_class = new                                    # possibilities: old or new, use new
+useOfflinePartitionedMesh = true                 						 # true for loading an already partitioned mesh, false to partition the mesh online
+num_parts = 24                                     						 # must be the same of the number of parts when we partioned offline the mesh
+hdf5_file_name = cylinder_new_longer_24__MeshPartitionTool_ParMETIS.h5   # file generated running test partion_io (main_write) - REQUIRED - 
+io_class = new                                    						 # possibilities: old or new, use new
 
 [exporter]
 type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
 start      = 0
 save       = 1
+filename   = resultParteDue # name of the file with the results 
+
+[importer]
+restart  = false
+initSol  = 00004        # label of the solution from which we want to start (5 digits by convention)
+type     = hdf5         # format of the imported solution
+filename = resultPart2  # filename of the solution from which we restart the simulation
 
 [NavierStokes]
 initialization         = interpolation #projection   # initialization (L2 projection) or interpolation
@@ -26,6 +33,7 @@ mesh_source            = regular_mesh
 
 [fluid]
 
+	save_every          = 5
     export_coefficients = true  
     conservativeFormulation = false
     
