@@ -351,19 +351,21 @@ TestImportExport::run ( GetPot& commandLine, const std::string& testString )
     M_timeData.updateTime();
     M_displayer.leaderPrint ( "\t[t = ", M_timeData.time(), " s.]\n" );
 
-    if ( testString.compare ( "import" ) == 0 )
+
+    // Exporting
+    if ( testString.compare ( "export" ) == 0 )
     {
-        passed = passed && importLoop (importerPtr, exporterPtr);
+    passed = passed && exportLoop (importerPtr, exporterPtr);
     }
-    else
-    {
-        passed = passed && exportLoop (importerPtr, exporterPtr);
-    }
+
+    MPI_Barrier (MPI_COMM_WORLD);
+    M_displayer.leaderPrint ( "Exporting finished. Now importing\n" );
+
+    // Exporting and checking
+    passed = passed && importLoop (importerPtr, exporterPtr);
 
     globalChrono.stop();
     M_displayer.leaderPrint ( "[Time loop, elapsed time:  ", globalChrono.diff(), " s.]\n" );
-
-    exporterPtr->closeFile();
 
     return passed;
 }
@@ -401,9 +403,6 @@ TestImportExport::exportLoop ( const boost::shared_ptr< ImporterType >& importer
 
     //exporterPtr->postProcess( 0 );
 
-    Exporter<mesh_Type >::vector_Type vectorDiff ( M_vectorFESpacePtr->map(), ExporterType::MapType );
-    Exporter<mesh_Type >::vector_Type scalarDiff ( M_scalarFESpacePtr->map(), ExporterType::MapType );
-
     for ( ; M_timeData.canAdvance(); M_timeData.updateTime() )
     {
 
@@ -423,7 +422,42 @@ TestImportExport::exportLoop ( const boost::shared_ptr< ImporterType >& importer
         exporterPtr->postProcess ( M_timeData.time() );
 
     }
-    MPI_Barrier (MPI_COMM_WORLD);
+
+    exporterPtr->closeFile();
+
+    return passed;
+
+}
+
+
+template<typename ImporterType, typename ExporterType>
+bool
+TestImportExport::importLoop ( const boost::shared_ptr< ImporterType >& importerPtr,
+                               const boost::shared_ptr< ExporterType >& exporterPtr )
+{
+    using namespace LifeV;
+
+    bool passed (true);
+
+    ASSERT ( M_vectorImportedPtr.size() + M_scalarImportedPtr.size(), "There's no data on which to work!" )
+
+    const UInt vectorImportedPtrSize = M_vectorImportedPtr.size();
+    const UInt scalarImportedPtrSize = M_scalarImportedPtr.size();
+
+    Exporter<mesh_Type >::vector_Type vectorDiff ( M_vectorFESpacePtr->map(), ExporterType::MapType );
+    Exporter<mesh_Type >::vector_Type scalarDiff ( M_scalarFESpacePtr->map(), ExporterType::MapType );
+
+    // Set up the EXPORTER
+    for ( UInt iVec (0); iVec < vectorImportedPtrSize; ++iVec )
+    {
+        M_vectorInterpolantPtr[iVec].reset (
+            new Exporter<mesh_Type >::vector_Type   ( M_vectorFESpacePtr->map(), ExporterType::MapType ) );
+    }
+    for ( UInt iScal (0); iScal < scalarImportedPtrSize; ++iScal )
+    {
+        M_scalarInterpolantPtr[iScal].reset (
+            new Exporter<mesh_Type >::vector_Type   ( M_scalarFESpacePtr->map(), ExporterType::MapType ) );
+    }
 
     M_timeData.setup ( M_dataFile, "time_discretization" );
     M_timeData.updateTime();
@@ -468,39 +502,6 @@ TestImportExport::exportLoop ( const boost::shared_ptr< ImporterType >& importer
         }
         passed = passed && (maxDiff < 1.e-4);
 
-    }
-
-    return passed;
-}
-
-
-template<typename ImporterType, typename ExporterType>
-bool
-TestImportExport::importLoop ( const boost::shared_ptr< ImporterType >& importerPtr,
-                               const boost::shared_ptr< ExporterType >& exporterPtr )
-{
-    using namespace LifeV;
-
-    bool passed (true);
-
-    for ( UInt iVec (0); iVec < M_vectorImportedPtr.size(); ++iVec )
-    {
-        exporterPtr->addVariable ( ExporterData<mesh_Type>::VectorField, M_vectorName[iVec],
-                                   M_vectorFESpacePtr, M_vectorImportedPtr[iVec], UInt (0) );
-    }
-    for ( UInt iScal (0); iScal < M_scalarImportedPtr.size(); ++iScal )
-    {
-        exporterPtr->addVariable ( ExporterData<mesh_Type>::ScalarField, M_scalarName[iScal],
-                                   M_scalarFESpacePtr, M_scalarImportedPtr[iScal], UInt (0) );
-    }
-
-    for ( ; M_timeData.canAdvance(); M_timeData.updateTime() )
-    {
-        M_displayer.leaderPrint ( "\t[t = ", M_timeData.time(), " s.]\n" );
-
-        importerPtr->import ( M_timeData.time() );
-
-        exporterPtr->postProcess ( M_timeData.time() );
     }
 
     return passed;
