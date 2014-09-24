@@ -58,6 +58,13 @@ public:
     typedef boost::shared_ptr<vector_Type>                vectorPtr_Type;
     typedef typename fluid_Type::matrix_Type              matrix_Type;
 
+    typedef boost::shared_ptr< LifeV::Exporter<LifeV::RegionMesh<LifeV::LinearTetra> > > filterPtr_Type;
+
+#ifdef HAVE_HDF5
+    typedef LifeV::ExporterHDF5<mesh_Type>      hdf5Filter_Type;
+    typedef boost::shared_ptr<hdf5Filter_Type>  hdf5FilterPtr_Type;
+#endif
+
     /** @name Constructors, destructor
      */
     //@{
@@ -298,6 +305,17 @@ NavierStokes::run()
      * 	Handling offline/online mesh partitioning - END -
      */
 
+    /*
+     *	Reading if we need to store at each timestep or not - BEGIN
+     */
+
+    int saveEvery = dataFile("fluid/save_every",1);
+    int orderBDF  = dataFile("fluid/time_discretization/BDF_order",1);
+
+    /*
+     *	Reading if we need to store at each timestep or not - END
+     */
+
     if (verbose)
         std::cout << std::endl << "[Creating the FE spaces]" << std::endl;
     
@@ -420,22 +438,123 @@ NavierStokes::run()
     vector_Type beta ( fullMap );
     vector_Type rhs ( fullMap );
     
+    /*
+     *  Starting from scratch or restarting? -BEGIN-
+     */
+
+    bool doRestart = dataFile("importer/restart", false);
+
+    Real time = t0;
     oseenData->dataTime()->setTime (t0);
-    
+
+    // initialize stencils
     std::vector<vectorPtr_Type> solutionStencilVelocity;
+    vectorPtr_Type velocity ( new vector_Type(uFESpace->map() ) );
     solutionStencilVelocity.resize ( bdf.bdfVelocity().size() );
-    for ( UInt i(0); i < bdf.bdfVelocity().size() ; ++i)
-    	solutionStencilVelocity[ i ] = fluid.solution();
 
     std::vector<vectorPtr_Type> solutionStencilPressure;
     vectorPtr_Type pressure ( new vector_Type(pFESpace->map() ) );
-    *pressure *= 0;
     solutionStencilPressure.resize ( bdf.bdfPressure().size() );
-    for ( UInt i(0); i < bdf.bdfPressure().size() ; ++i)
-    	solutionStencilPressure[ i ] = pressure;
 
-    bdf.bdfVelocity().setInitialCondition (solutionStencilVelocity);
-    bdf.bdfPressure().setInitialCondition (solutionStencilPressure);
+    // initialize vectors for printing the solution when we do the restart
+    vectorPtr_Type velocityInitial ( new vector_Type(uFESpace->map() ) );
+    vectorPtr_Type pressureInitial ( new vector_Type(pFESpace->map() ) );
+
+    if (!doRestart)
+    {
+    	*velocity *= 0;
+    	for ( UInt i(0); i < bdf.bdfVelocity().size() ; ++i)
+    		solutionStencilVelocity[ i ] = fluid.solution();
+
+    	*pressure *= 0;
+    	for ( UInt i(0); i < bdf.bdfPressure().size() ; ++i)
+    		solutionStencilPressure[ i ] = pressure;
+
+    	bdf.bdfVelocity().setInitialCondition (solutionStencilVelocity);
+    	bdf.bdfPressure().setInitialCondition (solutionStencilPressure);
+
+    	*velocityInitial = *velocity;
+    	*pressureInitial = *pressure;
+
+    }
+    else
+    {
+    	std::string const importerType  =  dataFile ( "importer/type", "hdf5");
+    	std::string const fileName      =  dataFile ( "importer/filename", "SolutionRestarted");
+    	std::string const initialLoaded =  dataFile ( "importer/initSol", "NO_DEFAULT_VALUE");
+
+    	boost::shared_ptr<hdf5Filter_Type> importer;
+    	importer.reset ( new  hdf5Filter_Type ( dataFile, fileName) );
+
+    	importer->setMeshProcId (uFESpace->mesh(), M_data->comm->MyPID() );
+    	vectorPtr_Type velocity (new vector_Type (uFESpace->map(), importer->mapType() ) );
+    	vectorPtr_Type pressure (new vector_Type (pFESpace->map(), importer->mapType() ) );
+
+    	std::string iterationString;
+    	iterationString = initialLoaded;
+
+
+    	for (UInt iterInit = 0; iterInit < bdf.bdfVelocity().size(); iterInit++ )
+    	{
+    		velocity.reset ( new vector_Type (uFESpace->map(),  Unique ) );
+    		*velocity *= 0.0;
+
+
+    		pressure.reset ( new vector_Type (pFESpace->map(),  Unique ) );
+    		*pressure *= 0.0;
+
+    		LifeV::ExporterData<mesh_Type> velocityReader (LifeV::ExporterData<mesh_Type>::VectorField,
+    				std::string ("velocity." + iterationString),
+    				uFESpace,
+    				velocity,
+    				UInt (0),
+    				LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+
+    		LifeV::ExporterData<mesh_Type> pressureReader (LifeV::ExporterData<mesh_Type>::ScalarField,
+    				std::string ("pressure." + iterationString),
+    				pFESpace,
+    				pressure,
+    				UInt (0),
+    				LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+
+    		importer->readVariable (velocityReader);
+    		importer->readVariable (pressureReader);
+
+    		vectorPtr_Type solutionVelocityPart (new vector_Type (fluid.solution()->map(), Unique, Zero));
+    		*solutionVelocityPart *= 0;
+    		solutionVelocityPart->subset(*velocity, velocity->map(), UInt(0), UInt(0) );
+
+    		solutionStencilVelocity[ iterInit ] = solutionVelocityPart;
+    		solutionStencilPressure[ iterInit ] = pressure;
+
+    		int iterations = std::atoi (iterationString.c_str() );
+    		iterations--;
+
+    		std::ostringstream iter;
+    		iter.fill ( '0' );
+    		iter << std::setw (5) << ( iterations );
+    		iterationString = iter.str();
+
+    		if (iterInit == 0)
+    		{
+    			*velocityInitial = *velocity;
+    			*pressureInitial = *pressure;
+    		}
+
+    	}
+
+    	bdf.bdfVelocity().setInitialCondition (solutionStencilVelocity);
+    	bdf.bdfPressure().setInitialCondition (solutionStencilPressure);
+    	importer->closeFile();
+    }
+
+    bdf.bdfVelocity().updateRHSContribution ( oseenData->dataTime()->timeStep() );
+
+    bdf.bdfPressure().updateRHSContribution ( oseenData->dataTime()->timeStep() );
+
+    /*
+     *  Starting from scratch or restarting? -END-
+     */
     
 
     M_outputName = dataFile ( "exporter/filename", "result");
@@ -490,8 +609,7 @@ NavierStokes::run()
         std::cout << std::endl << "[Solving the problem]" << std::endl;
     
     int iter = 1;
-    Real time = t0 + dt;
-    Real drag(0.0);
+    time = t0 + dt;
     VectorSmall<2> AerodynamicCoefficients;
     
     if(verbose && M_exportCoeff)
@@ -500,9 +618,12 @@ NavierStokes::run()
         M_out << "% time / drag / lift \n" << std::flush;
     }
     
+    int n_iter = 0;
+
     for ( ; time <= tFinal + dt / 2.; time += dt, iter++)
     {
-        
+
+    	n_iter++;
         iterChrono.reset();
         iterChrono.start();
         
@@ -554,7 +675,10 @@ NavierStokes::run()
         // Exporting the solution
         *velAndPressure = *fluid.solution();
         
-        exporter->postProcess ( time );
+        if( n_iter%saveEvery == 0 || (n_iter+orderBDF-1)%saveEvery == 0)
+        {
+        	exporter->postProcess ( time );
+        }
         
         iterChrono.stop();
         
