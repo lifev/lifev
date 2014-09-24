@@ -484,8 +484,8 @@ TestImportExport::importLoop ( const boost::shared_ptr< ImporterType >& importer
             vectorDiff += (-*M_vectorImportedPtr[0]);
             maxDiff = vectorDiff.normInf();
 
-            M_vectorInterpolantPtr[0]->spy ("interpolant");
-            M_vectorImportedPtr[0]->spy ("imported");
+            //M_vectorInterpolantPtr[0]->spy ("interpolantVector");
+            //M_vectorImportedPtr[0]->spy ("importedVector");
 
             M_displayer.leaderPrint ( "[vectorDiff.normInf() = ", vectorDiff.normInf(), "]\n" );
         }
@@ -495,8 +495,8 @@ TestImportExport::importLoop ( const boost::shared_ptr< ImporterType >& importer
             scalarDiff += (-*M_scalarImportedPtr[0]);
             maxDiff = std::max (scalarDiff.normInf(), maxDiff);
 
-            M_scalarInterpolantPtr[0]->spy ("interpolant");
-            M_scalarImportedPtr[0]->spy ("imported");
+            //M_scalarInterpolantPtr[0]->spy ("interpolant");
+            //M_scalarImportedPtr[0]->spy ("imported");
 
             M_displayer.leaderPrint ( "[scalarDiff.normInf() = ", scalarDiff.normInf(), "]\n" );
         }
