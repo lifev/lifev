@@ -332,6 +332,12 @@ public:
     	}
     }
 
+    //! Compute the energy of the fluid
+    /*!
+        @return energy
+     */
+    Real energy ( );
+
     //! Compute area on a boundary face with given flag
     /*!
         @param  flag

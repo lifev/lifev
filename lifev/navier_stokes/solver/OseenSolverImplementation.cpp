@@ -1201,6 +1201,17 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::lagrangeMultipl
 }
 
 template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
+Real
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::energy ( )
+{
+	Real energy = 0.0;
+
+
+	return energy;
+}
+
+
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 VectorSmall<2> 
 OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeForces ( bcHandler_Type& bcHandlerDrag,
                                                                                	 bcHandler_Type& bcHandlerLift )
