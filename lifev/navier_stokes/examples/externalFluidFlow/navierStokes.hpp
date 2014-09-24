@@ -615,7 +615,7 @@ NavierStokes::run()
     if(verbose && M_exportCoeff)
     {
         M_out.open ("Coefficients.txt" );
-        M_out << "% time / drag / lift \n" << std::flush;
+        M_out << "% time / drag / lift / energy \n" << std::flush;
     }
     
     int n_iter = 0;
@@ -659,11 +659,14 @@ NavierStokes::run()
         
         AerodynamicCoefficients = fluid.computeDrag(1, bcHDrag, bcHLift, velInfty, 0.25*fluid.area(6) );
         
+        Real energy = fluid.energy();
+
         if ( verbose && M_exportCoeff )
         {
             M_out << time  << " "
             << AerodynamicCoefficients[0] << " "
-            << AerodynamicCoefficients[1] << "\n" << std::flush;
+            << AerodynamicCoefficients[1] << " "
+            << energy << "\n" << std::flush;
         }
         
         vector_Type computedPressure(pFESpace->map());
