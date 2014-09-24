@@ -89,25 +89,11 @@ public:
 
 
 private:
-    /*! @enum TestType
-        Order of the BDF
-     */
 
-    /*! @enum InitializationType
-        Type of initialization. "Interpolation" just interpolates the value of the exact solution to the DoFs.
-        "Projection" solves an Oseen problem where alpha=0, the convective term is linearized by using the exact solution for beta,
-        and the time derivative is passed to the right hand side and computed from the exact solution.
-     */
-    enum InitializationType {Projection, Interpolation};
-    
-    
     struct Private;
     
     boost::shared_ptr<Private> M_data;
     
-    // Initialization method
-    InitializationType         M_initMethod;
-
     // output file name
     std::string                M_outputName;
     
@@ -251,6 +237,9 @@ NavierStokes::run()
     
     /*
      * 	Handling offline/online mesh partitioning - BEGIN -
+     * 	Note: if one want to partion offline a mesh, he can use the test in:
+     * 	lifev/structure/example/example_partitionMesh -> main_write.cpp
+     * 	TODO: this example in my opinion should go in the core/offline_partition_io!
      */
 
     bool offlinePartio = dataFile ("offline_partitioner/useOfflinePartitionedMesh", false);
@@ -529,8 +518,6 @@ NavierStokes::run()
         
         *pressure *= 0;
         bdf.bdfPressure().extrapolation (*pressure); // Extrapolation for the LES terms
-        pressure->spy("pressureExtrapolated");
-
 
         bdf.bdfVelocity().updateRHSContribution ( oseenData->dataTime()->timeStep() );
         
