@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief test ExporterVTK
+    @brief test for ExporterEnsight
 
     @author Tiziano Passerini <tiziano@mathcs.emory.edu>
     @contributor
