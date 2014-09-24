@@ -60,7 +60,7 @@ main ( int argc, char** argv )
     verbose = true;
 #endif
 
-    NavierStokes ns ( argc, argv, "data", "result" );
+    NavierStokes ns ( argc, argv, "data" );
 
     ns.run();
 

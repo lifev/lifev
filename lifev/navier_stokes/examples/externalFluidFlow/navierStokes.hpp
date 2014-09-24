@@ -69,8 +69,7 @@ public:
      */
     NavierStokes ( int argc,
                    char** argv,
-                   const std::string defaultDataName = "data",
-                   const std::string outputName = "result");
+                   const std::string defaultDataName = "data");
 
     //! Destructor
     ~NavierStokes()
@@ -152,11 +151,9 @@ struct NavierStokes::Private
  
 NavierStokes::NavierStokes ( int argc,
                                                 char** argv,
-                                                const std::string defaultDataName,
-                                                const std::string outputName)
+                                                const std::string defaultDataName)
     :
-    M_data ( new Private ),
-    M_outputName (outputName)
+    M_data ( new Private )
 {
     GetPot command_line (argc, argv);
     string data_file_name = command_line.follow (defaultDataName.c_str(), 2, "-f", "--file");
@@ -440,6 +437,8 @@ NavierStokes::run()
     bdf.bdfVelocity().setInitialCondition (solutionStencilVelocity);
     bdf.bdfPressure().setInitialCondition (solutionStencilPressure);
     
+
+    M_outputName = dataFile ( "exporter/filename", "result");
     boost::shared_ptr< Exporter<mesh_Type > > exporter;
     
     vectorPtr_Type velAndPressure;
