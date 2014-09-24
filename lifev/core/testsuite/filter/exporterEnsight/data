@@ -14,7 +14,7 @@
 
 [space_discretization]
 dimension = 1
-vector_fespace = P2
+vector_fespace = P1
 scalar_fespace = P1
 
 [time_discretization]
