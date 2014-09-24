@@ -82,13 +82,11 @@ public:
     template<typename ImporterType, typename ExporterType>
     bool run ( GetPot& commandLine, const std::string& testString = "import" );
 
-    template<typename ImporterType, typename ExporterType>
-    bool importLoop ( const boost::shared_ptr< ImporterType >& importerPtr,
-                      const boost::shared_ptr< ExporterType >& exporterPtr );
+    template<typename ImporterType>
+    bool importLoop ( const boost::shared_ptr< ImporterType >& importerPtr );
 
-    template<typename ImporterType, typename ExporterType>
-    bool exportLoop ( const boost::shared_ptr< ImporterType >& importerPtr,
-                      const boost::shared_ptr< ExporterType >& exporterPtr );
+    template<typename ExporterType>
+    bool exportLoop ( const boost::shared_ptr< ExporterType >& exporterPtr );
 
 private:
     void loadData ( GetPot& commandLine );
@@ -96,7 +94,7 @@ private:
     void buildFESpaces();
     template<typename ExporterType>
     void buildExporter ( boost::shared_ptr< ExporterType >& exporterPtr,
-                         const std::string& prefix );
+                         const std::string& prefix ) const;
 
     commPtr_Type                                             M_commPtr;
     LifeV::Displayer                                         M_displayer;
@@ -263,7 +261,7 @@ TestImportExport::buildFESpaces()
 template<typename ExporterType>
 void
 TestImportExport::buildExporter ( boost::shared_ptr< ExporterType >& exporterPtr,
-                                  const std::string& prefix )
+                                  const std::string& prefix ) const
 {
     using namespace LifeV;
     // Chronometer
@@ -309,37 +307,6 @@ TestImportExport::run ( GetPot& commandLine, const std::string& testString )
     // Chronometer
     LifeChrono globalChrono;
 
-    // Set up the IMPORTER
-    ExporterData<mesh_Type>::WhereEnum whereVector =
-        ( M_vectorFESpacePtr->fe().refFE().type() == FE_P0_3D )
-        ?
-        ExporterData<mesh_Type>::Cell : ExporterData<mesh_Type>::Node;
-
-    ExporterData<mesh_Type>::WhereEnum whereScalar =
-        ( M_scalarFESpacePtr->fe().refFE().type() == FE_P0_3D )
-        ?
-        ExporterData<mesh_Type>::Cell : ExporterData<mesh_Type>::Node;
-
-    for ( UInt iVec (0); iVec < M_vectorImportedPtr.size(); ++iVec )
-    {
-        M_vectorImportedPtr[iVec].reset (
-            new Exporter<mesh_Type >::vector_Type   ( M_vectorFESpacePtr->map(), ExporterType::MapType ) );
-
-        importerPtr->addVariable ( ExporterData<mesh_Type>::VectorField, M_vectorName[iVec],
-                                   M_vectorFESpacePtr, M_vectorImportedPtr[iVec], UInt (0),
-                                   ExporterData<mesh_Type>::UnsteadyRegime,
-                                   whereVector );
-    }
-    for ( UInt iScal (0); iScal < M_scalarImportedPtr.size(); ++iScal )
-    {
-        M_scalarImportedPtr[iScal].reset (
-            new Exporter<mesh_Type >::vector_Type   ( M_scalarFESpacePtr->map(), ExporterType::MapType ) );
-        importerPtr->addVariable ( ExporterData<mesh_Type>::ScalarField, M_scalarName[iScal],
-                                   M_scalarFESpacePtr, M_scalarImportedPtr[iScal], UInt (0),
-                                   ExporterData<mesh_Type>::UnsteadyRegime,
-                                   whereScalar );
-    }
-
     // +-----------------------------------------------+
     // |             Solving the problem               |
     // +-----------------------------------------------+
@@ -355,14 +322,14 @@ TestImportExport::run ( GetPot& commandLine, const std::string& testString )
     // Exporting
     if ( testString.compare ( "export" ) == 0 )
     {
-    passed = passed && exportLoop (importerPtr, exporterPtr);
+        passed = passed && exportLoop (exporterPtr);
     }
 
     MPI_Barrier (MPI_COMM_WORLD);
     M_displayer.leaderPrint ( "Exporting finished. Now importing\n" );
 
     // Exporting and checking
-    passed = passed && importLoop (importerPtr, exporterPtr);
+    passed = passed && importLoop (importerPtr);
 
     globalChrono.stop();
     M_displayer.leaderPrint ( "[Time loop, elapsed time:  ", globalChrono.diff(), " s.]\n" );
@@ -371,29 +338,28 @@ TestImportExport::run ( GetPot& commandLine, const std::string& testString )
 }
 
 
-template<typename ImporterType, typename ExporterType>
+template<typename ExporterType>
 bool
-TestImportExport::exportLoop ( const boost::shared_ptr< ImporterType >& importerPtr,
-                               const boost::shared_ptr< ExporterType >& exporterPtr )
+TestImportExport::exportLoop ( const boost::shared_ptr< ExporterType >& exporterPtr )
 {
     using namespace LifeV;
 
     bool passed (true);
 
-    ASSERT ( M_vectorImportedPtr.size() + M_scalarImportedPtr.size(), "There's no data on which to work!" )
+    ASSERT ( M_vectorInterpolantPtr.size() + M_scalarInterpolantPtr.size(), "There's no data on which to work!" )
 
-    const UInt vectorImportedPtrSize = M_vectorImportedPtr.size();
-    const UInt scalarImportedPtrSize = M_scalarImportedPtr.size();
+    const UInt vectorInterpolantPtrSize = M_vectorInterpolantPtr.size();
+    const UInt scalarInterpolantPtrSize = M_scalarInterpolantPtr.size();
 
     // Set up the EXPORTER
-    for ( UInt iVec (0); iVec < vectorImportedPtrSize; ++iVec )
+    for ( UInt iVec (0); iVec < vectorInterpolantPtrSize; ++iVec )
     {
         M_vectorInterpolantPtr[iVec].reset (
             new Exporter<mesh_Type >::vector_Type   ( M_vectorFESpacePtr->map(), ExporterType::MapType ) );
         exporterPtr->addVariable ( ExporterData<mesh_Type>::VectorField, M_vectorName[iVec],
                                    M_vectorFESpacePtr, M_vectorInterpolantPtr[iVec], UInt (0) );
     }
-    for ( UInt iScal (0); iScal < scalarImportedPtrSize; ++iScal )
+    for ( UInt iScal (0); iScal < scalarInterpolantPtrSize; ++iScal )
     {
         M_scalarInterpolantPtr[iScal].reset (
             new Exporter<mesh_Type >::vector_Type   ( M_scalarFESpacePtr->map(), ExporterType::MapType ) );
@@ -409,11 +375,11 @@ TestImportExport::exportLoop ( const boost::shared_ptr< ImporterType >& importer
         M_displayer.leaderPrint ( "[t = ", M_timeData.time(), " s.]\n" );
 
         // Computation of the interpolation
-        if ( vectorImportedPtrSize )
+        if ( vectorInterpolantPtrSize )
         {
             M_vectorFESpacePtr->interpolate ( static_cast<function_Type> ( problem_Type::uexact ), *M_vectorInterpolantPtr[0], M_timeData.time() );
         }
-        if ( scalarImportedPtrSize )
+        if ( scalarInterpolantPtrSize )
         {
             M_scalarFESpacePtr->interpolate ( static_cast<function_Type> ( problem_Type::pexact ), *M_scalarInterpolantPtr[0], M_timeData.time() );
         }
@@ -430,10 +396,9 @@ TestImportExport::exportLoop ( const boost::shared_ptr< ImporterType >& importer
 }
 
 
-template<typename ImporterType, typename ExporterType>
+template<typename ImporterType>
 bool
-TestImportExport::importLoop ( const boost::shared_ptr< ImporterType >& importerPtr,
-                               const boost::shared_ptr< ExporterType >& exporterPtr )
+TestImportExport::importLoop ( const boost::shared_ptr< ImporterType >& importerPtr )
 {
     using namespace LifeV;
 
@@ -441,22 +406,53 @@ TestImportExport::importLoop ( const boost::shared_ptr< ImporterType >& importer
 
     ASSERT ( M_vectorImportedPtr.size() + M_scalarImportedPtr.size(), "There's no data on which to work!" )
 
+    // Set up the IMPORTER
+    ExporterData<mesh_Type>::WhereEnum whereVector =
+        ( M_vectorFESpacePtr->fe().refFE().type() == FE_P0_3D )
+        ?
+        ExporterData<mesh_Type>::Cell : ExporterData<mesh_Type>::Node;
+
+    ExporterData<mesh_Type>::WhereEnum whereScalar =
+        ( M_scalarFESpacePtr->fe().refFE().type() == FE_P0_3D )
+        ?
+        ExporterData<mesh_Type>::Cell : ExporterData<mesh_Type>::Node;
+
+    for ( UInt iVec (0); iVec < M_vectorImportedPtr.size(); ++iVec )
+    {
+        M_vectorImportedPtr[iVec].reset (
+            new Exporter<mesh_Type >::vector_Type   ( M_vectorFESpacePtr->map(), ImporterType::MapType ) );
+
+        importerPtr->addVariable ( ExporterData<mesh_Type>::VectorField, M_vectorName[iVec],
+                                   M_vectorFESpacePtr, M_vectorImportedPtr[iVec], UInt (0),
+                                   ExporterData<mesh_Type>::UnsteadyRegime,
+                                   whereVector );
+    }
+    for ( UInt iScal (0); iScal < M_scalarImportedPtr.size(); ++iScal )
+    {
+        M_scalarImportedPtr[iScal].reset (
+            new Exporter<mesh_Type >::vector_Type   ( M_scalarFESpacePtr->map(), ImporterType::MapType ) );
+        importerPtr->addVariable ( ExporterData<mesh_Type>::ScalarField, M_scalarName[iScal],
+                                   M_scalarFESpacePtr, M_scalarImportedPtr[iScal], UInt (0),
+                                   ExporterData<mesh_Type>::UnsteadyRegime,
+                                   whereScalar );
+    }
+
     const UInt vectorImportedPtrSize = M_vectorImportedPtr.size();
     const UInt scalarImportedPtrSize = M_scalarImportedPtr.size();
 
-    Exporter<mesh_Type >::vector_Type vectorDiff ( M_vectorFESpacePtr->map(), ExporterType::MapType );
-    Exporter<mesh_Type >::vector_Type scalarDiff ( M_scalarFESpacePtr->map(), ExporterType::MapType );
+    Exporter<mesh_Type >::vector_Type vectorDiff ( M_vectorFESpacePtr->map(), ImporterType::MapType );
+    Exporter<mesh_Type >::vector_Type scalarDiff ( M_scalarFESpacePtr->map(), ImporterType::MapType );
 
-    // Set up the EXPORTER
+    // Set up the INTERPOLANT
     for ( UInt iVec (0); iVec < vectorImportedPtrSize; ++iVec )
     {
         M_vectorInterpolantPtr[iVec].reset (
-            new Exporter<mesh_Type >::vector_Type   ( M_vectorFESpacePtr->map(), ExporterType::MapType ) );
+            new Exporter<mesh_Type >::vector_Type   ( M_vectorFESpacePtr->map(), ImporterType::MapType ) );
     }
     for ( UInt iScal (0); iScal < scalarImportedPtrSize; ++iScal )
     {
         M_scalarInterpolantPtr[iScal].reset (
-            new Exporter<mesh_Type >::vector_Type   ( M_scalarFESpacePtr->map(), ExporterType::MapType ) );
+            new Exporter<mesh_Type >::vector_Type   ( M_scalarFESpacePtr->map(), ImporterType::MapType ) );
     }
 
     M_timeData.setup ( M_dataFile, "time_discretization" );
