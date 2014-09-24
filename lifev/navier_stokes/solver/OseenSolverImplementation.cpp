@@ -1206,6 +1206,11 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::energy ( )
 {
 	Real energy = 0.0;
 
+	vector_Type tmp(M_localMap);
+	tmp *= 0;
+	tmp = (*M_matrixMass) * (*M_solution);
+	energy = M_solution->dot(tmp);
+	energy *= 0.5;
 
 	return energy;
 }
