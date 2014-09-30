@@ -105,12 +105,20 @@ int main (int argc, char** argv)
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     if(Comm->MyPID()==0)
-    	std::cout << "[Test with empty constructor ] \n\n";
+    	std::cout << "[Test with empty constructor ]";
 
+    UInt orderBDF = data_file("dataTimeHandler/orderBDF",2);
+    UInt orderExtrapolation = data_file("dataTimeHandler/orderExtrapolation",2);
+
+    // Initialize the time handler object, set the order of the BDF and for the extrapolation
     TimeAndExtrapolationHandler timeVelocity;
-    timeVelocity.setBDForder(1);
-    timeVelocity.setMaximumExtrapolationOrder(3);
+    timeVelocity.setBDForder(orderBDF);
+    timeVelocity.setMaximumExtrapolationOrder(orderExtrapolation);
 
+    // Set the timestep
+    timeVelocity.setTimeStep(0.2);
+
+    // Initialize 3 vectors
     vector_Type firstVector(velocityFESpace->map());
     vector_Type secondVector(velocityFESpace->map());
     vector_Type thirdVector(velocityFESpace->map());
@@ -118,27 +126,37 @@ int main (int argc, char** argv)
     secondVector += 2;
     thirdVector  += 3;
 
+    // Initialize the state with two vectors (we suppose that in the datafile orderBDF=2)
     std::vector<vector_Type> initialState;
     initialState.push_back(firstVector);
     initialState.push_back(secondVector);
-    initialState.push_back(thirdVector);
+    timeVelocity.initialize(initialState);
 
     if(Comm->MyPID()==0)
         std::cout << "\n";
 
-    timeVelocity.initialize(initialState);
-
-    timeVelocity.shift(thirdVector);
-
-    timeVelocity.setTimeStep(0.1);
-
+    // empty vector to check the extrapolation
     vector_Type extrapolation(velocityFESpace->map());
-    timeVelocity.extrapolate(1,extrapolation);
 
+    // Do an extrapolation
+    timeVelocity.extrapolate(orderExtrapolation, extrapolation);
+    extrapolation.spy("FirstExtrapolation");
+
+    // Put in the stencil a new vector, and do a new extrapolation
+    timeVelocity.shift(thirdVector);
+    timeVelocity.extrapolate(orderExtrapolation, extrapolation);
+    extrapolation.spy("SecondExtrapolation");
+
+    // Compute the term that should go to the right hand side
     vector_Type rhsTerm(velocityFESpace->map());
     timeVelocity.rhsContribution(rhsTerm);
+    rhsTerm.spy("rhsTerm");
 
-    std::cout << "\n\nAlpha = " << timeVelocity.alpha() << "\n\n";
+    timeVelocity.state()[0].spy("StatoZero");
+    timeVelocity.state()[1].spy("StatoUno");
+
+    // Print the value of alpha
+    std::cout << "\nAlpha = " << timeVelocity.alpha() << "\n\n";
 
 #ifdef HAVE_MPI
     MPI_Finalize();

@@ -4,6 +4,7 @@
 /*
  *  author: DAVIDE FORTI, davide.forti@epfl.ch
  *  Lightweighted class to Handle the time advancing scheme (based on BDF approximation of the time derivative and for the extrapolation).
+ *  It can be used for first derivatives.
  *
  *  The formulas implemented in the methods extrapolate and rhsContribution are taken from
  *  "Algebraic fractional-step schemes with spectral methods for the incompressible Navier–Stokes equations"
@@ -40,7 +41,7 @@ public:
     // initialize the time handler class with initial data, need a vector of M_order vectorEpetra
     void initialize(const std::vector<vector_Type> InitialData);
 
-    // shift a new vector
+    // shift - to be used when a timestep is solved
     void shift(const vector_Type newVector);
 
     // getter for the state
@@ -58,7 +59,7 @@ public:
     // get the part from the discretization of the time derivative that goes to the right hand side
     void rhsContribution(vector_Type& rhs_bdf);
 
-    // get the value of alpha that should go in frot of the term u_(n+1) see the paper cited at the beginning of the class
+    // get the value of alpha that should go in front of the term u_(n+1) (see the paper cited at the beginning of the doc)
     Real alpha();
 
 private:
@@ -180,10 +181,10 @@ TimeAndExtrapolationHandler::rhsContribution(vector_Type& rhs_bdf)
             rhs_bdf = 1/M_timeStep*M_states[M_sizeStencil-1]; // u_rhs = 1/dt*u_n
             break;
         case 2:
-            rhs_bdf = 1/M_timeStep*(2*M_states[M_sizeStencil-1] - 1/2*M_states[M_sizeStencil-2]); // u_rhs = 1/dt*(2*u_n - 0.5*u_{n-1})
+            rhs_bdf = 1/M_timeStep*(2*M_states[M_sizeStencil-1] - (1.0/2.0)*M_states[M_sizeStencil-2]); // u_rhs = 1/dt*(2*u_n - 0.5*u_{n-1})
             break;
         case 3:
-        	rhs_bdf = 1/M_timeStep*(3*M_states[M_sizeStencil-1] - 3/2*M_states[M_sizeStencil-2] + 1/3*M_states[M_sizeStencil-3]); // u_rhs = 1/dt*(3*u_n - 3/2*u_{n-1} + 1/3*u_{n-2})
+        	rhs_bdf = 1/M_timeStep*(3*M_states[M_sizeStencil-1] - (3.0/2.0)*M_states[M_sizeStencil-2] + (1.0/3.0)*M_states[M_sizeStencil-3]); // u_rhs = 1/dt*(3*u_n - 3/2*u_{n-1} + 1/3*u_{n-2})
         	break;
         default:
             break;
@@ -201,7 +202,7 @@ TimeAndExtrapolationHandler::alpha()
             return 1.5;
             break;
         case 3:
-        	return 11/6;
+        	return 11.0/6.0;
         	break;
         default:
             break;
