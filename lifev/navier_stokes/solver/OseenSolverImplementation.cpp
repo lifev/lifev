@@ -455,7 +455,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::buildSystem()
                     M_velocityFESpace.qr(),
                     M_fespaceUETA,
                     M_fespaceUETA,
-                    M_oseenData->viscosity() * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) )
+                    value( 0.5 * M_oseenData->viscosity() ) * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) )
             ) >> M_matrixStokes->block(0,0);
         }
         else

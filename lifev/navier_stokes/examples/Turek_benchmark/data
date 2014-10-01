@@ -15,7 +15,7 @@ type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
 start      = 0
 save       = 1
-filename   = result_M1_BDF2_SUPG
+filename   = result_P1_BDF2
 
 [importer]
 restart  = false
@@ -46,7 +46,7 @@ mesh_source            = regular_mesh
     endtime         = 12.0
     timestep        = 0.2
 
-    BDF_order       = 1 
+    BDF_order       = 2
 
     [../space_discretization]
     mesh_dir        = ./
@@ -60,7 +60,7 @@ mesh_source            = regular_mesh
     FE_number       = 1
     vel_order       = P1
     pres_order      = P1
-    stiff_strain    = false
+    stiff_strain    = true
     
 	[../stabilization]
 	use             = true
