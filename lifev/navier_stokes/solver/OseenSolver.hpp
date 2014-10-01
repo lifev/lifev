@@ -525,6 +525,16 @@ public:
                               const vector_Type& solution );
 
     
+    //! Compute the forces
+    /*!
+         @param flag      Flag of the boundary face associated with the boundary of the body.
+         @param bcHandler BChandler containing the boundary conditions of the problem.
+         @return          Forces
+     */
+    VectorSmall<2> computeForces(	const markerID_Type&  flag,
+    								bcHandler_Type& bcHandlerDrag,
+    								bcHandler_Type& bcHandlerLift);
+
     //! Compute the drag
     /*!
      @param flag      Flag of the boundary face associated

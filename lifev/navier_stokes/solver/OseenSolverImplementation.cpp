@@ -944,8 +944,21 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::iterate ( bcHan
         M_pressurePreviousTimestep->subset(*M_solution, M_pressureFESpace.map(), 0, 0);
     }
     
-    *M_residual  = *M_rightHandSideNoBC;
-    *M_residual -= (*M_matrixNoBC) * (*M_solution);
+    // Computation of the residual for the coefficients
+
+    matrixPtr_Type matrixNoBC ( new matrix_Type ( M_velocityFESpace.map() + M_pressureFESpace.map() + M_fluxMap ) );
+    *matrixNoBC *= 0;
+    updateStabilization ( *matrixNoBC );
+    getFluidMatrix ( *matrixNoBC );
+    matrixNoBC->globalAssemble();
+
+    vector_Type rightHandSideNoBC ( *M_rightHandSideNoBC );
+    rightHandSideNoBC.globalAssemble();
+
+    *M_residual *= 0;
+
+    *M_residual  = rightHandSideNoBC;
+    *M_residual -= (*matrixNoBC) * (*M_solution);
 
     //M_residual.spy("residual");
 } // iterate()
@@ -1248,11 +1261,9 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeForces (
 
 template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 VectorSmall<2>
-OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeDrag ( const markerID_Type&  flag,
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeForces ( const markerID_Type&  flag,
                                                                                bcHandler_Type& bcHandlerDrag,
-                                                                               bcHandler_Type& bcHandlerLift,
-                                                                               const Real& velocityInfty,
-                                                                               const Real& Area)
+                                                                               bcHandler_Type& bcHandlerLift)
 {
     // 1) flag che dice in quale componente calcolare la resistenza (0 in x, 1 in y, 2 in z)
     // 2) creare vettore pieno di zeri lungo quanto il vettore soluzione -> vettore soluzione u organizzato come ( ux | uy | uz | p)
@@ -1279,18 +1290,58 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeDrag ( c
     M_Displayer.leaderPrint ( "  F-  Value of the drag:          ", drag );
     M_Displayer.leaderPrint ( "  F-  Value of the lift:          ", lift );
 
+    VectorSmall<2> Forces;
+    Forces[0] = drag;
+    Forces[1] = lift;
+    
+    return Forces;
+}
+
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
+VectorSmall<2>
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeDrag ( const markerID_Type&  flag,
+                                                                               bcHandler_Type& bcHandlerDrag,
+                                                                               bcHandler_Type& bcHandlerLift,
+                                                                               const Real& velocityInfty,
+                                                                               const Real& Area)
+{
+    // 1) flag che dice in quale componente calcolare la resistenza (0 in x, 1 in y, 2 in z)
+    // 2) creare vettore pieno di zeri lungo quanto il vettore soluzione -> vettore soluzione u organizzato come ( ux | uy | uz | p)
+    // 3) mettere degli 1 nei nodi corrispondenti al bordo nel blocco del vettore, ovvero:
+    //      se la resistenza é in direzione x: vettore da creare ( 1suBody | 0 | 0 | 0 )
+    // 4) prodotto scalare del vettore del residuo con questo vettore definito al punto 3)
+
+
+    vector_Type onesOnBodyDrag(M_localMap, Unique);
+    onesOnBodyDrag *= 0;
+
+    vector_Type onesOnBodyLift(M_localMap, Unique);
+    onesOnBodyLift *= 0;
+
+    bcManageRhs ( onesOnBodyDrag, *M_velocityFESpace.mesh(), M_velocityFESpace.dof(),  bcHandlerDrag, M_velocityFESpace.feBd(), 1., 0.);
+    bcManageRhs ( onesOnBodyLift, *M_velocityFESpace.mesh(), M_velocityFESpace.dof(),  bcHandlerLift, M_velocityFESpace.feBd(), 1., 0.);
+
+    Real drag (0.0);
+    Real lift (0.0);
+
+    drag = M_residual->dot(onesOnBodyDrag);
+    lift = M_residual->dot(onesOnBodyLift);
+
+    M_Displayer.leaderPrint ( "  F-  Value of the drag:          ", drag );
+    M_Displayer.leaderPrint ( "  F-  Value of the lift:          ", lift );
+
     M_Displayer.leaderPrint ( "\n\n" );
 
     drag /= (0.5*M_oseenData->density()*velocityInfty*velocityInfty*Area);
     lift /= (0.5*M_oseenData->density()*velocityInfty*velocityInfty*Area);
-    
+
     M_Displayer.leaderPrint ( "  F-  Value of the drag coefficient:          ", drag );
     M_Displayer.leaderPrint ( "  F-  Value of the lift coefficient:          ", lift );
-                             
+
     VectorSmall<2> Coefficients;
     Coefficients[0] = drag;
     Coefficients[1] = lift;
-    
+
     return Coefficients;
 }
     

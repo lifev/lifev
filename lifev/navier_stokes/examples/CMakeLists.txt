@@ -11,11 +11,13 @@ ADD_SUBDIRECTORIES(
 
 IF(LifeV_ENABLE_ETA)
 ADD_SUBDIRECTORIES(
-  ETpseudo_fsi
+  #ETpseudo_fsi
   externalFluidFlow
-  oseen_assembler
-  resistanceBCs
-  computeWSS
+  #oseen_assembler
+  #resistanceBCs
+  #computeWSS
+  externalFluidFlow_FORTESTING
   #computeAeroCoeff
+  Turek_benchmark
 )
 ENDIF()
