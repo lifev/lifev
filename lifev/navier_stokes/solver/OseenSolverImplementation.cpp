@@ -296,7 +296,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::setUp ( const G
     //	M_stabilization = true;
 
     M_steady        = dataFile ( "fluid/miscellaneous/steady", 0 );
-    
+
     if (M_stabilization)
     {
     	if(M_oseenData->stabilizationType() == "IP")

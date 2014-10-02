@@ -240,9 +240,9 @@ void StabilizationSUPGVMS<MeshType, MapType, SpaceDim>::applySUPGVMS_Matrix_semi
             - value(M_density*M_viscosity)*TAU_M*dot( value(M_fespaceUETA, velocityExtrapolated)*grad(phi_i), laplacian(phi_j))
 
 			// VMS TERMS
-	        + value(M_density*M_density)*TAU_M*value(alfa/M_timestep) * dot( value(M_fespaceUETA, velocityExtrapolated)*transpose(grad(phi_i)), phi_j )
-	        + value(M_density*M_density)*TAU_M*dot( value(M_fespaceUETA, velocityExtrapolated)*transpose(grad(phi_i)), value(M_fespaceUETA, velocityExtrapolated)*grad(phi_j) )
-	        - value(M_density*M_viscosity)*TAU_M*dot( value(M_fespaceUETA, velocityExtrapolated)*transpose(grad(phi_i)), laplacian(phi_j))
+	        + value(M_density*M_density)*TAU_M*value(alfa/M_timestep) * dot( transpose(grad(phi_i))*value(M_fespaceUETA, velocityExtrapolated), phi_j )
+	        + value(M_density*M_density)*TAU_M*dot( transpose(grad(phi_i))*value(M_fespaceUETA, velocityExtrapolated), value(M_fespaceUETA, velocityExtrapolated)*grad(phi_j) )
+	        - value(M_density*M_viscosity)*TAU_M*dot( transpose(grad(phi_i))*value(M_fespaceUETA, velocityExtrapolated), laplacian(phi_j))
 
 	) >> matrix->block(0,0);
 
@@ -256,7 +256,7 @@ void StabilizationSUPGVMS<MeshType, MapType, SpaceDim>::applySUPGVMS_Matrix_semi
 			TAU_M*value(M_density)*dot( value(M_fespaceUETA, velocityExtrapolated)*grad(phi_i), grad(phi_j) )
 
 			// VMS TERMS
-			+ TAU_M*value(M_density)*dot( value(M_fespaceUETA, velocityExtrapolated)*transpose(grad(phi_i)), grad(phi_j) )
+			+ TAU_M*value(M_density)*dot( transpose(grad(phi_i))*value(M_fespaceUETA, velocityExtrapolated), grad(phi_j) )
 
 	) >> matrix->block(0,1);
 
@@ -281,7 +281,7 @@ void StabilizationSUPGVMS<MeshType, MapType, SpaceDim>::applySUPGVMS_Matrix_semi
 			M_fespacePETA, // trial  p -> phi_j
 
 			// SUPG TERMS
-			TAU_M*dot(  grad(phi_j), grad(phi_i) )
+			TAU_M*dot(  grad(phi_i), grad(phi_j) )
 
 			// VMS TERMS - no terms
 	) >> matrix->block(1,1);
@@ -311,7 +311,7 @@ void StabilizationSUPGVMS<MeshType, MapType, SpaceDim>::applySUPGVMS_RHS_semi_im
 			TAU_M*value(M_density*M_density)*dot( value(M_fespaceUETA, velocityExtrapolated)*grad(phi_i), value(M_fespaceUETA, velocityRhs))
 
 			// VMS TERMS
-			+ TAU_M*value(M_density*M_density)*dot( value(M_fespaceUETA, velocityExtrapolated)*transpose(grad(phi_i)), value(M_fespaceUETA, velocityRhs))
+			+ TAU_M*value(M_density*M_density)*dot( transpose(grad(phi_i))*value(M_fespaceUETA, velocityExtrapolated), value(M_fespaceUETA, velocityRhs))
 	)
 	>> rhs->block(0);
 
