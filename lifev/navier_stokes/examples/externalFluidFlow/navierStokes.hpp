@@ -36,13 +36,14 @@
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/navier_stokes/solver/OseenData.hpp>
 #include <lifev/core/fem/FESpace.hpp>
-#include <lifev/navier_stokes/fem/TimeAdvanceBDFNavierStokes.hpp>
+#include <lifev/core/fem/TimeAndExtrapolationHandler.hpp>
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #include <lifev/core/filter/ExporterVTK.hpp>
 #include <lifev/core/filter/ExporterEmpty.hpp>
 #include <lifev/core/mesh/MeshUtility.hpp>
 #include <lifev/core/filter/PartitionIO.hpp>
+#include <algorithm>    // std::reverse
 
 using namespace LifeV;
 
@@ -95,11 +96,25 @@ public:
 
 
 private:
+    /*! @enum TestType
+        Order of the BDF
+     */
+
+    /*! @enum InitializationType
+        Type of initialization. "Interpolation" just interpolates the value of the exact solution to the DoFs.
+        "Projection" solves an Oseen problem where alpha=0, the convective term is linearized by using the exact solution for beta,
+        and the time derivative is passed to the right hand side and computed from the exact solution.
+     */
+    enum InitializationType {Projection, Interpolation};
+
 
     struct Private;
     
     boost::shared_ptr<Private> M_data;
     
+    // Initialization method
+    InitializationType         M_initMethod;
+
     // output file name
     std::string                M_outputName;
     
@@ -116,17 +131,47 @@ Real zeroFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const
     return 0;
 }
 
-Real oneFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+Real oneFunctionX(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
-    return 1;
+	if(i==0)
+	{
+		return 1.0;
+	}
+	else
+	{
+		return 0.0;
+	}
+}
+
+Real oneFunctionY(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+{
+	if(i==1)
+	{
+		return 1.0;
+	}
+	else
+	{
+		return 0.0;
+	}
 }
 
 Real inflowFunction(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
     if (i == 0)
     {
-        Real ux = 22.0;              // flat velocity profile
-        return (1 * ux * t/0.15 * (t < 0.15) + 1 * ux * (t >= 0.15));
+        Real ux = 22.0;
+        Real T_ramp    	= 0.15;
+        Real inflowVel;
+
+        if ( t <= T_ramp )
+        {
+        	inflowVel =	ux/2.0*(1.0-std::cos(M_PI/T_ramp*t));
+        }
+        else
+        {
+        	inflowVel = ux;
+        }
+        return inflowVel;
     }
     else
     {
@@ -134,7 +179,7 @@ Real inflowFunction(const Real& t, const Real& /*x*/, const Real& /*y*/, const R
     }
     
 }
- 
+
 struct NavierStokes::Private
 {
     Private() :
@@ -147,6 +192,8 @@ struct NavierStokes::Private
     double         Re;
 
     std::string    data_file_name;
+
+
 
     double         nu;  /* < viscosity (in m^2/s) */
     //const double rho; /* < density is constant (in kg/m^3) */
@@ -171,6 +218,8 @@ NavierStokes::NavierStokes ( int argc,
     M_data->Re = dataFile ( "fluid/problem/Re", 1. );
     M_data->nu = dataFile ( "fluid/physics/viscosity", 1. ) /
                  dataFile ( "fluid/physics/density", 1. );
+
+
 
 #ifdef EPETRA_MPI
 
@@ -241,9 +290,6 @@ NavierStokes::run()
     
     /*
      * 	Handling offline/online mesh partitioning - BEGIN -
-     * 	Note: if one want to partion offline a mesh, he can use the test in:
-     * 	lifev/structure/example/example_partitionMesh -> main_write.cpp
-     * 	TODO: this example in my opinion should go in the core/offline_partition_io!
      */
 
     bool offlinePartio = dataFile ("offline_partitioner/useOfflinePartitionedMesh", false);
@@ -310,7 +356,6 @@ NavierStokes::run()
      */
 
     int saveEvery = dataFile("fluid/save_every",1);
-    int orderBDF  = dataFile("fluid/time_discretization/BDF_order",1);
 
     /*
      *	Reading if we need to store at each timestep or not - END
@@ -383,15 +428,15 @@ NavierStokes::run()
 
     // If we change the FE we have to update the BCHandler (internal data)
     bcH.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
-    
-    BCFunctionBase uOne( oneFunction );
+    BCFunctionBase uOneX( oneFunctionX );
+    BCFunctionBase uOneY( oneFunctionY );
     
     BCHandler bcHDrag;
-    bcHDrag.addBC( "Cylinderr",   6, Essential, Component, uOne,   xComp ); // ATTENTO CAMBIA A SECONDA DEL FLAG DEL CILINDRO
+    bcHDrag.addBC( "CylinderDrag",   6, Essential, Full, uOneX, 3 ); // ATTENTO CAMBIA A SECONDA DEL FLAG DEL CILINDRO
     bcHDrag.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
     
     BCHandler bcHLift;
-    bcHLift.addBC( "Cylinderr",   6, Essential, Component, uOne,   yComp ); // ATTENTO CAMBIA A SECONDA DEL FLAG DEL CILINDRO
+    bcHLift.addBC( "CylinderLift",   6, Essential, Full, uOneY, 3 ); // ATTENTO CAMBIA A SECONDA DEL FLAG DEL CILINDRO
     bcHLift.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
     
     // +-----------------------------------------------+
@@ -423,19 +468,29 @@ NavierStokes::run()
     if (verbose)
         std::cout << std::endl << "[Initialization of the simulation]" << std::endl;
     
-    Real dt     = oseenData->dataTime()->timeStep();
-    Real t0     = oseenData->dataTime()->initialTime();
-    Real tFinal = oseenData->dataTime()->endTime();
+    Real dt       = dataFile("fluid/time_discretization/timestep",0.0);
+    Real t0       = dataFile("fluid/time_discretization/initialtime",0.0);
+    Real tFinal   = dataFile("fluid/time_discretization/endtime",0.0);
+    UInt orderBDF = dataFile("fluid/time_discretization/BDF_order",2);
     
-    
-    // bdf object to store the previous solutions
-    TimeAdvanceBDFNavierStokes<vector_Type> bdf;
-    bdf.setup (oseenData->dataTimeAdvance()->orderBDF() );
-    
+    // Time handler objects to deal with time advancing and extrapolation
+    TimeAndExtrapolationHandler timeVelocity;
+    TimeAndExtrapolationHandler timePressure;
+
+    // Order of BDF and extrapolation for the velocity
+    timeVelocity.setBDForder(orderBDF);
+    timeVelocity.setMaximumExtrapolationOrder(orderBDF);
+    timeVelocity.setTimeStep(dt);
+
+    // Order of BDF and extrapolation for the pressure
+    timePressure.setBDForder(orderBDF);
+    timePressure.setMaximumExtrapolationOrder(orderBDF);
+    timePressure.setTimeStep(dt);
+
     if (verbose)
         std::cout << "Computing the initial solution ... " << std::endl;
     
-    vector_Type beta ( fullMap );
+    vector_Type beta ( uFESpace->map() );
     vector_Type rhs ( fullMap );
     
     /*
@@ -448,34 +503,34 @@ NavierStokes::run()
     oseenData->dataTime()->setTime (t0);
 
     // initialize stencils
-    std::vector<vectorPtr_Type> solutionStencilVelocity;
-    vectorPtr_Type velocity ( new vector_Type(uFESpace->map() ) );
-    solutionStencilVelocity.resize ( bdf.bdfVelocity().size() );
+	vector_Type velocityInitial ( uFESpace->map() );
+	vector_Type pressureInitial ( pFESpace->map() );
 
-    std::vector<vectorPtr_Type> solutionStencilPressure;
-    vectorPtr_Type pressure ( new vector_Type(pFESpace->map() ) );
-    solutionStencilPressure.resize ( bdf.bdfPressure().size() );
-
-    // initialize vectors for printing the solution when we do the restart
-    vectorPtr_Type velocityInitial ( new vector_Type(uFESpace->map() ) );
-    vectorPtr_Type pressureInitial ( new vector_Type(pFESpace->map() ) );
+	std::vector<vector_Type> initialStateVelocity;
+	std::vector<vector_Type> initialStatePressure;
 
     if (!doRestart)
     {
-    	*velocity *= 0;
-    	for ( UInt i(0); i < bdf.bdfVelocity().size() ; ++i)
-    		solutionStencilVelocity[ i ] = fluid.solution();
+    	// if you start from scratch
+    	velocityInitial *= 0 ;
+    	pressureInitial *= 0;
 
-    	*pressure *= 0;
-    	for ( UInt i(0); i < bdf.bdfPressure().size() ; ++i)
-    		solutionStencilPressure[ i ] = pressure;
+    	if(orderBDF==1)
+    	{
+    		initialStateVelocity.push_back(velocityInitial);
+    		initialStatePressure.push_back(pressureInitial);
+    	}
+    	else if (orderBDF==2)
+    	{
+    		initialStateVelocity.push_back(velocityInitial);
+    		initialStateVelocity.push_back(velocityInitial);
 
-    	bdf.bdfVelocity().setInitialCondition (solutionStencilVelocity);
-    	bdf.bdfPressure().setInitialCondition (solutionStencilPressure);
+    		initialStatePressure.push_back(pressureInitial);
+    		initialStatePressure.push_back(pressureInitial);
+    	}
 
-    	*velocityInitial = *velocity;
-    	*pressureInitial = *pressure;
-
+    	timeVelocity.initialize(initialStateVelocity);
+    	timePressure.initialize(initialStatePressure);
     }
     else
     {
@@ -487,45 +542,36 @@ NavierStokes::run()
     	importer.reset ( new  hdf5Filter_Type ( dataFile, fileName) );
 
     	importer->setMeshProcId (uFESpace->mesh(), M_data->comm->MyPID() );
-    	vectorPtr_Type velocity (new vector_Type (uFESpace->map(), importer->mapType() ) );
-    	vectorPtr_Type pressure (new vector_Type (pFESpace->map(), importer->mapType() ) );
 
     	std::string iterationString;
     	iterationString = initialLoaded;
 
-
-    	for (UInt iterInit = 0; iterInit < bdf.bdfVelocity().size(); iterInit++ )
+    	for (UInt iterInit = 0; iterInit < orderBDF; iterInit++ )
     	{
-    		velocity.reset ( new vector_Type (uFESpace->map(),  Unique ) );
-    		*velocity *= 0.0;
+    		vectorPtr_Type velocityRestart;
+    		velocityRestart.reset ( new vector_Type (uFESpace->map(),  Unique ) );
+    		*velocityRestart *= 0.0;
 
-
-    		pressure.reset ( new vector_Type (pFESpace->map(),  Unique ) );
-    		*pressure *= 0.0;
+    		vectorPtr_Type pressureRestart;
+    		pressureRestart.reset ( new vector_Type (pFESpace->map(),  Unique ) );
+    		*pressureRestart *= 0.0;
 
     		LifeV::ExporterData<mesh_Type> velocityReader (LifeV::ExporterData<mesh_Type>::VectorField,
-    				std::string ("velocity." + iterationString),
-    				uFESpace,
-    				velocity,
-    				UInt (0),
-    				LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+    													   std::string ("velocity." + iterationString),
+    													   uFESpace,
+    													   velocityRestart,
+    													   UInt (0),
+    													   LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
     		LifeV::ExporterData<mesh_Type> pressureReader (LifeV::ExporterData<mesh_Type>::ScalarField,
-    				std::string ("pressure." + iterationString),
-    				pFESpace,
-    				pressure,
-    				UInt (0),
-    				LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+    													   std::string ("pressure." + iterationString),
+    													   pFESpace,
+    													   pressureRestart,
+    													   UInt (0),
+    													   LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
     		importer->readVariable (velocityReader);
     		importer->readVariable (pressureReader);
-
-    		vectorPtr_Type solutionVelocityPart (new vector_Type (fluid.solution()->map(), Unique, Zero));
-    		*solutionVelocityPart *= 0;
-    		solutionVelocityPart->subset(*velocity, velocity->map(), UInt(0), UInt(0) );
-
-    		solutionStencilVelocity[ iterInit ] = solutionVelocityPart;
-    		solutionStencilPressure[ iterInit ] = pressure;
 
     		int iterations = std::atoi (iterationString.c_str() );
     		iterations--;
@@ -535,27 +581,22 @@ NavierStokes::run()
     		iter << std::setw (5) << ( iterations );
     		iterationString = iter.str();
 
-    		if (iterInit == 0)
-    		{
-    			*velocityInitial = *velocity;
-    			*pressureInitial = *pressure;
-    		}
-
+    		initialStateVelocity.push_back(*velocityRestart);
+    		initialStatePressure.push_back(*pressureRestart);
     	}
 
-    	bdf.bdfVelocity().setInitialCondition (solutionStencilVelocity);
-    	bdf.bdfPressure().setInitialCondition (solutionStencilPressure);
+    	// For BDF 1 it does not change anything, for BDF2 it is necessary
+    	std::reverse(initialStateVelocity.begin(),initialStateVelocity.end());
+    	std::reverse(initialStatePressure.begin(),initialStatePressure.end());
+
+    	timeVelocity.initialize(initialStateVelocity);
+    	timePressure.initialize(initialStatePressure);
     	importer->closeFile();
     }
-
-    bdf.bdfVelocity().updateRHSContribution ( oseenData->dataTime()->timeStep() );
-
-    bdf.bdfPressure().updateRHSContribution ( oseenData->dataTime()->timeStep() );
 
     /*
      *  Starting from scratch or restarting? -END-
      */
-    
 
     M_outputName = dataFile ( "exporter/filename", "result");
     boost::shared_ptr< Exporter<mesh_Type > > exporter;
@@ -591,11 +632,14 @@ NavierStokes::run()
     }
     
     velAndPressure.reset ( new vector_Type (*fluid.solution(), exporter->mapType() ) );
-    
+
+    velAndPressure->subset(velocityInitial,  uFESpace->map(), 0, 0);
+    velAndPressure->subset(pressureInitial,  pFESpace->map(), 0, pressureOffset);
+
     exporter->addVariable ( ExporterData<mesh_Type>::VectorField, "velocity", uFESpace, velAndPressure, UInt (0) );
     exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpace, velAndPressure, pressureOffset );
     
-    exporter->postProcess ( 0 );
+    exporter->postProcess ( time );
     
     initChrono.stop();
     
@@ -610,20 +654,30 @@ NavierStokes::run()
     
     int iter = 1;
     time = t0 + dt;
+    Real drag(0.0);
     VectorSmall<2> AerodynamicCoefficients;
     
     if(verbose && M_exportCoeff)
     {
         M_out.open ("Coefficients.txt" );
-        M_out << "% time / drag / lift / energy \n" << std::flush;
+        M_out << "% time / drag coefficient / lift coefficient / energy \n" << std::flush;
     }
     
     int n_iter = 0;
 
+    // initialize stencils
+    vector_Type pressure ( pFESpace->map() );
+    vector_Type pressureFull ( fullMap );
+    vector_Type rhsVelocity ( uFESpace->map() );
+    vector_Type rhsVelocityFull ( fullMap );
+    vector_Type betaFull ( fullMap );
+
+    Real S = 0.25*fluid.area(6);
+    Real factor = 2.0/(1000.0*22.0*22.0*S); // 2/(rho*V^2*S)
+
     for ( ; time <= tFinal + dt / 2.; time += dt, iter++)
     {
-
-    	n_iter++;
+        n_iter++;
         iterChrono.reset();
         iterChrono.start();
         
@@ -632,48 +686,53 @@ NavierStokes::run()
         if (verbose)
             std::cout << "[t = " << oseenData->dataTime()->time() << " s.]" << std::endl;
         
-        double alpha = bdf.bdfVelocity().coefficientFirstDerivative ( 0 ) / oseenData->dataTime()->timeStep();
+        double alpha = timeVelocity.alpha() / dt;
         
-        bdf.bdfVelocity().extrapolation (beta); // Extrapolation for the convective term
-        
-        *pressure *= 0;
-        bdf.bdfPressure().extrapolation (*pressure); // Extrapolation for the LES terms
+        beta *= 0;
+        timeVelocity.extrapolate (orderBDF, beta); // Extrapolation for the convective term
+        betaFull.subset(beta, uFESpace->map(), 0, 0);
 
-        bdf.bdfVelocity().updateRHSContribution ( oseenData->dataTime()->timeStep() );
-        
-        bdf.bdfPressure().updateRHSContribution ( oseenData->dataTime()->timeStep() );
+        pressure *= 0;
+        timePressure.extrapolate (orderBDF, pressure); // Extrapolation for the LES terms
+        pressureFull *= 0;
+        pressureFull.subset(pressure, pFESpace->map(), 0, pressureOffset);
 
+        rhsVelocity *= 0;
+        timeVelocity.rhsContribution (rhsVelocity);
+        rhsVelocityFull.subset(rhsVelocity, uFESpace->map(), 0, 0);
 
-        fluid.setVelocityRhs(bdf.bdfVelocity().rhsContributionFirstDerivative());
-        
-        fluid.setPressureExtrapolated(*pressure);
-        
-        
-        rhs  = fluid.matrixMass() * bdf.bdfVelocity().rhsContributionFirstDerivative();
-        
-        fluid.updateSystem ( alpha, beta, rhs );
+        fluid.setVelocityRhs(rhsVelocityFull);
+        fluid.setPressureExtrapolated(pressureFull);
 
+        rhs  = fluid.matrixMass() * rhsVelocityFull;
+        
+        fluid.updateSystem ( alpha, betaFull, rhs );
+        
         fluid.iterate ( bcH );
         
-        Real velInfty = (1 * 22 * time/0.15 * (time < 0.15) + 1 * 22 * (time >= 0.15));
+        AerodynamicCoefficients = fluid.computeForces(1, bcHDrag, bcHLift );
         
-        AerodynamicCoefficients = fluid.computeDrag(1, bcHDrag, bcHLift, velInfty, 0.25*fluid.area(6) );
-        
+        Real cd = factor*AerodynamicCoefficients[0];
+        Real cl = factor*AerodynamicCoefficients[1];
         Real energy = fluid.energy();
 
         if ( verbose && M_exportCoeff )
         {
             M_out << time  << " "
-            << AerodynamicCoefficients[0] << " "
-            << AerodynamicCoefficients[1] << " "
+            << cd << " "
+            << cl << " "
             << energy << "\n" << std::flush;
         }
         
+
+        vector_Type computedVelocity(uFESpace->map());
+        computedVelocity.subset(*fluid.solution(), uFESpace->map(), 0, 0);
+
         vector_Type computedPressure(pFESpace->map());
         computedPressure.subset(*fluid.solution(), pressureOffset );
 
-        bdf.bdfVelocity().shiftRight ( *fluid.solution() );
-        bdf.bdfPressure().shiftRight ( computedPressure );
+        timeVelocity.shift(computedVelocity);
+        timePressure.shift(computedPressure);
         
         // Exporting the solution
         *velAndPressure = *fluid.solution();
@@ -703,7 +762,7 @@ NavierStokes::run()
     }
     
     globalChrono.stop();
-    
+
     if (verbose)
         std::cout << std::endl << "[[END_SIMULATION]]" << std::endl;
 }

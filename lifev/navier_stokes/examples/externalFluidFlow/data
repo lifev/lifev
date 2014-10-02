@@ -5,23 +5,23 @@
 
 * #offline partitioner details
 [offline_partitioner]
-useOfflinePartitionedMesh = true                 						 # true for loading an already partitioned mesh, false to partition the mesh online
-num_parts = 24                                     						 # must be the same of the number of parts when we partioned offline the mesh
-hdf5_file_name = cylinder_new_longer_24__MeshPartitionTool_ParMETIS.h5   # file generated running test partion_io (main_write) - REQUIRED - 
-io_class = new                                    						 # possibilities: old or new, use new
+useOfflinePartitionedMesh = true                  					# true for loading an already partitioned mesh, false to partition the mesh online
+num_parts = 24                                     					# must be the same of the number of parts when we partioned offline the mesh
+hdf5_file_name = cylinder_new_longer_24__MeshPartitionTool_ParMETIS.h5     # file generated running test partion_io (main_write) - REQUIRED - 
+io_class = new                                    					# possibilities: old or new, use new
 
 [exporter]
 type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
 start      = 0
 save       = 1
-filename   = resultParteDue # name of the file with the results 
+filename   = result_SUPG
 
 [importer]
 restart  = false
-initSol  = 00004        # label of the solution from which we want to start (5 digits by convention)
+initSol  = 00007        # label of the solution from which we want to start (5 digits by convention)
 type     = hdf5         # format of the imported solution
-filename = resultPart2  # filename of the solution from which we restart the simulation
+filename = resultBDF2_parte1
 
 [NavierStokes]
 initialization         = interpolation #projection   # initialization (L2 projection) or interpolation
@@ -33,24 +33,24 @@ mesh_source            = regular_mesh
 
 [fluid]
 
-	save_every          = 5
+    save_every          = 1
     export_coefficients = true  
     conservativeFormulation = false
     
     [./physics]
-    density         = 1000       # density
-    viscosity       = 1          # viscosity
+    density         = 1000  # density
+    viscosity       = 1     # viscosity
 
     [../time_discretization]
     initialtime     = 0.0
-    endtime         = 14.945
+    endtime         = 15.0
     timestep        = 0.0025
 
-    BDF_order       = 1 
+    BDF_order       = 2
 
     [../space_discretization]
     mesh_dir        = ./
-    mesh_file       = cylinder_new_longer.mesh
+    mesh_file       = fluid1_L1.mesh
     mesh_type       = .mesh
 
     verbose         = 0
@@ -64,21 +64,28 @@ mesh_source            = regular_mesh
     
 	[../stabilization]
 	use             = true
-	method          = VMSLES	  # other possible choices: IP, SUPG, VMSLES, SUPGVMS
+	method          = SUPG	  # other possible choices: IP, SUPG, VMSLES, SUPGVMS
 
     [../miscellaneous]
     verbose         = 1
     steady          = 0
 
+    [../solver]
+    solver          = gmres
+    output          = all # none
+    max_iter        = 1800
+    kspace          = 200
+    tol             = 1e-9    # AztecOO tolerance
+
     [../prec]
-    prectype                = ML # Ifpack or ML
+    prectype                = Ifpack # Ifpack or ML
     displayList             = true
-    
+        
         [./ML]
 
         default_parameter_list  = NSSA  # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
         inc_or_dec              = increasing
-	    max_levels              = 3
+	   max_levels              = 3
         MLOutput                = 10
         pde_equations           = 4
         cycle_applications      = 3
@@ -132,17 +139,6 @@ mesh_source            = regular_mesh
 
             [../]
         [../]
-
-	[../solver]
-    solver          = gmres
-    scaling         = none
-    output          = all # none
-    conv            = rhs
-    max_iter        = 1800
-    reuse           = true
-    max_iter_reuse  = 80
-    kspace          = 100
-    tol             = 1e-8    # AztecOO tolerance
     
     [../ipstab]
     gammaBeta  = 0.7
