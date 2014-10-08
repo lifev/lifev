@@ -937,8 +937,8 @@ void StructuralOperator<Mesh>::setupMapMarkersVolumes ( void )
         extractedVolumes = this->M_dispFESpace->mesh()->elementList().extractAccordingToPredicateNonConstElement ( *ref, extractedIndexes );
 
         //Insert the correspondande Marker <--> List of Volumes inside the map
-        M_mapMarkersVolumes->insert ( pair<UInt, vectorVolumes_Type> (M_data->vectorFlags() [i], extractedVolumes) ) ;
-        M_mapMarkersIndexes->insert ( pair<UInt, vectorIndexes_Type> (M_data->vectorFlags() [i], extractedIndexes) ) ;
+        M_mapMarkersVolumes->insert ( std::pair<UInt, vectorVolumes_Type> (M_data->vectorFlags() [i], extractedVolumes) ) ;
+        M_mapMarkersIndexes->insert ( std::pair<UInt, vectorIndexes_Type> (M_data->vectorFlags() [i], extractedIndexes) ) ;
 
         // for( UInt i(0); i<extractedIndexes.size(); i++ )
         //     std::cout << "Element: " << extractedIndexes[i] << std::endl;

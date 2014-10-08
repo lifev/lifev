@@ -469,7 +469,7 @@ OneDFSISolver::postProcess ( const solution_Type& solution, const Real& time )
     {
         std::string file = M_physicsPtr->data()->postprocessingDirectory() + "/" + M_physicsPtr->data()->postprocessingFile() + "_" + i->first + ".mfile";
         outfile.open ( file.c_str(), std::ios::app );
-        outfile.setf ( ios::scientific, ios::floatfield );
+        outfile.setf ( std::ios::scientific, std::ios::floatfield );
 
         outfile << time << " ";
         for ( UInt iNode (0); iNode < static_cast< UInt > ( (*i->second).size() ); ++iNode )
