@@ -131,6 +131,11 @@ Real zeroFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const
     return 0;
 }
 
+Real oneFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+{
+    return 1.0;
+}
+
 Real oneFunctionX(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
 	if(i==0)
@@ -412,6 +417,7 @@ NavierStokes::run()
     
     BCFunctionBase uZero( zeroFunction );
 	BCFunctionBase uInflow( inflowFunction );
+	BCFunctionBase one( oneFunction );
     
 	std::vector<LifeV::ID> zComp(1), yComp(1), xComp(1);
     xComp[0] = 0;
@@ -439,6 +445,19 @@ NavierStokes::run()
     bcHLift.addBC( "CylinderLift",   6, Essential, Full, uOneY, 3 ); // ATTENTO CAMBIA A SECONDA DEL FLAG DEL CILINDRO
     bcHLift.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
     
+    BCHandler bcHLoads;
+    bcHLoads.addBC( "ZerosUD", 4, Essential, Full, uZero, 3 );
+    bcHLoads.addBC( "ZerosLR", 5, Essential, Full, uZero, 3 );
+    bcHLoads.addBC( "ZerosI",  2, Essential, Full, uZero, 3 );
+    bcHLoads.addBC( "ZerosO",  3, Essential, Full, uZero, 3 );
+    bcHLoads.addBC( "OneOnBody", 6, Essential, Full, one, 3 );
+    bcHLoads.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
+
+    // bc for the loads
+    BCHandler bcHLoadsVec;
+    bcHLoadsVec.addBC( "OneOnBody", 6, Essential, Full, one, 3 );
+    bcHLoadsVec.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
+
     // +-----------------------------------------------+
     // |             Creating the problem              |
     // +-----------------------------------------------+
@@ -636,10 +655,15 @@ NavierStokes::run()
     velAndPressure->subset(velocityInitial,  uFESpace->map(), 0, 0);
     velAndPressure->subset(pressureInitial,  pFESpace->map(), 0, pressureOffset);
 
+    vectorPtr_Type sol_drag;
+    vectorPtr_Type sol_lift;
+    sol_drag.reset ( new vector_Type( uFESpace->map(), exporter->mapType() ) );
+    sol_lift.reset ( new vector_Type( uFESpace->map(), exporter->mapType() ) );
+
     exporter->addVariable ( ExporterData<mesh_Type>::VectorField, "velocity", uFESpace, velAndPressure, UInt (0) );
     exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpace, velAndPressure, pressureOffset );
-    
-    exporter->postProcess ( time );
+    exporter->addVariable ( ExporterData<mesh_Type>::VectorField, "sol_drag", uFESpace, sol_drag, UInt(0) );
+    exporter->addVariable ( ExporterData<mesh_Type>::VectorField, "sol_lift", uFESpace, sol_lift, UInt(0) );
     
     initChrono.stop();
     
@@ -673,7 +697,26 @@ NavierStokes::run()
     vector_Type betaFull ( fullMap );
 
     Real S = 0.25*fluid.area(6);
-    Real factor = 2.0/(1000.0*22.0*22.0*S); // 2/(rho*V^2*S)
+    Real factor = 2.0/(fluid.density()*22.0*22.0*S); // 2/(rho*V^2*S)
+
+    /*
+     * 	Compute the vector for computing Loads - BEGIN
+     */
+
+    fluid.preprocessing(bcHLoads, dataFile, bcHDrag, bcHLift, *sol_drag, *sol_lift);
+
+    // Vector for loads
+    vector_Type vector_load_drag ( fullMap );
+    vector_Type vector_load_lift ( fullMap );
+
+    vector_load_drag.subset(*sol_drag, uFESpace->map(), 0, 0);
+    vector_load_lift.subset(*sol_lift, uFESpace->map(), 0, 0);
+
+    exporter->postProcess ( time );
+
+    /*
+     * 	Compute the vector for computing Loads - END
+     */
 
     for ( ; time <= tFinal + dt / 2.; time += dt, iter++)
     {
@@ -710,7 +753,7 @@ NavierStokes::run()
         
         fluid.iterate ( bcH );
         
-        AerodynamicCoefficients = fluid.computeForces(1, bcHDrag, bcHLift );
+        AerodynamicCoefficients = fluid.computeForcesNewTest( vector_load_drag, vector_load_lift );
         
         Real cd = factor*AerodynamicCoefficients[0];
         Real cl = factor*AerodynamicCoefficients[1];

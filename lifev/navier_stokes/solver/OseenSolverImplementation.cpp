@@ -410,6 +410,81 @@ initialize ( const vector_Type& velocityAndPressure )
 
 template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::preprocessing( BCHandler& bcloads,
+																				const GetPot& dataFile, BCHandler& bcDrag,
+																				BCHandler& bcHLift,
+																				vector_Type& solDrag,
+																				vector_Type& solLift )
+{
+	matrixPtr_Type laplacian;
+	laplacian.reset( new matrix_Type ( M_velocityFESpace.map() ) );
+
+	{
+		using namespace ExpressionAssembly;
+
+		integrate(
+				elements(M_fespaceUETA->mesh()),
+				M_velocityFESpace.qr(),
+				M_fespaceUETA,
+				M_fespaceUETA,
+				dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) )
+		) >> laplacian;
+	}
+
+	vector_Type rhs_drag( M_velocityFESpace.map(), Unique );
+	rhs_drag *= 0;
+
+	vector_Type rhs_lift( M_velocityFESpace.map(), Unique );
+	rhs_lift *= 0;
+
+	vectorPtr_Type solution_drag;
+	solution_drag.reset( new vector_Type( M_velocityFESpace.map(), Unique ) );
+
+	vectorPtr_Type solution_lift;
+	solution_lift.reset( new vector_Type( M_velocityFESpace.map(), Unique ) );
+
+	bcloads.bcUpdate ( *M_velocityFESpace.mesh(), M_velocityFESpace.feBd(), M_velocityFESpace.dof() );
+
+	bcManage ( *laplacian, rhs_drag, *M_velocityFESpace.mesh(), M_velocityFESpace.dof(), bcloads, M_velocityFESpace.feBd(), 1.0, 0.0 );
+
+	bcManageRhs ( rhs_drag, *M_velocityFESpace.mesh(), M_velocityFESpace.dof(),  bcDrag, M_velocityFESpace.feBd(), 1., 0.);
+	bcManageRhs ( rhs_lift, *M_velocityFESpace.mesh(), M_velocityFESpace.dof(),  bcHLift, M_velocityFESpace.feBd(), 1., 0.);
+
+	laplacian->globalAssemble();
+	rhs_drag.globalAssemble();
+	rhs_lift.globalAssemble();
+
+	// drag
+	linearSolverPtr_Type linearSolver_drag;
+	linearSolver_drag.reset( new linearSolver_Type (M_velocityFESpace.map().commPtr()) );
+
+	linearSolver_drag->setupPreconditioner ( dataFile, "preprocessing/prec" );
+	linearSolver_drag->setDataFromGetPot ( dataFile, "preprocessing/solver" );
+
+	linearSolver_drag->setMatrix ( *laplacian );
+
+	boost::shared_ptr<MatrixEpetra<Real> > staticCast_drag = boost::static_pointer_cast<MatrixEpetra<Real> > (laplacian);
+	Int numIter_drag = linearSolver_drag->solveSystem ( rhs_drag, *solution_drag, staticCast_drag );
+
+	solDrag = *solution_drag;
+
+	// lift
+	linearSolverPtr_Type linearSolver_lift;
+	linearSolver_lift.reset( new linearSolver_Type (M_velocityFESpace.map().commPtr()) );
+
+	linearSolver_lift->setupPreconditioner ( dataFile, "preprocessing/prec" );
+	linearSolver_lift->setDataFromGetPot ( dataFile, "preprocessing/solver" );
+
+	linearSolver_lift->setMatrix ( *laplacian );
+
+	boost::shared_ptr<MatrixEpetra<Real> > staticCast_lift = boost::static_pointer_cast<MatrixEpetra<Real> > (laplacian);
+	Int numIter_lift = linearSolver_lift->solveSystem ( rhs_lift, *solution_lift, staticCast_lift );
+
+	solLift = *solution_lift;
+}
+
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
+void
 OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::buildSystem()
 {
 	// New ETA PART
@@ -1248,6 +1323,27 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeForces (
 
     drag = M_residual->dot(onesOnBodyDrag);
     lift = M_residual->dot(onesOnBodyLift);
+
+    M_Displayer.leaderPrint ( "  F-  Value of the drag:          ", drag );
+    M_Displayer.leaderPrint ( "  F-  Value of the lift:          ", lift );
+
+    VectorSmall<2> Forces;
+    Forces[0] = drag;
+    Forces[1] = lift;
+
+    return Forces;
+}
+
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
+VectorSmall<2>
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeForcesNewTest ( const vector_Type& drag_vector,
+																						const vector_Type& lift_vector )
+{
+    Real drag (0.0);
+    Real lift (0.0);
+
+    drag = M_residual->dot(drag_vector);
+    lift = M_residual->dot(lift_vector);
 
     M_Displayer.leaderPrint ( "  F-  Value of the drag:          ", drag );
     M_Displayer.leaderPrint ( "  F-  Value of the lift:          ", lift );

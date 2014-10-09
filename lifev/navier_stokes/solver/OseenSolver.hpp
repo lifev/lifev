@@ -338,6 +338,8 @@ public:
      */
     Real energy ( );
 
+    void preprocessing( BCHandler& bcloads, const GetPot& dataFile, BCHandler& bcDrag, BCHandler& bcHLift, vector_Type& solDrag, vector_Type& solLift);
+
     //! Compute area on a boundary face with given flag
     /*!
         @param  flag
@@ -534,6 +536,10 @@ public:
     VectorSmall<2> computeForces(	const markerID_Type&  flag,
     								bcHandler_Type& bcHandlerDrag,
     								bcHandler_Type& bcHandlerLift);
+
+    VectorSmall<2> computeForcesNewTest(	const vector_Type& drag_vector,
+    										const vector_Type& lift_vector);
+
 
     //! Compute the drag
     /*!
