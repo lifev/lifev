@@ -429,7 +429,7 @@ NavierStokes::run()
     bcH.addBC( "Outflow",        3, Natural,   Full,      uZero,   3 );
     bcH.addBC( "Inflow",         2, Essential, Full,      uInflow, 3 );
     bcH.addBC( "WallUpDown",     4, Essential, Component, uZero,   yComp );
-    bcH.addBC( "Cylinder",       6, Essential, Full,      uZero,   3 );
+    bcH.addBC( "Cylinder",       6, Essential, Normal,    uZero );
     bcH.addBC( "WallLeftRight",  5, Essential, Component, uZero,   zComp );
 
     // If we change the FE we have to update the BCHandler (internal data)
