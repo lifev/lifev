@@ -31,78 +31,6 @@ test                   = accuracy
 accuracy_tolerance     = 0.09
 mesh_source            = regular_mesh
 
-[preprocessing]
-
-	[./solver]
-    		solver          = gmres
-    		output          = all # none
-    		max_iter        = 1800
-    		kspace          = 200
-    		tol             = 1e-9    # AztecOO tolerance
-
-    	[./prec]
-    		prectype                = ML # Ifpack or ML
-    		displayList             = true
-        
-        	[../ML]
-
-        		default_parameter_list  = NSSA  # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
-        		inc_or_dec              = increasing
-	   		max_levels              = 3
-		    	MLOutput                = 10
-		     pde_equations           = 3
-		     cycle_applications      = 3
-
-            [./smoother]
-            # smoother type
-            # Aztec, IFPACK, Jacobi, ML symmetric Gauss-Seidel, symmetric Gauss-Seidel,
-            # ML Gauss-Seidel, Gauss-Seidel, Chebyshev, MLS, Hiptmair, Amesos-KLU,
-            # Amesos-Superlu, Amesos-UMFPACK, Amesos-Superludist, Amesos-MUMPS,
-            # user-defined, SuperLU, IFPACK-Chebyshev, self, do-nothing,
-            # IC, ICT, ILU, ILUT
-            type            = Gauss-Seidel
-            pre_or_post     = both
-            sweeps          = 3
-
-            [../coarse]
-            type                    = Amesos-KLU
-            sweeps                  = 1
-            pre_or_post             = both
- 
-	    [../aggregation]
-            threshold               = 0.01
-            type                    = Uncoupled-MIS      
-      
-            [../energy_minimization]
-            enable                  = true
-
-	    [../repartition]
-            enable                  = true
-            partitioner             = ParMETIS    
-
-
-        # ifpack
-        [../ifpack]
-        overlap     = 2
-
-            [./fact]
-            ilut_level-of-fill            = 1
-            drop_tolerance                = 1.e-5
-            relax_value                   = 0
-
-            [../amesos]
-            solvertype =  Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
-
-            [../partitioner]
-            overlap = 2
-
-            [../schwarz]
-            reordering_type = none #metis, rcm, none
-            filter_singletons = true
-
-            [../]
-        [../]
-
 [fluid]
 
     save_every          = 1
@@ -147,7 +75,7 @@ mesh_source            = regular_mesh
     output          = all # none
     max_iter        = 1800
     kspace          = 200
-    tol             = 1e-9    # AztecOO tolerance
+    tol             = 1e-7    # AztecOO tolerance
 
     [../prec]
     prectype                = ML # Ifpack or ML
