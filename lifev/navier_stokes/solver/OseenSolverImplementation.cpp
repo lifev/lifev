@@ -297,6 +297,8 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::setUp ( const G
 
     M_steady        = dataFile ( "fluid/miscellaneous/steady", 0 );
 
+    Real bdfOrder = dataFile ( "fluid/time_discretization/BDF_order", 1.0 );
+
     if (M_stabilization)
     {
     	if(M_oseenData->stabilizationType() == "IP")
@@ -321,6 +323,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::setUp ( const G
     		M_supgStabilization->setETpressureSpace(M_fespacePETA);
     		M_supgStabilization->setCommunicator(M_velocityFESpace.map().commPtr());
     		M_supgStabilization->setDensity(M_oseenData->density());
+    		M_supgStabilization->setBDForder(bdfOrder);
     		M_supgStabilization->setViscosity(M_oseenData->viscosity());
     		M_supgStabilization->setTimeStep(M_oseenData->dataTime()->timeStep());
 
@@ -333,6 +336,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::setUp ( const G
     		M_supgVmsStabilization->setETpressureSpace(M_fespacePETA);
     		M_supgVmsStabilization->setCommunicator(M_velocityFESpace.map().commPtr());
     		M_supgVmsStabilization->setDensity(M_oseenData->density());
+    		M_supgVmsStabilization->setBDForder(bdfOrder);
     		M_supgVmsStabilization->setViscosity(M_oseenData->viscosity());
     		M_supgVmsStabilization->setTimeStep(M_oseenData->dataTime()->timeStep());
 
@@ -347,6 +351,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::setUp ( const G
     		M_VMSLESStabilization->setETpressureSpace(M_fespacePETA);
     		M_VMSLESStabilization->setCommunicator(M_velocityFESpace.map().commPtr());
     		M_VMSLESStabilization->setDensity(M_oseenData->density());
+    		M_VMSLESStabilization->setBDForder(bdfOrder);
     		M_VMSLESStabilization->setViscosity(M_oseenData->viscosity());
     		M_VMSLESStabilization->setTimeStep(M_oseenData->dataTime()->timeStep());
     	}

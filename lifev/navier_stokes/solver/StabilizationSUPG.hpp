@@ -69,7 +69,7 @@
 // MACRO TO DEFINE TAU_M
 #define TAU_M 	       value(1)/( eval(squareroot,TAU_M_DEN) )
 #define TAU_M_DEN      TAU_M_DEN_DT + TAU_M_DEN_VEL + TAU_M_DEN_VISC
-#define TAU_M_DEN_DT   value(M_density*M_density)*value(4)/value(M_timestep * M_timestep)
+#define TAU_M_DEN_DT   value(M_density*M_density)*value(M_bdfOrder*M_bdfOrder)/value(M_timestep * M_timestep)
 #define TAU_M_DEN_VEL  value(M_density*M_density)*dot(value(M_fespaceUETA, velocityExtrapolated), value(M_fespaceUETA, velocityExtrapolated))/(h_K*h_K)
 #define TAU_M_DEN_VISC value(M_C_I)*value(M_viscosity*M_viscosity)/(h_K*h_K*h_K*h_K)
 
@@ -171,6 +171,9 @@ public:
     //! Set the fluid density
     void setDensity (const Real & density) { M_density = density;}
 
+    //! Set the bdf order
+    void setBDForder (const Real & bdfOrder) { M_bdfOrder = bdfOrder;}
+
     //! Set the fluid dynamic viscosity
     void setViscosity (const Real & viscosity) { M_viscosity = viscosity;}
 
@@ -210,6 +213,7 @@ private:
     Real         M_tauC;
     Real         M_timestep;
     bool         M_flag_timestep;
+    Real         M_bdfOrder;
 
     Real         M_C_I;
 
