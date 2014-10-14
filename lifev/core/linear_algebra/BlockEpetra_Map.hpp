@@ -17,7 +17,7 @@
 #ifndef BLOCKEPETRA_MAP_HPP_
 #define BLOCKEPETRA_MAP_HPP_
 
-#include <lifev/operator/linear_algebra/LinearOperator.hpp>
+#include <lifev/core/linear_algebra/LinearOperator.hpp>
 #include <Epetra_Import.h>
 
 

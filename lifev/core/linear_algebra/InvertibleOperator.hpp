@@ -11,7 +11,7 @@
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_RCPDecl.hpp>
 
-#include <lifev/operator/linear_algebra/LinearOperator.hpp>
+#include <lifev/core/linear_algebra/LinearOperator.hpp>
 #include <lifev/core/util/FactorySingleton.hpp>
 #include <lifev/core/util/Factory.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>

@@ -19,7 +19,7 @@
 #define BLOCKEPETRA_MULTIVECTOR_HPP_
 
 #include <Epetra_MultiVector.h>
-#include <lifev/operator/linear_algebra/BlockEpetra_Map.hpp>
+#include <lifev/core/linear_algebra/BlockEpetra_Map.hpp>
 
 namespace LifeV
 {

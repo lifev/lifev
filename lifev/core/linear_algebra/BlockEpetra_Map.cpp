@@ -5,7 +5,7 @@
  *      Author: uvilla
  */
 
-#include <lifev/operator/linear_algebra/BlockEpetra_Map.hpp>
+#include <lifev/core/linear_algebra/BlockEpetra_Map.hpp>
 
 namespace LifeV
 {

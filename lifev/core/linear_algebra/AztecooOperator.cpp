@@ -1,4 +1,4 @@
-#include <lifev/operator/linear_algebra/AztecooOperator.hpp>
+#include <lifev/core/linear_algebra/AztecooOperator.hpp>
 
 namespace LifeV
 {

@@ -18,7 +18,7 @@
 #ifndef TWOLEVELOPERATOR_HPP_
 #define TWOLEVELOPERATOR_HPP_
 
-#include <lifev/operator/linear_algebra/LinearOperator.hpp>
+#include <lifev/core/linear_algebra/LinearOperator.hpp>
 
 namespace LifeV
 {

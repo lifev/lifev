@@ -7,7 +7,7 @@
 
 #include <Ifpack.h>
 
-#include <lifev/operator/linear_algebra/IfpackPreconditioner.hpp>
+#include <lifev/core/linear_algebra/IfpackPreconditioner.hpp>
 
 namespace LifeV {
 

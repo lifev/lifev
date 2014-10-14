@@ -22,7 +22,7 @@
 #include <AztecOO.h>
 #include <Teuchos_ParameterList.hpp>
 
-#include <lifev/operator/linear_algebra/InvertibleOperator.hpp>
+#include <lifev/core/linear_algebra/InvertibleOperator.hpp>
 
 namespace LifeV
 {

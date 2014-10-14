@@ -20,9 +20,9 @@
 #ifndef APPROXIMATEDINVERTIBLEROWMATRIX_H_
 #define APPROXIMATEDINVERTIBLEROWMATRIX_H_
 
-#include <lifev/operator/linear_algebra/LinearOperator.hpp>
-#include <lifev/operator/linear_algebra/RowMatrixPreconditioner.hpp>
-#include <lifev/operator/linear_algebra/InvertibleOperator.hpp>
+#include <lifev/core/linear_algebra/LinearOperator.hpp>
+#include <lifev/core/linear_algebra/RowMatrixPreconditioner.hpp>
+#include <lifev/core/linear_algebra/InvertibleOperator.hpp>
 
 namespace LifeV
 {

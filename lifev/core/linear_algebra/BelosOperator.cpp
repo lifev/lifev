@@ -15,7 +15,7 @@
 #include <BelosRCGSolMgr.hpp>
 #include <BelosTFQMRSolMgr.hpp>
 
-#include<lifev/operator/linear_algebra/BelosOperator.hpp>
+#include<lifev/core/linear_algebra/BelosOperator.hpp>
 
 namespace LifeV
 {

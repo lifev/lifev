@@ -5,7 +5,7 @@
  *      Author: uvilla
  */
 
-#include <lifev/operator/linear_algebra/BlockOperator.hpp>
+#include <lifev/core/linear_algebra/BlockOperator.hpp>
 
 namespace LifeV
 {

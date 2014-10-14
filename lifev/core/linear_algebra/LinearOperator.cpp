@@ -5,7 +5,7 @@
  *      Author: uvilla
  */
 
-#include <lifev/operator/linear_algebra/LinearOperator.hpp>
+#include <lifev/core/linear_algebra/LinearOperator.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
 
 namespace LifeV

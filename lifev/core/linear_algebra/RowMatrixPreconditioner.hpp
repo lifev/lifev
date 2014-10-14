@@ -17,7 +17,7 @@
 #include <Epetra_CrsMatrix.h>
 #include <Teuchos_ParameterList.hpp>
 
-#include <lifev/operator/linear_algebra/LinearOperator.hpp>
+#include <lifev/core/linear_algebra/LinearOperator.hpp>
 #include <lifev/core/util/FactorySingleton.hpp>
 #include <lifev/core/util/Factory.hpp>
 

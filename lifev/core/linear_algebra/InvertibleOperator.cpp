@@ -1,4 +1,4 @@
-#include <lifev/operator/linear_algebra/InvertibleOperator.hpp>
+#include <lifev/core/linear_algebra/InvertibleOperator.hpp>
 #include <Teuchos_RCPBoostSharedPtrConversions.hpp>
 
 namespace LifeV

@@ -5,7 +5,7 @@
  *      Author: uvilla
  */
 
-#include<lifev/operator/linear_algebra/LumpedOperator.hpp>
+#include <lifev/core/linear_algebra/LumpedOperator.hpp>
 
 namespace LifeV
 {

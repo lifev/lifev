@@ -17,7 +17,7 @@
 #ifndef TWOLEVELPRECONDITIONER_HPP_
 #define TWOLEVELPRECONDITIONER_HPP_
 
-#include <lifev/operator/linear_algebra/RowMatrixPreconditioner.hpp>
+#include <lifev/core/linear_algebra/RowMatrixPreconditioner.hpp>
 
 namespace LifeV
 {

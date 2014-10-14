@@ -11,9 +11,9 @@
 #include <Epetra_Import.h>
 #include <boost/numeric/ublas/matrix.hpp>
 
-#include <lifev/operator/linear_algebra/BlockEpetra_Map.hpp>
-#include <lifev/operator/linear_algebra/BlockEpetra_MultiVector.hpp>
-#include <lifev/operator/linear_algebra/LinearOperator.hpp>
+#include <lifev/core/linear_algebra/BlockEpetra_Map.hpp>
+#include <lifev/core/linear_algebra/BlockEpetra_MultiVector.hpp>
+#include <lifev/core/linear_algebra/LinearOperator.hpp>
 
 namespace LifeV
 {
