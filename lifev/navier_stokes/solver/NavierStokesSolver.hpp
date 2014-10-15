@@ -100,6 +100,21 @@ public:
 	// Assemble constant terms
 	void buildSystem();
 
+	// Update the convective term and the right hand side, sum contributions of block (0,0) in M_F
+	void updateSystem( const vectorPtr_Type& u_star, const vectorPtr_Type& rhs_velocity );
+
+	// Set coefficient associated to the time discretization scheme
+	void setAlpha(const Real& alpha)
+	{
+		M_alpha = alpha;
+	}
+
+	// Set coefficient associated to the time discretization scheme
+	void setTimeStep(const Real& dt)
+	{
+		M_timeStep = dt;
+	}
+
 	// Get the velocity FE space
 	const boost::shared_ptr<FESpace<mesh_Type, map_Type> >& uFESpace() const
 	{
@@ -143,6 +158,7 @@ private:
 	graphPtr_Type M_B_graph;
 	graphPtr_Type M_C_graph;
 	graphPtr_Type M_A_graph;
+	graphPtr_Type M_F_graph;
 
 	// matrices
 	matrixPtr_Type M_Mu;
@@ -150,12 +166,17 @@ private:
 	matrixPtr_Type M_B;
 	matrixPtr_Type M_C;
 	matrixPtr_Type M_A;
+	matrixPtr_Type M_F;
 
 	// vectors
 	vectorPtr_Type M_uExtrapolated;
 
 	//! Displayer to print in parallel (only PID 0 will print)
 	Displayer M_displayer;
+
+	//! Reals
+	Real M_alpha;
+	Real M_timeStep;
 
 }; // class NavierStokesSolver
 
@@ -209,7 +230,7 @@ void NavierStokesSolver::buildGraphs()
 					 quadRuleTetra4pt,
 					 M_fespaceUETA,
 					 M_fespaceUETA,
-					 dot ( phi_i, phi_j )
+					 M_fluidData->density() * dot ( phi_i, phi_j )
 		) >> M_Mu_graph;
 		M_Mu_graph->GlobalAssemble();
 
@@ -265,6 +286,31 @@ void NavierStokesSolver::buildGraphs()
 		}
 		M_A_graph->GlobalAssemble();
 
+		// Graph of entire block (0,0)
+		M_F_graph.reset (new Epetra_FECrsGraph (Copy, * (M_fespaceUETA->map().map (Unique) ), 0) );
+		if (M_stiffStrain)
+		{
+			buildGraph ( elements (M_fespaceUETA->mesh() ),
+						 quadRuleTetra4pt,
+						 M_fespaceUETA,
+						 M_fespaceUETA,
+						 dot ( phi_i, phi_j ) + // mass
+						 dot( M_fluidData->density()*value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) + // convective term
+						 value( 0.5 * M_fluidData->viscosity() ) * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) ) // stiffness
+			) >> M_F_graph;
+		}
+		else
+		{
+			buildGraph ( elements (M_fespaceUETA->mesh() ),
+						 quadRuleTetra4pt,
+						 M_fespaceUETA,
+						 M_fespaceUETA,
+						 dot ( phi_i, phi_j ) + // mass
+						 dot( M_fluidData->density()*value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) + // convective term
+						 M_fluidData->viscosity() * dot( grad(phi_i) , grad(phi_j) + transpose(grad(phi_j)) ) // stiffness
+			) >> M_F_graph;
+		}
+		M_F_graph->GlobalAssemble();
 	}
 
 	chrono.stop();
@@ -334,10 +380,43 @@ void NavierStokesSolver::buildSystem()
 			) >> M_A;
 		}
 		M_A->globalAssemble();
+
+		M_C.reset (new matrix_Type ( M_velocityFESpace->map(), *M_C_graph ) );
+		*M_C *= 0;
+		M_C->globalAssemble();
+
+		M_F.reset (new matrix_Type ( M_velocityFESpace->map(), *M_F_graph ) );
+		*M_F *= 0;
+		M_F->globalAssemble();
 	}
 
 	chrono.stop();
 	M_displayer.leaderPrintMax ( " done in ", chrono.diff() ) ;
+}
+
+void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vectorPtr_Type& rhs_velocity )
+{
+	M_uExtrapolated.reset( new vector_Type ( *u_star, Repeated ) );
+
+	*M_C *= 0;
+	{
+		using namespace ExpressionAssembly;
+		integrate( elements(M_fespaceUETA->mesh()), // Mesh
+				   M_velocityFESpace->qr(),               // Quadrature rule
+				   M_fespaceUETA,
+				   M_fespaceUETA,
+				   dot( M_fluidData->density() * value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) // semi-implicit treatment of the convective term
+		)
+		>> M_C;
+	}
+	M_C->globalAssemble();
+
+	*M_F *= 0;
+	*M_F += *M_Mu;
+	*M_F *= M_alpha/M_timeStep;
+	*M_F += *M_A;
+	*M_F += *M_C;
+
 }
 
 } // namespace LifeV
