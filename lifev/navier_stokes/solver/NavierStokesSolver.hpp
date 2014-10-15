@@ -100,6 +100,18 @@ public:
 	// Assemble constant terms
 	void buildSystem();
 
+	// Get the velocity FE space
+	const boost::shared_ptr<FESpace<mesh_Type, map_Type> >& uFESpace() const
+	{
+		return M_velocityFESpace;
+	}
+
+	// Get the velocity FE space
+	const boost::shared_ptr<FESpace<mesh_Type, map_Type> >& pFESpace() const
+	{
+		return M_pressureFESpace;
+	}
+
 private:
 
 	// build the graphs
