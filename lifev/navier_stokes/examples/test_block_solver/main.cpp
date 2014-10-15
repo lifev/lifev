@@ -135,14 +135,44 @@ main ( int argc, char** argv )
     exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "pressure", ns.pFESpace(), pressure, UInt (0) );
     exporter->postProcess ( t0 );
 
+    // time loop
+    LifeChrono iterChrono;
+    Real time = t0 + dt;
 
+    vectorPtr_Type u_star( new vector_Type(ns.uFESpace()->map(), Unique ) );
+    vectorPtr_Type rhs_velocity( new vector_Type(ns.uFESpace()->map(), Unique ) );
+
+    ns.setAlpha(timeVelocity.alpha());
+    ns.setTimeStep(dt);
+
+    for ( ; time <= tFinal + dt / 2.; time += dt)
+    {
+    	if (verbose)
+    		std::cout << "\nWe are at time " << time << " s\n";
+
+    	iterChrono.reset();
+    	iterChrono.start();
+
+    	*u_star *= 0;
+    	*rhs_velocity *= 0;
+    	timeVelocity.extrapolate (orderBDF, *u_star);
+    	timeVelocity.rhsContribution (*rhs_velocity);
+    	*u_star += 10;
+
+    	ns.updateSystem ( u_star, rhs_velocity );
+
+    	iterChrono.stop();
+
+    	if (verbose)
+    		std::cout << "\nTimestep solved in " << iterChrono.diff() << " s\n";
+    }
 
     exporter->closeFile();
 
 #ifdef HAVE_MPI
     if (verbose)
     {
-        std::cout << "MPI Finalization" << std::endl;
+        std::cout << "\nMPI Finalization" << std::endl;
     }
     MPI_Finalize();
 #endif
