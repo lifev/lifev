@@ -102,6 +102,9 @@ public:
 
 private:
 
+	// build the graphs
+	void buildGraphs();
+
 	// communicator
 	commPtr_Type M_comm;
 
@@ -179,7 +182,7 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
 	M_stiffStrain = M_dataFile("fluid/space_discretization/stiff_strain", true);
 }
 
-void NavierStokesSolver::buildSystem()
+void NavierStokesSolver::buildGraphs()
 {
 	M_displayer.leaderPrint ( " F - Pre-building the graphs... ");
 	LifeChrono chrono;
@@ -191,10 +194,10 @@ void NavierStokesSolver::buildSystem()
 		// Graph velocity mass -> block (0,0)
 		M_Mu_graph.reset (new Epetra_FECrsGraph (Copy, * (M_fespaceUETA->map().map (Unique) ), 0) );
 		buildGraph ( elements (M_fespaceUETA->mesh() ),
-				     quadRuleTetra4pt,
-				     M_fespaceUETA,
-				     M_fespaceUETA,
-				     dot ( phi_i, phi_j )
+					 quadRuleTetra4pt,
+					 M_fespaceUETA,
+					 M_fespaceUETA,
+					 dot ( phi_i, phi_j )
 		) >> M_Mu_graph;
 		M_Mu_graph->GlobalAssemble();
 
@@ -254,10 +257,14 @@ void NavierStokesSolver::buildSystem()
 
 	chrono.stop();
 	M_displayer.leaderPrintMax ( "   done in ", chrono.diff() ) ;
+}
 
+void NavierStokesSolver::buildSystem()
+{
+	buildGraphs();
 
 	M_displayer.leaderPrint ( " F - Assembling constant terms... ");
-	chrono.reset();
+	LifeChrono chrono;
 	chrono.start();
 
 	{
