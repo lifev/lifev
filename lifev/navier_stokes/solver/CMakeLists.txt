@@ -6,6 +6,10 @@ SET(solver_HEADERS
   solver/StabilizationIP.hpp
   solver/OseenSolverShapeDerivative.hpp
   solver/OseenSolver.hpp
+  solver/StabilizationSUPG.hpp
+  solver/StabilizationSUPGVMS.hpp
+  solver/StabilizationVMSLES.hpp
+  solver/NavierStokesSolver.hpp
 CACHE INTERNAL "")
 
 SET(solver_SOURCES
