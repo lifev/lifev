@@ -260,9 +260,9 @@ private:
     bool                    M_analyze;
 
     bool                    M_visualizationDataAvailable;
-    boost::shared_ptr<vector<Real> > M_xCoord;
-    boost::shared_ptr<vector<Real> > M_yCoord;
-    boost::shared_ptr<vector<Real> > M_zCoord;
+    boost::shared_ptr<std::vector<Real> > M_xCoord;
+    boost::shared_ptr<std::vector<Real> > M_yCoord;
+    boost::shared_ptr<std::vector<Real> > M_zCoord;
 
 };
 

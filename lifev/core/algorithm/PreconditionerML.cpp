@@ -558,9 +558,9 @@ PreconditionerML::setDataFromGetPot ( const GetPot&      dataFile,
 }
 
 void
-PreconditionerML::setVerticesCoordinates (boost::shared_ptr<vector<Real> > xCoord,
-                                          boost::shared_ptr<vector<Real> > yCoord,
-                                          boost::shared_ptr<vector<Real> > zCoord)
+PreconditionerML::setVerticesCoordinates (boost::shared_ptr<std::vector<Real> > xCoord,
+                                          boost::shared_ptr<std::vector<Real> > yCoord,
+                                          boost::shared_ptr<std::vector<Real> > zCoord)
 {
     M_xCoord = xCoord;
     M_yCoord = yCoord;
