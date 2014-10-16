@@ -15,21 +15,13 @@ type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
 start      = 0
 save       = 1
-filename   = result_NUOVOTEST
+filename   = result_fluid
 
 [importer]
 restart  = false
 initSol  = 00007        # label of the solution from which we want to start (5 digits by convention)
 type     = hdf5         # format of the imported solution
 filename = resultBDF2_parte1
-
-[NavierStokes]
-initialization         = interpolation #projection   # initialization (L2 projection) or interpolation
-export_norms           = true
-export_exact_solutions = true
-test                   = accuracy
-accuracy_tolerance     = 0.09
-mesh_source            = regular_mesh
 
 [fluid]
 
@@ -43,8 +35,8 @@ mesh_source            = regular_mesh
 
     [../time_discretization]
     initialtime     = 0.0
-    endtime         = 15.0
-    timestep        = 0.0025
+    endtime         = 0.001
+    timestep        = 0.001
 
     BDF_order       = 2
 
@@ -63,7 +55,7 @@ mesh_source            = regular_mesh
     stiff_strain    = true
     
 	[../stabilization]
-	use             = true
+	use             = false
 	method          = SUPG	  # other possible choices: IP, SUPG, VMSLES, SUPGVMS
 
     [../miscellaneous]
