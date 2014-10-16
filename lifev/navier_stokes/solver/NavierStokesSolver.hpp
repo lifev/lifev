@@ -237,7 +237,7 @@ void NavierStokesSolver::buildGraphs()
 		using namespace ExpressionAssembly;
 
 		// Graph velocity mass -> block (0,0)
-		M_Mu_graph.reset (new Epetra_FECrsGraph (Copy, * (M_fespaceUETA->map().map (Unique) ), 0) );
+		M_Mu_graph.reset (new Epetra_FECrsGraph (Copy, * (M_velocityFESpace->map().map (Unique) ), 0) );
 		buildGraph ( elements (M_fespaceUETA->mesh() ),
 					 quadRuleTetra4pt,
 					 M_fespaceUETA,
@@ -247,7 +247,7 @@ void NavierStokesSolver::buildGraphs()
 		M_Mu_graph->GlobalAssemble();
 
 		// Graph block (0,1) of NS
-		M_Btranspose_graph.reset (new Epetra_FECrsGraph (Copy, * (M_fespaceUETA->map().map (Unique) ), * (M_fespacePETA->map().map (Unique) ), 0) );
+		M_Btranspose_graph.reset (new Epetra_FECrsGraph (Copy, * (M_velocityFESpace->map().map (Unique) ), 0) );
 		buildGraph ( elements (M_fespaceUETA->mesh() ),
 					 quadRuleTetra4pt,
 					 M_fespaceUETA,
@@ -257,17 +257,17 @@ void NavierStokesSolver::buildGraphs()
 		M_Btranspose_graph->GlobalAssemble( *(M_pressureFESpace->map().map (Unique)), *(M_velocityFESpace->map().map (Unique)) );
 
 		// Graph block (1,0) of NS
-		M_B_graph.reset (new Epetra_FECrsGraph (Copy, * (M_fespacePETA->map().map (Unique) ), * (M_fespaceUETA->map().map (Unique) ), 0) );
+		M_B_graph.reset (new Epetra_FECrsGraph (Copy, *(M_pressureFESpace->map().map (Unique)), 0) );
 		buildGraph ( elements (M_fespaceUETA->mesh() ),
 					 quadRuleTetra4pt,
 					 M_fespacePETA,
 					 M_fespaceUETA,
 					 phi_i * div(phi_j)
 		) >> M_B_graph;
-		M_B_graph->GlobalAssemble(*(M_velocityFESpace->map().map (Unique)), *(M_pressureFESpace->map().map (Unique)));
+		M_B_graph->GlobalAssemble( *(M_velocityFESpace->map().map (Unique)), *(M_pressureFESpace->map().map (Unique)) );
 
 		// Graph convective term, block (0,0)
-		M_C_graph.reset (new Epetra_FECrsGraph (Copy, * (M_fespaceUETA->map().map (Unique) ), 0) );
+		M_C_graph.reset (new Epetra_FECrsGraph (Copy, * (M_velocityFESpace->map().map (Unique) ), 0) );
 		buildGraph ( elements (M_fespaceUETA->mesh() ),
 					 quadRuleTetra4pt,
 					 M_fespaceUETA,
@@ -277,7 +277,7 @@ void NavierStokesSolver::buildGraphs()
 		M_C_graph->GlobalAssemble();
 
 		// Graph stiffness, block (0,0)
-		M_A_graph.reset (new Epetra_FECrsGraph (Copy, * (M_fespaceUETA->map().map (Unique) ), 0) );
+		M_A_graph.reset (new Epetra_FECrsGraph (Copy, * (M_velocityFESpace->map().map (Unique) ), 0) );
 		if (M_stiffStrain)
 		{
 			buildGraph ( elements (M_fespaceUETA->mesh() ),
@@ -299,7 +299,7 @@ void NavierStokesSolver::buildGraphs()
 		M_A_graph->GlobalAssemble();
 
 		// Graph of entire block (0,0)
-		M_F_graph.reset (new Epetra_FECrsGraph (Copy, * (M_fespaceUETA->map().map (Unique) ), 0) );
+		M_F_graph.reset (new Epetra_FECrsGraph (Copy, * (M_velocityFESpace->map().map (Unique) ), 0) );
 		if (M_stiffStrain)
 		{
 			buildGraph ( elements (M_fespaceUETA->mesh() ),
@@ -359,7 +359,7 @@ void NavierStokesSolver::buildSystem()
 				   M_fespacePETA,
 				   value(-1.0) * phi_j * div(phi_i)
 		) >> M_Btranspose;
-		M_Btranspose->globalAssemble();
+		M_Btranspose->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
 
 		M_B.reset (new matrix_Type ( M_pressureFESpace->map(), *M_B_graph ) );
 		*M_B *= 0;
@@ -369,7 +369,7 @@ void NavierStokesSolver::buildSystem()
 				   M_fespaceUETA,
 				   phi_i * div(phi_j)
 		) >> M_B;
-		M_B->globalAssemble();
+		M_B->globalAssemble( M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
 
 		M_A.reset (new matrix_Type ( M_velocityFESpace->map(), *M_A_graph ) );
 		*M_A *= 0;
