@@ -14,25 +14,34 @@ namespace LifeV
 {
 
 aSIMPLE::aSIMPLE():
-        SolverManager()
-        //M_LSCapproximatedMomentumOperator(new Operators::ApproximatedInvertibleRowMatrix),
-        //M_LSCapproximatedSchurComplementOperator(new Operators::LeastSquaresCommutator)
+        SolverManager(),
+        M_aSIMPLEapproximatedMomentumOperator(new Operators::ApproximatedInvertibleRowMatrix),
+        M_aSIMPLEapproximatedSchurComplementOperator(new Operators::ApproximatedInvertibleRowMatrix)
 {
-    //M_approximatedMomentumOperator.reset(M_LSCapproximatedMomentumOperator);
-    //M_approximatedSchurComplementOperator.reset(M_LSCapproximatedSchurComplementOperator);
+    M_approximatedMomentumOperator.reset(M_aSIMPLEapproximatedMomentumOperator);
+    M_approximatedSchurComplementOperator.reset(M_aSIMPLEapproximatedSchurComplementOperator);
 }
 
+void aSIMPLE::getMatrices(const matrix_Type& F, const matrix_Type& B, const matrix_Type& Btranspose)
+{
+    M_F = F.matrixPtr();
+    M_B = B.matrixPtr();
+    M_Btranspose = Btranspose.matrixPtr();
+}
+    
 void aSIMPLE::updateApproximatedMomentumOperator( )
 {
-	/*
-    M_LSCapproximatedMomentumOperator->SetRowMatrix(M_momentumMatrix);
-    M_LSCapproximatedMomentumOperator->SetParameterList(*M_momentumOptions);
-    M_LSCapproximatedMomentumOperator->Compute();
-	*/
+    M_aSIMPLEapproximatedMomentumOperator->SetRowMatrix(M_F);
+    M_aSIMPLEapproximatedMomentumOperator->SetParameterList(*M_momentumList);
+    M_aSIMPLEapproximatedMomentumOperator->Compute();
 }
 
 void aSIMPLE::updateApproximatedSchurComplementOperator( )
 {
+    M_aSIMPLEapproximatedMomentumOperator->SetRowMatrix(M_F); // wrong
+    M_aSIMPLEapproximatedMomentumOperator->SetParameterList(*M_schurComplementList);
+    M_aSIMPLEapproximatedMomentumOperator->Compute();
+    
 	/*
     if( M_velocityLumpedMass.get() == 0 || M_recomputeConstantMatrices)
     {

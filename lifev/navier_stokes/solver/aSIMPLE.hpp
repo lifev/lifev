@@ -29,11 +29,15 @@ public:
 
 protected:
 
+    void getMatrices(const matrix_Type& F, const matrix_Type& B, const matrix_Type& Btranspose);
+    
 	void updateApproximatedMomentumOperator( );
 
 	void updateApproximatedSchurComplementOperator( );
 
-	Operators::ApproximatedInvertibleRowMatrix * M_LSCapproximatedMomentumOperator;
+	Operators::ApproximatedInvertibleRowMatrix * M_aSIMPLEapproximatedMomentumOperator;
+    
+    Operators::ApproximatedInvertibleRowMatrix * M_aSIMPLEapproximatedSchurComplementOperator;
 };
 
 inline SolverManager* create_aSIMPLE() { return new aSIMPLE(); }

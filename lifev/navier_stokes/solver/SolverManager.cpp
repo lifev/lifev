@@ -66,18 +66,18 @@ void SolverManager::setComm(const commPtr_Type & comm)
 
 void SolverManager::setMomentumOptions(const parameterListPtr_Type & _oList)
 {
-    //M_momentumOptions = _oList;
+    M_momentumList = _oList;
 }
 
 
 void SolverManager::setSchurOptions(const parameterListPtr_Type & _oList)
 {
-    //M_schurOptions = _oList;
+    M_schurComplementList = _oList;
 }
 
 void SolverManager::setLinSolverParameter(const parameterListPtr_Type & _pList)
 {
-    //M_pListLinSolver = _pList;
+    M_linearSolverList = _pList;
 }
 
 

@@ -37,6 +37,7 @@
 
 #include <lifev/core/linear_algebra/InvertibleOperator.hpp>
 #include <lifev/core/linear_algebra/BlockOperator.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
 
 namespace LifeV
 {
@@ -58,6 +59,12 @@ public:
 
     typedef Teuchos::ParameterList parameterList_Type;
     typedef boost::shared_ptr<parameterList_Type> parameterListPtr_Type;
+    
+    typedef MatrixEpetra<Real> matrix_Type;
+    typedef boost::shared_ptr<matrix_Type > matrixPtr_Type;
+    
+    typedef Epetra_CrsMatrix rowMatrix_Type;
+    typedef boost::shared_ptr<rowMatrix_Type> rowMatrixPtr_Type;
 
     //@}
 
@@ -77,10 +84,16 @@ public:
 
 protected:
 
+    virtual void getMatrices( const matrix_Type& F, const matrix_Type& B, const matrix_Type& Btranspose ) = 0;
+    
     virtual void updateApproximatedMomentumOperator( ) = 0;
 
     virtual void updateApproximatedSchurComplementOperator( ) = 0;
 
+    rowMatrixPtr_Type M_F;
+    rowMatrixPtr_Type M_Btranspose;
+    rowMatrixPtr_Type M_B;
+    
     operatorPtr_Type M_approximatedSchurComplementOperator;
     operatorPtr_Type M_approximatedMomentumOperator;
 

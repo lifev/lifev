@@ -25,6 +25,7 @@ filename = resultBDF2_parte1
 
 [fluid]
 
+    solver_manager_type = aSIMPLE
     save_every          = 1
     export_coefficients = true  
     conservativeFormulation = false

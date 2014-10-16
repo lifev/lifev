@@ -236,9 +236,9 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
 
 	M_stiffStrain = M_dataFile("fluid/space_discretization/stiff_strain", true);
 
-	std::string solverManagerType = M_dataFile("fluid/solver_manager_type","aSIMPLE");
+	std::string solverManagerType = M_dataFile("fluid/solver_manager_type"," ");
 	M_solverManager.reset(SolverFactory::instance().createObject(solverManagerType));
-	//M_solverManager->setComm(M_comm);
+	M_solverManager->setComm(M_comm);
 }
 
 void NavierStokesSolver::buildGraphs()
@@ -259,6 +259,7 @@ void NavierStokesSolver::buildGraphs()
 					 M_fluidData->density() * dot ( phi_i, phi_j )
 		) >> M_Mu_graph;
 		M_Mu_graph->GlobalAssemble();
+        M_Mu_graph->OptimizeStorage();
 
 		// Graph block (0,1) of NS
 		M_Btranspose_graph.reset (new Epetra_FECrsGraph (Copy, * (M_velocityFESpace->map().map (Unique) ), 0) );
@@ -269,7 +270,8 @@ void NavierStokesSolver::buildGraphs()
 					 value(-1.0) * phi_j * div(phi_i)
 		) >> M_Btranspose_graph;
 		M_Btranspose_graph->GlobalAssemble( *(M_pressureFESpace->map().map (Unique)), *(M_velocityFESpace->map().map (Unique)) );
-
+        M_Btranspose_graph->OptimizeStorage();
+        
 		// Graph block (1,0) of NS
 		M_B_graph.reset (new Epetra_FECrsGraph (Copy, *(M_pressureFESpace->map().map (Unique)), 0) );
 		buildGraph ( elements (M_fespaceUETA->mesh() ),
@@ -279,7 +281,8 @@ void NavierStokesSolver::buildGraphs()
 					 phi_i * div(phi_j)
 		) >> M_B_graph;
 		M_B_graph->GlobalAssemble( *(M_velocityFESpace->map().map (Unique)), *(M_pressureFESpace->map().map (Unique)) );
-
+        M_B_graph->OptimizeStorage();
+        
 		// Graph convective term, block (0,0)
 		M_C_graph.reset (new Epetra_FECrsGraph (Copy, * (M_velocityFESpace->map().map (Unique) ), 0) );
 		buildGraph ( elements (M_fespaceUETA->mesh() ),
@@ -289,6 +292,7 @@ void NavierStokesSolver::buildGraphs()
 					 dot( M_fluidData->density()*value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i)
 		) >> M_C_graph;
 		M_C_graph->GlobalAssemble();
+        M_C_graph->OptimizeStorage();
 
 		// Graph stiffness, block (0,0)
 		M_A_graph.reset (new Epetra_FECrsGraph (Copy, * (M_velocityFESpace->map().map (Unique) ), 0) );
@@ -311,7 +315,8 @@ void NavierStokesSolver::buildGraphs()
 			) >> M_A_graph;
 		}
 		M_A_graph->GlobalAssemble();
-
+        M_A_graph->OptimizeStorage();
+        
 		// Graph of entire block (0,0)
 		M_F_graph.reset (new Epetra_FECrsGraph (Copy, * (M_velocityFESpace->map().map (Unique) ), 0) );
 		if (M_stiffStrain)
@@ -337,6 +342,7 @@ void NavierStokesSolver::buildGraphs()
 			) >> M_F_graph;
 		}
 		M_F_graph->GlobalAssemble();
+        M_F_graph->OptimizeStorage();
 	}
 
 	chrono.stop();
