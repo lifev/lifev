@@ -55,6 +55,10 @@
 // expression template finite element space
 #include <lifev/eta/fem/ETFESpace.hpp>
 
+// includes for the linear solver
+#include <lifev/navier_stokes/solver/SolverManager.hpp>
+#include <lifev/navier_stokes/solver/aSIMPLE.hpp>
+
 // utilities
 #include <lifev/core/util/LifeChrono.hpp>
 #include <lifev/core/util/Displayer.hpp>
@@ -92,6 +96,9 @@ public:
 	typedef ETFESpace<mesh_Type, map_Type, 3, 1 > ETFESpace_pressure;
 
 	typedef boost::shared_ptr<BCHandler> bcPtr_Type;
+
+	typedef Teuchos::ParameterList parameterList_Type;
+	typedef boost::shared_ptr<parameterList_Type> parameterListPtr_Type;
 
 	// Constructor
 	NavierStokesSolver(const dataFile_Type dataFile, const commPtr_Type& communicator);
@@ -190,6 +197,9 @@ private:
 	Real M_alpha;
 	Real M_timeStep;
 
+	// Solver Manager
+	boost::shared_ptr<SolverManager> M_solverManager;
+
 }; // class NavierStokesSolver
 
 
@@ -225,6 +235,10 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
 	*M_uExtrapolated *= 0;
 
 	M_stiffStrain = M_dataFile("fluid/space_discretization/stiff_strain", true);
+
+	std::string solverManagerType = M_dataFile("fluid/solver_manager_type","aSIMPLE");
+	M_solverManager.reset(SolverFactory::instance().createObject(solverManagerType));
+	//M_solverManager->setComm(M_comm);
 }
 
 void NavierStokesSolver::buildGraphs()
