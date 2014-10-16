@@ -49,6 +49,9 @@
 // classical FE space
 #include <lifev/core/fem/FESpace.hpp>
 
+// boundary conditions
+#include <lifev/core/fem/BCManage.hpp>
+
 // expression template finite element space
 #include <lifev/eta/fem/ETFESpace.hpp>
 
@@ -88,6 +91,8 @@ public:
 	typedef ETFESpace<mesh_Type, map_Type, 3, 3 > ETFESpace_velocity;
 	typedef ETFESpace<mesh_Type, map_Type, 3, 1 > ETFESpace_pressure;
 
+	typedef boost::shared_ptr<BCHandler> bcPtr_Type;
+
 	// Constructor
 	NavierStokesSolver(const dataFile_Type dataFile, const commPtr_Type& communicator);
 
@@ -102,6 +107,9 @@ public:
 
 	// Update the convective term and the right hand side, sum contributions of block (0,0) in M_F
 	void updateSystem( const vectorPtr_Type& u_star, const vectorPtr_Type& rhs_velocity );
+
+	// Solve the current timestep, provided the BC
+	void iterate( bcPtr_Type & bc, const Real& time );
 
 	// Set coefficient associated to the time discretization scheme
 	void setAlpha(const Real& alpha)
@@ -131,6 +139,9 @@ private:
 
 	// build the graphs
 	void buildGraphs();
+
+	// update the bc handler
+	void updateBCHandler( bcPtr_Type & bc );
 
 	// communicator
 	commPtr_Type M_comm;
@@ -170,6 +181,7 @@ private:
 
 	// vectors
 	vectorPtr_Type M_uExtrapolated;
+	vectorPtr_Type M_rhs;
 
 	//! Displayer to print in parallel (only PID 0 will print)
 	Displayer M_displayer;
@@ -398,11 +410,12 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 {
 	M_uExtrapolated.reset( new vector_Type ( *u_star, Repeated ) );
 
+	// Update convective term
 	*M_C *= 0;
 	{
 		using namespace ExpressionAssembly;
-		integrate( elements(M_fespaceUETA->mesh()), // Mesh
-				   M_velocityFESpace->qr(),               // Quadrature rule
+		integrate( elements(M_fespaceUETA->mesh()),
+				   M_velocityFESpace->qr(),
 				   M_fespaceUETA,
 				   M_fespaceUETA,
 				   dot( M_fluidData->density() * value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) // semi-implicit treatment of the convective term
@@ -411,12 +424,35 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 	}
 	M_C->globalAssemble();
 
+	// Get the matrix corresponding to the block (0,0)
 	*M_F *= 0;
 	*M_F += *M_Mu;
 	*M_F *= M_alpha/M_timeStep;
 	*M_F += *M_A;
 	*M_F += *M_C;
 
+	// Get the right hand side with inertia contribution
+	M_rhs.reset( new vector_Type ( M_velocityFESpace->map(), Repeated ) );
+	*M_rhs = *M_Mu* (*rhs_velocity);
+}
+
+void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
+{
+	updateBCHandler(bc);
+	bcManage ( *M_F, *M_rhs, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 1.0, time );
+
+	for (BCHandler::bcBaseIterator_Type it = bc->begin(); it != bc->end(); ++it)
+	{
+		if ( it->type() != Essential)
+			continue;
+
+		bcManageMatrix( *M_Btranspose, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 0.0, 0.0);
+	}
+}
+
+void NavierStokesSolver::updateBCHandler( bcPtr_Type & bc )
+{
+	bc->bcUpdate ( *M_velocityFESpace->mesh(), M_velocityFESpace->feBd(), M_velocityFESpace->dof() );
 }
 
 } // namespace LifeV

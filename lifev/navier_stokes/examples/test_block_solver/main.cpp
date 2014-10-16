@@ -37,11 +37,13 @@
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
-#include "lifev/navier_stokes/solver/NavierStokesSolver.hpp"
+#include <lifev/navier_stokes/solver/NavierStokesSolver.hpp>
 #include <lifev/core/fem/TimeAndExtrapolationHandler.hpp>
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #include <lifev/core/filter/ExporterVTK.hpp>
+
+#include "boundaryConditions.hpp"
 
 using namespace LifeV;
 
@@ -135,7 +137,10 @@ main ( int argc, char** argv )
     exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "pressure", ns.pFESpace(), pressure, UInt (0) );
     exporter->postProcess ( t0 );
 
-    // time loop
+    // Boundary conditions
+    boost::shared_ptr<BCHandler> bc ( new BCHandler (*BCh_fluid ()) );
+
+    // Time loop
     LifeChrono iterChrono;
     Real time = t0 + dt;
 
@@ -157,9 +162,9 @@ main ( int argc, char** argv )
     	*rhs_velocity *= 0;
     	timeVelocity.extrapolate (orderBDF, *u_star);
     	timeVelocity.rhsContribution (*rhs_velocity);
-    	*u_star += 10;
 
     	ns.updateSystem ( u_star, rhs_velocity );
+    	ns.iterate( bc, time );
 
     	iterChrono.stop();
 
