@@ -5,8 +5,8 @@
  *      Author: uvilla
  */
 
-#ifndef aSIMPLE_HPP_
-#define aSIMPLE_HPP_
+#ifndef solverManager_aSIMPLE_HPP_
+#define solverManager_aSIMPLE_HPP_
 
 #include <lifev/navier_stokes/solver/SolverManager.hpp>
 
@@ -20,16 +20,16 @@
 namespace LifeV
 {
 
-class aSIMPLE : public SolverManager
+class solverManager_aSIMPLE : public SolverManager
 {
 public:
 
-	aSIMPLE();
-	virtual ~aSIMPLE(){};
+	solverManager_aSIMPLE();
+	virtual ~solverManager_aSIMPLE(){};
 
 protected:
 
-    void getMatrices(const matrix_Type& F, const matrix_Type& B, const matrix_Type& Btranspose);
+    void getMatrices(const matrixPtr_Type& F, const matrixPtr_Type& B, const matrixPtr_Type& Btranspose);
     
 	void updateApproximatedMomentumOperator( );
 
@@ -40,7 +40,7 @@ protected:
     Operators::ApproximatedInvertibleRowMatrix * M_aSIMPLEapproximatedSchurComplementOperator;
 };
 
-inline SolverManager* create_aSIMPLE() { return new aSIMPLE(); }
+inline SolverManager* create_aSIMPLE() { return new solverManager_aSIMPLE(); }
 namespace
 {
 	static bool register_aSIMPLE = SolverFactory::instance().registerProduct( "aSIMPLE", &create_aSIMPLE );
@@ -51,4 +51,4 @@ namespace
 
 
 
-#endif /* aSIMPLE_HPP_ */
+#endif /* solverManager_aSIMPLE_HPP_ */

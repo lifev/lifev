@@ -81,41 +81,17 @@ void SolverManager::setLinSolverParameter(const parameterListPtr_Type & _pList)
 }
 
 
-//const SolverManager::operatorPtr_Type SolverManager::updateInvertibleOperator( )
-//{
-	/*
-    LifeChrono chrono;
-
-    //(1) Do Manager specific operations
-    M_displayer.leaderPrint( "OseenOperatorManager:\n\tparsing matrix container...");
-    chrono.start();
-    parseMatrixContainer( _mc );
-    chrono.stop();
-    M_displayer.leaderPrintMax(" done in " , chrono.diff() );
-
-    M_displayer.leaderPrint( "\tupdate the approximate momentum operator...");
-    chrono.start();
+const SolverManager::operatorPtr_Type SolverManager::updateInvertibleOperator( const matrixPtr_Type& F,
+                                                                               const matrixPtr_Type& B,
+                                                                               const matrixPtr_Type& Btranspose )
+{
+    getMatrices( F, B, Btranspose );
+    
     updateApproximatedMomentumOperator( );
-    chrono.stop();
-    M_displayer.leaderPrintMax(" done in " , chrono.diff() );
-
-    M_displayer.leaderPrint( "\tupdate the approximate Schur complement operator...");
-    chrono.start();
+    
     updateApproximatedSchurComplementOperator( );
-    chrono.stop();
-    M_displayer.leaderPrintMax(" done in " , chrono.diff() );
-
-    ASSERT_POS(M_momentumMatrix.get() != 0,
-               "[OseenOperatorManager::updateInvertibleOperator]: parseMatrixContainer did not initialize M_momentumMatrix");
-    ASSERT_POS(M_pressureGradientMatrix.get() != 0,
-               "[OseenOperatorManager::updateInvertibleOperator]: parseMatrixContainer did not initialize M_pressureGradientMatrix");
-    ASSERT_POS(M_velocityDivergenceMatrix.get() != 0,
-               "[OseenOperatorManager::updateInvertibleOperator]: parseMatrixContainer did not initialize M_velocityDivergenceMatrix");
-    ASSERT_POS(M_approximatedMomentumOperator.get() != 0,
-               "[OseenOperatorManager::updateInvertibleOperator]: updateApproximatedMomentumOperator did not initialize M_approximatedMomentumOperator");
-    ASSERT_POS(M_approximatedSchurComplementOperator.get() != 0,
-               "[OseenOperatorManager::updateInvertibleOperator]:updateApproximatedSchurComplementOperator did not initialize M_approximatedSchurComplementOperator");
-
+    
+    /*
     //(2) Set up the OseenOperator
     M_displayer.leaderPrint( "\tset up the block operator...");
     chrono.start();
@@ -154,7 +130,7 @@ void SolverManager::setLinSolverParameter(const parameterListPtr_Type & _pList)
     M_displayer.leaderPrintMax(" done in " , chrono.diff() );
 	*/
 
-//    return M_invOper;
-//}
+    return M_invOper;
+}
 
 } /*end namespace */

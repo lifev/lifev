@@ -57,7 +57,7 @@
 
 // includes for the linear solver
 #include <lifev/navier_stokes/solver/SolverManager.hpp>
-#include <lifev/navier_stokes/solver/aSIMPLE.hpp>
+#include <lifev/navier_stokes/solver/solverManager_aSIMPLE.hpp>
 
 // utilities
 #include <lifev/core/util/LifeChrono.hpp>
@@ -99,6 +99,8 @@ public:
 
 	typedef Teuchos::ParameterList parameterList_Type;
 	typedef boost::shared_ptr<parameterList_Type> parameterListPtr_Type;
+    
+    typedef boost::shared_ptr<Epetra_Operator> invOpPtr_Type;
 
 	// Constructor
 	NavierStokesSolver(const dataFile_Type dataFile, const commPtr_Type& communicator);
@@ -141,6 +143,9 @@ public:
 	{
 		return M_pressureFESpace;
 	}
+    
+    //! Setter for the solvers options
+    void setSolversOptions (const Teuchos::ParameterList& solversOptions);
 
 private:
 
@@ -199,6 +204,9 @@ private:
 
 	// Solver Manager
 	boost::shared_ptr<SolverManager> M_solverManager;
+    
+    // Epetra Operator needed to solve the linear system
+    invOpPtr_Type M_invOp;
 
 }; // class NavierStokesSolver
 
@@ -468,11 +476,31 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
 
 		bcManageMatrix( *M_Btranspose, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 0.0, 0.0);
 	}
+    
+    // We are ready to solve the timestep
+    M_invOp = M_solverManager->updateInvertibleOperator(M_F, M_B, M_Btranspose);
+    
 }
 
 void NavierStokesSolver::updateBCHandler( bcPtr_Type & bc )
 {
 	bc->bcUpdate ( *M_velocityFESpace->mesh(), M_velocityFESpace->feBd(), M_velocityFESpace->dof() );
+}
+    
+//! Setter for the solvers options
+void NavierStokesSolver::setSolversOptions (const Teuchos::ParameterList& solversOptions)
+{
+    boost::shared_ptr<Teuchos::ParameterList> schurComplementList;
+    schurComplementList.reset(new Teuchos::ParameterList(solversOptions.sublist("ApproximatedSchurOperator")) );
+    M_solverManager->setSchurOptions(schurComplementList);
+    
+    boost::shared_ptr<Teuchos::ParameterList> momentumList;
+    momentumList.reset(new Teuchos::ParameterList(solversOptions.sublist("MomentumOperator")) );
+    M_solverManager->setMomentumOptions(momentumList);
+    
+    boost::shared_ptr<Teuchos::ParameterList> monolithicList;
+    monolithicList.reset(new Teuchos::ParameterList(solversOptions.sublist("MonolithicOperator")) );
+    M_solverManager->setLinSolverParameter(monolithicList);
 }
 
 } // namespace LifeV

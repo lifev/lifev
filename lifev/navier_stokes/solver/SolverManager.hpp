@@ -39,6 +39,10 @@
 #include <lifev/core/linear_algebra/BlockOperator.hpp>
 #include <lifev/core/array/MatrixEpetra.hpp>
 
+#include <Teuchos_ParameterList.hpp>
+
+#include <lifev/core/util/LifeChrono.hpp>
+
 namespace LifeV
 {
 
@@ -80,11 +84,11 @@ public:
 
     void setLinSolverParameter(const parameterListPtr_Type & linearSolverList);
 
-    //const operatorPtr_Type updateInvertibleOperator( );
+    const operatorPtr_Type updateInvertibleOperator( const matrixPtr_Type& F, const matrixPtr_Type& B, const matrixPtr_Type& Btranspose );
 
 protected:
 
-    virtual void getMatrices( const matrix_Type& F, const matrix_Type& B, const matrix_Type& Btranspose ) = 0;
+    virtual void getMatrices( const matrixPtr_Type& F, const matrixPtr_Type& B, const matrixPtr_Type& Btranspose ) = 0;
     
     virtual void updateApproximatedMomentumOperator( ) = 0;
 

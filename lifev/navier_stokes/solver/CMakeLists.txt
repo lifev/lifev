@@ -11,13 +11,13 @@ SET(solver_HEADERS
   solver/StabilizationVMSLES.hpp
   solver/NavierStokesSolver.hpp
   solver/SolverManager.hpp
-  solver/aSIMPLE.hpp
+  solver/solverManager_aSIMPLE.hpp
 CACHE INTERNAL "")
 
 SET(solver_SOURCES
   solver/OseenData.cpp
   solver/SolverManager.cpp
-  solver/aSIMPLE.cpp
+  solver/solverManager_aSIMPLE.cpp
 CACHE INTERNAL "")
 
 
