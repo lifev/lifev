@@ -42,6 +42,7 @@
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #include <lifev/core/filter/ExporterVTK.hpp>
+#include <Teuchos_XMLParameterListHelpers.hpp>
 
 #include "boundaryConditions.hpp"
 
@@ -90,6 +91,9 @@ main ( int argc, char** argv )
     ns.setup(localMeshPtr);
     ns.buildSystem();
 
+    Teuchos::RCP<Teuchos::ParameterList> solversOptions = Teuchos::getParametersFromXmlFile ("solversOptionsFast.xml");
+    ns.setSolversOptions(*solversOptions);
+    
     // Time handler objects to deal with time advancing and extrapolation
     TimeAndExtrapolationHandler timeVelocity;
     Real dt       = dataFile("fluid/time_discretization/timestep",0.0);
@@ -153,7 +157,7 @@ main ( int argc, char** argv )
     for ( ; time <= tFinal + dt / 2.; time += dt)
     {
     	if (verbose)
-    		std::cout << "\nWe are at time " << time << " s\n";
+    		std::cout << "\nWe are at time " << time << " s\n\n";
 
     	iterChrono.reset();
     	iterChrono.start();

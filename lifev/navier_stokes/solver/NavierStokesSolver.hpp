@@ -56,8 +56,9 @@
 #include <lifev/eta/fem/ETFESpace.hpp>
 
 // includes for the linear solver
-#include <lifev/navier_stokes/solver/SolverManager.hpp>
-#include <lifev/navier_stokes/solver/solverManager_aSIMPLE.hpp>
+#include <lifev/navier_stokes/solver/NavierStokesOperator.hpp>
+//#include <lifev/navier_stokes/solver/SolverManager.hpp>
+//#include <lifev/navier_stokes/solver/solverManager_aSIMPLE.hpp>
 
 // utilities
 #include <lifev/core/util/LifeChrono.hpp>
@@ -203,10 +204,13 @@ private:
 	Real M_timeStep;
 
 	// Solver Manager
-	boost::shared_ptr<SolverManager> M_solverManager;
+	// boost::shared_ptr<SolverManager> M_solverManager;
+    
+    // Navoer Stokes operator
+	boost::shared_ptr<LifeV::Operators::NavierStokesOperator> M_oper;
     
     // Epetra Operator needed to solve the linear system
-    invOpPtr_Type M_invOp;
+    // invOpPtr_Type M_invOp;
 
 }; // class NavierStokesSolver
 
@@ -214,7 +218,8 @@ private:
 NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commPtr_Type& communicator):
 		M_comm(communicator),
 		M_dataFile(dataFile),
-		M_displayer(communicator)
+		M_displayer(communicator),
+        M_oper(new Operators::NavierStokesOperator)
 {
 }
 
@@ -244,9 +249,9 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
 
 	M_stiffStrain = M_dataFile("fluid/space_discretization/stiff_strain", true);
 
-	std::string solverManagerType = M_dataFile("fluid/solver_manager_type"," ");
-	M_solverManager.reset(SolverFactory::instance().createObject(solverManagerType));
-	M_solverManager->setComm(M_comm);
+	//std::string solverManagerType = M_dataFile("fluid/solver_manager_type"," ");
+	//M_solverManager.reset(SolverFactory::instance().createObject(solverManagerType));
+	//M_solverManager->setComm(M_comm);
 }
 
 void NavierStokesSolver::buildGraphs()
@@ -477,8 +482,19 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
 		bcManageMatrix( *M_Btranspose, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 0.0, 0.0);
 	}
     
-    // We are ready to solve the timestep
-    M_invOp = M_solverManager->updateInvertibleOperator(M_F, M_B, M_Btranspose);
+    //(2) Set up the OseenOperator
+    M_displayer.leaderPrint( "\tset up the block operator...");
+    LifeChrono chrono;
+    chrono.start();
+    
+    Operators::NavierStokesOperator::operatorPtrContainer_Type operData(2,2);
+    operData(0,0) = M_F->matrixPtr();
+    operData(0,1) = M_Btranspose->matrixPtr();
+    operData(1,0) = M_B->matrixPtr();
+    
+    M_oper->setUp(operData, M_displayer.comm());
+    chrono.stop();
+    M_displayer.leaderPrintMax(" done in " , chrono.diff() );
     
 }
 
@@ -490,6 +506,7 @@ void NavierStokesSolver::updateBCHandler( bcPtr_Type & bc )
 //! Setter for the solvers options
 void NavierStokesSolver::setSolversOptions (const Teuchos::ParameterList& solversOptions)
 {
+    /*
     boost::shared_ptr<Teuchos::ParameterList> schurComplementList;
     schurComplementList.reset(new Teuchos::ParameterList(solversOptions.sublist("ApproximatedSchurOperator")) );
     M_solverManager->setSchurOptions(schurComplementList);
@@ -501,6 +518,7 @@ void NavierStokesSolver::setSolversOptions (const Teuchos::ParameterList& solver
     boost::shared_ptr<Teuchos::ParameterList> monolithicList;
     monolithicList.reset(new Teuchos::ParameterList(solversOptions.sublist("MonolithicOperator")) );
     M_solverManager->setLinSolverParameter(monolithicList);
+    */
 }
 
 } // namespace LifeV

@@ -43,6 +43,8 @@
 
 #include <lifev/core/util/LifeChrono.hpp>
 
+#include <lifev/navier_stokes/solver/aSIMPLE.hpp>
+
 namespace LifeV
 {
 

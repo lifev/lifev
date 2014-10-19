@@ -11,7 +11,7 @@
 #include <lifev/navier_stokes/solver/SolverManager.hpp>
 
 #include <lifev/core/linear_algebra/ApproximatedInvertibleRowMatrix.hpp>
-#include <lifev/core/linear_algebra/LumpedOperator.hpp>
+#include <lifev/navier_stokes/solver/aSIMPLE.hpp>
 
 #include <lifev/core/linear_algebra/IfpackPreconditioner.hpp>
 #include <lifev/core/linear_algebra/MLPreconditioner.hpp>
