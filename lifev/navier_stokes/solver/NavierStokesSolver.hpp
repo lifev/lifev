@@ -482,8 +482,8 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
 		bcManageMatrix( *M_Btranspose, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 0.0, 0.0);
 	}
     
-    //(2) Set up the OseenOperator
-    M_displayer.leaderPrint( "\tset up the block operator...");
+    //(1) Set up the OseenOperator
+    M_displayer.leaderPrint( "\tNS operator - set up the block operator...");
     LifeChrono chrono;
     chrono.start();
     
@@ -495,6 +495,9 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
     M_oper->setUp(operData, M_displayer.comm());
     chrono.stop();
     M_displayer.leaderPrintMax(" done in " , chrono.diff() );
+
+    //(2) Set the data for the preconditioner
+    
     
 }
 
