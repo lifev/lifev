@@ -239,7 +239,7 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
 	Int geoDimensions = mesh_Type::S_geoDimensions;
 
 	M_velocityFESpace.reset (new FESpace<mesh_Type, map_Type> (mesh, uOrder, geoDimensions, M_comm) );
-	M_pressureFESpace.reset (new FESpace<mesh_Type, map_Type> (mesh, pOrder, geoDimensions, M_comm) );
+	M_pressureFESpace.reset (new FESpace<mesh_Type, map_Type> (mesh, pOrder, 1, M_comm) );
 
 	M_fespaceUETA.reset( new ETFESpace_velocity(M_velocityFESpace->mesh(), &(M_velocityFESpace->refFE()), M_comm));
 	M_fespacePETA.reset( new ETFESpace_pressure(M_pressureFESpace->mesh(), &(M_pressureFESpace->refFE()), M_comm));
@@ -432,6 +432,8 @@ void NavierStokesSolver::buildSystem()
 		M_F.reset (new matrix_Type ( M_velocityFESpace->map(), *M_F_graph ) );
 		*M_F *= 0;
 		M_F->globalAssemble();
+
+        
 	}
 
 	chrono.stop();
@@ -464,7 +466,7 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 	*M_F += *M_C;
 
 	// Get the right hand side with inertia contribution
-	M_rhs.reset( new vector_Type ( M_velocityFESpace->map(), Repeated ) );
+	M_rhs.reset( new vector_Type ( M_velocityFESpace->map(), Unique ) );
 	*M_rhs = *M_Mu* (*rhs_velocity);
 }
 
