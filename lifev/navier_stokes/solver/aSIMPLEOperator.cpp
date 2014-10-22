@@ -51,6 +51,7 @@ void aSIMPLEOperator::setUp(const matrixEpetraPtr_Type & F,
     M_B = B;
     M_Btranspose = Btranspose;
     M_comm = comm;
+    
 }
     
 void aSIMPLEOperator::setOptions(const Teuchos::ParameterList& solversOptions)
@@ -87,10 +88,35 @@ void aSIMPLEOperator::updateApproximatedMomentumOperator( )
 
 void aSIMPLEOperator::updateApproximatedSchurComplementOperator( )
 {
-    M_approximatedSchurComplementOperator->SetRowMatrix(M_F->matrixPtr());
+    buildShurComplement();
+    M_approximatedSchurComplementOperator->SetRowMatrix(M_schurComplement->matrixPtr());
     M_approximatedSchurComplementOperator->SetParameterList(*M_schurOptions);
     M_approximatedSchurComplementOperator->Compute();
 }
+    
+void aSIMPLEOperator::buildShurComplement( )
+{
+    Epetra_Vector diag( M_F->matrixPtr()->OperatorRangeMap() );
+    Epetra_Vector diag_reciprocal( M_F->matrixPtr()->OperatorRangeMap() );
+    
+    // extracting diag(F)
+    M_F->matrixPtr()->ExtractDiagonalCopy(diag);
+    
+    // computing diag(F)^{-1}
+    diag_reciprocal.Reciprocal(diag);
+    
+    // computing diag(F)^{-1}*M_Btranspose
+    matrixEpetra_Type FBT (*M_Btranspose);
+    FBT.matrixPtr()->LeftScale(diag_reciprocal);
+    
+    M_schurComplement.reset ( new matrixEpetra_Type ( M_B->map() ) );
+    
+    // computing M_B*(diag(F)^{-1}*M_Btranspose)
+    M_B->multiply (false, FBT, false, *M_schurComplement, false);
+    M_schurComplement->globalAssemble();
+    M_schurComplement->spy("shurCom");
+}
 
 } /* end namespace Operators */
+    
 } /*end namespace */

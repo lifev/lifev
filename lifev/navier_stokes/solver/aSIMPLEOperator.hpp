@@ -38,6 +38,8 @@ public:
     typedef  super::comm_Type                         comm_Type;
     typedef  super::commPtr_Type                      commPtr_Type;
     typedef  boost::shared_ptr<Teuchos::ParameterList> parameterListPtr_Type;
+    typedef  MapEpetra                                mapEpetra_Type;
+    typedef  boost::shared_ptr<mapEpetra_Type>        mapEpetraPtr_Type;
     //@}
     
     //! @name Constructors
@@ -112,6 +114,9 @@ private:
     //! Create the domain and the range maps
     void setMaps();
     
+    //! create the matrix B*diag(F)^-1*Btranspose
+    void buildShurComplement();
+    
     boost::shared_ptr<BlockEpetra_Map> M_operatorDomainMap;
     //! Range Map
     boost::shared_ptr<BlockEpetra_Map> M_operatorRangeMap;
@@ -121,6 +126,8 @@ private:
     matrixEpetraPtr_Type M_B;
 
     matrixEpetraPtr_Type M_Btranspose;
+    
+    matrixEpetraPtr_Type M_schurComplement;
     
     //! Communicator
     commPtr_Type M_comm;

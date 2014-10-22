@@ -1,7 +1,6 @@
 <ParameterList>
-    <Parameter name="Manager Type" type="string" value="HOY"/>
     <ParameterList name="MomentumOperator">
-        <Parameter name="use preconditioner as approximated inverse" type="bool" value="false"/>
+        <Parameter name="use preconditioner as approximated inverse" type="bool" value="true"/>
         <Parameter name="preconditioner type" type="string" value="Ifpack"/>
         <!-- ML, Ifpack, TwoLevel-->
         <ParameterList name="solver">
@@ -59,7 +58,7 @@
     </ParameterList>
 
     <ParameterList name="ApproximatedSchurOperator">
-            <Parameter name="use preconditioner as approximated inverse" type="bool" value="false"/>
+            <Parameter name="use preconditioner as approximated inverse" type="bool" value="true"/>
             <Parameter name="preconditioner type" type="string" value="ML"/>
             <ParameterList name="solver">
                <Parameter name="Linear Solver Type" type="string" value="AztecOO"/>
