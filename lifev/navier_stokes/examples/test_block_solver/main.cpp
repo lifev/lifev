@@ -91,9 +91,6 @@ main ( int argc, char** argv )
     ns.setup(localMeshPtr);
     ns.buildSystem();
 
-    Teuchos::RCP<Teuchos::ParameterList> solversOptions = Teuchos::getParametersFromXmlFile ("solversOptionsFast.xml");
-    ns.setSolversOptions(*solversOptions);
-    
     // Time handler objects to deal with time advancing and extrapolation
     TimeAndExtrapolationHandler timeVelocity;
     Real dt       = dataFile("fluid/time_discretization/timestep",0.0);

@@ -1,4 +1,5 @@
 <ParameterList>
+    <Parameter name="Manager Type" type="string" value="HOY"/>
     <ParameterList name="MomentumOperator">
         <Parameter name="use preconditioner as approximated inverse" type="bool" value="false"/>
         <Parameter name="preconditioner type" type="string" value="Ifpack"/>
@@ -58,61 +59,44 @@
     </ParameterList>
 
     <ParameterList name="ApproximatedSchurOperator">
-        <Parameter name="use preconditioner as approximated inverse" type="bool" value="false"/>
-        <Parameter name="preconditioner type" type="string" value="Ifpack"/>
-        <!-- ML, Ifpack, TwoLevel-->
-        <ParameterList name="solver">
-            <Parameter name="Linear Solver Type" type="string" value="AztecOO"/>
-            <ParameterList name="AztecOO">
-                <Parameter name="conv" type="string" value="r0"/>
-                <Parameter name="kspace" type="int" value="40"/>
-                <Parameter name="max_iter" type="int" value="1500"/>
-                <Parameter name="output" type="string" value="warnings"/>
-                <Parameter name="scaling" type="string" value="none"/>
-                <Parameter name="solver" type="string" value="gmres"/>
-                <Parameter name="tol" type="double" value="1e-03"/>
+            <Parameter name="use preconditioner as approximated inverse" type="bool" value="false"/>
+            <Parameter name="preconditioner type" type="string" value="ML"/>
+            <ParameterList name="solver">
+               <Parameter name="Linear Solver Type" type="string" value="AztecOO"/>
+               <ParameterList name="AztecOO">
+                  <Parameter name="conv" type="string" value="r0"/>
+                  <Parameter name="max_iter" type="int" value="1500"/>
+                  <Parameter name="output" type="string" value="warnings"/>
+                  <Parameter name="scaling" type="string" value="none"/>
+                  <Parameter name="solver" type="string" value="cg"/>
+                  <Parameter name="tol" type="double" value="1e-03"/>
+               </ParameterList>
             </ParameterList>
-        </ParameterList>
-        <ParameterList name="preconditioner">
-            <ParameterList name="ML">
-                <Parameter name="recompute" type="bool" value="true"/>
-                <ParameterList name="options">
-                    <Parameter name="default values" type="string" value="DD-ML"/>
-                    <Parameter name="ML validate parameter list" type="bool" value="true"/>
-                    <Parameter name="aggregation: damping factor" type="double" value="1.333"/>
-                    <Parameter name="aggregation: local aggregates" type="int" value="1"/>
-                    <Parameter name="aggregation: next-level aggregates per process" type="int" value="128"/>
-                    <Parameter name="aggregation: nodes per aggregate" type="int" value="512"/>
-                    <Parameter name="aggregation: type" type="string" value="METIS"/>
-                    <Parameter name="coarse: max size" type="int" value="128"/>
-                    <Parameter name="coarse: pre or post" type="string" value="post"/>
-                    <Parameter name="coarse: sweeps" type="int" value="1"/>
-                    <Parameter name="coarse: type" type="string" value="Amesos-KLU"/>
-                    <Parameter name="eigen-analysis: iterations" type="int" value="20"/>
-                    <Parameter name="eigen-analysis: type" type="string" value="power-method"/>
-                    <Parameter name="increasing or decreasing" type="string" value="increasing"/>
-                    <Parameter name="max levels" type="int" value="3"/>
-                    <Parameter name="prec type" type="string" value="MGW"/>
-                    <Parameter name="smoother: Aztec as solver" type="bool" value="false"/>
-                    <Parameter name="smoother: damping factor" type="double" value="0.67"/>
-                    <Parameter name="smoother: pre or post" type="string" value="both"/>
-                    <Parameter name="smoother: sweeps" type="int" value="4"/>
-                    <Parameter name="smoother: type" type="string" value="symmetric Gauss-Seidel"/>
+            <ParameterList name="preconditioner">
+                <ParameterList name="ML">
+                    <ParameterList name="options">
+                        <Parameter name="default values" type="string" value="SA"/>
+                        <Parameter name="ML validate parameter list" type="bool" value="true"/>
+                        <Parameter name="repartition: enable" type="int" value="1"/>
+                        <Parameter name="repartition: partitioner" type="string" value="ParMETIS"/>
+                        <Parameter name="coarse: max size" type="int" value="128"/>
+                        <Parameter name="coarse: pre or post" type="string" value="post"/>
+                        <Parameter name="coarse: sweeps" type="int" value="1"/>
+                        <Parameter name="coarse: type" type="string" value="Amesos-KLU"/>
+                        <Parameter name="eigen-analysis: iterations" type="int" value="20"/>
+                        <Parameter name="eigen-analysis: type" type="string" value="cg"/>
+                        <Parameter name="increasing or decreasing" type="string" value="increasing"/>
+                        <Parameter name="max levels" type="int" value="8"/>
+                        <Parameter name="prec type" type="string" value="MGW"/>
+                        <Parameter name="smoother: Aztec as solver" type="bool" value="false"/>
+                        <Parameter name="smoother: damping factor" type="double" value="1"/>
+                        <Parameter name="smoother: pre or post" type="string" value="both"/>
+                        <Parameter name="smoother: sweeps" type="int" value="3"/>
+                        <Parameter name="smoother: type" type="string" value="symmetric Gauss-Seidel"/>
+                    </ParameterList>
                 </ParameterList>
             </ParameterList>
-            <ParameterList name="Ifpack">
-                <Parameter name="preconditioner" type="string" value="ILU"/>
-                <Parameter name="overlap"        type="int"    value="1"/>
-                <Parameter name="recompute"      type="bool"   value="true"/>
-                <ParameterList name="options">
-                    <Parameter name="fact: level-of-fill"      type="int"    value="1"/>
-                    <Parameter name="fact: drop tolerance"     type="double" value="1e-9"/>
-                    <Parameter name="schwarz: combine mode"    type="string" value="Zero"/>
-                    <Parameter name="schwarz: reordering type" type="string" value="rcm"/>
-                    <!-- rcm, metis -->
-                </ParameterList>
-            </ParameterList>
-        </ParameterList>
+        <Parameter name="order" type="int" value="1"/> <!-- Used only by HOY -->
     </ParameterList>
 
     <ParameterList name="MonolithicOperator">

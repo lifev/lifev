@@ -57,12 +57,14 @@
 
 // includes for the linear solver
 #include <lifev/navier_stokes/solver/NavierStokesOperator.hpp>
-//#include <lifev/navier_stokes/solver/SolverManager.hpp>
-//#include <lifev/navier_stokes/solver/solverManager_aSIMPLE.hpp>
+#include <lifev/navier_stokes/solver/aSIMPLEOperator.hpp>
 
 // utilities
 #include <lifev/core/util/LifeChrono.hpp>
 #include <lifev/core/util/Displayer.hpp>
+
+#include <Teuchos_ParameterList.hpp>
+#include <Teuchos_XMLParameterListHelpers.hpp>
 
 namespace LifeV
 {
@@ -144,9 +146,6 @@ public:
 	{
 		return M_pressureFESpace;
 	}
-    
-    //! Setter for the solvers options
-    void setSolversOptions (const Teuchos::ParameterList& solversOptions);
 
 private:
 
@@ -202,12 +201,12 @@ private:
 	//! Reals
 	Real M_alpha;
 	Real M_timeStep;
-
-	// Solver Manager
-	// boost::shared_ptr<SolverManager> M_solverManager;
     
     // Navoer Stokes operator
 	boost::shared_ptr<LifeV::Operators::NavierStokesOperator> M_oper;
+    
+    // Navoer Stokes operator
+	boost::shared_ptr<LifeV::Operators::aSIMPLEOperator> M_prec;
     
     // Epetra Operator needed to solve the linear system
     // invOpPtr_Type M_invOp;
@@ -219,7 +218,8 @@ NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commP
 		M_comm(communicator),
 		M_dataFile(dataFile),
 		M_displayer(communicator),
-        M_oper(new Operators::NavierStokesOperator)
+        M_oper(new Operators::NavierStokesOperator),
+        M_prec(new Operators::aSIMPLEOperator)
 {
 }
 
@@ -248,10 +248,9 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
 	*M_uExtrapolated *= 0;
 
 	M_stiffStrain = M_dataFile("fluid/space_discretization/stiff_strain", true);
-
-	//std::string solverManagerType = M_dataFile("fluid/solver_manager_type"," ");
-	//M_solverManager.reset(SolverFactory::instance().createObject(solverManagerType));
-	//M_solverManager->setComm(M_comm);
+    
+    Teuchos::RCP<Teuchos::ParameterList> solversOptions = Teuchos::getParametersFromXmlFile ("solversOptionsFast.xml");
+    M_prec->setOptions(*solversOptions);
 }
 
 void NavierStokesSolver::buildGraphs()
@@ -491,37 +490,30 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
     operData(0,0) = M_F->matrixPtr();
     operData(0,1) = M_Btranspose->matrixPtr();
     operData(1,0) = M_B->matrixPtr();
-    
     M_oper->setUp(operData, M_displayer.comm());
     chrono.stop();
     M_displayer.leaderPrintMax(" done in " , chrono.diff() );
 
     //(2) Set the data for the preconditioner
+    M_displayer.leaderPrint( "\tPreconditioner operator - set up the block operator...");
+    chrono.reset();
+    chrono.start();
+    M_prec->setUp(M_F, M_B, M_Btranspose, M_comm);
+    M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
+    M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
+    M_prec->updateApproximatedMomentumOperator();
+    M_prec->updateApproximatedSchurComplementOperator();
+    chrono.stop();
+    M_displayer.leaderPrintMax(" done in " , chrono.diff() );
     
+    //(3) Set the solver for the linear system
     
+
 }
 
 void NavierStokesSolver::updateBCHandler( bcPtr_Type & bc )
 {
 	bc->bcUpdate ( *M_velocityFESpace->mesh(), M_velocityFESpace->feBd(), M_velocityFESpace->dof() );
-}
-    
-//! Setter for the solvers options
-void NavierStokesSolver::setSolversOptions (const Teuchos::ParameterList& solversOptions)
-{
-    /*
-    boost::shared_ptr<Teuchos::ParameterList> schurComplementList;
-    schurComplementList.reset(new Teuchos::ParameterList(solversOptions.sublist("ApproximatedSchurOperator")) );
-    M_solverManager->setSchurOptions(schurComplementList);
-    
-    boost::shared_ptr<Teuchos::ParameterList> momentumList;
-    momentumList.reset(new Teuchos::ParameterList(solversOptions.sublist("MomentumOperator")) );
-    M_solverManager->setMomentumOptions(momentumList);
-    
-    boost::shared_ptr<Teuchos::ParameterList> monolithicList;
-    monolithicList.reset(new Teuchos::ParameterList(solversOptions.sublist("MonolithicOperator")) );
-    M_solverManager->setLinSolverParameter(monolithicList);
-    */
 }
 
 } // namespace LifeV
