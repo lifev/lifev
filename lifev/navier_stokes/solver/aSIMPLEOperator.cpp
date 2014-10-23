@@ -116,7 +116,6 @@ int aSIMPLEOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
 {
     ASSERT_PRE(X.NumVectors() == Y.NumVectors(), "X and Y must have the same number of vectors");
 
-    // input vector into VectorEpetra
     const VectorEpetra_Type X_vectorEpetra(X, M_monolithicMap, Unique);
     
     // split the input vector into the velocity and pressure components
@@ -124,8 +123,8 @@ int aSIMPLEOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
     VectorEpetra_Type X_pressure(M_B->map(), Unique);
     
     // gather input values
-    X_velocity.subset(X_vectorEpetra);
-    X_pressure.subset(X_vectorEpetra, M_F->map().mapSize());
+    X_velocity.subset(X_vectorEpetra, M_F->map(), 0, 0);
+    X_pressure.subset(X_vectorEpetra, M_B->map(), M_F->map().mapSize(), 0);
     
     VectorEpetra_Type Z ( X_velocity.map(), Unique );
     M_approximatedMomentumOperator->ApplyInverse(X_velocity.epetraVector(), Z.epetraVector() );
@@ -135,19 +134,19 @@ int aSIMPLEOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
     
     VectorEpetra_Type W ( X_pressure.map(), Unique );
     M_approximatedSchurComplementOperator->ApplyInverse(K.epetraVector(), W.epetraVector());
-    Real alpha = 0.00001;
+    Real alpha = 1.0;
     W *= (-1.0/alpha);
     
     VectorEpetra_Type Y_velocity( Z );
     matrixEpetra_Type DBT ( *M_Btranspose );
-    Epetra_Vector invDiag ( M_F->matrixPtr()->OperatorRangeMap() );
     DBT.matrixPtr()->LeftScale(*M_invD);
+    
     Y_velocity -= DBT*W;
     
     VectorEpetra_Type Y_pressure ( W );
     
     // output vector
-    VectorEpetra_Type Y_vectorEpetra(Y, M_monolithicMap, Unique);
+    VectorEpetra_Type Y_vectorEpetra(M_monolithicMap, Unique);
     
     // Copy the individual parts inside
     Y_vectorEpetra.subset(Y_velocity, X_velocity.map(), 0, 0);
@@ -155,7 +154,7 @@ int aSIMPLEOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
     
     Y = dynamic_cast<Epetra_MultiVector &>( Y_vectorEpetra.epetraVector() );
     
-    return 1.0;
+    return 0;
 }
     
 } /* end namespace Operators */

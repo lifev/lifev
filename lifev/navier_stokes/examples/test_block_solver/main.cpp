@@ -167,10 +167,18 @@ main ( int argc, char** argv )
     	ns.updateSystem ( u_star, rhs_velocity );
     	ns.iterate( bc, time );
 
+        ns.updateVelocity(velocity);
+        ns.updatePressure(pressure);
+        
     	iterChrono.stop();
 
     	if (verbose)
     		std::cout << "\nTimestep solved in " << iterChrono.diff() << " s\n";
+        
+        exporter->postProcess ( time );
+        
+        timeVelocity.shift(*velocity);
+        
     }
 
     exporter->closeFile();

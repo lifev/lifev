@@ -147,6 +147,17 @@ public:
 		return M_pressureFESpace;
 	}
 
+    void updateVelocity(vectorPtr_Type& velocity)
+    {
+        *velocity = *M_velocity;
+    }
+    
+    void updatePressure(vectorPtr_Type& pressure)
+    {
+        *pressure = *M_pressure;
+    }
+    
+    
 private:
 
 	// build the graphs
@@ -154,6 +165,8 @@ private:
 
 	// update the bc handler
 	void updateBCHandler( bcPtr_Type & bc );
+
+    void setSolversOptions(const Teuchos::ParameterList& solversOptions);
 
 	// communicator
 	commPtr_Type M_comm;
@@ -194,7 +207,9 @@ private:
 	// vectors
 	vectorPtr_Type M_uExtrapolated;
 	vectorPtr_Type M_rhs;
-
+    vectorPtr_Type M_velocity;
+    vectorPtr_Type M_pressure;
+    
 	//! Displayer to print in parallel (only PID 0 will print)
 	Displayer M_displayer;
 
@@ -209,7 +224,10 @@ private:
 	boost::shared_ptr<LifeV::Operators::aSIMPLEOperator> M_prec;
     
     // Epetra Operator needed to solve the linear system
-    // invOpPtr_Type M_invOp;
+    boost::shared_ptr<Operators::InvertibleOperator> M_invOper;
+    
+    // Parameter list solver
+    parameterListPtr_Type M_pListLinSolver;
 
 }; // class NavierStokesSolver
 
@@ -219,7 +237,8 @@ NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commP
 		M_dataFile(dataFile),
 		M_displayer(communicator),
         M_oper(new Operators::NavierStokesOperator),
-        M_prec(new Operators::aSIMPLEOperator)
+        M_prec(new Operators::aSIMPLEOperator),
+        M_invOper()
 {
 }
 
@@ -251,8 +270,22 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
     
     Teuchos::RCP<Teuchos::ParameterList> solversOptions = Teuchos::getParametersFromXmlFile ("solversOptionsFast.xml");
     M_prec->setOptions(*solversOptions);
+    setSolversOptions(*solversOptions);
+    
+    M_velocity.reset( new vector_Type(M_velocityFESpace->map()) );
+    M_pressure.reset( new vector_Type(M_pressureFESpace->map()) );
+    
+    M_displayer.leaderPrintMax ( " Number of DOFs for the velocity = ", M_velocityFESpace->dof().numTotalDof()*3 ) ;
+    M_displayer.leaderPrintMax ( " Number of DOFs for the pressure = ", M_pressureFESpace->dof().numTotalDof() ) ;
 }
 
+void NavierStokesSolver::setSolversOptions(const Teuchos::ParameterList& solversOptions)
+{
+    boost::shared_ptr<Teuchos::ParameterList> monolithicOptions;
+    monolithicOptions.reset(new Teuchos::ParameterList(solversOptions.sublist("MonolithicOperator")) );
+    M_pListLinSolver = monolithicOptions;
+}
+    
 void NavierStokesSolver::buildGraphs()
 {
 	M_displayer.leaderPrint ( " F - Pre-building the graphs... ");
@@ -391,8 +424,7 @@ void NavierStokesSolver::buildSystem()
 				   M_fespacePETA,
 				   value(-1.0) * phi_j * div(phi_i)
 		) >> M_Btranspose;
-		M_Btranspose->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
-
+        
 		M_B.reset (new matrix_Type ( M_pressureFESpace->map(), *M_B_graph ) );
 		*M_B *= 0;
 		integrate( elements(M_fespaceUETA->mesh()),
@@ -483,6 +515,8 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
 		bcManageMatrix( *M_Btranspose, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 0.0, 0.0);
 	}
     
+    M_Btranspose->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
+    
     //(1) Set up the OseenOperator
     M_displayer.leaderPrint( "\tNS operator - set up the block operator...");
     LifeChrono chrono;
@@ -509,8 +543,31 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
     M_displayer.leaderPrintMax(" done in " , chrono.diff() );
 
     //(3) Set the solver for the linear system
+    M_displayer.leaderPrint( "\tset up the Trilinos solver...");
+    chrono.start();
+    std::string solverType(M_pListLinSolver->get<std::string>("Linear Solver Type"));
+    M_invOper.reset(Operators::InvertibleOperatorFactory::instance().createObject(solverType));
     
+    M_invOper->setOperator(M_oper);
+    M_invOper->setPreconditioner(M_prec);
+    M_invOper->setParameterList(M_pListLinSolver->sublist(solverType));
+    
+    chrono.stop();
+    M_displayer.leaderPrintMax(" done in " , chrono.diff() );
 
+    // Solving the system
+    BlockEpetra_Map upMap;
+    upMap.setUp ( M_velocityFESpace->map().map(Unique), M_pressureFESpace->map().map(Unique));
+    
+    BlockEpetra_MultiVector up(upMap, 1), rhs(upMap, 1);
+    rhs.block(0).Update(1.0, M_rhs->epetraVector(), 0.);
+    
+    // Solving the linear system
+    M_invOper->ApplyInverse(rhs,up);
+    
+    M_velocity->epetraVector().Update(1.0,up.block(0),0.0);
+    M_pressure->epetraVector().Update(1.0,up.block(1),0.0);
+    
 }
 
 void NavierStokesSolver::updateBCHandler( bcPtr_Type & bc )
