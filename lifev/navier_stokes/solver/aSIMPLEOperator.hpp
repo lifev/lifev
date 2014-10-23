@@ -40,6 +40,8 @@ public:
     typedef  boost::shared_ptr<Teuchos::ParameterList> parameterListPtr_Type;
     typedef  MapEpetra                                mapEpetra_Type;
     typedef  boost::shared_ptr<mapEpetra_Type>        mapEpetraPtr_Type;
+    typedef  VectorEpetra                             VectorEpetra_Type;
+    typedef  boost::shared_ptr<VectorEpetra_Type>     VectorEpetraPtr_Type;
     //@}
     
     //! @name Constructors
@@ -141,6 +143,10 @@ private:
     parameterListPtr_Type M_momentumOptions;
     
     parameterListPtr_Type M_schurOptions;
+    
+    mapEpetraPtr_Type M_monolithicMap;
+    
+    boost::shared_ptr<Epetra_Vector> M_invD;
     
     //! Label
     const std::string M_label;

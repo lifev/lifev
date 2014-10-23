@@ -507,7 +507,7 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
     M_prec->updateApproximatedSchurComplementOperator();
     chrono.stop();
     M_displayer.leaderPrintMax(" done in " , chrono.diff() );
-    
+
     //(3) Set the solver for the linear system
     
 

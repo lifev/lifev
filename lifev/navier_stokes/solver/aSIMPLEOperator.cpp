@@ -30,11 +30,6 @@ aSIMPLEOperator::~aSIMPLEOperator()
     
 }
 
-int aSIMPLEOperator::ApplyInverse(const vector_Type &X, vector_Type &Y) const
-{
-    return 0;
-}
-
 // show information about the class
 void aSIMPLEOperator::showMe(){
     //std::cout<<"Dimension u: "<< M_Bt->NumGlobalRows()<<
@@ -51,7 +46,8 @@ void aSIMPLEOperator::setUp(const matrixEpetraPtr_Type & F,
     M_B = B;
     M_Btranspose = Btranspose;
     M_comm = comm;
-    
+    M_monolithicMap.reset( new mapEpetra_Type ( M_F->map() ) );
+    *M_monolithicMap += M_B->map();
 }
     
 void aSIMPLEOperator::setOptions(const Teuchos::ParameterList& solversOptions)
@@ -97,26 +93,71 @@ void aSIMPLEOperator::updateApproximatedSchurComplementOperator( )
 void aSIMPLEOperator::buildShurComplement( )
 {
     Epetra_Vector diag( M_F->matrixPtr()->OperatorRangeMap() );
-    Epetra_Vector diag_reciprocal( M_F->matrixPtr()->OperatorRangeMap() );
+    M_invD.reset(new Epetra_Vector( M_F->matrixPtr()->OperatorRangeMap() ) );
     
     // extracting diag(F)
     M_F->matrixPtr()->ExtractDiagonalCopy(diag);
     
     // computing diag(F)^{-1}
-    diag_reciprocal.Reciprocal(diag);
+    M_invD->Reciprocal(diag);
     
     // computing diag(F)^{-1}*M_Btranspose
     matrixEpetra_Type FBT (*M_Btranspose);
-    FBT.matrixPtr()->LeftScale(diag_reciprocal);
+    FBT.matrixPtr()->LeftScale(*M_invD);
     
     M_schurComplement.reset ( new matrixEpetra_Type ( M_B->map() ) );
     
     // computing M_B*(diag(F)^{-1}*M_Btranspose)
     M_B->multiply (false, FBT, false, *M_schurComplement, false);
     M_schurComplement->globalAssemble();
-    M_schurComplement->spy("shurCom");
 }
 
+int aSIMPLEOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
+{
+    ASSERT_PRE(X.NumVectors() == Y.NumVectors(), "X and Y must have the same number of vectors");
+
+    // input vector into VectorEpetra
+    const VectorEpetra_Type X_vectorEpetra(X, M_monolithicMap, Unique);
+    
+    // split the input vector into the velocity and pressure components
+    VectorEpetra_Type X_velocity(M_F->map(), Unique);
+    VectorEpetra_Type X_pressure(M_B->map(), Unique);
+    
+    // gather input values
+    X_velocity.subset(X_vectorEpetra);
+    X_pressure.subset(X_vectorEpetra, M_F->map().mapSize());
+    
+    VectorEpetra_Type Z ( X_velocity.map(), Unique );
+    M_approximatedMomentumOperator->ApplyInverse(X_velocity.epetraVector(), Z.epetraVector() );
+    
+    VectorEpetra_Type K ( X_pressure, Unique );
+    K -= *M_B*Z;
+    
+    VectorEpetra_Type W ( X_pressure.map(), Unique );
+    M_approximatedSchurComplementOperator->ApplyInverse(K.epetraVector(), W.epetraVector());
+    Real alpha = 0.00001;
+    W *= (-1.0/alpha);
+    
+    VectorEpetra_Type Y_velocity( Z );
+    matrixEpetra_Type DBT ( *M_Btranspose );
+    Epetra_Vector invDiag ( M_F->matrixPtr()->OperatorRangeMap() );
+    DBT.matrixPtr()->LeftScale(*M_invD);
+    Y_velocity -= DBT*W;
+    
+    VectorEpetra_Type Y_pressure ( W );
+    
+    // output vector
+    VectorEpetra_Type Y_vectorEpetra(Y, M_monolithicMap, Unique);
+    
+    // Copy the individual parts inside
+    Y_vectorEpetra.subset(Y_velocity, X_velocity.map(), 0, 0);
+    Y_vectorEpetra.subset(Y_pressure, X_pressure.map(), 0, X_velocity.map().mapSize() );
+    
+    Y = dynamic_cast<Epetra_MultiVector &>( Y_vectorEpetra.epetraVector() );
+    
+    return 1.0;
+}
+    
 } /* end namespace Operators */
     
 } /*end namespace */
