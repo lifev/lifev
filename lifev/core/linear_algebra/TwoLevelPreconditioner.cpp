@@ -10,6 +10,7 @@
 #include "TwoLevelOperator.hpp"
 #include "ApproximatedInvertibleRowMatrix.hpp"
 
+#include <Trilinos_version.h>
 #include <EpetraExt_Transpose_RowMatrix.h>
 #include <EpetraExt_MatrixMatrix.h>
 
@@ -43,7 +44,11 @@ int TwoLevelPreconditioner::myCompute()
 	else
 	{
 		bool MakeDataContiguous = true;
-		EpetraExt::RowMatrix_Transpose transposer( MakeDataContiguous );
+#if TRILINOS_MAJOR_VERSION < 11
+	EpetraExt::RowMatrix_Transpose transposer ( MakeDataContiguous );
+#else
+	EpetraExt::RowMatrix_Transpose transposer ( 0, !MakeDataContiguous );
+#endif
 		R.reset( new rowMatrix_Type(dynamic_cast<rowMatrix_Type &>(transposer(*E))));
 		M_pList.set("RestricitionMatrix", R);
 	}

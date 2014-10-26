@@ -14,7 +14,7 @@ endif()
 
 MESSAGE("Trilinos_DIR: ${Trilinos_DIR}")
 
-# Here I am looking for TrilinosConfig.cmake and I will import it. 
+# Here I am looking for TrilinosConfig.cmake and I will import it.
 find_package (Trilinos NO_MODULE HINTS ${Trilinos_DIR})
 
 # Stop cmake if Trilinos is not found.
@@ -22,11 +22,20 @@ if (NOT Trilinos_FOUND)
   message (FATAL_ERROR "Could not find Trilinos!")
 endif ()
 
-if("${Trilinos_VERSION_MINOR}" GREATER 6)
+if("${Trilinos_VERSION_MAJOR}" GREATER 10)
   set (HAVE_TRILINOS_GT_10_6 TRUE)
-  message (STATUS "Using Trilinos > 10.6 " ${Trilinos_VERSION_MINOR})
+  message (STATUS "Using Trilinos > 10.6 : " ${Trilinos_VERSION_MAJOR} "." ${Trilinos_VERSION_MINOR})
 else()
-  message (STATUS "Using Trilinos <= 10.6 " ${Trilinos_VERSION_MINOR})
+ if("${Trilinos_VERSION_MAJOR}" SMALLER 10)
+   message (STATUS "Using Trilinos <= 10.6 : " ${Trilinos_VERSION_MAJOR} "." ${Trilinos_VERSION_MINOR})
+ else()
+   if("${Trilinos_VERSION_MINOR}" GREATER 6)
+    set (HAVE_TRILINOS_GT_10_6 TRUE)
+    message (STATUS "Using Trilinos > 10.6 : " ${Trilinos_VERSION_MAJOR} "." ${Trilinos_VERSION_MINOR})
+   else()
+    message (STATUS "Using Trilinos <= 10.6 : " ${Trilinos_VERSION_MAJOR} "." ${Trilinos_VERSION_MINOR})
+   endif()
+ endif()
 endif ()
 
 # Here it will be better just to raise a warning or have if(USE_TRILINOS_COMPILERS)
