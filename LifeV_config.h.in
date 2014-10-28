@@ -11,6 +11,7 @@
 #cmakedefine LIFEV_HAS_ELECTROPHYSIOLOGY
 #cmakedefine LIFEV_HAS_HEART
 #cmakedefine LIFEV_HAS_FSI
+#cmakedefine LIFEV_HAS_FSI_BLOCKS
 #cmakedefine LIFEV_HAS_MULTISCALE
 #cmakedefine LIFEV_HAS_DUMMY
 #cmakedefine H5_USE_16_API

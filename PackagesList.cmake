@@ -84,6 +84,7 @@ SET( LifeV_PACKAGES_AND_DIRS_AND_CLASSIFICATIONS
   Electrophysiology     lifev/electrophysiology           EX
   Heart                 lifev/heart                       EX
   FSI                   lifev/fsi                         PS
+  FSI_blocks            lifev/fsi_blocks                  EX
   ZeroDimensional       lifev/zero_dimensional            PS
   Multiscale            lifev/multiscale                  PS
   Dummy                 lifev/dummy                       EX
