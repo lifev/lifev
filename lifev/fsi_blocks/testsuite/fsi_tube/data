@@ -1,0 +1,19 @@
+[fluid]
+
+    [./space_discretization]
+    mesh_dir        = ./
+    mesh_file       = tube20.mesh
+    mesh_type       = .mesh
+  [../]
+
+[../]
+
+[structure]
+
+    [./space_discretization]
+    mesh_dir        = ./
+    mesh_file       = tube20.mesh
+    mesh_type       = .mesh
+    [../]
+    
+[../]    
