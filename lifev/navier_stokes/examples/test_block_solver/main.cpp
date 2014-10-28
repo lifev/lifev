@@ -71,7 +71,7 @@ main ( int argc, char** argv )
     // Reading the dataFile
     const std::string defaultDataName = "data";
     GetPot command_line (argc, argv);
-    string data_file_name = command_line.follow (defaultDataName.c_str(), 2, "-f", "--file");
+    std::string data_file_name = command_line.follow (defaultDataName.c_str(), 2, "-f", "--file");
     GetPot dataFile( data_file_name );
 
     // reading the mesh
