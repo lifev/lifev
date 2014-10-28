@@ -1,9 +1,9 @@
 SET(solver_HEADERS
-  solver/Settings.hpp
+  solver/FSIHandler.hpp
 CACHE INTERNAL "")
 
 SET(solver_SOURCES
-  solver/Settings.cpp
+  solver/FSIHandler.cpp
 CACHE INTERNAL "")
 
 
