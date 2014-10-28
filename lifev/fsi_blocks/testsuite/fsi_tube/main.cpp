@@ -41,6 +41,8 @@
 #include <lifev/core/array/VectorEpetra.hpp>
 #include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 
+#include <lifev/fsi_blocks/solver/FSIHandler.hpp>
+
 using namespace LifeV;
 
 int
@@ -76,6 +78,7 @@ main ( int argc, char** argv )
     // Loading the fluid and the structure meshes //
     // -------------------------------------------//
     
+    /*
     boost::shared_ptr<mesh_Type > fluidMesh ( new mesh_Type ( Comm ) );
     MeshData meshDataFluid;
     meshDataFluid.setup (dataFile, "fluid/space_discretization");
@@ -85,11 +88,13 @@ main ( int argc, char** argv )
     MeshData meshDataStructure;
     meshDataStructure.setup (dataFile, "structure/space_discretization");
     readMesh (*structureMesh, meshDataStructure);
+    */
     
     // ------------------------------------------------//
     // Partitioning the fluid and the structure meshes //
     // ------------------------------------------------//
     
+    /*
     MeshPartitioner< mesh_Type >  meshPartFluid (fluidMesh, Comm);
     boost::shared_ptr<mesh_Type > localFluidMesh ( new mesh_Type ( Comm ) );
     localFluidMesh = meshPartFluid.meshPartition();
@@ -97,17 +102,19 @@ main ( int argc, char** argv )
     MeshPartitioner< mesh_Type >  meshPartStructure (structureMesh, Comm);
     boost::shared_ptr<mesh_Type > localStructureMesh ( new mesh_Type ( Comm ) );
     localStructureMesh = meshPartStructure.meshPartition();
+    */
     
     // ---------------------------------------------------------------------------------------------//
     // Reading the physical informations for the fluid and the structure and initialize the solvers //
     // ---------------------------------------------------------------------------------------------//
     
-    boost::shared_ptr<StructuralConstitutiveLawData> structureData ( new StructuralConstitutiveLawData (  ) );
-    structureData->setup ( dataFile );
-    StructuralOperator<mesh_Type> structure;
+    FSIHandler fsi ( Comm );
     
-    NavierStokesSolver ns( dataFile, Comm);
+    fsi.setDatafile ( dataFile );
     
+    fsi.readMeshes ( );
+    
+    fsi.partitionMeshes ( );
     
 #ifdef HAVE_MPI
     if (verbose)
