@@ -16,6 +16,7 @@ CACHE INTERNAL "")
 
 SET(solver_SOURCES
   solver/OseenData.cpp
+  solver/NavierStokesSolver.cpp
   solver/NavierStokesOperator.cpp
   solver/aSIMPLEOperator.cpp
 CACHE INTERNAL "")
