@@ -52,6 +52,8 @@
 #include <lifev/core/fem/CurrentFEManifold.hpp>
 #include <lifev/core/util/LifeChrono.hpp>
 
+#include <lifev/core/array/MatrixSmall.hpp>
+
 namespace LifeV
 {
 /*!
@@ -572,34 +574,66 @@ void DOFInterface3Dto3D::updateDofConnections ( const Mesh& mesh1, const DOF& do
     // Loop on facets at the interface (matching facets)
     for ( Iterator i = M_facetToFacetConnectionList.begin(); i != M_facetToFacetConnectionList.end(); ++i )
     {
-        feBd1.update ( mesh1.boundaryFacet ( i->first ), UPDATE_ONLY_CELL_NODES ); // Updating facet information on mesh1
-        feBd2.update ( mesh2.boundaryFacet ( i->second ), UPDATE_ONLY_CELL_NODES ); // Updating facet information on mesh2
+    	// Update the Boundary FESpaces
+    	feBd1.update ( mesh1.boundaryFacet ( i->first ), UPDATE_ONLY_CELL_NODES );  // Updating facet information on mesh1
+    	feBd2.update ( mesh2.boundaryFacet ( i->second ), UPDATE_ONLY_CELL_NODES ); // Updating facet information on mesh2
 
-        std::vector<ID> localToGlobalMapOnBFacet1 = dof1.localToGlobalMapOnBdFacet (i->first);
-        std::vector<ID> localToGlobalMapOnBFacet2 = dof2.localToGlobalMapOnBdFacet (i->second);
+    	// Vectors containing the global ID of the local dofs
+    	std::vector<ID> localToGlobalMapOnBFacet1 = dof1.localToGlobalMapOnBdFacet (i->first);
+    	std::vector<ID> localToGlobalMapOnBFacet2 = dof2.localToGlobalMapOnBdFacet (i->second);
 
-        for (ID lDof1 = 0; lDof1 < localToGlobalMapOnBFacet1.size(); lDof1++)
-        {
-            if ( flag3 != 0 && static_cast < Int > ( mesh1.boundaryFacet ( i->first ).point ( lDof1 ).markerID () ) == *flag3 )
-            {
-                continue;
-            }
-            ID gDof1 = localToGlobalMapOnBFacet1[lDof1];
-            feBd1.coorMap ( p1[0], p1[1], p1[2], feBd1.refFE().xi ( lDof1 ), feBd1.refFE().eta ( lDof1 ) ); // Nodal coordinates on the current facet (mesh1)
+    	// for P2 triangles at the boundary: 6 dofs (rows) and 4 columns (x, y, z, MarkerID)
+    	MatrixSmall<6,4> FaceDof;
+    	FaceDof *= 0;
 
-            for (ID lDof2 = 0; lDof2 < localToGlobalMapOnBFacet2.size(); lDof2++)
-            {
-                ID gDof2 = localToGlobalMapOnBFacet2[lDof2];
-                feBd2.coorMap ( p2[0], p2[1], p2[2], feBd2.refFE().xi ( lDof2 ), feBd2.refFE().eta ( lDof2 ) );
+    	// Check for P2 FESpaces - this because we need to remove the dofs with flag = flag3
 
-                if ( coupled ( p1, p2, tol ) )
-                {
-                    std::pair<ID, ID> locDof ( gDof1, gDof2 );
-                    M_dofToDofConnectionList.push_front ( locDof ); // Updating the list of dof connections
-                    break;
-                }
-            }
-        }
+
+    	// Pre-processing: identifying the marker of the dofs over the face
+    	for (ID lDof1 = 0; lDof1 < localToGlobalMapOnBFacet1.size(); lDof1++){
+    		// get the x, y, z coordinates of the dof
+    		feBd1.coorMap ( FaceDof[lDof1][0], FaceDof[lDof1][1], FaceDof[lDof1][2], feBd1.refFE().xi ( lDof1 ), feBd1.refFE().eta ( lDof1 ) );
+    		if ( lDof1 < 3 ){
+    			// The first 3 dofs correspond to the vertices of the mesh and we know the marker ID from the mesh
+    			FaceDof[lDof1][3] = mesh1.boundaryFacet ( i->first ).point ( lDof1 ).markerID ();
+    		}
+    	}
+
+    	if ( localToGlobalMapOnBFacet1.size() > 3 ){
+    		// a p2 dof that was not in the mesh, so a dof the we inserted, has flag 1439 (random number) or it inherits the flag of the edge
+    		FaceDof[3][3] = ( FaceDof[0][3] == FaceDof[1][3] ) ? FaceDof[0][3] : 1439;
+    		FaceDof[4][3] = ( FaceDof[1][3] == FaceDof[2][3] ) ? FaceDof[1][3] : 1439;
+    		FaceDof[5][3] = ( FaceDof[0][3] == FaceDof[2][3] ) ? FaceDof[0][3] : 1439;
+    	}
+
+    	for (ID lDof1 = 0; lDof1 < localToGlobalMapOnBFacet1.size(); lDof1++)
+    	{
+    		// Get the global ID of the dof with local index lDof1
+    		ID gDof1 = localToGlobalMapOnBFacet1[lDof1];
+
+    		p1[0] = FaceDof[lDof1][0];
+    		p1[1] = FaceDof[lDof1][1];
+    		p1[2] = FaceDof[lDof1][2];
+
+    		if ( flag3 != 0 && static_cast < Int > (FaceDof[lDof1][3]) == *flag3 )
+    		{
+    			continue;
+    		}
+
+    		for (ID lDof2 = 0; lDof2 < localToGlobalMapOnBFacet2.size(); lDof2++)
+    		{
+    			ID gDof2 = localToGlobalMapOnBFacet2[lDof2];
+    			feBd2.coorMap ( p2[0], p2[1], p2[2], feBd2.refFE().xi ( lDof2 ), feBd2.refFE().eta ( lDof2 ) );
+
+    			if ( coupled ( p1, p2, tol ) )
+    			{
+    				std::pair<ID, ID> locDof ( gDof1, gDof2 );
+    				M_dofToDofConnectionList.push_front ( locDof ); // Updating the list of dof connections
+    				break;
+    			}
+    		}
+
+    	}
     }
 
     // Updating the map containter with the connections
