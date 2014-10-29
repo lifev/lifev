@@ -45,6 +45,10 @@
 		alpha 			= 2.684564e+6
 		gamma			= 1.0
 		solidTypeIsotropic 	= linearVenantKirchhoff	
+		
+	[../physics]
+		density   		= 1.2
+		material_flag       = 1
     	
     	[../]
 

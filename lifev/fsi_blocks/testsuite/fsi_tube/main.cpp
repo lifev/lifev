@@ -95,7 +95,6 @@ main ( int argc, char** argv )
 
     fsi.partitionMeshes ( );
 
-
     // --------------------------------//
     // Getting the boundary conditions //
     // --------------------------------//
@@ -116,7 +115,7 @@ main ( int argc, char** argv )
     // Getting the boundary conditions //
     // --------------------------------//
 
-    fsi.initializeTimeAdvance();
+    // fsi.initializeTimeAdvance();
 
 #ifdef HAVE_MPI
     if (verbose)

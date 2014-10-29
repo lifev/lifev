@@ -74,6 +74,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/fem/TimeAdvanceNewmark.hpp>
 #include <lifev/core/fem/TimeAdvanceBDF.hpp>
 
+#include <lifev/core/fem/TimeAndExtrapolationHandler.hpp>
+
 namespace LifeV
 {
 
@@ -113,6 +115,8 @@ public:
 
     typedef BCHandler bc_Type;
     typedef boost::shared_ptr<BCHandler> bcPtr_Type;
+
+	typedef boost::shared_ptr<VectorEpetra> vectorPtr_Type;
 
     //! Constructor
     FSIHandler(const commPtr_Type& communicator);
@@ -180,6 +184,7 @@ private:
     
     // time advance for the structure
     timeAdvancePtr_Type M_structureTimeAdvance;
+    boost::shared_ptr<TimeAndExtrapolationHandler> M_fluidTimeAdvance;
 
     // boundary conditions
     bcPtr_Type M_fluidBC;
@@ -188,6 +193,8 @@ private:
 
 	//! Displayer to print in parallel (only PID 0 will print)
 	Displayer M_displayer;
+
+	Real M_dt, M_t_zero, M_t_end;
 };
     
 } // end namespace LifeV

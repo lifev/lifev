@@ -41,7 +41,10 @@ namespace LifeV
 
 FSIHandler::FSIHandler( const commPtr_Type& communicator ) :
 M_comm ( communicator ),
-M_displayer ( communicator )
+M_displayer ( communicator ),
+M_dt (0.0),
+M_t_zero (0.0),
+M_t_end (0.0)
 {
 }
 
@@ -83,22 +86,32 @@ FSIHandler::partitionMeshes( )
     
 void FSIHandler::setup ( )
 {
+	// Fluid
 	M_fluid.reset ( new NavierStokesSolver ( M_datafile, M_comm ) );
 	M_fluid->setup ( M_fluidLocalMesh );
+	M_fluid->buildSystem();
 
+	// Structure data
 	M_dataStructure.reset ( new StructuralConstitutiveLawData ( ) );
 	M_dataStructure->setup ( M_datafile );
 
 	// This beacuse the structural solver requires that the FESpaces are given from outside
 	createStructureFESpaces();
 
+	// This beacuse the ale solver requires that the FESpace is given from outside
 	createAleFESpace();
 
 	updateBoundaryConditions();
 
+	initializeTimeAdvance ( );
+
+	// Structure
 	M_structure.reset (new StructuralOperator<mesh_Type> ( ) );
 	M_structure->setup ( M_dataStructure, M_displacementFESpace, M_displacementETFESpace, M_structureBC, M_comm);
+	double timeAdvanceCoefficient = M_structureTimeAdvance->coefficientSecondDerivative ( 0 ) / ( M_dt * M_dt );
+	M_structure->buildSystem (timeAdvanceCoefficient);
 
+	// Ale
 	M_ale.reset( new HarmonicExtensionSolver<mesh_Type> ( *M_aleFESpace, M_comm ) );
 	M_ale->setUp( M_datafile );
 
@@ -136,11 +149,45 @@ void FSIHandler::updateBoundaryConditions ( )
 
 void FSIHandler::initializeTimeAdvance ( )
 {
+	// Fluid
+	M_fluidTimeAdvance.reset( new TimeAndExtrapolationHandler ( ) );
+	M_dt      = M_datafile("fluid/time_discretization/timestep",0.0);
+	M_t_zero  = M_datafile("fluid/time_discretization/initialtime",0.0);
+	M_t_end   = M_datafile("fluid/time_discretization/endtime",0.0);
+	UInt orderBDF  = M_datafile("fluid/time_discretization/BDF_order",2);
+
+	// Order of BDF and extrapolation for the velocity
+	M_fluidTimeAdvance->setBDForder(orderBDF);
+	M_fluidTimeAdvance->setMaximumExtrapolationOrder(orderBDF);
+	M_fluidTimeAdvance->setTimeStep(M_dt);
+
+	// Initialize time advance
+	vector_Type velocityInitial ( M_fluid->uFESpace()->map() );
+	std::vector<vector_Type> initialStateVelocity;
+	velocityInitial *= 0 ;
+	for ( UInt i = 0; i < orderBDF; ++i )
+		initialStateVelocity.push_back(velocityInitial);
+
+	M_fluidTimeAdvance->initialize(initialStateVelocity);
+
+	// Structure
 	const std::string timeAdvanceMethod =  M_datafile ( "solid/time_discretization/method", "Newmark");
 	M_structureTimeAdvance.reset ( TimeAdvanceFactory::instance().createObject ( timeAdvanceMethod ) );
 	UInt OrderDev = 2;
 	M_structureTimeAdvance->setup (M_dataStructure->dataTimeAdvance()->orderBDF() , OrderDev);
 	M_structureTimeAdvance->setTimeStep (M_dataStructure->dataTime()->timeStep() );
+	vectorPtr_Type disp (new VectorEpetra (M_displacementFESpace->map(), Unique) );
+	*disp *= 0;
+	std::vector<vectorPtr_Type> uv0;
+	for ( UInt previousPass = 0; previousPass < M_structureTimeAdvance->size() ; previousPass++)
+	{
+		Real previousTimeStep = M_t_zero - previousPass * M_dt;
+		uv0.push_back (disp);
+	}
+	M_structureTimeAdvance->setInitialCondition (uv0);
+	M_structureTimeAdvance->setTimeStep ( M_dt );
+	M_structureTimeAdvance->updateRHSContribution ( M_dt );
+
 }
 
 }
