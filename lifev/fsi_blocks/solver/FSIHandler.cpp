@@ -206,40 +206,43 @@ void FSIHandler::buildInterfaceMaps ()
 
 void FSIHandler::createInterfaceMaps(std::map<ID, ID> const& locDofMap)
 {
-    std::vector<int> dofInterfaceFluid;
-    dofInterfaceFluid.reserve ( locDofMap.size()*3 );
-    std::map<ID, ID>::const_iterator iterator;
+	std::vector<int> dofInterfaceFluid;
+	dofInterfaceFluid.reserve ( locDofMap.size() );
 
-    for (UInt dim = 0; dim < nDimensions; ++dim)
-		for ( iterator = locDofMap.begin(); iterator != locDofMap.end(); ++iterator )
+	std::map<ID, ID>::const_iterator i;
+
+	for (UInt dim = 0; dim < nDimensions; ++dim)
+		for ( i = locDofMap.begin(); i != locDofMap.end(); ++i )
 		{
-			dofInterfaceFluid.push_back (iterator->first + dim * M_fluid->uFESpace()->dof().numTotalDof() );
+			dofInterfaceFluid.push_back (i->first + dim * M_fluid->uFESpace()->dof().numTotalDof() );
 		}
 
-    int* pointerToDofs (0);
-    if (dofInterfaceFluid.size() > 0)
-    {
-        pointerToDofs = &dofInterfaceFluid[0];
-    }
+	int* pointerToDofs (0);
+	if (dofInterfaceFluid.size() > 0)
+	{
+		pointerToDofs = &dofInterfaceFluid[0];
+	}
 
-    M_fluidInterfaceMap.reset ( new MapEpetra ( -1, static_cast<int> (dofInterfaceFluid.size() ), pointerToDofs, M_comm ) );
+	M_fluidInterfaceMap.reset ( new MapEpetra ( -1, static_cast<int> (dofInterfaceFluid.size() ), pointerToDofs, M_fluid->uFESpace()->map().commPtr() ) );
 
-    std::vector<int> dofInterfaceSolid;
-    dofInterfaceSolid.reserve ( locDofMap.size()*3 );
+	M_fluid->uFESpace()->map().commPtr()->Barrier();
 
-    for (UInt dim = 0; dim < nDimensions; ++dim)
-		for ( iterator = locDofMap.begin(); iterator != locDofMap.end(); ++iterator )
+	std::vector<int> dofInterfaceSolid;
+	dofInterfaceSolid.reserve ( locDofMap.size() );
+
+	for (UInt dim = 0; dim < nDimensions; ++dim)
+		for ( i = locDofMap.begin(); i != locDofMap.end(); ++i )
 		{
-			dofInterfaceSolid.push_back (iterator->second + dim * M_displacementFESpace->dof().numTotalDof() );
+			dofInterfaceSolid.push_back (i->second + dim * M_displacementFESpace->dof().numTotalDof() );
 		}
 
-    pointerToDofs = 0;
-    if (dofInterfaceSolid.size() > 0)
-    {
-        pointerToDofs = &dofInterfaceSolid[0];
-    }
+	pointerToDofs = 0;
+	if (dofInterfaceSolid.size() > 0)
+	{
+		pointerToDofs = &dofInterfaceSolid[0];
+	}
 
-    M_structureInterfaceMap.reset ( new MapEpetra ( -1, static_cast<int> (dofInterfaceSolid.size() ), pointerToDofs, M_comm ) );
+	M_structureInterfaceMap.reset ( new MapEpetra ( -1, static_cast<int> (dofInterfaceSolid.size() ), pointerToDofs, M_displacementFESpace->map().commPtr() ) );
 }
 
 }

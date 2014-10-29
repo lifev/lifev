@@ -156,6 +156,8 @@ private:
 
     void createInterfaceMaps ( std::map<ID, ID> const& locDofMap );
 
+    void constructInterfaceMap ( );
+
     //! communicator
     commPtr_Type M_comm;
     
