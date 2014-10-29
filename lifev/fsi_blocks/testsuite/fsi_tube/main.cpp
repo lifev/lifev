@@ -74,47 +74,32 @@ main ( int argc, char** argv )
     std::string data_file_name = command_line.follow (defaultDataName.c_str(), 2, "-f", "--file");
     GetPot dataFile( data_file_name );
     
-    // -------------------------------------------//
-    // Loading the fluid and the structure meshes //
-    // -------------------------------------------//
-    
-    /*
-    boost::shared_ptr<mesh_Type > fluidMesh ( new mesh_Type ( Comm ) );
-    MeshData meshDataFluid;
-    meshDataFluid.setup (dataFile, "fluid/space_discretization");
-    readMesh (*fluidMesh, meshDataFluid);
-    
-    boost::shared_ptr<mesh_Type > structureMesh ( new mesh_Type ( Comm ) );
-    MeshData meshDataStructure;
-    meshDataStructure.setup (dataFile, "structure/space_discretization");
-    readMesh (*structureMesh, meshDataStructure);
-    */
-    
-    // ------------------------------------------------//
-    // Partitioning the fluid and the structure meshes //
-    // ------------------------------------------------//
-    
-    /*
-    MeshPartitioner< mesh_Type >  meshPartFluid (fluidMesh, Comm);
-    boost::shared_ptr<mesh_Type > localFluidMesh ( new mesh_Type ( Comm ) );
-    localFluidMesh = meshPartFluid.meshPartition();
-    
-    MeshPartitioner< mesh_Type >  meshPartStructure (structureMesh, Comm);
-    boost::shared_ptr<mesh_Type > localStructureMesh ( new mesh_Type ( Comm ) );
-    localStructureMesh = meshPartStructure.meshPartition();
-    */
-    
-    // ---------------------------------------------------------------------------------------------//
-    // Reading the physical informations for the fluid and the structure and initialize the solvers //
-    // ---------------------------------------------------------------------------------------------//
+    // --------------------------------------------------//
+    // Initializing the handler and setting the datafile //
+    // --------------------------------------------------//
     
     FSIHandler fsi ( Comm );
     
     fsi.setDatafile ( dataFile );
     
+    // -------------------------------------------//
+    // Loading the fluid and the structure meshes //
+    // -------------------------------------------//
+    
     fsi.readMeshes ( );
     
+    // ------------------------------------------------//
+    // Partitioning the fluid and the structure meshes //
+    // ------------------------------------------------//
+
     fsi.partitionMeshes ( );
+
+    // ---------------------------------------------------------------------------------------------//
+    // Reading the physical informations for the fluid and the structure and initialize the solvers //
+    // ---------------------------------------------------------------------------------------------//
+    
+    fsi.setup();
+    
     
 #ifdef HAVE_MPI
     if (verbose)

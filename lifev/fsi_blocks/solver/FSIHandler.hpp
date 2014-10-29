@@ -51,6 +51,20 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 
+// solvers
+#include <lifev/navier_stokes/solver/NavierStokesSolver.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
+#include <lifev/structure/solver/StructuralOperator.hpp>
+#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialLinear.hpp>
+#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinearPenalized.hpp>
+#include <lifev/structure/solver/isotropic/SecondOrderExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/NeoHookeanMaterialNonLinear.hpp>
+
+
+
 namespace LifeV
 {
 
@@ -75,6 +89,9 @@ public:
     
     typedef boost::shared_ptr<MeshPartitioner<mesh_Type> > meshPartitionerPtr_Type;
     
+    typedef MapEpetra map_Type;
+	typedef boost::shared_ptr<map_Type> mapPtr_Type;
+    
     //! Constructor
     FSIHandler(const commPtr_Type& communicator);
 
@@ -87,23 +104,40 @@ public:
     
     void partitionMeshes ( );
     
+    void setup ( );
+    
 //@}
 
 private:
 
+    //! communicator
     commPtr_Type M_comm;
     
+    //! datafile
     GetPot M_datafile;
     
+    // members for the fluid mesh
     meshDataPtr_Type M_meshDataFluid;
     meshPtr_Type M_fluidMesh;
     meshPtr_Type M_fluidLocalMesh;
     meshPartitionerPtr_Type M_fluidPartitioner;
     
+    // members for the structure mesh
     meshDataPtr_Type M_meshDataStructure;
     meshPtr_Type M_structureMesh;
     meshPtr_Type M_structureLocalMesh;
     meshPartitionerPtr_Type M_structurePartitioner;
+    
+    // members for the fluid, the structura and the ALE fineite element spaces
+    boost::shared_ptr<FESpace<mesh_Type, map_Type> > M_velocityFESpace;
+	boost::shared_ptr<FESpace<mesh_Type, map_Type> > M_pressureFESpace;
+    boost::shared_ptr<FESpace<mesh_Type, map_Type> > M_displacementFESpace;
+	boost::shared_ptr<FESpace<mesh_Type, map_Type> > M_aleFESpace;
+    
+    // navier-stokes solver
+    boost::shared_ptr<NavierStokesSolver> M_fluid;
+    boost::shared_ptr<StructuralOperator<mesh_Type> > M_structure;
+    boost::shared_ptr<StructuralConstitutiveLawData> M_dataStructure;
     
 };
     

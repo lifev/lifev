@@ -80,5 +80,10 @@ FSIHandler::partitionMeshes( )
     M_structureLocalMesh = M_structurePartitioner->meshPartition();
 }
     
+void FSIHandler::setup ( )
+{
+    
+}
+    
     
 }
