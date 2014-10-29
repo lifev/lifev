@@ -57,12 +57,13 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 #include <lifev/structure/solver/StructuralOperator.hpp>
 #include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialLinear.hpp>
+/*
 #include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinear.hpp>
 #include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
 #include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinearPenalized.hpp>
 #include <lifev/structure/solver/isotropic/SecondOrderExponentialMaterialNonLinear.hpp>
 #include <lifev/structure/solver/isotropic/NeoHookeanMaterialNonLinear.hpp>
-
+*/
 
 
 namespace LifeV

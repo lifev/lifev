@@ -39,7 +39,6 @@
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 
 #include <lifev/core/array/VectorEpetra.hpp>
-#include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 
 #include <lifev/fsi_blocks/solver/FSIHandler.hpp>
 
