@@ -42,6 +42,8 @@
 
 #include <lifev/fsi_blocks/solver/FSIHandler.hpp>
 
+#include "boundaryConditions.hpp"
+
 using namespace LifeV;
 
 int
@@ -93,13 +95,29 @@ main ( int argc, char** argv )
 
     fsi.partitionMeshes ( );
 
+
+    // --------------------------------//
+    // Getting the boundary conditions //
+    // --------------------------------//
+
+    boost::shared_ptr<BCHandler> fluidBC ( new BCHandler (*BCh_fluid () ) );
+    boost::shared_ptr<BCHandler> structureBC ( new BCHandler (*BCh_structure () ) );
+    boost::shared_ptr<BCHandler> aleBC ( new BCHandler (*BCh_ale () ) );
+
+    fsi.setBoundaryConditions(fluidBC, structureBC, aleBC);
+
     // ---------------------------------------------------------------------------------------------//
     // Reading the physical informations for the fluid and the structure and initialize the solvers //
     // ---------------------------------------------------------------------------------------------//
     
     fsi.setup();
-    
-    
+
+    // --------------------------------//
+    // Getting the boundary conditions //
+    // --------------------------------//
+
+    fsi.initializeTimeAdvance();
+
 #ifdef HAVE_MPI
     if (verbose)
     {

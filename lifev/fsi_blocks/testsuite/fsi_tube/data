@@ -1,19 +1,60 @@
 [fluid]
 
-    [./space_discretization]
-    mesh_dir        = ./
-    mesh_file       = tube20.mesh
-    mesh_type       = .mesh
-  [../]
+	solver_manager_type = aSIMPLE
+    	
+    	[./physics]
+    		density         = 1.0    # density
+    		viscosity       = 0.035  # viscosity
+    		
+    	[../time_discretization]
+    		initialtime     = 0.0
+    		endtime	      = 0.2
+    		timestep	      = 0.001	
+    
+    	[../space_discretization]
+    		mesh_dir        = ./
+    		mesh_file       = tube20.mesh
+    		mesh_type       = .mesh
+    		vel_order       = P2
+    		pres_order      = P1
+    		
+    	[../]
 
 [../]
 
-[structure]
+[solid]
 
-    [./space_discretization]
-    mesh_dir        = ./
-    mesh_file       = tube20.mesh
-    mesh_type       = .mesh
-    [../]
-    
-[../]    
+    	[./space_discretization]
+    		mesh_dir        = ./
+    		mesh_file       = vessel20.mesh
+    		mesh_type       = .mesh
+    		order           = P2
+    	
+    	[../time_discretization]
+		method              = BDF
+		initialtime 		= 0.
+		endtime     		= 0.4
+		timestep    		= 0.1
+		BDF_order   		= 2
+		
+	[../model]
+		constitutiveLaw     = isotropic
+		young     		= 8.e+6
+		poisson   		= 0.49
+		bulk				= 1.3333e+8
+		alpha 			= 2.684564e+6
+		gamma			= 1.0
+		solidTypeIsotropic 	= linearVenantKirchhoff	
+    	
+    	[../]
+
+[../]
+
+[ale]
+
+	[./space_discretization]
+		order			= P2 
+		
+	[./]
+
+[../]			

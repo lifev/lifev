@@ -64,7 +64,15 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/structure/solver/isotropic/SecondOrderExponentialMaterialNonLinear.hpp>
 #include <lifev/structure/solver/isotropic/NeoHookeanMaterialNonLinear.hpp>
 */
+#include <lifev/fsi/solver/HarmonicExtensionSolver.hpp>
 
+// Expression template FE space
+#include <lifev/eta/fem/ETFESpace.hpp>
+
+// time advance for the structure
+#include <lifev/core/fem/TimeAdvance.hpp>
+#include <lifev/core/fem/TimeAdvanceNewmark.hpp>
+#include <lifev/core/fem/TimeAdvanceBDF.hpp>
 
 namespace LifeV
 {
@@ -77,6 +85,8 @@ namespace LifeV
 class FSIHandler
 {
 public:
+
+	// Public typedefs
 
     typedef Epetra_Comm comm_Type;
 	typedef boost::shared_ptr< comm_Type > commPtr_Type;
@@ -93,6 +103,17 @@ public:
     typedef MapEpetra map_Type;
 	typedef boost::shared_ptr<map_Type> mapPtr_Type;
     
+    typedef FESpace< mesh_Type, map_Type > FESpace_Type;
+    typedef boost::shared_ptr<FESpace_Type> FESpacePtr_Type;
+
+    typedef ETFESpace< mesh_Type, map_Type, 3, 3 > solidETFESpace_Type;
+    typedef boost::shared_ptr<solidETFESpace_Type> solidETFESpacePtr_Type;
+
+    typedef boost::shared_ptr<TimeAdvance<vector_Type> > timeAdvancePtr_Type;
+
+    typedef BCHandler bc_Type;
+    typedef boost::shared_ptr<BCHandler> bcPtr_Type;
+
     //! Constructor
     FSIHandler(const commPtr_Type& communicator);
 
@@ -107,9 +128,23 @@ public:
     
     void setup ( );
     
+    void setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& structureBC, const bcPtr_Type& aleBC);
+
+    // update all the bc handlers
+    void updateBoundaryConditions( );
+
+    void initializeTimeAdvance ( );
+
 //@}
 
 private:
+
+    void createStructureFESpaces ( );
+
+    void createAleFESpace();
+
+    // update the bc handler
+    void updateBCHandler( bcPtr_Type & bc );
 
     //! communicator
     commPtr_Type M_comm;
@@ -130,16 +165,29 @@ private:
     meshPartitionerPtr_Type M_structurePartitioner;
     
     // members for the fluid, the structura and the ALE fineite element spaces
-    boost::shared_ptr<FESpace<mesh_Type, map_Type> > M_velocityFESpace;
-	boost::shared_ptr<FESpace<mesh_Type, map_Type> > M_pressureFESpace;
-    boost::shared_ptr<FESpace<mesh_Type, map_Type> > M_displacementFESpace;
-	boost::shared_ptr<FESpace<mesh_Type, map_Type> > M_aleFESpace;
+    FESpacePtr_Type M_velocityFESpace;
+    FESpacePtr_Type M_pressureFESpace;
+    FESpacePtr_Type M_displacementFESpace;
+    FESpacePtr_Type M_aleFESpace;
+
+	solidETFESpacePtr_Type M_displacementETFESpace;
     
     // navier-stokes solver
     boost::shared_ptr<NavierStokesSolver> M_fluid;
     boost::shared_ptr<StructuralOperator<mesh_Type> > M_structure;
     boost::shared_ptr<StructuralConstitutiveLawData> M_dataStructure;
+    boost::shared_ptr<HarmonicExtensionSolver<mesh_Type> > M_ale;
     
+    // time advance for the structure
+    timeAdvancePtr_Type M_structureTimeAdvance;
+
+    // boundary conditions
+    bcPtr_Type M_fluidBC;
+    bcPtr_Type M_structureBC;
+    bcPtr_Type M_aleBC;
+
+	//! Displayer to print in parallel (only PID 0 will print)
+	Displayer M_displayer;
 };
     
 } // end namespace LifeV
