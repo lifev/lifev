@@ -44,7 +44,7 @@
 
 #include <lifev/core/array/VectorBlockStructure.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
-#include <lifev/core/operator/LinearOperator.hpp>
+#include <lifev/core/linear_algebra/LinearOperator.hpp>
 
 namespace LifeV
 {

@@ -38,7 +38,7 @@
 #define _SOLVEROPERATOR_HPP_
 
 
-#include <lifev/core/operator/LinearOperator.hpp>
+#include <lifev/core/linear_algebra/LinearOperator.hpp>
 #include <lifev/core/util/FactorySingleton.hpp>
 #include <lifev/core/util/Factory.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
