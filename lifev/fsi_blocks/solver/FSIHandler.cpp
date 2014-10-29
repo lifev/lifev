@@ -122,6 +122,7 @@ void FSIHandler::createStructureFESpaces ( )
 	const std::string dOrder = M_datafile ( "solid/space_discretization/order", "P2");
 	M_displacementFESpace.reset ( new FESpace_Type (M_structureLocalMesh, dOrder, 3, M_comm) );
 	M_displacementETFESpace.reset ( new solidETFESpace_Type (*M_structurePartitioner, & (M_displacementFESpace->refFE() ), & (M_displacementFESpace->fe().geoMap() ), M_comm) );
+	M_displacementFESpaceSerial.reset ( new FESpace_Type (M_structureMesh, dOrder, 3, M_comm) );
 
 	M_displayer.leaderPrintMax ( " Number of DOFs for the structure = ", M_displacementFESpace->dof().numTotalDof()*3 ) ;
 }
@@ -188,6 +189,57 @@ void FSIHandler::initializeTimeAdvance ( )
 	M_structureTimeAdvance->setTimeStep ( M_dt );
 	M_structureTimeAdvance->updateRHSContribution ( M_dt );
 
+}
+
+void FSIHandler::buildInterfaceMaps ()
+{
+	markerID_Type interface = M_datafile("interface/flag", 1);
+	Real tolerance = M_datafile("interface/tolerance", 1);
+	Int flag = M_datafile("interface/fluid_vertex_flag", 0);
+
+	M_dofStructureToFluid.reset ( new DOFInterface3Dto3D );
+	M_dofStructureToFluid->setup ( M_fluid->uFESpace()->refFE(), M_fluid->uFESpace()->dof(), M_displacementFESpaceSerial->refFE(), M_displacementFESpaceSerial->dof() );
+	M_dofStructureToFluid->update ( *M_fluid->uFESpace()->mesh(), interface, *M_displacementFESpaceSerial->mesh(),  interface, tolerance, &flag);
+
+	createInterfaceMaps ( M_dofStructureToFluid->localDofMap ( ) );
+}
+
+void FSIHandler::createInterfaceMaps(std::map<ID, ID> const& locDofMap)
+{
+    std::vector<int> dofInterfaceFluid;
+    dofInterfaceFluid.reserve ( locDofMap.size()*3 );
+    std::map<ID, ID>::const_iterator iterator;
+
+    for (UInt dim = 0; dim < nDimensions; ++dim)
+		for ( iterator = locDofMap.begin(); iterator != locDofMap.end(); ++iterator )
+		{
+			dofInterfaceFluid.push_back (iterator->first + dim * M_fluid->uFESpace()->dof().numTotalDof() );
+		}
+
+    int* pointerToDofs (0);
+    if (dofInterfaceFluid.size() > 0)
+    {
+        pointerToDofs = &dofInterfaceFluid[0];
+    }
+
+    M_fluidInterfaceMap.reset ( new MapEpetra ( -1, static_cast<int> (dofInterfaceFluid.size() ), pointerToDofs, M_comm ) );
+
+    std::vector<int> dofInterfaceSolid;
+    dofInterfaceSolid.reserve ( locDofMap.size()*3 );
+
+    for (UInt dim = 0; dim < nDimensions; ++dim)
+		for ( iterator = locDofMap.begin(); iterator != locDofMap.end(); ++iterator )
+		{
+			dofInterfaceSolid.push_back (iterator->second + dim * M_displacementFESpace->dof().numTotalDof() );
+		}
+
+    pointerToDofs = 0;
+    if (dofInterfaceSolid.size() > 0)
+    {
+        pointerToDofs = &dofInterfaceSolid[0];
+    }
+
+    M_structureInterfaceMap.reset ( new MapEpetra ( -1, static_cast<int> (dofInterfaceSolid.size() ), pointerToDofs, M_comm ) );
 }
 
 }

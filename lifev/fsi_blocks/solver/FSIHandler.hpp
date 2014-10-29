@@ -76,6 +76,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <lifev/core/fem/TimeAndExtrapolationHandler.hpp>
 
+#include <lifev/core/fem/DOFInterface3Dto3D.hpp>
+
 namespace LifeV
 {
 
@@ -139,6 +141,8 @@ public:
 
     void initializeTimeAdvance ( );
 
+    void buildInterfaceMaps ( );
+
 //@}
 
 private:
@@ -149,6 +153,8 @@ private:
 
     // update the bc handler
     void updateBCHandler( bcPtr_Type & bc );
+
+    void createInterfaceMaps ( std::map<ID, ID> const& locDofMap );
 
     //! communicator
     commPtr_Type M_comm;
@@ -172,6 +178,7 @@ private:
     FESpacePtr_Type M_velocityFESpace;
     FESpacePtr_Type M_pressureFESpace;
     FESpacePtr_Type M_displacementFESpace;
+    FESpacePtr_Type M_displacementFESpaceSerial;
     FESpacePtr_Type M_aleFESpace;
 
 	solidETFESpacePtr_Type M_displacementETFESpace;
@@ -195,6 +202,11 @@ private:
 	Displayer M_displayer;
 
 	Real M_dt, M_t_zero, M_t_end;
+
+	boost::shared_ptr<DOFInterface3Dto3D> M_dofStructureToFluid;
+	boost::shared_ptr<map_Type> M_structureInterfaceMap;
+	boost::shared_ptr<map_Type> M_fluidInterfaceMap;
+
 };
     
 } // end namespace LifeV

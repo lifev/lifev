@@ -7,4 +7,5 @@ ADD_SUBDIRECTORIES(
   fsi_monolithic
   fsi_restart
   fsi_couplingMaps
+  fsi_couplingMapsVectorial
   )

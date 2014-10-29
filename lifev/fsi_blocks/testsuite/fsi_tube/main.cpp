@@ -111,11 +111,13 @@ main ( int argc, char** argv )
     
     fsi.setup();
 
-    // --------------------------------//
-    // Getting the boundary conditions //
-    // --------------------------------//
+    // ---------------------//
+    // Create inteface maps //
+    // ---------------------//
 
-    // fsi.initializeTimeAdvance();
+    fsi.buildInterfaceMaps ( );
+
+
 
 #ifdef HAVE_MPI
     if (verbose)
