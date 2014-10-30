@@ -127,6 +127,7 @@ main ( int argc, char** argv )
     // Time Loop //
     // ----------//
 
+    fsi.solveFSIproblem ( );
 
 #ifdef HAVE_MPI
     if (verbose)

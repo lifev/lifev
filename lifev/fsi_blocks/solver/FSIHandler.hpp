@@ -80,6 +80,10 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <lifev/fsi_blocks/solver/FSIcouplingCE.hpp>
 
+#include <lifev/core/filter/ExporterEnsight.hpp>
+#include <lifev/core/filter/ExporterHDF5.hpp>
+#include <lifev/core/filter/ExporterVTK.hpp>
+
 namespace LifeV
 {
 
@@ -147,6 +151,8 @@ public:
 
     void assembleCoupling ( );
 
+    void solveFSIproblem();
+
 //@}
 
 private:
@@ -161,6 +167,12 @@ private:
     void createInterfaceMaps ( std::map<ID, ID> const& locDofMap );
 
     void constructInterfaceMap ( const std::map<ID, ID>& locDofMap, const UInt subdomainMaxId);
+
+    void setupExporters( );
+
+    void instantiateExporter( boost::shared_ptr< Exporter<mesh_Type > > & exporter,
+			  	  	  	  	  const meshPtr_Type& localMesh,
+			  	  	  	  	  const std::string& outputFileName );
 
     //! communicator
     commPtr_Type M_comm;
@@ -216,6 +228,14 @@ private:
 	vectorPtr_Type M_numerationInterface;
 
 	boost::shared_ptr<FSIcouplingCE> M_coupling;
+
+	boost::shared_ptr<Exporter<mesh_Type > > M_exporterFluid;
+	boost::shared_ptr<Exporter<mesh_Type > > M_exporterStructure;
+
+	vectorPtr_Type M_fluidVelocity;
+	vectorPtr_Type M_fluidPressure;
+	vectorPtr_Type M_fluidDisplacement;
+	vectorPtr_Type M_structureDisplacement;
 
 };
     

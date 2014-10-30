@@ -44,7 +44,9 @@ M_comm ( communicator ),
 M_displayer ( communicator ),
 M_dt (0.0),
 M_t_zero (0.0),
-M_t_end (0.0)
+M_t_end (0.0),
+M_exporterFluid (),
+M_exporterStructure ()
 {
 }
 
@@ -114,6 +116,58 @@ void FSIHandler::setup ( )
 	// Ale
 	M_ale.reset( new ALESolver ( *M_aleFESpace, M_comm ) );
 	M_ale->setUp( M_datafile );
+
+	setupExporters( );
+
+}
+
+void FSIHandler::setupExporters( )
+{
+	// Exporters
+	std::string outputNameFluid = M_datafile ( "exporter/fluid_filename", "fluid");
+	std::string outputNameStructure = M_datafile ( "exporter/structure_filename", "fluid");
+	instantiateExporter(M_exporterFluid, M_fluidLocalMesh, outputNameFluid);
+	instantiateExporter(M_exporterStructure, M_structureLocalMesh, outputNameStructure);
+
+	M_fluidVelocity.reset ( new VectorEpetra ( M_fluid->uFESpace()->map(), M_exporterFluid->mapType() ) );
+	M_fluidPressure.reset ( new VectorEpetra ( M_fluid->pFESpace()->map(), M_exporterFluid->mapType() ) );
+	M_fluidDisplacement.reset ( new VectorEpetra ( M_aleFESpace->map(), M_exporterFluid->mapType() ) );
+	M_structureDisplacement.reset ( new VectorEpetra ( M_displacementFESpace->map(), M_exporterStructure->mapType() ) );
+
+	*M_fluidVelocity *= 0;
+	*M_fluidPressure *= 0;
+	*M_fluidDisplacement *= 0;
+	*M_structureDisplacement *= 0;
+
+	M_exporterFluid->addVariable ( ExporterData<mesh_Type>::VectorField, "f - velocity", M_fluid->uFESpace(), M_fluidVelocity, UInt (0) );
+	M_exporterFluid->addVariable ( ExporterData<mesh_Type>::ScalarField, "f - pressure", M_fluid->pFESpace(), M_fluidPressure, UInt (0) );
+	M_exporterFluid->addVariable ( ExporterData<mesh_Type>::VectorField, "f - displacement", M_aleFESpace, M_fluidDisplacement, UInt (0) );
+	M_exporterStructure->addVariable ( ExporterData<mesh_Type>::VectorField, "s - displacement", M_displacementFESpace, M_structureDisplacement, UInt (0) );
+
+	M_exporterFluid->postProcess(M_t_zero);
+	M_exporterStructure->postProcess(M_t_zero);
+}
+
+void
+FSIHandler::instantiateExporter( boost::shared_ptr< Exporter<mesh_Type > >& exporter,
+							     const meshPtr_Type& localMesh,
+							     const std::string& outputName)
+{
+	std::string const exporterType =  M_datafile ( "exporter/type", "ensight");
+#ifdef HAVE_HDF5
+	if (exporterType.compare ("hdf5") == 0)
+	{
+		exporter.reset ( new ExporterHDF5<mesh_Type > ( M_datafile, outputName ) );
+		exporter->setPostDir ( "./" ); // This is a test to see if M_post_dir is working
+		exporter->setMeshProcId ( localMesh, M_comm->MyPID() );
+	}
+	else if(exporterType.compare ("vtk") == 0)
+#endif
+	{
+		exporter.reset ( new ExporterVTK<mesh_Type > ( M_datafile, outputName ) );
+		exporter->setPostDir ( "./" ); // This is a test to see if M_post_dir is working
+		exporter->setMeshProcId ( localMesh, M_comm->MyPID() );
+	}
 }
 
 void FSIHandler::createStructureFESpaces ( )
@@ -320,11 +374,14 @@ FSIHandler::assembleCoupling ( )
 
 }
 
+void
+FSIHandler::solveFSIproblem ( )
+{
 
 
 
-
-
-
+	M_exporterFluid->closeFile();
+	M_exporterStructure->closeFile();
+}
 
 }
