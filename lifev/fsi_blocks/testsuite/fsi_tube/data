@@ -79,5 +79,11 @@
     fluid_filename  = result_fluid    
     structure_filename  = result_structure
  
-[../]    
+[../]   
 
+[newton]
+	abstol          =  1.e-8
+	reltol          =  1.e-6 
+	etamax          =  1.e-6 
+
+[../]

@@ -220,7 +220,11 @@ private:
 	//! Displayer to print in parallel (only PID 0 will print)
 	Displayer M_displayer;
 
+	//! Variables for the time advancing
 	Real M_dt, M_t_zero, M_t_end;
+
+	//! Variables for the time advancing
+	Real M_relativeTolerance, M_absoluteTolerance, M_etaMax;
 
 	boost::shared_ptr<DOFInterface3Dto3D> M_dofStructureToFluid;
 	boost::shared_ptr<map_Type> M_structureInterfaceMap;

@@ -117,8 +117,13 @@ void FSIHandler::setup ( )
 	M_ale.reset( new ALESolver ( *M_aleFESpace, M_comm ) );
 	M_ale->setUp( M_datafile );
 
+	// Exporters
 	setupExporters( );
 
+	// Data needed by the Newton algorithm
+	M_relativeTolerance = M_datafile ( "newton/abstol", 1.e-4);
+	M_absoluteTolerance = M_datafile ( "newton/reltol", 1.e-4);
+	M_etaMax = M_datafile ( "newton/etamax", 1e-4);
 }
 
 void FSIHandler::setupExporters( )
