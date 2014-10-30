@@ -114,7 +114,6 @@ void FSIHandler::setup ( )
 	// Ale
 	M_ale.reset( new HarmonicExtensionSolver<mesh_Type> ( *M_aleFESpace, M_comm ) );
 	M_ale->setUp( M_datafile );
-
 }
 
 void FSIHandler::createStructureFESpaces ( )
@@ -202,6 +201,8 @@ void FSIHandler::buildInterfaceMaps ()
 	M_dofStructureToFluid->update ( *M_fluid->uFESpace()->mesh(), interface, *M_displacementFESpaceSerial->mesh(),  interface, tolerance, &flag);
 
 	createInterfaceMaps ( M_dofStructureToFluid->localDofMap ( ) );
+
+	constructInterfaceMap ( M_dofStructureToFluid->localDofMap ( ), M_displacementFESpace->map().map(Unique)->NumGlobalElements()/nDimensions );
 }
 
 void FSIHandler::createInterfaceMaps(std::map<ID, ID> const& locDofMap)
@@ -244,5 +245,86 @@ void FSIHandler::createInterfaceMaps(std::map<ID, ID> const& locDofMap)
 
 	M_structureInterfaceMap.reset ( new MapEpetra ( -1, static_cast<int> (dofInterfaceSolid.size() ), pointerToDofs, M_displacementFESpace->map().commPtr() ) );
 }
+
+void FSIHandler::constructInterfaceMap ( const std::map<ID, ID>& locDofMap,
+										 const UInt subdomainMaxId )
+{
+	std::map<ID, ID>::const_iterator ITrow;
+
+	Int numtasks = M_comm->NumProc();
+	int* numInterfaceDof (new int[numtasks]);
+	int pid = M_comm->MyPID();
+	int numMyElements = M_structureInterfaceMap->map (Unique)->NumMyElements();
+	numInterfaceDof[pid] = numMyElements;
+	MapEpetra subMap (*M_structureInterfaceMap->map (Unique), (UInt) 0, subdomainMaxId);
+
+	M_numerationInterface.reset (new VectorEpetra (subMap, Unique) );
+
+	for (int j = 0; j < numtasks; ++j)
+	{
+		M_comm->Broadcast ( &numInterfaceDof[j], 1, j);
+	}
+
+	for (int j = numtasks - 1; j > 0 ; --j)
+	{
+		numInterfaceDof[j] = numInterfaceDof[j - 1];
+	}
+	numInterfaceDof[0] = 0;
+	for (int j = 1; j < numtasks ; ++j)
+	{
+		numInterfaceDof[j] += numInterfaceDof[j - 1];
+	}
+
+	UInt l = 0;
+
+	Real M_interface = (UInt) M_structureInterfaceMap->map (Unique)->NumGlobalElements() / nDimensions;
+	for (l = 0, ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
+	{
+		if (M_structureInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second) ) >= 0)
+		{
+			(*M_numerationInterface) [ITrow->second ] = l + (int) (numInterfaceDof[pid] / nDimensions);
+			if ( (int) (*M_numerationInterface) (ITrow->second ) != floor (l + numInterfaceDof[pid] / nDimensions + 0.2) )
+			{
+				std::cout << "ERROR! the numeration of the coupling map is not correct" << std::endl;
+			}
+			++l;
+		}
+	}
+
+	std::vector<int> couplingVector;
+	couplingVector.reserve ( (int) (M_structureInterfaceMap->map (Unique)->NumMyElements() ) );
+
+	for (UInt dim = 0; dim < nDimensions; ++dim)
+	{
+		for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
+		{
+			if (M_structureInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second) ) >= 0)
+			{
+				couplingVector.push_back ( (*M_numerationInterface) (ITrow->second ) + dim * M_interface );
+			}
+		}
+	}// so the map for the coupling part of the matrix is just Unique
+
+	M_lagrangeMap.reset (new MapEpetra (-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], M_comm) );
+}
+
+void
+FSIHandler::assembleCoupling ( )
+{
+	M_coupling.reset ( new FSIcouplingCE ( M_comm ) );
+
+	M_coupling->setUp ( M_dt, M_structureInterfaceMap->mapSize()/3.0 , M_structureTimeAdvance->coefficientFirstDerivative ( 0 ),
+						M_lagrangeMap, M_fluid->uFESpace(), M_displacementFESpace, M_numerationInterface );
+
+	M_coupling->buildBlocks ( M_dofStructureToFluid->localDofMap ( ) );
+
+}
+
+
+
+
+
+
+
 
 }

@@ -117,6 +117,11 @@ main ( int argc, char** argv )
 
     fsi.buildInterfaceMaps ( );
 
+    // -------------------------------//
+    // Create blocks for the coupling //
+    // -------------------------------//
+
+    fsi.assembleCoupling ( );
 
 
 #ifdef HAVE_MPI

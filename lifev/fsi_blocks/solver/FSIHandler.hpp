@@ -78,6 +78,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <lifev/core/fem/DOFInterface3Dto3D.hpp>
 
+#include <lifev/fsi_blocks/solver/FSIcouplingCE.hpp>
+
 namespace LifeV
 {
 
@@ -143,6 +145,8 @@ public:
 
     void buildInterfaceMaps ( );
 
+    void assembleCoupling ( );
+
 //@}
 
 private:
@@ -156,7 +160,7 @@ private:
 
     void createInterfaceMaps ( std::map<ID, ID> const& locDofMap );
 
-    void constructInterfaceMap ( );
+    void constructInterfaceMap ( const std::map<ID, ID>& locDofMap, const UInt subdomainMaxId);
 
     //! communicator
     commPtr_Type M_comm;
@@ -208,6 +212,10 @@ private:
 	boost::shared_ptr<DOFInterface3Dto3D> M_dofStructureToFluid;
 	boost::shared_ptr<map_Type> M_structureInterfaceMap;
 	boost::shared_ptr<map_Type> M_fluidInterfaceMap;
+	boost::shared_ptr<map_Type> M_lagrangeMap;
+	vectorPtr_Type M_numerationInterface;
+
+	boost::shared_ptr<FSIcouplingCE> M_coupling;
 
 };
     
