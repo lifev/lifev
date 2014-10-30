@@ -229,7 +229,7 @@ void FSIHandler::initializeTimeAdvance ( )
 	M_structureTimeAdvance.reset ( TimeAdvanceFactory::instance().createObject ( timeAdvanceMethod ) );
 	UInt OrderDev = 2;
 	M_structureTimeAdvance->setup (M_dataStructure->dataTimeAdvance()->orderBDF() , OrderDev);
-	M_structureTimeAdvance->setTimeStep (M_dataStructure->dataTime()->timeStep() );
+	M_structureTimeAdvance->setTimeStep ( M_dt );
 	vectorPtr_Type disp (new VectorEpetra (M_displacementFESpace->map(), Unique) );
 	*disp *= 0;
 	std::vector<vectorPtr_Type> uv0;
@@ -239,9 +239,22 @@ void FSIHandler::initializeTimeAdvance ( )
 		uv0.push_back (disp);
 	}
 	M_structureTimeAdvance->setInitialCondition (uv0);
-	M_structureTimeAdvance->setTimeStep ( M_dt );
 	M_structureTimeAdvance->updateRHSContribution ( M_dt );
 
+	// Ale - the same method as for the structure
+	M_aleTimeAdvance.reset ( TimeAdvanceFactory::instance().createObject ( timeAdvanceMethod ) );
+	M_aleTimeAdvance->setup (M_dataStructure->dataTimeAdvance()->orderBDF() , 1);
+	M_aleTimeAdvance->setTimeStep ( M_dt );
+	vectorPtr_Type fluidDisp (new VectorEpetra (M_aleFESpace->map(), Unique) );
+	*fluidDisp *= 0;
+	std::vector<vectorPtr_Type> df0;
+	for ( UInt previousPass = 0; previousPass < M_aleTimeAdvance->size() ; previousPass++)
+	{
+		Real previousTimeStep = M_t_zero - previousPass * M_dt;
+		df0.push_back (fluidDisp);
+	}
+	M_aleTimeAdvance->setInitialCondition (df0);
+	M_aleTimeAdvance->updateRHSContribution ( M_dt );
 }
 
 void FSIHandler::buildInterfaceMaps ()
@@ -377,8 +390,26 @@ FSIHandler::assembleCoupling ( )
 void
 FSIHandler::solveFSIproblem ( )
 {
+	LifeChrono iterChrono;
+	Real time = M_t_zero + M_dt;
 
+	for ( ; time <= M_t_end + M_dt / 2.; time += M_dt)
+	{
+		M_displayer.leaderPrint ( "\n-----------------------------------\n" ) ;
+		M_displayer.leaderPrintMax ( "FSI - solving now for time ", time ) ;
+		M_displayer.leaderPrint ( "\n" ) ;
+		iterChrono.start();
 
+		iterChrono.stop();
+		M_displayer.leaderPrint ( "\n" ) ;
+		M_displayer.leaderPrintMax ( "FSI - timestep solved in ", iterChrono.diff() ) ;
+		iterChrono.reset();
+		M_displayer.leaderPrint ( "-----------------------------------\n\n" ) ;
+
+		// Export the solution obtained at the current timestep
+		M_exporterFluid->postProcess(time);
+		M_exporterStructure->postProcess(time);
+	}
 
 	M_exporterFluid->closeFile();
 	M_exporterStructure->closeFile();

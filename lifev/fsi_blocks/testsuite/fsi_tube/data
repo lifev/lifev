@@ -8,9 +8,10 @@
     		
     	[../time_discretization]
     		initialtime     = 0.0
-    		endtime	      = 0.2
+    		endtime	      = 0.003
     		timestep	      = 0.001	
-    
+    		BDF_order       = 2
+    		
     	[../space_discretization]
     		mesh_dir        = ./
     		mesh_file       = tube20.mesh
@@ -33,8 +34,8 @@
     	[../time_discretization]
 		method              = BDF
 		initialtime 		= 0.
-		endtime     		= 0.4
-		timestep    		= 0.1
+		endtime     		= 0.003
+		timestep    		= 0.001
 		BDF_order   		= 2
 		
 	[../model]

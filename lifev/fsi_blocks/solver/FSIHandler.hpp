@@ -209,6 +209,7 @@ private:
     
     // time advance for the structure
     timeAdvancePtr_Type M_structureTimeAdvance;
+    timeAdvancePtr_Type M_aleTimeAdvance;
     boost::shared_ptr<TimeAndExtrapolationHandler> M_fluidTimeAdvance;
 
     // boundary conditions
