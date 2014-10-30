@@ -278,7 +278,7 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 	*M_rhs = *M_Mu* (*rhs_velocity);
 }
 
-void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
+void NavierStokesSolver::applyBoundaryConditions ( bcPtr_Type & bc, const Real& time )
 {
 	updateBCHandler(bc);
 	bcManage ( *M_F, *M_rhs, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 1.0, time );
@@ -291,7 +291,12 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
 		bcManageMatrix( *M_Btranspose, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 0.0, 0.0);
 	}
 
-    M_Btranspose->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
+	M_Btranspose->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
+}
+
+void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
+{
+	applyBoundaryConditions ( bc, time );
 
     //(1) Set up the OseenOperator
     M_displayer.leaderPrint( "\tNS operator - set up the block operator...");

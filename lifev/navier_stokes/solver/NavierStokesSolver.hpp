@@ -156,7 +156,23 @@ public:
         *pressure = *M_pressure;
     }
     
+    void applyBoundaryConditions ( bcPtr_Type & bc, const Real& time );
     
+    matrixPtr_Type const& getF() const
+    {
+    	return M_F;
+    }
+
+    matrixPtr_Type const& getBtranspose() const
+    {
+    	return M_Btranspose;
+    }
+
+    matrixPtr_Type const& getB() const
+    {
+    	return M_B;
+    }
+
 private:
 
 	// build the graphs
