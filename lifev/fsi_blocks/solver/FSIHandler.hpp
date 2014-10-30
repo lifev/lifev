@@ -79,6 +79,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/fem/DOFInterface3Dto3D.hpp>
 
 #include <lifev/fsi_blocks/solver/FSIcouplingCE.hpp>
+#include <lifev/fsi_blocks/solver/FSIApplyOperator.hpp>
 
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
@@ -126,6 +127,9 @@ public:
 
 	typedef boost::shared_ptr<VectorEpetra> vectorPtr_Type;
 
+	typedef MatrixEpetra<Real> matrix_Type;
+	typedef boost::shared_ptr<matrix_Type> matrixPtr_Type;
+
     //! Constructor
     FSIHandler(const commPtr_Type& communicator);
 
@@ -161,6 +165,8 @@ public:
 
 private:
 
+    void moveMesh ( const VectorEpetra& displacement );
+
     void buildMonolithicMap ( );
 
     void createStructureFESpaces ( );
@@ -179,6 +185,16 @@ private:
     void instantiateExporter( boost::shared_ptr< Exporter<mesh_Type > > & exporter,
 			  	  	  	  	  const meshPtr_Type& localMesh,
 			  	  	  	  	  const std::string& outputFileName );
+
+    void updateSystem ( );
+
+    void initializeApplyOperator ( );
+
+    void getMatrixStructure ( );
+
+    void getRhsStructure ( );
+
+    void applyBCstructure ( );
 
     //! communicator
     commPtr_Type M_comm;
@@ -227,7 +243,8 @@ private:
 	Displayer M_displayer;
 
 	//! Variables for the time advancing
-	Real M_dt, M_t_zero, M_t_end;
+	Real M_dt, M_t_zero, M_t_end, M_time;
+	UInt M_orderBDF;
 
 	//! Variables for the time advancing
 	Real M_relativeTolerance, M_absoluteTolerance, M_etaMax;
@@ -254,6 +271,18 @@ private:
 
 	// Monolithic map
 	boost::shared_ptr<map_Type> M_monolithicMap;
+
+	boost::shared_ptr<LifeV::Operators::FSIApplyOperator> M_applyOperator;
+	vectorPtr_Type M_rhsFluid;
+	vectorPtr_Type M_rhsStructure;
+	vectorPtr_Type M_solution;
+
+	vectorPtr_Type M_u_star;
+	vectorPtr_Type M_w_star;
+	vectorPtr_Type M_beta_star;
+	vectorPtr_Type M_rhs_velocity;
+
+	matrixPtr_Type M_matrixStructure;
 };
     
 } // end namespace LifeV

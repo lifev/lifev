@@ -46,7 +46,8 @@ M_dt (0.0),
 M_t_zero (0.0),
 M_t_end (0.0),
 M_exporterFluid (),
-M_exporterStructure ()
+M_exporterStructure (),
+M_applyOperator(new Operators::FSIApplyOperator)
 {
 }
 
@@ -91,7 +92,6 @@ void FSIHandler::setup ( )
 	// Fluid
 	M_fluid.reset ( new NavierStokesSolver ( M_datafile, M_comm ) );
 	M_fluid->setup ( M_fluidLocalMesh );
-	M_fluid->buildSystem();
 
 	// Structure data
 	M_dataStructure.reset ( new StructuralConstitutiveLawData ( ) );
@@ -106,6 +106,11 @@ void FSIHandler::setup ( )
 	updateBoundaryConditions();
 
 	initializeTimeAdvance ( );
+
+	// Setting auxiliary variables for the fluid solver
+	M_fluid->setAlpha(M_fluidTimeAdvance->alpha());
+	M_fluid->setTimeStep(M_dt);
+	M_fluid->buildSystem();
 
 	// Structure
 	M_structure.reset (new StructuralOperator<mesh_Type> ( ) );
@@ -214,21 +219,21 @@ void FSIHandler::initializeTimeAdvance ( )
 {
 	// Fluid
 	M_fluidTimeAdvance.reset( new TimeAndExtrapolationHandler ( ) );
-	M_dt      = M_datafile("fluid/time_discretization/timestep",0.0);
-	M_t_zero  = M_datafile("fluid/time_discretization/initialtime",0.0);
-	M_t_end   = M_datafile("fluid/time_discretization/endtime",0.0);
-	UInt orderBDF  = M_datafile("fluid/time_discretization/BDF_order",2);
+	M_dt       = M_datafile("fluid/time_discretization/timestep",0.0);
+	M_t_zero   = M_datafile("fluid/time_discretization/initialtime",0.0);
+	M_t_end    = M_datafile("fluid/time_discretization/endtime",0.0);
+	M_orderBDF = M_datafile("fluid/time_discretization/BDF_order",2);
 
 	// Order of BDF and extrapolation for the velocity
-	M_fluidTimeAdvance->setBDForder(orderBDF);
-	M_fluidTimeAdvance->setMaximumExtrapolationOrder(orderBDF);
+	M_fluidTimeAdvance->setBDForder(M_orderBDF);
+	M_fluidTimeAdvance->setMaximumExtrapolationOrder(M_orderBDF);
 	M_fluidTimeAdvance->setTimeStep(M_dt);
 
 	// Initialize time advance
 	vector_Type velocityInitial ( M_fluid->uFESpace()->map() );
 	std::vector<vector_Type> initialStateVelocity;
 	velocityInitial *= 0 ;
-	for ( UInt i = 0; i < orderBDF; ++i )
+	for ( UInt i = 0; i < M_orderBDF; ++i )
 		initialStateVelocity.push_back(velocityInitial);
 
 	M_fluidTimeAdvance->initialize(initialStateVelocity);
@@ -410,21 +415,32 @@ void
 FSIHandler::solveFSIproblem ( )
 {
 	LifeChrono iterChrono;
-	Real time = M_t_zero + M_dt;
+	M_time = M_t_zero + M_dt;
 
 	buildMonolithicMap ( );
-	vectorPtr_Type solution ( new VectorEpetra ( *M_monolithicMap ) );
-	*solution *= 0;
+	M_solution.reset ( new VectorEpetra ( *M_monolithicMap ) );
+	*M_solution *= 0;
 
-	for ( ; time <= M_t_end + M_dt / 2.; time += M_dt)
+	// Apply boundary conditions for the ale problem (the matrix will not change during the simulation)
+	M_ale->applyBoundaryConditions ( *M_aleBC );
+
+	// Apply boundary conditions for the structure problem (the matrix will not change during the simulation, it is linear elasticity)
+	getMatrixStructure ( );
+	getRhsStructure ( );
+	applyBCstructure ( );
+
+	for ( ; M_time <= M_t_end + M_dt / 2.; M_time += M_dt)
 	{
 		M_displayer.leaderPrint ( "\n-----------------------------------\n" ) ;
-		M_displayer.leaderPrintMax ( "FSI - solving now for time ", time ) ;
+		M_displayer.leaderPrintMax ( "FSI - solving now for time ", M_time ) ;
 		M_displayer.leaderPrint ( "\n" ) ;
 		iterChrono.start();
 
-		UInt status = NonLinearRichardson ( *solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
-											M_nonLinearLineSearch, 0, 2, M_out_res, time);
+		updateSystem ( );
+
+		// Using the solution at the previous timestep as initial guess -> TODO: extrapolation
+		UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
+											M_nonLinearLineSearch, 0, 2, M_out_res, M_time);
 
 		iterChrono.stop();
 		M_displayer.leaderPrint ( "\n" ) ;
@@ -432,9 +448,12 @@ FSIHandler::solveFSIproblem ( )
 		iterChrono.reset();
 		M_displayer.leaderPrint ( "-----------------------------------\n\n" ) ;
 
+		// Updating all the time-advance objects
+
+
 		// Export the solution obtained at the current timestep
-		M_exporterFluid->postProcess(time);
-		M_exporterStructure->postProcess(time);
+		M_exporterFluid->postProcess(M_time);
+		M_exporterStructure->postProcess(M_time);
 	}
 
 	M_exporterFluid->closeFile();
@@ -444,13 +463,134 @@ FSIHandler::solveFSIproblem ( )
 void
 FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, const UInt iter_newton)
 {
+	residual = 0.;
 
+	//---------------------------------------------------------//
+	// First: extract the fluid displacement and move the mesh //
+	//---------------------------------------------------------//
+
+	UInt offset ( M_fluid->uFESpace()->map().mapSize() +
+				  M_fluid->pFESpace()->map().mapSize() +
+				  M_displacementFESpace->map().mapSize() +
+				  M_lagrangeMap->mapSize() );
+
+	vectorPtr_Type meshDisplacement ( new vector_Type (M_aleFESpace->map() ) );
+	meshDisplacement->subset (solution, offset);
+	vectorPtr_Type mmRep ( new vector_Type (*meshDisplacement, Repeated ) );
+	moveMesh ( *mmRep );
+
+	//-------------------------------------------------------------------//
+	// Second: re-assemble the fluid blocks since we have moved the mesh //
+	//-------------------------------------------------------------------//
+
+	M_fluid->buildSystem();
+	M_fluid->updateSystem ( M_beta_star, M_rhs_velocity );
+	M_fluid->applyBoundaryConditions ( M_fluidBC, M_time );
+
+	//--------------------------------------//
+	// Third: initialize the apply operator //
+	//--------------------------------------//
+
+	initializeApplyOperator ( );
+
+	M_displayer.leaderPrint (" END OF EVAL RESIDUAL ");
+	int kkk;
+	std::cin >> kkk;
 }
 
 void
 FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol )
 {
 
+}
+
+void
+FSIHandler::moveMesh ( const VectorEpetra& displacement )
+{
+    M_displayer.leaderPrint (" FSI-  Moving the mesh ...                      ");
+    M_fluidLocalMesh->meshTransformer().moveMesh (displacement,  M_aleFESpace->dof().numTotalDof() );
+    M_displayer.leaderPrint ( "done\n" );
+}
+
+void
+FSIHandler::updateSystem ( )
+{
+	// Fluid update - initialize vectors
+	M_u_star.reset ( new VectorEpetra ( M_fluid->uFESpace()->map ( ) ) );
+	M_w_star.reset ( new VectorEpetra ( M_aleFESpace->map ( ) ) );
+	M_beta_star.reset ( new VectorEpetra ( M_fluid->uFESpace()->map ( ) ) );
+	M_rhs_velocity.reset ( new VectorEpetra ( M_fluid->uFESpace()->map ( ) ) );
+
+	*M_u_star *= 0;
+	*M_w_star *= 0;
+	*M_beta_star *= 0;
+	*M_rhs_velocity *= 0;
+
+	// Compute extrapolation of the velocity for the fluid and rhs contribution due to the time derivative
+	M_fluidTimeAdvance->extrapolate (M_orderBDF, *M_u_star);
+	M_fluidTimeAdvance->rhsContribution (*M_rhs_velocity);
+
+	// Extrapolate the mesh velocity
+	M_aleTimeAdvance->extrapolation ( *M_w_star );
+
+	// compute beta* = u*-w*
+	*M_beta_star += *M_u_star;
+	*M_beta_star -= *M_w_star;
+}
+
+void
+FSIHandler::initializeApplyOperator ( )
+{
+	Operators::FSIApplyOperator::operatorPtrContainer_Type operData(5,5);
+	operData(0,0) = M_fluid->getF()->matrixPtr();
+	operData(0,1) = M_fluid->getBtranspose()->matrixPtr();
+	operData(0,3) = M_coupling->lambdaToFluidMomentum()->matrixPtr();
+	operData(1,0) = M_fluid->getB()->matrixPtr();
+	operData(2,2) = M_matrixStructure->matrixPtr();
+	operData(2,3) = M_coupling->lambdaToStructureMomentum()->matrixPtr();
+	operData(3,0) = M_coupling->fluidVelocityToLambda()->matrixPtr();
+	operData(3,2) = M_coupling->structureDisplacementToLambda()->matrixPtr();
+	operData(4,2) = M_coupling->structureDisplacementToFluidDisplacement()->matrixPtr();
+	operData(4,4) = M_ale->matrix()->matrixPtr();
+	M_applyOperator->setUp(operData, M_comm);
+}
+
+void
+FSIHandler::getMatrixStructure ( )
+{
+	M_matrixStructure.reset (new matrix_Type ( M_displacementFESpace->map(), 1 ) );
+	*M_matrixStructure *= 0.0;
+
+	vectorPtr_Type solidPortion ( new vector_Type ( M_displacementFESpace->map() ) );
+	*solidPortion *= 0;
+
+	M_structure->material()->updateJacobianMatrix ( *solidPortion, M_dataStructure, M_structure->mapMarkersVolumes(), M_structure->mapMarkersIndexes(), M_structure->displayerPtr() );
+	*M_matrixStructure += *M_structure->massMatrix();
+	*M_matrixStructure += * (M_structure->material()->jacobian() );
+}
+
+void
+FSIHandler::getRhsStructure ( )
+{
+	Real timeAdvanceCoefficient = M_structureTimeAdvance->coefficientSecondDerivative ( 0 ) / ( M_dt * M_dt );
+	M_structureTimeAdvance->updateRHSContribution ( M_dt );
+
+	M_rhsStructure.reset ( new VectorEpetra ( M_displacementFESpace->map() ) );
+	*M_rhsStructure *= 0;
+	*M_rhsStructure += *M_structure->massMatrix() * M_structureTimeAdvance->rhsContributionSecondDerivative() / timeAdvanceCoefficient;
+}
+
+void
+FSIHandler::applyBCstructure ( )
+{
+	if ( !M_structureBC->bcUpdateDone() )
+		M_structureBC->bcUpdate ( *M_displacementFESpace->mesh(), M_displacementFESpace->feBd(), M_displacementFESpace->dof() );
+
+
+
+	bcManage ( *M_matrixStructure, *M_rhsStructure, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC, M_displacementFESpace->feBd(), 1.0, M_time );
+
+	M_matrixStructure->globalAssemble();
 }
 
 }
