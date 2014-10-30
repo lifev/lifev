@@ -7,6 +7,7 @@ NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commP
 		M_comm(communicator),
 		M_dataFile(dataFile),
 		M_displayer(communicator),
+		M_graphIsBuilt(false)
         M_oper(new Operators::NavierStokesOperator),
         M_prec(new Operators::aSIMPLEOperator),
         M_invOper()
@@ -167,7 +168,8 @@ void NavierStokesSolver::buildGraphs()
 
 void NavierStokesSolver::buildSystem()
 {
-	buildGraphs();
+	if ( M_graphIsBuilt )
+		buildGraphs();
 
 	M_displayer.leaderPrint ( " F - Assembling constant terms... ");
 	LifeChrono chrono;
@@ -245,6 +247,7 @@ void NavierStokesSolver::buildSystem()
 
 void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vectorPtr_Type& rhs_velocity )
 {
+	// Note that u_star HAS to extrapolated from outside. Hence it works also for FSI in this manner.
 	M_uExtrapolated.reset( new vector_Type ( *u_star, Repeated ) );
 
 	// Update convective term

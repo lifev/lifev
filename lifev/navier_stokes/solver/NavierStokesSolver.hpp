@@ -215,6 +215,7 @@ private:
 	//! Reals
 	Real M_alpha;
 	Real M_timeStep;
+	bool M_graphIsBuilt;
     
     // Navoer Stokes operator
 	boost::shared_ptr<LifeV::Operators::NavierStokesOperator> M_oper;
