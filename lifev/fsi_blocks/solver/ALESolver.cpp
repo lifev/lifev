@@ -96,6 +96,17 @@ void ALESolver::applyBoundaryConditions (vector_Type& rhs, BCHandler& BCh)
     bcManageMatrix ( *M_matrHE, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.0, 0. );
 }
 
+void ALESolver::applyBoundaryConditions (BCHandler& BCh)
+{
+
+    if (  ! BCh.bcUpdateDone() )
+    {
+    	BCh.bcUpdate ( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
+    }
+
+    bcManageMatrix ( *M_matrHE, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.0, 0. );
+}
+
 void ALESolver::computeMatrix( )
 {
     LifeChrono chrono;

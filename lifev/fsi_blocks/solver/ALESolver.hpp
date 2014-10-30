@@ -141,6 +141,7 @@ public:
 
     matrixPtr_Type const& matrix() const
     {
+    	M_matrHE->globalAssemble();
     	return M_matrHE;
     }
 
@@ -156,6 +157,12 @@ public:
         @param bcHandler
      */
     void applyBoundaryConditions (vector_Type& rhs, BCHandler& BCh);
+
+    //! Apply boundary conditions to the matrix.
+    /*!
+        @param bcHandler
+     */
+    void applyBoundaryConditions (BCHandler& BCh);
 
     void computeMatrix();
     void updateDispDiff();
