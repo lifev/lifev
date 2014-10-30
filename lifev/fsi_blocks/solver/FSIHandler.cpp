@@ -399,7 +399,11 @@ FSIHandler::assembleCoupling ( )
 void
 FSIHandler::buildMonolithicMap ( )
 {
-
+	M_monolithicMap.reset( new map_Type ( M_fluid->uFESpace()->map() ) );
+	*M_monolithicMap += M_fluid->pFESpace()->map();
+	*M_monolithicMap += M_displacementFESpace->map();
+	*M_monolithicMap += *M_lagrangeMap;
+	*M_monolithicMap += M_aleFESpace->map();
 }
 
 void
@@ -408,7 +412,9 @@ FSIHandler::solveFSIproblem ( )
 	LifeChrono iterChrono;
 	Real time = M_t_zero + M_dt;
 
-	vectorPtr_Type solution;
+	buildMonolithicMap ( );
+	vectorPtr_Type solution ( new VectorEpetra ( *M_monolithicMap ) );
+	*solution *= 0;
 
 	for ( ; time <= M_t_end + M_dt / 2.; time += M_dt)
 	{

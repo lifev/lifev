@@ -161,6 +161,8 @@ public:
 
 private:
 
+    void buildMonolithicMap ( );
+
     void createStructureFESpaces ( );
 
     void createAleFESpace();
@@ -244,11 +246,14 @@ private:
 	boost::shared_ptr<Exporter<mesh_Type > > M_exporterFluid;
 	boost::shared_ptr<Exporter<mesh_Type > > M_exporterStructure;
 
+	// Vectors for the exporters
 	vectorPtr_Type M_fluidVelocity;
 	vectorPtr_Type M_fluidPressure;
 	vectorPtr_Type M_fluidDisplacement;
 	vectorPtr_Type M_structureDisplacement;
 
+	// Monolithic map
+	boost::shared_ptr<map_Type> M_monolithicMap;
 };
     
 } // end namespace LifeV
