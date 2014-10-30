@@ -76,12 +76,12 @@ FSIcouplingCE::buildBlocks ( std::map<ID, ID> const& localDofMap )
 			if ( M_numerationInterface->map().map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second) ) >= 0 )
 			{
 				M_fluidVelocityToLambda->addToCoefficient( (int) (*M_numerationInterface)[ITrow->second] + dim * M_interface,
-						                                   ITrow->second + dim * M_structureDisplacementFESpace->dof().numTotalDof(),
+						                                   ITrow->first + dim * M_fluidVelocityFESpace->dof().numTotalDof(),
 						                                   value );
 			}
 		}
 	}
-	M_fluidVelocityToLambda->globalAssemble(M_structureDisplacementFESpace->mapPtr(), M_interfaceMap);
+	M_fluidVelocityToLambda->globalAssemble(M_fluidVelocityFESpace->mapPtr(), M_interfaceMap);
 
 	// ----------------------------------------------------------------------------------------------------------------------------
 
@@ -96,12 +96,12 @@ FSIcouplingCE::buildBlocks ( std::map<ID, ID> const& localDofMap )
 			if ( M_numerationInterface->map().map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second) ) >= 0 )
 			{
 				M_structureDisplacementToLambda->addToCoefficient( (int) (*M_numerationInterface)[ITrow->second] + dim * M_interface,
-																   ITrow->first + dim * M_fluidVelocityFESpace->dof().numTotalDof(),
+																   ITrow->second + dim * M_structureDisplacementFESpace->dof().numTotalDof(),
 																   value );
 			}
 		}
 	}
-	M_structureDisplacementToLambda->globalAssemble(M_fluidVelocityFESpace->mapPtr(), M_interfaceMap);
+	M_structureDisplacementToLambda->globalAssemble(M_structureDisplacementFESpace->mapPtr(), M_interfaceMap);
 
 	// ----------------------------------------------------------------------------------------------------------------------------
 
