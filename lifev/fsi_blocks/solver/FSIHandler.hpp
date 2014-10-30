@@ -153,6 +153,10 @@ public:
 
     void solveFSIproblem();
 
+    void evalResidual(vector_Type& residual, const vector_Type& solution, const UInt iter_newton);
+
+    void solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol );
+
 //@}
 
 private:
@@ -225,6 +229,9 @@ private:
 
 	//! Variables for the time advancing
 	Real M_relativeTolerance, M_absoluteTolerance, M_etaMax;
+	Int  M_nonLinearLineSearch;
+	UInt M_maxiterNonlinear;
+	std::ofstream M_out_res;
 
 	boost::shared_ptr<DOFInterface3Dto3D> M_dofStructureToFluid;
 	boost::shared_ptr<map_Type> M_structureInterfaceMap;

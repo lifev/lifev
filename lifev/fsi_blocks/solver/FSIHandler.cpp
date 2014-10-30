@@ -124,6 +124,10 @@ void FSIHandler::setup ( )
 	M_relativeTolerance = M_datafile ( "newton/abstol", 1.e-4);
 	M_absoluteTolerance = M_datafile ( "newton/reltol", 1.e-4);
 	M_etaMax = M_datafile ( "newton/etamax", 1e-4);
+	M_maxiterNonlinear = M_datafile ( "newton/maxiter", 10);
+	M_nonLinearLineSearch = M_datafile ( "newton/NonLinearLineSearch", 0);
+	if (M_comm->MyPID() == 0)
+		M_out_res.open ("residualsNewton");
 }
 
 void FSIHandler::setupExporters( )
@@ -393,10 +397,18 @@ FSIHandler::assembleCoupling ( )
 }
 
 void
+FSIHandler::buildMonolithicMap ( )
+{
+
+}
+
+void
 FSIHandler::solveFSIproblem ( )
 {
 	LifeChrono iterChrono;
 	Real time = M_t_zero + M_dt;
+
+	vectorPtr_Type solution;
 
 	for ( ; time <= M_t_end + M_dt / 2.; time += M_dt)
 	{
@@ -404,6 +416,9 @@ FSIHandler::solveFSIproblem ( )
 		M_displayer.leaderPrintMax ( "FSI - solving now for time ", time ) ;
 		M_displayer.leaderPrint ( "\n" ) ;
 		iterChrono.start();
+
+		UInt status = NonLinearRichardson ( *solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
+											M_nonLinearLineSearch, 0, 2, M_out_res, time);
 
 		iterChrono.stop();
 		M_displayer.leaderPrint ( "\n" ) ;
@@ -418,6 +433,18 @@ FSIHandler::solveFSIproblem ( )
 
 	M_exporterFluid->closeFile();
 	M_exporterStructure->closeFile();
+}
+
+void
+FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, const UInt iter_newton)
+{
+
+}
+
+void
+FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol )
+{
+
 }
 
 }
