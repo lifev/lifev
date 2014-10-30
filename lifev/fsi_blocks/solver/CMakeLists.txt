@@ -1,9 +1,11 @@
 SET(solver_HEADERS
   solver/FSIHandler.hpp
+  solver/FSIcouplingCE.hpp
 CACHE INTERNAL "")
 
 SET(solver_SOURCES
   solver/FSIHandler.cpp
+  solver/FSIcouplingCE.cpp
 CACHE INTERNAL "")
 
 
