@@ -64,7 +64,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/structure/solver/isotropic/SecondOrderExponentialMaterialNonLinear.hpp>
 #include <lifev/structure/solver/isotropic/NeoHookeanMaterialNonLinear.hpp>
 */
-#include <lifev/fsi/solver/HarmonicExtensionSolver.hpp>
+#include <lifev/fsi_blocks/solver/ALESolver.hpp>
 
 // Expression template FE space
 #include <lifev/eta/fem/ETFESpace.hpp>
@@ -193,7 +193,7 @@ private:
     boost::shared_ptr<NavierStokesSolver> M_fluid;
     boost::shared_ptr<StructuralOperator<mesh_Type> > M_structure;
     boost::shared_ptr<StructuralConstitutiveLawData> M_dataStructure;
-    boost::shared_ptr<HarmonicExtensionSolver<mesh_Type> > M_ale;
+    boost::shared_ptr<ALESolver> M_ale;
     
     // time advance for the structure
     timeAdvancePtr_Type M_structureTimeAdvance;

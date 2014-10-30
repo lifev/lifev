@@ -112,7 +112,7 @@ void FSIHandler::setup ( )
 	M_structure->buildSystem (timeAdvanceCoefficient);
 
 	// Ale
-	M_ale.reset( new HarmonicExtensionSolver<mesh_Type> ( *M_aleFESpace, M_comm ) );
+	M_ale.reset( new ALESolver ( *M_aleFESpace, M_comm ) );
 	M_ale->setUp( M_datafile );
 }
 

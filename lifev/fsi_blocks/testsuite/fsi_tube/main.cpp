@@ -123,6 +123,10 @@ main ( int argc, char** argv )
 
     fsi.assembleCoupling ( );
 
+    // ----------//
+    // Time Loop //
+    // ----------//
+
 
 #ifdef HAVE_MPI
     if (verbose)
