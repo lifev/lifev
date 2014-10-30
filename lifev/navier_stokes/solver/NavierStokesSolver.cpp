@@ -7,7 +7,7 @@ NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commP
 		M_comm(communicator),
 		M_dataFile(dataFile),
 		M_displayer(communicator),
-		M_graphIsBuilt(false)
+		M_graphIsBuilt(false),
         M_oper(new Operators::NavierStokesOperator),
         M_prec(new Operators::aSIMPLEOperator),
         M_invOper()
@@ -162,13 +162,15 @@ void NavierStokesSolver::buildGraphs()
         M_F_graph->OptimizeStorage();
 	}
 
+	M_graphIsBuilt = true;
+
 	chrono.stop();
 	M_displayer.leaderPrintMax ( "   done in ", chrono.diff() ) ;
 }
 
 void NavierStokesSolver::buildSystem()
 {
-	if ( M_graphIsBuilt )
+	if ( !M_graphIsBuilt )
 		buildGraphs();
 
 	M_displayer.leaderPrint ( " F - Assembling constant terms... ");
