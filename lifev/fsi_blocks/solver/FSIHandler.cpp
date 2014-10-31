@@ -493,6 +493,14 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 	initializeApplyOperator ( );
 
+	//-----------------------------//
+	// Forth: compute the residual //
+	//-----------------------------//
+
+	VectorEpetra tmp(*M_monolithicMap);
+	tmp.zero();
+	M_applyOperator->Apply(solution.epetraVector(),residual.epetraVector());
+
 	M_displayer.leaderPrint (" END OF EVAL RESIDUAL ");
 	int kkk;
 	std::cin >> kkk;
