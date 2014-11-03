@@ -173,6 +173,11 @@ public:
     	return M_B;
     }
 
+    vectorPtr_Type const& getRhs() const
+    {
+    	return M_rhs;
+    }
+
 private:
 
 	// build the graphs

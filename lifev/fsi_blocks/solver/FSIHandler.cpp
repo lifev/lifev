@@ -426,8 +426,6 @@ FSIHandler::solveFSIproblem ( )
 
 	// Apply boundary conditions for the structure problem (the matrix will not change during the simulation, it is linear elasticity)
 	getMatrixStructure ( );
-	getRhsStructure ( );
-	applyBCstructure ( );
 
 	for ( ; M_time <= M_t_end + M_dt / 2.; M_time += M_dt)
 	{
@@ -486,12 +484,26 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	M_fluid->buildSystem();
 	M_fluid->updateSystem ( M_beta_star, M_rhs_velocity );
 	M_fluid->applyBoundaryConditions ( M_fluidBC, M_time );
+	M_rhsFluid = M_fluid->getRhs();
 
 	//--------------------------------------//
 	// Third: initialize the apply operator //
 	//--------------------------------------//
 
 	initializeApplyOperator ( );
+
+	//------------------------------------------------//
+	// Forth: assemble the monolithic right hand side //
+	//------------------------------------------------//
+
+	vectorPtr_Type rightHandSide ( new vector_Type ( M_monolithicMap ) );
+	rightHandSide->zero();
+	// get the fluid right hand side
+	rightHandSide->subset ( *M_rhsFluid );
+	// get the structure right hand side
+	rightHandSide->subset ( *M_rhsStructure, M_displacementFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() );
+	// get the right hand side of the coupling of the velocities
+	// rightHandSide.subset ( );
 
 	//-----------------------------//
 	// Forth: compute the residual //
@@ -500,16 +512,18 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	VectorEpetra tmp(*M_monolithicMap);
 	tmp.zero();
 	M_applyOperator->Apply(solution.epetraVector(),residual.epetraVector());
+	tmp -= *rightHandSide;
 
-	M_displayer.leaderPrint (" END OF EVAL RESIDUAL ");
-	int kkk;
-	std::cin >> kkk;
+	residual = tmp;
 }
 
 void
 FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol )
 {
 
+	M_displayer.leaderPrint (" FSI-  End of solve Jac ...                      ");
+	int kkk;
+	std::cin >> kkk;
 }
 
 void
@@ -529,10 +543,10 @@ FSIHandler::updateSystem ( )
 	M_beta_star.reset ( new VectorEpetra ( M_fluid->uFESpace()->map ( ) ) );
 	M_rhs_velocity.reset ( new VectorEpetra ( M_fluid->uFESpace()->map ( ) ) );
 
-	*M_u_star *= 0;
-	*M_w_star *= 0;
-	*M_beta_star *= 0;
-	*M_rhs_velocity *= 0;
+	M_u_star->zero();
+	M_w_star->zero();
+	M_beta_star->zero();
+	M_rhs_velocity->zero();
 
 	// Compute extrapolation of the velocity for the fluid and rhs contribution due to the time derivative
 	M_fluidTimeAdvance->extrapolate (M_orderBDF, *M_u_star);
@@ -544,6 +558,11 @@ FSIHandler::updateSystem ( )
 	// compute beta* = u*-w*
 	*M_beta_star += *M_u_star;
 	*M_beta_star -= *M_w_star;
+
+	// Get the right hand side of the structural part and apply the BC on it TODO now it also applies bc on the matrix, remove!!
+	getRhsStructure ( );
+	applyBCstructure ( );
+
 }
 
 void
@@ -593,8 +612,6 @@ FSIHandler::applyBCstructure ( )
 {
 	if ( !M_structureBC->bcUpdateDone() )
 		M_structureBC->bcUpdate ( *M_displacementFESpace->mesh(), M_displacementFESpace->feBd(), M_displacementFESpace->dof() );
-
-
 
 	bcManage ( *M_matrixStructure, *M_rhsStructure, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC, M_displacementFESpace->feBd(), 1.0, M_time );
 
