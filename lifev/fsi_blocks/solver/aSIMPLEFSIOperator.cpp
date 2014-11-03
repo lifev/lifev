@@ -74,7 +74,8 @@ aSIMPLEFSIOperator::setCouplingBlocks ( const matrixEpetraPtr_Type & C1transpose
 	M_C1 = C1;
 }
 
-void aSIMPLEFSIOperator::setOptions(const Teuchos::ParameterList& solversOptions)
+void
+aSIMPLEFSIOperator::setOptions(const Teuchos::ParameterList& solversOptions)
 {
 
 	boost::shared_ptr<Teuchos::ParameterList> structureMomentumOptions;
@@ -98,37 +99,43 @@ void aSIMPLEFSIOperator::setOptions(const Teuchos::ParameterList& solversOptions
 	setSchurCouplingOptions(schurCouplingOptions);
 }
 
-void aSIMPLEFSIOperator::setStructureMomentumOptions(const parameterListPtr_Type & _oList)
+void
+aSIMPLEFSIOperator::setStructureMomentumOptions(const parameterListPtr_Type & _oList)
 {
     ASSERT_PRE(_oList.get() != 0, "oList pointer not valid");
     M_structureMomentumOptions = _oList;
 }
 
-void aSIMPLEFSIOperator::setGeometryOptions(const parameterListPtr_Type & _oList)
+void
+aSIMPLEFSIOperator::setGeometryOptions(const parameterListPtr_Type & _oList)
 {
     ASSERT_PRE(_oList.get() != 0, "oList pointer not valid");
     M_geometryOptions = _oList;
 }
 
-void aSIMPLEFSIOperator::setFluidMomentumOptions(const parameterListPtr_Type & _oList)
+void
+aSIMPLEFSIOperator::setFluidMomentumOptions(const parameterListPtr_Type & _oList)
 {
     ASSERT_PRE(_oList.get() != 0, "oList pointer not valid");
     M_fluidMomentumOptions = _oList;
 }
 
-void aSIMPLEFSIOperator::setSchurOptions(const parameterListPtr_Type & _oList)
+void
+aSIMPLEFSIOperator::setSchurOptions(const parameterListPtr_Type & _oList)
 {
     ASSERT_PRE(_oList.get() != 0, "oList pointer not valid");
     M_schurOptions = _oList;
 }
 
-void aSIMPLEFSIOperator::setSchurCouplingOptions(const parameterListPtr_Type & _oList)
+void
+aSIMPLEFSIOperator::setSchurCouplingOptions(const parameterListPtr_Type & _oList)
 {
     ASSERT_PRE(_oList.get() != 0, "oList pointer not valid");
     M_schurCouplingOptions = _oList;
 }
 
-void aSIMPLEFSIOperator::updateApproximatedStructureMomentumOperator( )
+void
+aSIMPLEFSIOperator::updateApproximatedStructureMomentumOperator( )
 {
 	M_approximatedStructureMomentumOperator->SetRowMatrix(M_S->matrixPtr());
 	M_approximatedStructureMomentumOperator->SetParameterList(*M_structureMomentumOptions);
@@ -136,37 +143,80 @@ void aSIMPLEFSIOperator::updateApproximatedStructureMomentumOperator( )
 
 }
 
-void aSIMPLEFSIOperator::updateApproximatedGeometryOperator( )
+void
+aSIMPLEFSIOperator::updateApproximatedGeometryOperator( )
 {
     M_approximatedGeometryOperator->SetRowMatrix(M_G->matrixPtr());
     M_approximatedGeometryOperator->SetParameterList(*M_geometryOptions);
     M_approximatedGeometryOperator->Compute();
 }
 
-void aSIMPLEFSIOperator::updateApproximatedFluidMomentumOperator( )
+void
+aSIMPLEFSIOperator::updateApproximatedFluidMomentumOperator( )
 {
-	//M_approximatedFluidMomentumOperator->SetRowMatrix();
+	M_approximatedFluidMomentumOperator->SetRowMatrix( M_F->matrixPtr() );
 	M_approximatedFluidMomentumOperator->SetParameterList(*M_fluidMomentumOptions);
 	M_approximatedFluidMomentumOperator->Compute();
 
 }
 
-void aSIMPLEFSIOperator::updateApproximatedSchurComplementOperator( )
+void
+aSIMPLEFSIOperator::updateApproximatedSchurComplementOperator( )
 {
-	//buildShurComplement();
-	//M_approximatedSchurComplementOperator->SetRowMatrix();
+	buildShurComplement();
+	M_approximatedSchurComplementOperator->SetRowMatrix( M_schurComplement->matrixPtr() );
     M_approximatedSchurComplementOperator->SetParameterList(*M_schurOptions);
     M_approximatedSchurComplementOperator->Compute();
 }
 
-void aSIMPLEFSIOperator::updateApproximatedSchurComplementCouplingOperator( )
+void
+aSIMPLEFSIOperator::updateApproximatedSchurComplementCouplingOperator( )
 {
-	//M_approximatedSchurComplementCouplingOperator->SetRowMatrix();
+	buildShurComplementCoupling();
+	M_approximatedSchurComplementCouplingOperator->SetRowMatrix( M_schurComplementCoupling->matrixPtr() );
 	M_approximatedSchurComplementCouplingOperator->SetParameterList(*M_schurCouplingOptions);
 	M_approximatedSchurComplementCouplingOperator->Compute();
 }
 
-int aSIMPLEFSIOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
+void
+aSIMPLEFSIOperator::buildShurComplement( )
+{
+    Epetra_Vector diag( M_F->matrixPtr()->OperatorRangeMap() );
+    M_invD.reset(new Epetra_Vector( M_F->matrixPtr()->OperatorRangeMap() ) );
+
+    // extracting diag(F)
+    M_F->matrixPtr()->ExtractDiagonalCopy(diag);
+
+    // computing diag(F)^{-1}
+    M_invD->Reciprocal(diag);
+
+    // computing diag(F)^{-1}*M_Btranspose
+    matrixEpetra_Type FBT (*M_Btranspose);
+    FBT.matrixPtr()->LeftScale(*M_invD);
+
+    M_schurComplement.reset ( new matrixEpetra_Type ( M_B->map() ) );
+
+    // computing M_B*(diag(F)^{-1}*M_Btranspose)
+    M_B->multiply (false, FBT, false, *M_schurComplement, false);
+    M_schurComplement->globalAssemble();
+}
+
+void
+aSIMPLEFSIOperator::buildShurComplementCoupling( )
+{
+	// computing diag(F)^{-1}*M_C1transpose
+    matrixEpetra_Type invDC1transpose (*M_C1transpose);
+    invDC1transpose.matrixPtr()->LeftScale(*M_invD);
+
+    M_schurComplementCoupling.reset ( new matrixEpetra_Type ( M_C1->map() ) );
+
+    // computing M_C1*(diag(F)^{-1}*M_C1transpose)
+    M_C1->multiply (false, invDC1transpose, false, *M_schurComplementCoupling, false);
+    M_schurComplementCoupling->globalAssemble();
+}
+
+int
+aSIMPLEFSIOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
 {
     ASSERT_PRE(X.NumVectors() == Y.NumVectors(), "X and Y must have the same number of vectors");
     return 0;

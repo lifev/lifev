@@ -174,6 +174,9 @@ private:
     //! create the matrix B*diag(F)^-1*Btranspose
     void buildShurComplement();
 
+    //! create the matrix C1*diag(F)^-1*C1transpose
+    void buildShurComplementCoupling( );
+
     boost::shared_ptr<BlockEpetra_Map> M_operatorDomainMap;
     //! Range Map
     boost::shared_ptr<BlockEpetra_Map> M_operatorRangeMap;
@@ -237,6 +240,11 @@ private:
     //@}
 
     mapEpetraPtr_Type M_monolithicMap;
+
+    boost::shared_ptr<Epetra_Vector> M_invD;
+
+    matrixEpetraPtr_Type M_schurComplement;
+    matrixEpetraPtr_Type M_schurComplementCoupling;
 
     //! Label
     const std::string M_label;

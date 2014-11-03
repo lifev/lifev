@@ -514,7 +514,7 @@ FSIHandler::solveFSIproblem ( )
 	M_prec->setCouplingBlocks ( M_coupling->lambdaToFluidMomentum(),
 								M_coupling->lambdaToStructureMomentum(),
 								M_coupling->structureDisplacementToLambda(),
-								M_coupling->structureDisplacementToFluidDisplacement() );
+								M_coupling->fluidVelocityToLambda() );
 
 	for ( ; M_time <= M_t_end + M_dt / 2.; M_time += M_dt)
 	{
@@ -573,6 +573,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	M_fluid->buildSystem();
 	M_fluid->updateSystem ( M_beta_star, M_rhs_velocity );
 	M_fluid->applyBoundaryConditions ( M_fluidBC, M_time );
+	M_rhsFluid.reset(new VectorEpetra ( M_fluid->uFESpace()->map() ) );
 	M_rhsFluid = M_fluid->getRhs();
 
 	//--------------------------------------//
@@ -588,7 +589,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	vectorPtr_Type rightHandSide ( new vector_Type ( M_monolithicMap ) );
 	rightHandSide->zero();
 	// get the fluid right hand side
-	rightHandSide->subset ( *M_rhsFluid );
+	rightHandSide->subset ( *M_rhsFluid, M_fluid->uFESpace()->map(), 0, 0 );
 	// get the structure right hand side
 	rightHandSide->subset ( *M_rhsStructure, M_displacementFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() );
 	// get the right hand side of the coupling of the velocities
@@ -618,9 +619,13 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 	M_prec->setDomainMap(M_applyOperator->OperatorDomainBlockMapPtr());
 	M_prec->setRangeMap(M_applyOperator->OperatorRangeBlockMapPtr());
 
-	//---------------------------------------------------//
-	// First: set the fluid blocks in the preconditioner //
-	//---------------------------------------------------//
+	//--------------------------------------------------------------------------------//
+	// Second: update the operators associated to shur complements and fluid momentum //
+	//--------------------------------------------------------------------------------//
+
+	M_prec->updateApproximatedFluidMomentumOperator();
+	M_prec->updateApproximatedSchurComplementOperator();
+	M_prec->updateApproximatedSchurComplementCouplingOperator();
 
 	M_displayer.leaderPrint (" FSI-  End of solve Jac ...                      ");
 	int kkk;
