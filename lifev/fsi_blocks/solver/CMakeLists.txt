@@ -3,6 +3,7 @@ SET(solver_HEADERS
   solver/FSIcouplingCE.hpp
   solver/ALESolver.hpp
   solver/FSIApplyOperator.hpp
+  solver/aSIMPLEFSIOperator.hpp
 CACHE INTERNAL "")
 
 SET(solver_SOURCES
@@ -10,6 +11,7 @@ SET(solver_SOURCES
   solver/FSIcouplingCE.cpp
   solver/ALESolver.cpp
   solver/FSIApplyOperator.cpp	
+  solver/aSIMPLEFSIOperator.cpp
 CACHE INTERNAL "")
 
 
