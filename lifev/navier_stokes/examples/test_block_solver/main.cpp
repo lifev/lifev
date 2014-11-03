@@ -89,6 +89,7 @@ main ( int argc, char** argv )
     // create the solver
     NavierStokesSolver ns( dataFile, Comm);
     ns.setup(localMeshPtr);
+    ns.setParameters();
     ns.buildSystem();
 
     // Time handler objects to deal with time advancing and extrapolation

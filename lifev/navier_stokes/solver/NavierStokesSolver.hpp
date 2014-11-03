@@ -128,6 +128,8 @@ public:
 		M_alpha = alpha;
 	}
 
+	void setParameters( );
+
 	// Set coefficient associated to the time discretization scheme
 	void setTimeStep(const Real& dt)
 	{

@@ -18,6 +18,13 @@ NavierStokesSolver::~NavierStokesSolver()
 {
 }
 
+void NavierStokesSolver::setParameters( )
+{
+	Teuchos::RCP<Teuchos::ParameterList> solversOptions = Teuchos::getParametersFromXmlFile ("solversOptionsFast.xml");
+	M_prec->setOptions(*solversOptions);
+	setSolversOptions(*solversOptions);
+}
+
 
 void NavierStokesSolver::setup(const meshPtr_Type& mesh)
 {
@@ -39,10 +46,6 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
 	*M_uExtrapolated *= 0;
 
 	M_stiffStrain = M_dataFile("fluid/space_discretization/stiff_strain", true);
-
-    Teuchos::RCP<Teuchos::ParameterList> solversOptions = Teuchos::getParametersFromXmlFile ("solversOptionsFast.xml");
-    M_prec->setOptions(*solversOptions);
-    setSolversOptions(*solversOptions);
 
     M_velocity.reset( new vector_Type(M_velocityFESpace->map()) );
     M_pressure.reset( new vector_Type(M_pressureFESpace->map()) );
