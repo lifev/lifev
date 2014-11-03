@@ -85,6 +85,11 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #include <lifev/core/filter/ExporterVTK.hpp>
 
+#include <Teuchos_ParameterList.hpp>
+#include <Teuchos_XMLParameterListHelpers.hpp>
+
+#include <lifev/fsi_blocks/solver/aSIMPLEFSIOperator.hpp>
+
 namespace LifeV
 {
 
@@ -130,6 +135,9 @@ public:
 	typedef MatrixEpetra<Real> matrix_Type;
 	typedef boost::shared_ptr<matrix_Type> matrixPtr_Type;
 
+	typedef Teuchos::ParameterList parameterList_Type;
+	typedef boost::shared_ptr<parameterList_Type> parameterListPtr_Type;
+
     //! Constructor
     FSIHandler(const commPtr_Type& communicator);
 
@@ -160,6 +168,8 @@ public:
     void evalResidual(vector_Type& residual, const vector_Type& solution, const UInt iter_newton);
 
     void solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol );
+
+    void setParameterLists( );
 
 //@}
 
@@ -195,6 +205,8 @@ private:
     void getRhsStructure ( );
 
     void applyBCstructure ( );
+
+    void setSolversOptions(const Teuchos::ParameterList& solversOptions);
 
     //! communicator
     commPtr_Type M_comm;
@@ -272,7 +284,6 @@ private:
 	// Monolithic map
 	boost::shared_ptr<map_Type> M_monolithicMap;
 
-	boost::shared_ptr<LifeV::Operators::FSIApplyOperator> M_applyOperator;
 	vectorPtr_Type M_rhsFluid;
 	vectorPtr_Type M_rhsStructure;
 	vectorPtr_Type M_solution;
@@ -283,6 +294,18 @@ private:
 	vectorPtr_Type M_rhs_velocity;
 
 	matrixPtr_Type M_matrixStructure;
+
+	// Operator to apply the FSI
+	boost::shared_ptr<LifeV::Operators::FSIApplyOperator> M_applyOperator;
+
+	// Preconditioner operator
+	boost::shared_ptr<LifeV::Operators::aSIMPLEFSIOperator> M_prec;
+
+	// Epetra Operator needed to solve the linear system
+	boost::shared_ptr<Operators::InvertibleOperator> M_invOper;
+
+	// Parameter list solver
+	parameterListPtr_Type M_pListLinSolver;
 };
     
 } // end namespace LifeV

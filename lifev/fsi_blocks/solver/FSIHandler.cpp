@@ -47,7 +47,9 @@ M_t_zero (0.0),
 M_t_end (0.0),
 M_exporterFluid (),
 M_exporterStructure (),
-M_applyOperator(new Operators::FSIApplyOperator)
+M_applyOperator(new Operators::FSIApplyOperator),
+M_prec(new Operators::aSIMPLEFSIOperator),
+M_invOper()
 {
 }
 
@@ -59,8 +61,25 @@ void
 FSIHandler::setDatafile( const GetPot& dataFile)
 {
     M_datafile = dataFile;
+    setParameterLists( );
 }
-    
+
+void
+FSIHandler::setParameterLists( )
+{
+	Teuchos::RCP<Teuchos::ParameterList> solversOptions = Teuchos::getParametersFromXmlFile ("solversOptionsFast.xml");
+	M_prec->setOptions(*solversOptions);
+	setSolversOptions(*solversOptions);
+}
+
+void
+FSIHandler::setSolversOptions(const Teuchos::ParameterList& solversOptions)
+{
+    boost::shared_ptr<Teuchos::ParameterList> monolithicOptions;
+    monolithicOptions.reset(new Teuchos::ParameterList(solversOptions.sublist("MonolithicOperator")) );
+    M_pListLinSolver = monolithicOptions;
+}
+
 void
 FSIHandler::readMeshes( )
 {
@@ -133,6 +152,13 @@ void FSIHandler::setup ( )
 	M_nonLinearLineSearch = M_datafile ( "newton/NonLinearLineSearch", 0);
 	if (M_comm->MyPID() == 0)
 		M_out_res.open ("residualsNewton");
+
+	// Solver
+	std::string solverType(M_pListLinSolver->get<std::string>("Linear Solver Type"));
+	M_invOper.reset(Operators::InvertibleOperatorFactory::instance().createObject(solverType));
+
+	// Preconditioner
+	M_prec->setComm ( M_comm );
 }
 
 void FSIHandler::setupExporters( )
@@ -412,9 +438,47 @@ FSIHandler::buildMonolithicMap ( )
 }
 
 void
+FSIHandler::getMatrixStructure ( )
+{
+	M_matrixStructure.reset (new matrix_Type ( M_displacementFESpace->map(), 1 ) );
+	*M_matrixStructure *= 0.0;
+
+	vectorPtr_Type solidPortion ( new vector_Type ( M_displacementFESpace->map() ) );
+	*solidPortion *= 0;
+
+	M_structure->material()->updateJacobianMatrix ( *solidPortion, M_dataStructure, M_structure->mapMarkersVolumes(), M_structure->mapMarkersIndexes(), M_structure->displayerPtr() );
+	*M_matrixStructure += *M_structure->massMatrix();
+	*M_matrixStructure += * (M_structure->material()->jacobian() );
+
+	if ( !M_structureBC->bcUpdateDone() )
+		M_structureBC->bcUpdate ( *M_displacementFESpace->mesh(), M_displacementFESpace->feBd(), M_displacementFESpace->dof() );
+
+	bcManageMatrix ( *M_matrixStructure, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC, M_displacementFESpace->feBd(), 1.0, M_time );
+
+	M_matrixStructure->globalAssemble();
+}
+
+void
+FSIHandler::getRhsStructure ( )
+{
+	Real timeAdvanceCoefficient = M_structureTimeAdvance->coefficientSecondDerivative ( 0 ) / ( M_dt * M_dt );
+	M_structureTimeAdvance->updateRHSContribution ( M_dt );
+
+	M_rhsStructure.reset ( new VectorEpetra ( M_displacementFESpace->map() ) );
+	*M_rhsStructure *= 0;
+	*M_rhsStructure += *M_structure->massMatrix() * M_structureTimeAdvance->rhsContributionSecondDerivative() / timeAdvanceCoefficient;
+
+	if ( !M_structureBC->bcUpdateDone() )
+		M_structureBC->bcUpdate ( *M_displacementFESpace->mesh(), M_displacementFESpace->feBd(), M_displacementFESpace->dof() );
+
+	bcManageRhs ( *M_rhsStructure, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC, M_displacementFESpace->feBd(), 1.0, M_time );
+}
+
+void
 FSIHandler::solveFSIproblem ( )
 {
 	LifeChrono iterChrono;
+	LifeChrono smallThingsChrono;
 	M_time = M_t_zero + M_dt;
 
 	buildMonolithicMap ( );
@@ -426,6 +490,31 @@ FSIHandler::solveFSIproblem ( )
 
 	// Apply boundary conditions for the structure problem (the matrix will not change during the simulation, it is linear elasticity)
 	getMatrixStructure ( );
+
+	// Set blocks for the preconditioners: structure
+	M_displayer.leaderPrint ( "\n Set preconditioner for the structure and the geometry blocks\n" ) ;
+
+	M_displayer.leaderPrint ( "\t Set and approximate structure block in the preconditioner.. " ) ;
+	smallThingsChrono.start();
+	M_prec->setStructureBlock ( M_matrixStructure );
+	M_prec->updateApproximatedStructureMomentumOperator ( );
+	smallThingsChrono.stop();
+	M_displayer.leaderPrintMax ( "done in ", smallThingsChrono.diff() ) ;
+
+	// Set blocks for the preconditioners: geometry
+	smallThingsChrono.reset();
+	M_displayer.leaderPrint ( "\t Set and approximate geometry block in the preconditioner... " ) ;
+	smallThingsChrono.start();
+	M_prec->setGeometryBlock ( M_ale->matrix() );
+	M_prec->updateApproximatedGeometryOperator ( );
+	smallThingsChrono.stop();
+	M_displayer.leaderPrintMax ( "done in ", smallThingsChrono.diff() ) ;
+
+	// Set the coupling blocks in the preconditioner
+	M_prec->setCouplingBlocks ( M_coupling->lambdaToFluidMomentum(),
+								M_coupling->lambdaToStructureMomentum(),
+								M_coupling->structureDisplacementToLambda(),
+								M_coupling->structureDisplacementToFluidDisplacement() );
 
 	for ( ; M_time <= M_t_end + M_dt / 2.; M_time += M_dt)
 	{
@@ -521,6 +610,18 @@ void
 FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol )
 {
 
+	//---------------------------------------------------//
+	// First: set the fluid blocks in the preconditioner //
+	//---------------------------------------------------//
+
+	M_prec->setFluidBlocks( M_fluid->getF(), M_fluid->getBtranspose(), M_fluid->getB() );
+	M_prec->setDomainMap(M_applyOperator->OperatorDomainBlockMapPtr());
+	M_prec->setRangeMap(M_applyOperator->OperatorRangeBlockMapPtr());
+
+	//---------------------------------------------------//
+	// First: set the fluid blocks in the preconditioner //
+	//---------------------------------------------------//
+
 	M_displayer.leaderPrint (" FSI-  End of solve Jac ...                      ");
 	int kkk;
 	std::cin >> kkk;
@@ -561,8 +662,6 @@ FSIHandler::updateSystem ( )
 
 	// Get the right hand side of the structural part and apply the BC on it TODO now it also applies bc on the matrix, remove!!
 	getRhsStructure ( );
-	applyBCstructure ( );
-
 }
 
 void
@@ -580,42 +679,6 @@ FSIHandler::initializeApplyOperator ( )
 	operData(4,2) = M_coupling->structureDisplacementToFluidDisplacement()->matrixPtr();
 	operData(4,4) = M_ale->matrix()->matrixPtr();
 	M_applyOperator->setUp(operData, M_comm);
-}
-
-void
-FSIHandler::getMatrixStructure ( )
-{
-	M_matrixStructure.reset (new matrix_Type ( M_displacementFESpace->map(), 1 ) );
-	*M_matrixStructure *= 0.0;
-
-	vectorPtr_Type solidPortion ( new vector_Type ( M_displacementFESpace->map() ) );
-	*solidPortion *= 0;
-
-	M_structure->material()->updateJacobianMatrix ( *solidPortion, M_dataStructure, M_structure->mapMarkersVolumes(), M_structure->mapMarkersIndexes(), M_structure->displayerPtr() );
-	*M_matrixStructure += *M_structure->massMatrix();
-	*M_matrixStructure += * (M_structure->material()->jacobian() );
-}
-
-void
-FSIHandler::getRhsStructure ( )
-{
-	Real timeAdvanceCoefficient = M_structureTimeAdvance->coefficientSecondDerivative ( 0 ) / ( M_dt * M_dt );
-	M_structureTimeAdvance->updateRHSContribution ( M_dt );
-
-	M_rhsStructure.reset ( new VectorEpetra ( M_displacementFESpace->map() ) );
-	*M_rhsStructure *= 0;
-	*M_rhsStructure += *M_structure->massMatrix() * M_structureTimeAdvance->rhsContributionSecondDerivative() / timeAdvanceCoefficient;
-}
-
-void
-FSIHandler::applyBCstructure ( )
-{
-	if ( !M_structureBC->bcUpdateDone() )
-		M_structureBC->bcUpdate ( *M_displacementFESpace->mesh(), M_displacementFESpace->feBd(), M_displacementFESpace->dof() );
-
-	bcManage ( *M_matrixStructure, *M_rhsStructure, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC, M_displacementFESpace->feBd(), 1.0, M_time );
-
-	M_matrixStructure->globalAssemble();
 }
 
 }
