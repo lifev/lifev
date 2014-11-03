@@ -1,5 +1,5 @@
 <ParameterList>
-    <ParameterList name="MomentumOperator">
+    <ParameterList name="FluidMomentumOperator">
         <Parameter name="use preconditioner as approximated inverse" type="bool" value="true"/>
         <Parameter name="preconditioner type" type="string" value="ML"/>
         <!-- ML, Ifpack, TwoLevel-->
@@ -53,7 +53,7 @@
         </ParameterList>
     </ParameterList>
 
-    <ParameterList name="ApproximatedSchurOperator">
+    <ParameterList name="ApproximatedSchurOperatorFluid">
             <Parameter name="use preconditioner as approximated inverse" type="bool" value="true"/>
             <Parameter name="preconditioner type" type="string" value="ML"/>
             <ParameterList name="solver">
@@ -93,7 +93,7 @@
         <Parameter name="order" type="int" value="1"/> <!-- Used only by HOY -->
     </ParameterList>
     
-    <ParameterList name="Structure">
+    <ParameterList name="StructureMomentumOperator">
         <Parameter name="use preconditioner as approximated inverse" type="bool" value="true"/>
         <Parameter name="preconditioner type" type="string" value="ML"/>
         <!-- ML, Ifpack, TwoLevel-->
@@ -147,7 +147,7 @@
         </ParameterList>
     </ParameterList>
     
-    <ParameterList name="ALE">
+    <ParameterList name="ALEOperator">
         <Parameter name="use preconditioner as approximated inverse" type="bool" value="true"/>
         <Parameter name="preconditioner type" type="string" value="ML"/>
         <!-- ML, Ifpack, TwoLevel-->
