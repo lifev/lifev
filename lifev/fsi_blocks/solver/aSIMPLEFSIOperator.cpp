@@ -259,22 +259,62 @@ aSIMPLEFSIOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
     //--------------------------------------------------//
 
     VectorEpetra_Type Zg ( X_geometry );
-    Zg += *M_C3*Y_displacement;
+    Zg -= *M_C3*Y_displacement;
     VectorEpetra_Type Y_geometry ( X_geometry.map(), Unique);
     M_approximatedGeometryOperator->ApplyInverse(Zg.epetraVector(), Y_geometry.epetraVector() );
 
+    //----------------------------------------------//
+    // Third: apply the preconditioner of the fluid //
+    //----------------------------------------------//
 
+    // Missing step associated to shape derivatives, now just define vectors
+    VectorEpetra_Type Zf_velocity ( X_velocity );
+    VectorEpetra_Type Zf_pressure ( X_pressure );
 
+    VectorEpetra_Type Zlambda ( X_lambda );
+    Zlambda -= *M_C2*Y_displacement;
+
+    VectorEpetra_Type Wf_velocity ( X_velocity.map(), Unique );
+    VectorEpetra_Type Wf_pressure ( X_pressure.map(), Unique );
+
+    // Preconditioner for the fluid
+    M_approximatedFluidMomentumOperator->ApplyInverse ( Zf_velocity.epetraVector(), Wf_velocity.epetraVector() );
+    Zf_pressure -= *M_B*Wf_velocity;
+    M_approximatedSchurComplementOperator->ApplyInverse ( Zf_pressure.epetraVector(), Wf_pressure.epetraVector() );
+    Wf_pressure *= -1;
+
+    // Preconditioner for the coupling
+    VectorEpetra_Type Y_lambda ( X_lambda.map(), Unique );
+    Zlambda -= *M_C1*Wf_velocity;
+    M_approximatedSchurComplementCouplingOperator->ApplyInverse ( Zlambda.epetraVector(), Y_lambda.epetraVector());
+    Y_lambda *= -1;
+
+    VectorEpetra_Type K ( X_velocity.map(), Unique );
+    matrixEpetra_Type invDC1transpose (*M_C1transpose); // you already have it!
+    invDC1transpose.matrixPtr()->LeftScale(*M_invD);
+    K = invDC1transpose*Y_lambda;
+
+    VectorEpetra_Type deltaU ( Wf_velocity );
+    deltaU -= K;
+
+    VectorEpetra_Type Y_pressure ( Wf_pressure );
+    VectorEpetra_Type Y_velocity ( deltaU );
+    matrixEpetra_Type invDBtranspose (*M_Btranspose); // you already have it!
+    invDBtranspose.matrixPtr()->LeftScale(*M_invD);
+    Y_velocity -= invDBtranspose*Y_pressure;
 
     // output vector
-    VectorEpetra_Type Y_vectorEpetra(M_monolithicMap, Unique);
-
+    VectorEpetra_Type Y_vectorEpetra(Y, M_monolithicMap, Unique);
 
     //! Copy the single contributions into the optput vector
+    Y_vectorEpetra.subset(Y_velocity, Y_velocity.map(), 0, 0 );
+    Y_vectorEpetra.subset(Y_pressure, Y_pressure.map(), 0, M_F->map().mapSize() );
     Y_vectorEpetra.subset(Y_displacement, Y_displacement.map(), 0, M_F->map().mapSize() + M_B->map().mapSize() );
+    Y_vectorEpetra.subset(Y_lambda, Y_lambda.map(), 0, M_F->map().mapSize() + M_B->map().mapSize() + M_S->map().mapSize() );
     Y_vectorEpetra.subset(Y_geometry, Y_geometry.map(), 0, M_F->map().mapSize() + M_B->map().mapSize() + M_S->map().mapSize() + M_C1->map().mapSize() );
 
     Y = dynamic_cast<Epetra_MultiVector &>( Y_vectorEpetra.epetraVector() );
+
 
     return 0;
 }

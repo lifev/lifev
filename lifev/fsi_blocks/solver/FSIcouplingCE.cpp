@@ -114,7 +114,7 @@ FSIcouplingCE::buildBlocks ( std::map<ID, ID> const& localDofMap )
 			if ( M_numerationInterface->map().map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second) ) >= 0 )
 			{
 				M_structureDisplacementToFluidDisplacement->addToCoefficient( ITrow->first + dim * M_fluidVelocityFESpace->dof().numTotalDof(),
-																			  (int) (*M_numerationInterface)[ITrow->second] + dim * M_structureDisplacementFESpace->dof().numTotalDof(),
+																			  ITrow->second + dim * M_structureDisplacementFESpace->dof().numTotalDof(),
 																			  value );
 			}
 		}

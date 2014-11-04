@@ -206,6 +206,10 @@ private:
 
     void applyBCstructure ( );
 
+    void applyBCsolution(vectorPtr_Type& M_solution);
+
+    void applyBCresidual(VectorEpetra& residual);
+
     void setSolversOptions(const Teuchos::ParameterList& solversOptions);
 
     //! communicator
