@@ -156,6 +156,7 @@ void FSIHandler::setup ( )
 	// Solver
 	std::string solverType(M_pListLinSolver->get<std::string>("Linear Solver Type"));
 	M_invOper.reset(Operators::InvertibleOperatorFactory::instance().createObject(solverType));
+	M_invOper->setParameterList(M_pListLinSolver->sublist(solverType));
 
 	// Preconditioner
 	M_prec->setComm ( M_comm );
@@ -514,7 +515,10 @@ FSIHandler::solveFSIproblem ( )
 	M_prec->setCouplingBlocks ( M_coupling->lambdaToFluidMomentum(),
 								M_coupling->lambdaToStructureMomentum(),
 								M_coupling->structureDisplacementToLambda(),
-								M_coupling->fluidVelocityToLambda() );
+								M_coupling->fluidVelocityToLambda(),
+								M_coupling->structureDisplacementToFluidDisplacement() );
+
+	M_prec->setMonolithicMap ( M_monolithicMap );
 
 	for ( ; M_time <= M_t_end + M_dt / 2.; M_time += M_dt)
 	{
@@ -623,9 +627,40 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 	// Second: update the operators associated to shur complements and fluid momentum //
 	//--------------------------------------------------------------------------------//
 
+	LifeChrono smallThingsChrono;
+	M_displayer.leaderPrint ( "\n Set preconditioner for the fluid momentum and the shur complements\n" ) ;
+	M_displayer.leaderPrint ( "\t Set and approximate fluid momentum in the preconditioner.. " ) ;
+	smallThingsChrono.start();
 	M_prec->updateApproximatedFluidMomentumOperator();
+	smallThingsChrono.stop();
+	M_displayer.leaderPrintMax ( "done in ", smallThingsChrono.diff() ) ;
+
+	smallThingsChrono.reset();
+	M_displayer.leaderPrint ( "\t Set and approximate fluid shur complement in the preconditioner.. " ) ;
+	smallThingsChrono.start();
 	M_prec->updateApproximatedSchurComplementOperator();
+	smallThingsChrono.stop();
+	M_displayer.leaderPrintMax ( "done in ", smallThingsChrono.diff() ) ;
+
+	smallThingsChrono.reset();
+	M_displayer.leaderPrint ( "\t Set and approximate coupling shur complement in the preconditioner.. " ) ;
+	smallThingsChrono.start();
 	M_prec->updateApproximatedSchurComplementCouplingOperator();
+	smallThingsChrono.stop();
+	M_displayer.leaderPrintMax ( "done in ", smallThingsChrono.diff() ) ;
+
+	//----------------------------------------------//
+	// Third: set the solver of the jacobian system //
+	//----------------------------------------------//
+
+	M_invOper->setOperator(M_applyOperator);
+	M_invOper->setPreconditioner(M_prec);
+
+	//-------------------------//
+	// Forth: solve the system //
+	//-------------------------//
+
+	M_invOper->ApplyInverse(residual.epetraVector() , increment.epetraVector());
 
 	M_displayer.leaderPrint (" FSI-  End of solve Jac ...                      ");
 	int kkk;

@@ -41,6 +41,12 @@ void aSIMPLEFSIOperator::showMe(){
 }
 
 void
+aSIMPLEFSIOperator::setMonolithicMap(const mapEpetraPtr_Type& monolithicMap)
+{
+	M_monolithicMap = monolithicMap;
+}
+
+void
 aSIMPLEFSIOperator::setStructureBlock(const matrixEpetraPtr_Type & S)
 {
 	M_S = S;
@@ -66,12 +72,14 @@ void
 aSIMPLEFSIOperator::setCouplingBlocks ( const matrixEpetraPtr_Type & C1transpose,
 				   	   	   	   	  	    const matrixEpetraPtr_Type & C2transpose,
 				   	   	   	   	  	    const matrixEpetraPtr_Type & C2,
-				   	   	   	   	  	    const matrixEpetraPtr_Type & C1)
+				   	   	   	   	  	    const matrixEpetraPtr_Type & C1,
+				   	   	   	   	  	    const matrixEpetraPtr_Type & C3)
 {
 	M_C1transpose = C1transpose;
 	M_C2transpose = C2transpose;
 	M_C2 = C2;
 	M_C1 = C1;
+	M_C3 = C3;
 }
 
 void
@@ -219,6 +227,43 @@ int
 aSIMPLEFSIOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
 {
     ASSERT_PRE(X.NumVectors() == Y.NumVectors(), "X and Y must have the same number of vectors");
+
+    //! Input vector
+    const VectorEpetra_Type X_vectorEpetra(X, M_monolithicMap, Unique);
+
+    //! Extract each component of the input vector
+    VectorEpetra_Type X_velocity(M_F->map(), Unique);
+    X_velocity.subset(X_vectorEpetra, M_F->map(), 0, 0);
+
+    VectorEpetra_Type X_pressure(M_B->map(), Unique);
+    X_pressure.subset(X_vectorEpetra, M_B->map(), M_F->map().mapSize(), 0 );
+
+    VectorEpetra_Type X_displacement(M_S->map(), Unique);
+    X_displacement.subset(X_vectorEpetra, M_S->map(), M_F->map().mapSize() + M_B->map().mapSize(), 0 );
+
+    VectorEpetra_Type X_lambda(M_C1->map(), Unique);
+    X_lambda.subset(X_vectorEpetra, M_C1->map(), M_F->map().mapSize() + M_B->map().mapSize() + M_S->map().mapSize(), 0 );
+
+    VectorEpetra_Type X_geometry(M_G->map(), Unique);
+    X_geometry.subset(X_vectorEpetra, M_G->map(), M_F->map().mapSize() + M_B->map().mapSize() + M_S->map().mapSize() + M_C1->map().mapSize(), 0 );
+
+    //--------------------------------------------------//
+    // First: apply the preconditioner of the structure //
+    //--------------------------------------------------//
+
+    VectorEpetra_Type Y_displacement(M_S->map(), Unique);
+    M_approximatedStructureMomentumOperator->ApplyInverse(X_displacement.epetraVector(), Y_displacement.epetraVector() );
+
+
+    // output vector
+    VectorEpetra_Type Y_vectorEpetra(M_monolithicMap, Unique);
+
+
+    //! Copy the single contributions into the optput vector
+    Y_vectorEpetra.subset(Y_displacement, Y_displacement.map(), 0, M_F->map().mapSize() + M_B->map().mapSize() );
+
+    Y = dynamic_cast<Epetra_MultiVector &>( Y_vectorEpetra.epetraVector() );
+
     return 0;
 }
 

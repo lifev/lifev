@@ -114,7 +114,8 @@ public:
     void setCouplingBlocks ( const matrixEpetraPtr_Type & C1transpose,
 			  	  	   	     const matrixEpetraPtr_Type & C2transpose,
 			  	  	   	     const matrixEpetraPtr_Type & C2,
-			  	  	   	     const matrixEpetraPtr_Type & C1);
+			  	  	   	     const matrixEpetraPtr_Type & C1,
+		   	   	   	   	  	 const matrixEpetraPtr_Type & C3);
 
     //@}
 
@@ -145,6 +146,9 @@ public:
 
     //! Interface to set the parameters of each block
     void setOptions(const Teuchos::ParameterList& solversOptions);
+
+    //! Set the monolithic map
+    void setMonolithicMap(const mapEpetraPtr_Type& monolithicMap);
     //@}
 
 private:
@@ -237,6 +241,7 @@ private:
     matrixEpetraPtr_Type M_C2transpose;
     matrixEpetraPtr_Type M_C2;
     matrixEpetraPtr_Type M_C1;
+    matrixEpetraPtr_Type M_C3;
     //@}
 
     mapEpetraPtr_Type M_monolithicMap;
