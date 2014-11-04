@@ -254,6 +254,17 @@ aSIMPLEFSIOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
     VectorEpetra_Type Y_displacement(M_S->map(), Unique);
     M_approximatedStructureMomentumOperator->ApplyInverse(X_displacement.epetraVector(), Y_displacement.epetraVector() );
 
+    //--------------------------------------------------//
+    // Second: apply the preconditioner of the geometry //
+    //--------------------------------------------------//
+
+    VectorEpetra_Type Zg ( X_geometry );
+    Zg += *M_C3*Y_displacement;
+    VectorEpetra_Type Y_geometry ( X_geometry.map(), Unique);
+    M_approximatedGeometryOperator->ApplyInverse(Zg.epetraVector(), Y_geometry.epetraVector() );
+
+
+
 
     // output vector
     VectorEpetra_Type Y_vectorEpetra(M_monolithicMap, Unique);
@@ -261,6 +272,7 @@ aSIMPLEFSIOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
 
     //! Copy the single contributions into the optput vector
     Y_vectorEpetra.subset(Y_displacement, Y_displacement.map(), 0, M_F->map().mapSize() + M_B->map().mapSize() );
+    Y_vectorEpetra.subset(Y_geometry, Y_geometry.map(), 0, M_F->map().mapSize() + M_B->map().mapSize() + M_S->map().mapSize() + M_C1->map().mapSize() );
 
     Y = dynamic_cast<Epetra_MultiVector &>( Y_vectorEpetra.epetraVector() );
 
