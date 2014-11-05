@@ -275,31 +275,35 @@ aSIMPLEFSIOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
     Zlambda -= *M_C2*Y_displacement;
 
     VectorEpetra_Type Wf_velocity ( X_velocity.map(), Unique );
-    VectorEpetra_Type Wf_pressure ( X_pressure.map(), Unique );
 
     // Preconditioner for the fluid
+
+    // Momentum equation F Wf_v = Zf_v
     M_approximatedFluidMomentumOperator->ApplyInverse ( Zf_velocity.epetraVector(), Wf_velocity.epetraVector() );
+
+    // Schur Complement for the pressure
+    VectorEpetra_Type Wf_pressure ( X_pressure.map(), Unique );    
     Zf_pressure -= *M_B*Wf_velocity;
     M_approximatedSchurComplementOperator->ApplyInverse ( Zf_pressure.epetraVector(), Wf_pressure.epetraVector() );
     Wf_pressure *= -1;
 
-    VectorEpetra_Type Y_pressure ( Wf_pressure );
-    VectorEpetra_Type Y_velocity ( X_velocity.map() );
-    VectorEpetra_Type BTy ( X_velocity.map() );
-    BTy = - (*M_Btranspose*Y_pressure);
-    M_approximatedFluidMomentumOperator->ApplyInverse ( BTy.epetraVector(), Y_velocity.epetraVector() );
-    Y_velocity += Wf_velocity;
 
-    // Preconditioner for the coupling
+    // Schur Complement for the coupling
     VectorEpetra_Type Y_lambda ( X_lambda.map(), Unique );
-    Zlambda -= *M_C1*Y_velocity;
+    Zlambda -= *M_C1*Wf_velocity; // what about  Wf_velocity ? originally: Y_velocity
     M_approximatedSchurComplementCouplingOperator->ApplyInverse ( Zlambda.epetraVector(), Y_lambda.epetraVector());
     Y_lambda *= -1;
 
-    VectorEpetra_Type Kf ( X_velocity.map(), Unique );
-    BTy = *M_C1transpose*Y_lambda;
-    M_approximatedFluidMomentumOperator->ApplyInverse ( BTy.epetraVector(), Kf.epetraVector() );
-    Y_velocity -= Kf;
+
+    // Update the velocity, Yosida style
+    VectorEpetra_Type Y_velocity ( X_velocity.map() );
+    Wf_velocity = Zf_velocity - (*M_Btranspose*Wf_pressure) -  *M_C1transpose*Y_lambda;
+    M_approximatedFluidMomentumOperator->ApplyInverse (Wf_velocity.epetraVector(), Y_velocity.epetraVector());
+
+
+    VectorEpetra_Type Y_pressure ( Wf_pressure );
+
+    // Preconditioner for the coupling
 
     // output vector
     VectorEpetra_Type Y_vectorEpetra(Y, M_monolithicMap, Unique);
