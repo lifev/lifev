@@ -267,6 +267,8 @@ aSIMPLEFSIOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
     // Third: apply the preconditioner of the fluid //
     //----------------------------------------------//
 
+    VectorEpetra_Type Y_velocity ( X_velocity.map() );
+
     // Missing step associated to shape derivatives, now just define vectors
     VectorEpetra_Type Zf_velocity ( X_velocity );
     VectorEpetra_Type Zf_pressure ( X_pressure );
@@ -281,22 +283,26 @@ aSIMPLEFSIOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
     // Momentum equation F Wf_v = Zf_v
     M_approximatedFluidMomentumOperator->ApplyInverse ( Zf_velocity.epetraVector(), Wf_velocity.epetraVector() );
 
-    // Schur Complement for the pressure
-    VectorEpetra_Type Wf_pressure ( X_pressure.map(), Unique );    
-    Zf_pressure -= *M_B*Wf_velocity;
-    M_approximatedSchurComplementOperator->ApplyInverse ( Zf_pressure.epetraVector(), Wf_pressure.epetraVector() );
-    Wf_pressure *= -1;
-
-
     // Schur Complement for the coupling
     VectorEpetra_Type Y_lambda ( X_lambda.map(), Unique );
     Zlambda -= *M_C1*Wf_velocity; // what about  Wf_velocity ? originally: Y_velocity
     M_approximatedSchurComplementCouplingOperator->ApplyInverse ( Zlambda.epetraVector(), Y_lambda.epetraVector());
     Y_lambda *= -1;
 
+    // Update the velocity, Yosida style
+    Wf_velocity = Zf_velocity -  *M_C1transpose*Y_lambda;
+    M_approximatedFluidMomentumOperator->ApplyInverse (Wf_velocity.epetraVector(), Y_velocity.epetraVector());
+
+
+    // Schur Complement for the pressure
+    VectorEpetra_Type Wf_pressure ( X_pressure.map(), Unique );    
+    Zf_pressure -= *M_B*Y_velocity;
+    M_approximatedSchurComplementOperator->ApplyInverse ( Zf_pressure.epetraVector(), Wf_pressure.epetraVector() );
+    Wf_pressure *= -1;
+
+    
 
     // Update the velocity, Yosida style
-    VectorEpetra_Type Y_velocity ( X_velocity.map() );
     Wf_velocity = Zf_velocity - (*M_Btranspose*Wf_pressure) -  *M_C1transpose*Y_lambda;
     M_approximatedFluidMomentumOperator->ApplyInverse (Wf_velocity.epetraVector(), Y_velocity.epetraVector());
 
