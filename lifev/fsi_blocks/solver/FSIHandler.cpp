@@ -693,6 +693,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 void
 FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol )
 {
+	residual.spy("residual");
 
 	//---------------------------------------------------//
 	// First: set the fluid blocks in the preconditioner //
@@ -731,6 +732,19 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 	//----------------------------------------------//
 	// Third: set the solver of the jacobian system //
 	//----------------------------------------------//
+
+	/*
+	M_fluid->getF()->spy("F");
+	M_fluid->getBtranspose()->spy("BT");
+	M_fluid->getB()->spy("B");
+	M_matrixStructure->spy("S");
+	M_ale->matrix()->spy("G");
+	M_coupling->lambdaToFluidMomentum()->spy("C1T");
+	M_coupling->lambdaToStructureMomentum()->spy("C2T");
+	M_coupling->fluidVelocityToLambda()->spy("C1");
+	M_coupling->structureDisplacementToLambda()->spy("C2");
+	M_coupling->structureDisplacementToFluidDisplacement()->spy("C3");
+	*/
 
 	M_invOper->setOperator(M_applyOperator);
 	M_invOper->setPreconditioner(M_prec);

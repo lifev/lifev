@@ -55,7 +55,7 @@ Real fZero (const Real& t, const Real& x, const Real& y, const Real& z, const ID
 
 Real inflow (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 {
-    Real Q_hat = 1;
+    Real Q_hat = 1.0;
     Real Tr    = 0.1;
     Real Q     = 0;
     

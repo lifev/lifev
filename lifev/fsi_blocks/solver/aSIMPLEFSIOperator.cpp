@@ -284,10 +284,11 @@ aSIMPLEFSIOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
     Wf_pressure *= -1;
 
     VectorEpetra_Type Y_pressure ( Wf_pressure );
-    VectorEpetra_Type Y_velocity ( Wf_velocity );
-    matrixEpetra_Type invDBtranspose (*M_Btranspose); // you already have it!
-    invDBtranspose.matrixPtr()->LeftScale(*M_invD);
-    Y_velocity -= invDBtranspose*Y_pressure;
+    VectorEpetra_Type Y_velocity ( X_velocity.map() );
+    VectorEpetra_Type BTy ( X_velocity.map() );
+    BTy = - (*M_Btranspose*Y_pressure);
+    M_approximatedFluidMomentumOperator->ApplyInverse ( BTy.epetraVector(), Y_velocity.epetraVector() );
+    Y_velocity += Wf_velocity;
 
     // Preconditioner for the coupling
     VectorEpetra_Type Y_lambda ( X_lambda.map(), Unique );
@@ -296,10 +297,8 @@ aSIMPLEFSIOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
     Y_lambda *= -1;
 
     VectorEpetra_Type Kf ( X_velocity.map(), Unique );
-    matrixEpetra_Type invDC1transpose (*M_C1transpose); // you already have it!
-    invDC1transpose.matrixPtr()->LeftScale(*M_invD);
-    Kf = invDC1transpose*Y_lambda;
-
+    BTy = *M_C1transpose*Y_lambda;
+    M_approximatedFluidMomentumOperator->ApplyInverse ( BTy.epetraVector(), Kf.epetraVector() );
     Y_velocity -= Kf;
 
     // output vector

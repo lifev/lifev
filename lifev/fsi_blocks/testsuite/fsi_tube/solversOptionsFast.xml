@@ -17,7 +17,7 @@
         </ParameterList>
         <ParameterList name="preconditioner">
             <ParameterList name="ML">
-                <Parameter name="recompute" type="bool" value="true"/>
+                <Parameter name="recompute" type="bool" value="false"/>
                 <ParameterList name="options">
                     <Parameter name="default values" type="string" value="NSSA"/>
                     <Parameter name="ML validate parameter list" type="bool" value="true"/>
@@ -89,6 +89,18 @@
                         <Parameter name="repartition: partitioner" type="string" value="ParMETIS"/>
                     </ParameterList>
                 </ParameterList>
+                <ParameterList name="Ifpack">
+                	<Parameter name="preconditioner" type="string" value="ILU"/>
+	               <Parameter name="overlap"        type="int"    value="1"/>
+	               <Parameter name="recompute"      type="bool"   value="true"/>
+	               <ParameterList name="options">
+	                   <Parameter name="fact: level-of-fill"      type="int"    value="1"/>
+	                   <Parameter name="fact: drop tolerance"     type="double" value="1e-9"/>
+	                   <Parameter name="schwarz: combine mode"    type="string" value="Zero"/>
+	                   <Parameter name="schwarz: reordering type" type="string" value="rcm"/>
+	                    <!-- rcm, metis -->
+	               </ParameterList>
+            	</ParameterList>
             </ParameterList>
         <Parameter name="order" type="int" value="1"/> <!-- Used only by HOY -->
     </ParameterList>
@@ -237,6 +249,18 @@
                         <Parameter name="repartition: partitioner" type="string" value="ParMETIS"/>
                     </ParameterList>
                 </ParameterList>
+                <ParameterList name="Ifpack">
+                	<Parameter name="preconditioner" type="string" value="ILU"/>
+	               <Parameter name="overlap"        type="int"    value="1"/>
+	               <Parameter name="recompute"      type="bool"   value="true"/>
+	               <ParameterList name="options">
+	                   <Parameter name="fact: level-of-fill"      type="int"    value="1"/>
+	                   <Parameter name="fact: drop tolerance"     type="double" value="1e-9"/>
+	                   <Parameter name="schwarz: combine mode"    type="string" value="Zero"/>
+	                   <Parameter name="schwarz: reordering type" type="string" value="rcm"/>
+	                    <!-- rcm, metis -->
+	               </ParameterList>
+            	</ParameterList>
             </ParameterList>
         <Parameter name="order" type="int" value="1"/> <!-- Used only by HOY -->
     </ParameterList>
@@ -249,7 +273,7 @@
             <Parameter name="max_iter" type="int" value="1500"/>
             <Parameter name="output" type="string" value="all_res"/>
             <Parameter name="scaling" type="string" value="none"/>
-            <Parameter name="solver" type="string" value="gmresr"/>
+            <Parameter name="solver" type="string" value="gmres"/>
             <Parameter name="tol" type="double" value="1e-06"/>
         </ParameterList>
     </ParameterList>
