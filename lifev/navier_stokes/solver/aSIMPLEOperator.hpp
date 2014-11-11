@@ -27,7 +27,7 @@ public:
     //@{
     typedef boost::numeric::ublas::vector< boost::shared_ptr<vector_Type> > Zdata;
     typedef boost::numeric::ublas::matrix< boost::shared_ptr<vector_Type> > ZZdata;
-    
+
     typedef LinearOperator                            super;
     typedef  Epetra_CrsMatrix                         matrix_Type;
     typedef  boost::shared_ptr<matrix_Type>           matrixPtr_Type;
@@ -43,14 +43,14 @@ public:
     typedef  VectorEpetra                             VectorEpetra_Type;
     typedef  boost::shared_ptr<VectorEpetra_Type>     VectorEpetraPtr_Type;
     //@}
-    
+
     //! @name Constructors
     //@{
     //! Empty constructor
     aSIMPLEOperator();
     //@}
     virtual ~aSIMPLEOperator();
-    
+
     //! @name SetUp
     //@{
     //! SetUp
@@ -58,9 +58,8 @@ public:
      */
     void setUp(const matrixEpetraPtr_Type & F,
                const matrixEpetraPtr_Type & B,
-               const matrixEpetraPtr_Type & Btranspose,
-               const commPtr_Type & comm);
-    
+               const matrixEpetraPtr_Type & Btranspose);
+
     //! @name Set Methods
     //@{
     //! \warning Transpose of this operator is not supported
@@ -70,18 +69,25 @@ public:
     //! set the range map
     void setRangeMap(const boost::shared_ptr<BlockEpetra_Map> & rangeMap){M_operatorRangeMap = rangeMap;}
     //@}
-    
-    
+
+
     //! @name
     //@{
     //! \warning No method \c Apply defined for this operator. It return an error code.
     int Apply(const vector_Type &/*X*/, vector_Type &/*Y*/) const {return -1;};
+
+    //! Returns the High Order Yosida approximation of the inverse pressure Schur Complement applied to \c (Xu, Xp).
+    int ApplyInverse( VectorEpetra_Type const& X_velocity,
+                      VectorEpetra_Type const& X_pressure,
+                      VectorEpetra_Type & Y_velocity,
+                      VectorEpetra_Type & Y_pressure) const;
+
     //! Returns the High Order Yosida approximation of the inverse pressure Schur Complement applied to \c X.
     int ApplyInverse(const vector_Type &X, vector_Type &Y) const;
     //! \warning Infinity norm not defined for this operator
     double NormInf() const {return -1.0;}
     //@}
-    
+
     // @name Attribute access functions
     //@{
     //! Return a character string describing the operator
@@ -97,61 +103,61 @@ public:
     //! Returns the Epetra_Map object associated with the range of this operator
     const map_Type & OperatorRangeMap() const {return *(M_operatorRangeMap->monolithicMap());}
     //@}
-    
+
     void updateApproximatedMomentumOperator();
-    
+
     void updateApproximatedSchurComplementOperator();
-    
+
     void setMomentumOptions(const parameterListPtr_Type & _oList);
-    
+
     void setSchurOptions(const parameterListPtr_Type & _oList);
 
     //! Show information about the class
     void showMe();
-    
+
     void setOptions(const Teuchos::ParameterList& solversOptions);
-    
+
 private:
-    
+
     //! Create the domain and the range maps
     void setMaps();
-    
+
     //! create the matrix B*diag(F)^-1*Btranspose
     void buildShurComplement();
-    
+
     boost::shared_ptr<BlockEpetra_Map> M_operatorDomainMap;
     //! Range Map
     boost::shared_ptr<BlockEpetra_Map> M_operatorRangeMap;
-    
+
     matrixEpetraPtr_Type M_F;
 
     matrixEpetraPtr_Type M_B;
 
     matrixEpetraPtr_Type M_Btranspose;
-    
+
     matrixEpetraPtr_Type M_schurComplement;
-    
+
     //! Communicator
     commPtr_Type M_comm;
-    
+
     bool M_useTranspose;
-    
+
     Operators::ApproximatedInvertibleRowMatrix * M_approximatedMomentumOperator;
-    
+
     Operators::ApproximatedInvertibleRowMatrix * M_approximatedSchurComplementOperator;
-    
+
     parameterListPtr_Type M_momentumOptions;
-    
+
     parameterListPtr_Type M_schurOptions;
-    
+
     mapEpetraPtr_Type M_monolithicMap;
-    
+
     boost::shared_ptr<Epetra_Vector> M_invD;
-    
+
     //! Label
     const std::string M_label;
 };
-    
+
 } /* end namespace Operators */
 } //end namespace
 #endif
