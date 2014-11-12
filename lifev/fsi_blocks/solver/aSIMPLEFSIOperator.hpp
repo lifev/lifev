@@ -132,18 +132,6 @@ public:
 
     //! Update the approximation of the the geometry
     void updateApproximatedFluidOperator();
-private:
-    //! Update the approximation of the fluid momentum
-    void updateApproximatedFluidMomentumOperator();
-
-    //! Update the shur complement associated to the fluid
-    void updateApproximatedSchurComplementOperator();
-    //! Update the shur complement associated to the coupling
-    void updateApproximatedSchurComplementCouplingOperator();
-
-    void updateFluidDirichlet( );
-
-public:
 
     //@}
 
@@ -177,18 +165,10 @@ private:
     //! Set the list of the shur complement of the fluid
     void setSchurOptions(const parameterListPtr_Type & _oList);
 
-    //! Set the list of the shur complement of the coupling
-    void setSchurCouplingOptions(const parameterListPtr_Type & _oList);
     //@}
 
     //! Create the domain and the range maps
     void setMaps();
-
-    //! create the matrix B*diag(F)^-1*Btranspose
-    void buildShurComplement();
-
-    //! create the matrix C1*diag(F)^-1*C1transpose
-    void buildShurComplementCoupling( );
 
     boost::shared_ptr<BlockEpetra_Map> M_operatorDomainMap;
     //! Range Map

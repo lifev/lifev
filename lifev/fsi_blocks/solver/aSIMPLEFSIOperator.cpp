@@ -106,9 +106,6 @@ aSIMPLEFSIOperator::setOptions(const Teuchos::ParameterList& solversOptions)
 	schurFluidOptions.reset(new Teuchos::ParameterList(solversOptions.sublist("ApproximatedSchurOperatorFluid")) );
 	setSchurOptions(schurFluidOptions);
 
-	boost::shared_ptr<Teuchos::ParameterList> schurCouplingOptions;
-	schurCouplingOptions.reset(new Teuchos::ParameterList(solversOptions.sublist("ApproximatedSchurCouplingOperator")) );
-	setSchurCouplingOptions(schurCouplingOptions);
 }
 
 void
@@ -143,13 +140,6 @@ aSIMPLEFSIOperator::setSchurOptions(const parameterListPtr_Type & _oList)
 }
 
 void
-aSIMPLEFSIOperator::setSchurCouplingOptions(const parameterListPtr_Type & _oList)
-{
-    ASSERT_PRE(_oList.get() != 0, "oList pointer not valid");
-    M_schurCouplingOptions = _oList;
-}
-
-void
 aSIMPLEFSIOperator::updateApproximatedStructureMomentumOperator( )
 {
 	M_approximatedStructureMomentumOperator->SetRowMatrix(M_S->matrixPtr());
@@ -169,41 +159,6 @@ aSIMPLEFSIOperator::updateApproximatedGeometryOperator( )
 void
 aSIMPLEFSIOperator::updateApproximatedFluidOperator( )
 {
-    updateFluidDirichlet();
-}
-
-void
-aSIMPLEFSIOperator::updateApproximatedFluidMomentumOperator( )
-{
-	M_approximatedFluidMomentumOperator->SetRowMatrix( M_F->matrixPtr() );
-	M_approximatedFluidMomentumOperator->SetParameterList(*M_fluidMomentumOptions);
-	M_approximatedFluidMomentumOperator->Compute();
-
-}
-
-void
-aSIMPLEFSIOperator::updateApproximatedSchurComplementOperator( )
-{
-	buildShurComplement();
-	M_approximatedSchurComplementOperator->SetRowMatrix( M_schurComplement->matrixPtr() );
-    M_approximatedSchurComplementOperator->SetParameterList(*M_schurOptions);
-    M_approximatedSchurComplementOperator->Compute();
-}
-
-void
-aSIMPLEFSIOperator::updateApproximatedSchurComplementCouplingOperator( )
-{
-	buildShurComplementCoupling();
-	M_approximatedSchurComplementCouplingOperator->SetRowMatrix( M_schurComplementCoupling->matrixPtr() );
-	M_approximatedSchurComplementCouplingOperator->SetParameterList(*M_schurCouplingOptions);
-	M_approximatedSchurComplementCouplingOperator->Compute();
-}
-
-
-void
-aSIMPLEFSIOperator::updateFluidDirichlet( )
-{
-
     // Creating copies for simple on Navier-Stokes with Dirichlet BC on the interface
     matrixEpetraPtr_Type FDirichlet;
     matrixEpetraPtr_Type BtDirichlet;
@@ -273,43 +228,6 @@ aSIMPLEFSIOperator::updateFluidDirichlet( )
     chrono.stop();
     M_displayer.leaderPrintMax(" done in " , chrono.diff() );
 
-}
-
-void
-aSIMPLEFSIOperator::buildShurComplement( )
-{
-    Epetra_Vector diag( M_F->matrixPtr()->OperatorRangeMap() );
-    M_invD.reset(new Epetra_Vector( M_F->matrixPtr()->OperatorRangeMap() ) );
-
-    // extracting diag(F)
-    M_F->matrixPtr()->ExtractDiagonalCopy(diag);
-
-    // computing diag(F)^{-1}
-    M_invD->Reciprocal(diag);
-
-    // computing diag(F)^{-1}*M_Btranspose
-    matrixEpetra_Type FBT (*M_Btranspose);
-    FBT.matrixPtr()->LeftScale(*M_invD);
-
-    M_schurComplement.reset ( new matrixEpetra_Type ( M_B->map() ) );
-
-    // computing M_B*(diag(F)^{-1}*M_Btranspose)
-    M_B->multiply (false, FBT, false, *M_schurComplement, false);
-    M_schurComplement->globalAssemble();
-}
-
-void
-aSIMPLEFSIOperator::buildShurComplementCoupling( )
-{
-	// computing diag(F)^{-1}*M_C1transpose
-    matrixEpetra_Type invDC1transpose (*M_C1transpose);
-    invDC1transpose.matrixPtr()->LeftScale(*M_invD);
-
-    M_schurComplementCoupling.reset ( new matrixEpetra_Type ( M_C1->map() ) );
-
-    // computing M_C1*(diag(F)^{-1}*M_C1transpose)
-    M_C1->multiply (false, invDC1transpose, false, *M_schurComplementCoupling, false);
-    M_schurComplementCoupling->globalAssemble();
 }
 
 int
