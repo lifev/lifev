@@ -2,6 +2,21 @@
     <ParameterList name="FluidMomentumOperator">
         <Parameter name="use preconditioner as approximated inverse" type="bool" value="true"/>
         <Parameter name="preconditioner type" type="string" value="ML"/>
+
+        <!-- Fluid Solver -->
+        <ParameterList name="FluidSolver">
+          <Parameter name="Linear Solver Type" type="string" value="AztecOO"/>
+          <ParameterList name="AztecOO">
+            <Parameter name="conv" type="string" value="r0"/>
+            <Parameter name="kspace" type="int" value="100"/>
+            <Parameter name="max_iter" type="int" value="1500"/>
+            <Parameter name="output" type="string" value="all_res"/>
+            <Parameter name="scaling" type="string" value="none"/>
+            <Parameter name="solver" type="string" value="gmres"/>
+            <Parameter name="tol" type="double" value="1e-06"/>
+          </ParameterList>
+        </ParameterList>
+
         <!-- ML, Ifpack, TwoLevel-->
         <ParameterList name="solver">
             <Parameter name="Linear Solver Type" type="string" value="AztecOO"/>
@@ -134,7 +149,7 @@
             </ParameterList>
         <Parameter name="order" type="int" value="1"/> <!-- Used only by HOY -->
     </ParameterList>
-    
+
     <ParameterList name="StructureMomentumOperator">
         <Parameter name="use preconditioner as approximated inverse" type="bool" value="false"/>
         <Parameter name="preconditioner type" type="string" value="Ifpack"/>
@@ -203,7 +218,7 @@
             </ParameterList>
         </ParameterList>
     </ParameterList>
-    
+
     <ParameterList name="ALEOperator">
         <Parameter name="use preconditioner as approximated inverse" type="bool" value="true"/>
         <Parameter name="preconditioner type" type="string" value="ML"/>
@@ -217,7 +232,7 @@
                <Parameter name="output" type="string" value="warnings"/>
                <Parameter name="scaling" type="string" value="none"/>
                <Parameter name="solver" type="string" value="gmres"/>
-               <Parameter name="tol" type="double" value="1e-03"/>
+               <Parameter name="tol" type="double" value="1e-06"/>
             </ParameterList>
         </ParameterList>
         <ParameterList name="preconditioner">
@@ -339,7 +354,7 @@
             </ParameterList>
         <Parameter name="order" type="int" value="1"/> <!-- Used only by HOY -->
     </ParameterList>
-    	
+
     <ParameterList name="MonolithicOperator">
         <Parameter name="Linear Solver Type" type="string" value="AztecOO"/>
         <ParameterList name="AztecOO">
@@ -352,5 +367,5 @@
             <Parameter name="tol" type="double" value="1e-06"/>
         </ParameterList>
     </ParameterList>
-    
+
 </ParameterList>

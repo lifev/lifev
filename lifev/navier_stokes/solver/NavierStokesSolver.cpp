@@ -318,7 +318,7 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
     M_displayer.leaderPrint( "\tPreconditioner operator - set up the block operator...");
     chrono.reset();
     chrono.start();
-    M_prec->setUp(M_F, M_B, M_Btranspose, M_comm);
+    M_prec->setUp(M_F, M_B, M_Btranspose);
     M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
     M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
     M_prec->updateApproximatedMomentumOperator();

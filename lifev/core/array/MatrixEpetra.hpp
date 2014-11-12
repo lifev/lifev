@@ -576,12 +576,16 @@ public:
      */
     const MapEpetra& domainMap() const;
 
+    const boost::shared_ptr< const MapEpetra >& domainMapPtr() const;
+
+
     //! Return the range MapEpetra of the MatrixEpetra
     /*!
       This function should be called only after MatrixEpetra<DataType>::GlobalAssemble(...) has been called.
       If this is an open matrix that M_domainMap is an invalid pointer
      */
     const MapEpetra& rangeMap() const;
+    const boost::shared_ptr< const MapEpetra >& rangeMapPtr() const;
 
     //@}
 
@@ -716,7 +720,7 @@ template <typename DataType>
 MatrixEpetra<DataType>&
 MatrixEpetra<DataType>::operator -= ( const MatrixEpetra& matrix )
 {
-    EpetraExt::MatrixMatrix::Add ( *matrix.matrixPtr(), false, 1., *this->matrixPtr(), -1. );
+    EpetraExt::MatrixMatrix::Add ( *matrix.matrixPtr(), false, -1., *this->matrixPtr(), 1. );
 
     return *this;
 }
@@ -1655,10 +1659,22 @@ const MapEpetra& MatrixEpetra<DataType>::domainMap() const
 }
 
 template <typename DataType>
+const boost::shared_ptr< const MapEpetra >& MatrixEpetra<DataType>::domainMapPtr() const
+{
+    return M_domainMap;
+}
+
+template <typename DataType>
 const MapEpetra& MatrixEpetra<DataType>::rangeMap() const
 {
     ASSERT ( M_rangeMap.get() != 0, "MatrixEpetra::getRangeMap: Error: M_rangeMap pointer is null" );
     return *M_rangeMap;
+}
+
+template <typename DataType>
+const boost::shared_ptr< const MapEpetra >& MatrixEpetra<DataType>::rangeMapPtr() const
+{
+    return M_rangeMap;
 }
 
 template <typename DType>
