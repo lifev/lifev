@@ -26,10 +26,10 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 /*!
  @brief Settings - File handling the solution of the FSI problem
- 
+
  @author Davide Forti <davide.forti@epfl.ch>
  @date 28-10-2014
- 
+
 @maintainer Simone Deparis <simone.deparis@epfl.ch>
 */
 
@@ -87,7 +87,7 @@ FSIHandler::readMeshes( )
     M_meshDataFluid.reset( new MeshData ( ) );
     M_meshDataFluid->setup (M_datafile, "fluid/space_discretization");
     readMesh (*M_fluidMesh, *M_meshDataFluid);
-    
+
     M_structureMesh.reset ( new mesh_Type ( M_comm ) );
     M_meshDataStructure.reset( new MeshData ( ) );
     M_meshDataStructure->setup (M_datafile, "solid/space_discretization");
@@ -100,12 +100,12 @@ FSIHandler::partitionMeshes( )
     M_fluidPartitioner.reset ( new MeshPartitioner< mesh_Type > (M_fluidMesh, M_comm) );
     M_fluidLocalMesh.reset ( new mesh_Type ( M_comm ) );
     M_fluidLocalMesh = M_fluidPartitioner->meshPartition();
-    
+
     M_structurePartitioner.reset ( new MeshPartitioner< mesh_Type > (M_structureMesh, M_comm) );
     M_structureLocalMesh.reset ( new mesh_Type ( M_comm ) );
     M_structureLocalMesh = M_structurePartitioner->meshPartition();
 }
-    
+
 void FSIHandler::setup ( )
 {
 	// Fluid
@@ -711,21 +711,7 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 	M_displayer.leaderPrint ( "\n Set preconditioner for the fluid momentum and the shur complements\n" ) ;
 	M_displayer.leaderPrint ( "\t Set and approximate fluid momentum in the preconditioner.. " ) ;
 	smallThingsChrono.start();
-	M_prec->updateApproximatedFluidMomentumOperator();
-	smallThingsChrono.stop();
-	M_displayer.leaderPrintMax ( "done in ", smallThingsChrono.diff() ) ;
-
-	smallThingsChrono.reset();
-	M_displayer.leaderPrint ( "\t Set and approximate fluid shur complement in the preconditioner.. " ) ;
-	smallThingsChrono.start();
-	M_prec->updateApproximatedSchurComplementOperator();
-	smallThingsChrono.stop();
-	M_displayer.leaderPrintMax ( "done in ", smallThingsChrono.diff() ) ;
-
-	smallThingsChrono.reset();
-	M_displayer.leaderPrint ( "\t Set and approximate coupling shur complement in the preconditioner.. " ) ;
-	smallThingsChrono.start();
-	M_prec->updateApproximatedSchurComplementCouplingOperator();
+	M_prec->updateApproximatedFluidOperator();
 	smallThingsChrono.stop();
 	M_displayer.leaderPrintMax ( "done in ", smallThingsChrono.diff() ) ;
 
