@@ -134,6 +134,9 @@ int aSIMPLEOperator::ApplyInverse( VectorEpetra_Type const& X_velocity,
     Y_velocity -= DBT*W;
 
     Y_pressure = W;
+
+    return 0;
+
 }
 
 
