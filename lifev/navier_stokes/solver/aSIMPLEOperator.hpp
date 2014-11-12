@@ -117,6 +117,13 @@ public:
 
     void setOptions(const Teuchos::ParameterList& solversOptions);
 
+    matrixEpetraPtr_Type const& F() const { return M_F; }
+
+    matrixEpetraPtr_Type const& B() const { return M_B; }
+
+    matrixEpetraPtr_Type const& Btranspose() const { return M_Btranspose; }
+
+
 private:
 
     //! Create the domain and the range maps
