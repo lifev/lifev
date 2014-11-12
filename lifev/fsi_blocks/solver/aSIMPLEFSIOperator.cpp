@@ -8,6 +8,10 @@
 #include <lifev/core/linear_algebra/BelosOperator.hpp>
 #include <lifev/core/linear_algebra/ApproximatedInvertibleRowMatrix.hpp>
 
+#include <lifev/core/util/Displayer.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
+
+
 namespace LifeV
 {
 namespace Operators
@@ -126,6 +130,8 @@ aSIMPLEFSIOperator::setFluidMomentumOptions(const parameterListPtr_Type & _oList
 {
     ASSERT_PRE(_oList.get() != 0, "oList pointer not valid");
     M_fluidMomentumOptions = _oList;
+    M_FluidDirichlet.reset( new Operators::aSIMPLEOperator);
+    M_FluidDirichlet->setMomentumOptions( M_fluidMomentumOptions );
 }
 
 void
@@ -133,6 +139,7 @@ aSIMPLEFSIOperator::setSchurOptions(const parameterListPtr_Type & _oList)
 {
     ASSERT_PRE(_oList.get() != 0, "oList pointer not valid");
     M_schurOptions = _oList;
+    M_FluidDirichlet->setSchurOptions( M_schurOptions );
 }
 
 void
@@ -160,6 +167,12 @@ aSIMPLEFSIOperator::updateApproximatedGeometryOperator( )
 }
 
 void
+aSIMPLEFSIOperator::updateApproximatedFluidOperator( )
+{
+    updateFluidDirichlet();
+}
+
+void
 aSIMPLEFSIOperator::updateApproximatedFluidMomentumOperator( )
 {
 	M_approximatedFluidMomentumOperator->SetRowMatrix( M_F->matrixPtr() );
@@ -184,6 +197,82 @@ aSIMPLEFSIOperator::updateApproximatedSchurComplementCouplingOperator( )
 	M_approximatedSchurComplementCouplingOperator->SetRowMatrix( M_schurComplementCoupling->matrixPtr() );
 	M_approximatedSchurComplementCouplingOperator->SetParameterList(*M_schurCouplingOptions);
 	M_approximatedSchurComplementCouplingOperator->Compute();
+}
+
+
+void
+aSIMPLEFSIOperator::updateFluidDirichlet( )
+{
+
+    // Creating copies for simple on Navier-Stokes with Dirichlet BC on the interface
+    matrixEpetraPtr_Type FDirichlet;
+    matrixEpetraPtr_Type BtDirichlet;
+    FDirichlet.reset ( new matrixEpetra_Type(*M_F) );
+    BtDirichlet.reset ( new matrixEpetra_Type(*M_Btranspose) );
+
+    // Apply Dirichlet BC on the interface
+    matrixEpetra_Type C1tC1 (M_F->map(), 5);
+    M_C1transpose->multiply( false, *M_C1, false, C1tC1, true);
+
+    matrixEpetra_Type C1tC1F (M_F->map());
+    C1tC1.multiply( false, *M_F, false, C1tC1F, true);
+
+    *FDirichlet -= C1tC1F;
+    *FDirichlet += C1tC1;
+
+    matrixEpetra_Type C1tC1Bt (M_Btranspose->map());
+    C1tC1.multiply( false, *M_Btranspose, false, C1tC1Bt, false);
+    C1tC1Bt.globalAssemble( M_Btranspose->domainMapPtr(), M_C1transpose->rangeMapPtr());
+
+    *BtDirichlet -= C1tC1Bt;
+
+    M_FluidDirichlet->setUp( FDirichlet, M_B, BtDirichlet);
+
+    // Setting M_oper
+    Displayer M_displayer( M_F->map().commPtr() );
+
+    //(1) Set up the OseenOperator
+    M_displayer.leaderPrint( "\tNS operator - set up the block operator...");
+    LifeChrono chrono;
+    chrono.start();
+
+    Operators::NavierStokesOperator::operatorPtrContainer_Type operData(2,2);
+    operData(0,0) = M_FluidDirichlet->F()->matrixPtr();
+    operData(0,1) = M_FluidDirichlet->Btranspose()->matrixPtr();
+    operData(1,0) = M_FluidDirichlet->B()->matrixPtr();
+
+    M_oper.reset( new Operators::NavierStokesOperator );
+    M_oper->setUp(operData, M_displayer.comm());
+    chrono.stop();
+    M_displayer.leaderPrintMax(" done in " , chrono.diff() );
+
+    //(2) Set the data for the preconditioner
+    M_displayer.leaderPrint( "\tPreconditioner operator - set up the block operator...");
+    chrono.reset();
+    chrono.start();
+
+    //M_FluidDirichlet->setUp(M_F, M_B, M_Btranspose);
+    M_FluidDirichlet->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
+    M_FluidDirichlet->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
+    M_FluidDirichlet->updateApproximatedMomentumOperator();
+    M_FluidDirichlet->updateApproximatedSchurComplementOperator();
+    chrono.stop();
+    M_displayer.leaderPrintMax(" done in " , chrono.diff() );
+
+    //(3) Set the solver for the linear system
+    M_displayer.leaderPrint( "\tset up the Trilinos solver...");
+    chrono.start();
+
+    std::string solverType(M_fluidMomentumOptions->sublist("FluidSolver").get<std::string>("Linear Solver Type"));
+    M_invOper.reset(Operators::InvertibleOperatorFactory::instance().createObject(solverType));
+    M_invOper->setParameterList(M_fluidMomentumOptions->sublist("FluidSolver").sublist(solverType));
+
+    M_invOper->setOperator(M_oper);
+    M_invOper->setPreconditioner(M_FluidDirichlet);
+
+    chrono.stop();
+    M_displayer.leaderPrintMax(" done in " , chrono.diff() );
+
 }
 
 void
@@ -260,56 +349,167 @@ aSIMPLEFSIOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
 
     VectorEpetra_Type Zg ( X_geometry );
     Zg -= *M_C3*Y_displacement;
+
     VectorEpetra_Type Y_geometry ( X_geometry.map(), Unique);
     M_approximatedGeometryOperator->ApplyInverse(Zg.epetraVector(), Y_geometry.epetraVector() );
 
     //----------------------------------------------//
-    // Third: apply the preconditioner of the fluid //
+    // Third: Update shape derivatives and coupling with the solid (velocity)
     //----------------------------------------------//
-
-    VectorEpetra_Type Y_velocity ( X_velocity.map() );
-
-    // Missing step associated to shape derivatives, now just define vectors
-    VectorEpetra_Type Zf_velocity ( X_velocity );
-    VectorEpetra_Type Zf_pressure ( X_pressure );
 
     VectorEpetra_Type Zlambda ( X_lambda );
     Zlambda -= *M_C2*Y_displacement;
 
-    VectorEpetra_Type Wf_velocity ( X_velocity.map(), Unique );
+    // Todo: shape derivatives
+    VectorEpetra_Type Zf_velocity ( X_velocity );
+    VectorEpetra_Type Zf_pressure ( X_pressure );
 
-    // Preconditioner for the fluid
 
-    // Momentum equation F Wf_v = Zf_v
-    M_approximatedFluidMomentumOperator->ApplyInverse ( Zf_velocity.epetraVector(), Wf_velocity.epetraVector() );
+    //----------------------------------------------//
+    // Forth: Fluid by condensation
+    //----------------------------------------------//
+    VectorEpetra_Type Y_velocity ( X_velocity.map() );
+    VectorEpetra_Type Y_pressure ( X_pressure.map() );
 
-    // Schur Complement for the coupling
+    VectorEpetra_Type Wf_velocity ( Zf_velocity );
+
+    Wf_velocity -= *M_C1transpose * (*M_C1 *  Zf_velocity);
+    Wf_velocity += *M_C1transpose * ( Zlambda );
+
+    // Solver of fluid with dirichlet BC on interface
+    //----------------------------------------------//
+
+    if (true)
+    {
+        M_FluidDirichlet->ApplyInverse( Wf_velocity, Zf_pressure, Y_velocity, Y_pressure);
+    }
+    else
+    {
+
+        // Solving the system
+        BlockEpetra_Map upMap;
+        upMap.setUp ( X_velocity.map().map(Unique), X_pressure.map().map(Unique));
+
+        // Todo: optimize with pushing shared pointer into blockepetra.
+        BlockEpetra_MultiVector up(upMap, 1), rhs(upMap, 1);
+        rhs.block(0).Update(1.0, Wf_velocity.epetraVector(), 0.);
+        rhs.block(1).Update(1.0, Zf_pressure.epetraVector(), 0.);
+        // Solving the linear system
+        M_invOper->ApplyInverse(rhs,up);
+
+        Y_velocity.epetraVector().Update(1.0,up.block(0),0.0);
+        Y_pressure.epetraVector().Update(1.0,up.block(1),0.0);
+
+
+    }
+
+    /*
+    M_FluidDirichlet->F() -> spy("Fd");
+    M_FluidDirichlet->Btranspose() -> spy("Btd");
+    M_F -> spy("F");
+    M_Btranspose -> spy("Bt");
+    VectorEpetra_Type tmp(*M_C1transpose * ( Zlambda ));
+    tmp.spy("tmp");
+    exit(1);
+    */
+
+
+    // Update coupling
     VectorEpetra_Type Y_lambda ( X_lambda.map(), Unique );
-    Zlambda -= *M_C1*Wf_velocity; // what about  Wf_velocity ? originally: Y_velocity
-    M_approximatedSchurComplementCouplingOperator->ApplyInverse ( Zlambda.epetraVector(), Y_lambda.epetraVector());
-    Y_lambda *= -1;
 
-    // Update the velocity, Yosida style
-    Wf_velocity = Zf_velocity -  *M_C1transpose*Y_lambda;
-    M_approximatedFluidMomentumOperator->ApplyInverse (Wf_velocity.epetraVector(), Y_velocity.epetraVector());
+    VectorEpetra_Type Kf_velocity ( Zf_velocity );
+    Kf_velocity -= (*M_F * Y_velocity + *M_Btranspose * Y_pressure);
+    Y_lambda = *M_C1 * Kf_velocity;
+
+    /*
+    {
+        VectorEpetra_Type R_u(Zf_velocity);
+        VectorEpetra_Type R_p(Zf_pressure);
+        VectorEpetra_Type R_l(Zlambda);
+
+        R_u -= *M_F * Y_velocity + *M_Btranspose * Y_pressure
+            + *M_C1transpose * Y_lambda;
+
+        R_p -= *M_B * Y_velocity;
+        R_l -= *M_C1 * Y_velocity;
+
+        double normU, normP, normL;
+        normU = R_u.normInf();
+        normP = R_p.normInf();
+        normL = R_l.normInf();
+
+        std::cout << "1# Saddle point problem"
+                  << " inf norm of the residuals: "
+                  << " norm U = " << normU
+                  << " norm P = " << normP
+                  << " norm L = " << normL
+                  << std::endl;
+
+    }
 
 
-    // Schur Complement for the pressure
-    VectorEpetra_Type Wf_pressure ( X_pressure.map(), Unique );    
-    Zf_pressure -= *M_B*Y_velocity;
-    M_approximatedSchurComplementOperator->ApplyInverse ( Zf_pressure.epetraVector(), Wf_pressure.epetraVector() );
-    Wf_pressure *= -1;
+    {
+        VectorEpetra_Type R_u(Wf_velocity);
+        VectorEpetra_Type R_p(Zf_pressure);
+        VectorEpetra_Type R_l(Zlambda);
 
-    
+        R_u -= *M_FluidDirichlet->F() * Y_velocity + *M_FluidDirichlet->Btranspose() * Y_pressure;
+        R_p -= *M_FluidDirichlet->B() * Y_velocity;
+        R_l -= *M_C1 * Y_velocity;
 
-    // Update the velocity, Yosida style
-    Wf_velocity = Zf_velocity - (*M_Btranspose*Wf_pressure) -  *M_C1transpose*Y_lambda;
-    M_approximatedFluidMomentumOperator->ApplyInverse (Wf_velocity.epetraVector(), Y_velocity.epetraVector());
+        double normU, normP, normL;
+        normU = R_u.normInf();
+        normP = R_p.normInf();
+        //normL = R_l.normInf();
+
+        std::cout << "2# Dirichlet  problem"
+                  << " inf norm of the residuals: "
+                  << " norm U = " << normU
+                  << " norm P = " << normP
+            //                  << " norm L = " << normL
+                  << std::endl;
+
+    }
+
+    {
+        VectorEpetra_Type R_u(Zf_velocity);
+        VectorEpetra_Type R_p(Zf_pressure);
+        VectorEpetra_Type R_l(Zlambda);
+
+        R_u -= *M_F * Y_velocity
+            + *M_Btranspose * Y_pressure
+
+            - *M_C1transpose * Zlambda
+
+            -  *M_C1transpose * ( *M_C1 * ( *M_F * Y_velocity) )
+            -  *M_C1transpose * ( *M_C1 * (*M_Btranspose * Y_pressure))
+            + *M_C1transpose * ( *M_C1 * Zf_velocity)
+
+            + *M_C1transpose * ( *M_C1 * Y_velocity)
+
+            ;
+
+        // Note: Wf_velocity = Zf_velocity - *M_C1transpose * ( *M_C1 * Zf_velocity) + *M_C1transpose * Zlambda;
 
 
-    VectorEpetra_Type Y_pressure ( Wf_pressure );
+        R_p -= *M_B * Y_velocity;
 
-    // Preconditioner for the coupling
+        double normU, normP, normL;
+        normU = R_u.normInf();
+        normP = R_p.normInf();
+        //normL = R_l.normInf();
+
+        std::cout << "3# Condensated  problem"
+                  << " inf norm of the residuals: "
+                  << " norm U = " << normU
+                  << " norm P = " << normP
+            //                  << " norm L = " << normL
+                  << std::endl;
+
+    }
+
+    */
+
 
     // output vector
     VectorEpetra_Type Y_vectorEpetra(Y, M_monolithicMap, Unique);

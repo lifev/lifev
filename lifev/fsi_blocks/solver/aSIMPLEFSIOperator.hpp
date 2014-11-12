@@ -7,6 +7,8 @@
 
 #include <lifev/core/linear_algebra/BlockEpetra_Map.hpp>
 #include <lifev/core/linear_algebra/LinearOperator.hpp>
+#include <lifev/navier_stokes/solver/aSIMPLEOperator.hpp>
+#include <lifev/navier_stokes/solver/NavierStokesOperator.hpp>
 
 #include <lifev/core/array/MatrixEpetra.hpp>
 #include <lifev/core/linear_algebra/ApproximatedInvertibleRowMatrix.hpp>
@@ -128,14 +130,21 @@ public:
     //! Update the approximation of the the geometry
     void updateApproximatedGeometryOperator();
 
+    //! Update the approximation of the the geometry
+    void updateApproximatedFluidOperator();
+private:
     //! Update the approximation of the fluid momentum
     void updateApproximatedFluidMomentumOperator();
 
     //! Update the shur complement associated to the fluid
     void updateApproximatedSchurComplementOperator();
-
     //! Update the shur complement associated to the coupling
     void updateApproximatedSchurComplementCouplingOperator();
+
+    void updateFluidDirichlet( );
+
+public:
+
     //@}
 
     //! Show information about the class
@@ -192,15 +201,15 @@ private:
 
     // @name Approximation of the blocks
     //@{
-    Operators::ApproximatedInvertibleRowMatrix * M_approximatedStructureMomentumOperator;
+    boost::shared_ptr<Operators::ApproximatedInvertibleRowMatrix> M_approximatedStructureMomentumOperator;
 
-    Operators::ApproximatedInvertibleRowMatrix * M_approximatedGeometryOperator;
+    boost::shared_ptr<Operators::ApproximatedInvertibleRowMatrix> M_approximatedGeometryOperator;
 
-    Operators::ApproximatedInvertibleRowMatrix * M_approximatedFluidMomentumOperator;
+    boost::shared_ptr<Operators::ApproximatedInvertibleRowMatrix> M_approximatedFluidMomentumOperator;
 
-    Operators::ApproximatedInvertibleRowMatrix * M_approximatedSchurComplementOperator;
+    boost::shared_ptr<Operators::ApproximatedInvertibleRowMatrix> M_approximatedSchurComplementOperator;
 
-    Operators::ApproximatedInvertibleRowMatrix * M_approximatedSchurComplementCouplingOperator;
+    boost::shared_ptr<Operators::ApproximatedInvertibleRowMatrix> M_approximatedSchurComplementCouplingOperator;
     //@}
 
     // @name Parameter list of each block
@@ -235,6 +244,11 @@ private:
     matrixEpetraPtr_Type M_F;
     matrixEpetraPtr_Type M_Btranspose;
     matrixEpetraPtr_Type M_B;
+
+    boost::shared_ptr<Operators::aSIMPLEOperator> M_FluidDirichlet;
+    // Epetra Operator needed to solve the linear system
+    boost::shared_ptr<Operators::InvertibleOperator> M_invOper;
+    boost::shared_ptr<Operators::NavierStokesOperator> M_oper;
 
     //! Coupling blocks
     matrixEpetraPtr_Type M_C1transpose;
