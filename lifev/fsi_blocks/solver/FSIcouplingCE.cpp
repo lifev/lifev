@@ -29,7 +29,7 @@ FSIcouplingCE::setUp ( const Real& timeStep, const Real& interfaceDofs, const Re
 void
 FSIcouplingCE::buildBlocks ( std::map<ID, ID> const& localDofMap )
 {
-	Real value = -1.0;
+	Real value = 1.0;
 	std::map<ID, ID>::const_iterator ITrow;
 
 	M_lambdaToFluidMomentum.reset ( new MatrixEpetra<Real> ( M_fluidVelocityFESpace->map() ) );
@@ -49,7 +49,7 @@ FSIcouplingCE::buildBlocks ( std::map<ID, ID> const& localDofMap )
 
 	// ----------------------------------------------------------------------------------------------------------------------------
 
-	value = 1.0;
+	value = -1.0;
 	M_lambdaToStructureMomentum.reset ( new MatrixEpetra<Real> ( M_structureDisplacementFESpace->map() ) );
 	for (UInt dim = 0; dim < 3; ++dim)
 	{
