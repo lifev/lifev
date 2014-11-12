@@ -403,113 +403,12 @@ aSIMPLEFSIOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
 
     }
 
-    /*
-    M_FluidDirichlet->F() -> spy("Fd");
-    M_FluidDirichlet->Btranspose() -> spy("Btd");
-    M_F -> spy("F");
-    M_Btranspose -> spy("Bt");
-    VectorEpetra_Type tmp(*M_C1transpose * ( Zlambda ));
-    tmp.spy("tmp");
-    exit(1);
-    */
-
-
     // Update coupling
     VectorEpetra_Type Y_lambda ( X_lambda.map(), Unique );
 
     VectorEpetra_Type Kf_velocity ( Zf_velocity );
     Kf_velocity -= (*M_F * Y_velocity + *M_Btranspose * Y_pressure);
     Y_lambda = *M_C1 * Kf_velocity;
-
-    /*
-    {
-        VectorEpetra_Type R_u(Zf_velocity);
-        VectorEpetra_Type R_p(Zf_pressure);
-        VectorEpetra_Type R_l(Zlambda);
-
-        R_u -= *M_F * Y_velocity + *M_Btranspose * Y_pressure
-            + *M_C1transpose * Y_lambda;
-
-        R_p -= *M_B * Y_velocity;
-        R_l -= *M_C1 * Y_velocity;
-
-        double normU, normP, normL;
-        normU = R_u.normInf();
-        normP = R_p.normInf();
-        normL = R_l.normInf();
-
-        std::cout << "1# Saddle point problem"
-                  << " inf norm of the residuals: "
-                  << " norm U = " << normU
-                  << " norm P = " << normP
-                  << " norm L = " << normL
-                  << std::endl;
-
-    }
-
-
-    {
-        VectorEpetra_Type R_u(Wf_velocity);
-        VectorEpetra_Type R_p(Zf_pressure);
-        VectorEpetra_Type R_l(Zlambda);
-
-        R_u -= *M_FluidDirichlet->F() * Y_velocity + *M_FluidDirichlet->Btranspose() * Y_pressure;
-        R_p -= *M_FluidDirichlet->B() * Y_velocity;
-        R_l -= *M_C1 * Y_velocity;
-
-        double normU, normP, normL;
-        normU = R_u.normInf();
-        normP = R_p.normInf();
-        //normL = R_l.normInf();
-
-        std::cout << "2# Dirichlet  problem"
-                  << " inf norm of the residuals: "
-                  << " norm U = " << normU
-                  << " norm P = " << normP
-            //                  << " norm L = " << normL
-                  << std::endl;
-
-    }
-
-    {
-        VectorEpetra_Type R_u(Zf_velocity);
-        VectorEpetra_Type R_p(Zf_pressure);
-        VectorEpetra_Type R_l(Zlambda);
-
-        R_u -= *M_F * Y_velocity
-            + *M_Btranspose * Y_pressure
-
-            - *M_C1transpose * Zlambda
-
-            -  *M_C1transpose * ( *M_C1 * ( *M_F * Y_velocity) )
-            -  *M_C1transpose * ( *M_C1 * (*M_Btranspose * Y_pressure))
-            + *M_C1transpose * ( *M_C1 * Zf_velocity)
-
-            + *M_C1transpose * ( *M_C1 * Y_velocity)
-
-            ;
-
-        // Note: Wf_velocity = Zf_velocity - *M_C1transpose * ( *M_C1 * Zf_velocity) + *M_C1transpose * Zlambda;
-
-
-        R_p -= *M_B * Y_velocity;
-
-        double normU, normP, normL;
-        normU = R_u.normInf();
-        normP = R_p.normInf();
-        //normL = R_l.normInf();
-
-        std::cout << "3# Condensated  problem"
-                  << " inf norm of the residuals: "
-                  << " norm U = " << normU
-                  << " norm P = " << normP
-            //                  << " norm L = " << normL
-                  << std::endl;
-
-    }
-
-    */
-
 
     // output vector
     VectorEpetra_Type Y_vectorEpetra(Y, M_monolithicMap, Unique);
