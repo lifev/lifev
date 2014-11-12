@@ -542,15 +542,18 @@ FSIHandler::solveFSIproblem ( )
 		iterChrono.reset();
 		M_displayer.leaderPrint ( "-----------------------------------\n\n" ) ;
 
-		// Updating all the time-advance objects
-
-
 		// Export the solution obtained at the current timestep
 		M_fluidVelocity->subset(*M_solution, M_fluid->uFESpace()->map(), 0, 0);
 		M_fluidPressure->subset(*M_solution, M_fluid->pFESpace()->map(), M_fluid->uFESpace()->map().mapSize(), 0);
 		M_fluidDisplacement->subset(*M_solution, M_aleFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
          	   	  	  	  	  	  	  	  	  	  	  	  	  	  	  M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize(), 0);
 		M_structureDisplacement->subset(*M_solution, M_displacementFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize(), 0);
+
+		// Updating all the time-advance objects
+		M_fluidTimeAdvance->shift(*M_fluidVelocity);
+		M_structureTimeAdvance->shiftRight(*M_structureDisplacement);
+		M_aleTimeAdvance->shiftRight(*M_fluidDisplacement);
+
 
 		M_exporterFluid->postProcess(M_time);
 		M_exporterStructure->postProcess(M_time);
@@ -693,8 +696,6 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 void
 FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol )
 {
-	residual.spy("residual");
-
 	//---------------------------------------------------//
 	// First: set the fluid blocks in the preconditioner //
 	//---------------------------------------------------//
@@ -719,19 +720,6 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 	// Third: set the solver of the jacobian system //
 	//----------------------------------------------//
 
-	/*
-	M_fluid->getF()->spy("F");
-	M_fluid->getBtranspose()->spy("BT");
-	M_fluid->getB()->spy("B");
-	M_matrixStructure->spy("S");
-	M_ale->matrix()->spy("G");
-	M_coupling->lambdaToFluidMomentum()->spy("C1T");
-	M_coupling->lambdaToStructureMomentum()->spy("C2T");
-	M_coupling->fluidVelocityToLambda()->spy("C1");
-	M_coupling->structureDisplacementToLambda()->spy("C2");
-	M_coupling->structureDisplacementToFluidDisplacement()->spy("C3");
-	*/
-
 	M_invOper->setOperator(M_applyOperator);
 	M_invOper->setPreconditioner(M_prec);
 
@@ -742,8 +730,7 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 	M_invOper->ApplyInverse(residual.epetraVector() , increment.epetraVector());
 
 	M_displayer.leaderPrint (" FSI-  End of solve Jac ...                      ");
-	int kkk;
-	std::cin >> kkk;
+
 }
 
 void
