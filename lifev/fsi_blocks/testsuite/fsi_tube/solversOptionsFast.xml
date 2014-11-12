@@ -1,7 +1,7 @@
 <ParameterList>
     <ParameterList name="FluidMomentumOperator">
         <Parameter name="use preconditioner as approximated inverse" type="bool" value="true"/>
-        <Parameter name="preconditioner type" type="string" value="Ifpack"/>
+        <Parameter name="preconditioner type" type="string" value="ML"/>
 
         <!-- Fluid Solver -->
         <ParameterList name="FluidSolver">

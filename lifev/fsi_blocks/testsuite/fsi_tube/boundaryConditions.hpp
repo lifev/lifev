@@ -63,8 +63,9 @@ bcPtr_Type BCh_fluid ()
 
     bcPtr_Type bc (new BCHandler );
 
-    bc->addBC ("Inflow",  INLET,  Essential, Full,   inflow_function, 3);
-    bc->addBC ("Outflow", OUTLET, Natural,   Normal, zero_function);
+    bc->addBC ("Inflow",  	 INLET,      Essential,      Full,   inflow_function, 3);
+    bc->addBC ("INOUTEDGE",  INOUTEDGE,  EssentialEdges, Full,   zero_function,   3);
+    bc->addBC ("Outflow",    OUTLET,     Natural,        Normal, zero_function);
 
     return bc;
 }
@@ -76,8 +77,8 @@ bcPtr_Type BCh_structure ()
 
     bcPtr_Type bc (new BCHandler );
 
-    bc->addBC ("Inflow",  INLET,  Essential, Full, zero_function, 3);
-    bc->addBC ("Outflow", OUTLET, Essential, Full, zero_function, 3);
+    bc->addBC ("Inflow",     INLET,  	 Essential,      Full, zero_function, 3);
+    bc->addBC ("Outflow",    OUTLET, 	 Essential,      Full, zero_function, 3);
 
     return bc;
 }
