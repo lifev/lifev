@@ -212,6 +212,10 @@ private:
 
     void setSolversOptions(const Teuchos::ParameterList& solversOptions);
 
+    void updateRhsCouplingVelocities ( );
+
+    void structureToInterface (vector_Type& VectorOnGamma, const vector_Type& VectorOnStructure);
+
     //! communicator
     commPtr_Type M_comm;
     
@@ -290,6 +294,7 @@ private:
 
 	vectorPtr_Type M_rhsFluid;
 	vectorPtr_Type M_rhsStructure;
+	vectorPtr_Type M_rhsCouplingVelocities;
 	vectorPtr_Type M_solution;
 
 	vectorPtr_Type M_u_star;

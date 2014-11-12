@@ -476,6 +476,41 @@ FSIHandler::getRhsStructure ( )
 }
 
 void
+FSIHandler::updateRhsCouplingVelocities ( )
+{
+	vector_Type rhsStructureVelocity (M_structureTimeAdvance->rhsContributionFirstDerivative(), Unique, Add);
+	vector_Type lambda (*M_lagrangeMap, Unique);
+	structureToInterface ( lambda, rhsStructureVelocity);
+	M_rhsCouplingVelocities.reset( new VectorEpetra ( M_aleFESpace->map() ) );
+	M_rhsCouplingVelocities->zero();
+	*M_rhsCouplingVelocities += lambda;
+	*M_rhsCouplingVelocities *= -1;
+}
+
+void
+FSIHandler::structureToInterface (vector_Type& VectorOnGamma, const vector_Type& VectorOnStructure)
+{
+    if (VectorOnStructure.mapType() == Repeated)
+    {
+        vector_Type const  VectorOnStructureUnique (VectorOnStructure, Unique);
+        structureToInterface (VectorOnGamma, VectorOnStructureUnique);
+        return;
+    }
+    if (VectorOnGamma.mapType() == Repeated)
+    {
+        vector_Type  VectorOnGammaUn (VectorOnGamma.map(), Unique);
+        structureToInterface ( VectorOnGammaUn, VectorOnStructure);
+        VectorOnGamma = VectorOnGammaUn;
+        return;
+    }
+
+    MapEpetra subMap (*VectorOnStructure.map().map (Unique), 0, VectorOnStructure.map().map (Unique)->NumGlobalElements() );
+    vector_Type subVectorOnStructure (subMap, Unique);
+    subVectorOnStructure.subset (VectorOnStructure, 0);
+    VectorOnGamma = subVectorOnStructure;
+}
+
+void
 FSIHandler::solveFSIproblem ( )
 {
 	LifeChrono iterChrono;
@@ -491,9 +526,6 @@ FSIHandler::solveFSIproblem ( )
 
 	// Apply boundary conditions for the structure problem (the matrix will not change during the simulation, it is linear elasticity)
 	getMatrixStructure ( );
-
-	// Set blocks for the preconditioners: structure
-	M_displayer.leaderPrint ( "\n Set preconditioner for the structure and the geometry blocks\n" ) ;
 
 	M_displayer.leaderPrint ( "\t Set and approximate structure block in the preconditioner.. " ) ;
 	smallThingsChrono.start();
@@ -683,7 +715,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	// get the structure right hand side
 	rightHandSide->subset ( *M_rhsStructure, M_displacementFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() );
 	// get the right hand side of the coupling of the velocities
-	// rightHandSide.subset ( );
+	rightHandSide->subset ( *M_rhsCouplingVelocities, *M_lagrangeMap, 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize() );
 
 	//-----------------------------//
 	// Forth: compute the residual //
@@ -744,7 +776,11 @@ FSIHandler::moveMesh ( const VectorEpetra& displacement )
 void
 FSIHandler::updateSystem ( )
 {
-	// Fluid update - initialize vectors
+	M_structureTimeAdvance->updateRHSContribution ( M_dt );
+	M_aleTimeAdvance->updateRHSContribution ( M_dt );
+	M_aleTimeAdvance->updateRHSFirstDerivative ( M_dt );
+
+	// Fluid update - initialize vectors - TODO to be done only once at the beginning
 	M_u_star.reset ( new VectorEpetra ( M_fluid->uFESpace()->map ( ) ) );
 	M_w_star.reset ( new VectorEpetra ( M_aleFESpace->map ( ) ) );
 	M_beta_star.reset ( new VectorEpetra ( M_fluid->uFESpace()->map ( ) ) );
@@ -760,7 +796,7 @@ FSIHandler::updateSystem ( )
 	M_fluidTimeAdvance->rhsContribution (*M_rhs_velocity);
 
 	// Extrapolate the mesh velocity
-	M_aleTimeAdvance->extrapolation ( *M_w_star );
+	M_aleTimeAdvance->extrapolationFirstDerivative ( *M_w_star );
 
 	// compute beta* = u*-w*
 	*M_beta_star += *M_u_star;
@@ -768,6 +804,8 @@ FSIHandler::updateSystem ( )
 
 	// Get the right hand side of the structural part and apply the BC on it TODO now it also applies bc on the matrix, remove!!
 	getRhsStructure ( );
+
+	updateRhsCouplingVelocities ( );
 }
 
 void
