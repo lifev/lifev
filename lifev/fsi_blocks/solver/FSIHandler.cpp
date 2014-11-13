@@ -248,11 +248,12 @@ void FSIHandler::createAleFESpace()
 	M_displayer.leaderPrintMax ( " Number of DOFs for the ale = ", M_aleFESpace->dof().numTotalDof()*3 ) ;
 }
 
-void FSIHandler::setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& structureBC, const bcPtr_Type& aleBC)
+void FSIHandler::setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& fluidBC_residual, const bcPtr_Type& structureBC, const bcPtr_Type& aleBC)
 {
-	M_fluidBC 	  = fluidBC;
-	M_structureBC = structureBC;
-	M_aleBC       = aleBC;
+	M_fluidBC 	  		= fluidBC;
+	M_fluidBC_residual 	= fluidBC_residual;
+	M_structureBC 		= structureBC;
+	M_aleBC       		= aleBC;
 }
 
 void FSIHandler::updateBoundaryConditions ( )
@@ -680,34 +681,14 @@ FSIHandler::applyBCresidual(VectorEpetra& residual)
 	VectorEpetra velocity(M_fluid->uFESpace()->map(), Unique);
 	velocity.subset(residual, M_fluid->uFESpace()->map(), 0, 0);
 
-	VectorEpetra displacement(M_displacementFESpace->map(), Unique);
-	displacement.subset(residual, M_displacementFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize(), 0 );
-
-	VectorEpetra geometry(M_aleFESpace->map(), Unique);
-	geometry.subset(residual, M_aleFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
-			                                   	   	  M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize(), 0 );
-
 	//! Apply BC on each component
-	if ( !M_fluidBC->bcUpdateDone() )
-		M_fluidBC->bcUpdate ( *M_fluid->uFESpace()->mesh(), M_fluid->uFESpace()->feBd(), M_fluid->uFESpace()->dof() );
+	if ( !M_fluidBC_residual->bcUpdateDone() )
+		M_fluidBC_residual->bcUpdate ( *M_fluid->uFESpace()->mesh(), M_fluid->uFESpace()->feBd(), M_fluid->uFESpace()->dof() );
 
-	bcManageRhs ( velocity, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_fluidBC, M_fluid->uFESpace()->feBd(), 0.0, M_time );
-
-	if ( !M_structureBC->bcUpdateDone() )
-		M_structureBC->bcUpdate ( *M_displacementFESpace->mesh(), M_displacementFESpace->feBd(), M_displacementFESpace->dof() );
-
-	bcManageRhs ( displacement, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC, M_displacementFESpace->feBd(), 0.0, M_time );
-
-	if ( !M_aleBC->bcUpdateDone() )
-		M_aleBC->bcUpdate ( *M_aleFESpace->mesh(), M_aleFESpace->feBd(), M_aleFESpace->dof() );
-
-	bcManageRhs ( geometry, *M_aleFESpace->mesh(), M_aleFESpace->dof(), *M_aleBC, M_aleFESpace->feBd(), 0.0, M_time );
+	bcManageRhs ( velocity, *M_fluid->uFESpace()->mesh(), M_fluid->uFESpace()->dof(), *M_fluidBC_residual, M_fluid->uFESpace()->feBd(), 0.0, M_time );
 
 	//! Push local contributions into the global one
 	residual.subset(velocity, M_fluid->uFESpace()->map(), 0, 0);
-	residual.subset(displacement, M_displacementFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() );
-	residual.subset(geometry, M_aleFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
-     	   	  	  	  	  	  	  	  	  	  	  	  	 M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize() );
 }
 
 void
@@ -778,6 +759,8 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 	M_applyOperator->Apply(solution.epetraVector(), residual.epetraVector());
 	residual -= *rightHandSide;
+
+	applyBCresidual ( residual );
 
 	if (M_printResiduals)
 	{

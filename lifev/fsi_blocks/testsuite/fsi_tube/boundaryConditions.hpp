@@ -70,6 +70,20 @@ bcPtr_Type BCh_fluid ()
     return bc;
 }
 
+bcPtr_Type BCh_fluid_residual ()
+{
+    BCFunctionBase zero_function (fZero);
+    BCFunctionBase inflow_function (inflow);
+
+    bcPtr_Type bc (new BCHandler );
+
+    bc->addBC ("Inflow",  	 INLET,      Essential,      Full,   zero_function, 3);
+    bc->addBC ("INOUTEDGE",  INOUTEDGE,  EssentialEdges, Full,   zero_function, 3);
+    bc->addBC ("Outflow",    OUTLET,     Natural,        Normal, zero_function);
+
+    return bc;
+}
+
 bcPtr_Type BCh_structure ()
 {
     BCFunctionBase zero_function (fZero);
