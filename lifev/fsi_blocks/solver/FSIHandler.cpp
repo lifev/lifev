@@ -135,6 +135,7 @@ void FSIHandler::setup ( )
 	M_structure.reset (new StructuralOperator<mesh_Type> ( ) );
 	M_structure->setup ( M_dataStructure, M_displacementFESpace, M_displacementETFESpace, M_structureBC, M_comm);
 	double timeAdvanceCoefficient = M_structureTimeAdvance->coefficientSecondDerivative ( 0 ) / ( M_dt * M_dt );
+	M_structure->showMe();
 	M_structure->buildSystem (timeAdvanceCoefficient);
 
 	// Ale
@@ -479,12 +480,27 @@ void
 FSIHandler::updateRhsCouplingVelocities ( )
 {
 	vector_Type rhsStructureVelocity (M_structureTimeAdvance->rhsContributionFirstDerivative(), Unique, Add);
-	vector_Type lambda (*M_lagrangeMap, Unique);
+	vector_Type lambda (*M_structureInterfaceMap, Unique);
 	structureToInterface ( lambda, rhsStructureVelocity);
-	M_rhsCouplingVelocities.reset( new VectorEpetra ( M_aleFESpace->map() ) );
+	M_rhsCouplingVelocities.reset( new VectorEpetra ( *M_lagrangeMap ) );
 	M_rhsCouplingVelocities->zero();
-	*M_rhsCouplingVelocities += lambda;
-	*M_rhsCouplingVelocities *= -1;
+
+	std::map<ID, ID> const& localDofMap = M_dofStructureToFluid->localDofMap ( ) ;
+	std::map<ID, ID>::const_iterator ITrow;
+
+	UInt interface (M_structureInterfaceMap->mapSize()/3.0 );
+	UInt totalDofs (M_displacementFESpace->dof().numTotalDof() );
+
+	for (UInt dim = 0; dim < 3; ++dim)
+	{
+		for ( ITrow = localDofMap.begin(); ITrow != localDofMap.end() ; ++ITrow)
+		{
+			if (M_structureInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second ) ) >= 0 )
+			{
+					(*M_rhsCouplingVelocities) [  (int) (*M_numerationInterface) [ITrow->second ] + dim * interface ] = -lambda ( ITrow->second + dim * totalDofs );
+			}
+		}
+	}
 }
 
 void
@@ -688,6 +704,18 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	vectorPtr_Type mmRep ( new vector_Type (*meshDisplacement, Repeated ) );
 	moveMesh ( *mmRep );
 
+	if ( iter_newton ==  0 )
+	{
+		M_aleTimeAdvance->updateRHSFirstDerivative ( M_dt );
+	}
+
+	// Important: assume that the fluid velocity and the ale have the same map
+	vector_Type meshVelocity ( M_aleTimeAdvance->firstDerivative ( *meshDisplacement ) );
+
+	M_beta_star.reset ( new VectorEpetra ( M_fluid->uFESpace()->map ( ) ) );
+	M_beta_star->subset ( solution, 0);
+	*M_beta_star -= meshVelocity;
+
 	//-------------------------------------------------------------------//
 	// Second: re-assemble the fluid blocks since we have moved the mesh //
 	//-------------------------------------------------------------------//
@@ -776,31 +804,29 @@ FSIHandler::moveMesh ( const VectorEpetra& displacement )
 void
 FSIHandler::updateSystem ( )
 {
-	M_structureTimeAdvance->updateRHSContribution ( M_dt );
-	M_aleTimeAdvance->updateRHSContribution ( M_dt );
-	M_aleTimeAdvance->updateRHSFirstDerivative ( M_dt );
+	//M_structureTimeAdvance->updateRHSContribution ( M_dt );
 
 	// Fluid update - initialize vectors - TODO to be done only once at the beginning
-	M_u_star.reset ( new VectorEpetra ( M_fluid->uFESpace()->map ( ) ) );
-	M_w_star.reset ( new VectorEpetra ( M_aleFESpace->map ( ) ) );
-	M_beta_star.reset ( new VectorEpetra ( M_fluid->uFESpace()->map ( ) ) );
+	//M_u_star.reset ( new VectorEpetra ( M_fluid->uFESpace()->map ( ) ) );
+	//M_w_star.reset ( new VectorEpetra ( M_aleFESpace->map ( ) ) );
+	//M_beta_star.reset ( new VectorEpetra ( M_fluid->uFESpace()->map ( ) ) );
 	M_rhs_velocity.reset ( new VectorEpetra ( M_fluid->uFESpace()->map ( ) ) );
 
-	M_u_star->zero();
-	M_w_star->zero();
-	M_beta_star->zero();
+	//M_u_star->zero();
+	//M_w_star->zero();
+	//M_beta_star->zero();
 	M_rhs_velocity->zero();
 
 	// Compute extrapolation of the velocity for the fluid and rhs contribution due to the time derivative
-	M_fluidTimeAdvance->extrapolate (M_orderBDF, *M_u_star);
+	//M_fluidTimeAdvance->extrapolate (M_orderBDF, *M_u_star);
 	M_fluidTimeAdvance->rhsContribution (*M_rhs_velocity);
 
 	// Extrapolate the mesh velocity
-	M_aleTimeAdvance->extrapolationFirstDerivative ( *M_w_star );
+	//M_aleTimeAdvance->extrapolationFirstDerivative ( *M_w_star );
 
 	// compute beta* = u*-w*
-	*M_beta_star += *M_u_star;
-	*M_beta_star -= *M_w_star;
+	//*M_beta_star += *M_u_star;
+	//*M_beta_star -= *M_w_star;
 
 	// Get the right hand side of the structural part and apply the BC on it TODO now it also applies bc on the matrix, remove!!
 	getRhsStructure ( );
