@@ -21,7 +21,9 @@ NavierStokesSolver::~NavierStokesSolver()
 
 void NavierStokesSolver::setParameters( )
 {
-	Teuchos::RCP<Teuchos::ParameterList> solversOptions = Teuchos::getParametersFromXmlFile ("solversOptionsFast.xml");
+    std::string optionsPrec = M_dataFile("fluid/options_preconditioner","solverOptionsFast");
+    optionsPrec += ".xml";
+	Teuchos::RCP<Teuchos::ParameterList> solversOptions = Teuchos::getParametersFromXmlFile (optionsPrec);
 	M_prec->setOptions(*solversOptions);
 	setSolversOptions(*solversOptions);
 }
