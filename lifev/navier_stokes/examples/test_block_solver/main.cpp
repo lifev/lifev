@@ -160,8 +160,8 @@ main ( int argc, char** argv )
     	iterChrono.reset();
     	iterChrono.start();
 
-    	*u_star *= 0;
-    	*rhs_velocity *= 0;
+    	u_star->zero();
+    	rhs_velocity->zero();
     	timeVelocity.extrapolate (orderBDF, *u_star);
     	timeVelocity.rhsContribution (*rhs_velocity);
 
