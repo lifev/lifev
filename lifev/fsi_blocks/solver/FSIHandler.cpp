@@ -161,6 +161,13 @@ void FSIHandler::setup ( )
 
 	// Preconditioner
 	M_prec->setComm ( M_comm );
+
+	// Output Files
+	if(M_comm->MyPID()==0)
+	{
+		M_outputTimeStep << std::scientific;
+		M_outputTimeStep.open ("TimeStep.txt" );
+	}
 }
 
 void FSIHandler::setupExporters( )
@@ -587,8 +594,15 @@ FSIHandler::solveFSIproblem ( )
 		iterChrono.stop();
 		M_displayer.leaderPrint ( "\n" ) ;
 		M_displayer.leaderPrintMax ( "FSI - timestep solved in ", iterChrono.diff() ) ;
-		iterChrono.reset();
 		M_displayer.leaderPrint ( "-----------------------------------\n\n" ) ;
+
+		// Writing the norms into a file
+		if ( M_comm->MyPID()==0 )
+		{
+			M_outputTimeStep << "Time = " << M_time << " solved in " << iterChrono.diff() << " seconds" << std::endl;
+		}
+
+		iterChrono.reset();
 
 		// Export the solution obtained at the current timestep
 		M_fluidVelocity->subset(*M_solution, M_fluid->uFESpace()->map(), 0, 0);
@@ -601,7 +615,6 @@ FSIHandler::solveFSIproblem ( )
 		M_fluidTimeAdvance->shift(*M_fluidVelocity);
 		M_structureTimeAdvance->shiftRight(*M_structureDisplacement);
 		M_aleTimeAdvance->shiftRight(*M_fluidDisplacement);
-
 
 		M_exporterFluid->postProcess(M_time);
 		M_exporterStructure->postProcess(M_time);

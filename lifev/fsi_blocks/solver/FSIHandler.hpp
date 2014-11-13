@@ -315,6 +315,10 @@ private:
 
 	// Parameter list solver
 	parameterListPtr_Type M_pListLinSolver;
+
+	// output txt files
+	std::ofstream M_outputTimeStep;
+
 };
     
 } // end namespace LifeV
