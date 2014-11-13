@@ -20,7 +20,9 @@ NavierStokesSolver::~NavierStokesSolver()
 
 void NavierStokesSolver::setParameters( )
 {
-	Teuchos::RCP<Teuchos::ParameterList> solversOptions = Teuchos::getParametersFromXmlFile ("solversOptionsFast.xml");
+    std::string optionsPrec = M_dataFile("fluid/options_preconditioner","solverOptionsFast");
+    optionsPrec += ".xml";
+	Teuchos::RCP<Teuchos::ParameterList> solversOptions = Teuchos::getParametersFromXmlFile (optionsPrec);
 	M_prec->setOptions(*solversOptions);
 	setSolversOptions(*solversOptions);
 }
@@ -214,7 +216,7 @@ void NavierStokesSolver::buildSystem()
 		M_B->globalAssemble( M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
 
 		M_A.reset (new matrix_Type ( M_velocityFESpace->map(), *M_A_graph ) );
-		*M_A *= 0;
+		M_A->zero();
 		if ( M_stiffStrain )
 		{
 			integrate( elements(M_fespaceUETA->mesh()),
