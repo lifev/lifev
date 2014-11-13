@@ -45,7 +45,7 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
 	M_fespacePETA.reset( new ETFESpace_pressure(M_pressureFESpace->mesh(), &(M_pressureFESpace->refFE()), M_comm));
 
 	M_uExtrapolated.reset( new vector_Type ( M_velocityFESpace->map(), Repeated ) );
-	*M_uExtrapolated *= 0;
+	M_uExtrapolated->zero();
 
 	M_stiffStrain = M_dataFile("fluid/space_discretization/stiff_strain", true);
 
@@ -187,7 +187,7 @@ void NavierStokesSolver::buildSystem()
 
 		// Graph velocity mass -> block (0,0)
 		M_Mu.reset (new matrix_Type ( M_velocityFESpace->map(), *M_Mu_graph ) );
-		*M_Mu *= 0;
+		M_Mu->zero();
 		integrate ( elements (M_fespaceUETA->mesh() ),
 					M_velocityFESpace->qr(),
 					M_fespaceUETA,
@@ -197,7 +197,7 @@ void NavierStokesSolver::buildSystem()
 		M_Mu->globalAssemble();
 
 		M_Btranspose.reset (new matrix_Type ( M_velocityFESpace->map(), *M_Btranspose_graph ) );
-		*M_Btranspose *= 0;
+		M_Btranspose->zero();
 		integrate( elements(M_fespaceUETA->mesh()),
 				   M_velocityFESpace->qr(),
 				   M_fespaceUETA,
@@ -206,7 +206,7 @@ void NavierStokesSolver::buildSystem()
 		) >> M_Btranspose;
 
 		M_B.reset (new matrix_Type ( M_pressureFESpace->map(), *M_B_graph ) );
-		*M_B *= 0;
+		M_B->zero();
 		integrate( elements(M_fespaceUETA->mesh()),
 				   M_pressureFESpace->qr(),
 				   M_fespacePETA,
@@ -238,11 +238,11 @@ void NavierStokesSolver::buildSystem()
 		M_A->globalAssemble();
 
 		M_C.reset (new matrix_Type ( M_velocityFESpace->map(), *M_C_graph ) );
-		*M_C *= 0;
+		M_C->zero();
 		M_C->globalAssemble();
 
 		M_F.reset (new matrix_Type ( M_velocityFESpace->map(), *M_F_graph ) );
-		*M_F *= 0;
+		M_F->zero();
 		M_F->globalAssemble();
 
 
@@ -258,7 +258,7 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 	M_uExtrapolated.reset( new vector_Type ( *u_star, Repeated ) );
 
 	// Update convective term
-	*M_C *= 0;
+	M_C->zero();
 	{
 		using namespace ExpressionAssembly;
 		integrate( elements(M_fespaceUETA->mesh()),
@@ -272,7 +272,7 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 	M_C->globalAssemble();
 
 	// Get the matrix corresponding to the block (0,0)
-	*M_F *= 0;
+	M_F->zero();
 	*M_F += *M_Mu;
 	*M_F *= M_alpha/M_timeStep;
 	*M_F += *M_A;
