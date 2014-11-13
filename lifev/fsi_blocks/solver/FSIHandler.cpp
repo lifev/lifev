@@ -49,7 +49,8 @@ M_exporterFluid (),
 M_exporterStructure (),
 M_applyOperator(new Operators::FSIApplyOperator),
 M_prec(new Operators::aSIMPLEFSIOperator),
-M_invOper()
+M_invOper(),
+M_printResiduals ( false )
 {
 }
 
@@ -154,6 +155,8 @@ void FSIHandler::setup ( )
 	if (M_comm->MyPID() == 0)
 		M_out_res.open ("residualsNewton");
 
+	M_printResiduals = M_datafile ( "newton/output_Residuals", false);
+
 	// Solver
 	std::string solverType(M_pListLinSolver->get<std::string>("Linear Solver Type"));
 	M_invOper.reset(Operators::InvertibleOperatorFactory::instance().createObject(solverType));
@@ -167,6 +170,9 @@ void FSIHandler::setup ( )
 	{
 		M_outputTimeStep << std::scientific;
 		M_outputTimeStep.open ("TimeStep.txt" );
+
+		if (M_printResiduals)
+			M_outputResiduals.open ("Residuals.txt" );
 	}
 }
 
@@ -764,6 +770,48 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 	M_applyOperator->Apply(solution.epetraVector(), residual.epetraVector());
 	residual -= *rightHandSide;
+
+	if (M_printResiduals)
+	{
+		// Defining vectors for the single components of the residual
+		vectorPtr_Type r_fluid_vel ( new vector_Type (M_fluid->uFESpace()->map() ) );
+		vectorPtr_Type r_fluid_press ( new vector_Type (M_fluid->pFESpace()->map() ) );
+		vectorPtr_Type r_structure_displ ( new vector_Type (M_displacementFESpace->map() ) );
+		vectorPtr_Type r_coupling ( new vector_Type (*M_lagrangeMap ) );
+		vectorPtr_Type r_fluid_displ ( new vector_Type (M_aleFESpace->map() ) );
+
+		// Getting each single contribution
+		r_fluid_vel->subset(residual);
+		r_fluid_press->subset(residual, M_fluid->uFESpace()->dof().numTotalDof() * 3);
+		r_structure_displ->subset(residual, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() );
+		r_coupling->subset(residual, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize() );
+		r_fluid_displ->subset(residual, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize() );
+
+		// Computing the norms
+		Real norm_full_residual = residual.normInf();
+		Real norm_u_residual = r_fluid_vel->normInf();
+		Real norm_p_residual = r_fluid_press->normInf();
+		Real norm_ds_residual = r_structure_displ->normInf();
+		Real norm_lambda_residual = r_coupling->normInf();
+		Real norm_df_residual = r_fluid_displ->normInf();
+
+		// Writing the norms into a file
+		if ( M_comm->MyPID()==0 && iter_newton == 0)
+		{
+			M_outputResiduals << "------------------------------------------------------------------------------------" << std::endl;
+			M_outputResiduals << "# time = " << M_time << std::endl;
+			M_outputResiduals << "Initial norms: " << std::endl;
+			M_outputResiduals << "||r|| =" << norm_full_residual << ", ||r_u|| =" << norm_u_residual << ", ||r_p|| =" << norm_p_residual;
+			M_outputResiduals << ", ||r_ds|| =" << norm_ds_residual << ", ||r_lambda|| =" << norm_lambda_residual << ", ||r_df|| =" << norm_df_residual <<  std::endl;
+			M_outputResiduals << "iter    ||r||    ||r_u||        ||r_p||    ||r_ds||      ||r_lambda||    ||r_df||" << std::endl;
+		}
+		else if ( M_comm->MyPID()==0 && iter_newton > 0 )
+		{
+			M_outputResiduals << iter_newton << "  " << norm_full_residual << "  " << norm_u_residual << "  " << norm_p_residual << "  " <<
+					norm_ds_residual << "  " << norm_lambda_residual << "  " << norm_df_residual << std::endl;
+		}
+	}
+
 }
 
 void

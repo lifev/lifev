@@ -317,7 +317,9 @@ private:
 	parameterListPtr_Type M_pListLinSolver;
 
 	// output txt files
+	bool M_printResiduals;
 	std::ofstream M_outputTimeStep;
+	std::ofstream M_outputResiduals;
 
 };
     

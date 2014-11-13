@@ -42,8 +42,8 @@
 		constitutiveLaw     = isotropic
 		young     		= 4.e+6
 		poisson   		= 0.3
-		bulk				= 1.3333e+8
-		alpha 			= 2.684564e+6
+		bulk				= 1e7
+		alpha 			= 2.5e6
 		gamma			= 1.0
 		solidTypeIsotropic 	= linearVenantKirchhoff
 
@@ -87,5 +87,6 @@
 	etamax          	=  1.e-6
 	maxiter         	=  5
 	NonLinearLineSearch =  0
+	output_Residuals    =  true
 
 [../]
