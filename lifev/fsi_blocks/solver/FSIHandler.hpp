@@ -317,10 +317,12 @@ private:
 	parameterListPtr_Type M_pListLinSolver;
 
 	// output txt files
+	UInt M_NewtonIter;
 	bool M_printResiduals;
+	bool M_printSteps;
 	std::ofstream M_outputTimeStep;
 	std::ofstream M_outputResiduals;
-
+	std::ofstream M_outputSteps;
 };
     
 } // end namespace LifeV

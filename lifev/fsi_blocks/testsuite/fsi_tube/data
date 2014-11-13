@@ -88,5 +88,6 @@
 	maxiter         	=  5
 	NonLinearLineSearch =  0
 	output_Residuals    =  true
+	output_Steps        =  true
 
 [../]

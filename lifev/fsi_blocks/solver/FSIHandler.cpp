@@ -50,7 +50,9 @@ M_exporterStructure (),
 M_applyOperator(new Operators::FSIApplyOperator),
 M_prec(new Operators::aSIMPLEFSIOperator),
 M_invOper(),
-M_printResiduals ( false )
+M_printResiduals ( false ),
+M_printSteps ( false ),
+M_NewtonIter ( 0 )
 {
 }
 
@@ -156,6 +158,7 @@ void FSIHandler::setup ( )
 		M_out_res.open ("residualsNewton");
 
 	M_printResiduals = M_datafile ( "newton/output_Residuals", false);
+	M_printSteps = M_datafile ( "newton/output_Steps", false);
 
 	// Solver
 	std::string solverType(M_pListLinSolver->get<std::string>("Linear Solver Type"));
@@ -173,6 +176,9 @@ void FSIHandler::setup ( )
 
 		if (M_printResiduals)
 			M_outputResiduals.open ("Residuals.txt" );
+
+		if (M_printSteps)
+			M_outputSteps.open ("Steps.txt" );
 	}
 }
 
@@ -709,6 +715,8 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 {
 	residual = 0.;
 
+	M_NewtonIter = iter_newton;
+
 	//---------------------------------------------------------//
 	// First: extract the fluid displacement and move the mesh //
 	//---------------------------------------------------------//
@@ -851,6 +859,46 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 	M_invOper->ApplyInverse(residual.epetraVector() , increment.epetraVector());
 
 	M_displayer.leaderPrint (" FSI-  End of solve Jac ...                      ");
+
+	if (M_printSteps)
+	{
+		// Defining vectors for the single components of the residual
+		vectorPtr_Type s_fluid_vel ( new vector_Type (M_fluid->uFESpace()->map() ) );
+		vectorPtr_Type s_fluid_press ( new vector_Type (M_fluid->pFESpace()->map() ) );
+		vectorPtr_Type s_structure_displ ( new vector_Type (M_displacementFESpace->map() ) );
+		vectorPtr_Type s_coupling ( new vector_Type (*M_lagrangeMap ) );
+		vectorPtr_Type s_fluid_displ ( new vector_Type (M_aleFESpace->map() ) );
+
+		// Getting each single contribution
+		s_fluid_vel->subset(increment);
+		s_fluid_press->subset(increment, M_fluid->uFESpace()->dof().numTotalDof() * 3);
+		s_structure_displ->subset(increment, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() );
+		s_coupling->subset(increment, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize() );
+		s_fluid_displ->subset(increment, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize() );
+
+		// Computing the norms
+		Real norm_full_step = increment.normInf();
+		Real norm_u_step = s_fluid_vel->normInf();
+		Real norm_p_step = s_fluid_press->normInf();
+		Real norm_ds_step = s_structure_displ->normInf();
+		Real norm_lambda_step = s_coupling->normInf();
+		Real norm_df_step = s_fluid_displ->normInf();
+
+		// Writing the norms into a file
+		if ( M_comm->MyPID()==0 && M_NewtonIter == 0)
+		{
+			M_outputSteps << "------------------------------------------------------------------------------------" << std::endl;
+			M_outputSteps << "# time = " << M_time << std::endl;
+			M_outputSteps << "iter    ||s||        ||s_u||        ||s_p||        ||s_ds||     ||s_lambda||      ||s_df||" << std::endl;
+			M_outputSteps << M_NewtonIter+1 << std::setw (15) << norm_full_step << std::setw (15) << norm_u_step << std::setw (15) << norm_p_step << std::setw (15) <<
+					norm_ds_step << std::setw (15) << norm_lambda_step << std::setw (15) << norm_df_step << std::endl;
+		}
+		else if ( M_comm->MyPID()==0 && M_NewtonIter > 0 )
+		{
+			M_outputSteps << M_NewtonIter+1 << std::setw (15) << norm_full_step << std::setw (15) << norm_u_step << std::setw (15) << norm_p_step << std::setw (15) <<
+					norm_ds_step << std::setw (15) << norm_lambda_step << std::setw (15) << norm_df_step << std::endl;
+		}
+	}
 
 }
 
