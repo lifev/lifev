@@ -153,6 +153,9 @@ void FSIHandler::setup ( )
 	M_absoluteTolerance = M_datafile ( "newton/reltol", 1.e-4);
 	M_etaMax = M_datafile ( "newton/etamax", 1e-4);
 	M_maxiterNonlinear = M_datafile ( "newton/maxiter", 10);
+
+	M_displayer.leaderPrintMax ( " Maximum Newton iterations = ", M_maxiterNonlinear ) ;
+
 	M_nonLinearLineSearch = M_datafile ( "newton/NonLinearLineSearch", 0);
 	if (M_comm->MyPID() == 0)
 		M_out_res.open ("residualsNewton");
@@ -322,8 +325,11 @@ void FSIHandler::initializeTimeAdvance ( )
 void FSIHandler::buildInterfaceMaps ()
 {
 	markerID_Type interface = M_datafile("interface/flag", 1);
-	Real tolerance = M_datafile("interface/tolerance", 1);
+	Real tolerance = M_datafile("interface/tolerance", 1.0);
 	Int flag = M_datafile("interface/fluid_vertex_flag", 123);
+
+	M_displayer.leaderPrintMax ( " Flag of the interface = ", interface ) ;
+	M_displayer.leaderPrintMax ( " Tolerance for dofs on the interface = ", tolerance ) ;
 
 	M_dofStructureToFluid.reset ( new DOFInterface3Dto3D );
 	M_dofStructureToFluid->setup ( M_fluid->uFESpace()->refFE(), M_fluid->uFESpace()->dof(), M_displacementFESpaceSerial->refFE(), M_displacementFESpaceSerial->dof() );
@@ -332,6 +338,8 @@ void FSIHandler::buildInterfaceMaps ()
 	createInterfaceMaps ( M_dofStructureToFluid->localDofMap ( ) );
 
 	constructInterfaceMap ( M_dofStructureToFluid->localDofMap ( ), M_displacementFESpace->map().map(Unique)->NumGlobalElements()/nDimensions );
+
+	M_displayer.leaderPrintMax ( " Number of DOFs on the interface = ", M_lagrangeMap->mapSize() ) ;
 }
 
 void FSIHandler::createInterfaceMaps(std::map<ID, ID> const& locDofMap)
