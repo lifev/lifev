@@ -100,10 +100,11 @@ main ( int argc, char** argv )
     // --------------------------------//
 
     boost::shared_ptr<BCHandler> fluidBC ( new BCHandler (*BCh_fluid () ) );
+    boost::shared_ptr<BCHandler> fluidBC_residual ( new BCHandler (*BCh_fluid_residual () ) );
     boost::shared_ptr<BCHandler> structureBC ( new BCHandler (*BCh_structure () ) );
     boost::shared_ptr<BCHandler> aleBC ( new BCHandler (*BCh_ale () ) );
 
-    fsi.setBoundaryConditions(fluidBC, structureBC, aleBC);
+    fsi.setBoundaryConditions(fluidBC, fluidBC_residual, structureBC, aleBC);
 
     // ---------------------------------------------------------------------------------------------//
     // Reading the physical informations for the fluid and the structure and initialize the solvers //

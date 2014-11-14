@@ -153,6 +153,9 @@ void FSIHandler::setup ( )
 	M_absoluteTolerance = M_datafile ( "newton/reltol", 1.e-4);
 	M_etaMax = M_datafile ( "newton/etamax", 1e-4);
 	M_maxiterNonlinear = M_datafile ( "newton/maxiter", 10);
+
+	M_displayer.leaderPrintMax ( " Maximum Newton iterations = ", M_maxiterNonlinear ) ;
+
 	M_nonLinearLineSearch = M_datafile ( "newton/NonLinearLineSearch", 0);
 	if (M_comm->MyPID() == 0)
 		M_out_res.open ("residualsNewton");
@@ -248,11 +251,12 @@ void FSIHandler::createAleFESpace()
 	M_displayer.leaderPrintMax ( " Number of DOFs for the ale = ", M_aleFESpace->dof().numTotalDof()*3 ) ;
 }
 
-void FSIHandler::setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& structureBC, const bcPtr_Type& aleBC)
+void FSIHandler::setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& fluidBC_residual, const bcPtr_Type& structureBC, const bcPtr_Type& aleBC)
 {
-	M_fluidBC 	  = fluidBC;
-	M_structureBC = structureBC;
-	M_aleBC       = aleBC;
+	M_fluidBC 	  		= fluidBC;
+	M_fluidBC_residual 	= fluidBC_residual;
+	M_structureBC 		= structureBC;
+	M_aleBC       		= aleBC;
 }
 
 void FSIHandler::updateBoundaryConditions ( )
@@ -321,8 +325,11 @@ void FSIHandler::initializeTimeAdvance ( )
 void FSIHandler::buildInterfaceMaps ()
 {
 	markerID_Type interface = M_datafile("interface/flag", 1);
-	Real tolerance = M_datafile("interface/tolerance", 1);
+	Real tolerance = M_datafile("interface/tolerance", 1.0);
 	Int flag = M_datafile("interface/fluid_vertex_flag", 123);
+
+	M_displayer.leaderPrintMax ( " Flag of the interface = ", interface ) ;
+	M_displayer.leaderPrintMax ( " Tolerance for dofs on the interface = ", tolerance ) ;
 
 	M_dofStructureToFluid.reset ( new DOFInterface3Dto3D );
 	M_dofStructureToFluid->setup ( M_fluid->uFESpace()->refFE(), M_fluid->uFESpace()->dof(), M_displacementFESpaceSerial->refFE(), M_displacementFESpaceSerial->dof() );
@@ -331,6 +338,8 @@ void FSIHandler::buildInterfaceMaps ()
 	createInterfaceMaps ( M_dofStructureToFluid->localDofMap ( ) );
 
 	constructInterfaceMap ( M_dofStructureToFluid->localDofMap ( ), M_displacementFESpace->map().map(Unique)->NumGlobalElements()/nDimensions );
+
+	M_displayer.leaderPrintMax ( " Number of DOFs on the interface = ", M_lagrangeMap->mapSize() ) ;
 }
 
 void FSIHandler::createInterfaceMaps(std::map<ID, ID> const& locDofMap)
@@ -679,35 +688,18 @@ FSIHandler::applyBCresidual(VectorEpetra& residual)
 	//! Extract each component of the input vector
 	VectorEpetra velocity(M_fluid->uFESpace()->map(), Unique);
 	velocity.subset(residual, M_fluid->uFESpace()->map(), 0, 0);
-
-	VectorEpetra displacement(M_displacementFESpace->map(), Unique);
-	displacement.subset(residual, M_displacementFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize(), 0 );
-
-	VectorEpetra geometry(M_aleFESpace->map(), Unique);
-	geometry.subset(residual, M_aleFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
-			                                   	   	  M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize(), 0 );
+	velocity *= -1;
 
 	//! Apply BC on each component
-	if ( !M_fluidBC->bcUpdateDone() )
-		M_fluidBC->bcUpdate ( *M_fluid->uFESpace()->mesh(), M_fluid->uFESpace()->feBd(), M_fluid->uFESpace()->dof() );
+	if ( !M_fluidBC_residual->bcUpdateDone() )
+		M_fluidBC_residual->bcUpdate ( *M_fluid->uFESpace()->mesh(), M_fluid->uFESpace()->feBd(), M_fluid->uFESpace()->dof() );
 
-	bcManageRhs ( velocity, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_fluidBC, M_fluid->uFESpace()->feBd(), 0.0, M_time );
+	bcManageRhs ( velocity, *M_fluid->uFESpace()->mesh(), M_fluid->uFESpace()->dof(), *M_fluidBC_residual, M_fluid->uFESpace()->feBd(), 0.0, M_time );
 
-	if ( !M_structureBC->bcUpdateDone() )
-		M_structureBC->bcUpdate ( *M_displacementFESpace->mesh(), M_displacementFESpace->feBd(), M_displacementFESpace->dof() );
-
-	bcManageRhs ( displacement, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC, M_displacementFESpace->feBd(), 0.0, M_time );
-
-	if ( !M_aleBC->bcUpdateDone() )
-		M_aleBC->bcUpdate ( *M_aleFESpace->mesh(), M_aleFESpace->feBd(), M_aleFESpace->dof() );
-
-	bcManageRhs ( geometry, *M_aleFESpace->mesh(), M_aleFESpace->dof(), *M_aleBC, M_aleFESpace->feBd(), 0.0, M_time );
+	velocity *= -1;
 
 	//! Push local contributions into the global one
 	residual.subset(velocity, M_fluid->uFESpace()->map(), 0, 0);
-	residual.subset(displacement, M_displacementFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() );
-	residual.subset(geometry, M_aleFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
-     	   	  	  	  	  	  	  	  	  	  	  	  	 M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize() );
 }
 
 void
@@ -778,6 +770,8 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 	M_applyOperator->Apply(solution.epetraVector(), residual.epetraVector());
 	residual -= *rightHandSide;
+
+	applyBCresidual ( residual );
 
 	if (M_printResiduals)
 	{
