@@ -688,12 +688,15 @@ FSIHandler::applyBCresidual(VectorEpetra& residual)
 	//! Extract each component of the input vector
 	VectorEpetra velocity(M_fluid->uFESpace()->map(), Unique);
 	velocity.subset(residual, M_fluid->uFESpace()->map(), 0, 0);
+	velocity *= -1;
 
 	//! Apply BC on each component
 	if ( !M_fluidBC_residual->bcUpdateDone() )
 		M_fluidBC_residual->bcUpdate ( *M_fluid->uFESpace()->mesh(), M_fluid->uFESpace()->feBd(), M_fluid->uFESpace()->dof() );
 
 	bcManageRhs ( velocity, *M_fluid->uFESpace()->mesh(), M_fluid->uFESpace()->dof(), *M_fluidBC_residual, M_fluid->uFESpace()->feBd(), 0.0, M_time );
+
+	velocity *= -1;
 
 	//! Push local contributions into the global one
 	residual.subset(velocity, M_fluid->uFESpace()->map(), 0, 0);
