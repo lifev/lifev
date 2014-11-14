@@ -50,6 +50,7 @@
 #define WALL   1
 #define INOUTEDGE 20
 #define OUTERWALL 10
+#define FLUIDINTERFACE 1
 
 namespace LifeV
 {
@@ -106,6 +107,7 @@ bcPtr_Type BCh_ale ()
     bc_ale->addBC ("Inflow",  INLET,     Essential, Full, zero_function, 3);
     bc_ale->addBC ("Outflow", OUTLET,    Essential, Full, zero_function, 3);
     bc_ale->addBC ("Interface",    1,    Essential, Full, zero_function, 3);
+    bc_ale->addBC ("Gamma",  FLUIDINTERFACE, Essential, Full, zero_function,   3);
 
     return bc_ale;
 }
