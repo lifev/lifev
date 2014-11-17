@@ -515,7 +515,7 @@ reinitializationDirect()
 
 
     // Storage for the distance
-    std::vector < std::vector < Real > > temp_distances (nb_proc, vector< Real> (nPt, 0.0) );
+    std::vector < std::vector < Real > > temp_distances (nb_proc, std::vector< Real> (nPt, 0.0) );
 
     // Communications
 
@@ -556,7 +556,7 @@ reinitializationDirect()
             //std::cout << " Compute " << std::endl;
             for (int iter_pt (0); iter_pt < nPt; ++iter_pt)
             {
-                vector<Real> dof_coord;
+                std::vector<Real> dof_coord;
                 dof_coord.push_back (my_points[iter_pt][0]);
                 dof_coord.push_back (my_points[iter_pt][1]);
                 dof_coord.push_back (my_points[iter_pt][2]);
