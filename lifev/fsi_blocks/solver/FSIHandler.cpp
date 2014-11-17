@@ -608,6 +608,8 @@ FSIHandler::solveFSIproblem ( )
 		// Apply current BC to the solution vector
 		applyBCsolution ( M_solution );
 
+		M_maxiterNonlinear = 10;
+
 		// Using the solution at the previous timestep as initial guess -> TODO: extrapolation
 		UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
 											M_nonLinearLineSearch, 0, 2, M_out_res, M_time);
