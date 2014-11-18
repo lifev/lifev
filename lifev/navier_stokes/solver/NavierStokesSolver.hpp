@@ -122,6 +122,12 @@ public:
 	// Solve the current timestep, provided the BC
 	void iterate( bcPtr_Type & bc, const Real& time );
 
+	// Update the Jacobian matrix
+	void updateJacobian( const vector_Type& u_k );
+
+	// Apply the BCs on the Jacobian matrix
+	void applyBoundaryConditionsJacobian ( bcPtr_Type & bc );
+
 	// Set coefficient associated to the time discretization scheme
 	void setAlpha(const Real& alpha)
 	{
@@ -163,6 +169,11 @@ public:
     matrixPtr_Type const& getF() const
     {
     	return M_F;
+    }
+
+    matrixPtr_Type const& getJacobian() const
+    {
+    	return M_Jacobian;
     }
 
     matrixPtr_Type const& getBtranspose() const
@@ -224,6 +235,7 @@ private:
 	graphPtr_Type M_C_graph;
 	graphPtr_Type M_A_graph;
 	graphPtr_Type M_F_graph;
+	graphPtr_Type M_Jacobian_graph;
 
 	// matrices
 	matrixPtr_Type M_Mu;
@@ -232,6 +244,7 @@ private:
 	matrixPtr_Type M_C;
 	matrixPtr_Type M_A;
 	matrixPtr_Type M_F;
+	matrixPtr_Type M_Jacobian;
 
 	// vectors
 	vectorPtr_Type M_uExtrapolated;
@@ -258,6 +271,9 @@ private:
 
     // Parameter list solver
     parameterListPtr_Type M_pListLinSolver;
+
+    // Check if the convective term is fully implicit
+    bool M_fullyImplicit;
 
 }; // class NavierStokesSolver
 

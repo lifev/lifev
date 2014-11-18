@@ -10,7 +10,8 @@ NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commP
 		M_graphIsBuilt(false),
         M_oper(new Operators::NavierStokesOperator),
         M_prec(new Operators::aSIMPLEOperator),
-        M_invOper()
+        M_invOper(),
+        M_fullyImplicit(false)
 {
 }
 
@@ -52,6 +53,8 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
 
     M_displayer.leaderPrintMax ( " Number of DOFs for the velocity = ", M_velocityFESpace->dof().numTotalDof()*3 ) ;
     M_displayer.leaderPrintMax ( " Number of DOFs for the pressure = ", M_pressureFESpace->dof().numTotalDof() ) ;
+
+    M_fullyImplicit = M_dataFile ( "newton/convectiveImplicit", false);
 }
 
 void NavierStokesSolver::setSolversOptions(const Teuchos::ParameterList& solversOptions)
@@ -149,6 +152,21 @@ void NavierStokesSolver::buildGraphs()
 						 dot( M_fluidData->density()*value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) + // convective term
 						 value( 0.5 * M_fluidData->viscosity() ) * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) ) // stiffness
 			) >> M_F_graph;
+
+
+			M_Jacobian_graph.reset (new Epetra_FECrsGraph (Copy, * (M_velocityFESpace->map().map (Unique) ), 0) );
+			buildGraph ( elements (M_fespaceUETA->mesh() ),
+						 quadRuleTetra4pt,
+						 M_fespaceUETA,
+						 M_fespaceUETA,
+						 dot ( phi_i, phi_j ) + // mass
+						 dot( M_fluidData->density()*value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) + // convective term
+						 dot( M_fluidData->density() * phi_j * grad(M_fespaceUETA, *M_uExtrapolated), phi_i ) + // part of the Jacobian
+						 value( 0.5 * M_fluidData->viscosity() ) * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) ) // stiffness
+						) >> M_Jacobian_graph;
+			M_Jacobian_graph->GlobalAssemble();
+			M_Jacobian_graph->OptimizeStorage();
+
 		}
 		else
 		{
@@ -160,6 +178,21 @@ void NavierStokesSolver::buildGraphs()
 						 dot( M_fluidData->density()*value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) + // convective term
 						 M_fluidData->viscosity() * dot( grad(phi_i) , grad(phi_j) + transpose(grad(phi_j)) ) // stiffness
 			) >> M_F_graph;
+
+
+			M_Jacobian_graph.reset (new Epetra_FECrsGraph (Copy, * (M_velocityFESpace->map().map (Unique) ), 0) );
+			buildGraph ( elements (M_fespaceUETA->mesh() ),
+						 quadRuleTetra4pt,
+						 M_fespaceUETA,
+						 M_fespaceUETA,
+						 dot ( phi_i, phi_j ) + // mass
+						 dot( M_fluidData->density()*value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) + // convective term
+						 dot( M_fluidData->density() * phi_j * grad(M_fespaceUETA, *M_uExtrapolated), phi_i ) + // part of the Jacobian
+						 M_fluidData->viscosity() * dot( grad(phi_i) , grad(phi_j) + transpose(grad(phi_j)) ) // stiffness
+					  ) >> M_Jacobian_graph;
+			M_Jacobian_graph->GlobalAssemble();
+			M_Jacobian_graph->OptimizeStorage();
+
 		}
 		M_F_graph->GlobalAssemble();
         M_F_graph->OptimizeStorage();
@@ -185,7 +218,7 @@ void NavierStokesSolver::buildSystem()
 
 		// Graph velocity mass -> block (0,0)
 		M_Mu.reset (new matrix_Type ( M_velocityFESpace->map(), *M_Mu_graph ) );
-		*M_Mu *= 0;
+		M_Mu->zero();
 		integrate ( elements (M_fespaceUETA->mesh() ),
 					M_velocityFESpace->qr(),
 					M_fespaceUETA,
@@ -195,7 +228,7 @@ void NavierStokesSolver::buildSystem()
 		M_Mu->globalAssemble();
 
 		M_Btranspose.reset (new matrix_Type ( M_velocityFESpace->map(), *M_Btranspose_graph ) );
-		*M_Btranspose *= 0;
+		M_Btranspose->zero();
 		integrate( elements(M_fespaceUETA->mesh()),
 				   M_velocityFESpace->qr(),
 				   M_fespaceUETA,
@@ -204,7 +237,7 @@ void NavierStokesSolver::buildSystem()
 		) >> M_Btranspose;
 
 		M_B.reset (new matrix_Type ( M_pressureFESpace->map(), *M_B_graph ) );
-		*M_B *= 0;
+		M_B->zero();
 		integrate( elements(M_fespaceUETA->mesh()),
 				   M_pressureFESpace->qr(),
 				   M_fespacePETA,
@@ -214,7 +247,7 @@ void NavierStokesSolver::buildSystem()
 		M_B->globalAssemble( M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
 
 		M_A.reset (new matrix_Type ( M_velocityFESpace->map(), *M_A_graph ) );
-		*M_A *= 0;
+		M_A->zero();
 		if ( M_stiffStrain )
 		{
 			integrate( elements(M_fespaceUETA->mesh()),
@@ -236,13 +269,16 @@ void NavierStokesSolver::buildSystem()
 		M_A->globalAssemble();
 
 		M_C.reset (new matrix_Type ( M_velocityFESpace->map(), *M_C_graph ) );
-		*M_C *= 0;
+		M_C->zero();
 		M_C->globalAssemble();
 
 		M_F.reset (new matrix_Type ( M_velocityFESpace->map(), *M_F_graph ) );
-		*M_F *= 0;
+		M_F->zero();
 		M_F->globalAssemble();
 
+		M_Jacobian.reset (new matrix_Type ( M_velocityFESpace->map(), *M_Jacobian_graph ) );
+		M_Jacobian->zero();
+		M_Jacobian->globalAssemble();
 
 	}
 
@@ -295,6 +331,12 @@ void NavierStokesSolver::applyBoundaryConditions ( bcPtr_Type & bc, const Real& 
 	}
 
 	M_Btranspose->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
+}
+
+void NavierStokesSolver::applyBoundaryConditionsJacobian ( bcPtr_Type & bc )
+{
+	bcManageMatrix( *M_Jacobian, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 1.0, 0.0);
+	M_Jacobian->globalAssemble( );
 }
 
 void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
@@ -357,6 +399,28 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
 void NavierStokesSolver::updateBCHandler( bcPtr_Type & bc )
 {
 	bc->bcUpdate ( *M_velocityFESpace->mesh(), M_velocityFESpace->feBd(), M_velocityFESpace->dof() );
+}
+
+void NavierStokesSolver::updateJacobian( const vector_Type& u_k )
+{
+	vector_Type uk_rep ( u_k, Repeated );
+    // M_F and M_Jacobian need to have a switched name!
+	M_Jacobian->zero();
+
+	if ( M_fullyImplicit )
+	{
+		using namespace ExpressionAssembly;
+		integrate( elements(M_fespaceUETA->mesh()),
+					M_velocityFESpace->qr(),
+					M_fespaceUETA,
+					M_fespaceUETA,
+					dot( M_fluidData->density() * phi_j * grad(M_fespaceUETA, uk_rep), phi_i )
+		)
+		>> M_Jacobian;
+	}
+
+	*M_Jacobian += *M_F;
+	M_Jacobian->spy("Jac");
 }
 
 }
