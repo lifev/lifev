@@ -101,7 +101,7 @@ public:
 
 	typedef Teuchos::ParameterList parameterList_Type;
 	typedef boost::shared_ptr<parameterList_Type> parameterListPtr_Type;
-    
+
     typedef boost::shared_ptr<Epetra_Operator> invOpPtr_Type;
 
 	// Constructor
@@ -152,14 +152,14 @@ public:
     {
         *velocity = *M_velocity;
     }
-    
+
     void updatePressure(vectorPtr_Type& pressure)
     {
         *pressure = *M_pressure;
     }
-    
+
     void applyBoundaryConditions ( bcPtr_Type & bc, const Real& time );
-    
+
     matrixPtr_Type const& getF() const
     {
     	return M_F;
@@ -179,6 +179,13 @@ public:
     {
     	return M_rhs;
     }
+
+    boost::shared_ptr<OseenData> const& getData() const
+    {
+        return M_fluidData;
+    }
+
+
 
 private:
 
@@ -231,7 +238,7 @@ private:
 	vectorPtr_Type M_rhs;
     vectorPtr_Type M_velocity;
     vectorPtr_Type M_pressure;
-    
+
 	//! Displayer to print in parallel (only PID 0 will print)
 	Displayer M_displayer;
 
@@ -239,16 +246,16 @@ private:
 	Real M_alpha;
 	Real M_timeStep;
 	bool M_graphIsBuilt;
-    
+
     // Navoer Stokes operator
 	boost::shared_ptr<LifeV::Operators::NavierStokesOperator> M_oper;
-    
+
     // Navoer Stokes operator
 	boost::shared_ptr<LifeV::Operators::aSIMPLEOperator> M_prec;
-    
+
     // Epetra Operator needed to solve the linear system
     boost::shared_ptr<Operators::InvertibleOperator> M_invOper;
-    
+
     // Parameter list solver
     parameterListPtr_Type M_pListLinSolver;
 
