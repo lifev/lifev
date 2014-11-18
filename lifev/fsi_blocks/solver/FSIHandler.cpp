@@ -735,6 +735,44 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	M_beta_star->subset ( solution, 0);
 	*M_beta_star -= meshVelocity;
 
+	//---------------------------------------------------------//
+	// First bis: Compute the shape derivatives blcok          //
+	//---------------------------------------------------------//
+
+    Real alpha = M_fluidTimeAdvance->alpha() / M_dt;
+    Real density = M_fluid->getData()->density();
+    Real viscosity = M_fluid->getData()->viscosity();
+
+    vector_Type un (M_fluid->uFESpace()->map() );
+    vector_Type uk (M_fluid->uFESpace()->map() + M_fluid->pFESpace()->map() );
+    //vector_Type pk (M_fluid->pFESpace()->map() );
+
+    vector_Type meshVelRep (  M_aleFESpace->map(), Repeated ) ;
+
+    meshVelRep = M_aleTimeAdvance->firstDerivative();
+
+    //When this class is used, the convective term is used implictly
+    un.subset ( solution, 0 );
+
+    uk.subset ( solution, 0 );
+    //vector_Type veloFluidMesh ( M_uFESpace->map(), Repeated );
+    //this->transferMeshMotionOnFluid ( meshVelRep, veloFluidMesh );
+
+
+    // Simone check with Davide
+    M_ale->updateShapeDerivatives ( alpha,
+                                   density,
+                                   viscosity,
+                                   un,
+                                   uk,
+                                   // pk
+                                   meshVelRep, // or veloFluidMesh
+                                   *M_fluid->uFESpace(),
+                                   *M_fluid->pFESpace(),
+                                   true /*This flag tells the method to consider the velocity of the domain implicitly*/,
+                                   true /*This flag tells the method to consider the convective term implicitly */ );
+
+
 	//-------------------------------------------------------------------//
 	// Second: re-assemble the fluid blocks since we have moved the mesh //
 	//-------------------------------------------------------------------//
@@ -944,7 +982,9 @@ FSIHandler::initializeApplyOperator ( )
 	operData(0,0) = M_fluid->getF()->matrixPtr();
 	operData(0,1) = M_fluid->getBtranspose()->matrixPtr();
 	operData(0,3) = M_coupling->lambdaToFluidMomentum()->matrixPtr();
+	operData(0,4) = M_ale->shapeDerivativesVelocity()->matrixPtr();  // shape derivatives
 	operData(1,0) = M_fluid->getB()->matrixPtr();
+	operData(1,4) = M_ale->shapeDerivativesPressure()->matrixPtr();  // shape derivatives
 	operData(2,2) = M_matrixStructure->matrixPtr();
 	operData(2,3) = M_coupling->lambdaToStructureMomentum()->matrixPtr();
 	operData(3,0) = M_coupling->fluidVelocityToLambda()->matrixPtr();
