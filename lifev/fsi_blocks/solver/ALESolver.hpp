@@ -145,6 +145,28 @@ public:
     	return M_matrHE;
     }
 
+    void updateShapeDerivatives(Real&                          alpha,
+                                const Real&                    density,
+                                const Real&                    viscosity,
+                                const vector_Type&             un,
+                                const vector_Type&             uk,
+                                //const vector_Type&           disp,
+                                const vector_Type&             w,
+                                FESpace<mesh_Type, MapEpetra>& velocityFESpace,
+                                FESpace<mesh_Type, MapEpetra>& pressureFESpace,
+                                bool                           wImplicit,
+                                bool                           convectiveTermDerivative );
+
+    matrixPtr_Type const& shapeDerivativesVelocity() const
+    {
+    	return M_matrShapeDerVel;
+    }
+
+    matrixPtr_Type const& shapeDerivativesPressure() const
+    {
+    	return M_matrShapeDerPressure;
+    }
+
     //! Adds the system matrix to the argument
     void addSystemMatrixTo (matrixPtr_Type matr) const
     {
@@ -208,6 +230,11 @@ private:
 
     //! The matrix holding the values
     matrixPtr_Type                 M_matrHE;
+
+    //! The matrix holding the shape derivatives
+    matrixPtr_Type                 M_matrShapeDerVel;
+    matrixPtr_Type                 M_matrShapeDerPressure;
+
 
     Displayer                      M_displayer;
     int                            M_me;

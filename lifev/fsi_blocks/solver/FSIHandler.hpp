@@ -106,19 +106,19 @@ public:
 
     typedef Epetra_Comm comm_Type;
 	typedef boost::shared_ptr< comm_Type > commPtr_Type;
-    
+
     typedef boost::shared_ptr<GetPot> datafilePtr_Type;
-    
+
     typedef RegionMesh<LinearTetra> mesh_Type;
     typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
-    
+
     typedef boost::shared_ptr<MeshData> meshDataPtr_Type;
-    
+
     typedef boost::shared_ptr<MeshPartitioner<mesh_Type> > meshPartitionerPtr_Type;
-    
+
     typedef MapEpetra map_Type;
 	typedef boost::shared_ptr<map_Type> mapPtr_Type;
-    
+
     typedef FESpace< mesh_Type, map_Type > FESpace_Type;
     typedef boost::shared_ptr<FESpace_Type> FESpacePtr_Type;
 
@@ -143,15 +143,15 @@ public:
 
     //! Destructor
     ~FSIHandler();
-    
+
     void setDatafile(const GetPot& dataFile);
 
     void readMeshes( );
-    
+
     void partitionMeshes ( );
-    
+
     void setup ( );
-    
+
     void setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& fluidBC_residual, const bcPtr_Type& structureBC, const bcPtr_Type& aleBC);
 
     // update all the bc handlers
@@ -218,22 +218,22 @@ private:
 
     //! communicator
     commPtr_Type M_comm;
-    
+
     //! datafile
     GetPot M_datafile;
-    
+
     // members for the fluid mesh
     meshDataPtr_Type M_meshDataFluid;
     meshPtr_Type M_fluidMesh;
     meshPtr_Type M_fluidLocalMesh;
     meshPartitionerPtr_Type M_fluidPartitioner;
-    
+
     // members for the structure mesh
     meshDataPtr_Type M_meshDataStructure;
     meshPtr_Type M_structureMesh;
     meshPtr_Type M_structureLocalMesh;
     meshPartitionerPtr_Type M_structurePartitioner;
-    
+
     // members for the fluid, the structura and the ALE fineite element spaces
     FESpacePtr_Type M_velocityFESpace;
     FESpacePtr_Type M_pressureFESpace;
@@ -242,13 +242,13 @@ private:
     FESpacePtr_Type M_aleFESpace;
 
 	solidETFESpacePtr_Type M_displacementETFESpace;
-    
+
     // navier-stokes solver
     boost::shared_ptr<NavierStokesSolver> M_fluid;
     boost::shared_ptr<StructuralOperator<mesh_Type> > M_structure;
     boost::shared_ptr<StructuralConstitutiveLawData> M_dataStructure;
     boost::shared_ptr<ALESolver> M_ale;
-    
+
     // time advance for the structure
     timeAdvancePtr_Type M_structureTimeAdvance;
     timeAdvancePtr_Type M_aleTimeAdvance;
@@ -319,13 +319,14 @@ private:
 
 	// output txt files
 	UInt M_NewtonIter;
+	bool M_useShapeDerivatives;
 	bool M_printResiduals;
 	bool M_printSteps;
 	std::ofstream M_outputTimeStep;
 	std::ofstream M_outputResiduals;
 	std::ofstream M_outputSteps;
 };
-    
+
 } // end namespace LifeV
 
 #endif // end SETTINGS_H

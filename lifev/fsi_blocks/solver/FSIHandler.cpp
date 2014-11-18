@@ -50,6 +50,7 @@ M_exporterStructure (),
 M_applyOperator(new Operators::FSIApplyOperator),
 M_prec(new Operators::aSIMPLEFSIOperator),
 M_invOper(),
+M_useShapeDerivatives( false ),
 M_printResiduals ( false ),
 M_printSteps ( false ),
 M_NewtonIter ( 0 )
@@ -115,6 +116,9 @@ void FSIHandler::setup ( )
 	M_fluid.reset ( new NavierStokesSolver ( M_datafile, M_comm ) );
 	M_fluid->setup ( M_fluidLocalMesh );
 
+    // Temporary fix for Shape derivatives
+    M_fluid->pFESpace()->setQuadRule(M_fluid->uFESpace()->qr());
+
 	// Structure data
 	M_dataStructure.reset ( new StructuralConstitutiveLawData ( ) );
 	M_dataStructure->setup ( M_datafile );
@@ -160,6 +164,7 @@ void FSIHandler::setup ( )
 	if (M_comm->MyPID() == 0)
 		M_out_res.open ("residualsNewton");
 
+    M_useShapeDerivatives = M_datafile ( "newton/useShapeDerivatives", false);
 	M_printResiduals = M_datafile ( "newton/output_Residuals", false);
 	M_printSteps = M_datafile ( "newton/output_Steps", false);
 
@@ -737,6 +742,47 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	M_beta_star->subset ( solution, 0);
 	*M_beta_star -= meshVelocity;
 
+	//---------------------------------------------------------//
+	// First bis: Compute the shape derivatives blcok          //
+	//---------------------------------------------------------//
+
+    if (M_useShapeDerivatives)
+    {
+
+        Real alpha = M_fluidTimeAdvance->alpha() / M_dt;
+        Real density = M_fluid->getData()->density();
+        Real viscosity = M_fluid->getData()->viscosity();
+
+        vector_Type un (M_fluid->uFESpace()->map() );
+        vector_Type uk (M_fluid->uFESpace()->map() + M_fluid->pFESpace()->map() );
+        //vector_Type pk (M_fluid->pFESpace()->map() );
+
+        vector_Type meshVelRep (  M_aleFESpace->map(), Repeated ) ;
+
+        meshVelRep = M_aleTimeAdvance->firstDerivative();
+
+        //When this class is used, the convective term is used implictly
+        un.subset ( solution, 0 );
+
+        uk.subset ( solution, 0 );
+        //vector_Type veloFluidMesh ( M_uFESpace->map(), Repeated );
+        //this->transferMeshMotionOnFluid ( meshVelRep, veloFluidMesh );
+
+
+        // Simone check with Davide
+        M_ale->updateShapeDerivatives ( alpha,
+                                        density,
+                                        viscosity,
+                                        un,
+                                        uk,
+                                        // pk
+                                        meshVelRep, // or veloFluidMesh
+                                        *M_fluid->uFESpace(),
+                                        *M_fluid->pFESpace(),
+                                        true /*This flag tells the method to consider the velocity of the domain implicitly*/,
+                                        true /*This flag tells the method to consider the convective term implicitly */ );
+    }
+
 	//-------------------------------------------------------------------//
 	// Second: re-assemble the fluid blocks since we have moved the mesh //
 	//-------------------------------------------------------------------//
@@ -953,6 +999,14 @@ FSIHandler::initializeApplyOperator ( )
 	operData(3,2) = M_coupling->structureDisplacementToLambda()->matrixPtr();
 	operData(4,2) = M_coupling->structureDisplacementToFluidDisplacement()->matrixPtr();
 	operData(4,4) = M_ale->matrix()->matrixPtr();
+
+    if (M_useShapeDerivatives)
+    {
+        operData(0,4) = M_ale->shapeDerivativesVelocity()->matrixPtr();  // shape derivatives
+        operData(1,4) = M_ale->shapeDerivativesPressure()->matrixPtr();  // shape derivatives
+    }
+
+
 	M_applyOperator->setUp(operData, M_comm);
 }
 
