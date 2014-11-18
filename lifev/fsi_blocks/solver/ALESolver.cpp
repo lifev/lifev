@@ -361,7 +361,7 @@ void ALESolver::updateShapeDerivatives ( Real&                          alpha,
         }
 
     M_matrShapeDerVel->globalAssemble(M_FESpace.mapPtr(), velocityFESpace.mapPtr());
-    M_matrShapeDerVel->globalAssemble(M_FESpace.mapPtr(), pressureFESpace.mapPtr());
+    M_matrShapeDerPressure->globalAssemble(M_FESpace.mapPtr(), pressureFESpace.mapPtr());
 
 
     chrono.stop();
