@@ -827,6 +827,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	// Post-step: update the Jacobian of the fluid //
 	//---------------------------------------------//
 
+	M_displayer.leaderPrint ( "[FSI] - Update Jacobian terms: \n" ) ;
 	M_fluid->updateJacobian(u_k);
 	M_fluid->applyBoundaryConditionsJacobian ( M_fluidBC );
 

@@ -407,6 +407,8 @@ void NavierStokesSolver::updateJacobian( const vector_Type& u_k )
     // M_F and M_Jacobian need to have a switched name!
 	M_Jacobian->zero();
 
+	M_displayer.leaderPrint ( "[F] - Update Jacobian convective term\n" ) ;
+
 	if ( M_fullyImplicit )
 	{
 		using namespace ExpressionAssembly;
