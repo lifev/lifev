@@ -89,5 +89,7 @@
 	NonLinearLineSearch =  0
 	output_Residuals    =  true
 	output_Steps        =  true
-
+	convectiveImplicit  =  false
+	useShapeDerivatives =  false
+	
 [../]

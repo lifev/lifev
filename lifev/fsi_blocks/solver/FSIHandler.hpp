@@ -198,7 +198,9 @@ private:
 
     void updateSystem ( );
 
-    void initializeApplyOperator ( );
+    void initializeApplyOperatorResidual ( );
+
+    void initializeApplyOperatorJacobian ( );
 
     void getMatrixStructure ( );
 
@@ -305,8 +307,11 @@ private:
 
 	matrixPtr_Type M_matrixStructure;
 
-	// Operator to apply the FSI
-	boost::shared_ptr<LifeV::Operators::FSIApplyOperator> M_applyOperator;
+	// Operator to apply Jacobian of the FSI
+	boost::shared_ptr<LifeV::Operators::FSIApplyOperator> M_applyOperatorJacobian;
+
+	// Operator to compute the residual of the FSI
+	boost::shared_ptr<LifeV::Operators::FSIApplyOperator> M_applyOperatorResidual;
 
 	// Preconditioner operator
 	boost::shared_ptr<LifeV::Operators::aSIMPLEFSIOperator> M_prec;

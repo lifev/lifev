@@ -47,7 +47,8 @@ M_t_zero (0.0),
 M_t_end (0.0),
 M_exporterFluid (),
 M_exporterStructure (),
-M_applyOperator(new Operators::FSIApplyOperator),
+M_applyOperatorResidual(new Operators::FSIApplyOperator),
+M_applyOperatorJacobian(new Operators::FSIApplyOperator),
 M_prec(new Operators::aSIMPLEFSIOperator),
 M_invOper(),
 M_useShapeDerivatives( false ),
@@ -740,48 +741,8 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 	M_beta_star.reset ( new VectorEpetra ( M_fluid->uFESpace()->map ( ) ) );
 	M_beta_star->subset ( solution, 0);
+	vector_Type u_k ( *M_beta_star ); // Needed to update the Jacobian of the fluid
 	*M_beta_star -= meshVelocity;
-
-	//---------------------------------------------------------//
-	// First bis: Compute the shape derivatives blcok          //
-	//---------------------------------------------------------//
-
-    if (M_useShapeDerivatives)
-    {
-
-        Real alpha = M_fluidTimeAdvance->alpha() / M_dt;
-        Real density = M_fluid->getData()->density();
-        Real viscosity = M_fluid->getData()->viscosity();
-
-        vector_Type un (M_fluid->uFESpace()->map() );
-        vector_Type uk (M_fluid->uFESpace()->map() + M_fluid->pFESpace()->map() );
-        //vector_Type pk (M_fluid->pFESpace()->map() );
-
-        vector_Type meshVelRep (  M_aleFESpace->map(), Repeated ) ;
-
-        meshVelRep = M_aleTimeAdvance->firstDerivative();
-
-        //When this class is used, the convective term is used implictly
-        un.subset ( solution, 0 );
-
-        uk.subset ( solution, 0 );
-        //vector_Type veloFluidMesh ( M_uFESpace->map(), Repeated );
-        //this->transferMeshMotionOnFluid ( meshVelRep, veloFluidMesh );
-
-
-        // Simone check with Davide
-        M_ale->updateShapeDerivatives ( alpha,
-                                        density,
-                                        viscosity,
-                                        un,
-                                        uk,
-                                        // pk
-                                        meshVelRep, // or veloFluidMesh
-                                        *M_fluid->uFESpace(),
-                                        *M_fluid->pFESpace(),
-                                        true /*This flag tells the method to consider the velocity of the domain implicitly*/,
-                                        true /*This flag tells the method to consider the convective term implicitly */ );
-    }
 
 	//-------------------------------------------------------------------//
 	// Second: re-assemble the fluid blocks since we have moved the mesh //
@@ -797,7 +758,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	// Third: initialize the apply operator //
 	//--------------------------------------//
 
-	initializeApplyOperator ( );
+	initializeApplyOperatorResidual ( );
 
 	//------------------------------------------------//
 	// Forth: assemble the monolithic right hand side //
@@ -816,7 +777,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	// Forth: compute the residual //
 	//-----------------------------//
 
-	M_applyOperator->Apply(solution.epetraVector(), residual.epetraVector());
+	M_applyOperatorResidual->Apply(solution.epetraVector(), residual.epetraVector());
 	residual -= *rightHandSide;
 
 	applyBCresidual ( residual );
@@ -862,6 +823,60 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		}
 	}
 
+	//---------------------------------------------//
+	// Post-step: update the Jacobian of the fluid //
+	//---------------------------------------------//
+
+	M_fluid->updateJacobian(u_k);
+	M_fluid->applyBoundaryConditionsJacobian ( M_fluidBC );
+
+	//----------------------------------------------------//
+	// Post-step bis: Compute the shape derivatives block //
+	//----------------------------------------------------//
+
+	if (M_useShapeDerivatives)
+	{
+
+		Real alpha = M_fluidTimeAdvance->alpha() / M_dt;
+		Real density = M_fluid->getData()->density();
+		Real viscosity = M_fluid->getData()->viscosity();
+
+		vector_Type un (M_fluid->uFESpace()->map() );
+		vector_Type uk (M_fluid->uFESpace()->map() + M_fluid->pFESpace()->map() );
+		//vector_Type pk (M_fluid->pFESpace()->map() );
+
+		vector_Type meshVelRep (  M_aleFESpace->map(), Repeated ) ;
+
+		meshVelRep = M_aleTimeAdvance->firstDerivative();
+
+		//When this class is used, the convective term is used implictly
+		un.subset ( solution, 0 );
+
+		uk.subset ( solution, 0 );
+		//vector_Type veloFluidMesh ( M_uFESpace->map(), Repeated );
+		//this->transferMeshMotionOnFluid ( meshVelRep, veloFluidMesh );
+
+
+		// Simone check with Davide
+		M_ale->updateShapeDerivatives ( alpha,
+										density,
+										viscosity,
+										un,
+										uk,
+										// pk
+										meshVelRep, // or veloFluidMesh
+										*M_fluid->uFESpace(),
+										*M_fluid->pFESpace(),
+										true /*This flag tells the method to consider the velocity of the domain implicitly*/,
+										true /*This flag tells the method to consider the convective term implicitly */ );
+	}
+
+	//------------------------------------------------------------//
+	// Post-step tris: update the apply operator for the Jacobian //
+	//------------------------------------------------------------//
+
+	initializeApplyOperatorJacobian();
+
 }
 
 void
@@ -871,9 +886,9 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 	// First: set the fluid blocks in the preconditioner //
 	//---------------------------------------------------//
 
-	M_prec->setFluidBlocks( M_fluid->getF(), M_fluid->getBtranspose(), M_fluid->getB() );
-	M_prec->setDomainMap(M_applyOperator->OperatorDomainBlockMapPtr());
-	M_prec->setRangeMap(M_applyOperator->OperatorRangeBlockMapPtr());
+	M_prec->setFluidBlocks( M_fluid->getJacobian(), M_fluid->getBtranspose(), M_fluid->getB() );
+	M_prec->setDomainMap(M_applyOperatorJacobian->OperatorDomainBlockMapPtr());
+	M_prec->setRangeMap(M_applyOperatorJacobian->OperatorRangeBlockMapPtr());
 
 	//--------------------------------------------------------------------------------//
 	// Second: update the operators associated to shur complements and fluid momentum //
@@ -891,7 +906,7 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 	// Third: set the solver of the jacobian system //
 	//----------------------------------------------//
 
-	M_invOper->setOperator(M_applyOperator);
+	M_invOper->setOperator(M_applyOperatorJacobian);
 	M_invOper->setPreconditioner(M_prec);
 
 	//-------------------------//
@@ -986,28 +1001,44 @@ FSIHandler::updateSystem ( )
 }
 
 void
-FSIHandler::initializeApplyOperator ( )
+FSIHandler::initializeApplyOperatorResidual ( )
 {
-	Operators::FSIApplyOperator::operatorPtrContainer_Type operData(5,5);
-	operData(0,0) = M_fluid->getF()->matrixPtr();
-	operData(0,1) = M_fluid->getBtranspose()->matrixPtr();
-	operData(0,3) = M_coupling->lambdaToFluidMomentum()->matrixPtr();
-	operData(1,0) = M_fluid->getB()->matrixPtr();
-	operData(2,2) = M_matrixStructure->matrixPtr();
-	operData(2,3) = M_coupling->lambdaToStructureMomentum()->matrixPtr();
-	operData(3,0) = M_coupling->fluidVelocityToLambda()->matrixPtr();
-	operData(3,2) = M_coupling->structureDisplacementToLambda()->matrixPtr();
-	operData(4,2) = M_coupling->structureDisplacementToFluidDisplacement()->matrixPtr();
-	operData(4,4) = M_ale->matrix()->matrixPtr();
+	Operators::FSIApplyOperator::operatorPtrContainer_Type operDataResidual(5,5);
+	operDataResidual(0,0) = M_fluid->getF()->matrixPtr();
+	operDataResidual(0,1) = M_fluid->getBtranspose()->matrixPtr();
+	operDataResidual(0,3) = M_coupling->lambdaToFluidMomentum()->matrixPtr();
+	operDataResidual(1,0) = M_fluid->getB()->matrixPtr();
+	operDataResidual(2,2) = M_matrixStructure->matrixPtr();
+	operDataResidual(2,3) = M_coupling->lambdaToStructureMomentum()->matrixPtr();
+	operDataResidual(3,0) = M_coupling->fluidVelocityToLambda()->matrixPtr();
+	operDataResidual(3,2) = M_coupling->structureDisplacementToLambda()->matrixPtr();
+	operDataResidual(4,2) = M_coupling->structureDisplacementToFluidDisplacement()->matrixPtr();
+	operDataResidual(4,4) = M_ale->matrix()->matrixPtr();
+	M_applyOperatorResidual->setUp(operDataResidual, M_comm);
+}
+
+void
+FSIHandler::initializeApplyOperatorJacobian ( )
+{
+	Operators::FSIApplyOperator::operatorPtrContainer_Type operDataJacobian(5,5);
+	operDataJacobian(0,0) = M_fluid->getJacobian()->matrixPtr();
+	operDataJacobian(0,1) = M_fluid->getBtranspose()->matrixPtr();
+	operDataJacobian(0,3) = M_coupling->lambdaToFluidMomentum()->matrixPtr();
+	operDataJacobian(1,0) = M_fluid->getB()->matrixPtr();
+	operDataJacobian(2,2) = M_matrixStructure->matrixPtr();
+	operDataJacobian(2,3) = M_coupling->lambdaToStructureMomentum()->matrixPtr();
+	operDataJacobian(3,0) = M_coupling->fluidVelocityToLambda()->matrixPtr();
+	operDataJacobian(3,2) = M_coupling->structureDisplacementToLambda()->matrixPtr();
+	operDataJacobian(4,2) = M_coupling->structureDisplacementToFluidDisplacement()->matrixPtr();
+	operDataJacobian(4,4) = M_ale->matrix()->matrixPtr();
 
     if (M_useShapeDerivatives)
     {
-        operData(0,4) = M_ale->shapeDerivativesVelocity()->matrixPtr();  // shape derivatives
-        operData(1,4) = M_ale->shapeDerivativesPressure()->matrixPtr();  // shape derivatives
+        operDataJacobian(0,4) = M_ale->shapeDerivativesVelocity()->matrixPtr();  // shape derivatives
+        operDataJacobian(1,4) = M_ale->shapeDerivativesPressure()->matrixPtr();  // shape derivatives
     }
 
-
-	M_applyOperator->setUp(operData, M_comm);
+	M_applyOperatorJacobian->setUp(operDataJacobian, M_comm);
 }
 
 }
