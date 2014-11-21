@@ -945,7 +945,8 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 										*M_fluid->uFESpace(),
 										*M_fluid->pFESpace(),
 										true /*This flag tells the method to consider the velocity of the domain implicitly*/,
-										true /*This flag tells the method to consider the convective term implicitly */ );
+										true /*This flag tells the method to consider the convective term implicitly */,
+										*M_fluidBC);
 	}
 
 	//------------------------------------------------------------//

@@ -155,7 +155,8 @@ public:
                                 FESpace<mesh_Type, MapEpetra>& velocityFESpace,
                                 FESpace<mesh_Type, MapEpetra>& pressureFESpace,
                                 bool                           wImplicit,
-                                bool                           convectiveTermDerivative );
+                                bool                           convectiveTermDerivative,
+                                BCHandler& 					   BCh);
 
     matrixPtr_Type const& shapeDerivativesVelocity() const
     {

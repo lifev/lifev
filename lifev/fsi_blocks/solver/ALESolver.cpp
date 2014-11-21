@@ -147,7 +147,8 @@ void ALESolver::updateShapeDerivatives ( Real&                          alpha,
                                          FESpace<mesh_Type, MapEpetra>& velocityFESpace,
                                          FESpace<mesh_Type, MapEpetra>& pressureFESpace,
                                          bool                           wImplicit,
-                                         bool                           convectiveTermDerivative )
+                                         bool                           convectiveTermDerivative,
+                                         BCHandler& 					BCh )
 
 {
     LifeChrono chrono;
@@ -360,6 +361,14 @@ void ALESolver::updateShapeDerivatives ( Real&                          alpha,
             }
         }
 
+    if (  ! BCh.bcUpdateDone() )
+    {
+    	// BC boundary information update
+    	BCh.bcUpdate ( *velocityFESpace.mesh(), velocityFESpace.feBd(), velocityFESpace.dof() );
+    }
+
+    bcManageMatrix ( *M_matrShapeDerVel, *velocityFESpace.mesh(), velocityFESpace.dof(), BCh, velocityFESpace.feBd(), 0.0, 0.0 );
+
     M_matrShapeDerVel->globalAssemble(M_FESpace.mapPtr(), velocityFESpace.mapPtr());
     M_matrShapeDerPressure->globalAssemble(M_FESpace.mapPtr(), pressureFESpace.mapPtr());
 
@@ -367,7 +376,6 @@ void ALESolver::updateShapeDerivatives ( Real&                          alpha,
     chrono.stop();
     M_displayer.leaderPrintMax ("done in ", chrono.diff() );
 }
-
 
 
 } // end namespace LifeV
