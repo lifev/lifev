@@ -63,7 +63,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/filter/PartitionIO.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
 
-#include <lifev/fsi/filter/DOFInterfaceIO.hpp>
+#include <lifev/fsi_blocks/filter/DOFInterfaceIO.hpp>
 
 
 using namespace LifeV;

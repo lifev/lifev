@@ -7,5 +7,4 @@ ADD_SUBDIRECTORIES(
   challenge_VPH
   benchmark_GreenshieldsWeller
   application_aortaFSI
-  offline_partition_fsi
 )

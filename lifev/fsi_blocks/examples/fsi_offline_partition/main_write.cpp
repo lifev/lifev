@@ -58,8 +58,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/core/mesh/MeshData.hpp>
 
-#include <lifev/fsi/mesh/MeshPartitionerOfflineFSI.hpp>
-#include <lifev/fsi/filter/DOFInterfaceIO.hpp>
+#include <lifev/fsi_blocks/mesh/MeshPartitionerOfflineFSI.hpp>
+#include <lifev/fsi_blocks/filter/DOFInterfaceIO.hpp>
 
 using namespace LifeV;
 

@@ -37,7 +37,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <map>
 #include <algorithm>
 
-#include <lifev/fsi/filter/DOFInterfaceIO.hpp>
+#include <lifev/fsi_blocks/filter/DOFInterfaceIO.hpp>
 
 #ifdef LIFEV_HAS_HDF5
 #ifdef HAVE_MPI
