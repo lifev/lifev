@@ -66,6 +66,7 @@ main ( int argc, char** argv )
     typedef VectorEpetra vector_Type;
     typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
     
+    {
     // ---------------------------//
     // Reading the input datafile //
     // ---------------------------//
@@ -83,17 +84,49 @@ main ( int argc, char** argv )
     
     fsi.setDatafile ( dataFile );
     
-    // -------------------------------------------//
-    // Loading the fluid and the structure meshes //
-    // -------------------------------------------//
-    
-    fsi.readMeshes ( );
-    
-    // ------------------------------------------------//
-    // Partitioning the fluid and the structure meshes //
-    // ------------------------------------------------//
+    // check about the use of meshes: using partitioned meshes or do we have to partition them online?
 
-    fsi.partitionMeshes ( );
+    bool usePartitionedMeshes = dataFile("offlinePartioner/readPartitionedMeshes", false);
+
+    if ( usePartitionedMeshes )
+    {
+    	if ( verbose )
+    		std::cout << "\n[PreProcessing] - Using partitioned meshes\n";
+
+    	int numParts = dataFile("offlinePartioner/parts", 2);
+
+    	if( numParts != Comm->NumProc())
+    	{
+    		if ( verbose )
+    			std::cout << "\n[PreProcessing] - Using the wrong number of processes\n";
+
+    		return EXIT_FAILURE;
+    	}
+
+    	// -------------------------------------------------------//
+    	// Loading the partitioned fluid and the structure meshes //
+    	// -------------------------------------------------------//
+
+    	fsi.readPartitionedMeshes ( );
+    }
+    else
+    {
+    	if ( verbose )
+    		std::cout << "\n[PreProcessing] - The meshes will be partioned during this simulation\n\n";
+
+    	// -------------------------------------------//
+    	// Loading the fluid and the structure meshes //
+    	// -------------------------------------------//
+
+    	fsi.readMeshes ( );
+
+    	// ------------------------------------------------//
+    	// Partitioning the fluid and the structure meshes //
+    	// ------------------------------------------------//
+
+    	fsi.partitionMeshes ( );
+    }
+
 
     // --------------------------------//
     // Getting the boundary conditions //
@@ -112,6 +145,7 @@ main ( int argc, char** argv )
     
     fsi.setup();
 
+    /*
     // ---------------------//
     // Create inteface maps //
     // ---------------------//
@@ -129,6 +163,8 @@ main ( int argc, char** argv )
     // ----------//
 
     fsi.solveFSIproblem ( );
+	*/
+    }
 
 #ifdef HAVE_MPI
     if (verbose)

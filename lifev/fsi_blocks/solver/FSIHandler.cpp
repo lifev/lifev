@@ -56,7 +56,8 @@ M_printResiduals ( false ),
 M_printSteps ( false ),
 M_NewtonIter ( 0 ),
 M_extrapolateInitialGuess ( false ),
-M_orderExtrapolationInitialGuess ( 3 )
+M_orderExtrapolationInitialGuess ( 3 ),
+M_usePartitionedMeshes ( false )
 {
 }
 
@@ -135,6 +136,8 @@ FSIHandler::readPartitionedMeshes( )
 
 void FSIHandler::setup ( )
 {
+	M_usePartitionedMeshes = M_datafile ( "offlinePartioner/readPartitionedMeshes", false );
+
 	// Fluid
 	M_fluid.reset ( new NavierStokesSolver ( M_datafile, M_comm ) );
 	M_fluid->setup ( M_fluidLocalMesh );
@@ -269,8 +272,10 @@ void FSIHandler::createStructureFESpaces ( )
 {
 	const std::string dOrder = M_datafile ( "solid/space_discretization/order", "P2");
 	M_displacementFESpace.reset ( new FESpace_Type (M_structureLocalMesh, dOrder, 3, M_comm) );
-	M_displacementETFESpace.reset ( new solidETFESpace_Type (*M_structurePartitioner, & (M_displacementFESpace->refFE() ), & (M_displacementFESpace->fe().geoMap() ), M_comm) );
-	M_displacementFESpaceSerial.reset ( new FESpace_Type (M_structureMesh, dOrder, 3, M_comm) );
+	M_displacementETFESpace.reset ( new solidETFESpace_Type (M_structureLocalMesh, & (M_displacementFESpace->refFE() ), & (M_displacementFESpace->fe().geoMap() ), M_comm) );
+
+	if ( !M_usePartitionedMeshes )
+		M_displacementFESpaceSerial.reset ( new FESpace_Type (M_structureMesh, dOrder, 3, M_comm) );
 
 	M_displayer.leaderPrintMax ( " Number of DOFs for the structure = ", M_displacementFESpace->dof().numTotalDof()*3 ) ;
 }

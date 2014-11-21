@@ -341,6 +341,9 @@ private:
 	bool M_extrapolateInitialGuess;
 	UInt M_orderExtrapolationInitialGuess;
 	boost::shared_ptr<TimeAndExtrapolationHandler> M_extrapolationSolution;
+
+	// paritioned meshes
+	bool M_usePartitionedMeshes;
 };
 
 } // end namespace LifeV

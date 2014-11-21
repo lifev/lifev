@@ -1,8 +1,11 @@
 [offlinePartioner]
+	parts                 = 2
 	readPartitionedMeshes = true
-	fluidPartitionedMesh  = fluid_12.h5
-	solidPartitionedMesh  = solid_12.h5
-	interfacePartitioned  = interface_12.h5
+	fluidPartitionedMesh  = fluid_2.h5
+	solidPartitionedMesh  = solid_2.h5
+	interfacePartitioned  = interface_2.h5
+	
+[../]	
 	
 [fluid]
 
