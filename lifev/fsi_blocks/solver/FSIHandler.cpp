@@ -196,6 +196,9 @@ void FSIHandler::setup ( )
 	M_printResiduals = M_datafile ( "newton/output_Residuals", false);
 	M_printSteps = M_datafile ( "newton/output_Steps", false);
 
+	// setting also in the preconditioner if using shape derivatives
+	M_prec->setUseShapeDerivatives(M_useShapeDerivatives);
+
 	// Solver
 	std::string solverType(M_pListLinSolver->get<std::string>("Linear Solver Type"));
 	M_invOper.reset(Operators::InvertibleOperatorFactory::instance().createObject(solverType));
@@ -961,6 +964,11 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 	//---------------------------------------------------//
 
 	M_prec->setFluidBlocks( M_fluid->getJacobian(), M_fluid->getBtranspose(), M_fluid->getB() );
+	if (M_useShapeDerivatives)
+	{
+		M_prec->setShapeDerivativesBlocks(M_ale->shapeDerivativesVelocity(), M_ale->shapeDerivativesPressure());
+	}
+
 	M_prec->setDomainMap(M_applyOperatorJacobian->OperatorDomainBlockMapPtr());
 	M_prec->setRangeMap(M_applyOperatorJacobian->OperatorRangeBlockMapPtr());
 

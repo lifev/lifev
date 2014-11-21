@@ -119,6 +119,10 @@ public:
 			  	  	   	     const matrixEpetraPtr_Type & C1,
 		   	   	   	   	  	 const matrixEpetraPtr_Type & C3);
 
+    //! Set the shape derivatives
+    void setShapeDerivativesBlocks( const matrixEpetraPtr_Type & ShapeVelocity,
+    								const matrixEpetraPtr_Type & ShapePressure);
+
     //@}
 
     // @name Update approximations of the block preconditioners
@@ -146,6 +150,10 @@ public:
 
     //! Set the monolithic map
     void setMonolithicMap(const mapEpetraPtr_Type& monolithicMap);
+
+    //! Set the use of shape derivatives
+    void setUseShapeDerivatives(const bool & useShapeDerivatives);
+
     //@}
 
 private:
@@ -236,6 +244,8 @@ private:
     matrixEpetraPtr_Type M_C2;
     matrixEpetraPtr_Type M_C1;
     matrixEpetraPtr_Type M_C3;
+    matrixEpetraPtr_Type M_shapeVelocity;
+    matrixEpetraPtr_Type M_shapePressure;
     //@}
 
     mapEpetraPtr_Type M_monolithicMap;
@@ -247,6 +257,8 @@ private:
 
     //! Label
     const std::string M_label;
+
+    bool M_shapeDerivatives;
 };
 
 } /* end namespace Operators */

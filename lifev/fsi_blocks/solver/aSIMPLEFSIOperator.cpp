@@ -27,7 +27,8 @@ aSIMPLEFSIOperator::aSIMPLEFSIOperator():
     M_approximatedGeometryOperator(new Operators::ApproximatedInvertibleRowMatrix),
     M_approximatedFluidMomentumOperator(new Operators::ApproximatedInvertibleRowMatrix),
     M_approximatedSchurComplementOperator(new Operators::ApproximatedInvertibleRowMatrix),
-    M_approximatedSchurComplementCouplingOperator(new Operators::ApproximatedInvertibleRowMatrix)
+    M_approximatedSchurComplementCouplingOperator(new Operators::ApproximatedInvertibleRowMatrix),
+    M_shapeDerivatives ( false )
 {
 
 }
@@ -84,6 +85,20 @@ aSIMPLEFSIOperator::setCouplingBlocks ( const matrixEpetraPtr_Type & C1transpose
 	M_C2 = C2;
 	M_C1 = C1;
 	M_C3 = C3;
+}
+
+void
+aSIMPLEFSIOperator::setUseShapeDerivatives(const bool & useShapeDerivatives)
+{
+	M_shapeDerivatives = useShapeDerivatives;
+}
+
+void
+aSIMPLEFSIOperator::setShapeDerivativesBlocks( const matrixEpetraPtr_Type & shapeVelocity,
+   											   const matrixEpetraPtr_Type & shapePressure)
+{
+	M_shapeVelocity = shapeVelocity;
+	M_shapePressure = shapePressure;
 }
 
 void
@@ -278,10 +293,15 @@ aSIMPLEFSIOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
     VectorEpetra_Type Zlambda ( X_lambda );
     Zlambda -= *M_C2*Y_displacement;
 
-    // Todo: shape derivatives
+    // Shape derivatives
     VectorEpetra_Type Zf_velocity ( X_velocity );
     VectorEpetra_Type Zf_pressure ( X_pressure );
 
+    if ( M_shapeDerivatives )
+    {
+    	Zf_velocity -= *M_shapeVelocity * Y_geometry;
+    	Zf_pressure	-= *M_shapePressure * Y_geometry;
+    }
 
     //----------------------------------------------//
     // Forth: Fluid by condensation
