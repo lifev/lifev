@@ -1,3 +1,9 @@
+[offlinePartioner]
+	readPartitionedMeshes = true
+	fluidPartitionedMesh  = fluid_12.h5
+	solidPartitionedMesh  = solid_12.h5
+	interfacePartitioned  = interface_12.h5
+	
 [fluid]
 
 	solver_manager_type = aSIMPLE
