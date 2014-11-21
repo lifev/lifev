@@ -54,7 +54,9 @@ M_invOper(),
 M_useShapeDerivatives( false ),
 M_printResiduals ( false ),
 M_printSteps ( false ),
-M_NewtonIter ( 0 )
+M_NewtonIter ( 0 ),
+M_extrapolateInitialGuess ( false ),
+M_orderExtrapolationInitialGuess ( 3 )
 {
 }
 
@@ -131,6 +133,9 @@ void FSIHandler::setup ( )
 	createAleFESpace();
 
 	updateBoundaryConditions();
+
+	M_extrapolateInitialGuess = M_datafile ( "newton/extrapolateInitialGuess", false );
+	M_orderExtrapolationInitialGuess = M_datafile ( "newton/orderExtrapolation", 3 );
 
 	initializeTimeAdvance ( );
 
@@ -326,6 +331,14 @@ void FSIHandler::initializeTimeAdvance ( )
 	}
 	M_aleTimeAdvance->setInitialCondition (df0);
 	M_aleTimeAdvance->updateRHSContribution ( M_dt );
+
+	if ( M_extrapolateInitialGuess )
+	{
+		M_extrapolationSolution.reset( new TimeAndExtrapolationHandler ( ) );
+		M_extrapolationSolution->setBDForder(M_orderExtrapolationInitialGuess);
+		M_extrapolationSolution->setMaximumExtrapolationOrder(M_orderExtrapolationInitialGuess);
+		M_extrapolationSolution->setTimeStep(M_dt);
+	}
 }
 
 void FSIHandler::buildInterfaceMaps ()
@@ -611,6 +624,18 @@ FSIHandler::solveFSIproblem ( )
 
 		updateSystem ( );
 
+		if ( M_extrapolateInitialGuess && M_time == (M_t_zero + M_dt) )
+		{
+			M_displayer.leaderPrint ( "FSI - initializing extrapolation of initial guess\n" ) ;
+			initializeExtrapolation ( );
+		}
+
+		if ( M_extrapolateInitialGuess )
+		{
+			M_displayer.leaderPrint ( "FSI - Extrapolating initial guess for Newton\n" ) ;
+			M_extrapolationSolution->extrapolate (M_orderExtrapolationInitialGuess, *M_solution);
+		}
+
 		// Apply current BC to the solution vector
 		applyBCsolution ( M_solution );
 
@@ -633,6 +658,9 @@ FSIHandler::solveFSIproblem ( )
 
 		iterChrono.reset();
 
+		if ( M_extrapolateInitialGuess )
+			M_extrapolationSolution->shift(*M_solution);
+
 		// Export the solution obtained at the current timestep
 		M_fluidVelocity->subset(*M_solution, M_fluid->uFESpace()->map(), 0, 0);
 		M_fluidPressure->subset(*M_solution, M_fluid->pFESpace()->map(), M_fluid->uFESpace()->map().mapSize(), 0);
@@ -651,6 +679,19 @@ FSIHandler::solveFSIproblem ( )
 
 	M_exporterFluid->closeFile();
 	M_exporterStructure->closeFile();
+}
+
+void
+FSIHandler::initializeExtrapolation( )
+{
+	// Initialize vector in the extrapolation object for the initial guess of Newton
+	vector_Type solutionInitial ( *M_monolithicMap );
+	std::vector<vector_Type> initialStateSolution;
+	solutionInitial *= 0 ;
+	for ( UInt i = 0; i < M_orderExtrapolationInitialGuess; ++i )
+		initialStateSolution.push_back(solutionInitial);
+
+	M_extrapolationSolution->initialize(initialStateSolution);
 }
 
 void

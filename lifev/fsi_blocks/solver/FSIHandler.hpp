@@ -218,6 +218,8 @@ private:
 
     void structureToInterface (vector_Type& VectorOnGamma, const vector_Type& VectorOnStructure);
 
+    void initializeExtrapolation( );
+
     //! communicator
     commPtr_Type M_comm;
 
@@ -330,6 +332,11 @@ private:
 	std::ofstream M_outputTimeStep;
 	std::ofstream M_outputResiduals;
 	std::ofstream M_outputSteps;
+
+	// Extrapolation of the initial guess for Newton
+	bool M_extrapolateInitialGuess;
+	UInt M_orderExtrapolationInitialGuess;
+	boost::shared_ptr<TimeAndExtrapolationHandler> M_extrapolationSolution;
 };
 
 } // end namespace LifeV
