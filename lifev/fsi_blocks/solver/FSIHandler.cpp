@@ -113,6 +113,26 @@ FSIHandler::partitionMeshes( )
     M_structureLocalMesh = M_structurePartitioner->meshPartition();
 }
 
+void
+FSIHandler::readPartitionedMeshes( )
+{
+	const std::string fluidHdf5File (M_datafile ("offlinePartioner/fluidPartitionedMesh", "fluid.h5") );
+	const std::string solidHdf5File (M_datafile ("offlinePartioner/solidPartitionedMesh", "solid.h5") );
+	const std::string interfaceHdf5File (M_datafile ("offlinePartioner/interfacePartitioned", "interface.h5") );
+
+	boost::shared_ptr<Epetra_MpiComm> comm = boost::dynamic_pointer_cast<Epetra_MpiComm>(M_comm);
+
+	// Load fluid mesh part from HDF5
+	M_displayer.leaderPrint ( "\tReading the fluid mesh parts\n" ) ;
+	PartitionIO<mesh_Type > partitionIO (fluidHdf5File, comm);
+	partitionIO.read (M_fluidLocalMesh);
+
+	// Load fluid mesh part from HDF5
+	M_displayer.leaderPrint ( "\tReading the solid mesh parts\n" ) ;
+	PartitionIO<mesh_Type > partitionIOstructure (solidHdf5File, comm);
+	partitionIOstructure.read (M_structureLocalMesh);
+}
+
 void FSIHandler::setup ( )
 {
 	// Fluid

@@ -90,6 +90,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <lifev/fsi_blocks/solver/aSIMPLEFSIOperator.hpp>
 
+#include <lifev/core/filter/PartitionIO.hpp>
+
 namespace LifeV
 {
 
@@ -149,6 +151,8 @@ public:
     void readMeshes( );
 
     void partitionMeshes ( );
+
+    void readPartitionedMeshes( );
 
     void setup ( );
 
