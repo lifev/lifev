@@ -115,9 +115,14 @@ int main (int argc, char** argv)
     MeshData solidMeshData (dataFile, "solid_mesh");
     readMesh (*solidMeshPtr, solidMeshData);
 
+    std::string fluidOrder (dataFile ("fluid_mesh/order", "P1") );
+
+    std::string solidOrder (dataFile ("solid_mesh/order", "P1") );
+
+
     // Create the FSI partitioner
     MeshPartitionerOfflineFSI<mesh_Type> fsiPartitioner (
-        fluidMeshPtr, solidMeshPtr, numParts, numParts, "P1", "P1",
+        fluidMeshPtr, solidMeshPtr, numParts, numParts, fluidOrder, solidOrder,
         1, 1, 0, 0, 0, comm);
 
     // Release the original mesh from the MeshPartitioner object and

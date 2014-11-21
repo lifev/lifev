@@ -13,19 +13,21 @@
 ###################################################################################################
 
 [test]
-    num_parts = 3
-    fluid_hdf5_file_name = fluid.h5
-    solid_hdf5_file_name = solid.h5
-    interface_hdf5_file_name = interface.h5
+    num_parts = 2
+    fluid_hdf5_file_name = fluid_2.h5
+    solid_hdf5_file_name = solid_2.h5
+    interface_hdf5_file_name = interface_2.h5
 
 [fluid_mesh]
     mesh_dir = ./
     mesh_file = tube20.mesh
     mesh_type = .mesh
     verbose = false
+    order   = P2
     
 [solid_mesh]
     mesh_dir = ./
     mesh_file = vessel20.mesh
     mesh_type = .mesh
     verbose = false
+    order   = P2
