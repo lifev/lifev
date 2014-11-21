@@ -422,7 +422,6 @@ void NavierStokesSolver::updateJacobian( const vector_Type& u_k )
 	}
 
 	*M_Jacobian += *M_F;
-	M_Jacobian->spy("Jac");
 }
 
 }
