@@ -381,10 +381,12 @@ void MeshPartitionerOfflineFSI<MeshType>::runTheCutters()
 {
     std::cout << "\nPartitioning fluid mesh...\n" << std::endl;
     M_fluidMeshCutter->doPartitionGraph();
+    M_fluidMeshCutter->fillEntityPID();
     M_fluidMeshCutter->doPartitionMesh();
     M_fluidMeshCutter->releaseUnpartitionedMesh();
     std::cout << "\nPartitioning solid mesh...\n" << std::endl;
     M_solidMeshCutter->doPartitionGraph();
+    M_solidMeshCutter->fillEntityPID();
     M_solidMeshCutter->doPartitionMesh();
     M_solidMeshCutter->releaseUnpartitionedMesh();
     std::cout << std::endl;
