@@ -22,53 +22,10 @@
     mesh_dir = ./
     mesh_file = tube20.mesh
     mesh_type = .mesh
-    verbose = true
+    verbose = false
     
 [solid_mesh]
     mesh_dir = ./
     mesh_file = vessel20.mesh
     mesh_type = .mesh
-    verbose = true
-
-# [../exporter]
-# 
-# type       = hdf5
-# multimesh  = false
-# start      = 0
-# save       = 1
-# 
-# [../prec]
-# 	prectype                = Ifpack
-# 	displayList             = false
-# 
-#         [../ifpack]
-# 	        overlap		= 2
-# 
-#            	[./fact]
-#            	ilut_level-of-fill            = 1
-#            	drop_tolerance                = 1.e-5
-#            	relax_value                   = 0
-# 
-#            	[../amesos]
-#            	solvertype =  Amesos_Klu
-# 
-#            	[../partitioner]
-#            	overlap = 2
-# 
-#            	[../schwarz]
-#            	reordering_type = none
-#            	filter_singletons = true
-# 
-# 		[../]
-# 	[../]
-# 
-# [../solver]
-#     solver          = gmres
-#     scaling         = none
-#     output          = all
-#     conv            = rhs
-#     max_iter        = 200
-#     reuse           = true
-#     max_iter_reuse  = 80
-#     kspace          = 100
-#     tol             = 1.e-10    # AztecOO tolerance
+    verbose = false
