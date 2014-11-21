@@ -85,7 +85,7 @@ int main (int argc, char** argv)
     }
 
     GetPot commandLine (argc, argv);
-    string dataFileName = commandLine.follow ("data", 2, "-f", "--file");
+    std::string dataFileName = commandLine.follow ("data", 2, "-f", "--file");
     GetPot dataFile (dataFileName);
 
     const UInt numParts (dataFile ("test/num_parts", 4) );
