@@ -92,6 +92,6 @@
 	convectiveImplicit      	=  true
 	useShapeDerivatives     	=  true
 	extrapolateInitialGuess  =  true
-	orderExtrapolation       =  3
+	orderExtrapolation       =  3    # it can be 1, 2 or 3
 	
 [../]
