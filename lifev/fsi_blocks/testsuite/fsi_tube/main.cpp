@@ -145,7 +145,6 @@ main ( int argc, char** argv )
     
     fsi.setup();
 
-    /*
     // ---------------------//
     // Create inteface maps //
     // ---------------------//
@@ -163,7 +162,7 @@ main ( int argc, char** argv )
     // ----------//
 
     fsi.solveFSIproblem ( );
-	*/
+
     }
 
 #ifdef HAVE_MPI

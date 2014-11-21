@@ -119,7 +119,6 @@ FSIHandler::readPartitionedMeshes( )
 {
 	const std::string fluidHdf5File (M_datafile ("offlinePartioner/fluidPartitionedMesh", "fluid.h5") );
 	const std::string solidHdf5File (M_datafile ("offlinePartioner/solidPartitionedMesh", "solid.h5") );
-	const std::string interfaceHdf5File (M_datafile ("offlinePartioner/interfacePartitioned", "interface.h5") );
 
 	boost::shared_ptr<Epetra_MpiComm> comm = boost::dynamic_pointer_cast<Epetra_MpiComm>(M_comm);
 
@@ -336,7 +335,6 @@ void FSIHandler::initializeTimeAdvance ( )
 	std::vector<vectorPtr_Type> uv0;
 	for ( UInt previousPass = 0; previousPass < M_structureTimeAdvance->size() ; previousPass++)
 	{
-		Real previousTimeStep = M_t_zero - previousPass * M_dt;
 		uv0.push_back (disp);
 	}
 	M_structureTimeAdvance->setInitialCondition (uv0);
@@ -351,7 +349,6 @@ void FSIHandler::initializeTimeAdvance ( )
 	std::vector<vectorPtr_Type> df0;
 	for ( UInt previousPass = 0; previousPass < M_aleTimeAdvance->size() ; previousPass++)
 	{
-		Real previousTimeStep = M_t_zero - previousPass * M_dt;
 		df0.push_back (fluidDisp);
 	}
 	M_aleTimeAdvance->setInitialCondition (df0);
@@ -375,13 +372,24 @@ void FSIHandler::buildInterfaceMaps ()
 	M_displayer.leaderPrintMax ( " Flag of the interface = ", interface ) ;
 	M_displayer.leaderPrintMax ( " Tolerance for dofs on the interface = ", tolerance ) ;
 
-	M_dofStructureToFluid.reset ( new DOFInterface3Dto3D );
-	M_dofStructureToFluid->setup ( M_fluid->uFESpace()->refFE(), M_fluid->uFESpace()->dof(), M_displacementFESpaceSerial->refFE(), M_displacementFESpaceSerial->dof() );
-	M_dofStructureToFluid->update ( *M_fluid->uFESpace()->mesh(), interface, *M_displacementFESpaceSerial->mesh(),  interface, tolerance, &flag);
+	if ( !M_usePartitionedMeshes )
+	{
+		M_dofStructureToFluid.reset ( new DOFInterface3Dto3D );
+		M_dofStructureToFluid->setup ( M_fluid->uFESpace()->refFE(), M_fluid->uFESpace()->dof(), M_displacementFESpaceSerial->refFE(), M_displacementFESpaceSerial->dof() );
+		M_dofStructureToFluid->update ( *M_fluid->uFESpace()->mesh(), interface, *M_displacementFESpaceSerial->mesh(),  interface, tolerance, &flag);
+		M_localDofMap.reset(new std::map<UInt, UInt> ( M_dofStructureToFluid->localDofMap ( ) ) );
+	}
+	else
+	{
+		const std::string interfaceHdf5File (M_datafile ("offlinePartioner/interfacePartitioned", "interface.h5") );
+		boost::shared_ptr<Epetra_MpiComm> comm = boost::dynamic_pointer_cast<Epetra_MpiComm>(M_comm);
+		DOFInterfaceIO interfaceIO (interfaceHdf5File, comm);
+		interfaceIO.read (M_localDofMap);
+	}
 
-	createInterfaceMaps ( M_dofStructureToFluid->localDofMap ( ) );
+	createInterfaceMaps ( *M_localDofMap );
 
-	constructInterfaceMap ( M_dofStructureToFluid->localDofMap ( ), M_displacementFESpace->map().map(Unique)->NumGlobalElements()/nDimensions );
+	constructInterfaceMap ( *M_localDofMap, M_displacementFESpace->map().map(Unique)->NumGlobalElements()/nDimensions );
 
 	M_displayer.leaderPrintMax ( " Number of DOFs on the interface = ", M_lagrangeMap->mapSize() ) ;
 }
@@ -497,7 +505,7 @@ FSIHandler::assembleCoupling ( )
 	M_coupling->setUp ( M_dt, M_structureInterfaceMap->mapSize()/3.0 , M_structureTimeAdvance->coefficientFirstDerivative ( 0 ),
 						M_lagrangeMap, M_fluid->uFESpace(), M_displacementFESpace, M_numerationInterface );
 
-	M_coupling->buildBlocks ( M_dofStructureToFluid->localDofMap ( ) );
+	M_coupling->buildBlocks ( *M_localDofMap );
 
 }
 
@@ -557,7 +565,6 @@ FSIHandler::updateRhsCouplingVelocities ( )
 	M_rhsCouplingVelocities.reset( new VectorEpetra ( *M_lagrangeMap ) );
 	M_rhsCouplingVelocities->zero();
 
-	std::map<ID, ID> const& localDofMap = M_dofStructureToFluid->localDofMap ( ) ;
 	std::map<ID, ID>::const_iterator ITrow;
 
 	UInt interface (M_structureInterfaceMap->mapSize()/3.0 );
@@ -565,7 +572,7 @@ FSIHandler::updateRhsCouplingVelocities ( )
 
 	for (UInt dim = 0; dim < 3; ++dim)
 	{
-		for ( ITrow = localDofMap.begin(); ITrow != localDofMap.end() ; ++ITrow)
+		for ( ITrow = M_localDofMap->begin(); ITrow != M_localDofMap->end() ; ++ITrow)
 		{
 			if (M_structureInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second ) ) >= 0 )
 			{

@@ -91,6 +91,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/fsi_blocks/solver/aSIMPLEFSIOperator.hpp>
 
 #include <lifev/core/filter/PartitionIO.hpp>
+#include <lifev/fsi_blocks/filter/DOFInterfaceIO.hpp>
 
 namespace LifeV
 {
@@ -344,6 +345,7 @@ private:
 
 	// paritioned meshes
 	bool M_usePartitionedMeshes;
+	boost::shared_ptr<std::map<UInt, UInt> > M_localDofMap;
 };
 
 } // end namespace LifeV
