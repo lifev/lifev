@@ -21,7 +21,9 @@ NavierStokesSolver::~NavierStokesSolver()
 
 void NavierStokesSolver::setParameters( )
 {
-	Teuchos::RCP<Teuchos::ParameterList> solversOptions = Teuchos::getParametersFromXmlFile ("solversOptionsFast.xml");
+    std::string optionsPrec = M_dataFile("fluid/options_preconditioner","solverOptionsFast");
+    optionsPrec += ".xml";
+	Teuchos::RCP<Teuchos::ParameterList> solversOptions = Teuchos::getParametersFromXmlFile (optionsPrec);
 	M_prec->setOptions(*solversOptions);
 	setSolversOptions(*solversOptions);
 }
@@ -44,7 +46,7 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
 	M_fespacePETA.reset( new ETFESpace_pressure(M_pressureFESpace->mesh(), &(M_pressureFESpace->refFE()), M_comm));
 
 	M_uExtrapolated.reset( new vector_Type ( M_velocityFESpace->map(), Repeated ) );
-	*M_uExtrapolated *= 0;
+	M_uExtrapolated->zero();
 
 	M_stiffStrain = M_dataFile("fluid/space_discretization/stiff_strain", true);
 
@@ -292,7 +294,7 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 	M_uExtrapolated.reset( new vector_Type ( *u_star, Repeated ) );
 
 	// Update convective term
-	*M_C *= 0;
+	M_C->zero();
 	{
 		using namespace ExpressionAssembly;
 		integrate( elements(M_fespaceUETA->mesh()),
@@ -306,7 +308,7 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 	M_C->globalAssemble();
 
 	// Get the matrix corresponding to the block (0,0)
-	*M_F *= 0;
+	M_F->zero();
 	*M_F += *M_Mu;
 	*M_F *= M_alpha/M_timeStep;
 	*M_F += *M_A;
