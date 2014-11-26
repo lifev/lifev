@@ -14,20 +14,21 @@
 
 [test]
     num_parts = 12
-    fluid_hdf5_file_name = fluid_P2_12.h5
-    solid_hdf5_file_name = solid_P2_12.h5
-    interface_hdf5_file_name = interface_P2_12.h5
+    fluid_hdf5_file_name = bypassFluid_P2_12.h5
+    solid_hdf5_file_name = bypassStructure_P2_12.h5
+    interface_hdf5_file_name = interfaceBypass_P2_12.h5
+    fluidVertexFlag = 20
 
 [fluid_mesh]
     mesh_dir = ./
-    mesh_file = tube20.mesh
+    mesh_file = fluido_1level.mesh
     mesh_type = .mesh
     verbose = false
     order   = P2
     
 [solid_mesh]
     mesh_dir = ./
-    mesh_file = vessel20.mesh
+    mesh_file = struttura_1level.mesh
     mesh_type = .mesh
     verbose = false
     order   = P2
