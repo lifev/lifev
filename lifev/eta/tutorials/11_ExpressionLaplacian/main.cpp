@@ -103,7 +103,7 @@ typedef VectorEpetra vector_Type;
 Real uFct ( const Real& /* t */, const Real&  x , const Real&  y , const Real& z , const ID& i )
 {
     if ( i == 0 )
-    	return x*x;
+    	return x;
     else
     	return 0.0;
 }
@@ -181,7 +181,7 @@ int main ( int argc, char** argv )
     std::string uOrder ("P1");
 
     boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace
-    ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 3, Comm) );
+    ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 1, Comm) );
 
     if (verbose)
     {
@@ -197,8 +197,8 @@ int main ( int argc, char** argv )
         std::cout << " -- Building ETFESpaces ... " << std::flush;
     }
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 3 > > ETuSpace
-    ( new ETFESpace< mesh_Type, MapEpetra, 3, 3 > (meshPtr, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), Comm) );
+    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > ETuSpace
+    ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPtr, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), Comm) );
 
     if (verbose)
     {

@@ -320,6 +320,8 @@ addTo (VectorType& vec)
     // Defaulted to true for security
     bool isPreviousAdapted (true);
 
+    std::cout << "\n\n[DF-] Number of elements = " << nbElements << "\n\n";
+
     for (UInt iElement (0); iElement < nbElements; ++iElement)
     {
         // Zeros out the elemental vector
@@ -406,9 +408,11 @@ addTo (VectorType& vec)
                      M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() + M_offset);
                 }
 
+                std::cout << "\n\n[DF-] Number of quad Points = " << nbQuadPt_std << "\n\n";
                 // Make the assembly
                 for (UInt iQuadPt (0); iQuadPt < nbQuadPt_std; ++iQuadPt)
                 {
+                	std::cout << "\n\t[DF-] Number of test Dofs = " << nbTestDof << "\n\n";
                     for (UInt i (0); i < nbTestDof; ++i)
                     {
                         M_elementalVector.element (i + iblock * nbTestDof) +=
