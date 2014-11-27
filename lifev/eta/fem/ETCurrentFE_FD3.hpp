@@ -305,8 +305,14 @@ private:
     //! Update Dphi
     void updateDphi ( const UInt& iQuadPt );
 
+    //! Update D2phi
+    void updateD2phi ( const UInt& iQuadPt );
+
     //! Update Divergence
     void updateDivergence (const UInt& iQuadPt);
+
+    //! Update Divergence
+    void updateLaplacian (const UInt& iQuadPt);
 
     //@}
 
@@ -800,6 +806,25 @@ setupInternalConstants()
         }
     }
 
+    // D2PHIREFERENCEFE
+    M_d2phiReferenceFE.resize (M_nbQuadPt);
+    for (UInt q (0); q < M_nbQuadPt; ++q)
+    {
+    	M_d2phiReferenceFE[q].resize (M_nbFEDof);
+    	for (UInt i (0); i < M_nbFEDof; ++i)
+    	{
+    		M_d2phiReferenceFE[q][i].resize (spaceDim);
+    		for (UInt j (0); j < spaceDim; ++j)
+    		{
+    			M_d2phiReferenceFE[q][i][j].resize (spaceDim);
+    			for (UInt k (0); k < spaceDim; ++k)
+    			{
+    				M_d2phiReferenceFE[q][i][j][k] = M_referenceFE->d2Phi (i, j, k, M_quadratureRule->quadPointCoor (q) );
+    			}
+    		}
+    	}
+    }
+
     // The second group of values cannot be computed
     // now because it depends on the current element.
     // So, we just make space for it.
@@ -1013,6 +1038,74 @@ void ETCurrentFE< spaceDim, fieldDim >::updateDivergence ( const UInt& iQuadPt )
     }
 }
 
+template< UInt spaceDim, UInt fieldDim >
+void ETCurrentFE< spaceDim, fieldDim >::updateD2phi ( const UInt& iQuadPt )
+{
+    ASSERT ( M_isInverseJacobianUpdated,
+             "Inverse jacobian must be updated to compute the derivative of the basis functions" );
+
+#ifdef HAVE_LIFEV_DEBUG
+    M_isD2phiUpdated = true;
+#endif
+
+    Real partialSum ( 0.0 );
+
+    for ( UInt iDof ( 0 ); iDof < M_nbFEDof; ++iDof )
+    {
+        for ( UInt iCoor ( 0 ); iCoor < S_spaceDimension; ++iCoor )
+        {
+        	for ( UInt jCoor ( 0 ); jCoor < S_spaceDimension; ++jCoor )
+        	{
+        		partialSum = 0.0;
+        		for ( UInt k1 (0); k1 < S_spaceDimension; ++k1 )
+        		{
+        			for ( UInt k2 (0) ; k2 < S_spaceDimension; ++k2 )
+        			{
+        				partialSum += M_tInverseJacobian[iQuadPt][iCoor][k1]
+        				            * M_d2phiReferenceFE[iQuadPt][iDof][k1][k2]
+        				            * M_tInverseJacobian[iQuadPt][jCoor][k2];
+        			}
+        		}
+
+        		// set only appropriate values, other are initialized to 0 by default constructor (of VectorSmall)
+        		M_d2phi[iQuadPt][iDof][0][iCoor][jCoor] = partialSum;
+
+        		// copy other values according to the vectorial basis functions
+        		for ( UInt k ( 1 ); k < fieldDim; ++k)
+        		{
+        			M_d2phi[iQuadPt][k * M_nbFEDof + iDof][k][iCoor][jCoor] = partialSum;
+        		}
+        	}
+        }
+    }
+}
+
+template< UInt spaceDim, UInt fieldDim >
+void ETCurrentFE< spaceDim, fieldDim >::updateLaplacian ( const UInt& iQuadPt )
+{
+    ASSERT ( M_isD2phiUpdated,
+             "Basis function second derivatives must be updated to compute the laplacian" );
+
+#ifdef HAVE_LIFEV_DEBUG
+    M_isLaplacianUpdated = true;
+#endif
+
+    Real partialSum ( 0.0 );
+
+    for ( UInt iDof ( 0 ); iDof < fieldDim * M_nbFEDof; ++iDof )
+    {
+        for ( UInt k ( 0 ); k < fieldDim; ++k )
+        {
+        	partialSum = 0.0;
+        	for ( UInt iCoor ( 0 ); iCoor < S_spaceDimension; ++iCoor )
+        	{
+        		partialSum += M_d2phi[iQuadPt][iDof][k][iCoor][iCoor];
+        	}
+
+        	M_laplacian[iQuadPt][iDof][k] = partialSum;
+        }
+    }
+}
 
 template< UInt spaceDim, UInt fieldDim >
 template< typename ElementType >
