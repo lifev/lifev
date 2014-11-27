@@ -51,6 +51,10 @@ private:
     //Private typedefs for the 3D array of vector
     typedef std::vector< std::vector< matrix_Return_Type > > array2D_matrix_Type;
 
+    // Typedefs for the second derivative
+    typedef MatrixSmall< spaceDim, spaceDim > matrix_d2Phi;
+    typedef std::vector< std::vector< std::vector< matrix_d2Phi > > > array_d2Phi;
+
 public:
 
     //! @name Static constants
@@ -264,6 +268,9 @@ private:
     //Private typedefs for the 3D array (array of 2D array)
     typedef std::vector< array2D_Type > array3D_Type;
 
+    //Private typedefs for the 4D array (array of 3D array)
+    typedef std::vector< array3D_Type > array4D_Type;
+
     //! @name Private Methods
     //@{
 
@@ -331,6 +338,8 @@ private:
     array3D_Type M_dphiReferenceFE;
     // Storage for the derivatives of the geometric map
     array3D_Type M_dphiGeometricMap;
+    // Storage for the second derivatives of the basis functions
+    array4D_Type M_d2phiReferenceFE;
 
     // Storage for the coordinates of the nodes of the current element
     array2D_Type M_cellNode;
@@ -347,9 +356,14 @@ private:
 
     // Storage for the derivative of the basis functions
     array2D_matrix_Type M_dphi;
-
     // Storage for the divergence of the basis functions
     array2D_Type M_divergence;
+
+    // Storage for the second derivative of the basis functions
+    array_d2Phi M_d2phi;
+    // Storage for the laplacian of the basis functions
+    array3D_Type M_laplacian;
+
 
 #ifdef HAVE_LIFEV_DEBUG
     // Debug informations, defined only if the code
@@ -365,6 +379,8 @@ private:
     bool M_isPhiUpdated;
     bool M_isDphiUpdated;
     bool M_isDivergenceUpdated;
+    bool M_isD2phiUpdated;
+    bool M_isLaplacianUpdated;
 #endif
 
 };
@@ -401,6 +417,7 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadrat
     M_phi(),
     M_phiMap(),
     M_dphiReferenceFE(),
+    M_d2phiReferenceFE(),
     M_dphiGeometricMap(),
 
     M_cellNode(),
@@ -410,7 +427,9 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadrat
     M_wDet(),
     M_tInverseJacobian(),
     M_dphi(),
-    M_divergence()
+    M_divergence(),
+    M_d2phi(),
+    M_laplacian()
 
 #ifdef HAVE_LIFEV_DEBUG
     , M_isCellNodeUpdated (false),
@@ -422,6 +441,8 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadrat
     M_isPhiUpdated (false),
     M_isDphiUpdated (false),
     M_isDivergenceUpdated (false)
+    M_isD2phiUpdated (false),
+    M_isLaplacianUpdated (false)
 #endif
 
 {
@@ -447,6 +468,7 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap)
     M_phi(),
     M_phiMap(),
     M_dphiReferenceFE(),
+    M_d2phiReferenceFE(),
     M_dphiGeometricMap(),
 
     M_cellNode(),
@@ -456,7 +478,10 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap)
     M_wDet(),
     M_tInverseJacobian(),
     M_dphi(),
-    M_divergence()
+    M_divergence(),
+
+    M_d2phi(),
+    M_laplacian()
 
 #ifdef HAVE_LIFEV_DEBUG
     , M_isCellNodeUpdated (false),
@@ -467,7 +492,9 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap)
     M_isWDetUpdated (false),
     M_isPhiUpdated (false),
     M_isDphiUpdated (false),
-    M_isDivergenceUpdated (false)
+    M_isDivergenceUpdated (false),
+    M_isD2phiUpdated (false),
+    M_isLaplacianUpdated (false)
 #endif
 
 {
@@ -492,6 +519,7 @@ ETCurrentFE (const ETCurrentFE<spaceDim, fieldDim>& otherFE)
     M_phi (otherFE.M_phi),
     M_phiMap (otherFE.M_phiMap),
     M_dphiReferenceFE (otherFE.M_dphiReferenceFE),
+    M_d2phiReferenceFE (otherFE.M_d2phiReferenceFE),
     M_dphiGeometricMap (otherFE.M_dphiGeometricMap),
 
     M_cellNode (otherFE.M_cellNode),
@@ -501,7 +529,10 @@ ETCurrentFE (const ETCurrentFE<spaceDim, fieldDim>& otherFE)
     M_wDet (otherFE.M_wDet),
     M_tInverseJacobian (otherFE.M_tInverseJacobian),
     M_dphi (otherFE.M_dphi),
-    M_divergence (otherFE.M_divergence)
+    M_divergence (otherFE.M_divergence),
+
+    M_d2phi (otherFE.M_d2phi),
+    M_laplacian (otherFE.M_laplacian)
 
 #ifdef HAVE_LIFEV_DEBUG
     //Beware for the comma at the begining of this line!
@@ -513,7 +544,9 @@ ETCurrentFE (const ETCurrentFE<spaceDim, fieldDim>& otherFE)
     M_isWDetUpdated ( otherFE.M_isWDetUpdated ),
     M_isPhiUpdated ( otherFE.M_isPhiUpdated ),
     M_isDphiUpdated ( otherFE.M_isDphiUpdated ),
-    M_isDivergenceUpdated ( otherFE.M_isDivergenceUpdated )
+    M_isDivergenceUpdated ( otherFE.M_isDivergenceUpdated ),
+    M_isD2phiUpdated ( otherFE.M_isD2phiUpdated ),
+    M_isLaplacianUpdated ( otherFE.M_isLaplacianUpdated )
 #endif
 
 {}
@@ -547,6 +580,8 @@ update (const elementType& element, const flag_Type& flag)
     M_isWDetUpdated = false;
     M_isDphiUpdated = false;
     M_isDivergenceUpdated = false;
+    M_isD2phiUpdated = false;
+    M_isLaplacianUpdated = false;
 #endif
 
     // update the cell informations if required
@@ -824,6 +859,34 @@ setupInternalConstants()
     {
         // we have fieldDim * DoF basis functions
         M_divergence[i].resize ( fieldDim * M_nbFEDof );
+    }
+
+    // d2phi
+    M_d2phi.resize (M_nbQuadPt);
+    for (UInt i (0); i < M_nbQuadPt; ++i)
+    {
+    	// we have fieldDim * DoF basis functions
+    	M_d2phi[i].resize ( fieldDim * M_nbFEDof );
+
+    	// for each basis function we have fieldDim
+    	for (UInt j (0); j < ( fieldDim * M_nbFEDof ); ++j)
+    	{
+    		M_d2phi[i][j].resize(fieldDim);
+    	}
+    }
+
+    // laplacian
+    M_laplacian.resize (M_nbQuadPt);
+    for (UInt i (0); i < M_nbQuadPt; ++i)
+    {
+    	// we have fieldDim * DoF basis functions
+    	M_laplacian[i].resize ( fieldDim * M_nbFEDof );
+
+    	// for each basis function we have fieldDim components of the laplacian
+    	for (UInt j (0); j < ( fieldDim * M_nbFEDof ); ++j)
+    	{
+    		M_laplacian[i][j].resize(fieldDim);
+    	}
     }
 }
 
