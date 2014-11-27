@@ -93,12 +93,6 @@ typedef VectorEpetra vector_Type;
 //!                   Functions
 // ===================================================
 
-// ---------------------------------------------------------------
-// We define a function whose gradient is
-// (1 0 0)
-// (0 5 0)
-// (0 0 2)
-// ---------------------------------------------------------------
 
 Real uFct ( const Real& /* t */, const Real&  x , const Real&  y , const Real& z , const ID& i )
 {
