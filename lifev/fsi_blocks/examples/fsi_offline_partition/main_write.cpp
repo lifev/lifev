@@ -96,6 +96,8 @@ int main (int argc, char** argv)
     const std::string interfacePartsFileName (dataFile ("test/interface_hdf5_file_name",
                                                         "solid.h5") );
 
+    UInt fluidVertexFlag = dataFile ("test/fluidVertexFlag", 33 );
+
     std::cout << "Number of parts: " << numParts << std::endl;
     std::cout << "Name of fluid HDF5 container: "
               << fluidPartsFileName << std::endl;
@@ -123,7 +125,10 @@ int main (int argc, char** argv)
     // Create the FSI partitioner
     MeshPartitionerOfflineFSI<mesh_Type> fsiPartitioner (
         fluidMeshPtr, solidMeshPtr, numParts, numParts, fluidOrder, solidOrder,
-        1, 1, 0, 0, 0, comm);
+        1, 1, 0, fluidVertexFlag, 0, comm);
+
+
+    fsiPartitioner.showMe();
 
     // Release the original mesh from the MeshPartitioner object and
     // delete the RegionMesh object

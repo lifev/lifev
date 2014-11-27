@@ -475,6 +475,11 @@ void MeshPartitionerOfflineFSI<MeshType>::createSpaces()
                                                    3,
                                                    M_comm) );
     std::cout << "done." << std::endl;
+
+    // Printing out number of dofs for the fluid and the velocity
+    feSpace_Type velocity(M_uncutFluidMesh, *refFE_vel, *qR_vel, *bdQr_vel, 3, M_comm);
+    std::cout << "Number of dofs for the fluid velocity: " << velocity.dof().numTotalDof()*3 << std::endl;
+    std::cout << "Number of dofs for the structure displacement: " << M_displacementFESpace->dof().numTotalDof()*3 << std::endl;
 }
 
 template<typename MeshType>
