@@ -14,4 +14,5 @@ ADD_SUBDIRECTORIES(
   9_ETA_QRProvider
   10_ETA_QR_Advanced
   9_ETA_gradient_interpolation
+  11_ExpressionLaplacian
 )
