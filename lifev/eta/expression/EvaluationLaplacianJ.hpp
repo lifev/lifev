@@ -152,20 +152,10 @@ public:
     //! @name Get Methods
     //@{
 
-    //! Getter for the value for a vector
-    const return_Type& value_qi (const UInt& q, const UInt& i) const
-    {
-        ASSERT ( q < M_valuesPtr->size(), "Quadrature point index invalid");
-        ASSERT ( i < (*M_valuesPtr) [q].size(), "Dof index invalid");
-        return (*M_valuesPtr) [q][i];
-    }
-
     //! Getter for the value for a matrix
-    const return_Type& value_qij (const UInt& q, const UInt& i, const UInt& /*j*/) const
+    const return_Type& value_qij (const UInt& q, const UInt& /*i*/, const UInt& j) const
     {
-        ASSERT ( q < M_valuesPtr->size(), "Quadrature point index invalid");
-        ASSERT ( i < (*M_valuesPtr) [q].size(), "Dof index invalid");
-        return (*M_valuesPtr) [q][i];
+        return (*M_valuesPtr) [q][j];
     }
 
     //@}
@@ -182,10 +172,10 @@ template<UInt fieldDim, UInt spaceDim>
 const flag_Type EvaluationLaplacianJ<fieldDim, spaceDim>::S_globalUpdateFlag = ET_UPDATE_NONE;
 
 template<UInt fieldDim, UInt spaceDim>
-const flag_Type EvaluationLaplacianJ<fieldDim, spaceDim>::S_testUpdateFlag = ET_UPDATE_LAPLACIAN;
+const flag_Type EvaluationLaplacianJ<fieldDim, spaceDim>::S_testUpdateFlag = ET_UPDATE_NONE;
 
 template<UInt fieldDim, UInt spaceDim>
-const flag_Type EvaluationLaplacianJ<fieldDim, spaceDim>::S_solutionUpdateFlag = ET_UPDATE_NONE;
+const flag_Type EvaluationLaplacianJ<fieldDim, spaceDim>::S_solutionUpdateFlag = ET_UPDATE_LAPLACIAN;
 
 
 //! Evaluation of the basis function dphi_i in the case of a scalar FE.
@@ -287,20 +277,10 @@ public:
     //! @name Get Methods
     //@{
 
-    //! Getter for the value for a vector
-    const return_Type& value_qi (const UInt& q, const UInt& i) const
-    {
-        ASSERT ( q < M_valuesPtr->size(), "Quadrature point index invalid");
-        ASSERT ( i < (*M_valuesPtr) [q].size(), "Dof index invalid");
-        return (*M_valuesPtr) [q][i];
-    }
-
     //! Getter for the value for a matrix
-    const return_Type& value_qij (const UInt& q, const UInt& i, const UInt& /*j*/) const
+    const return_Type& value_qij (const UInt& q, const UInt& /*i*/, const UInt& j) const
     {
-        ASSERT ( q < M_valuesPtr->size(), "Quadrature point index invalid");
-        ASSERT ( i < (*M_valuesPtr) [q].size(), "Dof index invalid");
-        return (*M_valuesPtr) [q][i];
+        return (*M_valuesPtr) [q][j];
     }
 
     //@}
@@ -317,10 +297,10 @@ template<UInt spaceDim>
 const flag_Type EvaluationLaplacianJ<1, spaceDim>::S_globalUpdateFlag = ET_UPDATE_NONE;
 
 template<UInt spaceDim>
-const flag_Type EvaluationLaplacianJ<1, spaceDim>::S_testUpdateFlag = ET_UPDATE_LAPLACIAN;
+const flag_Type EvaluationLaplacianJ<1, spaceDim>::S_testUpdateFlag = ET_UPDATE_NONE;
 
 template<UInt spaceDim>
-const flag_Type EvaluationLaplacianJ<1, spaceDim>::S_solutionUpdateFlag = ET_UPDATE_NONE;
+const flag_Type EvaluationLaplacianJ<1, spaceDim>::S_solutionUpdateFlag = ET_UPDATE_LAPLACIAN;
 
 } // Namespace ExpressionAssembly
 
