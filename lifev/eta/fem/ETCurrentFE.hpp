@@ -1174,7 +1174,6 @@ void ETCurrentFE< spaceDim, 1 >::updateD2phi ( const UInt& iQuadPt )
         			}
         		}
 
-        		// set only appropriate values, other are initialized to 0 by default constructor (of VectorSmall)
         		M_d2phi[iQuadPt][iDof][iCoor][jCoor] = partialSum;
         	}
         }
