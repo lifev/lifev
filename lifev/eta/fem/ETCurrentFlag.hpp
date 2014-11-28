@@ -57,9 +57,12 @@ namespace LifeV
 
   \section flag_primitive How to define a flag?
 
-  The flags use the binary representation of the integers to work. This enables a very fast definition and use of the flags. To understand it, let us make a simple example. Suppose that we can update three quantities A,B and C.
+  The flags use the binary representation of the integers to work. This enables a very fast definition and
+  use of the flags. To understand it, let us make a simple example. Suppose that we can update three
+  quantities A,B and C.
 
-  The first step is to define a "primitive" flag for each of these quantities. These flags are defined as powers of 2. Here, we will define
+  The first step is to define a "primitive" flag for each of these quantities. These flags are defined as
+  powers of 2. Here, we will define
 
   \code
   flag_Type UPDATE_A(1);
