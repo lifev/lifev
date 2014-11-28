@@ -165,14 +165,17 @@ const flag_Type ET_UPDATE_ONLY_D2PHI (128);
 // Update the divergence of the basis functions
 const flag_Type ET_UPDATE_ONLY_DIVERGENCE (256);
 
+// Update the laplacian of the basis functions
+const flag_Type ET_UPDATE_ONLY_LAPLACIAN (512);
+
 // Update the diameter of the triangle
-const flag_Type ET_UPDATE_ONLY_DIAMETER (512);
+const flag_Type ET_UPDATE_ONLY_DIAMETER (1024);
 
 // Update the measure of the triangle
-const flag_Type ET_UPDATE_ONLY_MEASURE (1024);
+const flag_Type ET_UPDATE_ONLY_MEASURE (2048);
 
 // Update everything
-const flag_Type ET_UPDATE_ALL (2048 - 1);
+const flag_Type ET_UPDATE_ALL (4096 - 1);
 
 
 // COMPOSITE FLAGS
@@ -211,6 +214,15 @@ const flag_Type ET_UPDATE_DIVERGENCE (ET_UPDATE_ONLY_CELL_NODE
                                       | ET_UPDATE_ONLY_T_INVERSE_JACOBIAN
                                       | ET_UPDATE_ONLY_DPHI
                                       | ET_UPDATE_ONLY_DIVERGENCE);
+
+// Flag for the laplacian of the basis functions
+const flag_Type ET_UPDATE_LAPLACIAN  (ET_UPDATE_ONLY_CELL_NODE
+                                      | ET_UPDATE_ONLY_JACOBIAN
+                                      | ET_UPDATE_ONLY_DET_JACOBIAN
+                                      | ET_UPDATE_ONLY_T_INVERSE_JACOBIAN
+                                      | ET_UPDATE_ONLY_D2PHI
+                                      | ET_UPDATE_ONLY_LAPLACIAN);
+
 
 // Flag for the diameter of the cell
 const flag_Type ET_UPDATE_DIAMETER (ET_UPDATE_ONLY_CELL_NODE
