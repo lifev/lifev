@@ -628,6 +628,14 @@ update (const elementType& element, const flag_Type& flag)
         {
             updateDivergence (i);
         }
+        if ( flag & ET_UPDATE_ONLY_D2PHI )
+        {
+        	updateD2phi (i);
+        }
+        if ( flag & ET_UPDATE_ONLY_LAPLACIAN )
+        {
+        	updateLaplacian (i);
+        }
     }
 }
 
