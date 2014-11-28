@@ -799,7 +799,7 @@ update (const elementType& element, const flag_Type& flag)
         }
         if ( flag & ET_UPDATE_ONLY_D2PHI )
         {
-        	//updateD2phi (i); //TODO
+        	updateD2phi (i);
         }
         if ( flag & ET_UPDATE_ONLY_LAPLACIAN )
         {
@@ -1145,6 +1145,41 @@ updateDphi (const UInt& iQuadPt)
     }
 }
 
+template< UInt spaceDim>
+void ETCurrentFE< spaceDim, 1 >::updateD2phi ( const UInt& iQuadPt )
+{
+    ASSERT ( M_isInverseJacobianUpdated,
+             "Inverse jacobian must be updated to compute the derivative of the basis functions" );
+
+#ifdef HAVE_LIFEV_DEBUG
+    M_isD2phiUpdated = true;
+#endif
+
+    Real partialSum ( 0.0 );
+
+    for ( UInt iDof ( 0 ); iDof < M_nbFEDof; ++iDof )
+    {
+        for ( UInt iCoor ( 0 ); iCoor < S_spaceDimension; ++iCoor )
+        {
+        	for ( UInt jCoor ( 0 ); jCoor < S_spaceDimension; ++jCoor )
+        	{
+        		partialSum = 0.0;
+        		for ( UInt k1 (0); k1 < S_spaceDimension; ++k1 )
+        		{
+        			for ( UInt k2 (0) ; k2 < S_spaceDimension; ++k2 )
+        			{
+        				partialSum += M_tInverseJacobian[iQuadPt][iCoor][k1]
+        				            * M_d2phiReferenceFE[iQuadPt][iDof][k1][k2]
+        				            * M_tInverseJacobian[iQuadPt][jCoor][k2];
+        			}
+        		}
+
+        		// set only appropriate values, other are initialized to 0 by default constructor (of VectorSmall)
+        		M_d2phi[iQuadPt][iDof][iCoor][jCoor] = partialSum;
+        	}
+        }
+    }
+}
 
 template< UInt spaceDim>
 template< typename ElementType >
