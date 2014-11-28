@@ -101,7 +101,7 @@ public:
     EvaluationLaplacianI (const EvaluationLaplacianI& provider) : M_valuesPtr (provider.M_valuesPtr) {}
 
     //! Expression-based constructor
-    explicit EvaluationLaplacianI (const ExpressionDphiI& /*expression*/) {}
+    explicit EvaluationLaplacianI (const ExpressionLaplacianI& /*expression*/) {}
 
     //! Destructor
     ~EvaluationLaplacianI() {}
@@ -236,7 +236,7 @@ public:
     EvaluationLaplacianI (const EvaluationLaplacianI& provider) : M_valuesPtr (provider.M_valuesPtr) {}
 
     //! Expression-based constructor
-    explicit EvaluationLaplacianI (const ExpressionDphiI& /*expression*/) {}
+    explicit EvaluationLaplacianI (const ExpressionLaplacianI& /*expression*/) {}
 
     //! Destructor
     ~EvaluationLaplacianI() {}
