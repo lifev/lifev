@@ -450,7 +450,7 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadrat
     M_isWDetUpdated (false),
     M_isPhiUpdated (false),
     M_isDphiUpdated (false),
-    M_isDivergenceUpdated (false)
+    M_isDivergenceUpdated (false),
     M_isD2phiUpdated (false),
     M_isLaplacianUpdated (false)
 #endif

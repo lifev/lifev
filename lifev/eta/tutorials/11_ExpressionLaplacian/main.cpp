@@ -97,7 +97,7 @@ typedef VectorEpetra vector_Type;
 Real uFct ( const Real& /* t */, const Real&  x , const Real&  y , const Real& z , const ID& i )
 {
     if ( i == 0 )
-    	return x;
+    	return 1.0;
     else
     	return 0.0;
 }
@@ -105,7 +105,7 @@ Real uFct ( const Real& /* t */, const Real&  x , const Real&  y , const Real& z
 Real uFctTest ( const Real& /* t */, const Real&  x , const Real&  y , const Real& z , const ID& i )
 {
     if ( i == 0 )
-    	return x;
+    	return x*x*0.5;
     else
     	return 0.0;
 }
@@ -172,7 +172,7 @@ int main ( int argc, char** argv )
         std::cout << " -- Building FESpaces ... " << std::flush;
     }
 
-    std::string uOrder ("P1");
+    std::string uOrder ("P2");
 
     boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace
     ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 1, Comm) );
@@ -253,7 +253,7 @@ int main ( int argc, char** argv )
         integrate ( elements (ETuSpace->mesh() ),
                     uSpace->qr(),
                     ETuSpace,
-                    dot( grad(ETuSpace,uInterpolatedRepeated), grad(phi_i) )
+                    value(ETuSpace,uInterpolatedRepeated) * laplacian(phi_i)
                   )
                 >> integral;
 
