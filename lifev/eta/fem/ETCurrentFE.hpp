@@ -441,6 +441,9 @@ private:
     //! Update D2phi
     void updateD2phi (const UInt& iQuadPt);
 
+    //! Update Laplacian
+    void updateLaplacian (const UInt& iQuadPt);
+
     //@}
 
 
@@ -803,7 +806,7 @@ update (const elementType& element, const flag_Type& flag)
         }
         if ( flag & ET_UPDATE_ONLY_LAPLACIAN )
         {
-        	//updateD2phi (i); //TODO
+        	updateLaplacian (i);
         }
     }
 
@@ -1177,6 +1180,30 @@ void ETCurrentFE< spaceDim, 1 >::updateD2phi ( const UInt& iQuadPt )
         		M_d2phi[iQuadPt][iDof][iCoor][jCoor] = partialSum;
         	}
         }
+    }
+}
+
+template< UInt spaceDim >
+void ETCurrentFE< spaceDim, 1 >::updateLaplacian ( const UInt& iQuadPt )
+{
+    ASSERT ( M_isD2phiUpdated,
+             "Basis function second derivatives must be updated to compute the laplacian" );
+
+#ifdef HAVE_LIFEV_DEBUG
+    M_isLaplacianUpdated = true;
+#endif
+
+    Real partialSum ( 0.0 );
+
+    for ( UInt iDof ( 0 ); iDof < M_nbFEDof; ++iDof )
+    {
+    	partialSum = 0.0;
+    	for ( UInt iCoor ( 0 ); iCoor < S_spaceDimension; ++iCoor )
+    	{
+    		partialSum += M_d2phi[iQuadPt][iDof][iCoor][iCoor];
+    	}
+
+    	M_laplacian[iQuadPt][iDof] = partialSum;
     }
 }
 
