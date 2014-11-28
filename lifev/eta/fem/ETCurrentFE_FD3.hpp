@@ -272,6 +272,8 @@ private:
     //Private typedefs for the 3D array (array of 2D array)
     typedef std::vector< array2D_Type > array3D_Type;
 
+    typedef std::vector< std::vector< array1D_Return_Type > > arrayLaplacian_Type;
+
     //Private typedefs for the 4D array (array of 3D array)
     typedef std::vector< array3D_Type > array4D_Type;
 
@@ -372,7 +374,7 @@ private:
     // Storage for the second derivative of the basis functions
     array_d2Phi M_d2phi;
     // Storage for the laplacian of the basis functions
-    array3D_Type M_laplacian;
+    arrayLaplacian_Type M_laplacian;
 
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -918,12 +920,6 @@ setupInternalConstants()
     {
     	// we have fieldDim * DoF basis functions
     	M_laplacian[i].resize ( fieldDim * M_nbFEDof );
-
-    	// for each basis function we have fieldDim components of the laplacian
-    	for (UInt j (0); j < ( fieldDim * M_nbFEDof ); ++j)
-    	{
-    		M_laplacian[i][j].resize(fieldDim);
-    	}
     }
 }
 
