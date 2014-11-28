@@ -243,6 +243,21 @@ public:
       @param q The index of the quadrature node
       @return The divergence of the ith basis function in the qth quadrature node
      */
+    Real const& laplacian (const UInt& i, const UInt& q, const UInt& direction) const
+    {
+    	ASSERT ( M_isLaplacianUpdated, "Divergence of the basis functions have not been updated");
+    	ASSERT ( i < fieldDim * M_nbFEDof, "No basis function with this index" );
+    	ASSERT ( q < M_nbQuadPt, "No quadrature point with this index" );
+
+    	return ( M_laplacian[q][i][direction] );
+    }
+
+    //! Getter for the divergence of the basis functions in the quadrature nodes in the current element
+    /*!
+      @param i The index of the basis function
+      @param q The index of the quadrature node
+      @return The divergence of the ith basis function in the qth quadrature node
+     */
     const array1D_Return_Type& divergence (const UInt& i, const UInt& q) const
     {
         ASSERT ( M_isDivergenceUpdated, "Divergence of the basis functions have not been updated");

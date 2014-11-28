@@ -69,6 +69,7 @@
 
 #include <lifev/eta/expression/ExpressionInterpolateValue.hpp>
 #include <lifev/eta/expression/ExpressionInterpolateGradient.hpp>
+#include <lifev/eta/expression/ExpressionInterpolateLaplacian.hpp>
 
 #include <lifev/eta/expression/ExpressionFunctor.hpp>
 
@@ -112,6 +113,7 @@
 
 #include <lifev/eta/expression/EvaluationInterpolateValue.hpp>
 #include <lifev/eta/expression/EvaluationInterpolateGradient.hpp>
+#include <lifev/eta/expression/EvaluationInterpolateLaplacian.hpp>
 
 #include <lifev/eta/expression/EvaluationFunctor.hpp>
 
@@ -436,6 +438,18 @@ class ExpressionToEvaluation <
 {
 public:
     typedef EvaluationInterpolateGradient<MeshType, MapType, FESpaceDim, FEFieldDim> evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+// Specialized for an interpolated laplacian
+template<typename MeshType, typename MapType, UInt FESpaceDim, UInt FEFieldDim, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation <
+    ExpressionInterpolateLaplacian<MeshType, MapType, FESpaceDim, FEFieldDim>, testDim, solutionDim, spaceDim >
+{
+public:
+    typedef EvaluationInterpolateLaplacian<MeshType, MapType, FESpaceDim, FEFieldDim> evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();

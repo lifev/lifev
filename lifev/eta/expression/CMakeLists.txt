@@ -14,6 +14,7 @@ SET(expression_HEADERS
 	expression/EvaluationHK.hpp
 	expression/EvaluationIfCrossed.hpp
 	expression/EvaluationInterpolateGradient.hpp
+	expression/EvaluationInterpolateLaplacian.hpp
 	expression/EvaluationInterpolateValue.hpp
 	expression/EvaluationMatrix.hpp
 	expression/EvaluationMeas.hpp
@@ -48,6 +49,7 @@ SET(expression_HEADERS
 	expression/ExpressionHK.hpp
 	expression/ExpressionIfCrossed.hpp
 	expression/ExpressionInterpolateGradient.hpp
+	expression/ExpressionInterpolateLaplacian.hpp
 	expression/ExpressionInterpolateValue.hpp
 	expression/ExpressionMatrix.hpp
 	expression/ExpressionMeas.hpp

@@ -221,7 +221,7 @@ int main ( int argc, char** argv )
     vector_Type uTest (uSpace->map(), Unique);
     uSpace->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (uFctTest), uTest, 0.0);
 
-    matrix_Type matrix (uSpace->map() );
+    vector_Type vector (uSpace->map() );
 
     if (verbose)
     {
@@ -247,33 +247,24 @@ int main ( int argc, char** argv )
         std::cout << " -- ET assembly ... " << std::flush;
     }
 
-
     {
         using namespace ExpressionAssembly;
 
         integrate ( elements (ETuSpace->mesh() ),
                     uSpace->qr(),
                     ETuSpace,
-                    ETuSpace,
-                    laplacian(phi_i) * laplacian(phi_j)
+                    laplacian(ETuSpace,uTest) * phi_i
                   )
-                >> matrix;
+                  >> vector;
 
     }
 
-    matrix.globalAssemble();
-
-    matrix.spy("matrice");
-
     Real result = 0.0;
 
-    vector_Type first_vec(uSpace->map());
-    first_vec.zero();
-
-    first_vec = matrix * uTest;
-    result = uTest.dot(first_vec);
+    result = vector.dot(uInterpolated);
 
     std::cout << "\n\nRisultato = " << result << std::endl;
+
 
     ETChrono.stop();
 
@@ -292,5 +283,3 @@ int main ( int argc, char** argv )
 
     return ( EXIT_SUCCESS );
 }
-
-
