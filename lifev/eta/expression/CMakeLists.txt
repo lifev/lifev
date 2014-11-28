@@ -86,7 +86,9 @@ SET(expression_HEADERS
 	expression/RequestLoopVolumeID.hpp
 	expression/RequestLoopFaceID.hpp
 	expression/ExpressionLaplacianI.hpp
+	expression/ExpressionLaplacianJ.hpp
 	expression/EvaluationLaplacianI.hpp
+	expression/EvaluationLaplacianJ.hpp
 CACHE INTERNAL "")
 
 SET(expression_SOURCES ""
@@ -102,6 +104,7 @@ SET(expression_SOURCES ""
 	expression/ExpressionNormal.cpp
 	expression/ExpressionScalar.cpp
 	expression/ExpressionLaplacianI.cpp
+	expression/ExpressionLaplacianJ.cpp
 CACHE INTERNAL "")
 
 
