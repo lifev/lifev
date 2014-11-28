@@ -376,11 +376,17 @@ private:
     //Private typedefs for the 3D array (array of 2D array)
     typedef std::vector< array2D_Type > array3D_Type;
 
+    //Private typedefs for the 4D array (array of 3D array)
+    typedef std::vector< array3D_Type > array4D_Type;
+
     //Private typedefs for the 1D array of vector
     typedef std::vector< VectorSmall<spaceDim> > array1D_vector_Type;
 
     //Private typedefs for the 2D array of vector
     typedef std::vector< std::vector< VectorSmall<spaceDim> > > array2D_vector_Type;
+
+    //Private typedefs for the 2D array of vector (for second derivatives)
+    typedef std::vector< std::vector< MatrixSmall<spaceDim, spaceDim > > > array2D_matrix_Type;
 
     //! @name Private Methods
     //@{
@@ -432,6 +438,9 @@ private:
     //! Update Dphi
     void updateDphi (const UInt& iQuadPt);
 
+    //! Update D2phi
+    void updateD2phi (const UInt& iQuadPt);
+
     //@}
 
 
@@ -474,6 +483,9 @@ private:
     // Storage for the derivatives of the basis functions
     array3D_Type M_dphiReferenceFE;
 
+    // Storage for the second derivatives of the basis functions
+    array4D_Type M_d2phiReferenceFE;
+
     // Storage for the derivatives of the geometric map
     array3D_Type M_dphiGeometricMap;
 
@@ -498,6 +510,12 @@ private:
     // Storage for the derivative of the basis functions
     array2D_vector_Type M_dphi;
 
+    // Storage for the second derivatives
+    array2D_matrix_Type M_d2phi;
+
+    // Storage for the laplacian derivatives
+    array2D_Type M_laplacian;
+
 #ifdef HAVE_LIFEV_DEBUG
     // Debug informations, defined only if the code
     // is compiled in debug mode. These booleans store the
@@ -514,7 +532,8 @@ private:
     bool M_isWDetUpdated;
     bool M_isPhiUpdated;
     bool M_isDphiUpdated;
-
+    bool M_isD2phiUpdated;
+    bool M_isLaplacianUpdated;
 #endif
 
 };
@@ -559,6 +578,7 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadrat
     M_phi(),
     M_phiMap(),
     M_dphiReferenceFE(),
+    M_d2phiReferenceFE (),
     M_dphiGeometricMap(),
 
     M_cellNode(),
@@ -567,7 +587,9 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadrat
     M_detJacobian(),
     M_wDet(),
     M_tInverseJacobian(),
-    M_dphi()
+    M_dphi(),
+
+    M_d2phi()
 
 #ifdef HAVE_LIFEV_DEBUG
     , M_isCellNodeUpdated (false),
@@ -579,7 +601,9 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadrat
     M_isInverseJacobianUpdated (false),
     M_isWDetUpdated (false),
     M_isPhiUpdated (false),
-    M_isDphiUpdated (false)
+    M_isDphiUpdated (false),
+    M_isD2phiUpdated (false),
+    M_isLaplacianUpdated (false)
 #endif
 
 
@@ -609,6 +633,7 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap)
     M_phi(),
     M_phiMap(),
     M_dphiReferenceFE(),
+    M_d2phiReferenceFE (),
     M_dphiGeometricMap(),
 
     M_cellNode(),
@@ -617,7 +642,9 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap)
     M_detJacobian(),
     M_wDet(),
     M_tInverseJacobian(),
-    M_dphi()
+    M_dphi(),
+
+    M_d2phi()
 
 #ifdef HAVE_LIFEV_DEBUG
     , M_isCellNodeUpdated (false),
@@ -629,7 +656,10 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap)
     M_isInverseJacobianUpdated (false),
     M_isWDetUpdated (false),
     M_isPhiUpdated (false),
-    M_isDphiUpdated (false)
+    M_isDphiUpdated (false),
+    M_isD2phiUpdated (false),
+    M_isLaplacianUpdated (false)
+
 #endif
 
 {
@@ -656,6 +686,7 @@ ETCurrentFE (const ETCurrentFE<spaceDim, 1>& otherFE)
     M_phi (otherFE.M_phi),
     M_phiMap (otherFE.M_phiMap),
     M_dphiReferenceFE (otherFE.M_dphiReferenceFE),
+    M_d2phiReferenceFE (otherFE.M_d2phiReferenceFE),
     M_dphiGeometricMap (otherFE.M_dphiGeometricMap),
 
     M_cellNode (otherFE.M_cellNode),
@@ -664,7 +695,9 @@ ETCurrentFE (const ETCurrentFE<spaceDim, 1>& otherFE)
     M_detJacobian (otherFE.M_detJacobian),
     M_wDet (otherFE.M_wDet),
     M_tInverseJacobian (otherFE.M_tInverseJacobian),
-    M_dphi (otherFE.M_dphi)
+    M_dphi (otherFE.M_dphi),
+
+    M_d2phi (otherFE.M_d2phi)
 
 #ifdef HAVE_LIFEV_DEBUG
     //Beware for the comma at the begining of this line!
@@ -677,7 +710,9 @@ ETCurrentFE (const ETCurrentFE<spaceDim, 1>& otherFE)
     M_isInverseJacobianUpdated ( otherFE.M_isInverseJacobianUpdated ),
     M_isWDetUpdated ( otherFE.M_isWDetUpdated ),
     M_isPhiUpdated ( otherFE.M_isPhiUpdated ),
-    M_isDphiUpdated ( otherFE.M_isDphiUpdated )
+    M_isDphiUpdated ( otherFE.M_isDphiUpdated ),
+    M_isD2phiUpdated ( otherFE.M_isD2phiUpdated ),
+    M_isLaplacianUpdated ( otherFE.M_isLaplacianUpdated )
 #endif
 
 {}
@@ -720,6 +755,8 @@ update (const elementType& element, const flag_Type& flag)
     M_isInverseJacobianUpdated = false;
     M_isWDetUpdated = false;
     M_isDphiUpdated = false;
+    M_isD2phiUpdated = false;
+    M_isLaplacianUpdated = false;
 #endif
 
     // update the cell informations if required
@@ -759,6 +796,14 @@ update (const elementType& element, const flag_Type& flag)
         if ( flag & ET_UPDATE_ONLY_DPHI )
         {
             updateDphi (i);
+        }
+        if ( flag & ET_UPDATE_ONLY_D2PHI )
+        {
+        	//updateD2phi (i); //TODO
+        }
+        if ( flag & ET_UPDATE_ONLY_LAPLACIAN )
+        {
+        	//updateD2phi (i); //TODO
         }
     }
 
@@ -926,6 +971,25 @@ setupInternalConstants()
                 M_dphiGeometricMap[q][i][j] = M_geometricMap->dPhi (i, j, M_quadratureRule->quadPointCoor (q) );
             }
         }
+    }
+
+    // D2PHIREFERENCEFE
+    M_d2phiReferenceFE.resize (M_nbQuadPt);
+    for (UInt q (0); q < M_nbQuadPt; ++q)
+    {
+    	M_d2phiReferenceFE[q].resize (M_nbFEDof);
+    	for (UInt i (0); i < M_nbFEDof; ++i)
+    	{
+    		M_d2phiReferenceFE[q][i].resize (spaceDim);
+    		for (UInt j (0); j < spaceDim; ++j)
+    		{
+    			M_d2phiReferenceFE[q][i][j].resize (spaceDim);
+    			for (UInt k (0); k < spaceDim; ++k)
+    			{
+    				M_d2phiReferenceFE[q][i][j][k] = M_referenceFE->d2Phi (i, j, k, M_quadratureRule->quadPointCoor (q) );
+    			}
+    		}
+    	}
     }
 
     // The second group of values cannot be computed
