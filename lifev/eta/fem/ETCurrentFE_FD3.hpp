@@ -1100,7 +1100,7 @@ void ETCurrentFE< spaceDim, fieldDim >::updateLaplacian ( const UInt& iQuadPt )
 
     Real partialSum ( 0.0 );
 
-    for ( UInt iDof ( 0 ); iDof < fieldDim * M_nbFEDof; ++iDof )
+    for ( UInt iDof ( 0 ); iDof < M_nbFEDof; ++iDof )
     {
         for ( UInt k ( 0 ); k < fieldDim; ++k )
         {
@@ -1111,6 +1111,12 @@ void ETCurrentFE< spaceDim, fieldDim >::updateLaplacian ( const UInt& iQuadPt )
         	}
 
         	M_laplacian[iQuadPt][iDof][k] = partialSum;
+
+        	// copy other values according to the vectorial basis functions
+        	for ( UInt k ( 1 ); k < fieldDim; ++k)
+        	{
+        		M_laplacian[iQuadPt][k * M_nbFEDof + iDof][k] = partialSum;
+        	}
         }
     }
 }
