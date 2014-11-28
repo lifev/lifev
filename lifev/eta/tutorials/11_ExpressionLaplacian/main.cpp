@@ -137,6 +137,7 @@ int main ( int argc, char** argv )
 
     boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
 
+    /*
     GetPot command_line (argc, argv);
     const std::string dataFileName = command_line.follow ("data", 2, "-f", "--file");
     GetPot dataFile (dataFileName);
@@ -144,12 +145,11 @@ int main ( int argc, char** argv )
     MeshData meshData;
     meshData.setup (dataFile, "mesh");
     readMesh (*fullMeshPtr, meshData);
+    */
 
-    /*
     regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                     3.0,   3.0,   3.0,
                     0.0,  0.0,  0.0);
-    */
 
     MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
     boost::shared_ptr< mesh_Type > meshPtr (meshPart.meshPartition() );
@@ -175,7 +175,7 @@ int main ( int argc, char** argv )
     std::string uOrder ("P2");
 
     boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace
-    ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 1, Comm) );
+    ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 3, Comm) );
 
     if (verbose)
     {
@@ -191,8 +191,8 @@ int main ( int argc, char** argv )
         std::cout << " -- Building ETFESpaces ... " << std::flush;
     }
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > ETuSpace
-    ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPtr, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), Comm) );
+    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 3 > > ETuSpace
+    ( new ETFESpace< mesh_Type, MapEpetra, 3, 3 > (meshPtr, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), Comm) );
 
     if (verbose)
     {
@@ -253,7 +253,7 @@ int main ( int argc, char** argv )
         integrate ( elements (ETuSpace->mesh() ),
                     uSpace->qr(),
                     ETuSpace,
-                    value(ETuSpace,uInterpolatedRepeated) * laplacian(phi_i)
+                    dot ( value(ETuSpace,uInterpolatedRepeated), laplacian(phi_i) )
                   )
                 >> integral;
 

@@ -70,7 +70,7 @@ ExpressionLaplacianI::~ExpressionLaplacianI()
 void
 ExpressionLaplacianI::display (std::ostream& out)
 {
-    out << "dphi_i";
+    out << "laplacian(phi_i)";
 }
 
 
