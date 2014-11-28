@@ -46,6 +46,7 @@
 #include <lifev/eta/expression/ExpressionDeterminant.hpp>
 #include <lifev/eta/expression/ExpressionTrace.hpp>
 #include <lifev/eta/expression/ExpressionLaplacianI.hpp>
+#include <lifev/eta/expression/ExpressionLaplacianJ.hpp>
 
 #include <lifev/eta/expression/ExpressionAddition.hpp>
 #include <lifev/eta/expression/ExpressionSubstraction.hpp>
@@ -88,6 +89,7 @@
 #include <lifev/eta/expression/EvaluationDeterminant.hpp>
 #include <lifev/eta/expression/EvaluationTrace.hpp>
 #include <lifev/eta/expression/EvaluationLaplacianI.hpp>
+#include <lifev/eta/expression/EvaluationLaplacianJ.hpp>
 
 #include <lifev/eta/expression/EvaluationAddition.hpp>
 #include <lifev/eta/expression/EvaluationSubstraction.hpp>
@@ -233,6 +235,17 @@ class ExpressionToEvaluation<ExpressionLaplacianI, testDim, solutionDim, spaceDi
 {
 public:
     typedef EvaluationLaplacianI<testDim, spaceDim> evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+// Specialized for laplacian(phi_j)
+template<UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionLaplacianJ, testDim, solutionDim, spaceDim>
+{
+public:
+    typedef EvaluationLaplacianJ<testDim, spaceDim> evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();
