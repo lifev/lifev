@@ -85,6 +85,9 @@ class EvaluationDivI;
 template <UInt dim, UInt FSpaceDim>
 class EvaluationDivJ;
 
+template <UInt dim, UInt FSpaceDim>
+class EvaluationLaplacianI;
+
 template <UInt dim>
 class EvaluationHK;
 
@@ -142,6 +145,10 @@ class ETCurrentFE<spaceDim, 1>
     //!Friend to allow direct access to the raw data
     template <UInt dim, UInt FSpaceDim>
     friend class ExpressionAssembly::EvaluationDphiJ;
+
+    //!Friend to allow direct access to the raw data
+    template <UInt dim, UInt FSpaceDim>
+    friend class ExpressionAssembly::EvaluationLaplacianI;
 
     //!Friend to allow direct access to the raw data
     template <UInt dim>
