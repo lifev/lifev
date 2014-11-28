@@ -39,6 +39,10 @@ class ETCurrentFE
     template< UInt dim, UInt FSpaceDim >
     friend class ExpressionAssembly::EvaluationLaplacianI;
 
+    //!Friend to allow direct access to the raw data
+    template< UInt dim, UInt FSpaceDim >
+    friend class ExpressionAssembly::EvaluationLaplacianJ;
+
     //@}
 
 private:
