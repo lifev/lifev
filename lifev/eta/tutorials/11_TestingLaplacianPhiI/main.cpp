@@ -76,44 +76,26 @@
 
 #include <boost/shared_ptr.hpp>
 
-
-// ---------------------------------------------------------------
-// We work in the LifeV namespace and define the mesh, matrix and
-// vector types that we will need several times.
-// ---------------------------------------------------------------
-
 using namespace LifeV;
 
 typedef RegionMesh<LinearTetra> mesh_Type;
 typedef MatrixEpetra<Real> matrix_Type;
 typedef VectorEpetra vector_Type;
 
-
-// ===================================================
-//!                   Functions
-// ===================================================
-
-
-Real uFct ( const Real& /* t */, const Real&  x , const Real&  y , const Real& z , const ID& i )
+Real uOne ( const Real& /* t */, const Real&  x , const Real&  y , const Real& z , const ID& i )
 {
-    if ( i == 0 )
-    	return 1.0;
-    else
-    	return 0.0;
+	return 1.0;
 }
 
-Real uFctTest ( const Real& /* t */, const Real&  x , const Real&  y , const Real& z , const ID& i )
+Real uTestFunctions ( const Real& /* t */, const Real&  x , const Real&  y , const Real& z , const ID& i )
 {
     if ( i == 0 )
     	return x*x*0.5;
+    else if ( i == 1)
+    	return y*y*0.5;
     else
-    	return 0.0;
+    	return z*z*0.5;
 }
-
-// ---------------------------------------------------------------
-// As usual, we start by the MPI communicator, the definition of
-// the mesh and its partitioning.
-// ---------------------------------------------------------------
 
 int main ( int argc, char** argv )
 {
@@ -127,28 +109,14 @@ int main ( int argc, char** argv )
 
     const bool verbose (Comm->MyPID() == 0);
 
-
-    if (verbose)
-    {
-        std::cout << " -- Building and partitioning the mesh ... " << std::flush;
-    }
-
     const UInt Nelements (10);
 
     boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
 
-    /*
-    GetPot command_line (argc, argv);
-    const std::string dataFileName = command_line.follow ("data", 2, "-f", "--file");
-    GetPot dataFile (dataFileName);
-
-    MeshData meshData;
-    meshData.setup (dataFile, "mesh");
-    readMesh (*fullMeshPtr, meshData);
-    */
+    Real length = 3.0;
 
     regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
-                    3.0,   3.0,   3.0,
+    		        length,   length,   length,
                     0.0,  0.0,  0.0);
 
     MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
@@ -156,125 +124,87 @@ int main ( int argc, char** argv )
 
     fullMeshPtr.reset();
 
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    // ---------------------------------------------------------------
-    // We define then the ETFESpace, that we suppose scalar in this
-    // case. We also need a standard FESpace to perform the
-    // interpolation.
-    // ---------------------------------------------------------------
-
-    if (verbose)
-    {
-        std::cout << " -- Building FESpaces ... " << std::flush;
-    }
-
     std::string uOrder ("P2");
 
+    ///////////////////////////////////
+    // Testing the scalar field case //
+    ///////////////////////////////////
+
     boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace
-    ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 3, Comm) );
+    ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 1, Comm) );
 
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-    if (verbose)
-    {
-        std::cout << " ---> Dofs: " << uSpace->dof().numTotalDof() << std::endl;
-    }
+    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > ETuSpace
+    ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPtr, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), Comm) );
 
-    if (verbose)
-    {
-        std::cout << " -- Building ETFESpaces ... " << std::flush;
-    }
+    vector_Type vectorTestFunctions (uSpace->map(), Unique);
+    uSpace->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (uTestFunctions), vectorTestFunctions, 0.0);
+    vector_Type vectorTestFunctionsRepeated (vectorTestFunctions, Repeated);
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 3 > > ETuSpace
-    ( new ETFESpace< mesh_Type, MapEpetra, 3, 3 > (meshPtr, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), Comm) );
-
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-    if (verbose)
-    {
-        std::cout << " ---> Dofs: " << ETuSpace->dof().numTotalDof() << std::endl;
-    }
-
-    // ---------------------------------------------------------------
-    // We interpolate then the function.
-    // This can only be performed with the classical FESpace.
-    // ---------------------------------------------------------------
-
-    if (verbose)
-    {
-        std::cout << " -- Interpolating the function ... " << std::flush;
-    }
-
-    vector_Type uInterpolated (uSpace->map(), Unique);
-    uSpace->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (uFct), uInterpolated, 0.0);
-    vector_Type uInterpolatedRepeated (uInterpolated, Repeated);
-
-    vector_Type uTest (uSpace->map(), Unique);
-    uSpace->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (uFctTest), uTest, 0.0);
+    vector_Type vectorOnes (uSpace->map(), Unique);
+    vectorOnes.zero();
+    vectorOnes += 1;
 
     vector_Type integral (uSpace->map() );
 
-    if (verbose)
     {
-        std::cout << " done! " << std::endl;
-    }
+    	using namespace ExpressionAssembly;
 
-
-    if (verbose)
-    {
-        std::cout << " done! " << std::endl;
-    }
-
-    // ---------------------------------------------------------------
-    // We integrate on the domain the trace of the gradient
-    // (1+5+2 in this case)
-    // ---------------------------------------------------------------
-
-    LifeChrono ETChrono;
-    ETChrono.start();
-
-    if (verbose)
-    {
-        std::cout << " -- ET assembly ... " << std::flush;
-    }
-
-
-    {
-        using namespace ExpressionAssembly;
-
-        integrate ( elements (ETuSpace->mesh() ),
-                    uSpace->qr(),
-                    ETuSpace,
-                    dot ( value(ETuSpace,uInterpolatedRepeated), laplacian(phi_i) )
-                  )
-                >> integral;
-
+    	integrate ( elements (ETuSpace->mesh() ),
+    				uSpace->qr(),
+    				ETuSpace,
+    				value(ETuSpace,vectorOnes) * laplacian(phi_i)
+    			  )
+    		>> integral;
     }
 
     Real result = 0.0;
 
-    result = integral.dot(uTest);
+    result = integral.dot(vectorTestFunctions);
 
-    std::cout << "\n\nRisultato = " << result << std::endl;
+    std::cout << "\n\nSCALAR CASE " << std::endl;
+    std::cout << "\nThe volume is = " << length*length*length << std::endl;
+    std::cout << "\nThe result is = " << result << std::endl;
+    std::cout << "\nThe error is = " << result-(length*length*length) << std::endl;
 
-    ETChrono.stop();
+    ///////////////////////////////////
+    // Testing the vector field case //
+    ///////////////////////////////////
 
-    if (verbose)
+    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpaceVec
+    ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 3, Comm) );
+
+    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 3 > > ETuSpaceVec
+    ( new ETFESpace< mesh_Type, MapEpetra, 3, 3 > (meshPtr, & (uSpaceVec->refFE() ), & (uSpaceVec->fe().geoMap() ), Comm) );
+
+    vector_Type vectorTestFunctionsVec (uSpaceVec->map(), Unique);
+    uSpaceVec->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (uTestFunctions), vectorTestFunctionsVec, 0.0);
+    vector_Type vectorTestFunctionsRepeatedVec (vectorTestFunctionsVec, Repeated);
+
+    vector_Type vectorOnesVec (uSpaceVec->map(), Unique);
+    vectorOnesVec.zero();
+    vectorOnesVec += 1;
+
+    vector_Type integralVec (uSpaceVec->map() );
+
     {
-        std::cout << " done! " << std::endl;
+    	using namespace ExpressionAssembly;
+
+    	integrate ( elements (ETuSpaceVec->mesh() ),
+    			    uSpaceVec->qr(),
+    			    ETuSpaceVec,
+    			    dot ( value(ETuSpaceVec,vectorOnesVec), laplacian(phi_i) )
+    			  )
+    		>> integralVec;
     }
-    if (verbose)
-    {
-        std::cout << " Time : " << ETChrono.diff() << std::endl;
-    }
+
+    result = 0.0;
+
+    result = integralVec.dot(vectorTestFunctionsVec);
+
+    std::cout << "\n\nVECTORIAL CASE " << std::endl;
+    std::cout << "\nThe volume is = " << length*length*length << std::endl;
+    std::cout << "\nThe result is = " << result << std::endl;
+    std::cout << "\nThe error is = " << result-(length*length*length) << "\n\n";
 
 #ifdef HAVE_MPI
     MPI_Finalize();
