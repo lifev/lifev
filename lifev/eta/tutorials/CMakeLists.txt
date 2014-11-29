@@ -15,5 +15,6 @@ ADD_SUBDIRECTORIES(
   10_ETA_QR_Advanced
   9_ETA_gradient_interpolation
   11_TestingLaplacianPhiI
-  12_ExpressionLaplacianTrial
+  12_TestingLaplacianPhiJ
+  13_TestingLaplacianFEVector
 )
