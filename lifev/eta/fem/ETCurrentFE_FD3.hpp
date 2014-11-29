@@ -313,9 +313,6 @@ private:
     //Private typedefs for the 3D array (array of 2D array)
     typedef std::vector< array2D_Type > array3D_Type;
     
-    //Private typedefs for the 4D array (array of 3D array)
-    typedef std::vector< array3D_Type > array4D_Type;
-
     typedef std::vector< std::vector< array1D_Return_Type > > arrayLaplacian_Type;
 
     //Private typedefs for the 4D array (array of 3D array)
@@ -361,14 +358,9 @@ private:
     //! Update Divergence
     void updateDivergence (const UInt& iQuadPt);
     
-    //! Update D2phi
-    void updateD2phi ( const UInt& iQuadPt);
-    
     //! Update Laplacian
     void updateLaplacian ( const UInt& iQuadPt);
 
-    //! Update Divergence
-    void updateLaplacian (const UInt& iQuadPt);
 
     //@}
 
@@ -420,18 +412,10 @@ private:
     array2D_matrix_Type M_dphi;
     // Storage for the divergence of the basis functions
     array2D_Type M_divergence;
-    
-    // Storage for the second derivatives of the basis functions (note: the geometric map used for the 2nd derivative is M_dphiGeometricMap, no support for isoparametric elements)
-    array4D_Type M_d2phiReferenceFE;
-    
-    // Storage for the second derivatives of the basis functions
-    array2D_matrix_Type M_d2phi;
-    
-    // Storage for the laplacian of the basis functions
-    array2D_vector_Type M_laplacian;
 
     // Storage for the second derivative of the basis functions
     array_d2Phi M_d2phi;
+
     // Storage for the laplacian of the basis functions
     arrayLaplacian_Type M_laplacian;
 
@@ -1231,85 +1215,6 @@ void ETCurrentFE< spaceDim, fieldDim >::updateLaplacian ( const UInt& iQuadPt )
         		M_laplacian[iQuadPt][k * M_nbFEDof + iDof][k] = partialSum;
         	}
         }
-    }
-}
-
-template< UInt spaceDim, UInt fieldDim >
-void ETCurrentFE<spaceDim, fieldDim>::updateD2phi (const UInt& iQuadPt)
-{
-    ASSERT (M_isInverseJacobianUpdated,
-            "Inverse jacobian must be updated to compute the derivative of the basis functions" );
-    
-#ifdef HAVE_LIFEV_DEBUG
-    M_isD2phiUpdated = true;
-#endif
-    
-    Real partialSum (0.0);
-    
-//    std::cout << "\n---------- BEGIN D2PHI ---------\n";
-    
-    for (UInt iDof (0); iDof < M_nbFEDof; ++iDof)
-    {
-//        std::cout << "\n begin Dof " << iDof << ":\n";
-        for (UInt iCoor (0); iCoor < S_spaceDimension; ++iCoor)
-        {
-            for (UInt jCoor (0); jCoor < S_spaceDimension; ++jCoor)
-            {
-                partialSum = 0.0;
-                for ( UInt k1 (0); k1 < S_spaceDimension; ++k1 )
-                {
-                    for ( UInt k2 (0) ; k2 < S_spaceDimension; ++k2 )
-                    {
-                        partialSum += M_tInverseJacobian[iQuadPt][iCoor][k1] * M_d2phiReferenceFE[iQuadPt][iDof][k1][k2] * M_tInverseJacobian[iQuadPt][jCoor][k2];
-                    }
-                }
-                M_d2phi[iQuadPt][iDof][iCoor][jCoor] = partialSum;
-            }
-        }
-//        std::cout << M_d2phi[iQuadPt][iDof];
-//        std::cout << "\n\n";
-//        std::cout << "End field direction ---------------------\n";
-    }
-//    std::cout << "End dof ---------------------\n";
-//    std::cout << "\n---------- END D2PHI ---------\n";
-}
-
-template< UInt spaceDim, UInt fieldDim >
-void ETCurrentFE<spaceDim, fieldDim>::updateLaplacian (const UInt& iQuadPt)
-{
-    ASSERT ( M_isD2phiUpdated,
-            "Basis function second derivatives must be updated to compute the laplacian" );
-    
-#ifdef HAVE_LIFEV_DEBUG
-    M_isLaplacianUpdated = true;
-#endif
-    
-    Real partialSum ( 0.0 );
-    
-    //std::cout << "\n-------- LAPLACIAN BEGIN -------\n";
-    
-    for ( UInt iDof ( 0 ); iDof < M_nbFEDof; ++iDof )
-    {
-        partialSum = 0.0;
-
-        for ( UInt iCoor ( 0 ); iCoor < S_spaceDimension; ++iCoor )
-        {
-            partialSum += M_d2phi[iQuadPt][iDof][iCoor][iCoor];
-        }
-        
-        for ( UInt iCoor ( 0 ); iCoor < S_spaceDimension; ++iCoor )
-        {
-            M_laplacian[iQuadPt][iDof][iCoor] = partialSum;
-    //        std::cout << "Laplacian of dof " << iDof << " equal to ";
-            
-            // copy other values according to the vectorial basis functions
-            for ( UInt k ( 1 ); k < fieldDim; ++k)
-            {
-                M_laplacian[iQuadPt][k * M_nbFEDof + iDof][iCoor] = partialSum;
-            }
-        }
-    //    std::cout << M_laplacian[iQuadPt][iDof];
-    //    std::cout << "\n---------------\n";
     }
 }
 

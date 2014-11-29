@@ -91,7 +91,6 @@
 #include <lifev/eta/expression/ExpressionPatchArea.hpp>
 
 #include <lifev/eta/expression/ExpressionScalarToVector.hpp>
-#include <lifev/eta/expression/ExpressionLaplacianPhiJ.hpp>
 
 #include <lifev/eta/expression/EvaluationPhiI.hpp>
 #include <lifev/eta/expression/EvaluationPhiJ.hpp>
@@ -148,7 +147,6 @@
 #include <lifev/eta/expression/EvaluationVectorFromNonConstantMatrix.hpp>
 
 #include <lifev/eta/expression/EvaluationScalarToVector.hpp>
-#include <lifev/eta/expression/EvaluationLaplacianPhiJ.hpp>
 
 namespace LifeV
 {
@@ -285,17 +283,6 @@ class ExpressionToEvaluation<ExpressionDphiJ, testDim, solutionDim, spaceDim>
 {
 public:
     typedef EvaluationDphiJ<solutionDim, spaceDim> evaluation_Type;
-private:
-    ExpressionToEvaluation();
-    ~ExpressionToEvaluation();
-};
-    
-// Specialized for laplacian_phi_j
-template<UInt testDim, UInt solutionDim, UInt spaceDim>
-class ExpressionToEvaluation<ExpressionLaplacianPhiJ, testDim, solutionDim, spaceDim>
-{
-public:
-    typedef EvaluationLaplacianPhiJ<solutionDim, spaceDim> evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();

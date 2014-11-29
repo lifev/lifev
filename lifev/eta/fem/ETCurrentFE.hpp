@@ -428,9 +428,6 @@ private:
     //To contain the second derivatives
     typedef std::vector< std::vector< MatrixSmall<spaceDim,spaceDim> > > array2D_matrix_Type;
 
-    //Private typedefs for the 2D array of vector (for second derivatives)
-    typedef std::vector< std::vector< MatrixSmall<spaceDim, spaceDim > > > array2D_matrix_Type;
-
     //! @name Private Methods
     //@{
 
@@ -487,12 +484,6 @@ private:
     //! Update Laplacian
     void updateLaplacian (const UInt& iQuadPt);
 
-    //! Update D2phi
-    void updateD2phi (const UInt& iQuadPt);
-
-    //! Update Laplacian
-    void updateLaplacian (const UInt& iQuadPt);
-
     //@}
 
 
@@ -540,9 +531,6 @@ private:
 
     // Storage for the derivatives of the geometric map
     array3D_Type M_dphiGeometricMap;
-    
-    // Storage for the second derivatives of the basis functions (note: the geometric map used for the 2nd derivative is M_dphiGeometricMap, no support for isoparametric elements)
-    array4D_Type M_d2phiReferenceFE;
 
     // Storage for the coordinates of the nodes of the current element
     array2D_Type M_cellNode;
@@ -564,17 +552,11 @@ private:
 
     // Storage for the derivative of the basis functions
     array2D_vector_Type M_dphi;
-    
+
     // Storage for the second derivative of the basis functions
     array2D_matrix_Type M_d2phi;
-    
+
     // Storage for the laplacian
-    array2D_Type M_laplacian;
-
-    // Storage for the second derivatives
-    array2D_matrix_Type M_d2phi;
-
-    // Storage for the laplacian derivatives
     array2D_Type M_laplacian;
 
 #ifdef HAVE_LIFEV_DEBUG
