@@ -34,10 +34,6 @@ class ETCurrentFE
     //!Friend to allow direct access to the raw data
     template< UInt dim, UInt FSpaceDim >
     friend class ExpressionAssembly::EvaluationDivJ;
-    
-    //!Friend to allow direct access to the raw data
-    template< UInt dim, UInt FSpaceDim >
-    friend class ExpressionAssembly::EvaluationLaplacianPhiJ;
 
     //!Friend to allow direct access to the raw data
     template< UInt dim, UInt FSpaceDim >
@@ -241,22 +237,6 @@ public:
         ASSERT ( i < 3 * M_nbFEDof, "No basis function with this index");
         ASSERT ( q < M_nbQuadPt, "No quadrature point with this index");
         return M_dphi[q][i];
-    }
-
-
-    //! Getter for the divergence of the basis functions in the quadrature nodes in the current element
-    /*!
-      @param i The index of the basis function
-      @param q The index of the quadrature node
-      @return The divergence of the ith basis function in the qth quadrature node
-     */
-    Real const& laplacian (const UInt& i, const UInt& q, const UInt& direction) const
-    {
-    	ASSERT ( M_isLaplacianUpdated, "Divergence of the basis functions have not been updated");
-    	ASSERT ( i < fieldDim * M_nbFEDof, "No basis function with this index" );
-    	ASSERT ( q < M_nbQuadPt, "No quadrature point with this index" );
-
-    	return ( M_laplacian[q][i][direction] );
     }
 
     //! Getter for the divergence of the basis functions in the quadrature nodes in the current element
@@ -770,42 +750,6 @@ showMe (std::ostream& out) const
         }
         out << std::endl;
     }
-    
-    out << " D2Phi : " << std::endl;
-    for (UInt iQuad (0); iQuad < M_nbQuadPt; ++iQuad)
-    {
-        for (UInt iDof (0); iDof < M_nbFEDof; ++iDof)
-        {
-            for (UInt iFieldDim (0); iFieldDim < fieldDim; ++iFieldDim)
-            {
-                for (UInt iCoor (0); iCoor < S_spaceDimension; ++iCoor)
-                {
-                    for (UInt jCoor (0); jCoor < S_spaceDimension; ++jCoor)
-                    {
-                        out << M_d2phi[iQuad][iDof][iCoor][jCoor] << " ";
-                    }
-                    out << std::endl;
-                }
-                out << std::endl;
-            }
-            out << std::endl;
-        }
-        out << std::endl;
-    }
-    
-    out << " Laplacian : " << std::endl;
-    for (UInt iQuad (0); iQuad < M_nbQuadPt; ++iQuad)
-    {
-        for (UInt iDof (0); iDof < M_nbFEDof; ++iDof)
-        {
-            for (UInt iFieldDim (0); iFieldDim < fieldDim; ++iFieldDim)
-            {
-                out << M_laplacian[iQuad][iDof][iFieldDim] << " ";
-            }
-            out << std::endl;
-        }
-        out << std::endl;
-    }
 
 }
 
@@ -1212,7 +1156,7 @@ void ETCurrentFE< spaceDim, fieldDim >::updateLaplacian ( const UInt& iQuadPt )
         	// copy other values according to the vectorial basis functions
         	for ( UInt k ( 1 ); k < fieldDim; ++k)
         	{
-        		M_laplacian[iQuadPt][k * M_nbFEDof + iDof][k] = partialSum;
+        		M_laplacian[iQuadPt][k * M_nbFEDof + iDof][k] = M_laplacian[iQuadPt][iDof][0];
         	}
         }
     }

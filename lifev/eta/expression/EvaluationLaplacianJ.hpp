@@ -163,7 +163,7 @@ public:
 private:
 
     //! Storage of the pointer to the data
-    std::vector< std::vector < return_Type > > const* M_valuesPtr;
+    std::vector< std::vector < VectorSmall<fieldDim> > > const* M_valuesPtr;
 
 };
 
@@ -288,7 +288,7 @@ public:
 private:
 
     //! Storage of the pointer to the data
-    std::vector< std::vector < return_Type > > const* M_valuesPtr;
+    std::vector< std::vector < Real > > const* M_valuesPtr;
 
 };
 
