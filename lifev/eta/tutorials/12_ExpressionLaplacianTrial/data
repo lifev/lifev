@@ -1,4 +1,0 @@
-[mesh]
-    mesh_dir        = ./
-    mesh_file       = tetraedro.mesh
-    mesh_type       = .mesh
