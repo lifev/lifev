@@ -26,10 +26,10 @@
 
 /*!
     @file
-    @brief test ExporterVTK
+    @brief test for ExporterEnsight
 
     @author Tiziano Passerini <tiziano@mathcs.emory.edu>
-    @contributor
+    @contributor Simone Deparis
     @maintainer
 
     @date 13-1-2011
@@ -44,6 +44,17 @@
 #include <lifev/core/LifeV.hpp>
 #include "../importExport/RossEthierSteinmanDec.hpp"
 #include "../importExport/TestImportExport.hpp"
+
+#include <lifev/core/filter/ExporterEnsight.hpp>
+#include <lifev/core/filter/ExporterVTK.hpp>
+#include <lifev/core/filter/ExporterHDF5.hpp>
+
+
+typedef LifeV::ExporterEnsight<TestImportExport::mesh_Type> ensight_Type;
+typedef LifeV::ExporterHDF5<TestImportExport::mesh_Type> hdf5_Type;
+typedef LifeV::ExporterVTK<TestImportExport::mesh_Type> vtk_Type;
+
+
 
 using namespace LifeV;
 
@@ -88,8 +99,22 @@ main ( int argc, char** argv )
 
     bool passed (false);
 
-    typedef ExporterEnsight<mesh_Type> exporter_Type;
-    passed = testImportExport.run<exporter_Type, exporter_Type > ( command_line, "import" );
+    const std::string exporterName = command_line.follow ("ensight", 2, "-e", "--exporter");
+
+    if ( exporterName.compare ( "vtk" ) == 0 )
+    {
+	passed = testImportExport.run<vtk_Type, vtk_Type > ( command_line, "export" );
+    }	
+    else if ( exporterName.compare ( "ensight" ) == 0 )
+    {
+	passed = testImportExport.run<ensight_Type, ensight_Type > ( command_line, "export" );
+    }
+#ifdef HAVE_HDF5
+    else
+    {
+	passed = testImportExport.run<hdf5_Type, hdf5_Type > ( command_line, "export" );
+    }
+#endif
 
     // ----- End of test calls -----
 

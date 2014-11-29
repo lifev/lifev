@@ -98,6 +98,13 @@ public:
     typedef std::vector<std::vector<Int> > graph_Type;
     typedef boost::shared_ptr<graph_Type> graphPtr_Type;
     typedef boost::shared_ptr<std::vector<meshPtr_Type> > serial_meshPtr_Type;
+
+    //! @name Static members
+
+    //! returns the type of the map to use for the VectorEpetra
+    static MapEpetraType const MapType;
+    //@}
+
     //@}
 
     //! @name Constructor & Destructor
@@ -243,6 +250,8 @@ protected:
 
 };
 
+template<typename MeshType>
+MapEpetraType const ExporterHDF5<MeshType>::MapType (Unique);
 
 
 // ===================================================
@@ -576,7 +585,7 @@ void ExporterHDF5<MeshType>::setDataFromGetPot ( const GetPot& dataFile, const s
 template<typename MeshType>
 MapEpetraType ExporterHDF5<MeshType>::mapType() const
 {
-    return Unique;
+    return MapType;
 }
 
 // ===================================================
