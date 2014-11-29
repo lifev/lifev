@@ -4,15 +4,9 @@ INCLUDE(TribitsCopyFilesToBinaryDir)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
 TRIBITS_ADD_EXECUTABLE_AND_TEST(
-  11_ExpressionLaplacian
+  11_TestingLaplacianPhiI
   SOURCES main.cpp
   ARGS -c
   NUM_MPI_PROCS 2
   COMM serial mpi
   )
-  
-TRIBITS_COPY_FILES_TO_BINARY_DIR(data_Laplacian
-  SOURCE_FILES data
-  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-  CREATE_SYMLINK
-)
