@@ -271,7 +271,7 @@ template<UInt testDim, UInt solutionDim, UInt spaceDim>
 class ExpressionToEvaluation<ExpressionLaplacianJ, testDim, solutionDim, spaceDim>
 {
 public:
-    typedef EvaluationLaplacianJ<testDim, spaceDim> evaluation_Type;
+    typedef EvaluationLaplacianJ<solutionDim, spaceDim> evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();

@@ -133,15 +133,16 @@ public:
 
     //! Setter for the test current FE
     template< typename CFEType >
-    void setTestCFE (const CFEType* testCFE)
-    {
-        ASSERT (testCFE != 0, "Nul pointer to the testCFE cannot be set");
-        M_valuesPtr = & (testCFE->M_laplacian);
-    }
+    void setTestCFE (const CFEType* /*testCFE*/)
+    { }
 
     //! Do nothing setter for the solution current FE
     template< typename CFEType >
-    void setSolutionCFE (const CFEType* /*solutionCFE*/) {}
+    void setSolutionCFE (const CFEType* solutionCFE)
+    {
+    	ASSERT (testCFE != 0, "Nul pointer to the testCFE cannot be set");
+    	M_valuesPtr = & (solutionCFE->M_laplacian);
+    }
 
     //! Do nothing setter for the quadrature rule
     void setQuadrature (const QuadratureRule&) {}
@@ -176,7 +177,6 @@ const flag_Type EvaluationLaplacianJ<fieldDim, spaceDim>::S_testUpdateFlag = ET_
 
 template<UInt fieldDim, UInt spaceDim>
 const flag_Type EvaluationLaplacianJ<fieldDim, spaceDim>::S_solutionUpdateFlag = ET_UPDATE_LAPLACIAN;
-
 
 //! Evaluation of the basis function dphi_i in the case of a scalar FE.
 /*!
