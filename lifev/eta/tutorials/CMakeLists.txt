@@ -17,4 +17,5 @@ ADD_SUBDIRECTORIES(
   11_TestingLaplacianPhiI
   12_TestingLaplacianPhiJ
   13_TestingLaplacianFEVector
+  14_testNS
 )
