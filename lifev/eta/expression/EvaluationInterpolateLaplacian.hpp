@@ -168,7 +168,7 @@ public:
         					+ jDim * M_fespace->dof().numTotalDof() );
 
         			M_interpolatedLaplacians[q][jDim] +=
-        					M_currentFE.laplacian (i + jDim * M_currentFE.nbFEDof(), q, jDim)
+        					M_currentFE.laplacian (i + jDim * M_currentFE.nbFEDof(), q)[jDim]
         					* M_vector[globalID];
         		}
         	}
