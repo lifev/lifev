@@ -198,9 +198,9 @@ int main ( int argc, char** argv )
     result = integralVec.dot(vectorOnesVec);
 
     std::cout << "\n\nVECTORIAL CASE " << std::endl;
-    std::cout << "\nThe volume is = " << length*length*length << std::endl;
+    std::cout << "\nThe volume is = " << 3*length*length*length << std::endl;
     std::cout << "\nThe result is = " << result << std::endl;
-    std::cout << "\nThe error is = " << result-(length*length*length) << "\n\n";
+    std::cout << "\nThe error is = " << result-(3*(length*length*length)) << "\n\n";
 
 #ifdef HAVE_MPI
     MPI_Finalize();

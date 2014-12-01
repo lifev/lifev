@@ -102,6 +102,7 @@ int main ( int argc, char** argv )
 
     boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
 
+    /*
     GetPot command_line (argc, argv);
     const std::string dataFileName = command_line.follow ("data", 2, "-f", "--file");
     GetPot dataFile (dataFileName);
@@ -109,15 +110,14 @@ int main ( int argc, char** argv )
     MeshData meshData;
     meshData.setup (dataFile, "mesh");
     readMesh (*fullMeshPtr, meshData);
+	*/
 
-    /*
     Real length = 3.0;
 
 
     regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
     		        length,   length,   length,
                     0.0,  0.0,  0.0);
-    */
 
     MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
     boost::shared_ptr< mesh_Type > meshPtr (meshPart.meshPartition() );
@@ -162,9 +162,9 @@ int main ( int argc, char** argv )
     result = vectorTestFunctions.dot(first);
 
     std::cout << "\n\nSCALAR CASE " << std::endl;
-    std::cout << "\nThe volume is = " << 4.5 << std::endl;
+    std::cout << "\nThe volume is = " << 27 << std::endl;
     std::cout << "\nThe result is = " << result << std::endl;
-    std::cout << "\nThe error is = " << result-(4.5) << std::endl;
+    std::cout << "\nThe error is = " << result-27 << std::endl;
 
     ///////////////////////////////////
     // Testing the vector field case //
@@ -195,6 +195,8 @@ int main ( int argc, char** argv )
 
     integralVec.globalAssemble();
 
+    integralVec.spy("matrice");
+
     result = 0.0;
 
     vector_Type firstVec(uSpaceVec->map());
@@ -202,9 +204,9 @@ int main ( int argc, char** argv )
     result = vectorTestFunctionsVec.dot(firstVec);
 
     std::cout << "\n\nVECTORIAL CASE " << std::endl;
-    std::cout << "\nThe volume is = " << 13.5 << std::endl;
+    std::cout << "\nThe volume is = " << 81 << std::endl;
     std::cout << "\nThe result is = " << result << std::endl;
-    std::cout << "\nThe error is = " << result-(13.5) << "\n\n";
+    std::cout << "\nThe error is = " << result-81 << "\n\n";
 
 #ifdef HAVE_MPI
     MPI_Finalize();

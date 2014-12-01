@@ -199,12 +199,14 @@ int main ( int argc, char** argv )
 
     result = 0.0;
 
+    integralVec.spy("vettore.m");
+
     result = integralVec.dot(vectorTestFunctionsVec);
 
     std::cout << "\n\nVECTORIAL CASE " << std::endl;
-    std::cout << "\nThe volume is = " << length*length*length << std::endl;
+    std::cout << "\nThe volume is = " << (length*length*length)*3 << std::endl;
     std::cout << "\nThe result is = " << result << std::endl;
-    std::cout << "\nThe error is = " << result-(length*length*length) << "\n\n";
+    std::cout << "\nThe error is = " << result-((length*length*length)*3) << "\n\n";
 
 #ifdef HAVE_MPI
     MPI_Finalize();
