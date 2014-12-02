@@ -667,7 +667,8 @@ updateSystem ( const Real          alphaOverTimestep,
                         M_velocityFESpace.qr(),               // Quadrature rule
                         M_fespaceUETA,
                         M_fespaceUETA,
-                        dot( M_oseenData->density() * value(M_fespaceUETA, u_starRepeated)*grad(phi_j), phi_i) // semi-implicit treatment of the convective term
+                        // dot( M_oseenData->density() * value(M_fespaceUETA, u_starRepeated)*grad(phi_j), phi_i) // semi-implicit treatment of the convective term
+                        value( -1.0*M_oseenData->density() )* dot( grad(phi_i), outerProduct( value(M_fespaceUETA, u_starRepeated), phi_j ) )
                      )
             >> M_convectiveMatrix->block(0,0);
         }
