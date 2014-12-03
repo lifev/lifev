@@ -170,7 +170,6 @@ void FSIHandler::setup ( )
 	M_structure.reset (new StructuralOperator<mesh_Type> ( ) );
 	M_structure->setup ( M_dataStructure, M_displacementFESpace, M_displacementETFESpace, M_structureBC, M_comm);
 	double timeAdvanceCoefficient = M_structureTimeAdvance->coefficientSecondDerivative ( 0 ) / ( M_dt * M_dt );
-	M_structure->showMe();
 	M_structure->buildSystem (timeAdvanceCoefficient);
 
 	// Ale
