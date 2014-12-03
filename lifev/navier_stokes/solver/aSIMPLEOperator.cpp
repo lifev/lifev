@@ -127,8 +127,7 @@ int aSIMPLEOperator::ApplyInverse( VectorEpetra_Type const& X_velocity,
 
     VectorEpetra_Type W ( X_pressure.map(), Unique );
     M_approximatedSchurComplementOperator->ApplyInverse(K.epetraVector(), W.epetraVector());
-    Real alpha = 1.0;
-    W *= (-1.0/alpha);
+    W *= (-1.0);
 
     Y_velocity = Z;
 
@@ -166,7 +165,7 @@ int aSIMPLEOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
     Y_vectorEpetra.subset(Y_velocity, X_velocity.map(), 0, 0);
     Y_vectorEpetra.subset(Y_pressure, X_pressure.map(), 0, X_velocity.map().mapSize() );
 
-    Y = static_cast<Epetra_MultiVector>( Y_vectorEpetra.epetraVector() );
+    Y = dynamic_cast<Epetra_MultiVector&>( Y_vectorEpetra.epetraVector() );
 
     return 0;
 }
