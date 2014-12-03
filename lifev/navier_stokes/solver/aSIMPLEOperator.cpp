@@ -109,6 +109,9 @@ void aSIMPLEOperator::buildShurComplement( )
     // computing M_B*(diag(F)^{-1}*M_Btranspose)
     M_B->multiply (false, FBT, false, *M_schurComplement, false);
     M_schurComplement->globalAssemble();
+
+    M_DBT.reset ( new matrixEpetra_Type( *M_Btranspose ) );
+    M_DBT->matrixPtr()->LeftScale(*M_invD);
 }
 
 int aSIMPLEOperator::ApplyInverse( VectorEpetra_Type const& X_velocity,
@@ -128,10 +131,8 @@ int aSIMPLEOperator::ApplyInverse( VectorEpetra_Type const& X_velocity,
     W *= (-1.0/alpha);
 
     Y_velocity = Z;
-    matrixEpetra_Type DBT ( *M_Btranspose );
-    DBT.matrixPtr()->LeftScale(*M_invD);
 
-    Y_velocity -= DBT*W;
+    Y_velocity -= *M_DBT*W;
 
     Y_pressure = W;
 

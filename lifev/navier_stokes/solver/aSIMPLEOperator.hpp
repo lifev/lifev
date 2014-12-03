@@ -161,6 +161,8 @@ private:
 
     boost::shared_ptr<Epetra_Vector> M_invD;
 
+    matrixEpetraPtr_Type M_DBT;
+
     //! Label
     const std::string M_label;
 };
