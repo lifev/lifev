@@ -55,12 +55,15 @@ void
 aSIMPLEFSIOperator::setStructureBlock(const matrixEpetraPtr_Type & S)
 {
 	M_S = S;
+	M_X_displacement.reset( new VectorEpetra_Type( M_S->map(), Unique) );
+	M_structure = M_S->map().mapSize();
 }
 
 void
 aSIMPLEFSIOperator::setGeometryBlock(const matrixEpetraPtr_Type & G)
 {
 	M_G = G;
+	M_X_geometry.reset( new VectorEpetra_Type (M_G->map(), Unique) );
 }
 
 void
@@ -71,6 +74,10 @@ aSIMPLEFSIOperator::setFluidBlocks(const matrixEpetraPtr_Type & F,
 	M_F = F;
 	M_Btranspose = Btranspose;
 	M_B = B;
+	M_X_velocity.reset( new VectorEpetra_Type (M_F->map(), Unique) );
+	M_X_pressure.reset( new VectorEpetra_Type (M_B->map(), Unique) );
+	M_fluidVelocity = M_F->map().mapSize();
+	M_fluid         = M_fluidVelocity + M_B->map().mapSize();
 }
 
 void
@@ -85,6 +92,8 @@ aSIMPLEFSIOperator::setCouplingBlocks ( const matrixEpetraPtr_Type & C1transpose
 	M_C2 = C2;
 	M_C1 = C1;
 	M_C3 = C3;
+	M_X_lambda.reset(  new VectorEpetra_Type ( M_C1->map(), Unique) );\
+	M_lambda = M_C1->map().mapSize();
 }
 
 void
@@ -254,48 +263,43 @@ aSIMPLEFSIOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
     const VectorEpetra_Type X_vectorEpetra(X, M_monolithicMap, Unique);
 
     //! Extract each component of the input vector
-    VectorEpetra_Type X_velocity(M_F->map(), Unique);
-    X_velocity.subset(X_vectorEpetra, M_F->map(), 0, 0);
+    M_X_velocity->subset(X_vectorEpetra, M_F->map(), 0, 0);
 
-    VectorEpetra_Type X_pressure(M_B->map(), Unique);
-    X_pressure.subset(X_vectorEpetra, M_B->map(), M_F->map().mapSize(), 0 );
+    M_X_pressure->subset(X_vectorEpetra, M_B->map(), M_fluidVelocity, 0 );
 
-    VectorEpetra_Type X_displacement(M_S->map(), Unique);
-    X_displacement.subset(X_vectorEpetra, M_S->map(), M_F->map().mapSize() + M_B->map().mapSize(), 0 );
+    M_X_displacement->subset(X_vectorEpetra, M_S->map(), M_fluid, 0 );
 
-    VectorEpetra_Type X_lambda(M_C1->map(), Unique);
-    X_lambda.subset(X_vectorEpetra, M_C1->map(), M_F->map().mapSize() + M_B->map().mapSize() + M_S->map().mapSize(), 0 );
+    M_X_lambda->subset(X_vectorEpetra, M_C1->map(), M_fluid + M_structure, 0 );
 
-    VectorEpetra_Type X_geometry(M_G->map(), Unique);
-    X_geometry.subset(X_vectorEpetra, M_G->map(), M_F->map().mapSize() + M_B->map().mapSize() + M_S->map().mapSize() + M_C1->map().mapSize(), 0 );
+    M_X_geometry->subset(X_vectorEpetra, M_G->map(), M_fluid + M_structure + M_lambda , 0 );
 
     //--------------------------------------------------//
     // First: apply the preconditioner of the structure //
     //--------------------------------------------------//
 
     VectorEpetra_Type Y_displacement(M_S->map(), Unique);
-    M_approximatedStructureMomentumOperator->ApplyInverse(X_displacement.epetraVector(), Y_displacement.epetraVector() );
+    M_approximatedStructureMomentumOperator->ApplyInverse(M_X_displacement->epetraVector(), Y_displacement.epetraVector() );
 
     //--------------------------------------------------//
     // Second: apply the preconditioner of the geometry //
     //--------------------------------------------------//
 
-    VectorEpetra_Type Zg ( X_geometry );
+    VectorEpetra_Type Zg ( *M_X_geometry );
     Zg -= *M_C3*Y_displacement;
 
-    VectorEpetra_Type Y_geometry ( X_geometry.map(), Unique);
+    VectorEpetra_Type Y_geometry ( M_X_geometry->map(), Unique);
     M_approximatedGeometryOperator->ApplyInverse(Zg.epetraVector(), Y_geometry.epetraVector() );
 
     //----------------------------------------------//
     // Third: Update shape derivatives and coupling with the solid (velocity)
     //----------------------------------------------//
 
-    VectorEpetra_Type Zlambda ( X_lambda );
+    VectorEpetra_Type Zlambda ( *M_X_lambda );
     Zlambda -= *M_C2*Y_displacement;
 
     // Shape derivatives
-    VectorEpetra_Type Zf_velocity ( X_velocity );
-    VectorEpetra_Type Zf_pressure ( X_pressure );
+    VectorEpetra_Type Zf_velocity ( *M_X_velocity );
+    VectorEpetra_Type Zf_pressure ( *M_X_pressure );
 
     if ( M_shapeDerivatives )
     {
@@ -306,8 +310,8 @@ aSIMPLEFSIOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
     //----------------------------------------------//
     // Forth: Fluid by condensation
     //----------------------------------------------//
-    VectorEpetra_Type Y_velocity ( X_velocity.map() );
-    VectorEpetra_Type Y_pressure ( X_pressure.map() );
+    VectorEpetra_Type Y_velocity ( M_X_velocity->map() );
+    VectorEpetra_Type Y_pressure ( M_X_pressure->map() );
 
     VectorEpetra_Type Wf_velocity ( Zf_velocity );
 
@@ -326,7 +330,7 @@ aSIMPLEFSIOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
 
         // Solving the system
         BlockEpetra_Map upMap;
-        upMap.setUp ( X_velocity.map().map(Unique), X_pressure.map().map(Unique));
+        upMap.setUp ( M_X_velocity->map().map(Unique), M_X_pressure->map().map(Unique));
 
         // Todo: optimize with pushing shared pointer into blockepetra.
         BlockEpetra_MultiVector up(upMap, 1), rhs(upMap, 1);
@@ -342,7 +346,7 @@ aSIMPLEFSIOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
     }
 
     // Update coupling
-    VectorEpetra_Type Y_lambda ( X_lambda.map(), Unique );
+    VectorEpetra_Type Y_lambda ( M_X_lambda->map(), Unique );
 
     VectorEpetra_Type Kf_velocity ( Zf_velocity );
     Kf_velocity -= (*M_F * Y_velocity + *M_Btranspose * Y_pressure);
@@ -353,10 +357,10 @@ aSIMPLEFSIOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
 
     //! Copy the single contributions into the optput vector
     Y_vectorEpetra.subset(Y_velocity, Y_velocity.map(), 0, 0 );
-    Y_vectorEpetra.subset(Y_pressure, Y_pressure.map(), 0, M_F->map().mapSize() );
-    Y_vectorEpetra.subset(Y_displacement, Y_displacement.map(), 0, M_F->map().mapSize() + M_B->map().mapSize() );
-    Y_vectorEpetra.subset(Y_lambda, Y_lambda.map(), 0, M_F->map().mapSize() + M_B->map().mapSize() + M_S->map().mapSize() );
-    Y_vectorEpetra.subset(Y_geometry, Y_geometry.map(), 0, M_F->map().mapSize() + M_B->map().mapSize() + M_S->map().mapSize() + M_C1->map().mapSize() );
+    Y_vectorEpetra.subset(Y_pressure, Y_pressure.map(), 0, M_fluidVelocity );
+    Y_vectorEpetra.subset(Y_displacement, Y_displacement.map(), 0, M_fluid );
+    Y_vectorEpetra.subset(Y_lambda, Y_lambda.map(), 0, M_fluid + M_structure );
+    Y_vectorEpetra.subset(Y_geometry, Y_geometry.map(), 0, M_fluid + M_structure + M_lambda );
 
     Y = dynamic_cast<Epetra_MultiVector &>( Y_vectorEpetra.epetraVector() );
 

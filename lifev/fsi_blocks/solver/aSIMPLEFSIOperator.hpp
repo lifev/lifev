@@ -259,6 +259,21 @@ private:
     const std::string M_label;
 
     bool M_shapeDerivatives;
+
+    // Offsets
+    Real M_fluidVelocity;
+    Real M_fluid;
+    Real M_structure;
+    Real M_lambda;
+
+    //! Vectors needed for the applyInverse
+    boost::shared_ptr<VectorEpetra_Type > M_X_velocity;
+    boost::shared_ptr<VectorEpetra_Type > M_X_pressure;
+    boost::shared_ptr<VectorEpetra_Type > M_X_displacement;
+    boost::shared_ptr<VectorEpetra_Type > M_X_lambda;
+    boost::shared_ptr<VectorEpetra_Type > M_X_geometry;
+
+
 };
 
 } /* end namespace Operators */
