@@ -266,12 +266,19 @@ private:
     Real M_structure;
     Real M_lambda;
 
-    //! Vectors needed for the applyInverse
+    //! Vectors needed for the applyInverse - input vectors associated to each part
     boost::shared_ptr<VectorEpetra_Type > M_X_velocity;
     boost::shared_ptr<VectorEpetra_Type > M_X_pressure;
     boost::shared_ptr<VectorEpetra_Type > M_X_displacement;
     boost::shared_ptr<VectorEpetra_Type > M_X_lambda;
     boost::shared_ptr<VectorEpetra_Type > M_X_geometry;
+
+    //! Vectors needed for the applyInverse - output vectors associated to each part
+    boost::shared_ptr<VectorEpetra_Type > M_Y_velocity;
+    boost::shared_ptr<VectorEpetra_Type > M_Y_pressure;
+    boost::shared_ptr<VectorEpetra_Type > M_Y_displacement;
+    boost::shared_ptr<VectorEpetra_Type > M_Y_lambda;
+    boost::shared_ptr<VectorEpetra_Type > M_Y_geometry;
 
 
 };
