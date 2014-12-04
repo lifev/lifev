@@ -43,8 +43,8 @@
                     <Parameter name="coarse: type" type="string" value="Amesos-KLU"/>
                     <Parameter name="increasing or decreasing" type="string" value="increasing"/>
                     <Parameter name="PDE equations" type="int" value="3"/>
-                    <Parameter name="cycle applications" type="int" value="3"/>
-                    <Parameter name="max levels" type="int" value="3"/>
+                    <Parameter name="cycle applications" type="int" value="1"/>
+                    <Parameter name="max levels" type="int" value="2"/>
                     <Parameter name="smoother: pre or post" type="string" value="pre"/>
                     <Parameter name="smoother: sweeps" type="int" value="3"/>
                     <Parameter name="smoother: type" type="string" value="IFPACK"/>
