@@ -79,7 +79,7 @@ int ApproximatedInvertibleRowMatrix::Apply(const vector_Type& X, vector_Type& Y)
 	return M_rowMatrix->Apply(X,Y);
 }
 
-int ApproximatedInvertibleRowMatrix::ApplyInverse(const vector_Type& X, vector_Type& Y) const
+inline int ApproximatedInvertibleRowMatrix::ApplyInverse(const vector_Type& X, vector_Type& Y) const
 {
 	int ierr;
 	if(usePreconditionerAsApproximatedInverse)
