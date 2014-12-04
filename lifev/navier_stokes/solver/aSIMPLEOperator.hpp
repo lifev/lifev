@@ -165,6 +165,15 @@ private:
 
     //! Label
     const std::string M_label;
+
+    //! Vectors needed for the apply inverse
+    boost::shared_ptr<VectorEpetra_Type> M_Z;
+
+    boost::shared_ptr<VectorEpetra_Type> M_X_velocity;
+    boost::shared_ptr<VectorEpetra_Type> M_X_pressure;
+    boost::shared_ptr<VectorEpetra_Type> M_Y_velocity;
+    boost::shared_ptr<VectorEpetra_Type> M_Y_pressure;
+
 };
 
 } /* end namespace Operators */

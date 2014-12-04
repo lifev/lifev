@@ -47,6 +47,11 @@ void aSIMPLEOperator::setUp(const matrixEpetraPtr_Type & F,
     M_comm = F->map().commPtr();
     M_monolithicMap.reset( new mapEpetra_Type ( M_F->map() ) );
     *M_monolithicMap += M_B->map();
+    M_Z.reset(new VectorEpetra_Type( F->map(), Unique ) );
+    M_X_velocity.reset( new VectorEpetra_Type (M_F->map(), Unique) );
+    M_X_pressure.reset( new VectorEpetra_Type (M_B->map(), Unique) );
+    M_Y_velocity.reset( new VectorEpetra_Type (M_F->map(), Unique ) );
+    M_Y_pressure.reset( new VectorEpetra_Type (M_B->map(), Unique) );
 }
 
 void aSIMPLEOperator::setOptions(const Teuchos::ParameterList& solversOptions)
@@ -114,26 +119,16 @@ void aSIMPLEOperator::buildShurComplement( )
     M_DBT->matrixPtr()->LeftScale(*M_invD);
 }
 
-int aSIMPLEOperator::ApplyInverse( VectorEpetra_Type const& X_velocity,
+inline int aSIMPLEOperator::ApplyInverse( VectorEpetra_Type const& X_velocity,
                                    VectorEpetra_Type const& X_pressure,
                                    VectorEpetra_Type & Y_velocity,
                                    VectorEpetra_Type & Y_pressure) const
 {
-    VectorEpetra_Type Z ( X_velocity.map(), Unique );
-    M_approximatedMomentumOperator->ApplyInverse(X_velocity.epetraVector(), Z.epetraVector() );
+    M_approximatedMomentumOperator->ApplyInverse(X_velocity.epetraVector(), M_Z->epetraVector() );
 
-    VectorEpetra_Type K ( X_pressure, Unique );
-    K -= *M_B*Z;
+    M_approximatedSchurComplementOperator->ApplyInverse( (*M_B*(*M_Z) - X_pressure ).epetraVector(), Y_pressure.epetraVector());
 
-    VectorEpetra_Type W ( X_pressure.map(), Unique );
-    M_approximatedSchurComplementOperator->ApplyInverse(K.epetraVector(), W.epetraVector());
-    W *= (-1.0);
-
-    Y_velocity = Z;
-
-    Y_velocity -= *M_DBT*W;
-
-    Y_pressure = W;
+    Y_velocity = (*M_Z - *M_DBT*Y_pressure);
 
     return 0;
 
@@ -146,24 +141,18 @@ int aSIMPLEOperator::ApplyInverse(const vector_Type& X, vector_Type& Y) const
 
     const VectorEpetra_Type X_vectorEpetra(X, M_monolithicMap, Unique);
 
-    // split the input vector into the velocity and pressure components
-    VectorEpetra_Type X_velocity(M_F->map(), Unique);
-    VectorEpetra_Type X_pressure(M_B->map(), Unique);
-    VectorEpetra_Type Y_velocity( X_velocity.map(), Unique );
-    VectorEpetra_Type Y_pressure ( X_pressure.map(), Unique);
-
     // gather input values
-    X_velocity.subset(X_vectorEpetra, M_F->map(), 0, 0);
-    X_pressure.subset(X_vectorEpetra, M_B->map(), M_F->map().mapSize(), 0);
+    M_X_velocity->subset(X_vectorEpetra, M_F->map(), 0, 0);
+    M_X_pressure->subset(X_vectorEpetra, M_B->map(), M_F->map().mapSize(), 0);
 
-    ApplyInverse( X_velocity, X_pressure, Y_velocity, Y_pressure);
+    ApplyInverse( *M_X_velocity, *M_X_pressure, *M_Y_velocity, *M_Y_pressure);
 
     // output vector
     VectorEpetra_Type Y_vectorEpetra(M_monolithicMap, Unique);
 
     // Copy the individual parts inside
-    Y_vectorEpetra.subset(Y_velocity, X_velocity.map(), 0, 0);
-    Y_vectorEpetra.subset(Y_pressure, X_pressure.map(), 0, X_velocity.map().mapSize() );
+    Y_vectorEpetra.subset(*M_Y_velocity, M_X_velocity->map(), 0, 0);
+    Y_vectorEpetra.subset(*M_Y_pressure, M_X_pressure->map(), 0, M_X_velocity->map().mapSize() );
 
     Y = dynamic_cast<Epetra_MultiVector&>( Y_vectorEpetra.epetraVector() );
 
