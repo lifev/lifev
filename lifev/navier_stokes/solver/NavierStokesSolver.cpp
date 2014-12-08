@@ -213,6 +213,8 @@ void NavierStokesSolver::updatePCD(const vectorPtr_Type& velocity)
 	// manner, velocoty is given from the previous newton step. Pay attantion when calling updatePCD, give in input the correct vector. In this way the
 	// method is flexible and can handle both scenarios.
 
+	vectorPtr_Type velocityRepeated( new vector_Type ( *velocity, Repeated ) );
+
 	if ( !M_graphPCDisBuilt )
 		buildPCDGraphs();
 
@@ -241,10 +243,13 @@ void NavierStokesSolver::updatePCD(const vectorPtr_Type& velocity)
 					M_fespacePETA,
 					value( M_fluidData->density()*M_alpha/M_timeStep ) * phi_i * phi_j
 					+ value( 0.5 * M_fluidData->viscosity() ) * dot( grad(phi_i) + grad(phi_i) , grad(phi_j) + grad(phi_j) )
-					+ value( M_fluidData->density() ) * dot( value(M_fespaceUETA, *velocity),grad(phi_j)) * phi_i
+					+ value( M_fluidData->density() ) * dot( value(M_fespaceUETA, *velocityRepeated),grad(phi_j)) * phi_i
 				  ) >> M_Fp;
 		M_Fp_graph->GlobalAssemble();
 	}
+
+	chrono.stop();
+	M_displayer.leaderPrintMax ( "   done in ", chrono.diff() ) ;
 }
 
 void NavierStokesSolver::buildPCDGraphs()
@@ -439,14 +444,30 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
     M_displayer.leaderPrintMax(" done in " , chrono.diff() );
 
     //(2) Set the data for the preconditioner
-    M_displayer.leaderPrint( "\tPreconditioner operator - set up the block operator...");
+
+	M_displayer.leaderPrint( "\tPreconditioner operator - set up the block operator...");
     chrono.reset();
     chrono.start();
-    M_prec->setUp(M_F, M_B, M_Btranspose);
-    M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
-    M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
-    M_prec->updateApproximatedMomentumOperator();
-    M_prec->updateApproximatedSchurComplementOperator();
+
+    if ( M_prec->Label() == "aSIMPLEOperator" )
+    {
+    	M_prec->setUp(M_F, M_B, M_Btranspose);
+    	M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
+    	M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
+    	M_prec->updateApproximatedMomentumOperator();
+    	M_prec->updateApproximatedSchurComplementOperator();
+    }
+    else if ( M_prec->Label() == "aPCDOperator" )
+    {
+    	updatePCD(M_uExtrapolated);
+    	M_prec->setUp(M_F, M_B, M_Btranspose, M_Fp, M_Mp, M_Mu); // Still need to apply BC!
+    	M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
+    	M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
+    	M_prec->updateApproximatedMomentumOperator();
+    	M_prec->updateApproximatedSchurComplementOperator();
+    	M_prec->updateApproximatedPressureMassOperator();
+    }
+
     chrono.stop();
     M_displayer.leaderPrintMax(" done in " , chrono.diff() );
 
