@@ -58,7 +58,8 @@ public:
                const matrixEpetraPtr_Type & B,
                const matrixEpetraPtr_Type & Btranspose,
                const matrixEpetraPtr_Type & Fp,
-               const matrixEpetraPtr_Type & Mp);
+               const matrixEpetraPtr_Type & Mp,
+               const matrixEpetraPtr_Type & Mu);
 
     //! @name Set Methods
     //@{
@@ -151,6 +152,8 @@ private:
 
     matrixEpetraPtr_Type M_Mp;
 
+    matrixEpetraPtr_Type M_Mu;
+
     matrixEpetraPtr_Type M_schurComplement;
 
     //! Communicator
@@ -165,6 +168,8 @@ private:
     parameterListPtr_Type M_momentumOptions;
 
     parameterListPtr_Type M_schurOptions;
+
+    parameterListPtr_Type M_PressureMassOptions;
 
     mapEpetraPtr_Type M_monolithicMap;
 
