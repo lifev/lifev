@@ -11,7 +11,8 @@ NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commP
         M_oper(new Operators::NavierStokesOperator),
         M_prec(new Operators::aSIMPLEOperator),
         M_invOper(),
-        M_fullyImplicit(false)
+        M_fullyImplicit(false),
+        M_graphPCDisBuilt(false)
 {
 }
 
@@ -201,6 +202,54 @@ void NavierStokesSolver::buildGraphs()
 	}
 
 	M_graphIsBuilt = true;
+
+	chrono.stop();
+	M_displayer.leaderPrintMax ( "   done in ", chrono.diff() ) ;
+}
+
+void NavierStokesSolver::setupPCD()
+{
+	if ( !M_graphPCDisBuilt )
+		buildPCDGraphs();
+
+
+
+}
+
+void NavierStokesSolver::buildPCDGraphs()
+{
+	M_displayer.leaderPrint ( " F - Pre-building the graphs for PCD... ");
+	LifeChrono chrono;
+	chrono.start();
+
+	{
+		using namespace ExpressionAssembly;
+
+		// Graph pressure mass
+		M_Mp_graph.reset (new Epetra_FECrsGraph (Copy, * (M_pressureFESpace->map().map (Unique) ), 0) );
+		buildGraph ( elements (M_fespacePETA->mesh() ),
+					 quadRuleTetra4pt,
+					 M_fespacePETA,
+					 M_fespacePETA,
+					 M_fluidData->density() * dot ( phi_i, phi_j )
+				   ) >> M_Mp_graph;
+		M_Mp_graph->GlobalAssemble();
+		M_Mp_graph->OptimizeStorage();
+
+		// Graph pressure mass
+		M_Fp_graph.reset (new Epetra_FECrsGraph (Copy, * (M_pressureFESpace->map().map (Unique) ), 0) );
+		buildGraph ( elements (M_fespacePETA->mesh() ),
+					 quadRuleTetra4pt,
+					 M_fespacePETA,
+					 M_fespacePETA,
+					 M_fluidData->density() * dot ( phi_i, phi_j ) +
+					 value( 0.5 * M_fluidData->viscosity() ) * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) ) +
+					 value( M_fluidData->density() ) * dot( value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i)
+				   ) >> M_Mp_graph;
+		M_Fp_graph->GlobalAssemble();
+		M_Fp_graph->OptimizeStorage();
+
+	}
 
 	chrono.stop();
 	M_displayer.leaderPrintMax ( "   done in ", chrono.diff() ) ;

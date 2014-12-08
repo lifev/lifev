@@ -208,6 +208,10 @@ private:
 
     void setSolversOptions(const Teuchos::ParameterList& solversOptions);
 
+    void setupPCD();
+
+    void buildPCDGraphs();
+
 	// communicator
 	commPtr_Type M_comm;
 
@@ -237,6 +241,9 @@ private:
 	graphPtr_Type M_F_graph;
 	graphPtr_Type M_Jacobian_graph;
 
+	graphPtr_Type M_Mp_graph;
+	graphPtr_Type M_Fp_graph;
+
 	// matrices
 	matrixPtr_Type M_Mu;
 	matrixPtr_Type M_Btranspose;
@@ -245,6 +252,9 @@ private:
 	matrixPtr_Type M_A;
 	matrixPtr_Type M_F;
 	matrixPtr_Type M_Jacobian;
+
+	matrixPtr_Type M_Mp;
+	matrixPtr_Type M_Fp;
 
 	// vectors
 	vectorPtr_Type M_uExtrapolated;
@@ -258,7 +268,10 @@ private:
 	//! Reals
 	Real M_alpha;
 	Real M_timeStep;
+
+	//! Booleans
 	bool M_graphIsBuilt;
+	bool M_graphPCDisBuilt;
 
     // Navoer Stokes operator
 	boost::shared_ptr<LifeV::Operators::NavierStokesOperator> M_oper;
