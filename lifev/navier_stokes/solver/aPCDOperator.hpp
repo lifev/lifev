@@ -109,6 +109,8 @@ public:
 
     void updateApproximatedSchurComplementOperator();
 
+    void updateApproximatedPressureMassOperator();
+
     void setMomentumOptions(const parameterListPtr_Type & _oList);
 
     void setPressureMassOptions(const parameterListPtr_Type & _oList);
@@ -165,23 +167,24 @@ private:
 
     Operators::ApproximatedInvertibleRowMatrix * M_approximatedSchurComplementOperator;
 
+    Operators::ApproximatedInvertibleRowMatrix * M_approximatedPressureMassOperator;
+
     parameterListPtr_Type M_momentumOptions;
 
     parameterListPtr_Type M_schurOptions;
 
-    parameterListPtr_Type M_PressureMassOptions;
+    parameterListPtr_Type M_pressureMassOptions;
 
     mapEpetraPtr_Type M_monolithicMap;
 
-    boost::shared_ptr<Epetra_Vector> M_invD;
-
-    matrixEpetraPtr_Type M_DBT;
+    boost::shared_ptr<Epetra_Vector> M_invDiagMassVelocity;
 
     //! Label
     const std::string M_label;
 
     //! Vectors needed for the apply inverse
-    boost::shared_ptr<VectorEpetra_Type> M_Z;
+    boost::shared_ptr<VectorEpetra_Type> M_Zu;
+    boost::shared_ptr<VectorEpetra_Type> M_Zp;
 
     boost::shared_ptr<VectorEpetra_Type> M_X_velocity;
     boost::shared_ptr<VectorEpetra_Type> M_X_pressure;
