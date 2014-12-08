@@ -13,35 +13,42 @@
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
 
+#include <lifev/navier_stokes/solver/NavierStokesPreconditionerOperator.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
+
 #ifndef _aSIMPLEOPERATOR_H_
 #define _aSIMPLEOPERATOR_H_
 
-namespace LifeV{
+namespace LifeV
+{
 namespace Operators
 {
 
-class aSIMPLEOperator: public LinearOperator
+class aSIMPLEOperator: public NavierStokesPreconditionerOperator
 {
 public:
     //! @name Public Types
     //@{
-    typedef boost::numeric::ublas::vector< boost::shared_ptr<vector_Type> > Zdata;
-    typedef boost::numeric::ublas::matrix< boost::shared_ptr<vector_Type> > ZZdata;
 
-    typedef LinearOperator                            super;
-    typedef  Epetra_CrsMatrix                         matrix_Type;
-    typedef  boost::shared_ptr<matrix_Type>           matrixPtr_Type;
-    typedef  MatrixEpetra<Real>                       matrixEpetra_Type;
-    typedef  boost::shared_ptr<matrixEpetra_Type>     matrixEpetraPtr_Type;
-    typedef  Epetra_Vector                            lumpedMatrix_Type;
-    typedef  boost::shared_ptr<lumpedMatrix_Type>     lumpedMatrixPtr_Type;
-    typedef  super::comm_Type                         comm_Type;
-    typedef  super::commPtr_Type                      commPtr_Type;
+    typedef  Epetra_MultiVector                        vector_Type;
+    typedef  boost::shared_ptr<vector_Type>            vectorPtr_Type;
+    typedef  Epetra_Map                                map_Type;
+    typedef  boost::shared_ptr<map_Type> 			   mapPtr_Type;
+    typedef  LinearOperator                            super;
+    typedef  Epetra_CrsMatrix                          matrix_Type;
+    typedef  boost::shared_ptr<matrix_Type>            matrixPtr_Type;
+    typedef  MatrixEpetra<Real>                        matrixEpetra_Type;
+    typedef  boost::shared_ptr<matrixEpetra_Type>      matrixEpetraPtr_Type;
+    typedef  Epetra_Vector                             lumpedMatrix_Type;
+    typedef  boost::shared_ptr<lumpedMatrix_Type>      lumpedMatrixPtr_Type;
+    typedef  super::comm_Type                          comm_Type;
+    typedef  super::commPtr_Type                       commPtr_Type;
     typedef  boost::shared_ptr<Teuchos::ParameterList> parameterListPtr_Type;
-    typedef  MapEpetra                                mapEpetra_Type;
-    typedef  boost::shared_ptr<mapEpetra_Type>        mapEpetraPtr_Type;
-    typedef  VectorEpetra                             VectorEpetra_Type;
-    typedef  boost::shared_ptr<VectorEpetra_Type>     VectorEpetraPtr_Type;
+    typedef  MapEpetra                                 mapEpetra_Type;
+    typedef  boost::shared_ptr<mapEpetra_Type>         mapEpetraPtr_Type;
+    typedef  VectorEpetra                              VectorEpetra_Type;
+    typedef  boost::shared_ptr<VectorEpetra_Type>      VectorEpetraPtr_Type;
     //@}
 
     //! @name Constructors
@@ -175,6 +182,16 @@ private:
     boost::shared_ptr<VectorEpetra_Type> M_Y_pressure;
 
 };
+
+//! Factory create function
+inline NavierStokesPreconditionerOperator * create_aSIMPLE()
+{
+    return new aSIMPLEOperator ();
+}
+namespace
+{
+static bool S_register_aSimple = LifeV::Operators::NavierStokesPreconditionerOperator::NSPreconditionerFactory::instance().registerProduct ( "aSIMPLEOperator", &create_aSIMPLE );
+}
 
 } /* end namespace Operators */
 } //end namespace

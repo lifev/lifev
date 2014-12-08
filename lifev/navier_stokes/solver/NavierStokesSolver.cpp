@@ -9,11 +9,12 @@ NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commP
 		M_displayer(communicator),
 		M_graphIsBuilt(false),
         M_oper(new Operators::NavierStokesOperator),
-        M_prec(new Operators::aSIMPLEOperator),
+        M_prec(new Operators::NavierStokesPreconditionerOperator),
         M_invOper(),
         M_fullyImplicit(false),
         M_graphPCDisBuilt(false)
 {
+	M_prec.reset ( Operators::NavierStokesPreconditionerOperator::NSPreconditionerFactory::instance().createObject (dataFile("fluid/preconditionerType","none")));
 }
 
 NavierStokesSolver::~NavierStokesSolver()

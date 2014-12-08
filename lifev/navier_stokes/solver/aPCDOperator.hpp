@@ -20,7 +20,7 @@ namespace LifeV{
 namespace Operators
 {
 
-class aPCDOperator: public LinearOperator
+class aPCDOperator: public NavierStokesPreconditionerOperator
 {
 public:
     //! @name Public Types

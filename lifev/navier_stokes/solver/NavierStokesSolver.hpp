@@ -56,7 +56,9 @@
 
 // includes for the linear solver
 #include <lifev/navier_stokes/solver/NavierStokesOperator.hpp>
+#include <lifev/navier_stokes/solver/NavierStokesPreconditionerOperator.hpp>
 #include <lifev/navier_stokes/solver/aSIMPLEOperator.hpp>
+#include <lifev/navier_stokes/solver/aPCDOperator.hpp>
 
 // utilities
 #include <lifev/core/util/LifeChrono.hpp>
@@ -276,8 +278,8 @@ private:
     // Navoer Stokes operator
 	boost::shared_ptr<LifeV::Operators::NavierStokesOperator> M_oper;
 
-    // Navoer Stokes operator
-	boost::shared_ptr<LifeV::Operators::aSIMPLEOperator> M_prec;
+    // Preconditioner
+	boost::shared_ptr<LifeV::Operators::NavierStokesPreconditionerOperator> M_prec;
 
     // Epetra Operator needed to solve the linear system
     boost::shared_ptr<Operators::InvertibleOperator> M_invOper;

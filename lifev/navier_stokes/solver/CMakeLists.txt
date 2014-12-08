@@ -13,6 +13,7 @@ SET(solver_HEADERS
   solver/NavierStokesOperator.hpp
   solver/aSIMPLEOperator.hpp
   solver/aPCDOperator.hpp
+  solver/NavierStokesPreconditionerOperator.hpp
 CACHE INTERNAL "")
 
 SET(solver_SOURCES

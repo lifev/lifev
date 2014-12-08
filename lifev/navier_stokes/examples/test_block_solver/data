@@ -25,8 +25,8 @@ filename = resultBDF2_parte1
 
 [fluid]
 
-	options_preconditioner = solversOptionsFast
-    solver_manager_type = aSIMPLE
+    options_preconditioner = solversOptionsFast
+    preconditionerType  = aSIMPLE
     save_every          = 1
     export_coefficients = true  
     conservativeFormulation = false
