@@ -208,7 +208,7 @@ private:
 
     void setSolversOptions(const Teuchos::ParameterList& solversOptions);
 
-    void setupPCD();
+    void updatePCD(const vectorPtr_Type& velocity);
 
     void buildPCDGraphs();
 

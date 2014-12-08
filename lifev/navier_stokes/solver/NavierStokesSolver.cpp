@@ -207,13 +207,44 @@ void NavierStokesSolver::buildGraphs()
 	M_displayer.leaderPrintMax ( "   done in ", chrono.diff() ) ;
 }
 
-void NavierStokesSolver::setupPCD()
+void NavierStokesSolver::updatePCD(const vectorPtr_Type& velocity)
 {
+	// Note: for semi-implicit treatment of the convective term velocity is an extrapolation. When the convective term is treated in a fully-implicit
+	// manner, velocoty is given from the previous newton step. Pay attantion when calling updatePCD, give in input the correct vector. In this way the
+	// method is flexible and can handle both scenarios.
+
 	if ( !M_graphPCDisBuilt )
 		buildPCDGraphs();
 
+	M_displayer.leaderPrint ( " F - Assembling PCD terms... ");
+	LifeChrono chrono;
+	chrono.start();
 
+	{
+		using namespace ExpressionAssembly;
 
+		M_Mp.reset (new matrix_Type ( M_pressureFESpace->map(), *M_Mp_graph ) );
+		M_Mp->zero();
+		integrate ( elements (M_fespaceUETA->mesh() ),
+					M_pressureFESpace->qr(),
+					M_fespacePETA,
+					M_fespacePETA,
+					phi_i * phi_j
+				  ) >> M_Mp;
+		M_Mp->globalAssemble();
+
+		// Graph pressure mass
+		M_Fp.reset (new matrix_Type ( M_pressureFESpace->map(), *M_Mp_graph ) );
+		integrate ( elements (M_fespacePETA->mesh() ),
+					M_pressureFESpace->qr(),
+					M_fespacePETA,
+					M_fespacePETA,
+					value( M_fluidData->density()*M_alpha/M_timeStep ) * phi_i * phi_j
+					+ value( 0.5 * M_fluidData->viscosity() ) * dot( grad(phi_i) + grad(phi_i) , grad(phi_j) + grad(phi_j) )
+					+ value( M_fluidData->density() ) * dot( value(M_fespaceUETA, *velocity),grad(phi_j)) * phi_i
+				  ) >> M_Fp;
+		M_Fp_graph->GlobalAssemble();
+	}
 }
 
 void NavierStokesSolver::buildPCDGraphs()
@@ -231,7 +262,7 @@ void NavierStokesSolver::buildPCDGraphs()
 					 quadRuleTetra4pt,
 					 M_fespacePETA,
 					 M_fespacePETA,
-					 M_fluidData->density() * dot ( phi_i, phi_j )
+					 phi_i * phi_j
 				   ) >> M_Mp_graph;
 		M_Mp_graph->GlobalAssemble();
 		M_Mp_graph->OptimizeStorage();
@@ -242,10 +273,10 @@ void NavierStokesSolver::buildPCDGraphs()
 					 quadRuleTetra4pt,
 					 M_fespacePETA,
 					 M_fespacePETA,
-					 M_fluidData->density() * dot ( phi_i, phi_j ) +
-					 value( 0.5 * M_fluidData->viscosity() ) * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) ) +
-					 value( M_fluidData->density() ) * dot( value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i)
-				   ) >> M_Mp_graph;
+					 value( M_fluidData->density()*M_alpha/M_timeStep ) * phi_i * phi_j
+					 + value( 0.5 * M_fluidData->viscosity() ) * dot( grad(phi_i) + grad(phi_i) , grad(phi_j) + grad(phi_j) )
+					 + value( M_fluidData->density() ) * dot( value(M_fespaceUETA, *M_uExtrapolated),grad(phi_j)) * phi_i
+				   ) >> M_Fp_graph;
 		M_Fp_graph->GlobalAssemble();
 		M_Fp_graph->OptimizeStorage();
 
