@@ -9,7 +9,7 @@
 	
 [fluid]
 
-	preconditionerType   = SIMPLE
+	preconditionerType   = PCD
 
     	[./physics]
     		density         = 1.0    # density
@@ -99,7 +99,7 @@
 	output_Residuals    	=  true
 	output_Steps        	=  true
 	convectiveImplicit      	=  true
-	useShapeDerivatives     	=  true
+	useShapeDerivatives     	=  false
 	extrapolateInitialGuess  =  true
 	orderExtrapolation       =  3    # it can be 1, 2 or 3
 	

@@ -112,6 +112,17 @@ bcPtr_Type BCh_ale ()
     return bc_ale;
 }
 
+bcPtr_Type BCh_PCD ()
+{
+    BCFunctionBase zero_function (fZero);
+
+    bcPtr_Type bc (new BCHandler );
+
+    bc->addBC ("Outflow", OUTLET, Essential, Full, zero_function, 3);
+
+    return bc;
+}
+
 }
 
 #endif

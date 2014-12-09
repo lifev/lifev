@@ -136,8 +136,14 @@ main ( int argc, char** argv )
     boost::shared_ptr<BCHandler> fluidBC_residual ( new BCHandler (*BCh_fluid_residual () ) );
     boost::shared_ptr<BCHandler> structureBC ( new BCHandler (*BCh_structure () ) );
     boost::shared_ptr<BCHandler> aleBC ( new BCHandler (*BCh_ale () ) );
+    boost::shared_ptr<BCHandler> pcdBC ( new BCHandler (*BCh_PCD () ) );
 
     fsi.setBoundaryConditions(fluidBC, fluidBC_residual, structureBC, aleBC);
+
+    std::string preconditioner = dataFile("fluid/preconditionerType","none");
+
+    if ( preconditioner.compare("PCD") == 0 )
+    	fsi.setBoundaryConditionsPCD(pcdBC);
 
     // ---------------------------------------------------------------------------------------------//
     // Reading the physical informations for the fluid and the structure and initialize the solvers //
