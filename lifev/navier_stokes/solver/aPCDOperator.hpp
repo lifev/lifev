@@ -170,11 +170,11 @@ private:
 
     bool M_useTranspose;
 
-    Operators::ApproximatedInvertibleRowMatrix * M_approximatedMomentumOperator;
+    boost::shared_ptr<Operators::ApproximatedInvertibleRowMatrix> M_approximatedMomentumOperator;
 
-    Operators::ApproximatedInvertibleRowMatrix * M_approximatedSchurComplementOperator;
+    boost::shared_ptr<Operators::ApproximatedInvertibleRowMatrix> M_approximatedSchurComplementOperator;
 
-    Operators::ApproximatedInvertibleRowMatrix * M_approximatedPressureMassOperator;
+    boost::shared_ptr<Operators::ApproximatedInvertibleRowMatrix> M_approximatedPressureMassOperator;
 
     parameterListPtr_Type M_momentumOptions;
 
