@@ -290,6 +290,8 @@ void NavierStokesSolver::buildPCDGraphs()
 
 	}
 
+	M_graphPCDisBuilt = true;
+
 	chrono.stop();
 	M_displayer.leaderPrintMax ( "   done in ", chrono.diff() ) ;
 }
@@ -463,7 +465,7 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
     else if ( std::strcmp(M_prec->Label(),"aPCDOperator")==0 )
     {
     	updatePCD(M_uExtrapolated);
-    	M_prec->setUp(M_F, M_B, M_Btranspose, M_Fp, M_Mp, M_Mu); // Still need to apply BC!
+    	M_prec->setUp(M_F, M_B, M_Btranspose, M_Fp, M_Mp, M_Mu);
     	M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
     	M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
     	M_prec->updateApproximatedMomentumOperator();

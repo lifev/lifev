@@ -205,6 +205,29 @@ public:
     	M_bcPCD = bc;
     }
 
+    void updatePCD(const vectorPtr_Type& velocity);
+
+    matrixPtr_Type const& Fp() const
+    {
+    	return M_Fp;
+    }
+
+    matrixPtr_Type const& Mp() const
+    {
+    	return M_Mp;
+    }
+
+    matrixPtr_Type const& Mu() const
+    {
+    	return M_Mu;
+    }
+
+    void applyBCMu(bcPtr_Type& pcdBC)
+    {
+    	bcManageMatrix( *M_Mu, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *pcdBC, M_velocityFESpace->feBd(), 1.0, 0.0);
+    	M_Mu->globalAssemble();
+    }
+
 private:
 
 	// build the graphs
@@ -214,8 +237,6 @@ private:
 	void updateBCHandler( bcPtr_Type & bc );
 
     void setSolversOptions(const Teuchos::ParameterList& solversOptions);
-
-    void updatePCD(const vectorPtr_Type& velocity);
 
     void buildPCDGraphs();
 
