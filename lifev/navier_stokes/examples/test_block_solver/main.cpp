@@ -142,6 +142,14 @@ main ( int argc, char** argv )
     // Boundary conditions
     boost::shared_ptr<BCHandler> bc ( new BCHandler (*BCh_fluid ()) );
 
+    std::string preconditioner = dataFile("fluid/preconditionerType","none");
+
+    if ( preconditioner.compare("aPCDOperator") == 0 )
+    {
+    	boost::shared_ptr<BCHandler> bc_pcd ( new BCHandler (*BCh_PCD ()) );
+    	ns.setBCpcd(bc_pcd);
+    }
+
     // Time loop
     LifeChrono iterChrono;
     Real time = t0 + dt;

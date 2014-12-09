@@ -237,7 +237,7 @@ void NavierStokesSolver::updatePCD(const vectorPtr_Type& velocity)
 		M_Mp->globalAssemble();
 
 		// Graph pressure mass
-		M_Fp.reset (new matrix_Type ( M_pressureFESpace->map(), *M_Mp_graph ) );
+		M_Fp.reset (new matrix_Type ( M_pressureFESpace->map(), *M_Fp_graph ) );
 		integrate ( elements (M_fespacePETA->mesh() ),
 					M_pressureFESpace->qr(),
 					M_fespacePETA,
@@ -246,8 +246,10 @@ void NavierStokesSolver::updatePCD(const vectorPtr_Type& velocity)
 					+ value( 0.5 * M_fluidData->viscosity() ) * dot( grad(phi_i) + grad(phi_i) , grad(phi_j) + grad(phi_j) )
 					+ value( M_fluidData->density() ) * dot( value(M_fespaceUETA, *velocityRepeated),grad(phi_j)) * phi_i
 				  ) >> M_Fp;
-		M_Fp_graph->GlobalAssemble();
 	}
+
+	bcManageMatrix( *M_Fp, *M_pressureFESpace->mesh(), M_pressureFESpace->dof(), *M_bcPCD, M_pressureFESpace->feBd(), 1.0, 0.0);
+	M_Fp->globalAssemble();
 
 	chrono.stop();
 	M_displayer.leaderPrintMax ( "   done in ", chrono.diff() ) ;
@@ -458,9 +460,8 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
     	M_prec->updateApproximatedMomentumOperator();
     	M_prec->updateApproximatedSchurComplementOperator();
     }
-    else if ( M_prec->Label() == "aPCDOperator" )
+    else if ( std::strcmp(M_prec->Label(),"aPCDOperator")==0 )
     {
-    	/*
     	updatePCD(M_uExtrapolated);
     	M_prec->setUp(M_F, M_B, M_Btranspose, M_Fp, M_Mp, M_Mu); // Still need to apply BC!
     	M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
@@ -468,7 +469,6 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
     	M_prec->updateApproximatedMomentumOperator();
     	M_prec->updateApproximatedSchurComplementOperator();
     	M_prec->updateApproximatedPressureMassOperator();
-    	*/
     }
 
     chrono.stop();

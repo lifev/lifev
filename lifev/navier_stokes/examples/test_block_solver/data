@@ -26,10 +26,8 @@ filename = resultBDF2_parte1
 [fluid]
 
     options_preconditioner = solversOptionsFast
-    preconditionerType  = aSIMPLEOperator
-    save_every          = 1
-    export_coefficients = true  
-    conservativeFormulation = false
+    preconditionerType     = aSIMPLEOperator
+    save_every             = 1
     
     [./physics]
     density         = 1.0    # density

@@ -200,7 +200,10 @@ public:
         return M_fluidData;
     }
 
-
+    void setBCpcd(const bcPtr_Type & bc)
+    {
+    	M_bcPCD = bc;
+    }
 
 private:
 
@@ -291,6 +294,9 @@ private:
 
     // Check if the convective term is fully implicit
     bool M_fullyImplicit;
+
+    // BC for the pcd preconditioner
+    bcPtr_Type M_bcPCD;
 
 }; // class NavierStokesSolver
 
