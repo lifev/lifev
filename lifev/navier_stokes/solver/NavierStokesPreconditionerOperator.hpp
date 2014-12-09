@@ -175,6 +175,8 @@ public:
 
     virtual void setSchurOptions(const parameterListPtr_Type & _oList) {};
 
+    virtual void setPressureMassOptions(const parameterListPtr_Type & _oList) {};
+
     virtual matrixEpetraPtr_Type const& F() const {};
 
     virtual matrixEpetraPtr_Type const& B() const {};
