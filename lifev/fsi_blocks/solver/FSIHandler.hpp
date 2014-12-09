@@ -57,13 +57,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 #include <lifev/structure/solver/StructuralOperator.hpp>
 #include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialLinear.hpp>
-/*
-#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinear.hpp>
-#include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
-#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinearPenalized.hpp>
-#include <lifev/structure/solver/isotropic/SecondOrderExponentialMaterialNonLinear.hpp>
-#include <lifev/structure/solver/isotropic/NeoHookeanMaterialNonLinear.hpp>
-*/
+
 #include <lifev/fsi_blocks/solver/ALESolver.hpp>
 
 // Expression template FE space
@@ -88,7 +82,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
 
-#include <lifev/fsi_blocks/solver/aSIMPLEFSIOperator.hpp>
+#include <lifev/fsi_blocks/solver/DirichletNeumannPreconditioner.hpp>
 
 #include <lifev/core/filter/PartitionIO.hpp>
 #include <lifev/fsi_blocks/filter/DOFInterfaceIO.hpp>
@@ -321,7 +315,7 @@ private:
 	boost::shared_ptr<LifeV::Operators::FSIApplyOperator> M_applyOperatorResidual;
 
 	// Preconditioner operator
-	boost::shared_ptr<LifeV::Operators::aSIMPLEFSIOperator> M_prec;
+	boost::shared_ptr<LifeV::Operators::DirichletNeumannPreconditioner> M_prec;
 
 	// Epetra Operator needed to solve the linear system
 	boost::shared_ptr<Operators::InvertibleOperator> M_invOper;

@@ -1,6 +1,6 @@
 [offlinePartioner]
 	parts                 = 12
-	readPartitionedMeshes = true
+	readPartitionedMeshes = false
 	fluidPartitionedMesh  = fluid_P2_12.h5
 	solidPartitionedMesh  = solid_P2_12.h5
 	interfacePartitioned  = interface_P2_12.h5
@@ -9,7 +9,7 @@
 	
 [fluid]
 
-	solver_manager_type = aSIMPLE
+	preconditionerType   = SIMPLE
 
     	[./physics]
     		density         = 1.0    # density

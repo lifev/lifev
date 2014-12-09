@@ -49,7 +49,7 @@ M_exporterFluid (),
 M_exporterStructure (),
 M_applyOperatorResidual(new Operators::FSIApplyOperator),
 M_applyOperatorJacobian(new Operators::FSIApplyOperator),
-M_prec(new Operators::aSIMPLEFSIOperator),
+M_prec(new Operators::DirichletNeumannPreconditioner),
 M_invOper(),
 M_useShapeDerivatives( false ),
 M_printResiduals ( false ),
@@ -76,6 +76,8 @@ void
 FSIHandler::setParameterLists( )
 {
 	Teuchos::RCP<Teuchos::ParameterList> solversOptions = Teuchos::getParametersFromXmlFile ("solversOptionsFast.xml");
+	std::string precType = M_datafile ("fluid/preconditionerType", "none");
+	M_prec->setFluidPreconditioner(precType);
 	M_prec->setOptions(*solversOptions);
 	setSolversOptions(*solversOptions);
 }

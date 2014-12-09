@@ -45,6 +45,10 @@
 #include <lifev/core/array/MatrixEpetra.hpp>
 #include <lifev/core/linear_algebra/BlockEpetra_Map.hpp>
 
+#include <Teuchos_ParameterList.hpp>
+#include <Teuchos_XMLParameterListHelpers.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
+
 namespace LifeV
 {
 namespace Operators
@@ -71,6 +75,8 @@ public:
     typedef Epetra_Operator operator_Type;
 
     typedef boost::shared_ptr<operator_Type> operatorPtr_Type;
+
+    typedef  boost::shared_ptr<Teuchos::ParameterList> parameterListPtr_Type;
 
     NavierStokesPreconditionerOperator();
 
@@ -165,6 +171,21 @@ public:
     virtual void setUp ( const matrixEpetraPtr_Type & F, const matrixEpetraPtr_Type & B, const matrixEpetraPtr_Type & Btranspose,
                	   	   	 const matrixEpetraPtr_Type & Fp, const matrixEpetraPtr_Type & Mp, const matrixEpetraPtr_Type & Mu){};
 
+    virtual void setMomentumOptions(const parameterListPtr_Type & _oList) {};
+
+    virtual void setSchurOptions(const parameterListPtr_Type & _oList) {};
+
+    virtual matrixEpetraPtr_Type const& F() const {};
+
+    virtual matrixEpetraPtr_Type const& B() const {};
+
+    virtual matrixEpetraPtr_Type const& Btranspose() const {};
+
+    //! Returns the High Order Yosida approximation of the inverse pressure Schur Complement applied to \c (Xu, Xp).
+    virtual int ApplyInverse( VectorEpetra const& X_velocity,
+    						  VectorEpetra const& X_pressure,
+    						  VectorEpetra & Y_velocity,
+    						  VectorEpetra & Y_pressure) const {};
 
 
 private:

@@ -17,7 +17,7 @@
 #include <lifev/core/array/MapEpetra.hpp>
 
 #ifndef _aPCDOPERATOR_H_
-#define _aPCDOPERATOR_H_1
+#define _aPCDOPERATOR_H_ 1
 
 namespace LifeV{
 namespace Operators
