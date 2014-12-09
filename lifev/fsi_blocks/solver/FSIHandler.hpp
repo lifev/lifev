@@ -170,6 +170,8 @@ public:
 
     void setParameterLists( );
 
+    void setBoundaryConditionsPCD ( const bcPtr_Type& pcdBC);
+
 //@}
 
 private:
@@ -340,6 +342,9 @@ private:
 	// paritioned meshes
 	bool M_usePartitionedMeshes;
 	boost::shared_ptr<std::map<UInt, UInt> > M_localDofMap;
+
+	//! BCs for the PCD block Fp
+	bcPtr_Type M_pcdBC;
 };
 
 } // end namespace LifeV

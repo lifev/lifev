@@ -220,6 +220,12 @@ void FSIHandler::setup ( )
 		if (M_printSteps)
 			M_outputSteps.open ("Steps.txt" );
 	}
+
+	if ( std::strcmp(M_prec->preconditionerTypeFluid(),"aPCDOperator")==0 )
+	{
+		M_pcdBC->bcUpdate ( *M_fluid->pFESpace()->mesh(), M_fluid->pFESpace()->feBd(), M_fluid->pFESpace()->dof() );
+		M_fluid->setBCpcd(M_pcdBC);
+	}
 }
 
 void FSIHandler::setupExporters( )
@@ -296,6 +302,11 @@ void FSIHandler::setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_
 	M_fluidBC_residual 	= fluidBC_residual;
 	M_structureBC 		= structureBC;
 	M_aleBC       		= aleBC;
+}
+
+void FSIHandler::setBoundaryConditionsPCD ( const bcPtr_Type& pcdBC)
+{
+	M_pcdBC = pcdBC;
 }
 
 void FSIHandler::updateBoundaryConditions ( )
@@ -956,6 +967,11 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 	initializeApplyOperatorJacobian();
 
+	if ( std::strcmp(M_prec->preconditionerTypeFluid(),"aPCDOperator")==0 )
+	{
+		M_fluid->updatePCD(M_beta_star);
+		M_prec->setPCDBlocks(M_fluid->Fp(),M_fluid->Mp(),M_fluid->Mu());
+	}
 }
 
 void
