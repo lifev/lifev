@@ -18,8 +18,8 @@ namespace Operators
 aSIMPLEOperator::aSIMPLEOperator():
     M_label("aSIMPLEOperator"),
     M_useTranspose(false),
-    M_approximatedMomentumOperator(new Operators::ApproximatedInvertibleRowMatrix),
-    M_approximatedSchurComplementOperator(new Operators::ApproximatedInvertibleRowMatrix)
+    M_approximatedMomentumOperator ( new Operators::ApproximatedInvertibleRowMatrix ),
+    M_approximatedSchurComplementOperator ( new Operators::ApproximatedInvertibleRowMatrix )
 {
 
 }
