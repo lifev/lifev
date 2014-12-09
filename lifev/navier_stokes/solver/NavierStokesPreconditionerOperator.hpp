@@ -35,13 +35,15 @@
  */
 
 #ifndef NSPRECONDITIONEROPERATOR_HPP
-#define NSPRECONDITIONEROPERATOR_HPP
+#define NSPRECONDITIONEROPERATOR_HPP 1
 
 #include <lifev/core/linear_algebra/LinearOperator.hpp>
 #include <lifev/core/util/Factory.hpp>
 #include <lifev/core/util/FactorySingleton.hpp>
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
+#include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/linear_algebra/BlockEpetra_Map.hpp>
 
 namespace LifeV
 {
@@ -54,9 +56,9 @@ public:
 
     typedef FactorySingleton<Factory<NavierStokesPreconditionerOperator, std::string> >  NSPreconditionerFactory;
 
-    typedef  MatrixEpetra<Real> matrixEpetra_Type;
+    typedef MatrixEpetra<Real> matrixEpetra_Type;
 
-    typedef  boost::shared_ptr<matrixEpetra_Type> matrixEpetraPtr_Type;
+    typedef boost::shared_ptr<matrixEpetra_Type> matrixEpetraPtr_Type;
 
     typedef Epetra_Comm comm_Type;
 
@@ -72,7 +74,7 @@ public:
 
     typedef boost::shared_ptr<operator_Type> operatorPtr_Type;
 
-    NavierStokesPreconditionerOperator();
+    NavierStokesPreconditionerOperator(){};
 
     virtual ~NavierStokesPreconditionerOperator() {}
 
@@ -148,22 +150,22 @@ public:
 
     virtual void setUp ( const matrixEpetraPtr_Type & F,
     		   	   	     const matrixEpetraPtr_Type & B,
-    		   	   	     const matrixEpetraPtr_Type & Btranspose );
+    		   	   	     const matrixEpetraPtr_Type & Btranspose ){};
 
-    virtual void setOptions ( const Teuchos::ParameterList& solversOptions);
+    virtual void setOptions ( const Teuchos::ParameterList& solversOptions){};
 
-    virtual void setDomainMap ( const boost::shared_ptr<BlockEpetra_Map> & domainMap);
+    virtual void setDomainMap ( const boost::shared_ptr<BlockEpetra_Map> & domainMap){};
 
-    virtual void setRangeMap ( const boost::shared_ptr<BlockEpetra_Map> & rangeMap);
+    virtual void setRangeMap ( const boost::shared_ptr<BlockEpetra_Map> & rangeMap){};
 
-    virtual void updateApproximatedMomentumOperator ( );
+    virtual void updateApproximatedMomentumOperator ( ){};
 
-    virtual void updateApproximatedSchurComplementOperator ( );
+    virtual void updateApproximatedSchurComplementOperator ( ){};
 
-    virtual void updateApproximatedPressureMassOperator ( );
+    virtual void updateApproximatedPressureMassOperator ( ){};
 
     virtual void setUp ( const matrixEpetraPtr_Type & F, const matrixEpetraPtr_Type & B, const matrixEpetraPtr_Type & Btranspose,
-               	   	   	 const matrixEpetraPtr_Type & Fp, const matrixEpetraPtr_Type & Mp, const matrixEpetraPtr_Type & Mu);
+               	   	   	 const matrixEpetraPtr_Type & Fp, const matrixEpetraPtr_Type & Mp, const matrixEpetraPtr_Type & Mu){};
 
 
 
@@ -171,8 +173,7 @@ private:
 
 };
 
-NavierStokesPreconditionerOperator::NavierStokesPreconditionerOperator()
-{}
+//NavierStokesPreconditionerOperator::NavierStokesPreconditionerOperator() {};
 
 } // namespace Operators
 

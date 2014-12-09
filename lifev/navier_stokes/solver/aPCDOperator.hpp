@@ -6,15 +6,18 @@
 #include <Epetra_Vector.h>
 
 #include <lifev/core/linear_algebra/BlockEpetra_Map.hpp>
-#include <lifev/core/linear_algebra/LinearOperator.hpp>
+#include <lifev/navier_stokes/solver/NavierStokesPreconditionerOperator.hpp>
 
 #include <lifev/core/array/MatrixEpetra.hpp>
 #include <lifev/core/linear_algebra/ApproximatedInvertibleRowMatrix.hpp>
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
 
+#include <lifev/core/array/VectorEpetra.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
+
 #ifndef _aPCDOPERATOR_H_
-#define _aPCDOPERATOR_H_
+#define _aPCDOPERATOR_H_1
 
 namespace LifeV{
 namespace Operators
@@ -27,6 +30,10 @@ public:
     //@{
 
     typedef  LinearOperator                            super;
+    typedef  Epetra_MultiVector                        vector_Type;
+    typedef  boost::shared_ptr<vector_Type>            vectorPtr_Type;
+    typedef  Epetra_Map                                map_Type;
+    typedef  boost::shared_ptr<map_Type> 			   mapPtr_Type;
     typedef  Epetra_CrsMatrix                          matrix_Type;
     typedef  boost::shared_ptr<matrix_Type>            matrixPtr_Type;
     typedef  MatrixEpetra<Real>                        matrixEpetra_Type;
@@ -47,7 +54,7 @@ public:
     //! Empty constructor
     aPCDOperator();
     //@}
-    virtual ~aPCDOperator();
+    ~aPCDOperator();
 
     //! @name SetUp
     //@{
@@ -192,6 +199,16 @@ private:
     boost::shared_ptr<VectorEpetra_Type> M_Y_pressure;
 
 };
+
+//! Factory create function
+inline NavierStokesPreconditionerOperator * create_aPCD()
+{
+    return new aPCDOperator ();
+}
+namespace
+{
+static bool S_register_aPCD = LifeV::Operators::NavierStokesPreconditionerOperator::NSPreconditionerFactory::instance().registerProduct ( "aPCDOperator", &create_aPCD );
+}
 
 } /* end namespace Operators */
 } //end namespace

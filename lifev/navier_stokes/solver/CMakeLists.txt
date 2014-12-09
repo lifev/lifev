@@ -11,8 +11,6 @@ SET(solver_HEADERS
   solver/StabilizationVMSLES.hpp
   solver/NavierStokesSolver.hpp
   solver/NavierStokesOperator.hpp
-  solver/aSIMPLEOperator.hpp
-  solver/aPCDOperator.hpp
   solver/NavierStokesPreconditionerOperator.hpp
 CACHE INTERNAL "")
 

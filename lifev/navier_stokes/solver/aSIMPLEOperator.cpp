@@ -1,4 +1,3 @@
-
 #include <lifev/navier_stokes/solver/aSIMPLEOperator.hpp>
 
 #include <lifev/core/linear_algebra/IfpackPreconditioner.hpp>

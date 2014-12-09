@@ -6,19 +6,20 @@
 #include <Epetra_Vector.h>
 
 #include <lifev/core/linear_algebra/BlockEpetra_Map.hpp>
-#include <lifev/core/linear_algebra/LinearOperator.hpp>
+#include <lifev/navier_stokes/solver/NavierStokesPreconditionerOperator.hpp>
 
 #include <lifev/core/array/MatrixEpetra.hpp>
 #include <lifev/core/linear_algebra/ApproximatedInvertibleRowMatrix.hpp>
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
 
-#include <lifev/navier_stokes/solver/NavierStokesPreconditionerOperator.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
 
+
+
 #ifndef _aSIMPLEOPERATOR_H_
-#define _aSIMPLEOPERATOR_H_
+#define _aSIMPLEOPERATOR_H_ 1
 
 namespace LifeV
 {
@@ -56,7 +57,7 @@ public:
     //! Empty constructor
     aSIMPLEOperator();
     //@}
-    virtual ~aSIMPLEOperator();
+    ~aSIMPLEOperator();
 
     //! @name SetUp
     //@{
@@ -184,7 +185,7 @@ private:
 };
 
 //! Factory create function
-inline NavierStokesPreconditionerOperator * create_aSIMPLE()
+inline LifeV::Operators::NavierStokesPreconditionerOperator * create_aSIMPLE()
 {
     return new aSIMPLEOperator ();
 }

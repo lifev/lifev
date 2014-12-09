@@ -1,4 +1,3 @@
-
 #include <lifev/navier_stokes/solver/aPCDOperator.hpp>
 
 #include <lifev/core/linear_algebra/IfpackPreconditioner.hpp>
