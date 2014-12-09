@@ -57,7 +57,7 @@ public:
     //! Empty constructor
     aSIMPLEOperator();
     //@}
-    ~aSIMPLEOperator();
+    virtual ~aSIMPLEOperator();
 
     //! @name SetUp
     //@{
@@ -185,13 +185,13 @@ private:
 };
 
 //! Factory create function
-inline LifeV::Operators::NavierStokesPreconditionerOperator * create_aSIMPLE()
+inline NavierStokesPreconditionerOperator * create_aSIMPLE()
 {
     return new aSIMPLEOperator ();
 }
 namespace
 {
-static bool S_register_aSimple = LifeV::Operators::NavierStokesPreconditionerOperator::NSPreconditionerFactory::instance().registerProduct ( "aSIMPLEOperator", &create_aSIMPLE );
+static bool S_register_aSimple = NSPreconditionerFactory::instance().registerProduct ( "aSIMPLEOperator", &create_aSIMPLE );
 }
 
 } /* end namespace Operators */

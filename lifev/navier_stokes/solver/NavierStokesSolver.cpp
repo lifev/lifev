@@ -4,12 +4,6 @@
 namespace LifeV
 {
 
-namespace
-{
-static bool reg_aSIMPLE = (LifeV::Operators::NavierStokesPreconditionerOperator::NSPreconditionerFactory::instance().registerProduct ( "aSIMPLEOperator", &LifeV::Operators::create_aSIMPLE ) );
-static bool reg_aPCD    = (LifeV::Operators::NavierStokesPreconditionerOperator::NSPreconditionerFactory::instance().registerProduct ( "aPCDOperator", &LifeV::Operators::create_aPCD ) );
-}
-
 NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commPtr_Type& communicator):
 		M_comm(communicator),
 		M_dataFile(dataFile),
@@ -20,7 +14,7 @@ NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commP
         M_fullyImplicit(false),
         M_graphPCDisBuilt(false)
 {
-	M_prec.reset ( Operators::NavierStokesPreconditionerOperator::NSPreconditionerFactory::instance().createObject (dataFile("fluid/preconditionerType","none")));
+	M_prec.reset ( Operators::NSPreconditionerFactory::instance().createObject (dataFile("fluid/preconditionerType","none")));
 }
 
 NavierStokesSolver::~NavierStokesSolver()
@@ -456,15 +450,13 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
     chrono.reset();
     chrono.start();
 
-    if ( M_prec->Label() == "aSIMPLEOperator" )
+    if ( std::strcmp(M_prec->Label(),"aSIMPLEOperator")==0 )
     {
-    	/*
     	M_prec->setUp(M_F, M_B, M_Btranspose);
     	M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
     	M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
     	M_prec->updateApproximatedMomentumOperator();
     	M_prec->updateApproximatedSchurComplementOperator();
-    	*/
     }
     else if ( M_prec->Label() == "aPCDOperator" )
     {

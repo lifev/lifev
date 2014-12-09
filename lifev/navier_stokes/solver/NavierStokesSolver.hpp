@@ -56,9 +56,9 @@
 
 // includes for the linear solver
 #include <lifev/navier_stokes/solver/NavierStokesOperator.hpp>
-#include <lifev/navier_stokes/solver/NavierStokesPreconditionerOperator.hpp>
 #include <lifev/core/linear_algebra/ApproximatedInvertibleRowMatrix.hpp>
 
+#include <lifev/navier_stokes/solver/NavierStokesPreconditionerOperator.hpp>
 #include <lifev/navier_stokes/solver/aSIMPLEOperator.hpp>
 #include <lifev/navier_stokes/solver/aPCDOperator.hpp>
 

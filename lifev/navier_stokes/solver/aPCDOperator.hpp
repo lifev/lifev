@@ -54,7 +54,7 @@ public:
     //! Empty constructor
     aPCDOperator();
     //@}
-    ~aPCDOperator();
+    virtual ~aPCDOperator();
 
     //! @name SetUp
     //@{
@@ -207,7 +207,7 @@ inline NavierStokesPreconditionerOperator * create_aPCD()
 }
 namespace
 {
-static bool S_register_aPCD = LifeV::Operators::NavierStokesPreconditionerOperator::NSPreconditionerFactory::instance().registerProduct ( "aPCDOperator", &create_aPCD );
+static bool S_register_aPCD = NSPreconditionerFactory::instance().registerProduct ( "aPCDOperator", &create_aPCD );
 }
 
 } /* end namespace Operators */

@@ -54,8 +54,6 @@ class NavierStokesPreconditionerOperator : public LinearOperator
 {
 public:
 
-    typedef FactorySingleton<Factory<NavierStokesPreconditionerOperator, std::string> >  NSPreconditionerFactory;
-
     typedef MatrixEpetra<Real> matrixEpetra_Type;
 
     typedef boost::shared_ptr<matrixEpetra_Type> matrixEpetraPtr_Type;
@@ -74,9 +72,9 @@ public:
 
     typedef boost::shared_ptr<operator_Type> operatorPtr_Type;
 
-    NavierStokesPreconditionerOperator(){};
+    NavierStokesPreconditionerOperator();
 
-    virtual ~NavierStokesPreconditionerOperator() {}
+    ~NavierStokesPreconditionerOperator();
 
     //! If set true, transpose of this operator will be applied.
     /*! This flag allows the transpose of the given operator to be used implicitly.  Setting this flag
@@ -88,7 +86,7 @@ public:
 
         \return Integer error code, set to 0 if successful.  Set to -1 if this implementation does not support transpose.
      */
-    virtual int SetUseTranspose(bool UseTranspose);
+    virtual int SetUseTranspose(bool UseTranspose){};
 
     //! @name Mathematical functions
     //@{
@@ -102,7 +100,7 @@ public:
 
         \return Integer error code, set to 0 if successful.
      */
-    virtual int Apply(const vector_Type& X, vector_Type& Y) const;
+    virtual int Apply(const vector_Type& X, vector_Type& Y) const {};
 
     //! Returns the result of a raw_operator inverse applied to an raw_vector X in Y.
     /*!
@@ -116,7 +114,7 @@ public:
         \warning In order to work with AztecOO, any implementation of this method must
                   support the case where X and Y are the same object.
      */
-    virtual int ApplyInverse(const vector_Type& X, vector_Type& Y) const;
+    virtual int ApplyInverse(const vector_Type& X, vector_Type& Y) const {};
 
     //! Returns the infinity norm of the global matrix.
     /* Returns the quantity \f$ \| A \|_\infty\f$ such that
@@ -124,25 +122,25 @@ public:
 
            \warning This method must not be called unless HasNormInf() returns true.
      */
-    virtual double NormInf() const;
+    virtual double NormInf() const {};
 
     //! Returns a character string describing the operator
-    virtual const char * Label() const;
+    virtual const char * Label() const {};
 
     //! Returns the current UseTranspose setting.
-    virtual bool UseTranspose() const;
+    virtual bool UseTranspose() const {};
 
     //! Returns true if the \e this object can provide an approximate Inf-norm, false otherwise.
-    virtual bool HasNormInf() const;
+    virtual bool HasNormInf() const {};
 
     //! Returns a pointer to the Epetra_Comm communicator associated with this operator.
-    virtual const comm_Type & Comm() const;
+    virtual const comm_Type & Comm() const {};
 
     //! Returns the raw_map object associated with the domain of this operator.
-    virtual const map_Type & OperatorDomainMap() const;
+    virtual const map_Type & OperatorDomainMap() const {};
 
     //! Returns the raw_map object associated with the range of this operator.
-    virtual const map_Type & OperatorRangeMap() const;
+    virtual const map_Type & OperatorRangeMap() const {};
     //@}
 
     //! @name Methods used by the preconditioners that derive from here
@@ -173,7 +171,15 @@ private:
 
 };
 
-//NavierStokesPreconditionerOperator::NavierStokesPreconditionerOperator() {};
+inline NavierStokesPreconditionerOperator::NavierStokesPreconditionerOperator()
+{
+}
+
+inline NavierStokesPreconditionerOperator::~NavierStokesPreconditionerOperator()
+{
+}
+
+typedef FactorySingleton<Factory<NavierStokesPreconditionerOperator, std::string> >  NSPreconditionerFactory;
 
 } // namespace Operators
 
