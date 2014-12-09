@@ -207,7 +207,7 @@ inline NavierStokesPreconditionerOperator * create_aPCD()
 }
 namespace
 {
-static bool S_register_aPCD = NSPreconditionerFactory::instance().registerProduct ( "aPCDOperator", &create_aPCD );
+static bool S_register_aPCD = NSPreconditionerFactory::instance().registerProduct ( "PCD", &create_aPCD );
 }
 
 } /* end namespace Operators */

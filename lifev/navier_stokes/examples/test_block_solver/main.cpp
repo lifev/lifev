@@ -144,7 +144,7 @@ main ( int argc, char** argv )
 
     std::string preconditioner = dataFile("fluid/preconditionerType","none");
 
-    if ( preconditioner.compare("aPCDOperator") == 0 )
+    if ( preconditioner.compare("PCD") == 0 )
     {
     	boost::shared_ptr<BCHandler> bc_pcd ( new BCHandler (*BCh_PCD ()) );
     	ns.setBCpcd(bc_pcd);

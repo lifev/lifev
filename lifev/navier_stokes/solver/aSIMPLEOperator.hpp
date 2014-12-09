@@ -191,7 +191,7 @@ inline NavierStokesPreconditionerOperator * create_aSIMPLE()
 }
 namespace
 {
-static bool S_register_aSimple = NSPreconditionerFactory::instance().registerProduct ( "aSIMPLEOperator", &create_aSIMPLE );
+static bool S_register_aSimple = NSPreconditionerFactory::instance().registerProduct ( "SIMPLE", &create_aSIMPLE );
 }
 
 } /* end namespace Operators */
