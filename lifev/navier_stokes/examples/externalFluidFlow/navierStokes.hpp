@@ -497,8 +497,53 @@ NavierStokes::run()
         std::cout << "Computing the initial solution ... " << std::endl;
     
     vector_Type beta ( uFESpace->map() );
-    vector_Type rhs ( fullMap );
     
+    M_outputName = dataFile ( "exporter/filename", "result");
+    boost::shared_ptr< Exporter<mesh_Type > > exporter;
+
+    std::string const exporterType =  dataFile ( "exporter/type", "ensight");
+
+#ifdef HAVE_HDF5
+    if (exporterType.compare ("hdf5") == 0)
+    {
+        exporter.reset ( new ExporterHDF5<mesh_Type > ( dataFile, M_outputName ) );
+        exporter->setPostDir ( "./" ); // This is a test to see if M_post_dir is working
+        exporter->setMeshProcId ( localMeshPtr, M_data->comm->MyPID() );
+    }
+#endif
+    else if(exporterType.compare ("vtk") == 0)
+    {
+        exporter.reset ( new ExporterVTK<mesh_Type > ( dataFile, M_outputName ) );
+        exporter->setPostDir ( "./" ); // This is a test to see if M_post_dir is working
+        exporter->setMeshProcId ( localMeshPtr, M_data->comm->MyPID() );
+    }
+    else
+    {
+        if (exporterType.compare ("none") == 0)
+        {
+            exporter.reset ( new ExporterEmpty<mesh_Type > ( dataFile, localMeshPtr, M_outputName, M_data->comm->MyPID() ) );
+        }
+        else
+        {
+            exporter.reset ( new ExporterEnsight<mesh_Type > ( dataFile, localMeshPtr, M_outputName, M_data->comm->MyPID() ) );
+        }
+    }
+
+    vectorPtr_Type velAndPressure;
+    velAndPressure.reset ( new vector_Type (*fluid.solution(), exporter->mapType() ) );
+
+    vectorPtr_Type betaFull;
+    betaFull.reset ( new vector_Type (*fluid.solution(), exporter->mapType() ) );
+
+    vectorPtr_Type pressureFull;
+    pressureFull.reset ( new vector_Type (*fluid.solution(), exporter->mapType() ) );
+
+    vectorPtr_Type rhs;
+    rhs.reset ( new vector_Type (*fluid.solution(), exporter->mapType() ) );
+
+    exporter->addVariable ( ExporterData<mesh_Type>::VectorField, "velocity", uFESpace, velAndPressure, UInt (0) );
+    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpace, velAndPressure, pressureOffset );
+
     /*
      *  Starting from scratch or restarting? -BEGIN-
      */
@@ -515,6 +560,9 @@ NavierStokes::run()
 
 	std::vector<vector_Type> initialStateVelocity;
 	std::vector<vector_Type> initialStatePressure;
+
+	vector_Type vectorForInitializationVelocitySolution(*fluid.solution(), Unique);
+	vector_Type vectorForInitializationPressureSolution(*fluid.solution(), Unique);
 
     if (!doRestart)
     {
@@ -581,6 +629,21 @@ NavierStokes::run()
     		importer->readVariable (pressureReader);
 
     		int iterations = std::atoi (iterationString.c_str() );
+    		Real iterationsReal = iterations;
+
+    		velocityInitial = *velocityRestart;
+    		pressureInitial = *pressureRestart;
+    		velAndPressure->subset(velocityInitial,  uFESpace->map(), 0, 0);
+    		velAndPressure->subset(pressureInitial,  pFESpace->map(), 0, pressureOffset);
+    		//exporter->postProcess ( iterationsReal*0.0025 + 0.0025);
+
+    		if ( iterInit == 0 )
+    		{
+    			vectorForInitializationVelocitySolution = velocityInitial;
+    			vectorForInitializationPressureSolution = pressureInitial;
+    		}
+
+
     		iterations--;
 
     		std::ostringstream iter;
@@ -604,49 +667,6 @@ NavierStokes::run()
     /*
      *  Starting from scratch or restarting? -END-
      */
-
-    M_outputName = dataFile ( "exporter/filename", "result");
-    boost::shared_ptr< Exporter<mesh_Type > > exporter;
-    
-    vectorPtr_Type velAndPressure;
-    
-    std::string const exporterType =  dataFile ( "exporter/type", "ensight");
-    
-#ifdef HAVE_HDF5
-    if (exporterType.compare ("hdf5") == 0)
-    {
-        exporter.reset ( new ExporterHDF5<mesh_Type > ( dataFile, M_outputName ) );
-        exporter->setPostDir ( "./" ); // This is a test to see if M_post_dir is working
-        exporter->setMeshProcId ( localMeshPtr, M_data->comm->MyPID() );
-    }
-#endif
-    else if(exporterType.compare ("vtk") == 0)
-    {
-        exporter.reset ( new ExporterVTK<mesh_Type > ( dataFile, M_outputName ) );
-        exporter->setPostDir ( "./" ); // This is a test to see if M_post_dir is working
-        exporter->setMeshProcId ( localMeshPtr, M_data->comm->MyPID() );
-    }
-    else
-    {
-        if (exporterType.compare ("none") == 0)
-        {
-            exporter.reset ( new ExporterEmpty<mesh_Type > ( dataFile, localMeshPtr, M_outputName, M_data->comm->MyPID() ) );
-        }
-        else
-        {
-            exporter.reset ( new ExporterEnsight<mesh_Type > ( dataFile, localMeshPtr, M_outputName, M_data->comm->MyPID() ) );
-        }
-    }
-    
-    velAndPressure.reset ( new vector_Type (*fluid.solution(), exporter->mapType() ) );
-
-    velAndPressure->subset(velocityInitial,  uFESpace->map(), 0, 0);
-    velAndPressure->subset(pressureInitial,  pFESpace->map(), 0, pressureOffset);
-
-    exporter->addVariable ( ExporterData<mesh_Type>::VectorField, "velocity", uFESpace, velAndPressure, UInt (0) );
-    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpace, velAndPressure, pressureOffset );
-
-    exporter->postProcess ( time );
 
     initChrono.stop();
     
@@ -674,10 +694,8 @@ NavierStokes::run()
 
     // initialize stencils
     vector_Type pressure ( pFESpace->map() );
-    vector_Type pressureFull ( fullMap );
     vector_Type rhsVelocity ( uFESpace->map() );
     vector_Type rhsVelocityFull ( fullMap );
-    vector_Type betaFull ( fullMap );
 
     Real S = 0.25*fluid.area(4);
     Real factor = 2.0/(fluid.density()*22.0*22.0*S); // 2/(rho*V^2*S)
@@ -685,6 +703,12 @@ NavierStokes::run()
     /*
      * 	Compute the vector for computing Loads - END
      */
+
+    if (doRestart)
+    {
+    	fluid.initializeVelocitySolution(vectorForInitializationVelocitySolution);
+    	fluid.initializePressureSolution(vectorForInitializationPressureSolution);
+    }
 
     for ( ; time <= tFinal + dt / 2.; time += dt, iter++)
     {
@@ -701,23 +725,25 @@ NavierStokes::run()
         
         beta *= 0;
         timeVelocity.extrapolate (orderBDF, beta); // Extrapolation for the convective term
-        betaFull.subset(beta, uFESpace->map(), 0, 0);
+        *betaFull *= 0;
+        betaFull->subset(beta, uFESpace->map(), 0, 0);
 
         pressure *= 0;
         timePressure.extrapolate (orderBDF, pressure); // Extrapolation for the LES terms
-        pressureFull *= 0;
-        pressureFull.subset(pressure, pFESpace->map(), 0, pressureOffset);
+        *pressureFull *= 0;
+        pressureFull->subset(pressure, pFESpace->map(), 0, pressureOffset);
 
         rhsVelocity *= 0;
         timeVelocity.rhsContribution (rhsVelocity);
+        rhsVelocityFull *= 0;
         rhsVelocityFull.subset(rhsVelocity, uFESpace->map(), 0, 0);
 
         fluid.setVelocityRhs(rhsVelocityFull);
-        fluid.setPressureExtrapolated(pressureFull);
+        fluid.setPressureExtrapolated(*pressureFull);
 
-        rhs  = fluid.matrixMass() * rhsVelocityFull;
+        *rhs  = fluid.matrixMass() * rhsVelocityFull;
         
-        fluid.updateSystem ( alpha, betaFull, rhs );
+        fluid.updateSystem ( alpha, *betaFull, *rhs );
         
         fluid.iterate ( bcH );
         
