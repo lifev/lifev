@@ -165,7 +165,7 @@ Real inflowFunction(const Real& t, const Real& /*x*/, const Real& /*y*/, const R
     if (i == 0)
     {
         Real ux = 22.0;
-        Real T_ramp    	= 0.15;
+        Real T_ramp    	= 0.3;
         Real inflowVel;
 
         if ( t <= T_ramp )
@@ -427,9 +427,9 @@ NavierStokes::run()
     BCHandler bcH;
 
     bcH.addBC( "Outflow",        3, Natural,   Full,      	uZero,   3 );
-    bcH.addBC( "Inflow",         1, Essential, Full,      	uInflow, 3 );
-    bcH.addBC( "WallUpDown",     2, Essential, Component, 	uZero,   yComp );
-    bcH.addBC( "Cylinder",       4, Essential, Full,    	uZero,	 3 );
+    bcH.addBC( "Inflow",         2, Essential, Full,      	uInflow, 3 );
+    bcH.addBC( "WallUpDown",     4, Essential, Component, 	uZero,   yComp );
+    bcH.addBC( "Cylinder",       6, Essential, Full,    	uZero,	 3 );
     bcH.addBC( "WallLeftRight",  5, Essential, Component, 	uZero,   zComp );
 
     // If we change the FE we have to update the BCHandler (internal data)
@@ -438,11 +438,11 @@ NavierStokes::run()
     BCFunctionBase uOneY( oneFunctionY );
     
     BCHandler bcHDrag;
-    bcHDrag.addBC( "CylinderDrag",   4, Essential, Full, uOneX, 3 ); // ATTENTO CAMBIA A SECONDA DEL FLAG DEL CILINDRO
+    bcHDrag.addBC( "CylinderDrag",   6, Essential, Full, uOneX, 3 ); // ATTENTO CAMBIA A SECONDA DEL FLAG DEL CILINDRO
     bcHDrag.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
     
     BCHandler bcHLift;
-    bcHLift.addBC( "CylinderLift",   4, Essential, Full, uOneY, 3 ); // ATTENTO CAMBIA A SECONDA DEL FLAG DEL CILINDRO
+    bcHLift.addBC( "CylinderLift",   6, Essential, Full, uOneY, 3 ); // ATTENTO CAMBIA A SECONDA DEL FLAG DEL CILINDRO
     bcHLift.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
 
     // +-----------------------------------------------+
@@ -697,7 +697,7 @@ NavierStokes::run()
     vector_Type rhsVelocity ( uFESpace->map() );
     vector_Type rhsVelocityFull ( fullMap );
 
-    Real S = 0.25*fluid.area(4);
+    Real S = 0.25*fluid.area(6);
     Real factor = 2.0/(fluid.density()*22.0*22.0*S); // 2/(rho*V^2*S)
 
     /*
