@@ -9,11 +9,11 @@
           <ParameterList name="AztecOO">
             <Parameter name="conv" type="string" value="r0"/>
             <Parameter name="kspace" type="int" value="100"/>
-            <Parameter name="max_iter" type="int" value="1500"/>
-            <Parameter name="output" type="string" value="all_res"/>
+            <Parameter name="max_iter" type="int" value="10"/>
+            <Parameter name="output" type="string" value="none"/>
             <Parameter name="scaling" type="string" value="none"/>
             <Parameter name="solver" type="string" value="gmres"/>
-            <Parameter name="tol" type="double" value="1e-01"/>
+            <Parameter name="tol" type="double" value="1e-02"/>
           </ParameterList>
         </ParameterList>
 
@@ -34,7 +34,7 @@
             <ParameterList name="ML">
                 <Parameter name="recompute" type="bool" value="false"/>
                 <ParameterList name="options">
-                    <Parameter name="default values" type="string" value="DD"/>
+                    <Parameter name="default values" type="string" value="NSSA"/>
                     <Parameter name="ML validate parameter list" type="bool" value="true"/>
                     <Parameter name="aggregation: threshold" type="double" value="0.01"/>
                     <Parameter name="aggregation: type" type="string" value="Uncoupled-MIS"/>
@@ -102,22 +102,23 @@
                 <ParameterList name="ML">
                     <ParameterList name="options">
                         <Parameter name="default values" type="string" value="NSSA"/>
-                        <Parameter name="ML validate parameter list" type="bool" value="true"/>
-                        <Parameter name="aggregation: threshold" type="double" value="0.01"/>
-                        <Parameter name="aggregation: type" type="string" value="Uncoupled-MIS"/>
-                        <Parameter name="coarse: pre or post" type="string" value="both"/>
-                        <Parameter name="coarse: sweeps" type="int" value="1"/>
-                        <Parameter name="coarse: type" type="string" value="Amesos-KLU"/>
-                        <Parameter name="increasing or decreasing" type="string" value="increasing"/>
-                        <Parameter name="PDE equations" type="int" value="1"/>
-                        <Parameter name="cycle applications" type="int" value="3"/>
-                        <Parameter name="max levels" type="int" value="3"/>
-                        <Parameter name="smoother: pre or post" type="string" value="both"/>
-                        <Parameter name="smoother: sweeps" type="int" value="3"/>
-                        <Parameter name="smoother: type" type="string" value="Gauss-Seidel"/>
-                        <Parameter name="energy minimization: enable" type="bool" value="true"/>
-                        <Parameter name="repartition: enable" type="int" value="1"/>
-                        <Parameter name="repartition: partitioner" type="string" value="ParMETIS"/>
+                    <Parameter name="ML validate parameter list" type="bool" value="true"/>
+                    <Parameter name="aggregation: threshold" type="double" value="0.01"/>
+                    <Parameter name="aggregation: type" type="string" value="Uncoupled-MIS"/>
+                    <Parameter name="coarse: pre or post" type="string" value="both"/>
+                    <Parameter name="coarse: sweeps" type="int" value="1"/>
+                    <Parameter name="coarse: type" type="string" value="Amesos-KLU"/>
+                    <Parameter name="increasing or decreasing" type="string" value="increasing"/>
+                    <Parameter name="PDE equations" type="int" value="1"/>
+                    <Parameter name="cycle applications" type="int" value="1"/>
+                    <Parameter name="max levels" type="int" value="2"/>
+                    <Parameter name="smoother: pre or post" type="string" value="pre"/>
+                    <Parameter name="smoother: sweeps" type="int" value="3"/>
+                    <Parameter name="smoother: type" type="string" value="IFPACK"/>
+                    <Parameter name="smoother: ifpack overlap" type="int" value="0"/>
+                    <Parameter name="energy minimization: enable" type="bool" value="true"/>
+                    <Parameter name="repartition: enable" type="int" value="1"/>
+                    <Parameter name="repartition: partitioner" type="string" value="ParMETIS"/>
                     </ParameterList>
                 </ParameterList>
                 <ParameterList name="Ifpack7">
@@ -152,7 +153,7 @@
     </ParameterList>
 
     <ParameterList name="StructureMomentumOperator">
-        <Parameter name="use preconditioner as approximated inverse" type="bool" value="true"/>
+        <Parameter name="use preconditioner as approximated inverse" type="bool" value="false"/>
         <Parameter name="preconditioner type" type="string" value="Ifpack"/>
         <!-- ML, Ifpack, TwoLevel-->
         <ParameterList name="solver">
@@ -160,11 +161,11 @@
             <ParameterList name="AztecOO">
                <Parameter name="conv" type="string" value="r0"/>
                <Parameter name="kspace" type="int" value="40"/>
-               <Parameter name="max_iter" type="int" value="1500"/>
-               <Parameter name="output" type="string" value="warnings"/>
+               <Parameter name="max_iter" type="int" value="10"/>
+               <Parameter name="output" type="string" value="none"/>
                <Parameter name="scaling" type="string" value="none"/>
                <Parameter name="solver" type="string" value="gmres"/>
-               <Parameter name="tol" type="double" value="1e-01"/>
+               <Parameter name="tol" type="double" value="1e-05"/>
             </ParameterList>
         </ParameterList>
         <ParameterList name="preconditioner">
@@ -222,25 +223,25 @@
 
     <ParameterList name="ALEOperator">
         <Parameter name="use preconditioner as approximated inverse" type="bool" value="true"/>
-        <Parameter name="preconditioner type" type="string" value="Ifpack"/>
+        <Parameter name="preconditioner type" type="string" value="ML"/>
         <!-- ML, Ifpack, TwoLevel-->
         <ParameterList name="solver">
             <Parameter name="Linear Solver Type" type="string" value="AztecOO"/>
             <ParameterList name="AztecOO">
                <Parameter name="conv" type="string" value="r0"/>
                <Parameter name="kspace" type="int" value="40"/>
-               <Parameter name="max_iter" type="int" value="1500"/>
-               <Parameter name="output" type="string" value="warnings"/>
+               <Parameter name="max_iter" type="int" value="10"/>
+               <Parameter name="output" type="string" value="none"/>
                <Parameter name="scaling" type="string" value="none"/>
                <Parameter name="solver" type="string" value="gmres"/>
-               <Parameter name="tol" type="double" value="1e-01"/>
+               <Parameter name="tol" type="double" value="1e-03"/>
             </ParameterList>
         </ParameterList>
         <ParameterList name="preconditioner">
             <ParameterList name="ML">
                 <Parameter name="recompute" type="bool" value="true"/>
                 <ParameterList name="options">
-                    <Parameter name="default values" type="string" value="NSSA"/>
+                    <Parameter name="default values" type="string" value="DD"/>
                     <Parameter name="ML validate parameter list" type="bool" value="true"/>
                     <Parameter name="aggregation: threshold" type="double" value="0.01"/>
                     <Parameter name="aggregation: type" type="string" value="Uncoupled-MIS"/>

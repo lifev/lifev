@@ -57,7 +57,8 @@ M_printSteps ( false ),
 M_NewtonIter ( 0 ),
 M_extrapolateInitialGuess ( false ),
 M_orderExtrapolationInitialGuess ( 3 ),
-M_usePartitionedMeshes ( false )
+M_usePartitionedMeshes ( false ),
+M_subiterateFluidDirichlet ( false )
 {
 }
 
@@ -194,11 +195,16 @@ void FSIHandler::setup ( )
 		M_out_res.open ("residualsNewton");
 
     M_useShapeDerivatives = M_datafile ( "newton/useShapeDerivatives", false);
+    M_subiterateFluidDirichlet = M_datafile ( "fluid/subiterateFluidDirichlet", false);
+
 	M_printResiduals = M_datafile ( "newton/output_Residuals", false);
 	M_printSteps = M_datafile ( "newton/output_Steps", false);
 
 	// setting also in the preconditioner if using shape derivatives
 	M_prec->setUseShapeDerivatives(M_useShapeDerivatives);
+
+	// setting also in the preconditioner if using shape derivatives
+	M_prec->setSubiterateFluidDirichlet(M_subiterateFluidDirichlet);
 
 	// Solver
 	std::string solverType(M_pListLinSolver->get<std::string>("Linear Solver Type"));

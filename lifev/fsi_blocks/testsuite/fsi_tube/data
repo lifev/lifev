@@ -9,8 +9,9 @@
 	
 [fluid]
 
-	preconditionerType   = PCD
-
+	preconditionerType       = SIMPLE # PCD or SIMPLE
+     subiterateFluidDirichlet = true 
+     
     	[./physics]
     		density         = 1.0    # density
     		viscosity       = 0.035  # viscosity
@@ -91,8 +92,8 @@
 [../]
 
 [newton]
-	abstol          		=  1.e-8
-	reltol          		=  1.e-8
+	abstol          		=  1.e-6
+	reltol          		=  1.e-6
 	etamax          		=  1.e-6
 	maxiter         		=  10
 	NonLinearLineSearch 	=  0
@@ -100,7 +101,7 @@
 	output_Steps        	=  true
 	convectiveImplicit      	=  true
 	useShapeDerivatives     	=  false
-	extrapolateInitialGuess  =  true
-	orderExtrapolation       =  3    # it can be 1, 2 or 3
+	extrapolateInitialGuess  =  false
+	orderExtrapolation       =  1    # it can be 1, 2 or 3
 	
 [../]

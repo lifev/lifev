@@ -345,6 +345,8 @@ private:
 
 	//! BCs for the PCD block Fp
 	bcPtr_Type M_pcdBC;
+	bool M_subiterateFluidDirichlet;
+
 };
 
 } // end namespace LifeV
