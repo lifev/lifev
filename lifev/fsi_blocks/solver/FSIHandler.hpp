@@ -246,6 +246,7 @@ private:
     FESpacePtr_Type M_pressureFESpace;
     FESpacePtr_Type M_displacementFESpace;
     FESpacePtr_Type M_displacementFESpaceSerial;
+    FESpacePtr_Type M_displacementFESpaceScalar;
     FESpacePtr_Type M_aleFESpace;
 
 	solidETFESpacePtr_Type M_displacementETFESpace;

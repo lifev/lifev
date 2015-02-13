@@ -43,6 +43,7 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
 
 	M_velocityFESpace.reset (new FESpace<mesh_Type, map_Type> (mesh, uOrder, geoDimensions, M_comm) );
 	M_pressureFESpace.reset (new FESpace<mesh_Type, map_Type> (mesh, pOrder, 1, M_comm) );
+	M_velocityFESpaceScalar.reset (new FESpace<mesh_Type, map_Type> (mesh, uOrder, 1, M_comm) );
 
 	M_fespaceUETA.reset( new ETFESpace_velocity(M_velocityFESpace->mesh(), &(M_velocityFESpace->refFE()), M_comm));
 	M_fespacePETA.reset( new ETFESpace_pressure(M_pressureFESpace->mesh(), &(M_pressureFESpace->refFE()), M_comm));
@@ -412,11 +413,11 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 void NavierStokesSolver::applyGravityForce ( const Real& gravity, const Real& gravityDirection)
 {
 	vectorPtr_Type gravity_vector ( new vector_Type ( M_velocityFESpace->map(), Unique ) );
-	vectorPtr_Type gravity_component ( new vector_Type ( M_pressureFESpace->map(), Unique ) );
+	vectorPtr_Type gravity_component ( new vector_Type ( M_velocityFESpaceScalar->map(), Unique ) );
 
 	gravity_component->zero();
 	*gravity_component += gravity;
-	gravity_vector->subset(*gravity_component, M_pressureFESpace->map(), 0, gravityDirection*M_pressureFESpace->dof().numTotalDof() );
+	gravity_vector->subset(*gravity_component, M_velocityFESpaceScalar->map(), 0, gravityDirection*M_velocityFESpaceScalar->dof().numTotalDof() );
 
 	*M_rhs += *M_Mu* (*gravity_vector);
 }

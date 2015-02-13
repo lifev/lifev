@@ -298,6 +298,7 @@ void FSIHandler::createStructureFESpaces ( )
 	const std::string dOrder = M_datafile ( "solid/space_discretization/order", "P2");
 	M_displacementFESpace.reset ( new FESpace_Type (M_structureLocalMesh, dOrder, 3, M_comm) );
 	M_displacementETFESpace.reset ( new solidETFESpace_Type (M_structureLocalMesh, & (M_displacementFESpace->refFE() ), & (M_displacementFESpace->fe().geoMap() ), M_comm) );
+	M_displacementFESpaceScalar.reset ( new FESpace_Type (M_structureLocalMesh, dOrder, 1, M_comm) );
 
 	if ( !M_usePartitionedMeshes )
 		M_displacementFESpaceSerial.reset ( new FESpace_Type (M_structureMesh, dOrder, 3, M_comm) );
@@ -580,6 +581,18 @@ FSIHandler::getRhsStructure ( )
 	M_rhsStructure.reset ( new VectorEpetra ( M_displacementFESpace->map() ) );
 	*M_rhsStructure *= 0;
 	*M_rhsStructure += *M_structure->massMatrix() * M_structureTimeAdvance->rhsContributionSecondDerivative() / timeAdvanceCoefficient;
+
+	if ( M_considerGravity )
+	{
+		vectorPtr_Type gravity_vector ( new vector_Type ( M_displacementFESpace->map(), Unique ) );
+		vectorPtr_Type gravity_component ( new vector_Type ( M_displacementFESpaceScalar->map(), Unique ) );
+
+		gravity_component->zero();
+		*gravity_component += M_gravity;
+		gravity_vector->subset(*gravity_component, M_displacementFESpaceScalar->map(), 0, M_gravityDirection*M_displacementFESpaceScalar->dof().numTotalDof() );
+
+		*M_rhsStructure += *M_structure->massMatrix()* (*gravity_vector)/timeAdvanceCoefficient;
+	}
 
 	if ( !M_structureBC->bcUpdateDone() )
 		M_structureBC->bcUpdate ( *M_displacementFESpace->mesh(), M_displacementFESpace->feBd(), M_displacementFESpace->dof() );

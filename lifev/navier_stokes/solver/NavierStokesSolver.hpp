@@ -254,6 +254,7 @@ private:
 	// FE spaces
 	boost::shared_ptr<FESpace<mesh_Type, map_Type> > M_velocityFESpace;
 	boost::shared_ptr<FESpace<mesh_Type, map_Type> > M_pressureFESpace;
+	boost::shared_ptr<FESpace<mesh_Type, map_Type> > M_velocityFESpaceScalar;
 
 	// ET FE Spaces
 	boost::shared_ptr<ETFESpace_velocity > M_fespaceUETA;
