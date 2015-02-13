@@ -58,12 +58,22 @@ M_NewtonIter ( 0 ),
 M_extrapolateInitialGuess ( false ),
 M_orderExtrapolationInitialGuess ( 3 ),
 M_usePartitionedMeshes ( false ),
-M_subiterateFluidDirichlet ( false )
+M_subiterateFluidDirichlet ( false ),
+M_gravity ( 0.0 ),
+M_considerGravity ( false )
 {
 }
 
 FSIHandler::~FSIHandler( )
 {
+}
+
+void
+FSIHandler::setGravity ( const Real& gravity, const Real& gravity_direction)
+{
+	M_gravity = gravity;
+	M_gravityDirection = gravity_direction;
+	M_considerGravity = true;
 }
 
 void
@@ -844,6 +854,10 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 	M_fluid->buildSystem();
 	M_fluid->updateSystem ( M_beta_star, M_rhs_velocity );
+
+	if ( M_considerGravity )
+		M_fluid->applyGravityForce ( M_gravity, M_gravityDirection);
+
 	M_fluid->applyBoundaryConditions ( M_fluidBC, M_time );
 	M_rhsFluid.reset(new VectorEpetra ( M_fluid->uFESpace()->map() ) );
 	M_rhsFluid = M_fluid->getRhs();

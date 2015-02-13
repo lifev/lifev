@@ -172,6 +172,8 @@ public:
 
     void setBoundaryConditionsPCD ( const bcPtr_Type& pcdBC);
 
+    void setGravity ( const Real& gravity, const Real& gravity_direction);
+
 //@}
 
 private:
@@ -346,6 +348,10 @@ private:
 	//! BCs for the PCD block Fp
 	bcPtr_Type M_pcdBC;
 	bool M_subiterateFluidDirichlet;
+
+	bool M_considerGravity;
+	Real M_gravity;
+	Real M_gravityDirection;
 
 };
 

@@ -409,6 +409,18 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 	*M_rhs = *M_Mu* (*rhs_velocity);
 }
 
+void NavierStokesSolver::applyGravityForce ( const Real& gravity, const Real& gravityDirection)
+{
+	vectorPtr_Type gravity_vector ( new vector_Type ( M_velocityFESpace->map(), Unique ) );
+	vectorPtr_Type gravity_component ( new vector_Type ( M_pressureFESpace->map(), Unique ) );
+
+	gravity_component->zero();
+	*gravity_component += gravity;
+	gravity_vector->subset(*gravity_component, M_pressureFESpace->map(), 0, gravityDirection*M_pressureFESpace->dof().numTotalDof() );
+
+	*M_rhs += *M_Mu* (*gravity_vector);
+}
+
 void NavierStokesSolver::applyBoundaryConditions ( bcPtr_Type & bc, const Real& time )
 {
 	updateBCHandler(bc);

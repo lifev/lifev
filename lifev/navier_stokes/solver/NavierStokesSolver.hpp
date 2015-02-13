@@ -132,6 +132,8 @@ public:
 	// Apply the BCs on the Jacobian matrix
 	void applyBoundaryConditionsJacobian ( bcPtr_Type & bc );
 
+	void applyGravityForce ( const Real& gravity, const Real& gravityDirection);
+
 	// Set coefficient associated to the time discretization scheme
 	void setAlpha(const Real& alpha)
 	{

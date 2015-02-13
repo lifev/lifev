@@ -9,8 +9,8 @@
 	
 [fluid]
 
-	preconditionerType       = SIMPLE # PCD or SIMPLE
-     subiterateFluidDirichlet = true 
+	 preconditionerType       = SIMPLE # PCD or SIMPLE
+     subiterateFluidDirichlet = false 
      
     	[./physics]
     		density         = 1.0    # density
