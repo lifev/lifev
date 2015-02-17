@@ -476,6 +476,40 @@ NavierStokes::run()
     exporter->postProcess ( 0.0 );
     exporter->closeFile();
 
+    Real Q_hat = 0.0;
+
+    // Computing the flowrate associated to Phi_h_inflow
+
+    vectorPtr_Type Phi_h_inflow_rep;
+    Phi_h_inflow_rep.reset ( new vector_Type ( *Phi_h_inflow, Repeated ) );
+
+    vectorPtr_Type Q_hat_vec;
+    Q_hat_vec.reset ( new vector_Type ( uFESpace->map() ) );
+    Q_hat_vec->zero();
+
+    vectorPtr_Type ones_vec;
+    ones_vec.reset ( new vector_Type ( uFESpace->map() ) );
+    ones_vec->zero();
+    *ones_vec += 1.0;
+
+    {
+    	using namespace ExpressionAssembly;
+    	QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria6pt) );
+    	integrate (
+    			boundary (uFESpace_ETA->mesh(), 3), // 3 is for the flag of the outflow
+    			myBDQR,
+    			uFESpace_ETA,
+    			dot(value(uFESpace_ETA, *Phi_h_inflow_rep), phi_i)
+    	)
+    	>> Q_hat_vec;
+    }
+
+    Q_hat = Q_hat_vec->dot(*ones_vec);
+
+    if (verbose)
+    	std::cout << std::endl << "\tValue of Q_hat = " << Q_hat << std::endl;
+
+
     // +-----------------------------------------------+
     // |             Creating the problem              |
     // +-----------------------------------------------+
