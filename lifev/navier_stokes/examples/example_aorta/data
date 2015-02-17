@@ -5,10 +5,10 @@
 
 * #offline partitioner details
 [offline_partitioner]
-useOfflinePartitionedMesh = true                  					# true for loading an already partitioned mesh, false to partition the mesh online
-num_parts = 18                                     					# must be the same of the number of parts when we partioned offline the mesh
-hdf5_file_name = cylinder_coarse_18_MeshPartitionTool_ParMETIS.h5                       # file generated running test partion_io (main_write) - REQUIRED - 
-io_class = new                                    					# possibilities: old or new, use new
+useOfflinePartitionedMesh = true                  							# true for loading an already partitioned mesh, false to partition the mesh online
+num_parts = 8                                     							# must be the same of the number of parts when we partioned offline the mesh
+hdf5_file_name = Aorta_fluid_1M_NE_8parts__MeshPartitionTool_ParMETIS.h5    # file generated running test partion_io (main_write) - REQUIRED - 
+io_class = new                                    							# possibilities: old or new, use new
 
 [exporter]
 type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
@@ -30,6 +30,78 @@ export_exact_solutions = true
 test                   = accuracy
 accuracy_tolerance     = 0.09
 mesh_source            = regular_mesh
+
+[laplacian]
+
+	[./solver]
+		solver          = gmres
+	    output          = all # none
+	    max_iter        = 1800
+	    kspace          = 200
+	    tol             = 1e-7    # AztecOO tolerance
+	
+	[../prec]
+	    prectype                = ML # Ifpack or ML
+	    displayList             = false
+        
+        [./ML]
+
+	        default_parameter_list  = DD-ML  # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+	        inc_or_dec              = increasing
+		    max_levels              = 3
+	        MLOutput                = 10
+	        pde_equations           = 3
+	        cycle_applications      = 3
+	
+	            [./smoother]
+	            # smoother type
+	            # Aztec, IFPACK, Jacobi, ML symmetric Gauss-Seidel, symmetric Gauss-Seidel,
+	            # ML Gauss-Seidel, Gauss-Seidel, Chebyshev, MLS, Hiptmair, Amesos-KLU,
+	            # Amesos-Superlu, Amesos-UMFPACK, Amesos-Superludist, Amesos-MUMPS,
+	            # user-defined, SuperLU, IFPACK-Chebyshev, self, do-nothing,
+	            # IC, ICT, ILU, ILUT
+	            type            = Gauss-Seidel
+	            pre_or_post     = both
+	            sweeps          = 3
+	
+	            [../coarse]
+	            type                    = Amesos-KLU
+	            sweeps                  = 1
+	            pre_or_post             = both
+	 
+		    [../aggregation]
+	            threshold               = 0.01
+	            type                    = Uncoupled-MIS      
+	      
+	            [../energy_minimization]
+	            enable                  = true
+	
+		    [../repartition]
+	            enable                  = true
+	            partitioner             = ParMETIS    
+
+        [../ifpack]
+	        overlap     = 2
+	
+	            [./fact]
+	            ilut_level-of-fill            = 1
+	            drop_tolerance                = 1.e-5
+	            relax_value                   = 0
+	
+	            [../amesos]
+	            solvertype =  Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+	
+	            [../partitioner]
+	            overlap = 2
+	
+	            [../schwarz]
+	            reordering_type = none #metis, rcm, none
+	            filter_singletons = true
+
+            	[../]
+       [../]
+       
+[../]       
 
 [fluid]
 

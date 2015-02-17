@@ -136,53 +136,23 @@ Real oneFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const 
     return 1.0;
 }
 
-Real oneFunctionX(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
-{
-	if(i==0)
-	{
-		return 1.0;
-	}
-	else
-	{
-		return 0.0;
-	}
-}
-
-Real oneFunctionY(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
-{
-	if(i==1)
-	{
-		return 1.0;
-	}
-	else
-	{
-		return 0.0;
-	}
-}
-
 Real inflowFunction(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
-    if (i == 0)
-    {
-        Real ux = 22.0;
-        Real T_ramp    	= 0.3;
-        Real inflowVel;
+	Real Velocity = 1.0;
 
-        if ( t <= T_ramp )
-        {
-        	inflowVel =	ux/2.0*(1.0-std::cos(M_PI/T_ramp*t));
-        }
-        else
-        {
-        	inflowVel = ux;
-        }
-        return inflowVel;
-    }
-    else
-    {
-        return 0;
-    }
-    
+	switch (i)
+	{
+	case 0:
+		return Velocity*0.07780;
+		break;
+	case 2:
+		return Velocity*0.0;
+		break;
+	case 1:
+		return Velocity*0.99696;
+		break;
+	}
+	return 0;
 }
 
 struct NavierStokes::Private
@@ -195,9 +165,7 @@ struct NavierStokes::Private
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_Type;
 
     double         Re;
-
     std::string    data_file_name;
-
 
 
     double         nu;  /* < viscosity (in m^2/s) */
@@ -280,9 +248,7 @@ NavierStokes::run()
     
     if (verbose)
         std::cout << std::endl << "[[BEGIN_RUN]]" << std::endl;
-    
-    M_exportCoeff = dataFile ("fluid/export_coefficients", false);
-    
+
     runChrono.reset();
     runChrono.start();
     initChrono.reset();
@@ -366,6 +332,7 @@ NavierStokes::run()
      *	Reading if we need to store at each timestep or not - END
      */
 
+
     if (verbose)
         std::cout << std::endl << "[Creating the FE spaces]" << std::endl;
     
@@ -373,11 +340,11 @@ NavierStokes::run()
     std::string pOrder = dataFile("fluid/space_discretization/pres_order","P1");;
     
     if (verbose)
-        std::cout << "FE for the velocity: " << uOrder << std::endl
-        << "FE for the pressure: " << pOrder << std::endl;
+        std::cout << "\tFE for the velocity: " << uOrder << std::endl
+        << "\tFE for the pressure: " << pOrder << std::endl;
     
     if (verbose)
-        std::cout << "Building the velocity FE space ... " << std::flush;
+        std::cout << "\tBuilding the velocity FE space ... " << std::flush;
     
     feSpacePtr_Type uFESpace;
     uFESpace.reset (new feSpace_Type (localMeshPtr, uOrder, geoDimensions, M_data->comm) );
@@ -385,16 +352,14 @@ NavierStokes::run()
     if (verbose)
         std::cout << "ok." << std::endl;
     
-    
     if (verbose)
-        std::cout << "Building the pressure FE space ... " << std::flush;
+        std::cout << "\tBuilding the pressure FE space ... " << std::flush;
     
     feSpacePtr_Type pFESpace;
     pFESpace.reset (new feSpace_Type (localMeshPtr, pOrder, 1, M_data->comm) );
     
     if (verbose)
         std::cout << "ok." << std::endl;
-    
     
     UInt totalVelDof   = uFESpace->dof().numTotalDof();
     UInt totalPressDof = pFESpace->dof().numTotalDof();
@@ -403,51 +368,119 @@ NavierStokes::run()
     UInt pressureOffset =  uFESpace->fieldDim() * uFESpace->dof().numTotalDof();
     
     if (verbose)
-        std::cout << "Total Velocity Dof = " << totalVelDof << std::endl;
+        std::cout << "\tTotal Velocity Dof = " << totalVelDof*3 << std::endl;
     
     if (verbose)
-        std::cout << "Total Pressure Dof = " << totalPressDof << std::endl;
+        std::cout << "\tTotal Pressure Dof = " << totalPressDof << std::endl;
     
     // +-----------------------------------------------+
     // |             Boundary conditions               |
     // +-----------------------------------------------+
     if (verbose)
         std::cout << std::endl << "[Boundary conditions]" << std::endl;
-    
-    
-    BCFunctionBase uZero( zeroFunction );
+
+    BCFunctionBase zero( zeroFunction );
+    BCFunctionBase one ( oneFunction  );
 	BCFunctionBase uInflow( inflowFunction );
-	BCFunctionBase one( oneFunction );
     
-	std::vector<LifeV::ID> zComp(1), yComp(1), xComp(1);
-    xComp[0] = 0;
-	yComp[0] = 1;
-	zComp[0] = 2;
-    
-    BCHandler bcH;
+	// BCs for the NS problem
 
-    bcH.addBC( "Outflow",        3, Natural,   Full,      	uZero,   3 );
-    bcH.addBC( "Inflow",         2, Essential, Full,      	uInflow, 3 );
-    bcH.addBC( "WallUpDown",     4, Essential, Component, 	uZero,   yComp );
-    bcH.addBC( "Cylinder",       6, Essential, Full,    	uZero,	 3 );
-    bcH.addBC( "WallLeftRight",  5, Essential, Component, 	uZero,   zComp );
+    BCHandler bcH_aorta;
 
-    // If we change the FE we have to update the BCHandler (internal data)
-    bcH.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
-    BCFunctionBase uOneX( oneFunctionX );
-    BCFunctionBase uOneY( oneFunctionY );
-    
-    BCHandler bcHDrag;
-    bcHDrag.addBC( "CylinderDrag",   6, Essential, Full, uOneX, 3 ); // ATTENTO CAMBIA A SECONDA DEL FLAG DEL CILINDRO
-    bcHDrag.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
-    
-    BCHandler bcHLift;
-    bcHLift.addBC( "CylinderLift",   6, Essential, Full, uOneY, 3 ); // ATTENTO CAMBIA A SECONDA DEL FLAG DEL CILINDRO
-    bcHLift.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
+    bcH_aorta.addBC( "Inflow",         3, Essential,      Full,     uInflow, 3 );
+    bcH_aorta.addBC( "Walls",        200, Essential, 	  Full, 	   zero, 3 );
+    bcH_aorta.addBC( "Outflow2",       2,   Natural, 	Normal,    	   zero    );
+    bcH_aorta.addBC( "Outflow4",       4, 	Natural, 	Normal,    	   zero    );
+    bcH_aorta.addBC( "Outflow5",       5, 	Natural, 	Normal,    	   zero    );
+    bcH_aorta.addBC( "Outflow6",       6, 	Natural, 	Normal,    	   zero    );
+    bcH_aorta.addBC( "Outflow7",       7, 	Natural, 	Normal,        zero    );
+    bcH_aorta.addBC( "Outflow8",       8, 	Natural, 	Normal,    	   zero    );
+    bcH_aorta.addBC( "Outflow9",       9, 	Natural, 	Normal,    	   zero    );
+
+    bcH_aorta.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
+
+    // BCs for the laplacian problem
+
+    BCHandler bcH_laplacian;
+    bcH_laplacian.addBC( "Walls", 200, Essential, Full, zero, 3 );
+    bcH_laplacian.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
+
+    // BCs for the laplacian problem
+
+    BCHandler bcH_laplacian_inflow;
+    bcH_laplacian_inflow.addBC( "Inflow", 3, Essential, Full, one, 3 );
+    bcH_laplacian_inflow.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
+
+    // +-----------------------------------------------+
+    // |             Solving the laplacian             |
+    // +-----------------------------------------------+
+
+    if (verbose)
+            std::cout << std::endl << "[Solving the laplacian for the inflow profile]" << std::endl;
+
+    boost::shared_ptr< Exporter<mesh_Type > > exporter;
+    exporter.reset ( new ExporterHDF5<mesh_Type > ( dataFile, "Laplacian" ) );
+    exporter->setPostDir ( "./" );
+    exporter->setMeshProcId ( localMeshPtr, M_data->comm->MyPID() );
+
+    vectorPtr_Type Phi_h;
+    Phi_h.reset ( new vector_Type ( uFESpace->map() ) );
+    Phi_h->zero();
+
+    vectorPtr_Type rhs_laplacian;
+    rhs_laplacian.reset ( new vector_Type ( uFESpace->map() ) );
+    rhs_laplacian->zero();
+    *rhs_laplacian += 1.0;
+
+    boost::shared_ptr<MatrixEpetra<Real> > Laplacian;
+    Laplacian.reset ( new MatrixEpetra<Real> ( uFESpace->map() ) );
+
+    boost::shared_ptr< ETFESpace<mesh_Type, MapEpetra, 3, 3 > > uFESpace_ETA;
+    uFESpace_ETA.reset( new ETFESpace<mesh_Type, MapEpetra, 3, 3 > ( uFESpace->mesh(), &(uFESpace->refFE()), M_data->comm) );
+
+    {
+    	using namespace ExpressionAssembly;
+
+    	integrate(
+    				elements(uFESpace_ETA->mesh()),
+    				uFESpace->qr(),
+    				uFESpace_ETA,
+    				uFESpace_ETA,
+    				dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) )
+    			 ) >> Laplacian;
+    }
+
+    bcManage ( *Laplacian, *rhs_laplacian, *uFESpace->mesh(), uFESpace->dof(), bcH_laplacian, uFESpace->feBd(), 1.0, 0.0 );
+    Laplacian->globalAssemble();
+
+    boost::shared_ptr<SolverAztecOO> linearSolver_laplacian;
+    linearSolver_laplacian.reset( new SolverAztecOO (uFESpace->map().commPtr()) );
+
+    linearSolver_laplacian->setupPreconditioner ( dataFile, "laplacian/prec" );
+    linearSolver_laplacian->setDataFromGetPot ( dataFile, "laplacian/solver" );
+
+    linearSolver_laplacian->setMatrix ( *Laplacian );
+
+    boost::shared_ptr<MatrixEpetra<Real> > staticCast_laplacian = boost::static_pointer_cast<MatrixEpetra<Real> > (Laplacian);
+    Int numIter_laplacian = linearSolver_laplacian->solveSystem ( *rhs_laplacian, *Phi_h, staticCast_laplacian );
+
+    vectorPtr_Type Phi_h_inflow;
+    Phi_h_inflow.reset ( new vector_Type ( uFESpace->map() ) );
+    Phi_h_inflow->zero();
+
+    bcManageRhs ( *Phi_h_inflow, *uFESpace->mesh(), uFESpace->dof(),  bcH_laplacian_inflow, uFESpace->feBd(), 1., 0.);
+
+    *Phi_h_inflow *= *Phi_h;
+
+    exporter->addVariable ( ExporterData<mesh_Type>::VectorField, "Laplacian", uFESpace, Phi_h_inflow, UInt (0) );
+    exporter->postProcess ( 0.0 );
+    exporter->closeFile();
 
     // +-----------------------------------------------+
     // |             Creating the problem              |
     // +-----------------------------------------------+
+
+    /*
     if (verbose)
         std::cout << std::endl << "[Creating the problem]" << std::endl;
     
@@ -543,11 +576,13 @@ NavierStokes::run()
 
     exporter->addVariable ( ExporterData<mesh_Type>::VectorField, "velocity", uFESpace, velAndPressure, UInt (0) );
     exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpace, velAndPressure, pressureOffset );
+	*/
 
     /*
      *  Starting from scratch or restarting? -BEGIN-
      */
 
+    /*
     bool doRestart = dataFile("importer/restart", false);
 
     Real time = t0;
@@ -663,11 +698,13 @@ NavierStokes::run()
     	timePressure.initialize(initialStatePressure);
     	importer->closeFile();
     }
+	*/
 
     /*
      *  Starting from scratch or restarting? -END-
      */
 
+    /*
     initChrono.stop();
     
     if (verbose)
@@ -699,11 +736,13 @@ NavierStokes::run()
 
     Real S = 0.25*fluid.area(6);
     Real factor = 2.0/(fluid.density()*22.0*22.0*S); // 2/(rho*V^2*S)
+	*/
 
     /*
      * 	Compute the vector for computing Loads - END
      */
 
+    /*
     if (doRestart)
     {
     	fluid.initializeVelocitySolution(vectorForInitializationVelocitySolution);
@@ -797,6 +836,7 @@ NavierStokes::run()
     {
         M_out.close();
     }
+    */
     
     globalChrono.stop();
 
