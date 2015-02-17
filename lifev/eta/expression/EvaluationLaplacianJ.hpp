@@ -140,7 +140,7 @@ public:
     template< typename CFEType >
     void setSolutionCFE (const CFEType* solutionCFE)
     {
-    	ASSERT (testCFE != 0, "Nul pointer to the testCFE cannot be set");
+    	ASSERT (solutionCFE != 0, "Nul pointer to the testCFE cannot be set");
     	M_valuesPtr = & (solutionCFE->M_laplacian);
     }
 
