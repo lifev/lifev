@@ -13,6 +13,7 @@ IF(LifeV_ENABLE_ETA)
 ADD_SUBDIRECTORIES(
   #ETpseudo_fsi
   externalFluidFlow
+  example_aorta
   #oseen_assembler
   #resistanceBCs
   #computeWSS
