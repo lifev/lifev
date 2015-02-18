@@ -188,6 +188,144 @@ void preprocessBoundary(const Real& nx, const Real& ny, const Real& nz, BCHandle
 	*V_hat_z *= nz;
 }
 
+// Flag 8
+Real flowrate_left_vertebral(const Real& t)
+{
+	int n_terms = 7;
+
+	Real a0    = 1.5285;
+	Real a[7]  = { 0.1553,-0.3354,0.1273,0.1795,-0.1826,-0.0937,0.1164};
+	Real b[7]  = {-0.2386,0.2504,0.2815,-0.3194,-0.3177,0.0762,0.0559};
+
+	Real q = 0.5*a0;
+
+	Real t_min = 0.0;
+	Real t_max = t_min + 0.8; // One heartbeat lasts in 0.8 second
+
+	Real x = M_PI * ( 2 * ( t-t_min ) / ( t_max - t_min )  - 1 );
+
+	for ( int i = 0; i < n_terms; i++){
+		q += ( a[i]*std::cos((i+1)*x) + b[i]*std::sin((i+1)*x) );
+	}
+
+	return q;
+}
+
+// Flag 9
+Real flowrate_left_subclavian(const Real& t)
+{
+	int n_terms = 3;
+
+	Real a0    = 10.8515;
+	Real a[3]  = { 2.2485,-3.0164,-2.3364};
+	Real b[3]  = {-10.4866,-7.0292,0.9718};
+
+	Real q = 0.5*a0;
+
+	Real t_min = 0.0;
+	Real t_max = t_min + 0.8; // One heartbeat lasts in 0.8 second
+
+	Real x = M_PI * ( 2 * ( t-t_min ) / ( t_max - t_min )  - 1 );
+
+	for ( int i = 0; i < n_terms; i++){
+		q += ( a[i]*std::cos((i+1)*x) + b[i]*std::sin((i+1)*x) );
+	}
+
+	return q;
+}
+
+// Flag 4
+Real flowrate_left_common_carotid(const Real& t)
+{
+	int n_terms = 7;
+
+	Real a0    = 10.4513;
+	Real a[7]  = {-0.1246,-3.9606,0.3866,1.1139,-1.0625,-0.2463,0.6308};
+	Real b[7]  = {-4.1038,0.6123,2.1410,-1.7495,-1.4388,0.4365,-0.6272};
+
+	Real q = 0.5*a0;
+
+	Real t_min = 0.0;
+	Real t_max = t_min + 0.8; // One heartbeat lasts in 0.8 second
+
+	Real x = M_PI * ( 2 * ( t-t_min ) / ( t_max - t_min )  - 1 );
+
+	for ( int i = 0; i < n_terms; i++){
+		q += ( a[i]*std::cos((i+1)*x) + b[i]*std::sin((i+1)*x) );
+	}
+
+	return q;
+}
+
+// Flag 6
+Real flowrate_rigth_vertebral(const Real& t)
+{
+	int n_terms = 6;
+
+	Real a0    = 2.4427;
+	Real a[6]  = {-0.0636,-0.6804,0.1434,0.1731,-0.2544,-0.0409};
+	Real b[6]  = {-0.7971,0.1950,0.3973,-0.3940,-0.3308,0.1010};
+
+	Real q = 0.5*a0;
+
+	Real t_min = 0.0;
+	Real t_max = t_min + 0.8; // One heartbeat lasts in 0.8 second
+
+	Real x = M_PI * ( 2 * ( t-t_min ) / ( t_max - t_min )  - 1 );
+
+	for ( int i = 0; i < n_terms; i++){
+		q += ( a[i]*std::cos((i+1)*x) + b[i]*std::sin((i+1)*x) );
+	}
+
+	return q;
+}
+
+// Flag 5
+Real flowrate_rigth_common_carotid(const Real& t)
+{
+	int n_terms = 5;
+
+	Real a0    = 10.9022;
+	Real a[5]  = {0.7414,-5.4981,-2.1308,0.9771,-0.0567};
+	Real b[5]  = {-8.7140,-6.3133,1.1468,-0.0879,-0.8391};
+
+	Real q = 0.5*a0;
+
+	Real t_min = 0.0;
+	Real t_max = t_min + 0.8; // One heartbeat lasts in 0.8 second
+
+	Real x = M_PI * ( 2 * ( t-t_min ) / ( t_max - t_min )  - 1 );
+
+	for ( int i = 0; i < n_terms; i++){
+		q += ( a[i]*std::cos((i+1)*x) + b[i]*std::sin((i+1)*x) );
+	}
+
+	return q;
+}
+
+// Flag 7
+Real flowrate_rigth_subclavian(const Real& t)
+{
+	int n_terms = 8;
+
+	Real a0    = 11.7149;
+	Real a[8]  = {0.1148,-3.2002,0.7985,0.8677,-1.4160,0.0309,0.2880,-0.7976};
+	Real b[8]  = {3.8802,0.4478,1.6398,-2.1626,-1.1474,0.1730,-1.1069,-0.6026};
+
+	Real q = 0.5*a0;
+
+	Real t_min = 0.0;
+	Real t_max = t_min + 0.8; // One heartbeat lasts in 0.8 second
+
+	Real x = M_PI * ( 2 * ( t-t_min ) / ( t_max - t_min )  - 1 );
+
+	for ( int i = 0; i < n_terms; i++){
+		q += ( a[i]*std::cos((i+1)*x) + b[i]*std::sin((i+1)*x) );
+	}
+
+	return q;
+}
+
 Real oneFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return 1.0;
@@ -447,12 +585,12 @@ NavierStokes::run()
     bcH_aorta.addBC( "Inflow",         3, Essential,      Full,        zero, 3 );
     bcH_aorta.addBC( "Walls",        200, Essential, 	  Full, 	   zero, 3 );
     bcH_aorta.addBC( "Outflow2",       2,   Natural, 	Normal,    	   zero    );
-    bcH_aorta.addBC( "Outflow4",       4, 	Natural, 	Normal,    	   zero    );
-    bcH_aorta.addBC( "Outflow5",       5, 	Natural, 	Normal,    	   zero    );
-    bcH_aorta.addBC( "Outflow6",       6, 	Natural, 	Normal,    	   zero    );
-    bcH_aorta.addBC( "Outflow7",       7, 	Natural, 	Normal,        zero    );
-    bcH_aorta.addBC( "Outflow8",       8, 	Natural, 	Normal,    	   zero    );
-    bcH_aorta.addBC( "Outflow9",       9, 	Natural, 	Normal,    	   zero    );
+    bcH_aorta.addBC( "Outflow4",       4, Essential,      Full,        zero, 3 );
+    bcH_aorta.addBC( "Outflow5",       5, Essential,      Full,        zero, 3 );
+    bcH_aorta.addBC( "Outflow6",       6, Essential,      Full,        zero, 3 );
+    bcH_aorta.addBC( "Outflow7",       7, Essential,      Full,        zero, 3 );
+    bcH_aorta.addBC( "Outflow8",       8, Essential,      Full,        zero, 3 );
+    bcH_aorta.addBC( "Outflow9",       9, Essential,      Full,        zero, 3 );
 
     bcH_aorta.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
 
@@ -608,7 +746,7 @@ NavierStokes::run()
     vectorPtr_Type V_hat_y_flag8;
     vectorPtr_Type V_hat_z_flag8;
     BCHandler bcH_laplacian_flag8;
-    bcH_laplacian_flag8.addBC( "Outflow5", 8, Essential, Full, one, 1 );
+    bcH_laplacian_flag8.addBC( "Outflow8", 8, Essential, Full, one, 1 );
     bcH_laplacian_flag8.bcUpdate ( *localMeshPtr, uFESpace_scalar->feBd(), uFESpace_scalar->dof() );
 
     preprocessBoundary(nx_flag8, ny_flag8, nz_flag8, bcH_laplacian_flag8, Q_hat_flag8, Phi_h, 8, uFESpace_scalar, uFESpace_ETA, V_hat_x_flag8, V_hat_y_flag8, V_hat_z_flag8);
@@ -625,7 +763,7 @@ NavierStokes::run()
     vectorPtr_Type V_hat_y_flag9;
     vectorPtr_Type V_hat_z_flag9;
     BCHandler bcH_laplacian_flag9;
-    bcH_laplacian_flag9.addBC( "Outflow5", 9, Essential, Full, one, 1 );
+    bcH_laplacian_flag9.addBC( "Outflow9", 9, Essential, Full, one, 1 );
     bcH_laplacian_flag9.bcUpdate ( *localMeshPtr, uFESpace_scalar->feBd(), uFESpace_scalar->dof() );
 
     preprocessBoundary(nx_flag9, ny_flag9, nz_flag9, bcH_laplacian_flag9, Q_hat_flag9, Phi_h, 9, uFESpace_scalar, uFESpace_ETA, V_hat_x_flag9, V_hat_y_flag9, V_hat_z_flag9);
@@ -639,7 +777,6 @@ NavierStokes::run()
     Laplacian.reset();
     staticCast_laplacian.reset();
     rhs_laplacian.reset();
-    Phi_h_inflow_rep.reset();
 
     /*
     // +-----------------------------------------------+
