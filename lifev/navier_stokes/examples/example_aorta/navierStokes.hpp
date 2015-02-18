@@ -512,18 +512,20 @@ NavierStokes::run()
     V_hat_z.reset ( new vector_Type ( *Phi_h_inflow ) );
 
     // Multiplying times the normal of the inflow section
-    *V_hat_x *= 0.07780;
-    *V_hat_y *= 0.0;
-    *V_hat_z *= 0.99696;
+    Real nx = 0.07780;
+    Real ny = 0.0;
+    Real nz = 0.99696;
+
+    *V_hat_x *= nx;
+    *V_hat_y *= ny;
+    *V_hat_z *= nz;
 
     // Cleaning useless things
     linearSolver_laplacian.reset();
     Phi_h.reset();
     Laplacian.reset();
-    uFESpace_ETA.reset();
     staticCast_laplacian.reset();
     rhs_laplacian.reset();
-    ones_vec.reset();
     Phi_h_inflow_rep.reset();
 
     // +-----------------------------------------------+
@@ -837,11 +839,17 @@ NavierStokes::run()
         Real T_heartbeat = 0.8;
 
         if ( (time >= 0.05 && time <= 0.42) || (time >= (0.05+T_heartbeat) && time <= (0.42+T_heartbeat) ) || (time >= (0.05+2*T_heartbeat) && time <= (0.42+2*T_heartbeat) ) || (time >= (0.05+3*T_heartbeat) && time <= (0.42+3*T_heartbeat) ) )
-        	Q_in = 2.422818092859456e+8*std::pow(time,8) -4.764207344433996e+8*std::pow(time,7) + 3.993883831476327e+8*std::pow(time,6) -1.867066900011057e+8*std::pow(time,5) +0.533079809563519e+8*std::pow(time,4) -0.094581323616832e+8*std::pow(time,3) +0.009804512311267e+8*std::pow(time,2) -0.000482942399225e+8*time+0.000008651437192;
+        	Q_in = 2.422818092859456e+8*std::pow(time,8)-4.764207344433996e+8*std::pow(time,7) + 3.993883831476327e+8*std::pow(time,6) -1.867066900011057e+8*std::pow(time,5) +0.533079809563519e+8*std::pow(time,4) -0.094581323616832e+8*std::pow(time,3) +0.009804512311267e+8*std::pow(time,2) -0.000482942399225e+8*time+0.000008651437192e+8;
         else
         	Q_in = 0.0;
 
         Real alpha_flowrate = Q_in/Q_hat;
+
+        if (verbose)
+        {
+        	std::cout << "Q_in: " << Q_in << std::endl << std::endl;
+        	std::cout << "alpha_flowrate: " << alpha_flowrate << std::endl << std::endl;
+        }
 
         velAndPressure_inflow->zero();
         *velAndPressure_inflow += *velAndPressure_inflow_reference;
