@@ -47,6 +47,11 @@
 
 using namespace LifeV;
 
+typedef VectorEpetra vector_Type;
+typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
+
+typedef FESpace< RegionMesh<LinearTetra>, MapEpetra > feSpace_Type;
+typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
 
 class NavierStokes
 {
@@ -129,6 +134,58 @@ using namespace LifeV;
 Real zeroFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return 0;
+}
+
+void preprocessBoundary(const Real& nx, const Real& ny, const Real& nz, BCHandler& bc, Real& Q_hat, const vectorPtr_Type& Phi_h, const UInt flag,
+					    const feSpacePtr_Type& uFESpace_scalar,
+						const boost::shared_ptr< ETFESpace<RegionMesh<LinearTetra>, MapEpetra, 3, 1 > >& uFESpace_ETA,
+						vectorPtr_Type& V_hat_x, vectorPtr_Type& V_hat_y, vectorPtr_Type& V_hat_z)
+{
+	vectorPtr_Type Phi_h_inflow;
+	Phi_h_inflow.reset ( new vector_Type ( uFESpace_scalar->map() ) );
+	Phi_h_inflow->zero();
+
+	bcManageRhs ( *Phi_h_inflow, *uFESpace_scalar->mesh(), uFESpace_scalar->dof(),  bc, uFESpace_scalar->feBd(), 1., 0.);
+
+	*Phi_h_inflow *= *Phi_h;
+
+	Q_hat = 0.0;
+
+	// Computing the flowrate associated to Phi_h_inflow
+
+	vectorPtr_Type Phi_h_inflow_rep;
+	Phi_h_inflow_rep.reset ( new vector_Type ( *Phi_h_inflow, Repeated ) );
+
+	vectorPtr_Type Q_hat_vec;
+	Q_hat_vec.reset ( new vector_Type ( uFESpace_scalar->map() ) );
+	Q_hat_vec->zero();
+
+	vectorPtr_Type ones_vec;
+	ones_vec.reset ( new vector_Type ( uFESpace_scalar->map() ) );
+	ones_vec->zero();
+	*ones_vec += 1.0;
+
+	{
+		using namespace ExpressionAssembly;
+		QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria6pt) );
+		integrate (
+				boundary (uFESpace_ETA->mesh(), flag),
+				myBDQR,
+				uFESpace_ETA,
+				value(uFESpace_ETA, *Phi_h_inflow_rep)*phi_i
+		)
+		>> Q_hat_vec;
+	}
+
+	Q_hat = Q_hat_vec->dot(*ones_vec);
+
+	V_hat_x.reset ( new vector_Type ( *Phi_h_inflow ) );
+	V_hat_y.reset ( new vector_Type ( *Phi_h_inflow ) );
+	V_hat_z.reset ( new vector_Type ( *Phi_h_inflow ) );
+
+	*V_hat_x *= nx;
+	*V_hat_y *= ny;
+	*V_hat_z *= nz;
 }
 
 Real oneFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
@@ -415,12 +472,6 @@ NavierStokes::run()
     bcH_laplacian.addBC( "Walls", 200, Essential, Full, zero, 1 );
     bcH_laplacian.bcUpdate ( *localMeshPtr, uFESpace_scalar->feBd(), uFESpace_scalar->dof() );
 
-    // BCs for the laplacian problem
-
-    BCHandler bcH_laplacian_inflow;
-    bcH_laplacian_inflow.addBC( "Inflow", 3, Essential, Full, one, 1 );
-    bcH_laplacian_inflow.bcUpdate ( *localMeshPtr, uFESpace_scalar->feBd(), uFESpace_scalar->dof() );
-
     vectorPtr_Type Phi_h;
     Phi_h.reset ( new vector_Type ( uFESpace_scalar->map() ) );
     Phi_h->zero();
@@ -462,63 +513,125 @@ NavierStokes::run()
     boost::shared_ptr<MatrixEpetra<Real> > staticCast_laplacian = boost::static_pointer_cast<MatrixEpetra<Real> > (Laplacian);
     Int numIter_laplacian = linearSolver_laplacian->solveSystem ( *rhs_laplacian, *Phi_h, staticCast_laplacian );
 
-    vectorPtr_Type Phi_h_inflow;
-    Phi_h_inflow.reset ( new vector_Type ( uFESpace_scalar->map() ) );
-    Phi_h_inflow->zero();
+    // Inflow
 
-    bcManageRhs ( *Phi_h_inflow, *uFESpace_scalar->mesh(), uFESpace_scalar->dof(),  bcH_laplacian_inflow, uFESpace_scalar->feBd(), 1., 0.);
+    Real nx_inflow = 0.07780;
+    Real ny_inflow = 0.0;
+    Real nz_inflow = 0.99696;
+    Real Q_hat_inflow = 0.0;
+    vectorPtr_Type V_hat_x_inflow;
+    vectorPtr_Type V_hat_y_inflow;
+    vectorPtr_Type V_hat_z_inflow;
+    BCHandler bcH_laplacian_inflow;
+    bcH_laplacian_inflow.addBC( "Inflow", 3, Essential, Full, one, 1 );
+    bcH_laplacian_inflow.bcUpdate ( *localMeshPtr, uFESpace_scalar->feBd(), uFESpace_scalar->dof() );
 
-    *Phi_h_inflow *= *Phi_h;
-
-    Real Q_hat = 0.0;
-
-    // Computing the flowrate associated to Phi_h_inflow
-
-    vectorPtr_Type Phi_h_inflow_rep;
-    Phi_h_inflow_rep.reset ( new vector_Type ( *Phi_h_inflow, Repeated ) );
-
-    vectorPtr_Type Q_hat_vec;
-    Q_hat_vec.reset ( new vector_Type ( uFESpace_scalar->map() ) );
-    Q_hat_vec->zero();
-
-    vectorPtr_Type ones_vec;
-    ones_vec.reset ( new vector_Type ( uFESpace_scalar->map() ) );
-    ones_vec->zero();
-    *ones_vec += 1.0;
-
-    {
-    	using namespace ExpressionAssembly;
-    	QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria6pt) );
-    	integrate (
-    			boundary (uFESpace_ETA->mesh(), 3), // 3 is for the flag of the outflow
-    			myBDQR,
-    			uFESpace_ETA,
-    			value(uFESpace_ETA, *Phi_h_inflow_rep)*phi_i
-    	)
-    	>> Q_hat_vec;
-    }
-
-    Q_hat = Q_hat_vec->dot(*ones_vec);
+    preprocessBoundary(nx_inflow, ny_inflow, nz_inflow, bcH_laplacian_inflow, Q_hat_inflow, Phi_h, 3, uFESpace_scalar, uFESpace_ETA, V_hat_x_inflow, V_hat_y_inflow, V_hat_z_inflow);
 
     if (verbose)
-    	std::cout << std::endl << "\tValue of Q_hat = " << Q_hat << std::endl;
+        	std::cout << "\tValue of inflow, Q_hat = " << Q_hat_inflow << std::endl;
 
-    vectorPtr_Type V_hat_x;
-    vectorPtr_Type V_hat_y;
-    vectorPtr_Type V_hat_z;
+    // Outflow 4
+    Real nx_flag4 = 0.0;
+    Real ny_flag4 = 0.206;
+    Real nz_flag4 = 0.978;
+    Real Q_hat_flag4 = 0.0;
+    vectorPtr_Type V_hat_x_flag4;
+    vectorPtr_Type V_hat_y_flag4;
+    vectorPtr_Type V_hat_z_flag4;
+    BCHandler bcH_laplacian_flag4;
+    bcH_laplacian_flag4.addBC( "Outflow4", 4, Essential, Full, one, 1 );
+    bcH_laplacian_flag4.bcUpdate ( *localMeshPtr, uFESpace_scalar->feBd(), uFESpace_scalar->dof() );
 
-    V_hat_x.reset ( new vector_Type ( *Phi_h_inflow ) );
-    V_hat_y.reset ( new vector_Type ( *Phi_h_inflow ) );
-    V_hat_z.reset ( new vector_Type ( *Phi_h_inflow ) );
+    preprocessBoundary(nx_flag4, ny_flag4, nz_flag4, bcH_laplacian_flag4, Q_hat_flag4, Phi_h, 4, uFESpace_scalar, uFESpace_ETA, V_hat_x_flag4, V_hat_y_flag4, V_hat_z_flag4);
 
-    // Multiplying times the normal of the inflow section
-    Real nx = 0.07780;
-    Real ny = 0.0;
-    Real nz = 0.99696;
+    if (verbose)
+            	std::cout << "\tValue of outflow 4, Q_hat = " << Q_hat_flag4 << std::endl;
 
-    *V_hat_x *= nx;
-    *V_hat_y *= ny;
-    *V_hat_z *= nz;
+    // Outflow 5
+    Real nx_flag5 = 0.0;
+    Real ny_flag5 = 0.0;
+    Real nz_flag5 = 1.0;
+    Real Q_hat_flag5 = 0.0;
+    vectorPtr_Type V_hat_x_flag5;
+    vectorPtr_Type V_hat_y_flag5;
+    vectorPtr_Type V_hat_z_flag5;
+    BCHandler bcH_laplacian_flag5;
+    bcH_laplacian_flag5.addBC( "Outflow5", 5, Essential, Full, one, 1 );
+    bcH_laplacian_flag5.bcUpdate ( *localMeshPtr, uFESpace_scalar->feBd(), uFESpace_scalar->dof() );
+
+    preprocessBoundary(nx_flag5, ny_flag5, nz_flag5, bcH_laplacian_flag5, Q_hat_flag5, Phi_h, 5, uFESpace_scalar, uFESpace_ETA, V_hat_x_flag5, V_hat_y_flag5, V_hat_z_flag5);
+
+    if (verbose)
+    	std::cout << "\tValue of outflow 5, Q_hat = " << Q_hat_flag5 << std::endl;
+
+    // Outflow 6
+    Real nx_flag6 = 0.0;
+    Real ny_flag6 = 0.51;
+    Real nz_flag6 = 0.86;
+    Real Q_hat_flag6 = 0.0;
+    vectorPtr_Type V_hat_x_flag6;
+    vectorPtr_Type V_hat_y_flag6;
+    vectorPtr_Type V_hat_z_flag6;
+    BCHandler bcH_laplacian_flag6;
+    bcH_laplacian_flag6.addBC( "Outflow6", 6, Essential, Full, one, 1 );
+    bcH_laplacian_flag6.bcUpdate ( *localMeshPtr, uFESpace_scalar->feBd(), uFESpace_scalar->dof() );
+
+    preprocessBoundary(nx_flag6, ny_flag6, nz_flag6, bcH_laplacian_flag6, Q_hat_flag6, Phi_h, 6, uFESpace_scalar, uFESpace_ETA, V_hat_x_flag6, V_hat_y_flag6, V_hat_z_flag6);
+
+    if (verbose)
+    	std::cout << "\tValue of outflow 6, Q_hat = " << Q_hat_flag6 << std::endl;
+
+    // Outflow 7
+    Real nx_flag7 = 0.0;
+    Real ny_flag7 = 0.807;
+    Real nz_flag7 = 0.589;
+    Real Q_hat_flag7 = 0.0;
+    vectorPtr_Type V_hat_x_flag7;
+    vectorPtr_Type V_hat_y_flag7;
+    vectorPtr_Type V_hat_z_flag7;
+    BCHandler bcH_laplacian_flag7;
+    bcH_laplacian_flag7.addBC( "Outflow7", 7, Essential, Full, one, 1 );
+    bcH_laplacian_flag7.bcUpdate ( *localMeshPtr, uFESpace_scalar->feBd(), uFESpace_scalar->dof() );
+
+    preprocessBoundary(nx_flag7, ny_flag7, nz_flag7, bcH_laplacian_flag7, Q_hat_flag7, Phi_h, 7, uFESpace_scalar, uFESpace_ETA, V_hat_x_flag7, V_hat_y_flag7, V_hat_z_flag7);
+
+    if (verbose)
+    	std::cout << "\tValue of outflow 7, Q_hat = " << Q_hat_flag7 << std::endl;
+
+    // Outflow 8
+    Real nx_flag8 = 0.0;
+    Real ny_flag8 = 0.185;
+    Real nz_flag8 = 0.983;
+    Real Q_hat_flag8 = 0.0;
+    vectorPtr_Type V_hat_x_flag8;
+    vectorPtr_Type V_hat_y_flag8;
+    vectorPtr_Type V_hat_z_flag8;
+    BCHandler bcH_laplacian_flag8;
+    bcH_laplacian_flag8.addBC( "Outflow5", 8, Essential, Full, one, 1 );
+    bcH_laplacian_flag8.bcUpdate ( *localMeshPtr, uFESpace_scalar->feBd(), uFESpace_scalar->dof() );
+
+    preprocessBoundary(nx_flag8, ny_flag8, nz_flag8, bcH_laplacian_flag8, Q_hat_flag8, Phi_h, 8, uFESpace_scalar, uFESpace_ETA, V_hat_x_flag8, V_hat_y_flag8, V_hat_z_flag8);
+
+    if (verbose)
+    	std::cout << "\tValue of outflow 8, Q_hat = " << Q_hat_flag8 << std::endl;
+
+    // Outflow 9
+    Real nx_flag9 = 0.0;
+    Real ny_flag9 = 0.851;
+    Real nz_flag9 = -0.525;
+    Real Q_hat_flag9 = 0.0;
+    vectorPtr_Type V_hat_x_flag9;
+    vectorPtr_Type V_hat_y_flag9;
+    vectorPtr_Type V_hat_z_flag9;
+    BCHandler bcH_laplacian_flag9;
+    bcH_laplacian_flag9.addBC( "Outflow5", 9, Essential, Full, one, 1 );
+    bcH_laplacian_flag9.bcUpdate ( *localMeshPtr, uFESpace_scalar->feBd(), uFESpace_scalar->dof() );
+
+    preprocessBoundary(nx_flag9, ny_flag9, nz_flag9, bcH_laplacian_flag9, Q_hat_flag9, Phi_h, 9, uFESpace_scalar, uFESpace_ETA, V_hat_x_flag9, V_hat_y_flag9, V_hat_z_flag9);
+
+    if (verbose)
+    	std::cout << "\tValue of outflow 9, Q_hat = " << Q_hat_flag9 << std::endl;
 
     // Cleaning useless things
     linearSolver_laplacian.reset();
@@ -528,6 +641,7 @@ NavierStokes::run()
     rhs_laplacian.reset();
     Phi_h_inflow_rep.reset();
 
+    /*
     // +-----------------------------------------------+
     // |             Creating the problem              |
     // +-----------------------------------------------+
@@ -634,11 +748,13 @@ NavierStokes::run()
     exporter->addVariable ( ExporterData<mesh_Type>::VectorField, "velocity", uFESpace, velAndPressure, UInt (0) );
     exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpace, velAndPressure, pressureOffset );
     exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian", uFESpace_scalar, Phi_h_inflow, UInt (0) );
+	*/
 
     /*
      *  Starting from scratch or restarting? -BEGIN-
      */
 
+    /*
     bool doRestart = dataFile("importer/restart", false);
 
     Real time = t0;
@@ -754,11 +870,13 @@ NavierStokes::run()
     	timePressure.initialize(initialStatePressure);
     	importer->closeFile();
     }
+	*/
 
     /*
      *  Starting from scratch or restarting? -END-
      */
 
+    /*
     velAndPressure_inflow_reference->zero();
     velAndPressure_inflow_reference->subset(*V_hat_x,uFESpace_scalar->map(), 0, 0);
     velAndPressure_inflow_reference->subset(*V_hat_y,uFESpace_scalar->map(), 0, uFESpace_scalar->dof().numTotalDof() );
@@ -784,10 +902,13 @@ NavierStokes::run()
     vector_Type pressure ( pFESpace->map() );
     vector_Type rhsVelocity ( uFESpace->map() );
     vector_Type rhsVelocityFull ( fullMap );
+	*/
 
     /*
      * 	Compute the vector for computing Loads - END
      */
+
+    /*
 
     if (doRestart)
     {
@@ -881,6 +1002,7 @@ NavierStokes::run()
     }
     
     exporter->closeFile();
+	*/
 
     runChrono.stop();
     
