@@ -6,8 +6,8 @@
 * #offline partitioner details
 [offline_partitioner]
 useOfflinePartitionedMesh = true                  							# true for loading an already partitioned mesh, false to partition the mesh online
-num_parts = 8                                     							# must be the same of the number of parts when we partioned offline the mesh
-hdf5_file_name = Aorta_fluid_1M_NE_8parts__MeshPartitionTool_ParMETIS.h5    # file generated running test partion_io (main_write) - REQUIRED - 
+num_parts = 12                                      							# must be the same of the number of parts when we partioned offline the mesh
+hdf5_file_name = Aorta_fluid_1M_NE_12parts__MeshPartitionTool_ParMETIS.h5    # file generated running test partion_io (main_write) - REQUIRED - 
 io_class = new                                    							# possibilities: old or new, use new
 
 [exporter]
@@ -50,7 +50,7 @@ mesh_source            = regular_mesh
 	        inc_or_dec              = increasing
 		    max_levels              = 3
 	        MLOutput                = 10
-	        pde_equations           = 3
+	        pde_equations           = 1
 	        cycle_applications      = 3
 	
 	            [./smoother]

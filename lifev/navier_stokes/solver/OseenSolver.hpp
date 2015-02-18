@@ -290,6 +290,13 @@ public:
      */
     virtual void iterate ( bcHandler_Type& bcHandler );
 
+    //! Update convective term, boundary condition and solve the linearized ns system
+    /*!
+        @param bcHandler BC handler
+        @param inflowVector Vector with non zero entries just at the inflow section, used for noncircular inflow sections
+     */
+    virtual void iterate ( bcHandler_Type& bcHandler, const vectorPtr_Type& inflowVector );
+
     //! Reduce the local solution in global vectors
     /*!
         @param velocity
@@ -1703,6 +1710,7 @@ updateSystem ( const Real          alphaOverTimestep,
             normal[1] = 0.0;
             normal[2] = 0.0;
 
+            /*
             // Reverse flow at the ouflow
             QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria6pt) );
             integrate (
@@ -1713,6 +1721,7 @@ updateSystem ( const Real          alphaOverTimestep,
                         value(-1.0*M_oseenData->density())*eval( signEvaluation, dot(value(M_fespaceUETA, u_starRepeated),normal))*dot(phi_i, phi_j)
                       )
             >> M_convectiveMatrix->block(0,0);
+            */
         }
 
         // Stabilising term: -rho div(u^n) u v
@@ -2109,6 +2118,75 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::iterate ( bcHan
 
     //M_residual.spy("residual");
 } // iterate()
+
+
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
+void
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::iterate ( bcHandler_Type& bcHandler, const vectorPtr_Type& inflowVector )
+{
+
+    LifeChrono chrono;
+
+    // matrix and vector assembling communication
+    M_Displayer.leaderPrint ( "  F-  Updating the boundary conditions ...     " );
+
+    // HERE I SHOULD APPLY THE STABILIZATION ON THE RHS
+
+    chrono.start();
+
+    M_matrixNoBC->globalAssemble();
+
+    matrixPtr_Type matrixFull ( new matrix_Type ( M_velocityFESpace.map() + M_pressureFESpace.map() + M_fluxMap ) );
+
+    updateStabilization ( *matrixFull );
+
+    getFluidMatrix ( *matrixFull );
+
+    vector_Type rightHandSideFull ( *M_rightHandSideNoBC );
+
+    if(M_stabilization)
+    {
+        if(M_oseenData->stabilizationType() == "SUPG" || M_oseenData->stabilizationType() == "SUPGVMS" || M_oseenData->stabilizationType() == "VMSLES" )
+        {
+            rightHandSideFull += *M_rhsStabilization;
+        }
+    }
+
+    chrono.stop();
+
+    M_Displayer.leaderPrintMax ( "done in ", chrono.diff() );
+
+    // boundary conditions update
+    M_Displayer.leaderPrint ("  F-  Applying boundary conditions ...         ");
+
+    chrono.start();
+
+    applyBoundaryConditions ( *matrixFull, rightHandSideFull, bcHandler );
+
+    matrixFull->globalAssemble();
+
+    chrono.stop();
+
+    M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
+
+    // solving the system
+    M_linearSolver->setMatrix ( *matrixFull );
+
+    boost::shared_ptr<MatrixEpetra<Real> > staticCast = boost::static_pointer_cast<MatrixEpetra<Real> > (matrixFull);
+
+    // sum the inflow contribution
+    rightHandSideFull += *inflowVector;
+
+    Int numIter = M_linearSolver->solveSystem ( rightHandSideFull, *M_solution, staticCast );
+
+    // if the preconditioner has been rese the stab terms are to be updated
+    if ( numIter < 0 || numIter > M_iterReuseStabilization )
+    {
+        resetStabilization();
+    }
+
+} // iterate()
+
 
 template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void

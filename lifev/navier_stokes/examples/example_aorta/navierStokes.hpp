@@ -387,7 +387,7 @@ NavierStokes::run()
 
     BCHandler bcH_aorta;
 
-    bcH_aorta.addBC( "Inflow",         3, Essential,      Full,     uInflow, 3 );
+    bcH_aorta.addBC( "Inflow",         3, Essential,      Full,        zero, 3 );
     bcH_aorta.addBC( "Walls",        200, Essential, 	  Full, 	   zero, 3 );
     bcH_aorta.addBC( "Outflow2",       2,   Natural, 	Normal,    	   zero    );
     bcH_aorta.addBC( "Outflow4",       4, 	Natural, 	Normal,    	   zero    );
@@ -399,18 +399,6 @@ NavierStokes::run()
 
     bcH_aorta.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
 
-    // BCs for the laplacian problem
-
-    BCHandler bcH_laplacian;
-    bcH_laplacian.addBC( "Walls", 200, Essential, Full, zero, 3 );
-    bcH_laplacian.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
-
-    // BCs for the laplacian problem
-
-    BCHandler bcH_laplacian_inflow;
-    bcH_laplacian_inflow.addBC( "Inflow", 3, Essential, Full, one, 3 );
-    bcH_laplacian_inflow.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
-
     // +-----------------------------------------------+
     // |             Solving the laplacian             |
     // +-----------------------------------------------+
@@ -418,43 +406,53 @@ NavierStokes::run()
     if (verbose)
             std::cout << std::endl << "[Solving the laplacian for the inflow profile]" << std::endl;
 
-    boost::shared_ptr< Exporter<mesh_Type > > exporter;
-    exporter.reset ( new ExporterHDF5<mesh_Type > ( dataFile, "Laplacian" ) );
-    exporter->setPostDir ( "./" );
-    exporter->setMeshProcId ( localMeshPtr, M_data->comm->MyPID() );
+    feSpacePtr_Type uFESpace_scalar;
+    uFESpace_scalar.reset (new feSpace_Type (localMeshPtr, uOrder, 1, M_data->comm) );
+
+    // BCs for the laplacian problem
+
+    BCHandler bcH_laplacian;
+    bcH_laplacian.addBC( "Walls", 200, Essential, Full, zero, 1 );
+    bcH_laplacian.bcUpdate ( *localMeshPtr, uFESpace_scalar->feBd(), uFESpace_scalar->dof() );
+
+    // BCs for the laplacian problem
+
+    BCHandler bcH_laplacian_inflow;
+    bcH_laplacian_inflow.addBC( "Inflow", 3, Essential, Full, one, 1 );
+    bcH_laplacian_inflow.bcUpdate ( *localMeshPtr, uFESpace_scalar->feBd(), uFESpace_scalar->dof() );
 
     vectorPtr_Type Phi_h;
-    Phi_h.reset ( new vector_Type ( uFESpace->map() ) );
+    Phi_h.reset ( new vector_Type ( uFESpace_scalar->map() ) );
     Phi_h->zero();
 
     vectorPtr_Type rhs_laplacian;
-    rhs_laplacian.reset ( new vector_Type ( uFESpace->map() ) );
+    rhs_laplacian.reset ( new vector_Type ( uFESpace_scalar->map() ) );
     rhs_laplacian->zero();
     *rhs_laplacian += 1.0;
 
     boost::shared_ptr<MatrixEpetra<Real> > Laplacian;
-    Laplacian.reset ( new MatrixEpetra<Real> ( uFESpace->map() ) );
+    Laplacian.reset ( new MatrixEpetra<Real> ( uFESpace_scalar->map() ) );
 
-    boost::shared_ptr< ETFESpace<mesh_Type, MapEpetra, 3, 3 > > uFESpace_ETA;
-    uFESpace_ETA.reset( new ETFESpace<mesh_Type, MapEpetra, 3, 3 > ( uFESpace->mesh(), &(uFESpace->refFE()), M_data->comm) );
+    boost::shared_ptr< ETFESpace<mesh_Type, MapEpetra, 3, 1 > > uFESpace_ETA;
+    uFESpace_ETA.reset( new ETFESpace<mesh_Type, MapEpetra, 3, 1 > ( uFESpace_scalar->mesh(), &(uFESpace_scalar->refFE()), M_data->comm) );
 
     {
     	using namespace ExpressionAssembly;
 
     	integrate(
     				elements(uFESpace_ETA->mesh()),
-    				uFESpace->qr(),
+    				uFESpace_scalar->qr(),
     				uFESpace_ETA,
     				uFESpace_ETA,
-    				dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) )
+    				dot( grad(phi_i) , grad(phi_j) )
     			 ) >> Laplacian;
     }
 
-    bcManage ( *Laplacian, *rhs_laplacian, *uFESpace->mesh(), uFESpace->dof(), bcH_laplacian, uFESpace->feBd(), 1.0, 0.0 );
+    bcManage ( *Laplacian, *rhs_laplacian, *uFESpace_scalar->mesh(), uFESpace_scalar->dof(), bcH_laplacian, uFESpace_scalar->feBd(), 1.0, 0.0 );
     Laplacian->globalAssemble();
 
     boost::shared_ptr<SolverAztecOO> linearSolver_laplacian;
-    linearSolver_laplacian.reset( new SolverAztecOO (uFESpace->map().commPtr()) );
+    linearSolver_laplacian.reset( new SolverAztecOO (uFESpace_scalar->map().commPtr()) );
 
     linearSolver_laplacian->setupPreconditioner ( dataFile, "laplacian/prec" );
     linearSolver_laplacian->setDataFromGetPot ( dataFile, "laplacian/solver" );
@@ -465,16 +463,12 @@ NavierStokes::run()
     Int numIter_laplacian = linearSolver_laplacian->solveSystem ( *rhs_laplacian, *Phi_h, staticCast_laplacian );
 
     vectorPtr_Type Phi_h_inflow;
-    Phi_h_inflow.reset ( new vector_Type ( uFESpace->map() ) );
+    Phi_h_inflow.reset ( new vector_Type ( uFESpace_scalar->map() ) );
     Phi_h_inflow->zero();
 
-    bcManageRhs ( *Phi_h_inflow, *uFESpace->mesh(), uFESpace->dof(),  bcH_laplacian_inflow, uFESpace->feBd(), 1., 0.);
+    bcManageRhs ( *Phi_h_inflow, *uFESpace_scalar->mesh(), uFESpace_scalar->dof(),  bcH_laplacian_inflow, uFESpace_scalar->feBd(), 1., 0.);
 
     *Phi_h_inflow *= *Phi_h;
-
-    exporter->addVariable ( ExporterData<mesh_Type>::VectorField, "Laplacian", uFESpace, Phi_h_inflow, UInt (0) );
-    exporter->postProcess ( 0.0 );
-    exporter->closeFile();
 
     Real Q_hat = 0.0;
 
@@ -484,11 +478,11 @@ NavierStokes::run()
     Phi_h_inflow_rep.reset ( new vector_Type ( *Phi_h_inflow, Repeated ) );
 
     vectorPtr_Type Q_hat_vec;
-    Q_hat_vec.reset ( new vector_Type ( uFESpace->map() ) );
+    Q_hat_vec.reset ( new vector_Type ( uFESpace_scalar->map() ) );
     Q_hat_vec->zero();
 
     vectorPtr_Type ones_vec;
-    ones_vec.reset ( new vector_Type ( uFESpace->map() ) );
+    ones_vec.reset ( new vector_Type ( uFESpace_scalar->map() ) );
     ones_vec->zero();
     *ones_vec += 1.0;
 
@@ -499,7 +493,7 @@ NavierStokes::run()
     			boundary (uFESpace_ETA->mesh(), 3), // 3 is for the flag of the outflow
     			myBDQR,
     			uFESpace_ETA,
-    			dot(value(uFESpace_ETA, *Phi_h_inflow_rep), phi_i)
+    			value(uFESpace_ETA, *Phi_h_inflow_rep)*phi_i
     	)
     	>> Q_hat_vec;
     }
@@ -509,12 +503,33 @@ NavierStokes::run()
     if (verbose)
     	std::cout << std::endl << "\tValue of Q_hat = " << Q_hat << std::endl;
 
+    vectorPtr_Type V_hat_x;
+    vectorPtr_Type V_hat_y;
+    vectorPtr_Type V_hat_z;
+
+    V_hat_x.reset ( new vector_Type ( *Phi_h_inflow ) );
+    V_hat_y.reset ( new vector_Type ( *Phi_h_inflow ) );
+    V_hat_z.reset ( new vector_Type ( *Phi_h_inflow ) );
+
+    // Multiplying times the normal of the inflow section
+    *V_hat_x *= 0.07780;
+    *V_hat_y *= 0.0;
+    *V_hat_z *= 0.99696;
+
+    // Cleaning useless things
+    linearSolver_laplacian.reset();
+    Phi_h.reset();
+    Laplacian.reset();
+    uFESpace_ETA.reset();
+    staticCast_laplacian.reset();
+    rhs_laplacian.reset();
+    ones_vec.reset();
+    Phi_h_inflow_rep.reset();
 
     // +-----------------------------------------------+
     // |             Creating the problem              |
     // +-----------------------------------------------+
 
-    /*
     if (verbose)
         std::cout << std::endl << "[Creating the problem]" << std::endl;
     
@@ -599,6 +614,12 @@ NavierStokes::run()
     vectorPtr_Type velAndPressure;
     velAndPressure.reset ( new vector_Type (*fluid.solution(), exporter->mapType() ) );
 
+    vectorPtr_Type velAndPressure_inflow_reference;
+    velAndPressure_inflow_reference.reset ( new vector_Type (*fluid.solution() ) );
+
+    vectorPtr_Type velAndPressure_inflow;
+    velAndPressure_inflow.reset ( new vector_Type (*fluid.solution() ) );
+
     vectorPtr_Type betaFull;
     betaFull.reset ( new vector_Type (*fluid.solution(), exporter->mapType() ) );
 
@@ -610,13 +631,12 @@ NavierStokes::run()
 
     exporter->addVariable ( ExporterData<mesh_Type>::VectorField, "velocity", uFESpace, velAndPressure, UInt (0) );
     exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpace, velAndPressure, pressureOffset );
-	*/
+    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian", uFESpace_scalar, Phi_h_inflow, UInt (0) );
 
     /*
      *  Starting from scratch or restarting? -BEGIN-
      */
 
-    /*
     bool doRestart = dataFile("importer/restart", false);
 
     Real time = t0;
@@ -732,13 +752,16 @@ NavierStokes::run()
     	timePressure.initialize(initialStatePressure);
     	importer->closeFile();
     }
-	*/
 
     /*
      *  Starting from scratch or restarting? -END-
      */
 
-    /*
+    velAndPressure_inflow_reference->zero();
+    velAndPressure_inflow_reference->subset(*V_hat_x,uFESpace_scalar->map(), 0, 0);
+    velAndPressure_inflow_reference->subset(*V_hat_y,uFESpace_scalar->map(), 0, uFESpace_scalar->dof().numTotalDof() );
+    velAndPressure_inflow_reference->subset(*V_hat_z,uFESpace_scalar->map(), 0, 2*uFESpace_scalar->dof().numTotalDof() );
+
     initChrono.stop();
     
     if (verbose)
@@ -752,14 +775,6 @@ NavierStokes::run()
     
     int iter = 1;
     time = t0 + dt;
-
-    VectorSmall<2> AerodynamicCoefficients;
-    
-    if(verbose && M_exportCoeff)
-    {
-        M_out.open ("Coefficients.txt" );
-        M_out << "% time / drag coefficient / lift coefficient / energy \n" << std::flush;
-    }
     
     int n_iter = 0;
 
@@ -768,15 +783,10 @@ NavierStokes::run()
     vector_Type rhsVelocity ( uFESpace->map() );
     vector_Type rhsVelocityFull ( fullMap );
 
-    Real S = 0.25*fluid.area(6);
-    Real factor = 2.0/(fluid.density()*22.0*22.0*S); // 2/(rho*V^2*S)
-	*/
-
     /*
      * 	Compute the vector for computing Loads - END
      */
 
-    /*
     if (doRestart)
     {
     	fluid.initializeVelocitySolution(vectorForInitializationVelocitySolution);
@@ -818,23 +828,27 @@ NavierStokes::run()
         
         fluid.updateSystem ( alpha, *betaFull, *rhs );
         
-        fluid.iterate ( bcH );
-        
-        AerodynamicCoefficients = fluid.computeForces( bcHDrag, bcHLift );
-        
-        Real cd = factor*AerodynamicCoefficients[0];
-        Real cl = factor*AerodynamicCoefficients[1];
-        Real energy = fluid.energy();
 
-        if ( verbose && M_exportCoeff )
-        {
-            M_out << time  << " "
-            << cd << " "
-            << cl << " "
-            << energy << "\n" << std::flush;
-        }
-        
+        // ---------------------------------
+        // Evaluation of the inflow velocity
+        // ---------------------------------
 
+        Real Q_in = 0;
+        Real T_heartbeat = 0.8;
+
+        if ( (time >= 0.05 && time <= 0.42) || (time >= (0.05+T_heartbeat) && time <= (0.42+T_heartbeat) ) || (time >= (0.05+2*T_heartbeat) && time <= (0.42+2*T_heartbeat) ) || (time >= (0.05+3*T_heartbeat) && time <= (0.42+3*T_heartbeat) ) )
+        	Q_in = 2.422818092859456e+8*std::pow(time,8) -4.764207344433996e+8*std::pow(time,7) + 3.993883831476327e+8*std::pow(time,6) -1.867066900011057e+8*std::pow(time,5) +0.533079809563519e+8*std::pow(time,4) -0.094581323616832e+8*std::pow(time,3) +0.009804512311267e+8*std::pow(time,2) -0.000482942399225e+8*time+0.000008651437192;
+        else
+        	Q_in = 0.0;
+
+        Real alpha_flowrate = Q_in/Q_hat;
+
+        velAndPressure_inflow->zero();
+        *velAndPressure_inflow += *velAndPressure_inflow_reference;
+        *velAndPressure_inflow *= alpha_flowrate;
+
+        fluid.iterate ( bcH_aorta, velAndPressure_inflow );
+        
         vector_Type computedVelocity(uFESpace->map());
         computedVelocity.subset(*fluid.solution(), uFESpace->map(), 0, 0);
 
@@ -858,6 +872,8 @@ NavierStokes::run()
             std::cout << "Iteration time: " << initChrono.diff() << " s." << std::endl << std::endl;
     }
     
+    exporter->closeFile();
+
     runChrono.stop();
     
     if (verbose)
@@ -865,13 +881,7 @@ NavierStokes::run()
     
     if (verbose)
         std::cout << "[[END_RUN]]" << std::endl;
-    
-    if (verbose && M_exportCoeff)
-    {
-        M_out.close();
-    }
-    */
-    
+
     globalChrono.stop();
 
     if (verbose)
