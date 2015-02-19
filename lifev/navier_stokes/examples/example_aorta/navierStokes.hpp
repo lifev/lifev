@@ -613,10 +613,10 @@ NavierStokes::run()
     Phi_h.reset ( new vector_Type ( uFESpace_scalar->map() ) );
     Phi_h->zero();
 
-    vectorPtr_Type rhs_laplacian;
-    rhs_laplacian.reset ( new vector_Type ( uFESpace_scalar->map() ) );
-    rhs_laplacian->zero();
-    *rhs_laplacian += 1.0;
+    vector_Type rhs_laplacian( uFESpace_scalar->map() );
+//    rhs_laplacian.reset ( new vector_Type ( uFESpace_scalar->map() ) );
+    rhs_laplacian.zero();
+    //*rhs_laplacian += 1.0;
 
     boost::shared_ptr<MatrixEpetra<Real> > Laplacian;
     Laplacian.reset ( new MatrixEpetra<Real> ( uFESpace_scalar->map() ) );
@@ -636,7 +636,18 @@ NavierStokes::run()
     			 ) >> Laplacian;
     }
 
-    bcManage ( *Laplacian, *rhs_laplacian, *uFESpace_scalar->mesh(), uFESpace_scalar->dof(), bcH_laplacian, uFESpace_scalar->feBd(), 1.0, 0.0 );
+    {
+    	using namespace ExpressionAssembly;
+
+    	integrate(
+    			elements(uFESpace_ETA->mesh()),
+    			uFESpace_scalar->qr(),
+    			uFESpace_ETA,
+    			value(1.0)*phi_i
+    	) >> rhs_laplacian;
+    }
+
+    bcManage ( *Laplacian, rhs_laplacian, *uFESpace_scalar->mesh(), uFESpace_scalar->dof(), bcH_laplacian, uFESpace_scalar->feBd(), 1.0, 0.0 );
     Laplacian->globalAssemble();
 
     boost::shared_ptr<SolverAztecOO> linearSolver_laplacian;
@@ -648,7 +659,7 @@ NavierStokes::run()
     linearSolver_laplacian->setMatrix ( *Laplacian );
 
     boost::shared_ptr<MatrixEpetra<Real> > staticCast_laplacian = boost::static_pointer_cast<MatrixEpetra<Real> > (Laplacian);
-    Int numIter_laplacian = linearSolver_laplacian->solveSystem ( *rhs_laplacian, *Phi_h, staticCast_laplacian );
+    Int numIter_laplacian = linearSolver_laplacian->solveSystem ( rhs_laplacian, *Phi_h, staticCast_laplacian );
 
     // Inflow
 
@@ -782,7 +793,7 @@ NavierStokes::run()
     Phi_h.reset();
     Laplacian.reset();
     staticCast_laplacian.reset();
-    rhs_laplacian.reset();
+    //rhs_laplacian.reset();
 
 
     // +-----------------------------------------------+
@@ -906,14 +917,13 @@ NavierStokes::run()
 
     exporter->addVariable ( ExporterData<mesh_Type>::VectorField, "velocity", uFESpace, velAndPressure, UInt (0) );
     exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpace, velAndPressure, pressureOffset );
-    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian inflow", uFESpace_scalar, Phi_h_inflow, UInt (0) );
-    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian outflow4", uFESpace_scalar, Phi_h_outflow4, UInt (0) );
-    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian outflow5", uFESpace_scalar, Phi_h_outflow5, UInt (0) );
-    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian outflow6", uFESpace_scalar, Phi_h_outflow6, UInt (0) );
-    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian outflow7", uFESpace_scalar, Phi_h_outflow7, UInt (0) );
-    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian outflow8", uFESpace_scalar, Phi_h_outflow8, UInt (0) );
-    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian outflow9", uFESpace_scalar, Phi_h_outflow9, UInt (0) );
-
+//    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian inflow", uFESpace_scalar, Phi_h_inflow, UInt (0) );
+//    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian outflow4", uFESpace_scalar, Phi_h_outflow4, UInt (0) );
+//    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian outflow5", uFESpace_scalar, Phi_h_outflow5, UInt (0) );
+//    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian outflow6", uFESpace_scalar, Phi_h_outflow6, UInt (0) );
+//    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian outflow7", uFESpace_scalar, Phi_h_outflow7, UInt (0) );
+//    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian outflow8", uFESpace_scalar, Phi_h_outflow8, UInt (0) );
+//    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian outflow9", uFESpace_scalar, Phi_h_outflow9, UInt (0) );
 
     /*
      *  Starting from scratch or restarting? -BEGIN-
