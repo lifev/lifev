@@ -1706,22 +1706,22 @@ updateSystem ( const Real          alphaOverTimestep,
             >> M_convectiveMatrix->block(0,0);
 
             VectorSmall<3> normal;
-            normal[0] = 1.0;
+            normal[0] = 0.28;
             normal[1] = 0.0;
-            normal[2] = 0.0;
+            normal[2] = -0.96;
 
-            /*
+
             // Reverse flow at the ouflow
             QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria6pt) );
             integrate (
-            			boundary (M_fespaceUETA->mesh(), 3), // 3 is for the flag of the outflow
+            			boundary (M_fespaceUETA->mesh(), 2), // 3 is for the flag of the outflow
                         myBDQR,
                         M_fespaceUETA,
                         M_fespaceUETA,
                         value(-1.0*M_oseenData->density())*eval( signEvaluation, dot(value(M_fespaceUETA, u_starRepeated),normal))*dot(phi_i, phi_j)
                       )
             >> M_convectiveMatrix->block(0,0);
-            */
+
         }
 
         // Stabilising term: -rho div(u^n) u v

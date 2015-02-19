@@ -137,24 +137,23 @@ Real zeroFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const
 }
 
 void preprocessBoundary(const Real& nx, const Real& ny, const Real& nz, BCHandler& bc, Real& Q_hat, const vectorPtr_Type& Phi_h, const UInt flag,
-					    const feSpacePtr_Type& uFESpace_scalar,
+					    const feSpacePtr_Type& uFESpace_scalar, vectorPtr_Type& Phi_h_flag,
 						const boost::shared_ptr< ETFESpace<RegionMesh<LinearTetra>, MapEpetra, 3, 1 > >& uFESpace_ETA,
 						vectorPtr_Type& V_hat_x, vectorPtr_Type& V_hat_y, vectorPtr_Type& V_hat_z)
 {
-	vectorPtr_Type Phi_h_inflow;
-	Phi_h_inflow.reset ( new vector_Type ( uFESpace_scalar->map() ) );
-	Phi_h_inflow->zero();
+	Phi_h_flag.reset ( new vector_Type ( uFESpace_scalar->map() ) );
+	Phi_h_flag->zero();
 
-	bcManageRhs ( *Phi_h_inflow, *uFESpace_scalar->mesh(), uFESpace_scalar->dof(),  bc, uFESpace_scalar->feBd(), 1., 0.);
+	bcManageRhs ( *Phi_h_flag, *uFESpace_scalar->mesh(), uFESpace_scalar->dof(),  bc, uFESpace_scalar->feBd(), 1., 0.);
 
-	*Phi_h_inflow *= *Phi_h;
+	*Phi_h_flag *= *Phi_h;
 
 	Q_hat = 0.0;
 
 	// Computing the flowrate associated to Phi_h_inflow
 
-	vectorPtr_Type Phi_h_inflow_rep;
-	Phi_h_inflow_rep.reset ( new vector_Type ( *Phi_h_inflow, Repeated ) );
+	vectorPtr_Type Phi_h_flag_rep;
+	Phi_h_flag_rep.reset ( new vector_Type ( *Phi_h_flag, Repeated ) );
 
 	vectorPtr_Type Q_hat_vec;
 	Q_hat_vec.reset ( new vector_Type ( uFESpace_scalar->map() ) );
@@ -172,16 +171,16 @@ void preprocessBoundary(const Real& nx, const Real& ny, const Real& nz, BCHandle
 				boundary (uFESpace_ETA->mesh(), flag),
 				myBDQR,
 				uFESpace_ETA,
-				value(uFESpace_ETA, *Phi_h_inflow_rep)*phi_i
+				value(uFESpace_ETA, *Phi_h_flag_rep)*phi_i
 		)
 		>> Q_hat_vec;
 	}
 
 	Q_hat = Q_hat_vec->dot(*ones_vec);
 
-	V_hat_x.reset ( new vector_Type ( *Phi_h_inflow ) );
-	V_hat_y.reset ( new vector_Type ( *Phi_h_inflow ) );
-	V_hat_z.reset ( new vector_Type ( *Phi_h_inflow ) );
+	V_hat_x.reset ( new vector_Type ( *Phi_h_flag ) );
+	V_hat_y.reset ( new vector_Type ( *Phi_h_flag ) );
+	V_hat_z.reset ( new vector_Type ( *Phi_h_flag ) );
 
 	*V_hat_x *= nx;
 	*V_hat_y *= ny;
@@ -657,6 +656,7 @@ NavierStokes::run()
     Real ny_inflow = 0.0;
     Real nz_inflow = 0.99696;
     Real Q_hat_inflow = 0.0;
+    vectorPtr_Type Phi_h_inflow;
     vectorPtr_Type V_hat_x_inflow;
     vectorPtr_Type V_hat_y_inflow;
     vectorPtr_Type V_hat_z_inflow;
@@ -664,7 +664,7 @@ NavierStokes::run()
     bcH_laplacian_inflow.addBC( "Inflow", 3, Essential, Full, one, 1 );
     bcH_laplacian_inflow.bcUpdate ( *localMeshPtr, uFESpace_scalar->feBd(), uFESpace_scalar->dof() );
 
-    preprocessBoundary(nx_inflow, ny_inflow, nz_inflow, bcH_laplacian_inflow, Q_hat_inflow, Phi_h, 3, uFESpace_scalar, uFESpace_ETA, V_hat_x_inflow, V_hat_y_inflow, V_hat_z_inflow);
+    preprocessBoundary(nx_inflow, ny_inflow, nz_inflow, bcH_laplacian_inflow, Q_hat_inflow, Phi_h, 3, uFESpace_scalar, Phi_h_inflow, uFESpace_ETA, V_hat_x_inflow, V_hat_y_inflow, V_hat_z_inflow);
 
     if (verbose)
         	std::cout << "\tValue of inflow, Q_hat = " << Q_hat_inflow << std::endl;
@@ -674,6 +674,7 @@ NavierStokes::run()
     Real ny_flag4 = 0.206;
     Real nz_flag4 = 0.978;
     Real Q_hat_flag4 = 0.0;
+    vectorPtr_Type Phi_h_outflow4;
     vectorPtr_Type V_hat_x_flag4;
     vectorPtr_Type V_hat_y_flag4;
     vectorPtr_Type V_hat_z_flag4;
@@ -681,7 +682,7 @@ NavierStokes::run()
     bcH_laplacian_flag4.addBC( "Outflow4", 4, Essential, Full, one, 1 );
     bcH_laplacian_flag4.bcUpdate ( *localMeshPtr, uFESpace_scalar->feBd(), uFESpace_scalar->dof() );
 
-    preprocessBoundary(nx_flag4, ny_flag4, nz_flag4, bcH_laplacian_flag4, Q_hat_flag4, Phi_h, 4, uFESpace_scalar, uFESpace_ETA, V_hat_x_flag4, V_hat_y_flag4, V_hat_z_flag4);
+    preprocessBoundary(nx_flag4, ny_flag4, nz_flag4, bcH_laplacian_flag4, Q_hat_flag4, Phi_h, 4, uFESpace_scalar, Phi_h_outflow4, uFESpace_ETA, V_hat_x_flag4, V_hat_y_flag4, V_hat_z_flag4);
 
     if (verbose)
             	std::cout << "\tValue of outflow 4, Q_hat = " << Q_hat_flag4 << std::endl;
@@ -691,6 +692,7 @@ NavierStokes::run()
     Real ny_flag5 = 0.0;
     Real nz_flag5 = 1.0;
     Real Q_hat_flag5 = 0.0;
+    vectorPtr_Type Phi_h_outflow5;
     vectorPtr_Type V_hat_x_flag5;
     vectorPtr_Type V_hat_y_flag5;
     vectorPtr_Type V_hat_z_flag5;
@@ -698,7 +700,7 @@ NavierStokes::run()
     bcH_laplacian_flag5.addBC( "Outflow5", 5, Essential, Full, one, 1 );
     bcH_laplacian_flag5.bcUpdate ( *localMeshPtr, uFESpace_scalar->feBd(), uFESpace_scalar->dof() );
 
-    preprocessBoundary(nx_flag5, ny_flag5, nz_flag5, bcH_laplacian_flag5, Q_hat_flag5, Phi_h, 5, uFESpace_scalar, uFESpace_ETA, V_hat_x_flag5, V_hat_y_flag5, V_hat_z_flag5);
+    preprocessBoundary(nx_flag5, ny_flag5, nz_flag5, bcH_laplacian_flag5, Q_hat_flag5, Phi_h, 5, uFESpace_scalar, Phi_h_outflow5, uFESpace_ETA, V_hat_x_flag5, V_hat_y_flag5, V_hat_z_flag5);
 
     if (verbose)
     	std::cout << "\tValue of outflow 5, Q_hat = " << Q_hat_flag5 << std::endl;
@@ -708,6 +710,7 @@ NavierStokes::run()
     Real ny_flag6 = 0.51;
     Real nz_flag6 = 0.86;
     Real Q_hat_flag6 = 0.0;
+    vectorPtr_Type Phi_h_outflow6;
     vectorPtr_Type V_hat_x_flag6;
     vectorPtr_Type V_hat_y_flag6;
     vectorPtr_Type V_hat_z_flag6;
@@ -715,16 +718,17 @@ NavierStokes::run()
     bcH_laplacian_flag6.addBC( "Outflow6", 6, Essential, Full, one, 1 );
     bcH_laplacian_flag6.bcUpdate ( *localMeshPtr, uFESpace_scalar->feBd(), uFESpace_scalar->dof() );
 
-    preprocessBoundary(nx_flag6, ny_flag6, nz_flag6, bcH_laplacian_flag6, Q_hat_flag6, Phi_h, 6, uFESpace_scalar, uFESpace_ETA, V_hat_x_flag6, V_hat_y_flag6, V_hat_z_flag6);
+    preprocessBoundary(nx_flag6, ny_flag6, nz_flag6, bcH_laplacian_flag6, Q_hat_flag6, Phi_h, 6, uFESpace_scalar, Phi_h_outflow6, uFESpace_ETA, V_hat_x_flag6, V_hat_y_flag6, V_hat_z_flag6);
 
     if (verbose)
     	std::cout << "\tValue of outflow 6, Q_hat = " << Q_hat_flag6 << std::endl;
 
     // Outflow 7
     Real nx_flag7 = 0.0;
-    Real ny_flag7 = 0.807;
-    Real nz_flag7 = 0.589;
+    Real ny_flag7 = -0.807;
+    Real nz_flag7 = -0.589;
     Real Q_hat_flag7 = 0.0;
+    vectorPtr_Type Phi_h_outflow7;
     vectorPtr_Type V_hat_x_flag7;
     vectorPtr_Type V_hat_y_flag7;
     vectorPtr_Type V_hat_z_flag7;
@@ -732,16 +736,17 @@ NavierStokes::run()
     bcH_laplacian_flag7.addBC( "Outflow7", 7, Essential, Full, one, 1 );
     bcH_laplacian_flag7.bcUpdate ( *localMeshPtr, uFESpace_scalar->feBd(), uFESpace_scalar->dof() );
 
-    preprocessBoundary(nx_flag7, ny_flag7, nz_flag7, bcH_laplacian_flag7, Q_hat_flag7, Phi_h, 7, uFESpace_scalar, uFESpace_ETA, V_hat_x_flag7, V_hat_y_flag7, V_hat_z_flag7);
+    preprocessBoundary(nx_flag7, ny_flag7, nz_flag7, bcH_laplacian_flag7, Q_hat_flag7, Phi_h, 7, uFESpace_scalar, Phi_h_outflow7, uFESpace_ETA, V_hat_x_flag7, V_hat_y_flag7, V_hat_z_flag7);
 
     if (verbose)
     	std::cout << "\tValue of outflow 7, Q_hat = " << Q_hat_flag7 << std::endl;
 
     // Outflow 8
     Real nx_flag8 = 0.0;
-    Real ny_flag8 = 0.185;
+    Real ny_flag8 = -0.185;
     Real nz_flag8 = 0.983;
     Real Q_hat_flag8 = 0.0;
+    vectorPtr_Type Phi_h_outflow8;
     vectorPtr_Type V_hat_x_flag8;
     vectorPtr_Type V_hat_y_flag8;
     vectorPtr_Type V_hat_z_flag8;
@@ -749,7 +754,7 @@ NavierStokes::run()
     bcH_laplacian_flag8.addBC( "Outflow8", 8, Essential, Full, one, 1 );
     bcH_laplacian_flag8.bcUpdate ( *localMeshPtr, uFESpace_scalar->feBd(), uFESpace_scalar->dof() );
 
-    preprocessBoundary(nx_flag8, ny_flag8, nz_flag8, bcH_laplacian_flag8, Q_hat_flag8, Phi_h, 8, uFESpace_scalar, uFESpace_ETA, V_hat_x_flag8, V_hat_y_flag8, V_hat_z_flag8);
+    preprocessBoundary(nx_flag8, ny_flag8, nz_flag8, bcH_laplacian_flag8, Q_hat_flag8, Phi_h, 8, uFESpace_scalar, Phi_h_outflow8, uFESpace_ETA, V_hat_x_flag8, V_hat_y_flag8, V_hat_z_flag8);
 
     if (verbose)
     	std::cout << "\tValue of outflow 8, Q_hat = " << Q_hat_flag8 << std::endl;
@@ -759,6 +764,7 @@ NavierStokes::run()
     Real ny_flag9 = 0.851;
     Real nz_flag9 = -0.525;
     Real Q_hat_flag9 = 0.0;
+    vectorPtr_Type Phi_h_outflow9;
     vectorPtr_Type V_hat_x_flag9;
     vectorPtr_Type V_hat_y_flag9;
     vectorPtr_Type V_hat_z_flag9;
@@ -766,7 +772,7 @@ NavierStokes::run()
     bcH_laplacian_flag9.addBC( "Outflow9", 9, Essential, Full, one, 1 );
     bcH_laplacian_flag9.bcUpdate ( *localMeshPtr, uFESpace_scalar->feBd(), uFESpace_scalar->dof() );
 
-    preprocessBoundary(nx_flag9, ny_flag9, nz_flag9, bcH_laplacian_flag9, Q_hat_flag9, Phi_h, 9, uFESpace_scalar, uFESpace_ETA, V_hat_x_flag9, V_hat_y_flag9, V_hat_z_flag9);
+    preprocessBoundary(nx_flag9, ny_flag9, nz_flag9, bcH_laplacian_flag9, Q_hat_flag9, Phi_h, 9, uFESpace_scalar, Phi_h_outflow9, uFESpace_ETA, V_hat_x_flag9, V_hat_y_flag9, V_hat_z_flag9);
 
     if (verbose)
     	std::cout << "\tValue of outflow 9, Q_hat = " << Q_hat_flag9 << std::endl;
@@ -778,7 +784,7 @@ NavierStokes::run()
     staticCast_laplacian.reset();
     rhs_laplacian.reset();
 
-    /*
+
     // +-----------------------------------------------+
     // |             Creating the problem              |
     // +-----------------------------------------------+
@@ -867,12 +873,6 @@ NavierStokes::run()
     vectorPtr_Type velAndPressure;
     velAndPressure.reset ( new vector_Type (*fluid.solution(), exporter->mapType() ) );
 
-    vectorPtr_Type velAndPressure_inflow_reference;
-    velAndPressure_inflow_reference.reset ( new vector_Type (*fluid.solution() ) );
-
-    vectorPtr_Type velAndPressure_inflow;
-    velAndPressure_inflow.reset ( new vector_Type (*fluid.solution() ) );
-
     vectorPtr_Type betaFull;
     betaFull.reset ( new vector_Type (*fluid.solution(), exporter->mapType() ) );
 
@@ -882,16 +882,43 @@ NavierStokes::run()
     vectorPtr_Type rhs;
     rhs.reset ( new vector_Type (*fluid.solution(), exporter->mapType() ) );
 
+    vectorPtr_Type velAndPressure_inflow;
+    velAndPressure_inflow.reset ( new vector_Type (*fluid.solution() ) );
+
+    vectorPtr_Type velAndPressure_outflow4;
+    velAndPressure_outflow4.reset ( new vector_Type (*fluid.solution() ) );
+
+    vectorPtr_Type velAndPressure_outflow5;
+    velAndPressure_outflow5.reset ( new vector_Type (*fluid.solution() ) );
+
+    vectorPtr_Type velAndPressure_outflow6;
+    velAndPressure_outflow6.reset ( new vector_Type (*fluid.solution() ) );
+
+    vectorPtr_Type velAndPressure_outflow7;
+    velAndPressure_outflow7.reset ( new vector_Type (*fluid.solution() ) );
+
+    vectorPtr_Type velAndPressure_outflow8;
+    velAndPressure_outflow8.reset ( new vector_Type (*fluid.solution() ) );
+
+    vectorPtr_Type velAndPressure_outflow9;
+    velAndPressure_outflow9.reset ( new vector_Type (*fluid.solution() ) );
+
+
     exporter->addVariable ( ExporterData<mesh_Type>::VectorField, "velocity", uFESpace, velAndPressure, UInt (0) );
     exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpace, velAndPressure, pressureOffset );
-    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian", uFESpace_scalar, Phi_h_inflow, UInt (0) );
-	*/
+    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian inflow", uFESpace_scalar, Phi_h_inflow, UInt (0) );
+    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian outflow4", uFESpace_scalar, Phi_h_outflow4, UInt (0) );
+    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian outflow5", uFESpace_scalar, Phi_h_outflow5, UInt (0) );
+    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian outflow6", uFESpace_scalar, Phi_h_outflow6, UInt (0) );
+    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian outflow7", uFESpace_scalar, Phi_h_outflow7, UInt (0) );
+    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian outflow8", uFESpace_scalar, Phi_h_outflow8, UInt (0) );
+    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "Laplacian outflow9", uFESpace_scalar, Phi_h_outflow9, UInt (0) );
+
 
     /*
      *  Starting from scratch or restarting? -BEGIN-
      */
 
-    /*
     bool doRestart = dataFile("importer/restart", false);
 
     Real time = t0;
@@ -1007,17 +1034,83 @@ NavierStokes::run()
     	timePressure.initialize(initialStatePressure);
     	importer->closeFile();
     }
-	*/
 
     /*
      *  Starting from scratch or restarting? -END-
      */
 
-    /*
+
+    /* Vectors needed to impose flowrates */
+
+    vectorPtr_Type velAndPressure_flowrates;
+    velAndPressure_flowrates.reset ( new vector_Type (*fluid.solution() ) );
+
+    // Inflow
+    vectorPtr_Type velAndPressure_inflow_reference;
+    velAndPressure_inflow_reference.reset ( new vector_Type (*fluid.solution() ) );
     velAndPressure_inflow_reference->zero();
-    velAndPressure_inflow_reference->subset(*V_hat_x,uFESpace_scalar->map(), 0, 0);
-    velAndPressure_inflow_reference->subset(*V_hat_y,uFESpace_scalar->map(), 0, uFESpace_scalar->dof().numTotalDof() );
-    velAndPressure_inflow_reference->subset(*V_hat_z,uFESpace_scalar->map(), 0, 2*uFESpace_scalar->dof().numTotalDof() );
+    velAndPressure_inflow_reference->subset(*V_hat_x_inflow,uFESpace_scalar->map(), 0, 0);
+    velAndPressure_inflow_reference->subset(*V_hat_y_inflow,uFESpace_scalar->map(), 0, uFESpace_scalar->dof().numTotalDof() );
+    velAndPressure_inflow_reference->subset(*V_hat_z_inflow,uFESpace_scalar->map(), 0, 2*uFESpace_scalar->dof().numTotalDof() );
+
+    // Flag 4
+    vectorPtr_Type velAndPressure_outflow4_reference;
+    velAndPressure_outflow4_reference.reset ( new vector_Type (*fluid.solution() ) );
+    velAndPressure_outflow4_reference->zero();
+    velAndPressure_outflow4_reference->subset(*V_hat_x_flag4,uFESpace_scalar->map(), 0, 0);
+    velAndPressure_outflow4_reference->subset(*V_hat_y_flag4,uFESpace_scalar->map(), 0, uFESpace_scalar->dof().numTotalDof() );
+    velAndPressure_outflow4_reference->subset(*V_hat_z_flag4,uFESpace_scalar->map(), 0, 2*uFESpace_scalar->dof().numTotalDof() );
+
+
+
+    // Flag 5
+    vectorPtr_Type velAndPressure_outflow5_reference;
+    velAndPressure_outflow5_reference.reset ( new vector_Type (*fluid.solution() ) );
+    velAndPressure_outflow5_reference->zero();
+    velAndPressure_outflow5_reference->subset(*V_hat_x_flag5,uFESpace_scalar->map(), 0, 0);
+    velAndPressure_outflow5_reference->subset(*V_hat_y_flag5,uFESpace_scalar->map(), 0, uFESpace_scalar->dof().numTotalDof() );
+    velAndPressure_outflow5_reference->subset(*V_hat_z_flag5,uFESpace_scalar->map(), 0, 2*uFESpace_scalar->dof().numTotalDof() );
+
+
+
+    // Flag 6
+    vectorPtr_Type velAndPressure_outflow6_reference;
+    velAndPressure_outflow6_reference.reset ( new vector_Type (*fluid.solution() ) );
+    velAndPressure_outflow6_reference->zero();
+    velAndPressure_outflow6_reference->subset(*V_hat_x_flag6,uFESpace_scalar->map(), 0, 0);
+    velAndPressure_outflow6_reference->subset(*V_hat_y_flag6,uFESpace_scalar->map(), 0, uFESpace_scalar->dof().numTotalDof() );
+    velAndPressure_outflow6_reference->subset(*V_hat_z_flag6,uFESpace_scalar->map(), 0, 2*uFESpace_scalar->dof().numTotalDof() );
+
+
+
+    // Flag 7
+    vectorPtr_Type velAndPressure_outflow7_reference;
+    velAndPressure_outflow7_reference.reset ( new vector_Type (*fluid.solution() ) );
+    velAndPressure_outflow7_reference->zero();
+    velAndPressure_outflow7_reference->subset(*V_hat_x_flag7,uFESpace_scalar->map(), 0, 0);
+    velAndPressure_outflow7_reference->subset(*V_hat_y_flag7,uFESpace_scalar->map(), 0, uFESpace_scalar->dof().numTotalDof() );
+    velAndPressure_outflow7_reference->subset(*V_hat_z_flag7,uFESpace_scalar->map(), 0, 2*uFESpace_scalar->dof().numTotalDof() );
+
+
+
+    // Flag 8
+    vectorPtr_Type velAndPressure_outflow8_reference;
+    velAndPressure_outflow8_reference.reset ( new vector_Type (*fluid.solution() ) );
+    velAndPressure_outflow8_reference->zero();
+    velAndPressure_outflow8_reference->subset(*V_hat_x_flag8,uFESpace_scalar->map(), 0, 0);
+    velAndPressure_outflow8_reference->subset(*V_hat_y_flag8,uFESpace_scalar->map(), 0, uFESpace_scalar->dof().numTotalDof() );
+    velAndPressure_outflow8_reference->subset(*V_hat_z_flag8,uFESpace_scalar->map(), 0, 2*uFESpace_scalar->dof().numTotalDof() );
+
+
+
+    // Flag 9
+    vectorPtr_Type velAndPressure_outflow9_reference;
+    velAndPressure_outflow9_reference.reset ( new vector_Type (*fluid.solution() ) );
+    velAndPressure_outflow9_reference->zero();
+    velAndPressure_outflow9_reference->subset(*V_hat_x_flag9,uFESpace_scalar->map(), 0, 0);
+    velAndPressure_outflow9_reference->subset(*V_hat_y_flag9,uFESpace_scalar->map(), 0, uFESpace_scalar->dof().numTotalDof() );
+    velAndPressure_outflow9_reference->subset(*V_hat_z_flag9,uFESpace_scalar->map(), 0, 2*uFESpace_scalar->dof().numTotalDof() );
+
 
     initChrono.stop();
     
@@ -1039,19 +1132,19 @@ NavierStokes::run()
     vector_Type pressure ( pFESpace->map() );
     vector_Type rhsVelocity ( uFESpace->map() );
     vector_Type rhsVelocityFull ( fullMap );
-	*/
+
 
     /*
      * 	Compute the vector for computing Loads - END
      */
-
-    /*
 
     if (doRestart)
     {
     	fluid.initializeVelocitySolution(vectorForInitializationVelocitySolution);
     	fluid.initializePressureSolution(vectorForInitializationPressureSolution);
     }
+
+    Real i_HeartBeat = 0.0;
 
     for ( ; time <= tFinal + dt / 2.; time += dt, iter++)
     {
@@ -1093,27 +1186,109 @@ NavierStokes::run()
         // Evaluation of the inflow velocity
         // ---------------------------------
 
-        Real Q_in = 0;
+        Real Q = 0;
+        Real Q_inflow = 0;
+        Real Q_flag4  = 0;
+        Real Q_flag5  = 0;
+        Real Q_flag6  = 0;
+        Real Q_flag7  = 0;
+        Real Q_flag8  = 0;
+        Real Q_flag9  = 0;
+
         Real T_heartbeat = 0.8;
 
-        if ( (time >= 0.05 && time <= 0.42) || (time >= (0.05+T_heartbeat) && time <= (0.42+T_heartbeat) ) || (time >= (0.05+2*T_heartbeat) && time <= (0.42+2*T_heartbeat) ) || (time >= (0.05+3*T_heartbeat) && time <= (0.42+3*T_heartbeat) ) )
-        	Q_in = 2.422818092859456e+8*std::pow(time,8)-4.764207344433996e+8*std::pow(time,7) + 3.993883831476327e+8*std::pow(time,6) -1.867066900011057e+8*std::pow(time,5) +0.533079809563519e+8*std::pow(time,4) -0.094581323616832e+8*std::pow(time,3) +0.009804512311267e+8*std::pow(time,2) -0.000482942399225e+8*time+0.000008651437192e+8;
-        else
-        	Q_in = 0.0;
+        if ( time < T_heartbeat )
+        {
+        	i_HeartBeat = 0.0;
+        }
+        else if ( time >= T_heartbeat && time < 2*T_heartbeat )
+        {
+        	i_HeartBeat = 1.0;
+        }
+        else if ( time >= 2*T_heartbeat && time < 3*T_heartbeat )
+        {
+        	i_HeartBeat = 2.0;
+        }
+        else if ( time >= 3*T_heartbeat && time < 4*T_heartbeat )
+        {
+        	i_HeartBeat = 3.0;
+        }
 
-        Real alpha_flowrate = Q_in/Q_hat;
+        if ( (time >= 0.05 && time <= 0.42) || (time >= (0.05+T_heartbeat) && time <= (0.42+T_heartbeat) ) || (time >= (0.05+2*T_heartbeat) && time <= (0.42+2*T_heartbeat) ) || (time >= (0.05+3*T_heartbeat) && time <= (0.42+3*T_heartbeat) ) )
+        {
+        	// Q_in = 2.422818092859456e+8*std::pow(time,8)-4.764207344433996e+8*std::pow(time,7) + 3.993883831476327e+8*std::pow(time,6) -1.867066900011057e+8*std::pow(time,5) +0.533079809563519e+8*std::pow(time,4) -0.094581323616832e+8*std::pow(time,3) +0.009804512311267e+8*std::pow(time,2) -0.000482942399225e+8*time+0.000008651437192e+8;
+        	Q = 2.117637666632775e+04*std::pow(time-i_HeartBeat*T_heartbeat,6)-3.370930726888496e+04*std::pow(time-i_HeartBeat*T_heartbeat,5)+2.133377678002176e+04*std::pow(time-i_HeartBeat*T_heartbeat,4)-6.666366536069445e+03*std::pow(time-i_HeartBeat*T_heartbeat,3)+1.011772959679957e+03*std::pow(time-i_HeartBeat*T_heartbeat,2)-6.023975547926423e+01*(time-i_HeartBeat*T_heartbeat)+1.192718364532979e+00;
+        }
+        else
+        {
+        	Q = 0.0;
+        }
+
+        Q_inflow = 394*Q;
+        Q_flag4  = 20.33*Q; // left_common_carotid
+        Q_flag5  = 21.21*Q; // right_common_carotid
+        Q_flag6  = 4.754*Q; // right_vertebral
+        Q_flag7  = 22.79*Q; // right_subclavian
+        Q_flag8  = 2.974*Q; // left_vertebral
+        Q_flag9  = 21.11*Q; // left_subclavian
+
+        Real alpha_flowrate_inflow = Q_inflow/Q_hat_inflow;
+        Real alpha_flowrate_flag4  = Q_flag4/Q_hat_flag4;
+        Real alpha_flowrate_flag5  = Q_flag5/Q_hat_flag5;
+        Real alpha_flowrate_flag6  = Q_flag6/Q_hat_flag6;
+        Real alpha_flowrate_flag7  = Q_flag7/Q_hat_flag7;
+        Real alpha_flowrate_flag8  = Q_flag8/Q_hat_flag8;
+        Real alpha_flowrate_flag9  = Q_flag9/Q_hat_flag9;
 
         if (verbose)
         {
-        	std::cout << "Q_in: " << Q_in << std::endl << std::endl;
-        	std::cout << "alpha_flowrate: " << alpha_flowrate << std::endl << std::endl;
+        	std::cout << "Q_inflow: " << Q_inflow << std::endl << std::endl;
+        	std::cout << "Q_flag4: "  << Q_flag4  << std::endl << std::endl;
+        	std::cout << "Q_flag5: "  << Q_flag5  << std::endl << std::endl;
+        	std::cout << "Q_flag6: "  << Q_flag6  << std::endl << std::endl;
+        	std::cout << "Q_flag7: "  << Q_flag7  << std::endl << std::endl;
+        	std::cout << "Q_flag8: "  << Q_flag8  << std::endl << std::endl;
+        	std::cout << "Q_flag9: "  << Q_flag9  << std::endl << std::endl;
         }
 
         velAndPressure_inflow->zero();
         *velAndPressure_inflow += *velAndPressure_inflow_reference;
-        *velAndPressure_inflow *= alpha_flowrate;
+        *velAndPressure_inflow *= alpha_flowrate_inflow;
 
-        fluid.iterate ( bcH_aorta, velAndPressure_inflow );
+        velAndPressure_outflow4->zero();
+        *velAndPressure_outflow4 += *velAndPressure_outflow4_reference;
+        *velAndPressure_outflow4 *= alpha_flowrate_flag4;
+
+        velAndPressure_outflow5->zero();
+        *velAndPressure_outflow5 += *velAndPressure_outflow5_reference;
+        *velAndPressure_outflow5 *= alpha_flowrate_flag5;
+
+        velAndPressure_outflow6->zero();
+        *velAndPressure_outflow6 += *velAndPressure_outflow6_reference;
+        *velAndPressure_outflow6 *= alpha_flowrate_flag6;
+
+        velAndPressure_outflow7->zero();
+        *velAndPressure_outflow7 += *velAndPressure_outflow7_reference;
+        *velAndPressure_outflow7 *= alpha_flowrate_flag7;
+
+        velAndPressure_outflow8->zero();
+        *velAndPressure_outflow8 += *velAndPressure_outflow8_reference;
+        *velAndPressure_outflow8 *= alpha_flowrate_flag8;
+
+        velAndPressure_outflow9->zero();
+        *velAndPressure_outflow9 += *velAndPressure_outflow9_reference;
+        *velAndPressure_outflow9 *= alpha_flowrate_flag9;
+
+        velAndPressure_flowrates->zero();
+        *velAndPressure_flowrates += *velAndPressure_inflow;
+        *velAndPressure_flowrates += *velAndPressure_outflow4;
+        *velAndPressure_flowrates += *velAndPressure_outflow5;
+        *velAndPressure_flowrates += *velAndPressure_outflow6;
+        *velAndPressure_flowrates += *velAndPressure_outflow7;
+        *velAndPressure_flowrates += *velAndPressure_outflow8;
+        *velAndPressure_flowrates += *velAndPressure_outflow9;
+
+        fluid.iterate ( bcH_aorta, velAndPressure_flowrates );
         
         vector_Type computedVelocity(uFESpace->map());
         computedVelocity.subset(*fluid.solution(), uFESpace->map(), 0, 0);
@@ -1133,13 +1308,14 @@ NavierStokes::run()
         }
         
         iterChrono.stop();
-        
+
         if (verbose)
             std::cout << "Iteration time: " << initChrono.diff() << " s." << std::endl << std::endl;
     }
     
+
     exporter->closeFile();
-	*/
+
 
     runChrono.stop();
     
