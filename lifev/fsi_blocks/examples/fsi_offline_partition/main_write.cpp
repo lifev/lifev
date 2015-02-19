@@ -117,15 +117,18 @@ int main (int argc, char** argv)
     MeshData solidMeshData (dataFile, "solid_mesh");
     readMesh (*solidMeshPtr, solidMeshData);
 
+    // Reading info about the discretizations
     std::string fluidOrder (dataFile ("fluid_mesh/order", "P1") );
-
     std::string solidOrder (dataFile ("solid_mesh/order", "P1") );
 
+    // Reading the flags of the interface
+    markerID_Type fluidInterfaceFlag (dataFile ("fluid_mesh/interface_flag", 1) );
+    markerID_Type solidInterfaceFlag (dataFile ("solid_mesh/interface_flag", 1) );
 
     // Create the FSI partitioner
     MeshPartitionerOfflineFSI<mesh_Type> fsiPartitioner (
         fluidMeshPtr, solidMeshPtr, numParts, numParts, fluidOrder, solidOrder,
-        1, 1, 0, fluidVertexFlag, 0, comm);
+        fluidInterfaceFlag, solidInterfaceFlag, 0, fluidVertexFlag, 0, comm);
 
 
     fsiPartitioner.showMe();
