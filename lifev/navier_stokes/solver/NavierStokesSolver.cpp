@@ -12,7 +12,8 @@ NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commP
         M_oper(new Operators::NavierStokesOperator),
         M_invOper(),
         M_fullyImplicit(false),
-        M_graphPCDisBuilt(false)
+        M_graphPCDisBuilt(false),
+        M_steady ( dataFile("fluid/miscellaneous/steady", false) )
 {
 	M_prec.reset ( Operators::NSPreconditionerFactory::instance().createObject (dataFile("fluid/preconditionerType","none")));
 }
@@ -56,6 +57,24 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
     M_velocity.reset( new vector_Type(M_velocityFESpace->map()) );
     M_pressure.reset( new vector_Type(M_pressureFESpace->map()) );
 
+    if ( M_steady )
+    {
+    	M_displayer.leaderPrint ( " F - solving steady Navier-Stokes\n");
+    	M_relativeTolerance = M_dataFile ( "newton/abstol", 1.e-4);
+    	M_absoluteTolerance = M_dataFile ( "newton/reltol", 1.e-4);
+    	M_etaMax = M_dataFile ( "newton/etamax", 1e-4);
+    	M_maxiterNonlinear = M_dataFile ( "newton/maxiter", 10);
+
+    	M_nonLinearLineSearch = M_dataFile ( "newton/NonLinearLineSearch", 0);
+    	if (M_comm->MyPID() == 0)
+    		M_out_res.open ("residualsNewton");
+
+    	M_monolithicMap.reset( new map_Type ( M_velocityFESpace->map() ) );
+    	*M_monolithicMap += M_pressureFESpace->map();
+
+    	M_solution.reset( new vector_Type ( *M_monolithicMap ) );
+    }
+
     M_displayer.leaderPrintMax ( " Number of DOFs for the velocity = ", M_velocityFESpace->dof().numTotalDof()*3 ) ;
     M_displayer.leaderPrintMax ( " Number of DOFs for the pressure = ", M_pressureFESpace->dof().numTotalDof() ) ;
 
@@ -78,16 +97,19 @@ void NavierStokesSolver::buildGraphs()
 	{
 		using namespace ExpressionAssembly;
 
-		// Graph velocity mass -> block (0,0)
-		M_Mu_graph.reset (new Epetra_FECrsGraph (Copy, * (M_velocityFESpace->map().map (Unique) ), 0) );
-		buildGraph ( elements (M_fespaceUETA->mesh() ),
-					 quadRuleTetra4pt,
-					 M_fespaceUETA,
-					 M_fespaceUETA,
-					 M_fluidData->density() * dot ( phi_i, phi_j )
-		) >> M_Mu_graph;
-		M_Mu_graph->GlobalAssemble();
-        M_Mu_graph->OptimizeStorage();
+		if ( !M_steady )
+		{
+			// Graph velocity mass -> block (0,0)
+			M_Mu_graph.reset (new Epetra_FECrsGraph (Copy, * (M_velocityFESpace->map().map (Unique) ), 0) );
+			buildGraph ( elements (M_fespaceUETA->mesh() ),
+						 quadRuleTetra4pt,
+						 M_fespaceUETA,
+						 M_fespaceUETA,
+						 M_fluidData->density() * dot ( phi_i, phi_j )
+			) >> M_Mu_graph;
+			M_Mu_graph->GlobalAssemble();
+			M_Mu_graph->OptimizeStorage();
+		}
 
 		// Graph block (0,1) of NS
 		M_Btranspose_graph.reset (new Epetra_FECrsGraph (Copy, * (M_velocityFESpace->map().map (Unique) ), 0) );
@@ -309,16 +331,19 @@ void NavierStokesSolver::buildSystem()
 	{
 		using namespace ExpressionAssembly;
 
-		// Graph velocity mass -> block (0,0)
-		M_Mu.reset (new matrix_Type ( M_velocityFESpace->map(), *M_Mu_graph ) );
-		M_Mu->zero();
-		integrate ( elements (M_fespaceUETA->mesh() ),
-					M_velocityFESpace->qr(),
-					M_fespaceUETA,
-					M_fespaceUETA,
-					M_fluidData->density() * dot ( phi_i, phi_j )
-		) >> M_Mu;
-		M_Mu->globalAssemble();
+		if ( !M_steady )
+		{
+			// Graph velocity mass -> block (0,0)
+			M_Mu.reset (new matrix_Type ( M_velocityFESpace->map(), *M_Mu_graph ) );
+			M_Mu->zero();
+			integrate ( elements (M_fespaceUETA->mesh() ),
+						M_velocityFESpace->qr(),
+						M_fespaceUETA,
+						M_fespaceUETA,
+						M_fluidData->density() * dot ( phi_i, phi_j )
+					  ) >> M_Mu;
+			M_Mu->globalAssemble();
+		}
 
 		M_Btranspose.reset (new matrix_Type ( M_velocityFESpace->map(), *M_Btranspose_graph ) );
 		M_Btranspose->zero();
@@ -389,10 +414,10 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 	{
 		using namespace ExpressionAssembly;
 		integrate( elements(M_fespaceUETA->mesh()),
-				   M_velocityFESpace->qr(),
-				   M_fespaceUETA,
-				   M_fespaceUETA,
-				   dot( M_fluidData->density() * value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) // semi-implicit treatment of the convective term
+				M_velocityFESpace->qr(),
+				M_fespaceUETA,
+				M_fespaceUETA,
+				dot( M_fluidData->density() * value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) // semi-implicit treatment of the convective term
 		)
 		>> M_C;
 	}
@@ -407,7 +432,10 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 
 	// Get the right hand side with inertia contribution
 	M_rhs.reset( new vector_Type ( M_velocityFESpace->map(), Unique ) );
-	*M_rhs = *M_Mu* (*rhs_velocity);
+	M_rhs->zero();
+
+	if ( !M_steady )
+		*M_rhs = *M_Mu* (*rhs_velocity);
 }
 
 void NavierStokesSolver::applyGravityForce ( const Real& gravity, const Real& gravityDirection)
@@ -436,12 +464,6 @@ void NavierStokesSolver::applyBoundaryConditions ( bcPtr_Type & bc, const Real& 
 	}
 
 	M_Btranspose->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
-}
-
-void NavierStokesSolver::applyBoundaryConditionsJacobian ( bcPtr_Type & bc )
-{
-	bcManageMatrix( *M_Jacobian, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 1.0, 0.0);
-	M_Jacobian->globalAssemble( );
 }
 
 void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
@@ -517,15 +539,127 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
 
 }
 
+void NavierStokesSolver::iterate_steady( bcPtr_Type & bc )
+{
+	// Initialize the solution
+	M_solution->zero();
+
+	applyBoundaryConditionsSolution ( bc, 0.0 ); // the second argument is zero since the problem is steady
+
+	// Call Newton
+	UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
+			M_nonLinearLineSearch, 0, 2, M_out_res, 0.0);
+
+	M_velocity->subset ( *M_solution, M_velocityFESpace->map(), 0, 0 );
+	M_pressure->subset ( *M_solution, M_pressureFESpace->map(), M_velocityFESpace->map().mapSize(), 0 );
+}
+
+void NavierStokesSolver::applyBoundaryConditionsSolution ( bcPtr_Type & bc, const Real& time )
+{
+	updateBCHandler(bc);
+	bcManageRhs ( *M_solution, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 1.0, time );
+}
+
 void NavierStokesSolver::updateBCHandler( bcPtr_Type & bc )
 {
 	bc->bcUpdate ( *M_velocityFESpace->mesh(), M_velocityFESpace->feBd(), M_velocityFESpace->dof() );
 }
 
+void NavierStokesSolver::evalResidual(vector_Type& residual, const vector_Type& solution, const UInt iter_newton)
+{
+	// Residual to zero
+	residual.zero();
+
+	// Extract the velocity and the pressure at the previous Newton step ( index k minus 1, i.e. km1)
+	vectorPtr_Type u_km1 ( new vector_Type ( M_velocityFESpace->map(), Repeated ) );
+	vectorPtr_Type p_km1 ( new vector_Type ( M_pressureFESpace->map(), Repeated ) );
+	u_km1->zero();
+	p_km1->zero();
+	u_km1->subset ( solution, M_velocityFESpace->map(), 0, 0 );
+	p_km1->subset ( solution, M_pressureFESpace->map(), M_velocityFESpace->map().mapSize(), 0 );
+
+	// Residual vector for the velocity and pressure components
+	vectorPtr_Type res_velocity ( new vector_Type ( M_velocityFESpace->map(), Unique ) );
+	vectorPtr_Type res_pressure ( new vector_Type ( M_pressureFESpace->map(), Unique ) );
+	res_velocity->zero();
+	res_pressure->zero();
+
+	// Assemble the residual vector: for the moment working for steady Navier-Stokes
+    {
+        using namespace ExpressionAssembly;
+
+        if ( M_stiffStrain )
+        {
+            integrate ( elements ( M_fespaceUETA->mesh() ),
+                        M_velocityFESpace->qr(),
+                        M_fespaceUETA,
+                        value ( 0.5 ) * M_fluidData->viscosity() * dot ( grad ( phi_i )  + transpose ( grad ( phi_i ) ), grad ( M_fespaceUETA, *u_km1 ) + transpose ( grad ( M_fespaceUETA, *u_km1 ) ) ) +
+                        M_fluidData->density() * dot ( value ( M_fespaceUETA, *u_km1 ) * grad ( M_fespaceUETA, *u_km1 ), phi_i ) +
+                        value ( -1.0 ) * value ( M_fespacePETA, *p_km1 ) * div ( phi_i )
+
+                      ) >> res_velocity;
+        }
+        else
+        {
+            integrate ( elements ( M_fespaceUETA->mesh() ),
+                        M_velocityFESpace->qr(),
+                        M_fespaceUETA,
+                        M_fluidData->viscosity() * dot ( grad ( phi_i ), grad ( M_fespaceUETA, *u_km1 ) + transpose ( grad ( M_fespaceUETA, *u_km1 ) ) ) +
+                        M_fluidData->density() * dot ( value ( M_fespaceUETA, *u_km1 ) * grad ( M_fespaceUETA, *u_km1 ), phi_i ) +
+                        value ( -1.0 ) * value ( M_fespacePETA, *p_km1 ) * div ( phi_i )
+                      ) >> res_velocity;
+        }
+
+        integrate ( elements ( M_fespaceUETA->mesh() ),
+                    M_pressureFESpace->qr(),
+                    M_fespacePETA,
+                    trace ( grad ( M_fespaceUETA, *u_km1 ) ) * phi_i
+                  ) >> res_pressure;
+    }
+
+    res_velocity->globalAssemble();
+    res_pressure->globalAssemble();
+
+    bcManageRhs ( *res_velocity, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *M_bc, M_velocityFESpace->feBd(), 0.0, 0.0 );
+
+    residual.subset ( *res_velocity, M_velocityFESpace->map(), 0, 0 );
+    residual.subset ( *res_pressure, M_pressureFESpace->map(), 0, M_velocityFESpace->map().mapSize() );
+
+    // We need to update the linearized terms in the jacobian coming from the convective part
+
+    updateConvectiveTerm(u_km1);
+    updateJacobian(*u_km1);
+
+}
+
+void NavierStokesSolver::updateConvectiveTerm ( const vectorPtr_Type& velocity)
+{
+    // Note that u_star HAS to extrapolated from outside. Hence it works also for FSI in this manner.
+    vectorPtr_Type velocity_repeated;
+    velocity_repeated.reset ( new vector_Type ( *velocity, Repeated ) );
+
+    // Update convective term
+    M_C->zero();
+    {
+        using namespace ExpressionAssembly;
+        integrate ( elements (M_fespaceUETA->mesh() ),
+                    M_velocityFESpace->qr(),
+                    M_fespaceUETA,
+                    M_fespaceUETA,
+                    dot ( M_fluidData->density() * value (M_fespaceUETA, *velocity_repeated) *grad (phi_j), phi_i)
+                  )
+                >> M_C;
+    }
+
+    // Assuming steady NS
+    M_F->zero();
+    *M_F += *M_A;
+    *M_F += *M_C;
+}
+
 void NavierStokesSolver::updateJacobian( const vector_Type& u_k )
 {
 	vector_Type uk_rep ( u_k, Repeated );
-    // M_F and M_Jacobian need to have a switched name!
 	M_Jacobian->zero();
 
 	M_displayer.leaderPrint ( "[F] - Update Jacobian convective term\n" ) ;
@@ -543,6 +677,78 @@ void NavierStokesSolver::updateJacobian( const vector_Type& u_k )
 	}
 
 	*M_Jacobian += *M_F;
+}
+
+void NavierStokesSolver::solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol )
+{
+	// Apply BCs on the jacobian matrix
+	applyBoundaryConditionsJacobian ( M_bc );
+
+	//(1) Set up the OseenOperator
+	M_displayer.leaderPrint( "\tNS operator - set up the block operator...");
+	LifeChrono chrono;
+	chrono.start();
+
+	Operators::NavierStokesOperator::operatorPtrContainer_Type operDataJacobian ( 2, 2 );
+	operDataJacobian ( 0, 0 ) = M_Jacobian->matrixPtr();
+	operDataJacobian ( 0, 1 ) = M_Btranspose->matrixPtr();
+	operDataJacobian ( 1, 0 ) = M_B->matrixPtr();
+
+	M_oper->setUp(operDataJacobian, M_displayer.comm());
+	chrono.stop();
+	M_displayer.leaderPrintMax(" done in " , chrono.diff() );
+
+	M_displayer.leaderPrint( "\tPreconditioner operator - set up the block operator...");
+	chrono.reset();
+	chrono.start();
+
+	//(2) Set the data for the preconditioner
+	if ( std::strcmp(M_prec->Label(),"aSIMPLEOperator")==0 )
+	{
+		M_prec->setUp(M_Jacobian, M_B, M_Btranspose);
+		M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
+		M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
+		M_prec->updateApproximatedMomentumOperator();
+		M_prec->updateApproximatedSchurComplementOperator();
+	}
+	else if ( std::strcmp(M_prec->Label(),"aPCDOperator")==0 )
+	{
+		updatePCD(M_uExtrapolated);
+		M_prec->setUp(M_Jacobian, M_B, M_Btranspose, M_Fp, M_Mp, M_Mu);
+		M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
+		M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
+		M_prec->updateApproximatedMomentumOperator();
+		M_prec->updateApproximatedSchurComplementOperator();
+		M_prec->updateApproximatedPressureMassOperator();
+	}
+	chrono.stop();
+	M_displayer.leaderPrintMax(" done in " , chrono.diff() );
+
+	//(3) Set the solver for the linear system
+	//(3) Set the solver for the linear system
+	M_displayer.leaderPrint( "\tset up the Trilinos solver...");
+	chrono.start();
+	std::string solverType(M_pListLinSolver->get<std::string>("Linear Solver Type"));
+	M_invOper.reset(Operators::InvertibleOperatorFactory::instance().createObject(solverType));
+	chrono.stop();
+	M_displayer.leaderPrintMax(" done in " , chrono.diff() );
+
+	M_invOper->setOperator(M_oper);
+	M_invOper->setPreconditioner(M_prec);
+	M_invOper->setParameterList(M_pListLinSolver->sublist(solverType));
+
+	increment.zero();
+
+	// Solving the linear system
+	M_invOper->ApplyInverse(residual.epetraVector(), increment.epetraVector());
+}
+
+void NavierStokesSolver::applyBoundaryConditionsJacobian ( bcPtr_Type & bc )
+{
+	bcManageMatrix( *M_Jacobian, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 1.0, 0.0);
+	M_Jacobian->globalAssemble( );
+	bcManageMatrix( *M_Btranspose, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 0.0, 0.0);
+	M_Btranspose->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
 }
 
 }

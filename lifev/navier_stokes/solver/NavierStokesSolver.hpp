@@ -69,6 +69,8 @@
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
 
+#include <lifev/core/algorithm/NonLinearRichardson.hpp>
+
 namespace LifeV
 {
 
@@ -126,13 +128,24 @@ public:
 	// Solve the current timestep, provided the BC
 	void iterate( bcPtr_Type & bc, const Real& time );
 
+	// Solve the steady Navier-Stokes equations, provided the BC
+	void iterate_steady( bcPtr_Type & bc );
+
+	void evalResidual(vector_Type& residual, const vector_Type& solution, const UInt iter_newton);
+
+	void solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol );
+
 	// Update the Jacobian matrix
 	void updateJacobian( const vector_Type& u_k );
 
 	// Apply the BCs on the Jacobian matrix
 	void applyBoundaryConditionsJacobian ( bcPtr_Type & bc );
 
+	void applyBoundaryConditionsSolution ( bcPtr_Type & bc, const Real& time );
+
 	void applyGravityForce ( const Real& gravity, const Real& gravityDirection);
+
+	void updateConvectiveTerm ( const vectorPtr_Type& velocity);
 
 	// Set coefficient associated to the time discretization scheme
 	void setAlpha(const Real& alpha)
@@ -230,6 +243,11 @@ public:
     	M_Mu->globalAssemble();
     }
 
+    void setBC ( const bcPtr_Type& bc )
+    {
+    	M_bc = bc;
+    }
+
 private:
 
 	// build the graphs
@@ -293,6 +311,15 @@ private:
     vectorPtr_Type M_velocity;
     vectorPtr_Type M_pressure;
 
+    boost::shared_ptr<map_Type> M_monolithicMap;
+    vectorPtr_Type M_solution;
+
+    vectorPtr_Type M_residual_u;
+    vectorPtr_Type M_residual_p;
+
+    vectorPtr_Type M_velocity_old_newton;
+    vectorPtr_Type M_pressure_old_newton;
+
 	//! Displayer to print in parallel (only PID 0 will print)
 	Displayer M_displayer;
 
@@ -321,6 +348,18 @@ private:
 
     // BC for the pcd preconditioner
     bcPtr_Type M_bcPCD;
+
+    // Check if we want to compute the steady state
+    bool M_steady;
+
+    Real M_relativeTolerance, M_absoluteTolerance, M_etaMax;
+    Int  M_nonLinearLineSearch;
+    UInt M_maxiterNonlinear;
+    std::ofstream M_out_res;
+
+    // BC handler
+    bcPtr_Type M_bc;
+
 
 }; // class NavierStokesSolver
 
