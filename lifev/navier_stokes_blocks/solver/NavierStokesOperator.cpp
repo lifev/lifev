@@ -5,7 +5,7 @@
  *      Author: dforti
  */
 
-#include <lifev/navier_stokes/solver/NavierStokesOperator.hpp>
+#include <lifev/navier_stokes_blocks/solver/NavierStokesOperator.hpp>
 
 namespace LifeV
 {

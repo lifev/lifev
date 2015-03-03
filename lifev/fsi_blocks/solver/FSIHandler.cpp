@@ -592,7 +592,7 @@ FSIHandler::getRhsStructure ( )
 		gravity_vector->subset(*gravity_component, M_displacementFESpaceScalar->map(), 0, M_gravityDirection*M_displacementFESpaceScalar->dof().numTotalDof() );
 
 		// Archimede's force: (rho_f-rho_s)*g
-		*M_rhsStructure += *M_structure->massMatrix()*(1.0/(timeAdvanceCoefficient*M_structure->rho())) * M_fluid->getData()->density() * (*gravity_vector);
+		*M_rhsStructure += *M_structure->massMatrix()*(1.0/(timeAdvanceCoefficient*M_structure->rho())) * M_fluid->density() * (*gravity_vector);
 		*M_rhsStructure -= *M_structure->massMatrix()*(1.0/timeAdvanceCoefficient)*(*gravity_vector);
 	}
 
@@ -962,8 +962,8 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	{
 
 		Real alpha = M_fluidTimeAdvance->alpha() / M_dt;
-		Real density = M_fluid->getData()->density();
-		Real viscosity = M_fluid->getData()->viscosity();
+		Real density = M_fluid->density();
+		Real viscosity = M_fluid->viscosity();
 
 		vector_Type un (M_fluid->uFESpace()->map() );
 		vector_Type uk (M_fluid->uFESpace()->map() + M_fluid->pFESpace()->map() );

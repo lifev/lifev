@@ -80,6 +80,7 @@ SET( LifeV_PACKAGES_AND_DIRS_AND_CLASSIFICATIONS
   LevelSet              lifev/level_set                   PS
   Darcy                 lifev/darcy                       PS
   NavierStokes          lifev/navier_stokes               PS
+  NavierStokesBlocks    lifev/navier_stokes_blocks        EX
   Structure             lifev/structure                   PS
   Electrophysiology     lifev/electrophysiology           EX
   Heart                 lifev/heart                       EX

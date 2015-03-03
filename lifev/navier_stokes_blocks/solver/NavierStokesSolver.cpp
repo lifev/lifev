@@ -1,4 +1,4 @@
-#include <lifev/navier_stokes/solver/NavierStokesSolver.hpp>
+#include <lifev/navier_stokes_blocks/solver/NavierStokesSolver.hpp>
 
 
 namespace LifeV
@@ -13,7 +13,9 @@ NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commP
         M_invOper(),
         M_fullyImplicit(false),
         M_graphPCDisBuilt(false),
-        M_steady ( dataFile("fluid/miscellaneous/steady", false) )
+        M_steady ( dataFile("fluid/miscellaneous/steady", false) ),
+        M_density ( dataFile("fluid/physics/density", 1.0 ) ),
+        M_viscosity ( dataFile("fluid/physics/viscosity", 0.035 ) )
 {
 	M_prec.reset ( Operators::NSPreconditionerFactory::instance().createObject (dataFile("fluid/preconditionerType","none")));
 }
@@ -34,9 +36,6 @@ void NavierStokesSolver::setParameters( )
 
 void NavierStokesSolver::setup(const meshPtr_Type& mesh)
 {
-	M_fluidData.reset( new OseenData() );
-	M_fluidData->setup( M_dataFile );
-
 	std::string uOrder = M_dataFile("fluid/space_discretization/vel_order","P1");
 	std::string pOrder = M_dataFile("fluid/space_discretization/pres_order","P1");
 
@@ -105,7 +104,7 @@ void NavierStokesSolver::buildGraphs()
 						 quadRuleTetra4pt,
 						 M_fespaceUETA,
 						 M_fespaceUETA,
-						 M_fluidData->density() * dot ( phi_i, phi_j )
+						 M_density * dot ( phi_i, phi_j )
 			) >> M_Mu_graph;
 			M_Mu_graph->GlobalAssemble();
 			M_Mu_graph->OptimizeStorage();
@@ -139,7 +138,7 @@ void NavierStokesSolver::buildGraphs()
 					 quadRuleTetra4pt,
 					 M_fespaceUETA,
 					 M_fespaceUETA,
-					 dot( M_fluidData->density()*value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i)
+					 dot( M_density*value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i)
 		) >> M_C_graph;
 		M_C_graph->GlobalAssemble();
         M_C_graph->OptimizeStorage();
@@ -152,7 +151,7 @@ void NavierStokesSolver::buildGraphs()
 						 quadRuleTetra4pt,
 						 M_fespaceUETA,
 						 M_fespaceUETA,
-						 value( 0.5 * M_fluidData->viscosity() ) * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) )
+						 value( 0.5 * M_viscosity ) * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) )
 			) >> M_A_graph;
 		}
 		else
@@ -161,7 +160,7 @@ void NavierStokesSolver::buildGraphs()
 						 quadRuleTetra4pt,
 						 M_fespaceUETA,
 						 M_fespaceUETA,
-						 M_fluidData->viscosity() * dot( grad(phi_i) , grad(phi_j) + transpose(grad(phi_j)) )
+						 M_viscosity * dot( grad(phi_i) , grad(phi_j) + transpose(grad(phi_j)) )
 			) >> M_A_graph;
 		}
 		M_A_graph->GlobalAssemble();
@@ -176,8 +175,8 @@ void NavierStokesSolver::buildGraphs()
 						 M_fespaceUETA,
 						 M_fespaceUETA,
 						 dot ( phi_i, phi_j ) + // mass
-						 dot( M_fluidData->density()*value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) + // convective term
-						 value( 0.5 * M_fluidData->viscosity() ) * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) ) // stiffness
+						 dot( M_density*value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) + // convective term
+						 value( 0.5 * M_viscosity ) * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) ) // stiffness
 			) >> M_F_graph;
 
 
@@ -187,9 +186,9 @@ void NavierStokesSolver::buildGraphs()
 						 M_fespaceUETA,
 						 M_fespaceUETA,
 						 dot ( phi_i, phi_j ) + // mass
-						 dot( M_fluidData->density()*value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) + // convective term
-						 dot( M_fluidData->density() * phi_j * grad(M_fespaceUETA, *M_uExtrapolated), phi_i ) + // part of the Jacobian
-						 value( 0.5 * M_fluidData->viscosity() ) * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) ) // stiffness
+						 dot( M_density*value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) + // convective term
+						 dot( M_density * phi_j * grad(M_fespaceUETA, *M_uExtrapolated), phi_i ) + // part of the Jacobian
+						 value( 0.5 * M_viscosity ) * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) ) // stiffness
 						) >> M_Jacobian_graph;
 			M_Jacobian_graph->GlobalAssemble();
 			M_Jacobian_graph->OptimizeStorage();
@@ -202,8 +201,8 @@ void NavierStokesSolver::buildGraphs()
 						 M_fespaceUETA,
 						 M_fespaceUETA,
 						 dot ( phi_i, phi_j ) + // mass
-						 dot( M_fluidData->density()*value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) + // convective term
-						 M_fluidData->viscosity() * dot( grad(phi_i) , grad(phi_j) + transpose(grad(phi_j)) ) // stiffness
+						 dot( M_density*value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) + // convective term
+						 M_viscosity * dot( grad(phi_i) , grad(phi_j) + transpose(grad(phi_j)) ) // stiffness
 			) >> M_F_graph;
 
 
@@ -213,9 +212,9 @@ void NavierStokesSolver::buildGraphs()
 						 M_fespaceUETA,
 						 M_fespaceUETA,
 						 dot ( phi_i, phi_j ) + // mass
-						 dot( M_fluidData->density()*value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) + // convective term
-						 dot( M_fluidData->density() * phi_j * grad(M_fespaceUETA, *M_uExtrapolated), phi_i ) + // part of the Jacobian
-						 M_fluidData->viscosity() * dot( grad(phi_i) , grad(phi_j) + transpose(grad(phi_j)) ) // stiffness
+						 dot( M_density*value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) + // convective term
+						 dot( M_density * phi_j * grad(M_fespaceUETA, *M_uExtrapolated), phi_i ) + // part of the Jacobian
+						 M_viscosity * dot( grad(phi_i) , grad(phi_j) + transpose(grad(phi_j)) ) // stiffness
 					  ) >> M_Jacobian_graph;
 			M_Jacobian_graph->GlobalAssemble();
 			M_Jacobian_graph->OptimizeStorage();
@@ -265,9 +264,9 @@ void NavierStokesSolver::updatePCD(const vectorPtr_Type& velocity)
 					M_pressureFESpace->qr(),
 					M_fespacePETA,
 					M_fespacePETA,
-					value( M_fluidData->density()*M_alpha/M_timeStep ) * phi_i * phi_j
-					+ value( 0.5 * M_fluidData->viscosity() ) * dot( grad(phi_i) + grad(phi_i) , grad(phi_j) + grad(phi_j) )
-					+ value( M_fluidData->density() ) * dot( value(M_fespaceUETA, *velocityRepeated),grad(phi_j)) * phi_i
+					value( M_density*M_alpha/M_timeStep ) * phi_i * phi_j
+					+ value( 0.5 * M_viscosity ) * dot( grad(phi_i) + grad(phi_i) , grad(phi_j) + grad(phi_j) )
+					+ value( M_density ) * dot( value(M_fespaceUETA, *velocityRepeated),grad(phi_j)) * phi_i
 				  ) >> M_Fp;
 	}
 
@@ -304,9 +303,9 @@ void NavierStokesSolver::buildPCDGraphs()
 					 quadRuleTetra4pt,
 					 M_fespacePETA,
 					 M_fespacePETA,
-					 value( M_fluidData->density()*M_alpha/M_timeStep ) * phi_i * phi_j
-					 + value( 0.5 * M_fluidData->viscosity() ) * dot( grad(phi_i) + grad(phi_i) , grad(phi_j) + grad(phi_j) )
-					 + value( M_fluidData->density() ) * dot( value(M_fespaceUETA, *M_uExtrapolated),grad(phi_j)) * phi_i
+					 value( M_density*M_alpha/M_timeStep ) * phi_i * phi_j
+					 + value( 0.5 * M_viscosity ) * dot( grad(phi_i) + grad(phi_i) , grad(phi_j) + grad(phi_j) )
+					 + value( M_density ) * dot( value(M_fespaceUETA, *M_uExtrapolated),grad(phi_j)) * phi_i
 				   ) >> M_Fp_graph;
 		M_Fp_graph->GlobalAssemble();
 		M_Fp_graph->OptimizeStorage();
@@ -340,7 +339,7 @@ void NavierStokesSolver::buildSystem()
 						M_velocityFESpace->qr(),
 						M_fespaceUETA,
 						M_fespaceUETA,
-						M_fluidData->density() * dot ( phi_i, phi_j )
+						M_density * dot ( phi_i, phi_j )
 					  ) >> M_Mu;
 			M_Mu->globalAssemble();
 		}
@@ -372,7 +371,7 @@ void NavierStokesSolver::buildSystem()
 					   M_velocityFESpace->qr(),
 					   M_fespaceUETA,
 					   M_fespaceUETA,
-					   value( 0.5 * M_fluidData->viscosity() ) * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) )
+					   value( 0.5 * M_viscosity ) * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) )
 			) >> M_A;
 		}
 		else
@@ -381,7 +380,7 @@ void NavierStokesSolver::buildSystem()
 					   M_velocityFESpace->qr(),
 					   M_fespaceUETA,
 				 	   M_fespaceUETA,
-					   M_fluidData->viscosity() * dot( grad(phi_i) , grad(phi_j) + transpose(grad(phi_j)) )
+					   M_viscosity * dot( grad(phi_i) , grad(phi_j) + transpose(grad(phi_j)) )
 			) >> M_A;
 		}
 		M_A->globalAssemble();
@@ -417,7 +416,7 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 				M_velocityFESpace->qr(),
 				M_fespaceUETA,
 				M_fespaceUETA,
-				dot( M_fluidData->density() * value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) // semi-implicit treatment of the convective term
+				dot( M_density * value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) // semi-implicit treatment of the convective term
 		)
 		>> M_C;
 	}
@@ -593,8 +592,8 @@ void NavierStokesSolver::evalResidual(vector_Type& residual, const vector_Type& 
             integrate ( elements ( M_fespaceUETA->mesh() ),
                         M_velocityFESpace->qr(),
                         M_fespaceUETA,
-                        value ( 0.5 ) * M_fluidData->viscosity() * dot ( grad ( phi_i )  + transpose ( grad ( phi_i ) ), grad ( M_fespaceUETA, *u_km1 ) + transpose ( grad ( M_fespaceUETA, *u_km1 ) ) ) +
-                        M_fluidData->density() * dot ( value ( M_fespaceUETA, *u_km1 ) * grad ( M_fespaceUETA, *u_km1 ), phi_i ) +
+                        value ( 0.5 ) * M_viscosity * dot ( grad ( phi_i )  + transpose ( grad ( phi_i ) ), grad ( M_fespaceUETA, *u_km1 ) + transpose ( grad ( M_fespaceUETA, *u_km1 ) ) ) +
+                        M_density * dot ( value ( M_fespaceUETA, *u_km1 ) * grad ( M_fespaceUETA, *u_km1 ), phi_i ) +
                         value ( -1.0 ) * value ( M_fespacePETA, *p_km1 ) * div ( phi_i )
 
                       ) >> res_velocity;
@@ -604,8 +603,8 @@ void NavierStokesSolver::evalResidual(vector_Type& residual, const vector_Type& 
             integrate ( elements ( M_fespaceUETA->mesh() ),
                         M_velocityFESpace->qr(),
                         M_fespaceUETA,
-                        M_fluidData->viscosity() * dot ( grad ( phi_i ), grad ( M_fespaceUETA, *u_km1 ) + transpose ( grad ( M_fespaceUETA, *u_km1 ) ) ) +
-                        M_fluidData->density() * dot ( value ( M_fespaceUETA, *u_km1 ) * grad ( M_fespaceUETA, *u_km1 ), phi_i ) +
+                        M_viscosity * dot ( grad ( phi_i ), grad ( M_fespaceUETA, *u_km1 ) + transpose ( grad ( M_fespaceUETA, *u_km1 ) ) ) +
+                        M_density * dot ( value ( M_fespaceUETA, *u_km1 ) * grad ( M_fespaceUETA, *u_km1 ), phi_i ) +
                         value ( -1.0 ) * value ( M_fespacePETA, *p_km1 ) * div ( phi_i )
                       ) >> res_velocity;
         }
@@ -646,7 +645,7 @@ void NavierStokesSolver::updateConvectiveTerm ( const vectorPtr_Type& velocity)
                     M_velocityFESpace->qr(),
                     M_fespaceUETA,
                     M_fespaceUETA,
-                    dot ( M_fluidData->density() * value (M_fespaceUETA, *velocity_repeated) *grad (phi_j), phi_i)
+                    dot ( M_density * value (M_fespaceUETA, *velocity_repeated) *grad (phi_j), phi_i)
                   )
                 >> M_C;
     }
@@ -671,7 +670,7 @@ void NavierStokesSolver::updateJacobian( const vector_Type& u_k )
 					M_velocityFESpace->qr(),
 					M_fespaceUETA,
 					M_fespaceUETA,
-					dot( M_fluidData->density() * phi_j * grad(M_fespaceUETA, uk_rep), phi_i )
+					dot( M_density * phi_j * grad(M_fespaceUETA, uk_rep), phi_i )
 		)
 		>> M_Jacobian;
 	}

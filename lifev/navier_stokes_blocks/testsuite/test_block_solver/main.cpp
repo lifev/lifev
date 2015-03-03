@@ -37,7 +37,7 @@
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
-#include <lifev/navier_stokes/solver/NavierStokesSolver.hpp>
+#include <lifev/navier_stokes_blocks/solver/NavierStokesSolver.hpp>
 #include <lifev/core/fem/TimeAndExtrapolationHandler.hpp>
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
@@ -63,8 +63,6 @@ main ( int argc, char** argv )
     boost::shared_ptr<Epetra_Comm> Comm( new Epetra_SerialComm () );
     verbose = true;
 #endif
-
-    {
 
     typedef RegionMesh<LinearTetra> mesh_Type;
     typedef VectorEpetra vector_Type;
@@ -94,6 +92,27 @@ main ( int argc, char** argv )
     ns.setParameters();
     ns.buildSystem();
 
+    // Time handler objects to deal with time advancing and extrapolation
+    TimeAndExtrapolationHandler timeVelocity;
+    Real dt       = dataFile("fluid/time_discretization/timestep",0.0);
+    Real t0       = dataFile("fluid/time_discretization/initialtime",0.0);
+    Real tFinal   = dataFile("fluid/time_discretization/endtime",0.0);
+    UInt orderBDF = dataFile("fluid/time_discretization/BDF_order",2);
+
+    // Order of BDF and extrapolation for the velocity
+    timeVelocity.setBDForder(orderBDF);
+    timeVelocity.setMaximumExtrapolationOrder(orderBDF);
+    timeVelocity.setTimeStep(dt);
+
+    // Initialize time advance
+    vector_Type velocityInitial ( ns.uFESpace()->map() );
+    std::vector<vector_Type> initialStateVelocity;
+    velocityInitial *= 0 ;
+    for ( UInt i = 0; i < orderBDF; ++i )
+    	initialStateVelocity.push_back(velocityInitial);
+
+    timeVelocity.initialize(initialStateVelocity);
+
     // Exporter
     std::string outputName = dataFile ( "exporter/filename", "result");
     boost::shared_ptr< Exporter<mesh_Type > > exporter;
@@ -118,7 +137,7 @@ main ( int argc, char** argv )
     vectorPtr_Type pressure( new vector_Type(ns.pFESpace()->map(), exporter->mapType() ) );
     exporter->addVariable ( ExporterData<mesh_Type>::VectorField, "velocity", ns.uFESpace(), velocity, UInt (0) );
     exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "pressure", ns.pFESpace(), pressure, UInt (0) );
-    exporter->postProcess ( 0.0 );
+    exporter->postProcess ( t0 );
 
     // Boundary conditions
     boost::shared_ptr<BCHandler> bc ( new BCHandler (*BCh_fluid ()) );
@@ -131,18 +150,47 @@ main ( int argc, char** argv )
     	ns.setBCpcd(bc_pcd);
     }
 
-    ns.setBC( bc );
+    // Time loop
+    LifeChrono iterChrono;
+    Real time = t0 + dt;
 
-    ns.iterate_steady( bc );
+    vectorPtr_Type u_star( new vector_Type(ns.uFESpace()->map(), Unique ) );
+    vectorPtr_Type rhs_velocity( new vector_Type(ns.uFESpace()->map(), Unique ) );
 
-    ns.updateVelocity(velocity);
-    ns.updatePressure(pressure);
+    ns.setAlpha(timeVelocity.alpha());
+    ns.setTimeStep(dt);
 
-    exporter->postProcess ( 1.0 );
+    for ( ; time <= tFinal + dt / 2.; time += dt)
+    {
+    	if (verbose)
+    		std::cout << "\nWe are at time " << time << " s\n\n";
+
+    	iterChrono.reset();
+    	iterChrono.start();
+
+    	u_star->zero();
+    	rhs_velocity->zero();
+    	timeVelocity.extrapolate (orderBDF, *u_star);
+    	timeVelocity.rhsContribution (*rhs_velocity);
+
+    	ns.updateSystem ( u_star, rhs_velocity );
+    	ns.iterate( bc, time );
+
+        ns.updateVelocity(velocity);
+        ns.updatePressure(pressure);
+        
+    	iterChrono.stop();
+
+    	if (verbose)
+    		std::cout << "\nTimestep solved in " << iterChrono.diff() << " s\n";
+        
+        exporter->postProcess ( time );
+        
+        timeVelocity.shift(*velocity);
+        
+    }
 
     exporter->closeFile();
-
-	}
 
 #ifdef HAVE_MPI
     if (verbose)

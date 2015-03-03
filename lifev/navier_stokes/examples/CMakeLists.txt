@@ -13,13 +13,11 @@ IF(LifeV_ENABLE_ETA)
 ADD_SUBDIRECTORIES(
   #ETpseudo_fsi
   #externalFluidFlow
-  test_block_solver
   #oseen_assembler
   #resistanceBCs
   #computeWSS
   #externalFluidFlow_FORTESTING
   #computeAeroCoeff
   #Turek_benchmark
-  steady_ns
 )
 ENDIF()

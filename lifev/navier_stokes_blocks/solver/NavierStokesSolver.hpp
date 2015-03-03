@@ -37,9 +37,6 @@
 #include <lifev/core/array/MatrixEpetra.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
 
-// including data container for the fluid problem
-#include <lifev/navier_stokes/solver/OseenData.hpp>
-
 // includes for building the matrix graph
 #include <Epetra_FECrsGraph.h>
 #include <lifev/eta/expression/Integrate.hpp>
@@ -55,12 +52,12 @@
 #include <lifev/eta/fem/ETFESpace.hpp>
 
 // includes for the linear solver
-#include <lifev/navier_stokes/solver/NavierStokesOperator.hpp>
+#include <lifev/navier_stokes_blocks/solver/NavierStokesOperator.hpp>
 #include <lifev/core/linear_algebra/ApproximatedInvertibleRowMatrix.hpp>
 
-#include <lifev/navier_stokes/solver/NavierStokesPreconditionerOperator.hpp>
-#include <lifev/navier_stokes/solver/aSIMPLEOperator.hpp>
-#include <lifev/navier_stokes/solver/aPCDOperator.hpp>
+#include <lifev/navier_stokes_blocks/solver/NavierStokesPreconditionerOperator.hpp>
+#include <lifev/navier_stokes_blocks/solver/aSIMPLEOperator.hpp>
+#include <lifev/navier_stokes_blocks/solver/aPCDOperator.hpp>
 
 // utilities
 #include <lifev/core/util/LifeChrono.hpp>
@@ -70,6 +67,8 @@
 #include <Teuchos_XMLParameterListHelpers.hpp>
 
 #include <lifev/core/algorithm/NonLinearRichardson.hpp>
+
+#include <lifev/core/filter/GetPot.hpp>
 
 namespace LifeV
 {
@@ -210,11 +209,6 @@ public:
     	return M_rhs;
     }
 
-    boost::shared_ptr<OseenData> const& getData() const
-    {
-        return M_fluidData;
-    }
-
     void setBCpcd(const bcPtr_Type & bc)
     {
     	M_bcPCD = bc;
@@ -248,6 +242,16 @@ public:
     	M_bc = bc;
     }
 
+    Real density (  ) const
+    {
+    	return M_density;
+    }
+
+    Real viscosity (  ) const
+    {
+    	return M_viscosity;
+    }
+
 private:
 
 	// build the graphs
@@ -265,9 +269,6 @@ private:
 
 	// getpot object
 	dataFile_Type M_dataFile;
-
-	// fluid data
-	boost::shared_ptr<OseenData> M_fluidData;
 
 	// FE spaces
 	boost::shared_ptr<FESpace<mesh_Type, map_Type> > M_velocityFESpace;
@@ -360,6 +361,8 @@ private:
     // BC handler
     bcPtr_Type M_bc;
 
+    Real M_density;
+    Real M_viscosity;
 
 }; // class NavierStokesSolver
 

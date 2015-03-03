@@ -6,7 +6,7 @@
 #include <Epetra_Vector.h>
 
 #include <lifev/core/linear_algebra/BlockEpetra_Map.hpp>
-#include <lifev/navier_stokes/solver/NavierStokesPreconditionerOperator.hpp>
+#include <lifev/navier_stokes_blocks/solver/NavierStokesPreconditionerOperator.hpp>
 
 #include <lifev/core/array/MatrixEpetra.hpp>
 #include <lifev/core/linear_algebra/ApproximatedInvertibleRowMatrix.hpp>

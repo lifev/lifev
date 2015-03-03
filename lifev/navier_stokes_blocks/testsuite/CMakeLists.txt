@@ -1,8 +1,8 @@
+
 INCLUDE(TribitsAddExecutableAndTest)
 INCLUDE(AddSubdirectories)
 
 ADD_SUBDIRECTORIES(
-    fsi_tube
-    fsi_challenge
-    fsi_challenge_steady
+	test_block_solver
+	steady_ns
 )

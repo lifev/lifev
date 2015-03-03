@@ -9,19 +9,10 @@ SET(solver_HEADERS
   solver/StabilizationSUPG.hpp
   solver/StabilizationSUPGVMS.hpp
   solver/StabilizationVMSLES.hpp
-  solver/NavierStokesSolver.hpp
-  solver/NavierStokesOperator.hpp
-  solver/NavierStokesPreconditionerOperator.hpp
-  solver/aSIMPLEOperator.hpp
-  solver/aPCDOperator.hpp
 CACHE INTERNAL "")
 
 SET(solver_SOURCES
   solver/OseenData.cpp
-  solver/NavierStokesSolver.cpp
-  solver/NavierStokesOperator.cpp
-  solver/aSIMPLEOperator.cpp
-  solver/aPCDOperator.cpp
 CACHE INTERNAL "")
 
 
