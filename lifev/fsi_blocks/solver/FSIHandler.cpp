@@ -591,7 +591,9 @@ FSIHandler::getRhsStructure ( )
 		*gravity_component += M_gravity;
 		gravity_vector->subset(*gravity_component, M_displacementFESpaceScalar->map(), 0, M_gravityDirection*M_displacementFESpaceScalar->dof().numTotalDof() );
 
-		*M_rhsStructure += *M_structure->massMatrix()* (*gravity_vector)/timeAdvanceCoefficient;
+		// Archimede's force: (rho_f-rho_s)*g
+		*M_rhsStructure += *M_structure->massMatrix()*(1.0/(timeAdvanceCoefficient*M_structure->rho())) * M_fluid->getData()->density() * (*gravity_vector);
+		*M_rhsStructure -= *M_structure->massMatrix()*(1.0/timeAdvanceCoefficient)*(*gravity_vector);
 	}
 
 	if ( !M_structureBC->bcUpdateDone() )
@@ -868,8 +870,8 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	M_fluid->buildSystem();
 	M_fluid->updateSystem ( M_beta_star, M_rhs_velocity );
 
-	if ( M_considerGravity )
-		M_fluid->applyGravityForce ( M_gravity, M_gravityDirection);
+//	if ( M_considerGravity )
+//		M_fluid->applyGravityForce ( M_gravity, M_gravityDirection);
 
 	M_fluid->applyBoundaryConditions ( M_fluidBC, M_time );
 	M_rhsFluid.reset(new VectorEpetra ( M_fluid->uFESpace()->map() ) );
