@@ -260,6 +260,26 @@ public:
     	M_velocityRhs.reset( new vector_Type ( *vel_rhs ) );
     }
 
+    matrixPtr_Type const& block00() const
+    {
+    	return M_block00;
+    }
+
+    matrixPtr_Type const& block01() const
+    {
+    	return M_block01;
+    }
+
+    matrixPtr_Type const& block10() const
+    {
+    	return M_block10;
+    }
+
+    matrixPtr_Type const& block11() const
+    {
+    	return M_block11;
+    }
+
 private:
 
 	// build the graphs
@@ -313,6 +333,12 @@ private:
 
 	matrixPtr_Type M_Mp;
 	matrixPtr_Type M_Fp;
+
+	// Navier-Stokes block matrices
+	matrixPtr_Type M_block00;
+	matrixPtr_Type M_block01;
+	matrixPtr_Type M_block10;
+	matrixPtr_Type M_block11;
 
 	// vectors
 	vectorPtr_Type M_uExtrapolated;
