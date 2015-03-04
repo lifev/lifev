@@ -56,15 +56,18 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
     M_velocity.reset( new vector_Type(M_velocityFESpace->map()) );
     M_pressure.reset( new vector_Type(M_pressureFESpace->map()) );
 
-    if ( M_steady )
+    M_fullyImplicit = M_dataFile ( "newton/convectiveImplicit", false);
+
+    if ( M_fullyImplicit )
     {
-    	M_displayer.leaderPrint ( " F - solving steady Navier-Stokes\n");
+    	M_displayer.leaderPrint ( " F - solving nonlinear Navier-Stokes\n");
     	M_relativeTolerance = M_dataFile ( "newton/abstol", 1.e-4);
     	M_absoluteTolerance = M_dataFile ( "newton/reltol", 1.e-4);
     	M_etaMax = M_dataFile ( "newton/etamax", 1e-4);
     	M_maxiterNonlinear = M_dataFile ( "newton/maxiter", 10);
 
     	M_nonLinearLineSearch = M_dataFile ( "newton/NonLinearLineSearch", 0);
+
     	if (M_comm->MyPID() == 0)
     		M_out_res.open ("residualsNewton");
 
@@ -76,8 +79,6 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
 
     M_displayer.leaderPrintMax ( " Number of DOFs for the velocity = ", M_velocityFESpace->dof().numTotalDof()*3 ) ;
     M_displayer.leaderPrintMax ( " Number of DOFs for the pressure = ", M_pressureFESpace->dof().numTotalDof() ) ;
-
-    M_fullyImplicit = M_dataFile ( "newton/convectiveImplicit", false);
 }
 
 void NavierStokesSolver::setSolversOptions(const Teuchos::ParameterList& solversOptions)
@@ -538,6 +539,21 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
 
 }
 
+void NavierStokesSolver::iterate_nonlinear( bcPtr_Type & bc, const Real& time )
+{
+	// Initialize the solution
+	M_solution->zero();
+
+	applyBoundaryConditionsSolution ( bc, time ); // the second argument is zero since the problem is steady
+
+	// Call Newton
+	UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
+			M_nonLinearLineSearch, 0, 2, M_out_res, 0.0);
+
+	M_velocity->subset ( *M_solution, M_velocityFESpace->map(), 0, 0 );
+	M_pressure->subset ( *M_solution, M_pressureFESpace->map(), M_velocityFESpace->map().mapSize(), 0 );
+}
+
 void NavierStokesSolver::iterate_steady( bcPtr_Type & bc )
 {
 	// Initialize the solution
@@ -583,38 +599,80 @@ void NavierStokesSolver::evalResidual(vector_Type& residual, const vector_Type& 
 	res_velocity->zero();
 	res_pressure->zero();
 
-	// Assemble the residual vector: for the moment working for steady Navier-Stokes
-    {
-        using namespace ExpressionAssembly;
+	vectorPtr_Type rhs_velocity_repeated;
+	if ( !M_steady )
+	{
+		rhs_velocity_repeated.reset( new vector_Type ( *M_velocityRhs, Repeated ) );
+	}
 
-        if ( M_stiffStrain )
-        {
-            integrate ( elements ( M_fespaceUETA->mesh() ),
-                        M_velocityFESpace->qr(),
-                        M_fespaceUETA,
-                        value ( 0.5 ) * M_viscosity * dot ( grad ( phi_i )  + transpose ( grad ( phi_i ) ), grad ( M_fespaceUETA, *u_km1 ) + transpose ( grad ( M_fespaceUETA, *u_km1 ) ) ) +
-                        M_density * dot ( value ( M_fespaceUETA, *u_km1 ) * grad ( M_fespaceUETA, *u_km1 ), phi_i ) +
-                        value ( -1.0 ) * value ( M_fespacePETA, *p_km1 ) * div ( phi_i )
+	if ( M_steady )
+	{
+		// Assemble the residual vector:
+		using namespace ExpressionAssembly;
 
-                      ) >> res_velocity;
-        }
-        else
-        {
-            integrate ( elements ( M_fespaceUETA->mesh() ),
-                        M_velocityFESpace->qr(),
-                        M_fespaceUETA,
-                        M_viscosity * dot ( grad ( phi_i ), grad ( M_fespaceUETA, *u_km1 ) + transpose ( grad ( M_fespaceUETA, *u_km1 ) ) ) +
-                        M_density * dot ( value ( M_fespaceUETA, *u_km1 ) * grad ( M_fespaceUETA, *u_km1 ), phi_i ) +
-                        value ( -1.0 ) * value ( M_fespacePETA, *p_km1 ) * div ( phi_i )
-                      ) >> res_velocity;
-        }
+		if ( M_stiffStrain )
+		{
+			integrate ( elements ( M_fespaceUETA->mesh() ),
+					M_velocityFESpace->qr(),
+					M_fespaceUETA,
+					value ( 0.5 ) * M_viscosity * dot ( grad ( phi_i )  + transpose ( grad ( phi_i ) ), grad ( M_fespaceUETA, *u_km1 ) + transpose ( grad ( M_fespaceUETA, *u_km1 ) ) ) +
+					M_density * dot ( value ( M_fespaceUETA, *u_km1 ) * grad ( M_fespaceUETA, *u_km1 ), phi_i ) +
+					value ( -1.0 ) * value ( M_fespacePETA, *p_km1 ) * div ( phi_i )
 
-        integrate ( elements ( M_fespaceUETA->mesh() ),
-                    M_pressureFESpace->qr(),
-                    M_fespacePETA,
-                    trace ( grad ( M_fespaceUETA, *u_km1 ) ) * phi_i
-                  ) >> res_pressure;
-    }
+			) >> res_velocity;
+		}
+		else
+		{
+			integrate ( elements ( M_fespaceUETA->mesh() ),
+					M_velocityFESpace->qr(),
+					M_fespaceUETA,
+					M_viscosity * dot ( grad ( phi_i ), grad ( M_fespaceUETA, *u_km1 ) + transpose ( grad ( M_fespaceUETA, *u_km1 ) ) ) +
+					M_density * dot ( value ( M_fespaceUETA, *u_km1 ) * grad ( M_fespaceUETA, *u_km1 ), phi_i ) +
+					value ( -1.0 ) * value ( M_fespacePETA, *p_km1 ) * div ( phi_i )
+			) >> res_velocity;
+		}
+
+		integrate ( elements ( M_fespaceUETA->mesh() ),
+				M_pressureFESpace->qr(),
+				M_fespacePETA,
+				trace ( grad ( M_fespaceUETA, *u_km1 ) ) * phi_i
+		) >> res_pressure;
+	}
+	else
+	{
+		using namespace ExpressionAssembly;
+
+		if ( M_stiffStrain )
+		{
+			integrate ( elements ( M_fespaceUETA->mesh() ),
+					M_velocityFESpace->qr(),
+					M_fespaceUETA,
+					M_density * value ( M_alpha / M_timeStep ) * dot ( value ( M_fespaceUETA, *u_km1 ), phi_i ) -
+					M_density * dot ( value ( M_fespaceUETA, *rhs_velocity_repeated ), phi_i ) +
+					value ( 0.5 ) * M_viscosity * dot ( grad ( phi_i )  + transpose ( grad ( phi_i ) ), grad ( M_fespaceUETA, *u_km1 ) + transpose ( grad ( M_fespaceUETA, *u_km1 ) ) ) +
+					M_density * dot ( value ( M_fespaceUETA, *u_km1 ) * grad ( M_fespaceUETA, *u_km1 ), phi_i ) +
+					value ( -1.0 ) * value ( M_fespacePETA, *p_km1 ) * div ( phi_i )
+			) >> res_velocity;
+		}
+		else
+		{
+			integrate ( elements ( M_fespaceUETA->mesh() ),
+					M_velocityFESpace->qr(),
+					M_fespaceUETA,
+					M_density * value ( M_alpha / M_timeStep ) * dot ( value ( M_fespaceUETA, *u_km1 ), phi_i ) -
+					M_density * dot ( value ( M_fespaceUETA, *rhs_velocity_repeated ), phi_i ) +
+					M_viscosity * dot ( grad ( phi_i ), grad ( M_fespaceUETA, *u_km1 ) + transpose ( grad ( M_fespaceUETA, *u_km1 ) ) ) +
+					M_density * dot ( value ( M_fespaceUETA, *u_km1 ) * grad ( M_fespaceUETA, *u_km1 ), phi_i ) +
+					value ( -1.0 ) * value ( M_fespacePETA, *p_km1 ) * div ( phi_i )
+			) >> res_velocity;
+		}
+
+		integrate ( elements ( M_fespaceUETA->mesh() ),
+				M_pressureFESpace->qr(),
+				M_fespacePETA,
+				trace ( grad ( M_fespaceUETA, *u_km1 ) ) * phi_i
+		) >> res_pressure;
+	}
 
     res_velocity->globalAssemble();
     res_pressure->globalAssemble();
@@ -652,6 +710,11 @@ void NavierStokesSolver::updateConvectiveTerm ( const vectorPtr_Type& velocity)
 
     // Assuming steady NS
     M_F->zero();
+    if ( !M_steady )
+    {
+    	*M_F += *M_Mu;
+    	*M_F *= M_alpha / M_timeStep;
+    }
     *M_F += *M_A;
     *M_F += *M_C;
 }

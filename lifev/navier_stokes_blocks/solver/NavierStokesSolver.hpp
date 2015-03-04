@@ -130,6 +130,9 @@ public:
 	// Solve the steady Navier-Stokes equations, provided the BC
 	void iterate_steady( bcPtr_Type & bc );
 
+	// Solve the Navier-Stokes equations, provided the BC
+	void iterate_nonlinear( bcPtr_Type & bc, const Real& time );
+
 	void evalResidual(vector_Type& residual, const vector_Type& solution, const UInt iter_newton);
 
 	void solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol );
@@ -252,6 +255,11 @@ public:
     	return M_viscosity;
     }
 
+    void setRhsVelocity ( const vectorPtr_Type& vel_rhs)
+    {
+    	M_velocityRhs.reset( new vector_Type ( *vel_rhs ) );
+    }
+
 private:
 
 	// build the graphs
@@ -311,6 +319,7 @@ private:
 	vectorPtr_Type M_rhs;
     vectorPtr_Type M_velocity;
     vectorPtr_Type M_pressure;
+    vectorPtr_Type M_velocityRhs;
 
     boost::shared_ptr<map_Type> M_monolithicMap;
     vectorPtr_Type M_solution;
