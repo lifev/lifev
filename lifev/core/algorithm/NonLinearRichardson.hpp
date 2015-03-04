@@ -263,7 +263,7 @@ Int NonLinearRichardson ( VectorEpetra& sol,
         std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
         std::cout << std::endl;
     }
-    maxit = iter;
+    // maxit = iter;
 
     return EXIT_SUCCESS;
 }
