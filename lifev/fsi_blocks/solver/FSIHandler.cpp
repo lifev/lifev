@@ -108,11 +108,18 @@ FSIHandler::readMeshes( )
     M_meshDataFluid.reset( new MeshData ( ) );
     M_meshDataFluid->setup (M_datafile, "fluid/space_discretization");
     readMesh (*M_fluidMesh, *M_meshDataFluid);
+    int severityLevelFluid = M_fluidMesh->check(1,true,true);
+
+    M_displayer.leaderPrintMax ( "\tSeverity Level fluid mesh is: ", severityLevelFluid ) ;
 
     M_structureMesh.reset ( new mesh_Type ( M_comm ) );
     M_meshDataStructure.reset( new MeshData ( ) );
     M_meshDataStructure->setup (M_datafile, "solid/space_discretization");
     readMesh (*M_structureMesh, *M_meshDataStructure);
+    int severityLevelSolid = M_structureMesh->check(1,true,true);
+
+    M_displayer.leaderPrintMax ( "\tSeverity Level solid mesh is: ", severityLevelSolid ) ;
+
 }
 
 void
@@ -1150,6 +1157,7 @@ FSIHandler::initializeApplyOperatorResidual ( )
 	operDataResidual(4,2) = M_coupling->structureDisplacementToFluidDisplacement()->matrixPtr();
 	operDataResidual(4,4) = M_ale->matrix()->matrixPtr();
 	M_applyOperatorResidual->setUp(operDataResidual, M_comm);
+
 }
 
 void
