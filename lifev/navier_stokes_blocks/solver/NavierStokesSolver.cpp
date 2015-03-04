@@ -56,6 +56,16 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
     M_velocity.reset( new vector_Type(M_velocityFESpace->map()) );
     M_pressure.reset( new vector_Type(M_pressureFESpace->map()) );
 
+    M_block00.reset( new matrix_Type(M_velocityFESpace->map() ) );
+    M_block01.reset( new matrix_Type(M_velocityFESpace->map() ) );
+    M_block10.reset( new matrix_Type(M_pressureFESpace->map() ) );
+    M_block11.reset( new matrix_Type(M_pressureFESpace->map() ) );
+
+    M_block00->zero();
+    M_block10->zero();
+    M_block01->zero();
+    M_block11->zero();
+
     M_fullyImplicit = M_dataFile ( "newton/convectiveImplicit", false);
 
     if ( M_fullyImplicit )
@@ -353,6 +363,7 @@ void NavierStokesSolver::buildSystem()
 				   M_fespacePETA,
 				   value(-1.0) * phi_j * div(phi_i)
 		) >> M_Btranspose;
+		M_Btranspose->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
 
 		M_B.reset (new matrix_Type ( M_pressureFESpace->map(), *M_B_graph ) );
 		M_B->zero();
@@ -398,6 +409,12 @@ void NavierStokesSolver::buildSystem()
 		M_Jacobian->zero();
 		M_Jacobian->globalAssemble();
 
+		M_block01->zero();
+		M_block10->zero();
+		*M_block01 += *M_Btranspose;
+		*M_block10 += *M_B;
+		M_block01->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
+		M_block10->globalAssemble(M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
 	}
 
 	chrono.stop();
@@ -424,11 +441,12 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 	M_C->globalAssemble();
 
 	// Get the matrix corresponding to the block (0,0)
-	M_F->zero();
-	*M_F += *M_Mu;
-	*M_F *= M_alpha/M_timeStep;
-	*M_F += *M_A;
-	*M_F += *M_C;
+	M_block00->zero();
+	*M_block00 += *M_Mu;
+	*M_block00 *= M_alpha/M_timeStep;
+	*M_block00 += *M_A;
+	*M_block00 += *M_C;
+	M_block00->globalAssemble();
 
 	// Get the right hand side with inertia contribution
 	M_rhs.reset( new vector_Type ( M_velocityFESpace->map(), Unique ) );
@@ -453,17 +471,15 @@ void NavierStokesSolver::applyGravityForce ( const Real& gravity, const Real& gr
 void NavierStokesSolver::applyBoundaryConditions ( bcPtr_Type & bc, const Real& time )
 {
 	updateBCHandler(bc);
-	bcManage ( *M_F, *M_rhs, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 1.0, time );
+	bcManage ( *M_block00, *M_rhs, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 1.0, time );
 
 	for (BCHandler::bcBaseIterator_Type it = bc->begin(); it != bc->end(); ++it)
 	{
 		if ( it->type() != Essential)
 			continue;
 
-		bcManageMatrix( *M_Btranspose, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 0.0, 0.0);
+		bcManageMatrix( *M_block01, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 0.0, 0.0);
 	}
-
-	M_Btranspose->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
 }
 
 void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
@@ -476,9 +492,9 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
     chrono.start();
 
     Operators::NavierStokesOperator::operatorPtrContainer_Type operData(2,2);
-    operData(0,0) = M_F->matrixPtr();
-    operData(0,1) = M_Btranspose->matrixPtr();
-    operData(1,0) = M_B->matrixPtr();
+    operData(0,0) = M_block00->matrixPtr();
+    operData(0,1) = M_block01->matrixPtr();
+    operData(1,0) = M_block10->matrixPtr();
     M_oper->setUp(operData, M_displayer.comm());
     chrono.stop();
     M_displayer.leaderPrintMax(" done in " , chrono.diff() );
@@ -491,7 +507,7 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
 
     if ( std::strcmp(M_prec->Label(),"aSIMPLEOperator")==0 )
     {
-    	M_prec->setUp(M_F, M_B, M_Btranspose);
+    	M_prec->setUp(M_block00, M_block10, M_block01);
     	M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
     	M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
     	M_prec->updateApproximatedMomentumOperator();
@@ -500,7 +516,7 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
     else if ( std::strcmp(M_prec->Label(),"aPCDOperator")==0 )
     {
     	updatePCD(M_uExtrapolated);
-    	M_prec->setUp(M_F, M_B, M_Btranspose, M_Fp, M_Mp, M_Mu);
+    	M_prec->setUp(M_block00, M_block10, M_block01, M_Fp, M_Mp, M_Mu);
     	M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
     	M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
     	M_prec->updateApproximatedMomentumOperator();
@@ -709,14 +725,16 @@ void NavierStokesSolver::updateConvectiveTerm ( const vectorPtr_Type& velocity)
     }
 
     // Assuming steady NS
-    M_F->zero();
+    M_block00->zero();
     if ( !M_steady )
     {
-    	*M_F += *M_Mu;
-    	*M_F *= M_alpha / M_timeStep;
+    	*M_block00 += *M_Mu;
+    	*M_block00 *= M_alpha / M_timeStep;
     }
-    *M_F += *M_A;
-    *M_F += *M_C;
+    *M_block00 += *M_A;
+    *M_block00 += *M_C;
+    if ( !M_fullyImplicit )
+    	M_block00->globalAssemble( );
 }
 
 void NavierStokesSolver::updateJacobian( const vector_Type& u_k )
@@ -738,7 +756,8 @@ void NavierStokesSolver::updateJacobian( const vector_Type& u_k )
 		>> M_Jacobian;
 	}
 
-	*M_Jacobian += *M_F;
+	*M_block00 += *M_Jacobian;
+	M_block00->globalAssemble( );
 }
 
 void NavierStokesSolver::solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol )
@@ -752,9 +771,9 @@ void NavierStokesSolver::solveJac( vector_Type& increment, const vector_Type& re
 	chrono.start();
 
 	Operators::NavierStokesOperator::operatorPtrContainer_Type operDataJacobian ( 2, 2 );
-	operDataJacobian ( 0, 0 ) = M_Jacobian->matrixPtr();
-	operDataJacobian ( 0, 1 ) = M_Btranspose->matrixPtr();
-	operDataJacobian ( 1, 0 ) = M_B->matrixPtr();
+	operDataJacobian ( 0, 0 ) = M_block00->matrixPtr();
+	operDataJacobian ( 0, 1 ) = M_block01->matrixPtr();
+	operDataJacobian ( 1, 0 ) = M_block10->matrixPtr();
 
 	M_oper->setUp(operDataJacobian, M_displayer.comm());
 	chrono.stop();
@@ -767,7 +786,7 @@ void NavierStokesSolver::solveJac( vector_Type& increment, const vector_Type& re
 	//(2) Set the data for the preconditioner
 	if ( std::strcmp(M_prec->Label(),"aSIMPLEOperator")==0 )
 	{
-		M_prec->setUp(M_Jacobian, M_B, M_Btranspose);
+		M_prec->setUp(M_block00, M_block10, M_block01);
 		M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
 		M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
 		M_prec->updateApproximatedMomentumOperator();
@@ -776,7 +795,7 @@ void NavierStokesSolver::solveJac( vector_Type& increment, const vector_Type& re
 	else if ( std::strcmp(M_prec->Label(),"aPCDOperator")==0 )
 	{
 		updatePCD(M_uExtrapolated);
-		M_prec->setUp(M_Jacobian, M_B, M_Btranspose, M_Fp, M_Mp, M_Mu);
+		M_prec->setUp(M_block00, M_block10, M_block01, M_Fp, M_Mp, M_Mu);
 		M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
 		M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
 		M_prec->updateApproximatedMomentumOperator();
@@ -807,10 +826,8 @@ void NavierStokesSolver::solveJac( vector_Type& increment, const vector_Type& re
 
 void NavierStokesSolver::applyBoundaryConditionsJacobian ( bcPtr_Type & bc )
 {
-	bcManageMatrix( *M_Jacobian, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 1.0, 0.0);
-	M_Jacobian->globalAssemble( );
-	bcManageMatrix( *M_Btranspose, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 0.0, 0.0);
-	M_Btranspose->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
+	bcManageMatrix( *M_block00, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 1.0, 0.0);
+	bcManageMatrix( *M_block01, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 0.0, 0.0);
 }
 
 }

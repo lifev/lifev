@@ -64,6 +64,8 @@ main ( int argc, char** argv )
     verbose = true;
 #endif
 
+    {
+
     typedef RegionMesh<LinearTetra> mesh_Type;
     typedef VectorEpetra vector_Type;
     typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
@@ -191,6 +193,8 @@ main ( int argc, char** argv )
     }
 
     exporter->closeFile();
+
+	}
 
 #ifdef HAVE_MPI
     if (verbose)

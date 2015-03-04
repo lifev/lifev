@@ -875,10 +875,8 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	//-------------------------------------------------------------------//
 
 	M_fluid->buildSystem();
-	M_fluid->updateSystem ( M_beta_star, M_rhs_velocity );
 
-//	if ( M_considerGravity )
-//		M_fluid->applyGravityForce ( M_gravity, M_gravityDirection);
+	M_fluid->updateSystem ( M_beta_star, M_rhs_velocity );
 
 	M_fluid->applyBoundaryConditions ( M_fluidBC, M_time );
 	M_rhsFluid.reset(new VectorEpetra ( M_fluid->uFESpace()->map() ) );
@@ -1023,7 +1021,7 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 	// First: set the fluid blocks in the preconditioner //
 	//---------------------------------------------------//
 
-	M_prec->setFluidBlocks( M_fluid->getJacobian(), M_fluid->getBtranspose(), M_fluid->getB() );
+	M_prec->setFluidBlocks( M_fluid->block00(), M_fluid->block01(), M_fluid->block10() );
 	if (M_useShapeDerivatives)
 	{
 		M_prec->setShapeDerivativesBlocks(M_ale->shapeDerivativesVelocity(), M_ale->shapeDerivativesPressure());
@@ -1146,10 +1144,10 @@ void
 FSIHandler::initializeApplyOperatorResidual ( )
 {
 	Operators::FSIApplyOperator::operatorPtrContainer_Type operDataResidual(5,5);
-	operDataResidual(0,0) = M_fluid->getF()->matrixPtr();
-	operDataResidual(0,1) = M_fluid->getBtranspose()->matrixPtr();
+	operDataResidual(0,0) = M_fluid->block00()->matrixPtr();
+	operDataResidual(0,1) = M_fluid->block01()->matrixPtr();
 	operDataResidual(0,3) = M_coupling->lambdaToFluidMomentum()->matrixPtr();
-	operDataResidual(1,0) = M_fluid->getB()->matrixPtr();
+	operDataResidual(1,0) = M_fluid->block10()->matrixPtr();
 	operDataResidual(2,2) = M_matrixStructure->matrixPtr();
 	operDataResidual(2,3) = M_coupling->lambdaToStructureMomentum()->matrixPtr();
 	operDataResidual(3,0) = M_coupling->fluidVelocityToLambda()->matrixPtr();
@@ -1164,10 +1162,10 @@ void
 FSIHandler::initializeApplyOperatorJacobian ( )
 {
 	Operators::FSIApplyOperator::operatorPtrContainer_Type operDataJacobian(5,5);
-	operDataJacobian(0,0) = M_fluid->getJacobian()->matrixPtr();
-	operDataJacobian(0,1) = M_fluid->getBtranspose()->matrixPtr();
+	operDataJacobian(0,0) = M_fluid->block00()->matrixPtr();
+	operDataJacobian(0,1) = M_fluid->block01()->matrixPtr();
 	operDataJacobian(0,3) = M_coupling->lambdaToFluidMomentum()->matrixPtr();
-	operDataJacobian(1,0) = M_fluid->getB()->matrixPtr();
+	operDataJacobian(1,0) = M_fluid->block10()->matrixPtr();
 	operDataJacobian(2,2) = M_matrixStructure->matrixPtr();
 	operDataJacobian(2,3) = M_coupling->lambdaToStructureMomentum()->matrixPtr();
 	operDataJacobian(3,0) = M_coupling->fluidVelocityToLambda()->matrixPtr();
