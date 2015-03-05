@@ -86,12 +86,6 @@ main ( int argc, char** argv )
     localMeshPtr = meshPart.meshPartition();
     fullMeshPtr.reset();
 
-    // create the solver
-    NavierStokesSolver ns( dataFile, Comm);
-    ns.setup(localMeshPtr);
-    ns.setParameters();
-    ns.buildSystem();
-
     // Time handler objects to deal with time advancing and extrapolation
     TimeAndExtrapolationHandler timeVelocity;
     Real dt       = dataFile("fluid/time_discretization/timestep",0.0);
@@ -103,6 +97,11 @@ main ( int argc, char** argv )
     timeVelocity.setBDForder(orderBDF);
     timeVelocity.setMaximumExtrapolationOrder(orderBDF);
     timeVelocity.setTimeStep(dt);
+
+    // create the solver
+    NavierStokesSolver ns( dataFile, Comm);
+    ns.setup(localMeshPtr);
+    ns.setParameters();
 
     // Initialize time advance
     vector_Type velocityInitial ( ns.uFESpace()->map() );
@@ -159,8 +158,9 @@ main ( int argc, char** argv )
 
     ns.setAlpha(timeVelocity.alpha());
     ns.setTimeStep(dt);
-
     ns.setBC( bc );
+
+    ns.buildSystem();
 
     for ( ; time <= tFinal + dt / 2.; time += dt)
     {

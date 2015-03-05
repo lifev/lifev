@@ -34,26 +34,28 @@ filename   = result_fluid
     save_every             = 1
     
     [./physics]
-    density         = 0.0011633 # density
-    viscosity       = 0.0125    # viscosity
+    density         = 1.0   # density
+    viscosity       = 0.035 # viscosity
 
     [../time_discretization]
     initialtime     = 0.0
     endtime         = 10.0
-    timestep        = 0.001
-
+    timestep        = 0.1
     BDF_order       = 2
 
     [../space_discretization]
     mesh_dir        = ./
-    mesh_file       = FSI_benchmark_fluid_coarse.mesh
+    mesh_file       = tube20.mesh #FSI_benchmark_fluid_coarse.mesh
     mesh_type       = .mesh
 
     vel_order       = P2
     pres_order      = P1
     stiff_strain    = true
    
-
+	[../stabilization]
+	use             = true
+	vel_order       = 2
+	
     [../miscellaneous]
     verbose         = 1
     steady          = false
