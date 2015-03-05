@@ -169,6 +169,10 @@ public:
 	void setAlpha(const Real& alpha)
 	{
 		M_alpha = alpha;
+		if ( M_useStabilization )
+		{
+			M_stabilization->setAlpha( M_alpha );
+		}
 	}
 
 	void setParameters( );
@@ -414,6 +418,10 @@ private:
 
     Real M_density;
     Real M_viscosity;
+
+    boost::shared_ptr<StabilizationSUPG> M_stabilization;
+
+    bool M_useStabilization;
 
 }; // class NavierStokesSolver
 

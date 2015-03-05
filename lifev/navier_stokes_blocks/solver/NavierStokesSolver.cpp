@@ -15,7 +15,8 @@ NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commP
         M_graphPCDisBuilt(false),
         M_steady ( dataFile("fluid/miscellaneous/steady", false) ),
         M_density ( dataFile("fluid/physics/density", 1.0 ) ),
-        M_viscosity ( dataFile("fluid/physics/viscosity", 0.035 ) )
+        M_viscosity ( dataFile("fluid/physics/viscosity", 0.035 ) ),
+        M_useStabilization ( dataFile("fluid/stabilization/use", false) )
 {
 	M_prec.reset ( Operators::NSPreconditionerFactory::instance().createObject (dataFile("fluid/preconditionerType","none")));
 }
@@ -85,6 +86,21 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
     	*M_monolithicMap += M_pressureFESpace->map();
 
     	M_solution.reset( new vector_Type ( *M_monolithicMap ) );
+    	M_solution->zero();
+    }
+
+    if ( M_useStabilization )
+    {
+    	M_stabilization.reset ( new StabilizationSUPG ( *M_velocityFESpace, *M_pressureFESpace) );
+    	M_stabilization->setDensity(M_density);
+    	M_stabilization->setViscosity(M_viscosity);
+    	int vel_order = M_dataFile ( "fluid/stabilization/vel_order", 1 );
+    	M_stabilization->setConstant( vel_order );
+    	M_stabilization->setBDForder ( M_dataFile ( "fluid/time_discretization/BDF_order", 1 ) );
+    	M_stabilization->setCommunicator ( M_velocityFESpace->map().commPtr() );
+    	M_stabilization->setTimeStep ( M_dataFile ( "fluid/time_discretization/timestep", 0.001 ) );
+    	M_stabilization->setETvelocitySpace ( M_fespaceUETA );
+    	M_stabilization->setETpressureSpace ( M_fespacePETA );
     }
 
     M_displayer.leaderPrintMax ( " Number of DOFs for the velocity = ", M_velocityFESpace->dof().numTotalDof()*3 ) ;
@@ -233,6 +249,12 @@ void NavierStokesSolver::buildGraphs()
 		}
 		M_F_graph->GlobalAssemble();
         M_F_graph->OptimizeStorage();
+
+        if ( M_useStabilization )
+        {
+        	M_stabilization->buildGraphs();
+        }
+
 	}
 
 	M_graphIsBuilt = true;
@@ -557,9 +579,6 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
 
 void NavierStokesSolver::iterate_nonlinear( bcPtr_Type & bc, const Real& time )
 {
-	// Initialize the solution
-	M_solution->zero();
-
 	applyBoundaryConditionsSolution ( bc, time ); // the second argument is zero since the problem is steady
 
 	// Call Newton
@@ -753,6 +772,12 @@ void NavierStokesSolver::evalResidual(vector_Type& residual, const vector_Type& 
 		) >> res_pressure;
 	}
 
+	if ( M_useStabilization )
+	{
+		M_displayer.leaderPrint ( "[F] - Assembly residual of the stabilization \n" ) ;
+		M_stabilization->residual(res_velocity, res_pressure, *u_km1, *p_km1, *rhs_velocity_repeated);
+	}
+
     res_velocity->globalAssemble();
     res_pressure->globalAssemble();
 
@@ -765,6 +790,33 @@ void NavierStokesSolver::evalResidual(vector_Type& residual, const vector_Type& 
 
     updateConvectiveTerm(u_km1);
     updateJacobian(*u_km1);
+
+    if ( M_useStabilization )
+    {
+    	M_stabilization->jacobian(*u_km1, *p_km1, *M_velocityRhs);
+
+    	*M_block00 += *M_stabilization->block_00();
+    	M_block00->globalAssemble();
+
+    	M_block01->zero();
+    	*M_block01 += *M_Btranspose;
+    	*M_block01 += *M_stabilization->block_01();
+    	M_block01->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
+
+    	M_block10->zero();
+    	*M_block10 += *M_B;
+    	*M_block10 += *M_stabilization->block_10();
+    	M_block10->globalAssemble(M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
+
+    	M_block11->zero();
+    	*M_block11 += *M_stabilization->block_11();
+    	M_block11->globalAssemble();
+
+//    	M_block00->spy("block00");
+//    	M_block01->spy("block01");
+//    	M_block10->spy("block10");
+//    	M_block11->spy("block11");
+    }
 
 }
 
@@ -820,7 +872,8 @@ void NavierStokesSolver::updateJacobian( const vector_Type& u_k )
 	}
 
 	*M_block00 += *M_Jacobian;
-	M_block00->globalAssemble( );
+	if ( !M_useStabilization )
+		M_block00->globalAssemble( );
 }
 
 void NavierStokesSolver::solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol )
@@ -837,6 +890,8 @@ void NavierStokesSolver::solveJac( vector_Type& increment, const vector_Type& re
 	operDataJacobian ( 0, 0 ) = M_block00->matrixPtr();
 	operDataJacobian ( 0, 1 ) = M_block01->matrixPtr();
 	operDataJacobian ( 1, 0 ) = M_block10->matrixPtr();
+	if ( M_useStabilization )
+		operDataJacobian ( 1, 1 ) = M_block11->matrixPtr();
 
 	M_oper->setUp(operDataJacobian, M_displayer.comm());
 	chrono.stop();
@@ -849,7 +904,15 @@ void NavierStokesSolver::solveJac( vector_Type& increment, const vector_Type& re
 	//(2) Set the data for the preconditioner
 	if ( std::strcmp(M_prec->Label(),"aSIMPLEOperator")==0 )
 	{
-		M_prec->setUp(M_block00, M_block10, M_block01);
+		if (M_useStabilization)
+		{
+			M_prec->setUp(M_block00, M_block10, M_block01, M_block11);
+		}
+		else
+		{
+			M_prec->setUp(M_block00, M_block10, M_block01);
+		}
+
 		M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
 		M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
 		M_prec->updateApproximatedMomentumOperator();

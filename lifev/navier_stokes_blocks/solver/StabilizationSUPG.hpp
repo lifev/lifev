@@ -126,7 +126,7 @@ public:
     //@}
 
     //! Build the graphs of each single block
-    void buildSUPGGraphs();
+    void buildGraphs();
 
     //! Updates the jacobian matrix
     /*!

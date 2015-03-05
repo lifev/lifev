@@ -156,6 +156,11 @@ public:
     		   	   	     const matrixEpetraPtr_Type & B,
     		   	   	     const matrixEpetraPtr_Type & Btranspose ){};
 
+    virtual void setUp ( const matrixEpetraPtr_Type & F,
+    					 const matrixEpetraPtr_Type & B,
+    					 const matrixEpetraPtr_Type & Btranspose,
+    					 const matrixEpetraPtr_Type & D ){};
+
     virtual void setOptions ( const Teuchos::ParameterList& solversOptions){};
 
     virtual void setDomainMap ( const boost::shared_ptr<BlockEpetra_Map> & domainMap){};
