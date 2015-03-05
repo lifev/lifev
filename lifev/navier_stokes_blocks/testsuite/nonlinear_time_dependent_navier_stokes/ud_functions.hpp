@@ -53,6 +53,39 @@ Real fZero (const Real& t, const Real& x, const Real& y, const Real& z, const ID
 	return 0.0;
 }
 
+Real inflow (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
+{
+    Real Q_hat = 1;
+    Real Tr    = 0.1;
+    Real Q     = 0;
+
+    if (t<=Tr)
+    {
+        Q = Q_hat/2.0*(1.0 - std::cos(t*M_PI/Tr));
+    }
+    else
+    {
+        Q = Q_hat;
+    }
+
+    Real fluidRadiusSquared = 0.5*0.5;
+    Real A = M_PI * fluidRadiusSquared;
+
+	switch (i)
+	{
+	case 0:
+		return 0.0;
+		break;
+	case 1:
+		return 0.0;
+		break;
+	case 2:
+		return 2.0*Q/A*(fluidRadiusSquared-(x*x+y*y))/(fluidRadiusSquared);
+		break;
+	}
+	return 0;
+}
+
 Real inflow_up (const Real& t, const Real& x, const Real& y, const Real& /*z*/, const ID& i)
 {
     Real max_peak  = 630;
