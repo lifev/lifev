@@ -19,7 +19,8 @@ aSIMPLEOperator::aSIMPLEOperator():
     M_label("aSIMPLEOperator"),
     M_useTranspose(false),
     M_approximatedMomentumOperator ( new Operators::ApproximatedInvertibleRowMatrix ),
-    M_approximatedSchurComplementOperator ( new Operators::ApproximatedInvertibleRowMatrix )
+    M_approximatedSchurComplementOperator ( new Operators::ApproximatedInvertibleRowMatrix ),
+    M_useStabilization ( false )
 {
 
 }
@@ -51,7 +52,30 @@ void aSIMPLEOperator::setUp(const matrixEpetraPtr_Type & F,
     M_X_pressure.reset( new VectorEpetra_Type (M_B->map(), Unique) );
     M_Y_velocity.reset( new VectorEpetra_Type (M_F->map(), Unique ) );
     M_Y_pressure.reset( new VectorEpetra_Type (M_B->map(), Unique) );
+    M_useStabilization = false;
 }
+
+void aSIMPLEOperator::setUp(const matrixEpetraPtr_Type & F,
+                            const matrixEpetraPtr_Type & B,
+                            const matrixEpetraPtr_Type & Btranspose,
+                            const matrixEpetraPtr_Type & D)
+{
+    M_F = F;
+    M_B = B;
+    M_Btranspose = Btranspose;
+    M_D.reset( new matrixEpetra_Type ( *D ) );
+    M_D->globalAssemble();
+    M_comm = F->map().commPtr();
+    M_monolithicMap.reset( new mapEpetra_Type ( M_F->map() ) );
+    *M_monolithicMap += M_B->map();
+    M_Z.reset(new VectorEpetra_Type( F->map(), Unique ) );
+    M_X_velocity.reset( new VectorEpetra_Type (M_F->map(), Unique) );
+    M_X_pressure.reset( new VectorEpetra_Type (M_B->map(), Unique) );
+    M_Y_velocity.reset( new VectorEpetra_Type (M_F->map(), Unique ) );
+    M_Y_pressure.reset( new VectorEpetra_Type (M_B->map(), Unique) );
+    M_useStabilization = true;
+}
+
 
 void aSIMPLEOperator::setOptions(const Teuchos::ParameterList& solversOptions)
 {
@@ -112,6 +136,12 @@ void aSIMPLEOperator::buildShurComplement( )
 
     // computing M_B*(diag(F)^{-1}*M_Btranspose)
     M_B->multiply (false, FBT, false, *M_schurComplement, false);
+    if ( M_useStabilization )
+    {
+    	*M_D *= -1.0;
+    	*M_schurComplement += *M_D;
+    }
+
     M_schurComplement->globalAssemble();
 
     M_DBT.reset ( new matrixEpetra_Type( *M_Btranspose ) );

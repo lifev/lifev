@@ -68,6 +68,12 @@ public:
                const matrixEpetraPtr_Type & B,
                const matrixEpetraPtr_Type & Btranspose);
 
+    void setUp ( const matrixEpetraPtr_Type & F,
+   				 const matrixEpetraPtr_Type & B,
+				 const matrixEpetraPtr_Type & Btranspose,
+				 const matrixEpetraPtr_Type & D );
+
+
     //! @name Set Methods
     //@{
     //! \warning Transpose of this operator is not supported
@@ -150,6 +156,8 @@ private:
 
     matrixEpetraPtr_Type M_Btranspose;
 
+    matrixEpetraPtr_Type M_D;
+
     matrixEpetraPtr_Type M_schurComplement;
 
     //! Communicator
@@ -181,6 +189,8 @@ private:
     boost::shared_ptr<VectorEpetra_Type> M_X_pressure;
     boost::shared_ptr<VectorEpetra_Type> M_Y_velocity;
     boost::shared_ptr<VectorEpetra_Type> M_Y_pressure;
+
+    bool M_useStabilization;
 
 };
 
