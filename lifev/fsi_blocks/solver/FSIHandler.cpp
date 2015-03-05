@@ -876,11 +876,27 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 	M_fluid->buildSystem();
 
+	/*
 	M_fluid->updateSystem ( M_beta_star, M_rhs_velocity );
 
 	M_fluid->applyBoundaryConditions ( M_fluidBC, M_time );
 	M_rhsFluid.reset(new VectorEpetra ( M_fluid->uFESpace()->map() ) );
 	M_rhsFluid = M_fluid->getRhs();
+	*/
+
+	// Initialize vector for the fluid residual with map of the full residual
+	vectorPtr_Type fluid_residual( new vector_Type ( residual.map() ) );
+	fluid_residual->zero();
+
+	// Get the fluid velocity at the previous Newton iteration
+	vectorPtr_Type velocity_km1( new vector_Type ( M_fluid->uFESpace()->map ( ) ) );
+	velocity_km1->subset ( solution, 0);
+
+	// Get the fluid pressure at the previous Newton iteration
+	vectorPtr_Type pressure_km1( new vector_Type ( M_fluid->pFESpace()->map ( ) ) );
+	pressure_km1->subset ( solution, M_fluid->pFESpace()->map ( ), M_fluid->uFESpace()->map().mapSize(), 0 );
+
+	M_fluid->evaluateResidual( M_beta_star, velocity_km1, pressure_km1, M_rhs_velocity, fluid_residual);
 
 	//--------------------------------------//
 	// Third: initialize the apply operator //
@@ -895,7 +911,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	vectorPtr_Type rightHandSide ( new vector_Type ( M_monolithicMap ) );
 	rightHandSide->zero();
 	// get the fluid right hand side
-	rightHandSide->subset ( *M_rhsFluid, M_fluid->uFESpace()->map(), 0, 0 );
+//	rightHandSide->subset ( *M_rhsFluid, M_fluid->uFESpace()->map(), 0, 0 );
 	// get the structure right hand side
 	rightHandSide->subset ( *M_rhsStructure, M_displacementFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() );
 	// get the right hand side of the coupling of the velocities
@@ -907,6 +923,9 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 	M_applyOperatorResidual->Apply(solution.epetraVector(), residual.epetraVector());
 	residual -= *rightHandSide;
+
+	// Adding contribution from the fluid
+	residual += *fluid_residual;
 
 	applyBCresidual ( residual );
 
@@ -956,6 +975,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	//---------------------------------------------//
 
 	M_displayer.leaderPrint ( "[FSI] - Update Jacobian terms: \n" ) ;
+	M_fluid->updateConvectiveTerm(M_beta_star);
 	M_fluid->updateJacobian(u_k);
 	M_fluid->applyBoundaryConditionsJacobian ( M_fluidBC );
 
@@ -1144,16 +1164,30 @@ void
 FSIHandler::initializeApplyOperatorResidual ( )
 {
 	Operators::FSIApplyOperator::operatorPtrContainer_Type operDataResidual(5,5);
-	operDataResidual(0,0) = M_fluid->block00()->matrixPtr();
-	operDataResidual(0,1) = M_fluid->block01()->matrixPtr();
+
+	matrixPtr_Type block00 ( new matrix_Type( M_fluid->uFESpace()->map() ) );
+	block00->zero();
+	block00->globalAssemble(); // the fluid part of the residual is assembled directly
+
+	matrixPtr_Type block10 ( new matrix_Type( M_fluid->pFESpace()->map() ) );
+	block10->zero();
+	block10->globalAssemble( M_fluid->uFESpace()->mapPtr(), M_fluid->pFESpace()->mapPtr() ); // the fluid part of the residual is assembled directly
+
+	matrixPtr_Type block01 ( new matrix_Type( M_fluid->uFESpace()->map() ) );
+	block01->zero();
+	block01->globalAssemble( M_fluid->pFESpace()->mapPtr(), M_fluid->uFESpace()->mapPtr() ); // the fluid part of the residual is assembled directly
+
+	operDataResidual(0,0) = block00->matrixPtr();
+	operDataResidual(0,1) = block01->matrixPtr();
+	operDataResidual(1,0) = block10->matrixPtr();
 	operDataResidual(0,3) = M_coupling->lambdaToFluidMomentum()->matrixPtr();
-	operDataResidual(1,0) = M_fluid->block10()->matrixPtr();
 	operDataResidual(2,2) = M_matrixStructure->matrixPtr();
 	operDataResidual(2,3) = M_coupling->lambdaToStructureMomentum()->matrixPtr();
 	operDataResidual(3,0) = M_coupling->fluidVelocityToLambda()->matrixPtr();
 	operDataResidual(3,2) = M_coupling->structureDisplacementToLambda()->matrixPtr();
 	operDataResidual(4,2) = M_coupling->structureDisplacementToFluidDisplacement()->matrixPtr();
 	operDataResidual(4,4) = M_ale->matrix()->matrixPtr();
+
 	M_applyOperatorResidual->setUp(operDataResidual, M_comm);
 
 }

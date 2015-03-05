@@ -596,6 +596,69 @@ void NavierStokesSolver::updateBCHandler( bcPtr_Type & bc )
 	bc->bcUpdate ( *M_velocityFESpace->mesh(), M_velocityFESpace->feBd(), M_velocityFESpace->dof() );
 }
 
+void NavierStokesSolver::evaluateResidual( const vectorPtr_Type& convective_velocity,
+					   	   	   	   	   	   const vectorPtr_Type& velocity_km1,
+					   	   	   	   	   	   const vectorPtr_Type& pressure_km1,
+					   	   	   	   	   	   const vectorPtr_Type& rhs_velocity,
+					   	   	   	   	   	   vectorPtr_Type& residual)
+{
+	residual->zero();
+
+	// Residual vector for the velocity and pressure components
+	vectorPtr_Type res_velocity ( new vector_Type ( M_velocityFESpace->map(), Unique ) );
+	vectorPtr_Type res_pressure ( new vector_Type ( M_pressureFESpace->map(), Unique ) );
+	res_velocity->zero();
+	res_pressure->zero();
+
+	// Get repeated versions of input vectors for the assembly
+	vectorPtr_Type convective_velocity_repeated ( new vector_Type (*convective_velocity, Repeated) );
+	vectorPtr_Type u_km1_repeated ( new vector_Type (*velocity_km1, Repeated) );
+	vectorPtr_Type p_km1_repeated ( new vector_Type (*pressure_km1, Repeated) );
+	vectorPtr_Type rhs_velocity_repeated ( new vector_Type (*rhs_velocity, Repeated) );
+
+	{
+		using namespace ExpressionAssembly;
+
+		if ( M_stiffStrain )
+		{
+			integrate ( elements ( M_fespaceUETA->mesh() ),
+					M_velocityFESpace->qr(),
+					M_fespaceUETA,
+					M_density * value ( M_alpha / M_timeStep ) * dot ( value ( M_fespaceUETA, *u_km1_repeated ), phi_i ) -
+					M_density * dot ( value ( M_fespaceUETA, *rhs_velocity_repeated ), phi_i ) +
+					value ( 0.5 ) * M_viscosity * dot ( grad ( phi_i )  + transpose ( grad ( phi_i ) ), grad ( M_fespaceUETA, *u_km1_repeated ) + transpose ( grad ( M_fespaceUETA, *u_km1_repeated ) ) ) +
+					M_density * dot ( value ( M_fespaceUETA, *convective_velocity_repeated ) * grad ( M_fespaceUETA, *u_km1_repeated ), phi_i ) +
+					value ( -1.0 ) * value ( M_fespacePETA, *p_km1_repeated ) * div ( phi_i )
+			) >> res_velocity;
+		}
+		else
+		{
+			integrate ( elements ( M_fespaceUETA->mesh() ),
+					M_velocityFESpace->qr(),
+					M_fespaceUETA,
+					M_density * value ( M_alpha / M_timeStep ) * dot ( value ( M_fespaceUETA, *u_km1_repeated ), phi_i ) -
+					M_density * dot ( value ( M_fespaceUETA, *rhs_velocity_repeated ), phi_i ) +
+					M_viscosity * dot ( grad ( phi_i ), grad ( M_fespaceUETA, *u_km1_repeated ) + transpose ( grad ( M_fespaceUETA, *u_km1_repeated ) ) ) +
+					M_density * dot ( value ( M_fespaceUETA, *convective_velocity_repeated ) * grad ( M_fespaceUETA, *u_km1_repeated ), phi_i ) +
+					value ( -1.0 ) * value ( M_fespacePETA, *p_km1_repeated ) * div ( phi_i )
+			) >> res_velocity;
+		}
+
+		integrate ( elements ( M_fespaceUETA->mesh() ),
+				M_pressureFESpace->qr(),
+				M_fespacePETA,
+				trace ( grad ( M_fespaceUETA, *u_km1_repeated ) ) * phi_i
+		) >> res_pressure;
+	}
+
+	res_velocity->globalAssemble();
+	res_pressure->globalAssemble();
+
+	residual->subset ( *res_velocity, M_velocityFESpace->map(), 0, 0 );
+	residual->subset ( *res_pressure, M_pressureFESpace->map(), 0, M_velocityFESpace->map().mapSize() );
+
+}
+
 void NavierStokesSolver::evalResidual(vector_Type& residual, const vector_Type& solution, const UInt iter_newton)
 {
 	// Residual to zero
