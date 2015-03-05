@@ -255,10 +255,10 @@ void StabilizationSUPG::residual( vectorPtr_Type& residual_velocity,
 				M_pFESpace.qr(),
 				M_fespacePETA,
 	  /*(3)*/	  TAU_M*value(M_density*M_alpha/M_timestep)*dot( grad(phi_i), value(M_fespaceUETA, velocity_previous_newton_step_rep) )
-	  /*(4)*/	-*TAU_M*value(M_density)*dot( grad(phi_i), value(M_fespaceUETA, velocity_rhs_rep))
-	  /*(6)*/   +*TAU_M*value(M_density)*dot( grad(phi_i), value(M_fespaceUETA, velocity_previous_newton_step_rep)*grad(M_fespaceUETA, velocity_previous_newton_step_rep) )
-	  /*(8)*/	+*TAU_M*dot( grad(phi_i), grad(M_fespacePETA,pressure_previous_newton_step_rep) )
-	 /*(10)*/   -*TAU_M*value(M_viscosity)*dot(grad(phi_i), laplacian(M_fespaceUETA, velocity_previous_newton_step_rep))
+	  /*(4)*/	-TAU_M*value(M_density)*dot( grad(phi_i), value(M_fespaceUETA, velocity_rhs_rep))
+	  /*(6)*/   +TAU_M*value(M_density)*dot( grad(phi_i), value(M_fespaceUETA, velocity_previous_newton_step_rep)*grad(M_fespaceUETA, velocity_previous_newton_step_rep) )
+	  /*(8)*/	+TAU_M*dot( grad(phi_i), grad(M_fespacePETA,pressure_previous_newton_step_rep) )
+	 /*(10)*/   -TAU_M*value(M_viscosity)*dot(grad(phi_i), laplacian(M_fespaceUETA, velocity_previous_newton_step_rep))
 			 )
 		     >> residualPressure;
 

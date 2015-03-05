@@ -3,7 +3,7 @@ INCLUDE(TribitsAddExecutableAndTest)
 INCLUDE(AddSubdirectories)
 
 ADD_SUBDIRECTORIES(
-	test_block_solver
-	steady_ns
-	fluid_challenge_steady
+	semi_implicit_time_dependent_navier_stokes
+	nonlinear_steady_navier_stokes
+	nonlinear_time_dependent_navier_stokes
 )
