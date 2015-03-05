@@ -1,6 +1,18 @@
 LifeV 3.8.5:
 ============
 
+* Added VerifySolution class for easier check of result based on scalar product between solution vectors
+* lighter FSI test for segregated method
+* ETA (expression template assembly) is not experimental anymore
+* Merged new Eletrophysiology module, cf https://cmcsforge.epfl.ch/issues/124 . Experimental since it compiles only with c++11
+* fixed several std:: namespaces
+* Enhanced import/export in tests, including export of P2 fields
+* Bugfix of operator-= in MatrixEpetra class
+
+
+LifeV 3.8.5:
+============
+
 * Fixed dependicies of Navier-Stokes example to ETA
 * ETA is now in production
 

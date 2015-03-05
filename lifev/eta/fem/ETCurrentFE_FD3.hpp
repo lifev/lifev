@@ -34,10 +34,14 @@ class ETCurrentFE
     //!Friend to allow direct access to the raw data
     template< UInt dim, UInt FSpaceDim >
     friend class ExpressionAssembly::EvaluationDivJ;
-    
+
     //!Friend to allow direct access to the raw data
     template< UInt dim, UInt FSpaceDim >
-    friend class ExpressionAssembly::EvaluationLaplacianPhiJ;
+    friend class ExpressionAssembly::EvaluationLaplacianI;
+
+    //!Friend to allow direct access to the raw data
+    template< UInt dim, UInt FSpaceDim >
+    friend class ExpressionAssembly::EvaluationLaplacianJ;
 
     //@}
 
@@ -57,6 +61,10 @@ private:
     
     //Private typedefs for the laplacian
     typedef std::vector< std::vector< std::vector <matrix_Return_Type > > > array_3D_matrix_Type;
+
+    // Typedefs for the second derivative
+    typedef MatrixSmall< spaceDim, spaceDim > matrix_d2Phi;
+    typedef std::vector< std::vector< std::vector< matrix_d2Phi > > > array_d2Phi;
 
 public:
 
@@ -231,7 +239,6 @@ public:
         return M_dphi[q][i];
     }
 
-
     //! Getter for the divergence of the basis functions in the quadrature nodes in the current element
     /*!
       @param i The index of the basis function
@@ -286,6 +293,8 @@ private:
     //Private typedefs for the 3D array (array of 2D array)
     typedef std::vector< array2D_Type > array3D_Type;
     
+    typedef std::vector< std::vector< array1D_Return_Type > > arrayLaplacian_Type;
+
     //Private typedefs for the 4D array (array of 3D array)
     typedef std::vector< array3D_Type > array4D_Type;
 
@@ -323,14 +332,15 @@ private:
     //! Update Dphi
     void updateDphi ( const UInt& iQuadPt );
 
+    //! Update D2phi
+    void updateD2phi ( const UInt& iQuadPt );
+
     //! Update Divergence
     void updateDivergence (const UInt& iQuadPt);
     
-    //! Update D2phi
-    void updateD2phi ( const UInt& iQuadPt);
-    
     //! Update Laplacian
     void updateLaplacian ( const UInt& iQuadPt);
+
 
     //@}
 
@@ -362,6 +372,8 @@ private:
     array3D_Type M_dphiReferenceFE;
     // Storage for the derivatives of the geometric map
     array3D_Type M_dphiGeometricMap;
+    // Storage for the second derivatives of the basis functions
+    array4D_Type M_d2phiReferenceFE;
 
     // Storage for the coordinates of the nodes of the current element
     array2D_Type M_cellNode;
@@ -378,18 +390,15 @@ private:
 
     // Storage for the derivative of the basis functions
     array2D_matrix_Type M_dphi;
-
     // Storage for the divergence of the basis functions
     array2D_Type M_divergence;
-    
-    // Storage for the second derivatives of the basis functions (note: the geometric map used for the 2nd derivative is M_dphiGeometricMap, no support for isoparametric elements)
-    array4D_Type M_d2phiReferenceFE;
-    
-    // Storage for the second derivatives of the basis functions
-    array2D_matrix_Type M_d2phi;
-    
+
+    // Storage for the second derivative of the basis functions
+    array_d2Phi M_d2phi;
+
     // Storage for the laplacian of the basis functions
-    array2D_vector_Type M_laplacian;
+    arrayLaplacian_Type M_laplacian;
+
 
 #ifdef HAVE_LIFEV_DEBUG
     // Debug informations, defined only if the code
@@ -443,6 +452,7 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadrat
     M_phi(),
     M_phiMap(),
     M_dphiReferenceFE(),
+    M_d2phiReferenceFE(),
     M_dphiGeometricMap(),
 
     M_cellNode(),
@@ -453,9 +463,9 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadrat
     M_tInverseJacobian(),
     M_dphi(),
     M_divergence(),
-    M_d2phiReferenceFE(),
     M_d2phi(),
     M_laplacian()
+
 #ifdef HAVE_LIFEV_DEBUG
     , M_isCellNodeUpdated (false),
     M_isQuadNodeUpdated (false),
@@ -493,6 +503,7 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap)
     M_phi(),
     M_phiMap(),
     M_dphiReferenceFE(),
+    M_d2phiReferenceFE(),
     M_dphiGeometricMap(),
 
     M_cellNode(),
@@ -503,7 +514,7 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap)
     M_tInverseJacobian(),
     M_dphi(),
     M_divergence(),
-    M_d2phiReferenceFE(),
+
     M_d2phi(),
     M_laplacian()
 
@@ -543,6 +554,7 @@ ETCurrentFE (const ETCurrentFE<spaceDim, fieldDim>& otherFE)
     M_phi (otherFE.M_phi),
     M_phiMap (otherFE.M_phiMap),
     M_dphiReferenceFE (otherFE.M_dphiReferenceFE),
+    M_d2phiReferenceFE (otherFE.M_d2phiReferenceFE),
     M_dphiGeometricMap (otherFE.M_dphiGeometricMap),
 
     M_cellNode (otherFE.M_cellNode),
@@ -553,7 +565,7 @@ ETCurrentFE (const ETCurrentFE<spaceDim, fieldDim>& otherFE)
     M_tInverseJacobian (otherFE.M_tInverseJacobian),
     M_dphi (otherFE.M_dphi),
     M_divergence (otherFE.M_divergence),
-    M_d2phiReferenceFE(otherFE.M_d2phiReferenceFE),
+
     M_d2phi (otherFE.M_d2phi),
     M_laplacian (otherFE.M_laplacian)
 
@@ -647,13 +659,12 @@ update (const elementType& element, const flag_Type& flag)
         }
         if ( flag & ET_UPDATE_ONLY_D2PHI )
         {
-            updateD2phi (i);
+        	updateD2phi (i);
         }
         if ( flag & ET_UPDATE_ONLY_LAPLACIAN )
         {
-            updateLaplacian (i);
+        	updateLaplacian (i);
         }
-
     }
 }
 
@@ -736,42 +747,6 @@ showMe (std::ostream& out) const
         for (UInt iDof (0); iDof < fieldDim * M_nbFEDof; ++iDof)
         {
             out << M_divergence[iQuad][iDof] << " ";
-        }
-        out << std::endl;
-    }
-    
-    out << " D2Phi : " << std::endl;
-    for (UInt iQuad (0); iQuad < M_nbQuadPt; ++iQuad)
-    {
-        for (UInt iDof (0); iDof < M_nbFEDof; ++iDof)
-        {
-            for (UInt iFieldDim (0); iFieldDim < fieldDim; ++iFieldDim)
-            {
-                for (UInt iCoor (0); iCoor < S_spaceDimension; ++iCoor)
-                {
-                    for (UInt jCoor (0); jCoor < S_spaceDimension; ++jCoor)
-                    {
-                        out << M_d2phi[iQuad][iDof][iCoor][jCoor] << " ";
-                    }
-                    out << std::endl;
-                }
-                out << std::endl;
-            }
-            out << std::endl;
-        }
-        out << std::endl;
-    }
-    
-    out << " Laplacian : " << std::endl;
-    for (UInt iQuad (0); iQuad < M_nbQuadPt; ++iQuad)
-    {
-        for (UInt iDof (0); iDof < M_nbFEDof; ++iDof)
-        {
-            for (UInt iFieldDim (0); iFieldDim < fieldDim; ++iFieldDim)
-            {
-                out << M_laplacian[iQuad][iDof][iFieldDim] << " ";
-            }
-            out << std::endl;
         }
         out << std::endl;
     }
@@ -868,25 +843,26 @@ setupInternalConstants()
         }
     }
 
-    // DPHI2REFERENCEFE
+
+    // D2PHIREFERENCEFE
     M_d2phiReferenceFE.resize (M_nbQuadPt);
     for (UInt q (0); q < M_nbQuadPt; ++q)
     {
-        M_d2phiReferenceFE[q].resize (M_nbFEDof);
-        for (UInt i (0); i < M_nbFEDof; ++i)
-        {
-            M_d2phiReferenceFE[q][i].resize (spaceDim);
-            for (UInt j (0); j < spaceDim; ++j)
-            {
-                M_d2phiReferenceFE[q][i][j].resize (spaceDim);
-                for (UInt k (0); k < spaceDim; ++k)
-                {
-                    M_d2phiReferenceFE[q][i][j][k] = M_referenceFE->d2Phi (i, j, k, M_quadratureRule->quadPointCoor (q) );
-                }
-            }
-        }
+    	M_d2phiReferenceFE[q].resize (M_nbFEDof);
+    	for (UInt i (0); i < M_nbFEDof; ++i)
+    	{
+    		M_d2phiReferenceFE[q][i].resize (spaceDim);
+    		for (UInt j (0); j < spaceDim; ++j)
+    		{
+    			M_d2phiReferenceFE[q][i][j].resize (spaceDim);
+    			for (UInt k (0); k < spaceDim; ++k)
+    			{
+    				M_d2phiReferenceFE[q][i][j][k] = M_referenceFE->d2Phi (i, j, k, M_quadratureRule->quadPointCoor (q) );
+    			}
+    		}
+    	}
     }
-    
+
     // The second group of values cannot be computed
     // now because it depends on the current element.
     // So, we just make space for it.
@@ -947,23 +923,28 @@ setupInternalConstants()
         // we have fieldDim * DoF basis functions
         M_divergence[i].resize ( fieldDim * M_nbFEDof );
     }
-    
+
     // d2phi
     M_d2phi.resize (M_nbQuadPt);
     for (UInt i (0); i < M_nbQuadPt; ++i)
     {
-        // we have fieldDim * DoF basis functions
-        M_d2phi[i].resize ( fieldDim * M_nbFEDof );
+    	// we have fieldDim * DoF basis functions
+    	M_d2phi[i].resize ( fieldDim * M_nbFEDof );
+
+    	// for each basis function we have fieldDim
+    	for (UInt j (0); j < ( fieldDim * M_nbFEDof ); ++j)
+    	{
+    		M_d2phi[i][j].resize(fieldDim);
+    	}
     }
-    
+
     // laplacian
     M_laplacian.resize (M_nbQuadPt);
     for (UInt i (0); i < M_nbQuadPt; ++i)
     {
-        // we have fieldDim * DoF basis functions
-        M_laplacian[i].resize ( fieldDim * M_nbFEDof );
+    	// we have fieldDim * DoF basis functions
+    	M_laplacian[i].resize ( fieldDim * M_nbFEDof );
     }
-    
 }
 
 template <UInt spaceDim, UInt fieldDim >
@@ -1106,83 +1087,78 @@ void ETCurrentFE< spaceDim, fieldDim >::updateDivergence ( const UInt& iQuadPt )
 //    std::cout << "\n-------- DIVERGENCE END -------\n";
 }
 
-
 template< UInt spaceDim, UInt fieldDim >
-void ETCurrentFE<spaceDim, fieldDim>::updateD2phi (const UInt& iQuadPt)
+void ETCurrentFE< spaceDim, fieldDim >::updateD2phi ( const UInt& iQuadPt )
 {
-    ASSERT (M_isInverseJacobianUpdated,
-            "Inverse jacobian must be updated to compute the derivative of the basis functions" );
-    
+    ASSERT ( M_isInverseJacobianUpdated,
+             "Inverse jacobian must be updated to compute the derivative of the basis functions" );
+
 #ifdef HAVE_LIFEV_DEBUG
     M_isD2phiUpdated = true;
 #endif
-    
-    Real partialSum (0.0);
-    
-//    std::cout << "\n---------- BEGIN D2PHI ---------\n";
-    
-    for (UInt iDof (0); iDof < M_nbFEDof; ++iDof)
+
+    Real partialSum ( 0.0 );
+
+    for ( UInt iDof ( 0 ); iDof < M_nbFEDof; ++iDof )
     {
-//        std::cout << "\n begin Dof " << iDof << ":\n";
-        for (UInt iCoor (0); iCoor < S_spaceDimension; ++iCoor)
+        for ( UInt iCoor ( 0 ); iCoor < S_spaceDimension; ++iCoor )
         {
-            for (UInt jCoor (0); jCoor < S_spaceDimension; ++jCoor)
-            {
-                partialSum = 0.0;
-                for ( UInt k1 (0); k1 < S_spaceDimension; ++k1 )
-                {
-                    for ( UInt k2 (0) ; k2 < S_spaceDimension; ++k2 )
-                    {
-                        partialSum += M_tInverseJacobian[iQuadPt][iCoor][k1] * M_d2phiReferenceFE[iQuadPt][iDof][k1][k2] * M_tInverseJacobian[iQuadPt][jCoor][k2];
-                    }
-                }
-                M_d2phi[iQuadPt][iDof][iCoor][jCoor] = partialSum;
-            }
+        	for ( UInt jCoor ( 0 ); jCoor < S_spaceDimension; ++jCoor )
+        	{
+        		partialSum = 0.0;
+        		for ( UInt k1 (0); k1 < S_spaceDimension; ++k1 )
+        		{
+        			for ( UInt k2 (0) ; k2 < S_spaceDimension; ++k2 )
+        			{
+        				partialSum += M_tInverseJacobian[iQuadPt][iCoor][k1]
+        				            * M_d2phiReferenceFE[iQuadPt][iDof][k1][k2]
+        				            * M_tInverseJacobian[iQuadPt][jCoor][k2];
+        			}
+        		}
+
+        		// set only appropriate values, other are initialized to 0 by default constructor (of VectorSmall)
+        		M_d2phi[iQuadPt][iDof][0][iCoor][jCoor] = partialSum;
+
+        		// copy other values according to the vectorial basis functions
+        		for ( UInt k ( 1 ); k < fieldDim; ++k)
+        		{
+        			M_d2phi[iQuadPt][k * M_nbFEDof + iDof][k][iCoor][jCoor] = partialSum;
+        		}
+        	}
         }
-//        std::cout << M_d2phi[iQuadPt][iDof];
-//        std::cout << "\n\n";
-//        std::cout << "End field direction ---------------------\n";
     }
-//    std::cout << "End dof ---------------------\n";
-//    std::cout << "\n---------- END D2PHI ---------\n";
 }
 
 template< UInt spaceDim, UInt fieldDim >
-void ETCurrentFE<spaceDim, fieldDim>::updateLaplacian (const UInt& iQuadPt)
+void ETCurrentFE< spaceDim, fieldDim >::updateLaplacian ( const UInt& iQuadPt )
 {
     ASSERT ( M_isD2phiUpdated,
-            "Basis function second derivatives must be updated to compute the laplacian" );
-    
+             "Basis function second derivatives must be updated to compute the laplacian" );
+
 #ifdef HAVE_LIFEV_DEBUG
     M_isLaplacianUpdated = true;
 #endif
-    
+
     Real partialSum ( 0.0 );
-    
-    //std::cout << "\n-------- LAPLACIAN BEGIN -------\n";
-    
+
     for ( UInt iDof ( 0 ); iDof < M_nbFEDof; ++iDof )
     {
-        partialSum = 0.0;
+        for ( UInt k ( 0 ); k < fieldDim; ++k )
+        {
+        	partialSum = 0.0;
+        	for ( UInt iCoor ( 0 ); iCoor < S_spaceDimension; ++iCoor )
+        	{
+        		partialSum += M_d2phi[iQuadPt][iDof][k][iCoor][iCoor];
+        	}
 
-        for ( UInt iCoor ( 0 ); iCoor < S_spaceDimension; ++iCoor )
-        {
-            partialSum += M_d2phi[iQuadPt][iDof][iCoor][iCoor];
+        	M_laplacian[iQuadPt][iDof][k] = partialSum;
+
+        	// copy other values according to the vectorial basis functions
+        	for ( UInt k ( 1 ); k < fieldDim; ++k)
+        	{
+        		M_laplacian[iQuadPt][k * M_nbFEDof + iDof][k] = M_laplacian[iQuadPt][iDof][0];
+        	}
         }
-        
-        for ( UInt iCoor ( 0 ); iCoor < S_spaceDimension; ++iCoor )
-        {
-            M_laplacian[iQuadPt][iDof][iCoor] = partialSum;
-    //        std::cout << "Laplacian of dof " << iDof << " equal to ";
-            
-            // copy other values according to the vectorial basis functions
-            for ( UInt k ( 1 ); k < fieldDim; ++k)
-            {
-                M_laplacian[iQuadPt][k * M_nbFEDof + iDof][iCoor] = partialSum;
-            }
-        }
-    //    std::cout << M_laplacian[iQuadPt][iDof];
-    //    std::cout << "\n---------------\n";
     }
 }
 

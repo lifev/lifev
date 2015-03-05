@@ -121,7 +121,7 @@ public:
     }
 
     //! Display method
-    static void display ( std::ostream& out = std::cout )
+    static void display (std::ostream& out = std::cout )
     {
         out << " cbrt( " ;
         EvaluationBaseType::display (out);

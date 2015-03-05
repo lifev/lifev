@@ -46,7 +46,8 @@
 #include <lifev/eta/expression/ExpressionInverse.hpp>
 #include <lifev/eta/expression/ExpressionDeterminant.hpp>
 #include <lifev/eta/expression/ExpressionTrace.hpp>
-
+#include <lifev/eta/expression/ExpressionLaplacianI.hpp>
+#include <lifev/eta/expression/ExpressionLaplacianJ.hpp>
 
 #include <lifev/eta/expression/ExpressionAddition.hpp>
 #include <lifev/eta/expression/ExpressionSubstraction.hpp>
@@ -74,6 +75,7 @@
 
 #include <lifev/eta/expression/ExpressionInterpolateValue.hpp>
 #include <lifev/eta/expression/ExpressionInterpolateGradient.hpp>
+#include <lifev/eta/expression/ExpressionInterpolateLaplacian.hpp>
 
 #include <lifev/eta/expression/ExpressionFunctor.hpp>
 
@@ -89,7 +91,6 @@
 #include <lifev/eta/expression/ExpressionPatchArea.hpp>
 
 #include <lifev/eta/expression/ExpressionScalarToVector.hpp>
-#include <lifev/eta/expression/ExpressionLaplacianPhiJ.hpp>
 
 #include <lifev/eta/expression/EvaluationPhiI.hpp>
 #include <lifev/eta/expression/EvaluationPhiJ.hpp>
@@ -101,7 +102,8 @@
 #include <lifev/eta/expression/EvaluationInverse.hpp>
 #include <lifev/eta/expression/EvaluationDeterminant.hpp>
 #include <lifev/eta/expression/EvaluationTrace.hpp>
-
+#include <lifev/eta/expression/EvaluationLaplacianI.hpp>
+#include <lifev/eta/expression/EvaluationLaplacianJ.hpp>
 
 #include <lifev/eta/expression/EvaluationAddition.hpp>
 #include <lifev/eta/expression/EvaluationSubstraction.hpp>
@@ -129,6 +131,7 @@
 
 #include <lifev/eta/expression/EvaluationInterpolateValue.hpp>
 #include <lifev/eta/expression/EvaluationInterpolateGradient.hpp>
+#include <lifev/eta/expression/EvaluationInterpolateLaplacian.hpp>
 
 #include <lifev/eta/expression/EvaluationFunctor.hpp>
 
@@ -144,7 +147,6 @@
 #include <lifev/eta/expression/EvaluationVectorFromNonConstantMatrix.hpp>
 
 #include <lifev/eta/expression/EvaluationScalarToVector.hpp>
-#include <lifev/eta/expression/EvaluationLaplacianPhiJ.hpp>
 
 namespace LifeV
 {
@@ -253,23 +255,34 @@ private:
     ~ExpressionToEvaluation();
 };
 
+// Specialized for laplacian(phi_i)
+template<UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionLaplacianI, testDim, solutionDim, spaceDim>
+{
+public:
+    typedef EvaluationLaplacianI<testDim, spaceDim> evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+// Specialized for laplacian(phi_j)
+template<UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionLaplacianJ, testDim, solutionDim, spaceDim>
+{
+public:
+    typedef EvaluationLaplacianJ<solutionDim, spaceDim> evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
 // Specialized for dphi_j
 template<UInt testDim, UInt solutionDim, UInt spaceDim>
 class ExpressionToEvaluation<ExpressionDphiJ, testDim, solutionDim, spaceDim>
 {
 public:
     typedef EvaluationDphiJ<solutionDim, spaceDim> evaluation_Type;
-private:
-    ExpressionToEvaluation();
-    ~ExpressionToEvaluation();
-};
-    
-// Specialized for laplacian_phi_j
-template<UInt testDim, UInt solutionDim, UInt spaceDim>
-class ExpressionToEvaluation<ExpressionLaplacianPhiJ, testDim, solutionDim, spaceDim>
-{
-public:
-    typedef EvaluationLaplacianPhiJ<solutionDim, spaceDim> evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();
@@ -551,6 +564,18 @@ class ExpressionToEvaluation <
 {
 public:
     typedef EvaluationInterpolateGradient<MeshType, MapType, FESpaceDim, FEFieldDim> evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+// Specialized for an interpolated laplacian
+template<typename MeshType, typename MapType, UInt FESpaceDim, UInt FEFieldDim, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation <
+    ExpressionInterpolateLaplacian<MeshType, MapType, FESpaceDim, FEFieldDim>, testDim, solutionDim, spaceDim >
+{
+public:
+    typedef EvaluationInterpolateLaplacian<MeshType, MapType, FESpaceDim, FEFieldDim> evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();

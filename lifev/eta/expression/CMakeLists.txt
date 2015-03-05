@@ -14,6 +14,7 @@ SET(expression_HEADERS
 	expression/EvaluationHK.hpp
 	expression/EvaluationIfCrossed.hpp
 	expression/EvaluationInterpolateGradient.hpp
+	expression/EvaluationInterpolateLaplacian.hpp
 	expression/EvaluationInterpolateValue.hpp
 	expression/EvaluationMatrix.hpp
 	expression/EvaluationMeas.hpp
@@ -56,6 +57,7 @@ SET(expression_HEADERS
 	expression/ExpressionHK.hpp
 	expression/ExpressionIfCrossed.hpp
 	expression/ExpressionInterpolateGradient.hpp
+	expression/ExpressionInterpolateLaplacian.hpp
 	expression/ExpressionInterpolateValue.hpp
 	expression/ExpressionMatrix.hpp
 	expression/ExpressionMeas.hpp
@@ -112,6 +114,10 @@ SET(expression_HEADERS
 	expression/EvaluationVectorFromNonConstantMatrix.hpp
 	expression/ExpressionPatchArea.hpp
 	expression/EvaluationPatchArea.hpp
+	expression/ExpressionLaplacianI.hpp
+	expression/ExpressionLaplacianJ.hpp
+	expression/EvaluationLaplacianI.hpp
+	expression/EvaluationLaplacianJ.hpp
 CACHE INTERNAL "")
 
 SET(expression_SOURCES ""
@@ -119,7 +125,6 @@ SET(expression_SOURCES ""
 	expression/ExpressionDivJ.cpp
 	expression/ExpressionDphiI.cpp
 	expression/ExpressionDphiJ.cpp
-    expression/ExpressionLaplacianPhiJ.cpp
 	expression/ExpressionHK.cpp
 	expression/ExpressionMeas.cpp
 	expression/ExpressionPhiI.cpp
@@ -127,6 +132,8 @@ SET(expression_SOURCES ""
 	expression/ExpressionPosition.cpp
 	expression/ExpressionNormal.cpp
 	expression/ExpressionScalar.cpp
+	expression/ExpressionLaplacianI.cpp
+	expression/ExpressionLaplacianJ.cpp
 CACHE INTERNAL "")
 
 

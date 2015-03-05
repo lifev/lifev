@@ -409,7 +409,7 @@ addTo (VectorType& vec)
                 // Make the assembly
                 for (UInt iQuadPt (0); iQuadPt < nbQuadPt_std; ++iQuadPt)
                 {
-                    for (UInt i (0); i < nbTestDof; ++i)
+                	for (UInt i (0); i < nbTestDof; ++i)
                     {
                         M_elementalVector.element (i + iblock * nbTestDof) +=
                             M_evaluation.value_qi (iQuadPt, i + iblock * nbTestDof)
