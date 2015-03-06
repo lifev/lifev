@@ -138,18 +138,6 @@ public:
 	  	  	  	  	const vector_Type& pressure_previous_newton_step,
 	  	  	  	  	const vector_Type& velocity_rhs );
 
-    //! Updates the jacobian matrix
-    /*!
-     * @param convective_velocity convective velocity from the previous Newton step
-     * @param velocity_previous_newton_step velocity from the previous Newton step
-     * @param pressure_previous_newton_step pressure from the previous Newton step
-     * @param velocity_rhs velocity term from approximation time derivative
-     */
-    void jacobianFSI(	const vector_Type& convective_velocity,
-    		        	const vector_Type& velocity_previous_newton_step,
-    		        	const vector_Type& pressure_previous_newton_step,
-    		        	const vector_Type& velocity_rhs );
-
     //! Adds to the residual the contribution coming from the SUPG stabilization
     /*!
        @param residual_velocity velocity component of the residual
@@ -163,22 +151,6 @@ public:
 			  	   const vector_Type& velocity_previous_newton_step,
 			  	   const vector_Type& pressure_previous_newton_step,
 			  	   const vector_Type& velocity_rhs);
-
-    //! Adds to the residual the contribution coming from the SUPG stabilization
-    /*!
-     * @param residual_velocity velocity component of the residual
-     * @param residual_pressure pressure component of the residual
-     * @param convective_velocity convective velocity from the previous Newton step
-     * @param velocity_previous_newton_step velocity from the previous Newton step
-     * @param pressure_previous_newton_step pressure from the previous Newton step
-     * @param velocity_rhs velocity term from approximation time derivative
-     */
-    void residualFSI(  vectorPtr_Type& residual_velocity,
-    			   	   vectorPtr_Type& residual_pressure,
-    			   	   const vector_Type& convective_velocity,
-    			   	   const vector_Type& velocity_previous_newton_step,
-    			   	   const vector_Type& pressure_previous_newton_step,
-    			   	   const vector_Type& velocity_rhs);
 
     //! Set the constant C_I for the supg
     void setConstant (const int & value);
