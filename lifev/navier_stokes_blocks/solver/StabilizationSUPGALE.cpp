@@ -1,4 +1,4 @@
-#include <lifev/fsi_blocks/solver/StabilizationSUPGALE.hpp>
+#include <lifev/navier_stokes_blocks/solver/StabilizationSUPGALE.hpp>
 
 // MACRO TO DEFINE TAU_M
 #define TAU_M 	       value(1)/( eval(squareroot,TAU_M_DEN) )
