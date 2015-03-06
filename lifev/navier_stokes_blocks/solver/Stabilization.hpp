@@ -45,6 +45,8 @@
 
 #include <lifev/eta/fem/ETFESpace.hpp>
 
+#include <lifev/core/array/MatrixEpetra.hpp>
+
 namespace LifeV
 {
 
@@ -70,14 +72,12 @@ public:
     typedef boost::shared_ptr<ETFESpace_velocity > ETFESpacePtr_velocity;
     typedef boost::shared_ptr<ETFESpace_pressure > ETFESpacePtr_pressure;
 
-    typedef FactorySingleton<Factory<Stabilization, std::string> >  StabilizationFactory;
-
     Stabilization();
 
-    ~Stabilization();
+    virtual ~Stabilization();
 
     //! Build the graphs of each single block
-    virtual void buildGraphs();
+    virtual void buildGraphs() = 0;
 
     //! Updates the jacobian matrix in Navier-Stokes simulations in fixed coordinates
     /*!
@@ -154,9 +154,9 @@ public:
     //! Set the time step size
     virtual void setTimeStep  (const Real & timestep) = 0;
 
-    virtual void setVelocitySpace(FESpace<mesh_Type, MapEpetra>&  velocityFESpace) = 0;
+    virtual void setVelocitySpace(fespacePtr_Type velocityFESpace) = 0;
 
-    virtual void setPressureSpace(FESpace<mesh_Type, MapEpetra>&  pressureFESpace) = 0;
+    virtual void setPressureSpace(fespacePtr_Type pressureFESpace) = 0;
 
     virtual void setETvelocitySpace(const ETFESpacePtr_velocity & velocityEta_fespace) = 0;
 
@@ -180,6 +180,12 @@ private:
 inline Stabilization::Stabilization()
 {
 }
+
+inline Stabilization::~Stabilization()
+{
+}
+
+typedef FactorySingleton<Factory<Stabilization, std::string> >  StabilizationFactory;
 
 } // namespace LifeV
 

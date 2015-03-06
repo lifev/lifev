@@ -17,10 +17,7 @@ namespace LifeV
 // Constructor
 //=============================================================================
 
-StabilizationSUPG::StabilizationSUPG(FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
-						             FESpace<mesh_Type, MapEpetra>&  pressureFESpace):
-M_uFESpace (velocityFESpace),
-M_pFESpace (pressureFESpace)
+StabilizationSUPG::StabilizationSUPG()
 {
 }
 
@@ -40,9 +37,9 @@ void StabilizationSUPG::setConstant(const int & value)
 
 void StabilizationSUPG::buildGraphs()
 {
-	vector_Type velocity_previous_newton_step_rep( M_uFESpace.map(), Repeated);
-	vector_Type pressure_previous_newton_step_rep( M_pFESpace.map(), Repeated);
-	vector_Type velocity_rhs_rep( M_uFESpace.map(), Repeated);
+	vector_Type velocity_previous_newton_step_rep( M_uFESpace->map(), Repeated);
+	vector_Type pressure_previous_newton_step_rep( M_pFESpace->map(), Repeated);
+	vector_Type velocity_rhs_rep( M_uFESpace->map(), Repeated);
 
 	velocity_previous_newton_step_rep.zero();
 	pressure_previous_newton_step_rep.zero();
@@ -64,8 +61,8 @@ void StabilizationSUPG::buildGraphs()
 		using namespace ExpressionAssembly;
 
 		// Graph for block 00
-		M_graph_block00.reset (new Epetra_FECrsGraph (Copy, * (M_uFESpace.map().map (Unique) ), 0) );
-		buildGraph ( elements ( M_uFESpace.mesh() ),
+		M_graph_block00.reset (new Epetra_FECrsGraph (Copy, * (M_uFESpace->map().map (Unique) ), 0) );
+		buildGraph ( elements ( M_uFESpace->mesh() ),
 					 quadRuleTetra4pt,
 					 M_fespaceUETA,
 					 M_fespaceUETA,
@@ -84,8 +81,8 @@ void StabilizationSUPG::buildGraphs()
 		M_graph_block00->OptimizeStorage();
 
 		// Graph for block 10
-		M_graph_block10.reset (new Epetra_FECrsGraph (Copy, * (M_pFESpace.map().map (Unique) ), 0) );
-		buildGraph ( elements (M_pFESpace.mesh() ),
+		M_graph_block10.reset (new Epetra_FECrsGraph (Copy, * (M_pFESpace->map().map (Unique) ), 0) );
+		buildGraph ( elements (M_pFESpace->mesh() ),
 					 quadRuleTetra4pt,
 					 M_fespacePETA,
 					 M_fespaceUETA,
@@ -94,23 +91,23 @@ void StabilizationSUPG::buildGraphs()
 			/*(9)*/	 +TAU_M*value(M_density) * dot( grad(phi_i), value(M_fespaceUETA, velocity_previous_newton_step_rep)*grad(phi_j) )
 		   /*(15)*/	 -TAU_M*value(M_viscosity)*dot(grad(phi_i), laplacian(phi_j))
 				   ) >> M_graph_block10;
-		M_graph_block10->GlobalAssemble ( * (M_uFESpace.map().map (Unique) ), * (M_pFESpace.map().map (Unique) ) );
+		M_graph_block10->GlobalAssemble ( * (M_uFESpace->map().map (Unique) ), * (M_pFESpace->map().map (Unique) ) );
 		M_graph_block10->OptimizeStorage();
 
 		// Graph for block 01
-		M_graph_block01.reset (new Epetra_FECrsGraph (Copy, * (M_uFESpace.map().map (Unique) ), 0) );
-		buildGraph ( elements (M_pFESpace.mesh() ),
+		M_graph_block01.reset (new Epetra_FECrsGraph (Copy, * (M_uFESpace->map().map (Unique) ), 0) );
+		buildGraph ( elements (M_pFESpace->mesh() ),
 					 quadRuleTetra4pt,
 					  M_fespaceUETA,
 					  M_fespacePETA,
 			/*(10)*/   TAU_M*value(M_density)*dot( value(M_fespaceUETA, velocity_previous_newton_step_rep)*grad(phi_i), grad(phi_j) )
 				   ) >> M_graph_block01;
-		M_graph_block01->GlobalAssemble ( * (M_pFESpace.map().map (Unique) ), * (M_uFESpace.map().map (Unique) ) );
+		M_graph_block01->GlobalAssemble ( * (M_pFESpace->map().map (Unique) ), * (M_uFESpace->map().map (Unique) ) );
 		M_graph_block01->OptimizeStorage();
 
 		// Graph for block 11
-		M_graph_block11.reset (new Epetra_FECrsGraph (Copy, * (M_pFESpace.map().map (Unique) ), 0) );
-		buildGraph ( elements (M_pFESpace.mesh() ),
+		M_graph_block11.reset (new Epetra_FECrsGraph (Copy, * (M_pFESpace->map().map (Unique) ), 0) );
+		buildGraph ( elements (M_pFESpace->mesh() ),
 					 quadRuleTetra4pt,
 					 M_fespacePETA,
 					 M_fespacePETA,
@@ -121,26 +118,26 @@ void StabilizationSUPG::buildGraphs()
 
 	}
 
-	M_block_00.reset (new matrix_Type ( M_uFESpace.map(), *M_graph_block00 ) );
+	M_block_00.reset (new matrix_Type ( M_uFESpace->map(), *M_graph_block00 ) );
 	M_block_00->zero();
 	M_block_00->globalAssemble();
 
-	M_block_01.reset (new matrix_Type ( M_uFESpace.map(), *M_graph_block01 ) );
+	M_block_01.reset (new matrix_Type ( M_uFESpace->map(), *M_graph_block01 ) );
 	M_block_01->zero();
-	M_block_01->globalAssemble( M_pFESpace.mapPtr(), M_uFESpace.mapPtr() );
+	M_block_01->globalAssemble( M_pFESpace->mapPtr(), M_uFESpace->mapPtr() );
 
-	M_block_10.reset (new matrix_Type ( M_pFESpace.map(), *M_graph_block10 ) );
+	M_block_10.reset (new matrix_Type ( M_pFESpace->map(), *M_graph_block10 ) );
 	M_block_10->zero();
-	M_block_10->globalAssemble( M_uFESpace.mapPtr(), M_pFESpace.mapPtr() );
+	M_block_10->globalAssemble( M_uFESpace->mapPtr(), M_pFESpace->mapPtr() );
 
-	M_block_11.reset (new matrix_Type ( M_pFESpace.map(), *M_graph_block11 ) );
+	M_block_11.reset (new matrix_Type ( M_pFESpace->map(), *M_graph_block11 ) );
 	M_block_11->zero();
 	M_block_11->globalAssemble( );
 }
 
-void StabilizationSUPG::jacobian( const vector_Type& velocity_previous_newton_step,
-		  	  	  	  	  	  	  const vector_Type& pressure_previous_newton_step,
-		  	  	  	  	  	  	  const vector_Type& velocity_rhs)
+void StabilizationSUPG::apply_matrix( const vector_Type& velocity_previous_newton_step,
+		  	  	  	  	  	  	  	  const vector_Type& pressure_previous_newton_step,
+		  	  	  	  	  	  	  	  const vector_Type& velocity_rhs)
 {
 	// missing force
 
@@ -164,8 +161,8 @@ void StabilizationSUPG::jacobian( const vector_Type& velocity_previous_newton_st
 	using namespace ExpressionAssembly;
 
 	integrate(
-				elements(M_uFESpace.mesh()),
-				M_uFESpace.qr(),
+				elements(M_uFESpace->mesh()),
+				M_uFESpace->qr(),
 				M_fespaceUETA, // test  w -> phi_i
 				M_fespaceUETA, // trial \delta u -> phi_j
 		/*(1)*/	  TAU_M*value(M_density*M_density)*value(M_alpha/M_timestep) * dot( value(M_fespaceUETA, velocity_previous_newton_step_rep)*grad(phi_i), phi_j )
@@ -182,8 +179,8 @@ void StabilizationSUPG::jacobian( const vector_Type& velocity_previous_newton_st
 	M_block_00->globalAssemble();
 
 	integrate(
-				elements(M_uFESpace.mesh()),
-				M_pFESpace.qr(),
+				elements(M_uFESpace->mesh()),
+				M_pFESpace->qr(),
 				M_fespacePETA, // test  q -> phi_i
 				M_fespaceUETA, // trial \delta u -> phi_j
 		/*(4)*/	  TAU_M*value(M_density*M_alpha/M_timestep)*dot( grad(phi_i), phi_j )
@@ -191,20 +188,20 @@ void StabilizationSUPG::jacobian( const vector_Type& velocity_previous_newton_st
 		/*(9)*/	 +TAU_M*value(M_density) * dot( grad(phi_i), value(M_fespaceUETA, velocity_previous_newton_step_rep)*grad(phi_j) )
 		/*(15)*/ -TAU_M*value(M_viscosity)*dot(grad(phi_i), laplacian(phi_j))
 	         ) >> M_block_10;
-	M_block_10->globalAssemble( M_uFESpace.mapPtr(), M_pFESpace.mapPtr() );
+	M_block_10->globalAssemble( M_uFESpace->mapPtr(), M_pFESpace->mapPtr() );
 
 	integrate(
-				elements(M_uFESpace.mesh()),
-				M_uFESpace.qr(),
+				elements(M_uFESpace->mesh()),
+				M_uFESpace->qr(),
 				M_fespaceUETA, // test  w -> phi_i
 				M_fespacePETA, // trial \delta p -> phi_j
 		/*(10)*/  TAU_M*value(M_density)*dot( value(M_fespaceUETA, velocity_previous_newton_step_rep)*grad(phi_i), grad(phi_j) )
 		     ) >> M_block_01;
-	M_block_01->globalAssemble( M_pFESpace.mapPtr(), M_uFESpace.mapPtr() );
+	M_block_01->globalAssemble( M_pFESpace->mapPtr(), M_uFESpace->mapPtr() );
 
 	integrate(
-				elements(M_uFESpace.mesh()),
-				M_pFESpace.qr(),
+				elements(M_uFESpace->mesh()),
+				M_pFESpace->qr(),
 				M_fespacePETA, // test   q -> phi_i
 				M_fespacePETA, // trial  \delta p -> phi_j
 		/*(12)*/  TAU_M*dot(  grad(phi_i), grad(phi_j) )
@@ -213,11 +210,11 @@ void StabilizationSUPG::jacobian( const vector_Type& velocity_previous_newton_st
 
 }
 
-void StabilizationSUPG::residual( vectorPtr_Type& residual_velocity,
-								  vectorPtr_Type& residual_pressure,
-								  const vector_Type& velocity_previous_newton_step,
-								  const vector_Type& pressure_previous_newton_step,
-								  const vector_Type& velocity_rhs)
+void StabilizationSUPG::apply_vector( vectorPtr_Type& residual_velocity,
+								  	  vectorPtr_Type& residual_pressure,
+								  	  const vector_Type& velocity_previous_newton_step,
+								  	  const vector_Type& pressure_previous_newton_step,
+								  	  const vector_Type& velocity_rhs)
 {
 	// missing force, terms 11 and 12
 
@@ -237,8 +234,8 @@ void StabilizationSUPG::residual( vectorPtr_Type& residual_velocity,
     using namespace ExpressionAssembly;
 
 	integrate(
-				elements(M_uFESpace.mesh()),
-				M_uFESpace.qr(),
+				elements(M_uFESpace->mesh()),
+				M_uFESpace->qr(),
 				M_fespaceUETA,
 	  /*(1)*/	  TAU_M*value(M_density*M_density)*value(M_alpha/M_timestep) * dot( value(M_fespaceUETA, velocity_previous_newton_step_rep)*grad(phi_i), value(M_fespaceUETA, velocity_previous_newton_step_rep) )
 	  /*(2)*/    -TAU_M*value(M_density*M_density)*dot( value(M_fespaceUETA, velocity_previous_newton_step_rep)*grad(phi_i), value(M_fespaceUETA, velocity_rhs_rep) )
@@ -250,8 +247,8 @@ void StabilizationSUPG::residual( vectorPtr_Type& residual_velocity,
 			 >> residual_velocity;
 
 	integrate(
-				elements(M_uFESpace.mesh()),
-				M_pFESpace.qr(),
+				elements(M_uFESpace->mesh()),
+				M_pFESpace->qr(),
 				M_fespacePETA,
 	  /*(3)*/	  TAU_M*value(M_density*M_alpha/M_timestep)*dot( grad(phi_i), value(M_fespaceUETA, velocity_previous_newton_step_rep) )
 	  /*(4)*/	-TAU_M*value(M_density)*dot( grad(phi_i), value(M_fespaceUETA, velocity_rhs_rep))

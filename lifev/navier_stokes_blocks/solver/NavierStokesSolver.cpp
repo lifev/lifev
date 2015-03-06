@@ -91,7 +91,9 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
 
     if ( M_useStabilization )
     {
-    	M_stabilization.reset ( new StabilizationSUPG ( *M_velocityFESpace, *M_pressureFESpace) );
+    	M_stabilization.reset ( StabilizationFactory::instance().createObject ( M_dataFile("fluid/stabilization/type","none") ) );
+    	M_stabilization->setVelocitySpace(M_velocityFESpace);
+    	M_stabilization->setPressureSpace(M_pressureFESpace);
     	M_stabilization->setDensity(M_density);
     	M_stabilization->setViscosity(M_viscosity);
     	int vel_order = M_dataFile ( "fluid/stabilization/vel_order", 1 );
@@ -775,7 +777,7 @@ void NavierStokesSolver::evalResidual(vector_Type& residual, const vector_Type& 
 	if ( M_useStabilization )
 	{
 		M_displayer.leaderPrint ( "[F] - Assembly residual of the stabilization \n" ) ;
-		M_stabilization->residual(res_velocity, res_pressure, *u_km1, *p_km1, *rhs_velocity_repeated);
+		M_stabilization->apply_vector(res_velocity, res_pressure, *u_km1, *p_km1, *rhs_velocity_repeated);
 	}
 
     res_velocity->globalAssemble();
@@ -793,7 +795,7 @@ void NavierStokesSolver::evalResidual(vector_Type& residual, const vector_Type& 
 
     if ( M_useStabilization )
     {
-    	M_stabilization->jacobian(*u_km1, *p_km1, *M_velocityRhs);
+    	M_stabilization->apply_matrix(*u_km1, *p_km1, *M_velocityRhs);
 
     	*M_block00 += *M_stabilization->block_00();
     	M_block00->globalAssemble();

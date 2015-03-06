@@ -420,7 +420,7 @@ private:
     Real M_density;
     Real M_viscosity;
 
-    boost::shared_ptr<StabilizationSUPG> M_stabilization;
+    boost::shared_ptr<Stabilization> M_stabilization;
 
     bool M_useStabilization;
 

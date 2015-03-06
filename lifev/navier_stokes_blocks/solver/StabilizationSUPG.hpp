@@ -38,7 +38,7 @@
 */
 
 #ifndef _STABILIZATIONSUPG_HPP_
-#define _STABILIZATIONSUPG_HPP_
+#define _STABILIZATIONSUPG_HPP_ 1
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -57,6 +57,8 @@
 //Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
+
+#include <lifev/navier_stokes_blocks/solver/Stabilization.hpp>
 
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/fem/ReferenceFE.hpp>
@@ -86,7 +88,7 @@ public:
     ~SquareRoot() {}
 };
 
-class StabilizationSUPG
+class StabilizationSUPG : public Stabilization
 {
 public:
 
@@ -118,10 +120,10 @@ public:
     //! @name Constructor and Destructor
     //@{
     //! Default Constructor
-    StabilizationSUPG(FESpace<mesh_Type, MapEpetra>&  velocityFESpace, FESpace<mesh_Type, MapEpetra>&  pressureFESpace);
+    StabilizationSUPG();
 
     //! ~Destructor
-    ~StabilizationSUPG() {};
+    virtual ~StabilizationSUPG(){}
 
     //@}
 
@@ -134,9 +136,9 @@ public:
        @param pressure_previous_newton_step pressure from the previous Newton step
        @param velocity_rhs velocity term from approximation time derivative
      */
-    void jacobian(	const vector_Type& velocity_previous_newton_step,
-	  	  	  	  	const vector_Type& pressure_previous_newton_step,
-	  	  	  	  	const vector_Type& velocity_rhs );
+    void apply_matrix(	const vector_Type& velocity_previous_newton_step,
+	  	  	  	  		const vector_Type& pressure_previous_newton_step,
+	  	  	  	  		const vector_Type& velocity_rhs );
 
     //! Adds to the residual the contribution coming from the SUPG stabilization
     /*!
@@ -146,11 +148,15 @@ public:
        @param pressure_previous_newton_step pressure from the previous Newton step
        @param velocity_rhs velocity term from approximation time derivative
      */
-    void residual( vectorPtr_Type& residual_velocity,
-			  	   vectorPtr_Type& residual_pressure,
-			  	   const vector_Type& velocity_previous_newton_step,
-			  	   const vector_Type& pressure_previous_newton_step,
-			  	   const vector_Type& velocity_rhs);
+    void apply_vector( vectorPtr_Type& residual_velocity,
+			  	   	   vectorPtr_Type& residual_pressure,
+			  	   	   const vector_Type& velocity_previous_newton_step,
+			  	   	   const vector_Type& pressure_previous_newton_step,
+			  	   	   const vector_Type& velocity_rhs);
+
+    void setVelocitySpace(fespacePtr_Type velocityFESpace){ M_uFESpace = velocityFESpace;}
+
+    void setPressureSpace(fespacePtr_Type pressureFESpace){ M_pFESpace = pressureFESpace;}
 
     //! Set the constant C_I for the supg
     void setConstant (const int & value);
@@ -208,8 +214,8 @@ private:
     //@{
 
     //! finite element spaces for velocity and pressure
-    fespace_Type& M_uFESpace;
-    fespace_Type& M_pFESpace;
+    fespacePtr_Type M_uFESpace;
+    fespacePtr_Type M_pFESpace;
 
     ETFESpacePtr_velocity M_fespaceUETA;
     ETFESpacePtr_pressure M_fespacePETA;
@@ -245,6 +251,16 @@ private:
 
     //@}
 }; // class StabilizationSUPG
+
+//! Factory create function
+inline StabilizationSUPG * createStabilizationSUPG()
+{
+    return new StabilizationSUPG();
+}
+namespace
+{
+static bool S_registerStabilizationSUPG = StabilizationFactory::instance().registerProduct ( "SUPG", &createStabilizationSUPG );
+}
 
 } // namespace LifeV
 
