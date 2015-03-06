@@ -5,6 +5,7 @@ SET(solver_HEADERS
   solver/NavierStokesPreconditionerOperator.hpp
   solver/aSIMPLEOperator.hpp
   solver/aPCDOperator.hpp
+  solver/Stabilization.hpp
   solver/StabilizationSUPG.hpp
   solver/StabilizationSUPGALE.hpp
 CACHE INTERNAL "")

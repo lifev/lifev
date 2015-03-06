@@ -70,6 +70,7 @@
 
 #include <lifev/core/filter/GetPot.hpp>
 
+#include <lifev/navier_stokes_blocks/solver/Stabilization.hpp>
 #include <lifev/navier_stokes_blocks/solver/StabilizationSUPG.hpp>
 
 namespace LifeV
