@@ -4,6 +4,7 @@ SET(solver_HEADERS
   solver/ALESolver.hpp
   solver/FSIApplyOperator.hpp
   solver/DirichletNeumannPreconditioner.hpp
+  solver/StabilizationSUPGALE.hpp
 CACHE INTERNAL "")
 
 SET(solver_SOURCES
@@ -12,6 +13,7 @@ SET(solver_SOURCES
   solver/ALESolver.cpp
   solver/FSIApplyOperator.cpp	
   solver/DirichletNeumannPreconditioner.cpp
+  solver/StabilizationSUPGALE.cpp
 CACHE INTERNAL "")
 
 
