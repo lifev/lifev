@@ -72,6 +72,7 @@
 
 #include <lifev/navier_stokes_blocks/solver/Stabilization.hpp>
 #include <lifev/navier_stokes_blocks/solver/StabilizationSUPG.hpp>
+#include <lifev/navier_stokes_blocks/solver/StabilizationSUPGALE.hpp>
 
 namespace LifeV
 {

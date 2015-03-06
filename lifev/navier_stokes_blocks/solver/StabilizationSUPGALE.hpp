@@ -38,7 +38,7 @@
 */
 
 #ifndef _STABILIZATIONSUPGALE_HPP_
-#define _STABILIZATIONSUPGALE_HPP_
+#define _STABILIZATIONSUPGALE_HPP_ 1
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -58,6 +58,8 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
+#include <lifev/navier_stokes_blocks/solver/Stabilization.hpp>
+
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/fem/ReferenceFE.hpp>
 
@@ -71,7 +73,7 @@
 namespace LifeV
 {
 
-class SquareRoot
+class SquareRoot_SUPGALE
 {
 public:
     typedef Real return_Type;
@@ -81,12 +83,12 @@ public:
         return std::sqrt(a);
     }
 
-    SquareRoot() {}
-    SquareRoot (const SquareRoot&) {}
-    ~SquareRoot() {}
+    SquareRoot_SUPGALE() {}
+    SquareRoot_SUPGALE (const SquareRoot_SUPGALE&) {}
+    ~SquareRoot_SUPGALE() {}
 };
 
-class StabilizationSUPGALE
+class StabilizationSUPGALE : public Stabilization
 {
 public:
 
@@ -118,10 +120,10 @@ public:
     //! @name Constructor and Destructor
     //@{
     //! Default Constructor
-    StabilizationSUPGALE(FESpace<mesh_Type, MapEpetra>&  velocityFESpace, FESpace<mesh_Type, MapEpetra>&  pressureFESpace);
+    StabilizationSUPGALE();
 
     //! ~Destructor
-    ~StabilizationSUPGALE() {};
+    virtual ~StabilizationSUPGALE() {}
 
     //@}
 
@@ -155,6 +157,10 @@ public:
     			    const vector_Type& velocity_previous_newton_step,
     			    const vector_Type& pressure_previous_newton_step,
     			    const vector_Type& velocity_rhs);
+
+    void setVelocitySpace(fespacePtr_Type velocityFESpace){ M_uFESpace = velocityFESpace;}
+
+    void setPressureSpace(fespacePtr_Type pressureFESpace){ M_pFESpace = pressureFESpace;}
 
     //! Set the constant C_I for the supg
     void setConstant (const int & value);
@@ -212,8 +218,8 @@ private:
     //@{
 
     //! finite element spaces for velocity and pressure
-    fespace_Type& M_uFESpace;
-    fespace_Type& M_pFESpace;
+    fespacePtr_Type M_uFESpace;
+    fespacePtr_Type M_pFESpace;
 
     ETFESpacePtr_velocity M_fespaceUETA;
     ETFESpacePtr_pressure M_fespacePETA;
@@ -248,7 +254,17 @@ private:
     matrixPtr_Type M_block_11;
 
     //@}
-}; // class StabilizationSUPG
+}; // class StabilizationSUPGALE
+
+//! Factory create function
+inline StabilizationSUPGALE * createStabilizationSUPGALE()
+{
+    return new StabilizationSUPGALE();
+}
+namespace
+{
+static bool S_registerStabilizationSUPGALE = StabilizationFactory::instance().registerProduct ( "SUPGALE", &createStabilizationSUPGALE );
+}
 
 } // namespace LifeV
 

@@ -17,10 +17,7 @@ namespace LifeV
 // Constructor
 //=============================================================================
 
-StabilizationSUPGALE::StabilizationSUPGALE(FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
-						             FESpace<mesh_Type, MapEpetra>&  pressureFESpace):
-M_uFESpace (velocityFESpace),
-M_pFESpace (pressureFESpace)
+StabilizationSUPGALE::StabilizationSUPGALE()
 {
 }
 
@@ -41,10 +38,10 @@ void StabilizationSUPGALE::setConstant(const int & value)
 void StabilizationSUPGALE::buildGraphs()
 {
 	// We assume that the fluid velocity and the mesh velocity are discretized by FE of same order
-	vector_Type u_km1( M_uFESpace.map(), Repeated);
-	vector_Type beta_km1( M_uFESpace.map(), Repeated);
-	vector_Type p_km1( M_pFESpace.map(), Repeated);
-	vector_Type u_bdf( M_uFESpace.map(), Repeated);
+	vector_Type u_km1( M_uFESpace->map(), Repeated);
+	vector_Type beta_km1( M_uFESpace->map(), Repeated);
+	vector_Type p_km1( M_pFESpace->map(), Repeated);
+	vector_Type u_bdf( M_uFESpace->map(), Repeated);
 
 	u_km1.zero();
 	beta_km1.zero();
@@ -56,7 +53,7 @@ void StabilizationSUPGALE::buildGraphs()
 	p_km1 += 1;
 	u_bdf += 1;
 
-	boost::shared_ptr<SquareRoot> squareroot(new SquareRoot());
+	boost::shared_ptr<SquareRoot_SUPGALE> squareroot(new SquareRoot_SUPGALE());
 
 	MatrixSmall<3, 3> Eye;
 	Eye *= 0.0;
@@ -68,8 +65,8 @@ void StabilizationSUPGALE::buildGraphs()
 		using namespace ExpressionAssembly;
 
 		// Graph for block 00
-		M_graph_block00.reset (new Epetra_FECrsGraph (Copy, * (M_uFESpace.map().map (Unique) ), 0) );
-		buildGraph ( elements ( M_uFESpace.mesh() ),
+		M_graph_block00.reset (new Epetra_FECrsGraph (Copy, * (M_uFESpace->map().map (Unique) ), 0) );
+		buildGraph ( elements ( M_uFESpace->mesh() ),
 					 quadRuleTetra4pt,
 					 M_fespaceUETA,
 					 M_fespaceUETA,
@@ -88,8 +85,8 @@ void StabilizationSUPGALE::buildGraphs()
 		M_graph_block00->OptimizeStorage();
 
 		// Graph for block 10
-		M_graph_block10.reset (new Epetra_FECrsGraph (Copy, * (M_pFESpace.map().map (Unique) ), 0) );
-		buildGraph ( elements (M_pFESpace.mesh() ),
+		M_graph_block10.reset (new Epetra_FECrsGraph (Copy, * (M_pFESpace->map().map (Unique) ), 0) );
+		buildGraph ( elements (M_pFESpace->mesh() ),
 					 quadRuleTetra4pt,
 					 M_fespacePETA,
 					 M_fespaceUETA,
@@ -98,23 +95,23 @@ void StabilizationSUPGALE::buildGraphs()
 			/*(13)*/ +TAU_M * value(M_density) * dot( grad(phi_i), value(M_fespaceUETA, beta_km1)*grad(phi_j) )
 			/*(15)*/ -TAU_M * value(M_viscosity) * dot( grad(phi_i), laplacian(phi_j) )
 				   ) >> M_graph_block10;
-		M_graph_block10->GlobalAssemble ( * (M_uFESpace.map().map (Unique) ), * (M_pFESpace.map().map (Unique) ) );
+		M_graph_block10->GlobalAssemble ( * (M_uFESpace->map().map (Unique) ), * (M_pFESpace->map().map (Unique) ) );
 		M_graph_block10->OptimizeStorage();
 
 		// Graph for block 01
-		M_graph_block01.reset (new Epetra_FECrsGraph (Copy, * (M_uFESpace.map().map (Unique) ), 0) );
-		buildGraph ( elements (M_pFESpace.mesh() ),
+		M_graph_block01.reset (new Epetra_FECrsGraph (Copy, * (M_uFESpace->map().map (Unique) ), 0) );
+		buildGraph ( elements (M_pFESpace->mesh() ),
 					 quadRuleTetra4pt,
 					  M_fespaceUETA,
 					  M_fespacePETA,
 			/*(7)*/	   TAU_M * value(M_density) * dot( value(M_fespaceUETA, beta_km1)*grad(phi_i), grad(phi_j) )
 				   ) >> M_graph_block01;
-		M_graph_block01->GlobalAssemble ( * (M_pFESpace.map().map (Unique) ), * (M_uFESpace.map().map (Unique) ) );
+		M_graph_block01->GlobalAssemble ( * (M_pFESpace->map().map (Unique) ), * (M_uFESpace->map().map (Unique) ) );
 		M_graph_block01->OptimizeStorage();
 
 		// Graph for block 11
-		M_graph_block11.reset (new Epetra_FECrsGraph (Copy, * (M_pFESpace.map().map (Unique) ), 0) );
-		buildGraph ( elements (M_pFESpace.mesh() ),
+		M_graph_block11.reset (new Epetra_FECrsGraph (Copy, * (M_pFESpace->map().map (Unique) ), 0) );
+		buildGraph ( elements (M_pFESpace->mesh() ),
 					 quadRuleTetra4pt,
 					 M_fespacePETA,
 					 M_fespacePETA,
@@ -125,19 +122,19 @@ void StabilizationSUPGALE::buildGraphs()
 
 	}
 
-	M_block_00.reset (new matrix_Type ( M_uFESpace.map(), *M_graph_block00 ) );
+	M_block_00.reset (new matrix_Type ( M_uFESpace->map(), *M_graph_block00 ) );
 	M_block_00->zero();
 	M_block_00->globalAssemble();
 
-	M_block_01.reset (new matrix_Type ( M_uFESpace.map(), *M_graph_block01 ) );
+	M_block_01.reset (new matrix_Type ( M_uFESpace->map(), *M_graph_block01 ) );
 	M_block_01->zero();
-	M_block_01->globalAssemble( M_pFESpace.mapPtr(), M_uFESpace.mapPtr() );
+	M_block_01->globalAssemble( M_pFESpace->mapPtr(), M_uFESpace->mapPtr() );
 
-	M_block_10.reset (new matrix_Type ( M_pFESpace.map(), *M_graph_block10 ) );
+	M_block_10.reset (new matrix_Type ( M_pFESpace->map(), *M_graph_block10 ) );
 	M_block_10->zero();
-	M_block_10->globalAssemble( M_uFESpace.mapPtr(), M_pFESpace.mapPtr() );
+	M_block_10->globalAssemble( M_uFESpace->mapPtr(), M_pFESpace->mapPtr() );
 
-	M_block_11.reset (new matrix_Type ( M_pFESpace.map(), *M_graph_block11 ) );
+	M_block_11.reset (new matrix_Type ( M_pFESpace->map(), *M_graph_block11 ) );
 	M_block_11->zero();
 	M_block_11->globalAssemble( );
 }
@@ -159,7 +156,7 @@ void StabilizationSUPGALE::jacobian( const vector_Type& convective_velocity_prev
 	vector_Type p_km1( pressure_previous_newton_step, Repeated);
 	vector_Type u_bdf( velocity_rhs, Repeated);
 
-	boost::shared_ptr<SquareRoot> squareroot(new SquareRoot());
+	boost::shared_ptr<SquareRoot_SUPGALE> squareroot(new SquareRoot_SUPGALE());
 
 	MatrixSmall<3, 3> Eye;
 	Eye *= 0.0;
@@ -170,8 +167,8 @@ void StabilizationSUPGALE::jacobian( const vector_Type& convective_velocity_prev
 	using namespace ExpressionAssembly;
 
 	integrate(
-				elements(M_uFESpace.mesh()),
-				M_uFESpace.qr(),
+				elements(M_uFESpace->mesh()),
+				M_uFESpace->qr(),
 				M_fespaceUETA, // test  w -> phi_i
 				M_fespaceUETA, // trial \delta u -> phi_j
 		/*(1)*/	  TAU_M * value(M_density*M_density) * value(M_alpha/M_timestep) * dot( value(M_fespaceUETA, beta_km1)*grad(phi_i), phi_j )
@@ -188,8 +185,8 @@ void StabilizationSUPGALE::jacobian( const vector_Type& convective_velocity_prev
 	M_block_00->globalAssemble();
 
 	integrate(
-				elements(M_uFESpace.mesh()),
-				M_pFESpace.qr(),
+				elements(M_uFESpace->mesh()),
+				M_pFESpace->qr(),
 				M_fespacePETA, // test  q -> phi_i
 				M_fespaceUETA, // trial \delta u -> phi_j
 		/*(11)*/  TAU_M * value(M_alpha*M_density/M_timestep) * dot( grad(phi_i), phi_j )
@@ -197,20 +194,20 @@ void StabilizationSUPGALE::jacobian( const vector_Type& convective_velocity_prev
 		/*(13)*/ +TAU_M * value(M_density) * dot( grad(phi_i), value(M_fespaceUETA, beta_km1)*grad(phi_j) )
 		/*(15)*/ -TAU_M * value(M_viscosity) * dot( grad(phi_i), laplacian(phi_j) )
 	         ) >> M_block_10;
-	M_block_10->globalAssemble( M_uFESpace.mapPtr(), M_pFESpace.mapPtr() );
+	M_block_10->globalAssemble( M_uFESpace->mapPtr(), M_pFESpace->mapPtr() );
 
 	integrate(
-				elements(M_uFESpace.mesh()),
-				M_uFESpace.qr(),
+				elements(M_uFESpace->mesh()),
+				M_uFESpace->qr(),
 				M_fespaceUETA, // test  w -> phi_i
 				M_fespacePETA, // trial \delta p -> phi_j
 		/*(7)*/	  TAU_M * value(M_density) * dot( value(M_fespaceUETA, beta_km1)*grad(phi_i), grad(phi_j) )
 		     ) >> M_block_01;
-	M_block_01->globalAssemble( M_pFESpace.mapPtr(), M_uFESpace.mapPtr() );
+	M_block_01->globalAssemble( M_pFESpace->mapPtr(), M_uFESpace->mapPtr() );
 
 	integrate(
-				elements(M_uFESpace.mesh()),
-				M_pFESpace.qr(),
+				elements(M_uFESpace->mesh()),
+				M_pFESpace->qr(),
 				M_fespacePETA, // test   q -> phi_i
 				M_fespacePETA, // trial  \delta p -> phi_j
 		/*(14)*/  TAU_M*dot(  grad(phi_i), grad(phi_j) )
@@ -233,7 +230,7 @@ void StabilizationSUPGALE::residual( vectorPtr_Type& residual_velocity,
 	vector_Type p_km1( pressure_previous_newton_step, Repeated);
 	vector_Type u_bdf( velocity_rhs, Repeated);
 
-	boost::shared_ptr<SquareRoot> squareroot(new SquareRoot());
+	boost::shared_ptr<SquareRoot_SUPGALE> squareroot(new SquareRoot_SUPGALE());
 
 	// Matrix needed to evaluate the divergence of a vector (term with TAU_C)
 	MatrixSmall<3, 3> Eye;
@@ -245,8 +242,8 @@ void StabilizationSUPGALE::residual( vectorPtr_Type& residual_velocity,
     using namespace ExpressionAssembly;
 
 	integrate(
-				elements(M_uFESpace.mesh()),
-				M_uFESpace.qr(),
+				elements(M_uFESpace->mesh()),
+				M_uFESpace->qr(),
 				M_fespaceUETA,
 	  /*(1)*/	  TAU_M * value(M_density*M_density)*value(M_alpha/M_timestep) * dot( value(M_fespaceUETA, beta_km1)*grad(phi_i), value(M_fespaceUETA, u_km1) )
 	  /*(2)*/    -TAU_M * value(M_density*M_density) * dot( value(M_fespaceUETA, beta_km1)*grad(phi_i), value(M_fespaceUETA, u_bdf) )
@@ -258,8 +255,8 @@ void StabilizationSUPGALE::residual( vectorPtr_Type& residual_velocity,
 			 >> residual_velocity;
 
 	integrate(
-				elements(M_uFESpace.mesh()),
-				M_pFESpace.qr(),
+				elements(M_uFESpace->mesh()),
+				M_pFESpace->qr(),
 				M_fespacePETA,
 	  /*(6)*/	  TAU_M*value(M_density*M_alpha/M_timestep)*dot( grad(phi_i), value(M_fespaceUETA, u_km1) )
 	  /*(7)*/	-TAU_M*value(M_density)*dot( grad(phi_i), value(M_fespaceUETA, u_bdf))
