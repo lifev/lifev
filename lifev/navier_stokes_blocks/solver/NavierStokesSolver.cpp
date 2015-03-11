@@ -672,6 +672,12 @@ void NavierStokesSolver::evaluateResidual( const vectorPtr_Type& convective_velo
 		) >> res_pressure;
 	}
 
+	if ( M_useStabilization )
+	{
+		M_displayer.leaderPrint ( "[F] - Assembly residual of the stabilization \n" ) ;
+		M_stabilization->apply_vector(res_velocity, res_pressure, *convective_velocity, *velocity_km1, *pressure_km1, *rhs_velocity);
+	}
+
 	res_velocity->globalAssemble();
 	res_pressure->globalAssemble();
 
@@ -876,6 +882,35 @@ void NavierStokesSolver::updateJacobian( const vector_Type& u_k )
 	*M_block00 += *M_Jacobian;
 	if ( !M_useStabilization )
 		M_block00->globalAssemble( );
+}
+
+void NavierStokesSolver::updateStabilization( const vector_Type& convective_velocity_previous_newton_step,
+	 	 	 	 	 	 	 	 	 	 	  const vector_Type& velocity_previous_newton_step,
+	 	 	 	 	 	 	 	 	 	 	  const vector_Type& pressure_previous_newton_step,
+	 	 	 	 	 	 	 	 	 	 	  const vector_Type& velocity_rhs )
+{
+	M_displayer.leaderPrint ( "[F] - Update Jacobian stabilization terms\n" ) ;
+	M_stabilization->apply_matrix(convective_velocity_previous_newton_step,
+								  velocity_previous_newton_step,
+								  pressure_previous_newton_step,
+								  velocity_rhs);
+
+	*M_block00 += *M_stabilization->block_00();
+	M_block00->globalAssemble();
+
+	M_block01->zero();
+	*M_block01 += *M_Btranspose;
+	*M_block01 += *M_stabilization->block_01();
+	M_block01->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
+
+	M_block10->zero();
+	*M_block10 += *M_B;
+	*M_block10 += *M_stabilization->block_10();
+	M_block10->globalAssemble(M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
+
+	M_block11->zero();
+	*M_block11 += *M_stabilization->block_11();
+	M_block11->globalAssemble();
 }
 
 void NavierStokesSolver::solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol )

@@ -167,6 +167,11 @@ public:
 						   const vectorPtr_Type& rhs_velocity,
 						   vectorPtr_Type& residual);
 
+	void updateStabilization( const vector_Type& convective_velocity_previous_newton_step,
+							  const vector_Type& velocity_previous_newton_step,
+							  const vector_Type& pressure_previous_newton_step,
+							  const vector_Type& velocity_rhs );
+
 	// Set coefficient associated to the time discretization scheme
 	void setAlpha(const Real& alpha)
 	{
@@ -300,6 +305,11 @@ public:
     matrixPtr_Type const& block11() const
     {
     	return M_block11;
+    }
+
+    bool useStabilization() const
+    {
+    	return M_useStabilization;
     }
 
 private:
