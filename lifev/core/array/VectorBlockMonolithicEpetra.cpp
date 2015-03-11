@@ -42,7 +42,7 @@ namespace LifeV
 // ===================================================
 
 VectorBlockMonolithicEpetra::
-VectorBlockMonolithicEpetra ( const map_type& map, const mapType_type& mapType)
+VectorBlockMonolithicEpetra ( const map_Type& map, const mapType_type& mapType)
     : VectorEpetra (map, mapType),
       M_blockSize (1, map.map (Unique)->NumGlobalElements() ),
       M_blockFirstIndex (1, 0)
@@ -56,7 +56,7 @@ VectorBlockMonolithicEpetra ( const mapVector_type& mapVector, const mapType_typ
 {
     ASSERT ( mapVector.nbMap() > 0 , "Map vector empty, impossible to construct a VectorBlockMonolithicEpetra!");
 
-    map_type myMap (mapVector.map (0) );
+    map_Type myMap (mapVector.map (0) );
 
     M_blockSize[0] = mapVector.mapSize (0);
     M_blockFirstIndex[0] = 0;

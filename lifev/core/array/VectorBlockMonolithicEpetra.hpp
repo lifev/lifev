@@ -80,10 +80,10 @@ public:
     typedef Real data_type;
 
     //! Type of the map to be used
-    typedef MapEpetra map_type;
+    typedef MapEpetra map_Type;
 
     //! Type of the MapVector to be used with this class
-    typedef MapVector<map_type> mapVector_type;
+    typedef MapVector<map_Type> mapVector_type;
 
     //! Type of the map (Unique/Repeated)
     typedef MapEpetraType mapType_type;
@@ -104,7 +104,7 @@ public:
     //@{
 
     //! Constructor with the monolithic map
-    VectorBlockMonolithicEpetra ( const map_type& map, const mapType_type& mapType = Unique);
+    VectorBlockMonolithicEpetra ( const map_Type& map, const mapType_type& mapType = Unique);
 
     //! Construction with a vector of map
     /*!

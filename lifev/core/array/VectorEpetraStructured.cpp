@@ -42,7 +42,7 @@ namespace LifeV
 // ===================================================
 
 VectorEpetraStructured::
-VectorEpetraStructured ( const map_type& map,
+VectorEpetraStructured ( const map_Type& map,
                          const mapType_type& mapType,
                          const combineMode_Type combineMode )
     : VectorEpetra ( map, mapType, combineMode ),
@@ -58,7 +58,7 @@ VectorEpetraStructured ( const mapVector_type& mapVector,
 {
     ASSERT ( mapVector.nbMap() > 0 , "Map vector empty, impossible to construct a VectorBlockMonolithicEpetra!" );
 
-    map_type myMap ( mapVector.totalMap() );
+    map_Type myMap ( mapVector.totalMap() );
 
     // Set the global map
     this->setMap ( myMap );
