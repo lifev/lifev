@@ -977,6 +977,9 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	M_displayer.leaderPrint ( "[FSI] - Update Jacobian terms: \n" ) ;
 	M_fluid->updateConvectiveTerm(M_beta_star);
 	M_fluid->updateJacobian(u_k);
+	if ( M_fluid->useStabilization() )
+		M_fluid->updateStabilization(*M_beta_star, *velocity_km1, *pressure_km1, *M_rhs_velocity);
+
 	M_fluid->applyBoundaryConditionsJacobian ( M_fluidBC );
 
 	//----------------------------------------------------//
@@ -1041,7 +1044,11 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 	// First: set the fluid blocks in the preconditioner //
 	//---------------------------------------------------//
 
-	M_prec->setFluidBlocks( M_fluid->block00(), M_fluid->block01(), M_fluid->block10() );
+	if ( !M_fluid->useStabilization() )
+		M_prec->setFluidBlocks( M_fluid->block00(), M_fluid->block01(), M_fluid->block10() );
+	else
+		M_prec->setFluidBlocks( M_fluid->block00(), M_fluid->block01(), M_fluid->block10(), M_fluid->block11() );
+
 	if (M_useShapeDerivatives)
 	{
 		M_prec->setShapeDerivativesBlocks(M_ale->shapeDerivativesVelocity(), M_ale->shapeDerivativesPressure());
@@ -1200,6 +1207,8 @@ FSIHandler::initializeApplyOperatorJacobian ( )
 	operDataJacobian(0,1) = M_fluid->block01()->matrixPtr();
 	operDataJacobian(0,3) = M_coupling->lambdaToFluidMomentum()->matrixPtr();
 	operDataJacobian(1,0) = M_fluid->block10()->matrixPtr();
+	if ( M_fluid->useStabilization() )
+		operDataJacobian(1,1) = M_fluid->block11()->matrixPtr();
 	operDataJacobian(2,2) = M_matrixStructure->matrixPtr();
 	operDataJacobian(2,3) = M_coupling->lambdaToStructureMomentum()->matrixPtr();
 	operDataJacobian(3,0) = M_coupling->fluidVelocityToLambda()->matrixPtr();
