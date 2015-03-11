@@ -126,12 +126,12 @@ public:
      * @param pressure_previous_newton_step pressure from the previous Newton step
      * @param velocity_rhs velocity term from approximation time derivative
      */
-    virtual void residual(  vectorPtr_Type& residual_velocity,
-    						vectorPtr_Type& residual_pressure,
-    						const vector_Type& convective_velocity_previous_newton_step,
-    						const vector_Type& velocity_previous_newton_step,
-    						const vector_Type& pressure_previous_newton_step,
-    						const vector_Type& velocity_rhs) {};
+    virtual void apply_vector(  vectorPtr_Type& residual_velocity,
+    						    vectorPtr_Type& residual_pressure,
+    						    const vector_Type& convective_velocity_previous_newton_step,
+    						    const vector_Type& velocity_previous_newton_step,
+    						    const vector_Type& pressure_previous_newton_step,
+    						    const vector_Type& velocity_rhs) {};
 
     //! Set the constant C_I for the supg
     virtual void setConstant (const int & value) = 0;;

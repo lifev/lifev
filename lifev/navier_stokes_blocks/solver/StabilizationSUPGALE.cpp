@@ -139,10 +139,10 @@ void StabilizationSUPGALE::buildGraphs()
 	M_block_11->globalAssemble( );
 }
 
-void StabilizationSUPGALE::jacobian( const vector_Type& convective_velocity_previous_newton_step,
-									 const vector_Type& velocity_previous_newton_step,
-		  	  	  	  	  	  	  	 const vector_Type& pressure_previous_newton_step,
-		  	  	  	  	  	  	     const vector_Type& velocity_rhs)
+void StabilizationSUPGALE::apply_matrix( const vector_Type& convective_velocity_previous_newton_step,
+									 	 const vector_Type& velocity_previous_newton_step,
+									 	 const vector_Type& pressure_previous_newton_step,
+									 	 const vector_Type& velocity_rhs)
 {
 	// missing force
 
@@ -216,12 +216,12 @@ void StabilizationSUPGALE::jacobian( const vector_Type& convective_velocity_prev
 
 }
 
-void StabilizationSUPGALE::residual( vectorPtr_Type& residual_velocity,
-								     vectorPtr_Type& residual_pressure,
-								     const vector_Type& convective_velocity_previous_newton_step,
-								     const vector_Type& velocity_previous_newton_step,
-								     const vector_Type& pressure_previous_newton_step,
-								     const vector_Type& velocity_rhs)
+void StabilizationSUPGALE::apply_vector( vectorPtr_Type& residual_velocity,
+								     	 vectorPtr_Type& residual_pressure,
+								     	 const vector_Type& convective_velocity_previous_newton_step,
+								     	 const vector_Type& velocity_previous_newton_step,
+								     	 const vector_Type& pressure_previous_newton_step,
+								     	 const vector_Type& velocity_rhs)
 {
 	// missing force, terms 11 and 12
 
