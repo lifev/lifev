@@ -67,7 +67,7 @@ public:
     //@{
 
     typedef Epetra_FEVector                  vector_type;
-    typedef boost::shared_ptr< vector_type > Vector_PtrType;
+    typedef boost::shared_ptr< vector_type > vectorPtr_Type;
     typedef Real                             data_type;
     typedef Epetra_CombineMode               combineMode_Type;
 
@@ -720,7 +720,7 @@ public:
     }
 
     //! Return the shared pointer on the raw VectorEpetra
-    const Vector_PtrType& epetraVectorPtr() const
+    const vectorPtr_Type& epetraVectorPtr() const
     {
         return M_epetraVector;
     }
@@ -814,7 +814,7 @@ private:
 
     boost::shared_ptr< MapEpetra > M_epetraMap;
     MapEpetraType                  M_mapType;
-    Vector_PtrType                 M_epetraVector;
+    vectorPtr_Type                 M_epetraVector;
     combineMode_Type               M_combineMode;
 };
 
