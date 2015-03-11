@@ -76,8 +76,8 @@ public:
     //! @name Public Types
     //@{
 
-    typedef Epetra_Map                                            map_type;
-    typedef boost::shared_ptr<map_type>                           map_ptrtype;
+    typedef Epetra_Map                                            map_Type;
+    typedef boost::shared_ptr<map_Type>                           mapPtr_Type;
 
     typedef MapEpetraData                                         mapData_Type;
 
@@ -86,12 +86,12 @@ public:
        map initialized without importer/exporter (i.e. with a shared_ptr
        pointing to 0) would not "gain" the importer/exporter created by another
        map.*/
-    typedef boost::shared_ptr< boost::shared_ptr<Epetra_Export> > exporter_ptrtype;
-    typedef boost::shared_ptr< boost::shared_ptr<Epetra_Import> > importer_ptrtype;
+    typedef boost::shared_ptr< boost::shared_ptr<Epetra_Export> > exporterPtr_Type;
+    typedef boost::shared_ptr< boost::shared_ptr<Epetra_Import> > importerPtr_Type;
 
 
-    typedef Epetra_Comm                                           comm_type;
-    typedef boost::shared_ptr<comm_type>                          comm_ptrtype;
+    typedef Epetra_Comm                                           comm_Type;
+    typedef boost::shared_ptr<comm_Type>                          commPtr_Type;
 
     //@}
 
@@ -112,7 +112,7 @@ public:
     MapEpetra ( Int  numGlobalElements,
                 Int  numMyElements,
                 Int* myGlobalElements,
-                const comm_ptrtype& commPtr );
+                const commPtr_Type& commPtr );
 
     //! Constructor
     /*!
@@ -120,7 +120,7 @@ public:
       @param mapData Structure containing Ids for the local Unique and Repeated map
       @param commPtr Pointer to the communicator
     */
-    MapEpetra ( mapData_Type const& mapData, comm_ptrtype const& commPtr );
+    MapEpetra ( mapData_Type const& mapData, commPtr_Type const& commPtr );
 
     //! Constructor
     /*
@@ -132,7 +132,7 @@ public:
      */
     MapEpetra ( const Int numGlobalElements,
                 const Int notUsed,
-                const comm_ptrtype& commPtr );
+                const commPtr_Type& commPtr );
 
     //! Constructor
     /*!
@@ -140,7 +140,7 @@ public:
       @param commPtr Pointer to the communicator
      */
     MapEpetra ( const Int           size,
-                const comm_ptrtype& commPtr );
+                const commPtr_Type& commPtr );
 
     //! Copy constructor
     /*!
@@ -176,7 +176,7 @@ private:
       therefore it is private
       @param map: underlying Epetra_Map
      */
-    MapEpetra ( const map_type map );
+    MapEpetra ( const map_Type map );
 
 public:
     //! Destructor
@@ -204,37 +204,11 @@ public:
 
     //! Addition operator
     /*!
-      The addition operator combines two map together to create a new map
-      @param epetraMap MapEpetra to be combined with the current map
-     */
-    MapEpetra operator +  ( const MapEpetra& epetraMap );
-
-    //! Addition operator
-    /*!
-      The addition operator create a map of size "size" and add it to the current map.
-      @param size Size of the map to be added to the current map
-     */
-    MapEpetra& operator += ( Int const size );
-
-    //! Addition operator
-    /*!
       The addition operator create a map of size "size" and add it to the current map
       to create a new map
       @param size Size of the map to be added to the current map
      */
-    MapEpetra operator +  ( Int const size );
-
-    //! Juxtaposition operator
-    /*!
-      This operator is used when block structures are used. Indeed, it creates
-      from two different maps a MapVector that can be used to initialize
-      block structures, such as matrices and vectors (see \ref BlockAlgebraPage "this page" for examples).
-     */
-    MapVector<MapEpetra> operator| (const MapEpetra& map) const
-    {
-        return MapVector<MapEpetra> (*this, map);
-    }
-
+    MapEpetra& operator+= (Int const size);
     //@}
 
     //! @name Methods
@@ -256,7 +230,7 @@ public:
       @param mapName Name of the map in the HDF5 file
       @param truncate True if the file has to be truncated; False if the file already exist and should not be truncated
      */
-    void exportToHDF5 ( std::string const& fileName, std::string const& mapName = "map", bool const& truncate = true );
+    void exportToHDF5 ( std::string const& fileName, std::string const& mapName = "map", bool const truncate = true );
 
     //! Read a matrix from a HDF5 (.h5) file
     /*!
@@ -287,23 +261,23 @@ public:
     //@{
 
     //! Return the communicator
-    comm_type const& comm() const
+    comm_Type const& comm() const
     {
         return *M_commPtr;
     }
 
     //! Return a shared pointer on the communicator
-    comm_ptrtype const& commPtr() const
+    commPtr_Type const& commPtr() const
     {
         return M_commPtr;
     }
-    comm_ptrtype& commPtr()
+    commPtr_Type& commPtr()
     {
         return M_commPtr;
     }
 
     //! Return a shared pointer on the internal Epetra_Map
-    map_ptrtype const& map ( MapEpetraType mapType ) const;
+    mapPtr_Type const& map ( MapEpetraType mapType ) const;
 
     //! Getter for the Epetra_Export
     Epetra_Export const& exporter();
@@ -316,13 +290,10 @@ public:
     //@{
 
     //! Set the communicator
-    void setComm ( comm_ptrtype const& commPtr )
-    {
-        M_commPtr = commPtr;
-    }
+    void setComm ( commPtr_Type const& commPtr );
 
     //! set the internal Epetra_Maps
-    void setMap ( map_ptrtype map, MapEpetraType mapType );
+    void setMap ( mapPtr_Type map, MapEpetraType mapType );
 
     //@}
 
@@ -342,16 +313,16 @@ private:
     void createMap ( Int   numGlobalElements,
                      Int   numMyElements,
                      Int*  myGlobalElements,
-                     const comm_type& comm );
+                     const comm_Type& comm );
 
     //! Getter for the repeated map
-    map_ptrtype const& getRepeatedMap() const
+    mapPtr_Type const& getRepeatedMap() const
     {
         return M_repeatedMapEpetra;
     }
 
     //! Getter for the unique map
-    map_ptrtype const& getUniqueMap()   const
+    mapPtr_Type const& getUniqueMap()   const
     {
         return M_uniqueMapEpetra;
     }
@@ -370,16 +341,42 @@ private:
 
     //@}
 
-    map_ptrtype        M_repeatedMapEpetra;
-    map_ptrtype        M_uniqueMapEpetra;
-    exporter_ptrtype   M_exporter;
-    importer_ptrtype   M_importer;
-    comm_ptrtype       M_commPtr;
+    mapPtr_Type        M_repeatedMapEpetra;
+    mapPtr_Type        M_uniqueMapEpetra;
+    exporterPtr_Type   M_exporter;
+    importerPtr_Type   M_importer;
+    commPtr_Type       M_commPtr;
 };
+
+// ===================================================
+// External Operators
+// ===================================================
+
+//! Addition operator
+/*!
+  The addition operator combines two map together to create a new map
+  @param epetraMap MapEpetra to be combined with the current map
+ */
+MapEpetra operator+ (const MapEpetra& map1, const MapEpetra& map2);
+
+//! Addition operator
+/*!
+  The addition operator create a map of size "size" and add it to the current map
+  to create a new map
+  @param size Size of the map to be added to the current map
+ */
+MapEpetra operator+ (const MapEpetra& map, Int size);
+
+//! Juxtaposition operator
+/*!
+  This operator is used when block structures are used. Indeed, it creates
+  from two different maps a MapVector that can be used to initialize
+  block structures, such as matrices and vectors (see \ref BlockAlgebraPage "this page" for examples).
+ */
+MapVector<MapEpetra> operator| (const MapEpetra& map1, const MapEpetra& map2);
 
 typedef MapVector<MapEpetra> MapEpetraVector;
 
 } // end namespace LifeV
 
 #endif
-
