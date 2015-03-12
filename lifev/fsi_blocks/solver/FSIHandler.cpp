@@ -60,7 +60,8 @@ M_orderExtrapolationInitialGuess ( 3 ),
 M_usePartitionedMeshes ( false ),
 M_subiterateFluidDirichlet ( false ),
 M_gravity ( 0.0 ),
-M_considerGravity ( false )
+M_considerGravity ( false ),
+M_moveMesh ( true )
 {
 }
 
@@ -249,6 +250,8 @@ void FSIHandler::setup ( )
 		M_pcdBC->bcUpdate ( *M_fluid->pFESpace()->mesh(), M_fluid->pFESpace()->feBd(), M_fluid->pFESpace()->dof() );
 		M_fluid->setBCpcd(M_pcdBC);
 	}
+
+	M_moveMesh = M_datafile ( "fluid/mesh/move_mesh", true);
 }
 
 void FSIHandler::setupExporters( )
@@ -855,7 +858,10 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	vectorPtr_Type meshDisplacement ( new vector_Type (M_aleFESpace->map() ) );
 	meshDisplacement->subset (solution, offset);
 	vectorPtr_Type mmRep ( new vector_Type (*meshDisplacement, Repeated ) );
-	moveMesh ( *mmRep );
+	if ( M_moveMesh )
+	{
+		moveMesh ( *mmRep );
+	}
 
 	if ( iter_newton ==  0 )
 	{

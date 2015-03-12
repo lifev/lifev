@@ -354,6 +354,8 @@ private:
 	Real M_gravity;
 	Real M_gravityDirection;
 
+	bool M_moveMesh;
+
 };
 
 } // end namespace LifeV
