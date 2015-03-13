@@ -43,12 +43,11 @@
                     <Parameter name="coarse: type" type="string" value="Amesos-KLU"/>
                     <Parameter name="increasing or decreasing" type="string" value="increasing"/>
                     <Parameter name="PDE equations" type="int" value="3"/>
-                    <Parameter name="cycle applications" type="int" value="1"/>
+                    <Parameter name="cycle applications" type="int" value="3"/>
                     <Parameter name="max levels" type="int" value="2"/>
-                    <Parameter name="smoother: pre or post" type="string" value="pre"/>
+                    <Parameter name="smoother: pre or post" type="string" value="both"/>
                     <Parameter name="smoother: sweeps" type="int" value="3"/>
-                    <Parameter name="smoother: type" type="string" value="IFPACK"/>
-                    <Parameter name="smoother: ifpack overlap" type="int" value="0"/>
+                    <Parameter name="smoother: type" type="string" value="Gauss-Seidel"/>
                     <Parameter name="energy minimization: enable" type="bool" value="true"/>
                     <Parameter name="repartition: enable" type="int" value="1"/>
                     <Parameter name="repartition: partitioner" type="string" value="ParMETIS"/>
@@ -86,7 +85,7 @@
 
     <ParameterList name="ApproximatedSchurOperatorFluid">
             <Parameter name="use preconditioner as approximated inverse" type="bool" value="true"/>
-            <Parameter name="preconditioner type" type="string" value="ML"/>
+            <Parameter name="preconditioner type" type="string" value="Ifpack"/>
             <ParameterList name="solver">
                <Parameter name="Linear Solver Type" type="string" value="AztecOO"/>
                <ParameterList name="AztecOO">
@@ -223,7 +222,7 @@
 
     <ParameterList name="ALEOperator">
         <Parameter name="use preconditioner as approximated inverse" type="bool" value="true"/>
-        <Parameter name="preconditioner type" type="string" value="ML"/>
+        <Parameter name="preconditioner type" type="string" value="Ifpack"/>
         <!-- ML, Ifpack, TwoLevel-->
         <ParameterList name="solver">
             <Parameter name="Linear Solver Type" type="string" value="AztecOO"/>
@@ -346,7 +345,21 @@
     </ParameterList>
     
     <ParameterList name="MonolithicOperator">
-        <Parameter name="Linear Solver Type" type="string" value="AztecOO"/>
+        <Parameter name="Linear Solver Type" type="string" value="Belos"/>
+        <ParameterList name="Belos">
+            <Parameter name="Solver Type" type="string" value="BlockGmres"/>
+            <Parameter name="Preconditioner Side" type="string" value="Right"/>
+            <ParameterList name="options">
+                <Parameter name="Flexible Gmres" type="bool" value="false"/>
+                <Parameter name="Output Frequency" type="int" value="1"/>
+                <Parameter name="Block Size" type="int" value="200"/>
+                <Parameter name="Num Blocks" type="int" value="200"/>
+                <Parameter name="Maximum Restarts" type="int" value="0"/>
+                <Parameter name="Output Style" type="int" value="1"/>
+                <Parameter name="Convergence Tolerance" type="double" value="1e-6"/>
+                <Parameter name="Silent" type="bool" value="false"/>
+           </ParameterList>
+        </ParameterList>
         <ParameterList name="AztecOO">
             <Parameter name="conv" type="string" value="r0"/>
             <Parameter name="kspace" type="int" value="40"/>
