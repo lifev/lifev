@@ -44,6 +44,8 @@ int BelosOperator::doApplyInverse(const vector_Type& X, vector_Type& Y) const
         return -12;
     }
 
+    M_solverManager->setProblem ( M_linProblem );
+    
     Belos::ReturnType ret = M_solverManager->solve();
 
     if(ret == Belos::Converged)
@@ -61,6 +63,28 @@ void BelosOperator::doSetOperator()
 void BelosOperator::doSetPreconditioner()
 {
     M_belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( M_prec ) );
+    
+    std::string precSideStr( M_pList->get<std::string>("Preconditioner Side"));
+    PreconditionerSide precSide((*S_precSideMap)[precSideStr]);
+    
+    switch(precSide)
+    {
+        case None:
+            break;
+        case Left:
+            M_linProblem->setLeftPrec(M_belosPrec);
+            break;
+        case Right:
+            M_linProblem->setRightPrec(M_belosPrec);
+            break;
+        default:
+            exit(1);
+    }
+    
+    
+    
+    M_solverManager->setProblem(M_linProblem);
+    
 }
 
 void BelosOperator::doSetParameterList()
@@ -89,8 +113,6 @@ void BelosOperator::doSetParameterList()
     default:
         exit(1);
     }
-
-
 
     M_solverManager->setProblem(M_linProblem);
 
