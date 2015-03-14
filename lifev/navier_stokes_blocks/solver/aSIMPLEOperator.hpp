@@ -189,6 +189,9 @@ private:
     boost::shared_ptr<VectorEpetra_Type> M_X_pressure;
     boost::shared_ptr<VectorEpetra_Type> M_Y_velocity;
     boost::shared_ptr<VectorEpetra_Type> M_Y_pressure;
+    
+    boost::shared_ptr<mapEpetra_Type> M_domainDBT;
+    boost::shared_ptr<mapEpetra_Type> M_rangeDBT;
 
     bool M_useStabilization;
 
