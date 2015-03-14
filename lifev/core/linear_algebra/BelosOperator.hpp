@@ -47,7 +47,7 @@ public:
 
     enum SolverManagerType { NotAValidSolverManager, BlockCG, PseudoBlockCG, RCG,
                              BlockGmres, PseudoBlockGmres, GmresPoly,
-                             GCRODR, PCPG, TFQMR };
+                             GCRODR, PCPG, Minres, TFQMR };
 
     typedef std::map<std::string, SolverManagerType> solverManagerMap_Type;
     typedef std::map<std::string, PreconditionerSide> precSideMap_Type;
