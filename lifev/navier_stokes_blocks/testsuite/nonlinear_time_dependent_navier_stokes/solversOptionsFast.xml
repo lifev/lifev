@@ -134,16 +134,31 @@
     </ParameterList>
 
     <ParameterList name="MonolithicOperator">
-        <Parameter name="Linear Solver Type" type="string" value="AztecOO"/>
+        <Parameter name="Linear Solver Type" type="string" value="Belos"/>
+        <ParameterList name="Belos">
+            <Parameter name="Solver Type" type="string" value="BlockGmres"/>
+            <Parameter name="Preconditioner Side" type="string" value="Right"/>
+            <ParameterList name="options">
+                <Parameter name="Flexible Gmres" type="bool" value="false"/>
+                <Parameter name="Output Frequency" type="int" value="1"/>
+                <Parameter name="Block Size" type="int" value="200"/>
+                <Parameter name="Num Blocks" type="int" value="200"/>
+                <Parameter name="Maximum Restarts" type="int" value="0"/>
+                <Parameter name="Output Style" type="int" value="1"/>
+                <Parameter name="Convergence Tolerance" type="double" value="1e-6"/>
+                <Parameter name="Silent" type="bool" value="false"/>
+            </ParameterList>
+        </ParameterList>
         <ParameterList name="AztecOO">
             <Parameter name="conv" type="string" value="r0"/>
             <Parameter name="kspace" type="int" value="40"/>
-            <Parameter name="max_iter" type="int" value="1500"/>
+            <Parameter name="max_iter" type="int" value="100"/>
             <Parameter name="output" type="string" value="all_res"/>
             <Parameter name="scaling" type="string" value="none"/>
-            <Parameter name="solver" type="string" value="gmresr"/>
+            <Parameter name="solver" type="string" value="gmres"/>
             <Parameter name="tol" type="double" value="1e-06"/>
         </ParameterList>
     </ParameterList>
-    
+
+
 </ParameterList>
