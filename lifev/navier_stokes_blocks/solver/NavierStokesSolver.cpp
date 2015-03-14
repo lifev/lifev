@@ -587,6 +587,11 @@ void NavierStokesSolver::iterate_nonlinear( bcPtr_Type & bc, const Real& time )
 	UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
 			M_nonLinearLineSearch, 0, 2, M_out_res, 0.0);
 
+    if (status == EXIT_FAILURE)
+    {
+        M_displayer.leaderPrint(" WARNING: Newton  failed " );
+    }
+    
 	M_velocity->subset ( *M_solution, M_velocityFESpace->map(), 0, 0 );
 	M_pressure->subset ( *M_solution, M_pressureFESpace->map(), M_velocityFESpace->map().mapSize(), 0 );
 }
@@ -974,13 +979,14 @@ void NavierStokesSolver::solveJac( vector_Type& increment, const vector_Type& re
 	chrono.start();
 	std::string solverType(M_pListLinSolver->get<std::string>("Linear Solver Type"));
 	M_invOper.reset(Operators::InvertibleOperatorFactory::instance().createObject(solverType));
-	chrono.stop();
+    M_invOper->setParameterList(M_pListLinSolver->sublist(solverType));
+
+    chrono.stop();
 	M_displayer.leaderPrintMax(" done in " , chrono.diff() );
 
 	M_invOper->setOperator(M_oper);
 	M_invOper->setPreconditioner(M_prec);
-	M_invOper->setParameterList(M_pListLinSolver->sublist(solverType));
-
+	
 	increment.zero();
 
 	// Solving the linear system
