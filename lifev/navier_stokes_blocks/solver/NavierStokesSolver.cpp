@@ -557,9 +557,9 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
     std::string solverType(M_pListLinSolver->get<std::string>("Linear Solver Type"));
     M_invOper.reset(Operators::InvertibleOperatorFactory::instance().createObject(solverType));
 
+    M_invOper->setParameterList(M_pListLinSolver->sublist(solverType));
     M_invOper->setOperator(M_oper);
     M_invOper->setPreconditioner(M_prec);
-    M_invOper->setParameterList(M_pListLinSolver->sublist(solverType));
 
     chrono.stop();
     M_displayer.leaderPrintMax(" done in " , chrono.diff() );
