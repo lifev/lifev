@@ -36,7 +36,7 @@
 #include <lifev/core/mesh/RegionMesh3DStructured.hpp>
 #include <lifev/core/fem/BCFunction.hpp>
 #include <lifev/navier_stokes/examples/TestCases/NavierStokesCavity.hpp>
-#include <lifev/navier_stokes/examples/TestCases/MeshUtility.hpp>
+#include <lifev/core/mesh/MeshLoadingUtility.hpp>
 
 namespace LifeV
 {
@@ -125,7 +125,7 @@ NavierStokesCavity::mesh ( boost::shared_ptr< RegionMesh<LinearTetra> >& mesh ) 
     std::vector<Real> width (3, -1.0);
     std::vector<Real> shift (3, -1.0);
     std::vector<UInt> numMeshElem (3, M_refinement);
-    MeshUtility::fillWithStructuredMesh ( mesh, 1, numMeshElem, false, width, shift );
+    MeshUtility::loadStructuredMesh ( mesh, 1, numMeshElem, false, width, shift );
 
 }
 

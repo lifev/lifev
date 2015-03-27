@@ -258,7 +258,7 @@ public:
     /*!
      * @return the pointer to the BCHandler
      */
-    const bcHandlerPtr_Type& handler()
+    bcHandlerPtr_Type& handler()
     {
         return M_handler;
     }

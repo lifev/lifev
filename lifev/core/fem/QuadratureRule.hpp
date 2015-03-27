@@ -402,6 +402,7 @@ extern const QuadratureRule quadRuleQuad16pt;
 
 extern const QuadratureRule quadRuleTetra1pt;
 extern const QuadratureRule quadRuleTetra4pt;
+extern const QuadratureRule quadRuleTetra4ptNodal;
 extern const QuadratureRule quadRuleTetra5pt;
 extern const QuadratureRule quadRuleTetra15pt;
 extern const QuadratureRule quadRuleTetra64pt;

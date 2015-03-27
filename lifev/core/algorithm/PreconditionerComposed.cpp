@@ -64,15 +64,21 @@ void
 PreconditionerComposed::setDataFromGetPot ( const GetPot&      dataFile,
                                             const std::string& section )
 {
-    list_Type LIFEV_DEPRECATED (uselessList);
-    createParametersList ( uselessList, dataFile, section, "Composed" );
+    myCreateParametersList (dataFile, section, "Composed" );
 }
 
 void
-PreconditionerComposed::createParametersList (       list_Type& /*list*/,
-                                                     const GetPot&      dataFile,
+PreconditionerComposed::createParametersList (list_Type& /*list*/,
+                                              const GetPot&      dataFile,
+                                              const std::string& section,
+                                              const std::string& subSection )
+{
+    myCreateParametersList (dataFile,section,subSection);
+}
+
+void PreconditionerComposed::myCreateParametersList (const GetPot&      dataFile,
                                                      const std::string& section,
-                                                     const std::string& subSection )
+                                                     const std::string& subSection)
 {
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters

@@ -89,7 +89,7 @@ public:
     typedef boost::shared_ptr<mesh_Type>                     meshPtr_Type;
     typedef MapType                                          map_Type;
     typedef boost::shared_ptr<map_Type>                      mapPtr_Type;
-    typedef typename map_Type::comm_ptrtype                  commPtr_Type;
+    typedef typename map_Type::commPtr_Type                  commPtr_Type;
 
     //@}
 

@@ -1,0 +1,15 @@
+<!-- Model Parameters -->
+<ParameterList name="Fitz-Hugh Nagumo: Parameter list">
+	<Parameter name="G" type="double" value="1.5"/>
+	<Parameter name="Vth" type="double" value="13."/>
+	<Parameter name="Vp" type="double" value="100."  />
+	<Parameter name="Eta1" type="double" value="4.4"  />
+	<Parameter name="Eta2" type="double" value="0.012"  />
+	<Parameter name="Eta3" type="double" value="1.0"  />
+	<Parameter name="Iapp" type="double" value="500.0"  />
+	<Parameter name="TF" type="double" value="80.0"  />
+	<Parameter name="dt" type="double" value="0.01"  />
+	<Parameter name="meth" type="double" value="0"  />
+	<Parameter name="S" type="double" value="0.95"  />
+	<Parameter name="D" type="double" value="1.5"  />
+</ParameterList>

@@ -181,8 +181,8 @@ SolverAztecOO::printStatus()
         stat << "Breakdown             ";
     }
 
-    stat << setw (12) << "res = " << status[AZ_scaled_r];
-    stat << setw (4)  << " " << (Int) status[AZ_its] << " iters. ";
+    stat << std::setw (12) << "res = " << status[AZ_scaled_r];
+    stat << std::setw (4)  << " " << (Int) status[AZ_its] << " iters. ";
     stat << std::endl;
 
     str = stat.str();
