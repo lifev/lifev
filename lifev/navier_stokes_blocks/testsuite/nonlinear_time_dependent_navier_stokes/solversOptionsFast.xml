@@ -1,7 +1,7 @@
 <ParameterList>
     <ParameterList name="MomentumOperator">
         <Parameter name="use preconditioner as approximated inverse" type="bool" value="true"/>
-        <Parameter name="preconditioner type" type="string" value="ML"/>
+        <Parameter name="preconditioner type" type="string" value="Ifpack"/>
         <!-- ML, Ifpack, TwoLevel-->
         <ParameterList name="solver">
             <Parameter name="Linear Solver Type" type="string" value="AztecOO"/>
@@ -55,7 +55,7 @@
 
     <ParameterList name="ApproximatedSchurOperator">
             <Parameter name="use preconditioner as approximated inverse" type="bool" value="true"/>
-            <Parameter name="preconditioner type" type="string" value="ML"/>
+            <Parameter name="preconditioner type" type="string" value="Ifpack"/>
             <ParameterList name="solver">
                <Parameter name="Linear Solver Type" type="string" value="AztecOO"/>
                <ParameterList name="AztecOO">
@@ -89,6 +89,18 @@
                         <Parameter name="repartition: partitioner" type="string" value="ParMETIS"/>
                     </ParameterList>
                 </ParameterList>
+                <ParameterList name="Ifpack">
+                <Parameter name="preconditioner" type="string" value="ILU"/>
+                <Parameter name="overlap"        type="int"    value="1"/>
+                <Parameter name="recompute"      type="bool"   value="true"/>
+                <ParameterList name="options">
+                    <Parameter name="fact: level-of-fill"      type="int"    value="1"/>
+                    <Parameter name="fact: drop tolerance"     type="double" value="1e-9"/>
+                    <Parameter name="schwarz: combine mode"    type="string" value="Zero"/>
+                    <Parameter name="schwarz: reordering type" type="string" value="rcm"/>
+                     <!-- rcm, metis -->
+                </ParameterList>
+            </ParameterList>
             </ParameterList>
         <Parameter name="order" type="int" value="1"/> <!-- Used only by HOY -->
     </ParameterList>
@@ -137,11 +149,11 @@
         <Parameter name="Linear Solver Type" type="string" value="AztecOO"/>
         <ParameterList name="AztecOO">
             <Parameter name="conv" type="string" value="r0"/>
-            <Parameter name="kspace" type="int" value="40"/>
+            <Parameter name="kspace" type="int" value="1500"/>
             <Parameter name="max_iter" type="int" value="1500"/>
             <Parameter name="output" type="string" value="all_res"/>
             <Parameter name="scaling" type="string" value="none"/>
-            <Parameter name="solver" type="string" value="gmresr"/>
+            <Parameter name="solver" type="string" value="gmres"/>
             <Parameter name="tol" type="double" value="1e-06"/>
         </ParameterList>
     </ParameterList>
