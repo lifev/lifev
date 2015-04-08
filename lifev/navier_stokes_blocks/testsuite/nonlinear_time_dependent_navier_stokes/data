@@ -50,11 +50,11 @@ filename   = result_fluid
 
     vel_order       = P1
     pres_order      = P1
-    stiff_strain    = true
+    stiff_strain    = false
    
 	[../stabilization]
 	use             = true
-	type            = SUPG
+    type            = SUPG
 	vel_order       = 1
 	
     [../miscellaneous]

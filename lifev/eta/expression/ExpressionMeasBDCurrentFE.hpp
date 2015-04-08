@@ -71,7 +71,7 @@ public:
     : base_Type() {}
 
     //! Copy constructor
-    ExpressionMeasBDCurrentFE ( const ExpressionMeasBDCurrentFE& expression)
+    ExpressionMeasBDCurrentFE ( const ExpressionMeasBDCurrentFE& /*expression*/)
     : base_Type() {}
 
     //! Destructor

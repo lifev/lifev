@@ -53,6 +53,9 @@ void aSIMPLEOperator::setUp(const matrixEpetraPtr_Type & F,
     M_Y_velocity.reset( new VectorEpetra_Type (M_F->map(), Unique ) );
     M_Y_pressure.reset( new VectorEpetra_Type (M_B->map(), Unique) );
     M_useStabilization = false;
+    M_domainDBT.reset( new mapEpetra_Type ( M_B->rangeMap() ) );
+    M_rangeDBT.reset( new mapEpetra_Type ( M_B->domainMap() ) );
+
 }
 
 void aSIMPLEOperator::setUp(const matrixEpetraPtr_Type & F,
@@ -68,12 +71,14 @@ void aSIMPLEOperator::setUp(const matrixEpetraPtr_Type & F,
     M_comm = F->map().commPtr();
     M_monolithicMap.reset( new mapEpetra_Type ( M_F->map() ) );
     *M_monolithicMap += M_B->map();
-    M_Z.reset(new VectorEpetra_Type( F->map(), Unique ) );
+    M_Z.reset(new VectorEpetra_Type( M_B->domainMap(), Unique ) );
     M_X_velocity.reset( new VectorEpetra_Type (M_F->map(), Unique) );
     M_X_pressure.reset( new VectorEpetra_Type (M_B->map(), Unique) );
     M_Y_velocity.reset( new VectorEpetra_Type (M_F->map(), Unique ) );
     M_Y_pressure.reset( new VectorEpetra_Type (M_B->map(), Unique) );
     M_useStabilization = true;
+    M_domainDBT.reset( new mapEpetra_Type ( M_B->rangeMap() ) );
+    M_rangeDBT.reset( new mapEpetra_Type ( M_B->domainMap() ) );
 }
 
 
@@ -146,6 +151,7 @@ void aSIMPLEOperator::buildShurComplement( )
 
     M_DBT.reset ( new matrixEpetra_Type( *M_Btranspose ) );
     M_DBT->matrixPtr()->LeftScale(*M_invD);
+    M_DBT->globalAssemble( M_domainDBT, M_rangeDBT );
 }
 
 inline int aSIMPLEOperator::ApplyInverse( VectorEpetra_Type const& X_velocity,
@@ -154,7 +160,7 @@ inline int aSIMPLEOperator::ApplyInverse( VectorEpetra_Type const& X_velocity,
                                    VectorEpetra_Type & Y_pressure) const
 {
     M_approximatedMomentumOperator->ApplyInverse(X_velocity.epetraVector(), M_Z->epetraVector() );
-
+    
     M_approximatedSchurComplementOperator->ApplyInverse( (*M_B*(*M_Z) - X_pressure ).epetraVector(), Y_pressure.epetraVector());
 
     Y_velocity = (*M_Z - *M_DBT*Y_pressure);

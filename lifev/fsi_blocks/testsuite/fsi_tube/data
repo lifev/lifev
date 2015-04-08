@@ -20,19 +20,24 @@
     		initialtime     = 0.0
     		endtime	        = 2.00
     		timestep	    = 0.001
-    		BDF_order       = 1
+    		BDF_order       = 2
 
     	[../space_discretization]
     		mesh_dir        = ./
     		mesh_file       = tube20.mesh
     		mesh_type       = .mesh
-    		vel_order       = P2
+    		vel_order       = P1
     		pres_order      = P1
     		
     	[../stabilization]
     	    use             = false
     	    type            = SUPGALE
     	    vel_order       = 1	
+
+        [../stabilization]
+            use             = true
+            type            = SUPGALE
+            vel_order       = 1
 
     	[../]
 
@@ -44,7 +49,7 @@
     		mesh_dir        = ./
     		mesh_file       = vessel20.mesh
     		mesh_type       = .mesh
-    		order           = P2
+    		order           = P1
 
     	[../time_discretization]
 		method              = BDF
@@ -73,7 +78,7 @@
 [ale]
 
 	[./space_discretization]
-		order			= P2
+		order			= P1
 
 	[./]
 
@@ -105,8 +110,8 @@
 	output_Residuals    	=  true
 	output_Steps        	=  true
 	convectiveImplicit      	=  true
-	useShapeDerivatives     	=  false
-	extrapolateInitialGuess  =  false
-	orderExtrapolation       =  1    # it can be 1, 2 or 3
+	useShapeDerivatives     	=  true
+	extrapolateInitialGuess  =  true
+	orderExtrapolation       =  2    # it can be 1, 2 or 3
 	
 [../]

@@ -85,9 +85,9 @@ public:
        @param pressure_previous_newton_step pressure from the previous Newton step
        @param velocity_rhs velocity term from approximation time derivative
      */
-    virtual void apply_matrix(	const vector_Type& velocity_previous_newton_step,
-    							const vector_Type& pressure_previous_newton_step,
-    							const vector_Type& velocity_rhs ) {};
+    virtual void apply_matrix(	const vector_Type& /*velocity_previous_newton_step*/,
+    							const vector_Type& /*pressure_previous_newton_step*/,
+    							const vector_Type& /*velocity_rhs*/ ) {};
 
     //! Adds to the residual the contribution coming from the SUPG stabilization
     //  in Navier-Stokes simulations in fixed coordinates
@@ -98,11 +98,11 @@ public:
        @param pressure_previous_newton_step pressure from the previous Newton step
        @param velocity_rhs velocity term from approximation time derivative
      */
-    virtual void apply_vector( 	vectorPtr_Type& residual_velocity,
-    							vectorPtr_Type& residual_pressure,
-    							const vector_Type& velocity_previous_newton_step,
-    							const vector_Type& pressure_previous_newton_step,
-    							const vector_Type& velocity_rhs) {};
+    virtual void apply_vector( 	vectorPtr_Type& /*residual_velocity*/,
+    							vectorPtr_Type& /*residual_pressure*/,
+    							const vector_Type& /*velocity_previous_newton_step*/,
+    							const vector_Type& /*pressure_previous_newton_step*/,
+    							const vector_Type& /*velocity_rhs*/) {};
 
     //! Updates the jacobian matrix in Navier-Stokes simulations in ALE coordinates
     /*!
@@ -111,10 +111,10 @@ public:
      * @param pressure_previous_newton_step pressure from the previous Newton step
      * @param velocity_rhs velocity term from approximation time derivative
      */
-    virtual void apply_matrix(	const vector_Type& convective_velocity_previous_newton_step,
-    							const vector_Type& velocity_previous_newton_step,
-    							const vector_Type& pressure_previous_newton_step,
-    							const vector_Type& velocity_rhs ) {};
+    virtual void apply_matrix(	const vector_Type& /*convective_velocity_previous_newton_step*/,
+    							const vector_Type& /*velocity_previous_newton_step*/,
+    							const vector_Type& /*pressure_previous_newton_step*/,
+    							const vector_Type& /*velocity_rhs*/ ) {};
 
     //! Adds to the residual the contribution coming from the SUPG stabilization
     //  in Navier-Stokes simulations in ALE coordinates
@@ -126,12 +126,12 @@ public:
      * @param pressure_previous_newton_step pressure from the previous Newton step
      * @param velocity_rhs velocity term from approximation time derivative
      */
-    virtual void apply_vector(  vectorPtr_Type& residual_velocity,
-    						    vectorPtr_Type& residual_pressure,
-    						    const vector_Type& convective_velocity_previous_newton_step,
-    						    const vector_Type& velocity_previous_newton_step,
-    						    const vector_Type& pressure_previous_newton_step,
-    						    const vector_Type& velocity_rhs) {};
+    virtual void apply_vector(  vectorPtr_Type& /*residual_velocity*/,
+    						    vectorPtr_Type& /*residual_pressure*/,
+    						    const vector_Type& /*convective_velocity_previous_newton_step*/,
+    						    const vector_Type& /*velocity_previous_newton_step*/,
+    						    const vector_Type& /*pressure_previous_newton_step*/,
+    						    const vector_Type& /*velocity_rhs*/) {};
 
     //! Set the constant C_I for the supg
     virtual void setConstant (const int & value) = 0;;
