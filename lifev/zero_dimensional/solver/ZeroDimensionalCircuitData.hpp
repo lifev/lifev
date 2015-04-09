@@ -80,7 +80,7 @@ class ZeroDimensionalElement
 {
 public:
 
-    //! @name Constructors & Destructor
+    //! @name Constructors and Destructor
     //@{
 
     //! Constructor
@@ -103,7 +103,7 @@ public:
     //! Connect elements to the nodes.
     /*!
      * After all emenets and nodes are created, each element will call this
-     * method to connect itse;f to the nodes.
+     * method to connect itself to the nodes.
      */
     virtual void connectElement ( zeroDimensionalNodeSPtr_Type& nodes ) = 0;
 
@@ -202,7 +202,7 @@ class ZeroDimensionalElementPassive: public ZeroDimensionalElement
 {
 public:
 
-    //! @name Constructors & Destructor
+    //! @name Constructors and Destructor
     //@{
 
     //! Constructor
@@ -290,7 +290,7 @@ class ZeroDimensionalElementPassiveResistor: public ZeroDimensionalElementPassiv
 {
 public:
 
-    //! @name Constructors & Destructor
+    //! @name Constructors and Destructor
     //@{
 
     //! Contructor.
@@ -324,7 +324,7 @@ class ZeroDimensionalElementPassiveDiode: public ZeroDimensionalElementPassiveRe
 {
 public:
 
-    //! @name Constructors & Destructor
+    //! @name Constructors and Destructor
     //@{
 
     //! Constructor
@@ -414,7 +414,7 @@ class ZeroDimensionalElementPassiveCapacitor: public ZeroDimensionalElementPassi
 {
 public:
 
-    //! @name Constructors & Destructor
+    //! @name Constructors and Destructor
     //@{
 
     //! Constructor
@@ -447,7 +447,7 @@ class ZeroDimensionalElementPassiveInductor: public ZeroDimensionalElementPassiv
 {
 public:
 
-    //! @name Constructors & Destructor
+    //! @name Constructors and Destructor
     //@{
 
     //! Constructor
@@ -484,7 +484,7 @@ public:
         return M_equationRow;
     }
 
-    //! get variable index in solution vector  x  and \dot{x}
+    //! get variable index in solution vector  \f[x\f]  and \f[\dot{x}\f]
     const Int& variableIndex() const
     {
         return M_variableIndex;
@@ -508,7 +508,7 @@ class ZeroDimensionalElementSource: public ZeroDimensionalElement
 
 public:
 
-    //! @name Constructors & Destructor
+    //! @name Constructors and Destructor
     //@{
 
     //!Constructor
@@ -577,7 +577,7 @@ class ZeroDimensionalElementVoltageSource: public ZeroDimensionalElementSource
 
 public:
 
-    //! @name Constructors & Destructor
+    //! @name Constructors and Destructor
     //@{
 
     //! Constructor
@@ -663,7 +663,7 @@ class ZeroDimensionalElementCurrentSource: public ZeroDimensionalElementSource
 
 public:
 
-    //! @name Constructors & Destructor
+    //! @name Constructors and Destructor
     //@{
 
     //! Constructor.
@@ -765,7 +765,7 @@ class ZeroDimensionalNode
 {
 public:
 
-    //! @name Constructors & Destructor
+    //! @name Constructors and Destructor
     //@{
 
     //! Constructor
@@ -895,7 +895,7 @@ class ZeroDimensionalNodeUnknown: public ZeroDimensionalNode
 {
 public:
 
-    //! @name Constructors & Destructor
+    //! @name Constructors and Destructor
     //@{
 
     //! Constructor
@@ -954,7 +954,7 @@ class ZeroDimensionalNodeKnown: public ZeroDimensionalNode
 {
 public:
 
-    //! @name Constructors & Destructor
+    //! @name Constructors and Destructor
     //@{
 
     //! Contructor
@@ -1218,7 +1218,7 @@ class ZeroDimensionalNodeS
 {
 public:
 
-    //! @name Constructors & Destructor
+    //! @name Constructors and Destructor
     //@{
 
     //! Constructor
@@ -1334,10 +1334,7 @@ class ZeroDimensionalCircuitData
 {
 public:
 
-    //! @name Constructors & Destructor
-    //@{
-
-    //! @name Constructors & Destructor
+    //! @name Constructors and Destructor
     //@{
 
     //! Constructor
