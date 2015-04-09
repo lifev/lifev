@@ -32,7 +32,7 @@
 
   Assume that the ionic model is written in the form
 
-  \f[ \dfrac{\partial \mathbf{v} }{\partial t} = f(\mathbf{v), t\f]
+  \f[ \frac{\partial \mathbf{v} }{\partial t} = f(\mathbf{v}, t\f]
 
   If you wish to implement a new ionic model you should create a new
   class which inherits from this class and implement the abstract methods:
