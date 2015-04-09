@@ -994,7 +994,7 @@ public:
     //! Solves one reaction step using the forward Euler scheme and N subiterations
     /*!
      * \f[
-     * \mathbf{V}^* = \mathbf{V}^{n+k/N} + \dfrac{\Delta t}{N} I_{ion}(\mathbf{V}^{n+k/N}), \quad \text{for } k=0,\dots,N-1.
+     * \mathbf{V}^* = \mathbf{V}^{n+k/N} + \frac{\Delta t}{N} I_{ion}(\mathbf{V}^{n+k/N}), \quad k=0,\dots,N-1.
      * \f]
      */
     /*!
@@ -1005,7 +1005,7 @@ public:
     //! Solves one reaction step using the forward Euler scheme
     /*!
      * \f[
-     * \mathbf{V}^* = \mathbf{V}^{n+k/N} + \dfrac{\Delta t}{N} M I_{ion}(\mathbf{V}^{n+k/N}), \quad \text{for } k=0,\dots,N-1.
+     * \mathbf{V}^* = \mathbf{V}^{n+k/N} + \frac{\Delta t}{N} M I_{ion}(\mathbf{V}^{n+k/N}), \quad  k=0,\dots,N-1.
      * \f]
      */
     /*!
