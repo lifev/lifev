@@ -1,0 +1,77 @@
+In order to read input data, LifeV is integrated with the open-source library \verb!GetPot! (\url{http://getpot.sourceforge.net/}). GetPot allows to easily handle the data regarding the different phases of the simulation, typically providing the mesh name, the discretization order, the physical parameters, the solver information and the time step (if any).
+\newline
+\noindent \verb!GetPot! needs the name of the input file that can be linked through the flags "-f" or "--file" while launching the
+program, e.g. 
+\begin{lstlisting}
+$ ./myProgram.exe -f myData
+\end{lstlisting}
+The GetPot object allows to read the data from the file, and is constructed thanks to the name of the input file. 
+If no name is provided, then LifeV uses the default input name "data".
+\begin{lstlisting}
+GetPot command_line(argc,argv);
+const std::string dataFileName = command_line.follow("data", 2, "-f","--file");
+GetPot dataFile(dataFileName);
+\end{lstlisting}
+\noindent
+The input file must have a tree-structure, an example is as follows
+\begin{lstlisting}
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for the Laplacian example
+#-------------------------------------------------
+
+[finite_element]
+    degree                       = P1
+
+[mesh]
+    nx                           = 40
+    ny                           = 40
+    nz                           = 40
+    overlap                      = 0
+    verbose                      = false
+
+[prec]
+    prectype                     = Ifpack # Ifpack or ML
+    displayList                  = false
+
+    [./ifpack]
+        overlap                  = 2
+
+        [./fact]
+            ilut_level-of-fill   = 1
+            drop_tolerance       = 1.e-5
+            relax_value          = 100
+
+    [../amesos]
+        solvertype               = Amesos_KLU #Amesos_KLU or Amesos_Umfpack
+
+    [../partitioner]
+        overlap                  = 0
+
+    [../schwarz]
+        reordering_type          = none #metis, rcm, none
+        filter_singletons        = true
+
+    [../]
+[../]
+\end{lstlisting}
+\noindent
+and the data can be read as in folders. For instance, if we have the previous data file and we want to print the mesh sizes in the three directions,
+we only need to type
+
+\begin{lstlisting}
+std::cout << "Number of elements in each direction" 
+          << "x: " dataFile( "mesh/nx", 15 )
+          << "y: " dataFile( "mesh/ny", 15 )
+          << "z: " dataFile( "mesh/nz", 15 )
+          << std::endl;
+\end{lstlisting}
+\noindent
+where the values "15" are set in LifeV as default sizes. More generally, in every LifeV-based program, we need to access in the same manner the data through the GetPot object, providing also a safe default value in case some variables are not specifically set.
+
+\noindent
+You can browse the default data file in every testsuite directory to see examples. Generally, some entries are compulsory (e.g. the mesh name for unstructured meshes), on the other hand others are filled with a default value if not specified in the input file. \\
+
+
+
+
