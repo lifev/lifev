@@ -13,7 +13,7 @@ The major objectives of this document are:
 \item to compile the software library,
 \item to provide examples of its use.
 \end{enumerate}
-For a more detailed overview of \lifev's main features (management of boundary conditions, time and space discretization, algebraic solvers and preconditioners, etc), see the doxygen webpage: \url{http://cmcsforge.epfl.ch/www/lifev/doxygen-release-2.2.0/lifev/}.
+For a more detailed overview of \lifev's main features (management of boundary conditions, time and space discretization, algebraic solvers and preconditioners, etc), see the doxygen webpage: \url{https://cmcsforge.epfl.ch/doxygen/lifev/}.
 \section{Language and nomenclature convention}
 \label{sec:lang-nomencl-conv}
 
@@ -57,7 +57,7 @@ There are a few compilation tools and libraries we need to build and install bef
 compiling \lifev, here is a short presentation. Note that, in addition to the following description, the complete installation steps are available on the following webpages:
 \begin{enumerate}
 \item \url{http://www.lifev.org/documentation/installation-tutorial}\,,
-\item \url{http://www.lifev.org/documentation/lifev-on-macosx}\,.
+\item \url{https://cmcsforge.epfl.ch/projects/lifev/wiki/LifeV_on_MacOSX}\,.
 \end{enumerate}
 
 
@@ -80,11 +80,11 @@ systems, the libraries \verb!.a! and
 \verb!.h! are installed in the \verb!/usr/include! directory. Compilers search
 for libraries there by default, but in principle they can be installed anywhere you want
 as long as you pass the path to the library using the compiler flag \verb!-L! immediately
-followed by the library path and similarly for the header files using the compiler
-flag \verb!-I! followed by the include path.
+followed by the library path (e.g. \verb!-L/path/to/lib!) and similarly for the header files using the compiler
+flag \verb!-I! followed by the include path. Libraries compiled from source are usually installed in \verb!/usr/local/lib!, \verb!/usr/local/include!.
 
 Libraries are usually created with the prefix \verb!lib! followed by the name of the library
-and linked with the compiler flag \verb!-l! followed by its name.
+and linked with the compiler flag \verb!-l! followed by its name (e.g. \verb!-lblas!).
 
 \subsubsection{Compilation Environment}
 \label{sec:comp-envir}
@@ -94,17 +94,16 @@ of the \ix{autotools} from the GNU project\footnote{\url{http://www.gnu.org}}
 available in most Linux OS:
 
 \begin{itemize}
-\item \verb!g++-4.0!\ixns{g++}{compilers} or newer (currently $4.5.4$)%$4.4.4$)
-\item \verb!mpi!\ixns{mpi}{compilers}, with preference to \verb!openmpi!\ixns{openmpi}{compilers}
-\item \verb!CMake 2.8! or newer.
+\item \verb!g++-4.0!\ixns{g++}{compilers} or newer (currently \verb!4.9.2!).
+\item \verb!mpi!\ixns{mpi}{compilers}, with preference to \verb!openmpi!\ixns{openmpi}{compilers}.
+\item \verb!CMake 2.8.11! or newer (currently \verb!3.1.0!).
 \end{itemize}
 
-In Mac OS X you get gcc in Xcode and cmake can be
-installed using MacPorts \verb!sudo port install cmake!. You can check the version of a command typing the command followed by \verb!--help!,
+In Mac OS X you get gcc in Xcode and cmake can be installed using MacPorts with the command \verb!sudo port install cmake!. You can check the version of a command typing the command followed by \verb!--help!,
 for example type \verb!cmake --help!.
 
 \lifev depends on several optimized libraries, you can check if you have them installed
-using the \verb!locate! command followed by the name of the library, for example
+using the \verb!locate! command (after updating the search database with \verb!sudo updatedb!) followed by the name of the library, for example
 \verb!locate liblapack.a!, or go to the \verb!/usr/lib! directory and search on the
 list with \verb!ls!.
 It is important to notice that some libraries are linked to others and they should
@@ -117,150 +116,159 @@ These are the optimized libraries you need to have installed:
 \item A version of \verb!MPI!.
 The message passing interface for C and Fortran compilers. For example \url{http://www.open-mpi.org/}.
 Once installed you can check the necessary flags for its use by typing
-\verb!mpicc --show!.
+\verb!mpicc --show!.\\
+On a Debian system the command \verb!sudo apt-get install libopenmpi*! should do the trick.\\
 In Mac OS X using MacPorts install a fortran compiler typing
 \verb!sudo port install gcc46! and openmpi with \verb!sudo port install openmpi!. Note however that MPI should be natively installed if you installed XCode.
 
 \item \verb!BOOST!.
-Libraries to extend the functionality of C$++$. Check if they exist on your computer, they are many
-libraries with the prefix \verb!libboost!.
-If you need to install them, try \verb!sudo apt-get install libboost*! in devian systems or
-something similar in others.
-If you can't do something like that then download at \url{http://www.boost.org}.
+Libraries which extend the functionality of C$++$. Check if they exist on your computer, they are many
+libraries with the prefix \verb!libboost!.\\
+If you need to install them, try \verb!sudo apt-get install libboost*! on Debian systems or
+something similar for other Linux distros.\\
+In Mac OS X using MacPorts type \verb!sudo port install boost!.\\
+If you need to compile from source, download the libraries at \url{http://www.boost.org}.
 Make sure you include the line ``\verb!using mpi;!" in the configuration text file \verb!project-config.jam!.
 You can specify the path to install using the flag \verb!--prefix=/path/! when running \verb!./bjam!
 \verb!install!. But most of the time cross compilation of this library won't work completely.
-In Mac OS X using MacPorts type \verb!sudo port install boost!.
 
 \item \verb!HDF5!
 If you don't have the library hdf5 installed in your system, you could use the
-\verb!sudo! \verb!apt-get install libhdf5-openmpi-dev! instruction in devian linux systems or something similar
-for your particular system. There are detailed instructions on-line on how to build it for other systems and
-with other options, for example at \url{http://micro.stanford.edu/wiki/Install_HDF5#Build_and_Installation_from_Sources}.
+\verb!sudo! \verb!apt-get install libhdf5-openmpi-dev! command on Debian systems or something similar
+for your particular distro. There are detailed instructions on-line on how to build it for other systems and
+with other options, see \url{http://micro.stanford.edu/wiki/Install_HDF5#Build_and_Installation_from_Sources}.\\
 In Mac OS X using MacPorts type \verb!sudo port install hdf5! or build it from the sources to link it to the correct
 openmpi compilers.
 
 \item \verb!BLAS!.
-For example get \url{http://www.tacc.utexas.edu/tacc-projects/gotoblas2/}. To build just type \verb!make!.
-To make use of the library remember to
-have the pthreads library and flag  \verb!-lpthread! while linking to the blas library  \verb!libgoto2_xxxxx_xx.xx.a!,
-whose exact name depends on the characteristics of your hardware. In Mac OS X
+On Debian systems run \verb!sudo apt-get install libblas-dev!.\\
+In Mac OS X
 the system comes with blas and lapack as part of the Accelerate framework \verb!-framework Accelerate!,
 and if using MacPorts type
-\verb!sudo port install atlas! to install the atlas library (blas and lapack).
+\verb!sudo port install atlas! to install the atlas library (blas and lapack).\\
+To compile from source, get the libraries e.g.\ at \url{https://www.tacc.utexas.edu/research-development/tacc-software/gotoblas2}. To build just type \verb!make!.
+To make use of the library remember to
+have the pthreads library and flag  \verb!-lpthread! while linking to the blas library  \verb!libgoto2_xxxxx_xx.xx.a!,
+whose exact name depends on the characteristics of your hardware.
 
 \item \verb!LAPACK!.
 Fortran $90$ Linear Algebra Routines for systems of simultaneous linear algebra equations, linear least-squares problems
-and matrix eigenvalue problems. You must pay attention to build the lapack using an optimized blas like the gotoblas of
-last item. Download at \url{http://www.netlib.org/lapack/}. You need a fortran compiler (for example gfortran).
+and matrix eigenvalue problems. You must pay attention to build the lapack using an optimized blas like the GotoBLAS (see above). Download it at \url{http://www.netlib.org/lapack/}. You need a fortran compiler (for example \verb!gfortran!).
 Copy \verb!make.inc.example! to \verb!make.inc! and edit the path to the blas library followed by the flag \verb!-lpthread!
-and type \verb!make!.
+and type \verb!make!.\\
+For a non-optimized version on a Debian system run \verb!sudo apt-get install liblapack-dev!.
 
 \item \verb!PARMETIS!.
-You can download it from \url{http://glaros.dtc.umn.edu/gkhome/metis/parmetis/download}. Set \verb!CC=mpicc!
+You can download ParMetis from \url{http://glaros.dtc.umn.edu/gkhome/metis/parmetis/download}. Set \verb!CC=mpicc!
 in \verb!Makefile.in!. and type \verb!make!. In Mac OS X you need the include path flags
 \verb!-I/usr/include! and \verb!-I/usr/include/malloc!.
 
-\item \verb!UMFPACK!.
-Set of routines for solving unsymmetric sparse linear systems.
-Download from \url{http://www.cise.ufl.edu/research/sparse/umfpack/}. Requires
-the packages \verb!UFconfig! and \verb!AMD!. Place amd, ufconfig and umfpack in the same parent directory.
-Modify the file \verb!UFconfig.mk! to specify the C compiler \verb!CC = gcc!, \verb!CPLUSPLUS=g++!,
-\verb!CFLAGS=-O3!
-\verb!-fexceptions!
-and the blas, lapack and metis paths and libraries including the \verb!-lpthread! flag.
-For Mac OS X you must uncheck the special options given for this system, you can use the blas and lapack
+\item \verb!UMFPACK (now part of SuiteSparse)!.
+Set of routines for solving unsymmetric sparse linear systems.\\
+On a Debian system, install it with the command \verb!sudo apt-get install libsuitesparse-dev!.
+To compile SuiteSparse from source, download it from \url{http://faculty.cse.tamu.edu/davis/suitesparse.html} and follow the instructions in the \verb!README.txt! file (in particular, you'll want to edit the \verb!SuiteSparse_config/SuiteSparse_config.mk! file according to your configuration).\\
+For Mac OS X you must uncomment the special options given for this system, so you can use the blas and lapack
 from atlas or from the Accelerate framework \verb!-framework Accelerate!.
-Type \verb!make! in
-the umfpack directory. Move the files in amd \verb!Lib! and \verb!Include! to the umfpack \verb!Lib! and \verb!Include! directories.
-Finally move \verb!UFconfig.h! to the corresponding \verb!Include! directory of umfpack.
 
-\item \verb!TRILINOS!\ixns{aztec}{algebra}.
+\item \verb!TRILINOS!\ixns{aztec}{algebra}. See the next section.
 
 \end{itemize}
-
-%\subsubsection{Runtime Environment}
-%\label{sec:runtime-env}
-
-%\begin{itemize}
-%\item \verb!aztec!
-%\end{itemize}
 
 \subsection{Trilinos compilation}
 \lifev depends on Trilinos, a set of object oriented C$++$ interfaces for packages like
 blas, lapack, parmetis, umfpack and many more. A copy of the source
-code is available for download at \url{http://trilinos.sandia.gov/packages/}.
+code is available for download at \url{http://trilinos.org/download/}.
 
 After downloading, decompressing and extracting the tarball, you'll need to
-make a build directory anywhere you want to avoid build in the sources directory.
-The autotools build is no longer available after the $10.0$ release.
-Trilinos now requires the CMake
-build system, version $2.8$ or newer.
-Go to the build directory and write a do-configure shell script like the following
+make a build directory anywhere you want to avoid build in the sources directory. (in the
+following script, we assume that the directories \verb!trilinos! and \verb!trilinos-build! are at the same level)
+Trilinos (latest version $11.12.1$ at the time of writing) now requires the CMake
+build system $2.8.11$ or newer.
+Go to the build directory and write a \verb!do-configure! shell script like the following
 
 
-\begin{verbatim}
+\begin{lstlisting}
 #!/bin/bash
 
 EXTRA_ARGS=$@
 
 cmake \
     -D CMAKE_BUILD_TYPE:STRING=RELEASE \
-    -D Trilinos_ENABLE_TESTS:BOOL=OFF \
-    -D Trilinos_ENABLE_Epetra:BOOL=ON \
-    -D Trilinos_ENABLE_Tpetra:BOOL=ON \
-    -D Trilinos_ENABLE_Kokkos:BOOL=ON \
-    -D Trilinos_ENABLE_EpetraExt:BOOL=ON \
-    -D Trilinos_ENABLE_AztecOO:BOOL=ON \
     -D Trilinos_ENABLE_Amesos:BOOL=ON \
-    -D Trilinos_ENABLE_Teuchos:BOOL=ON \
+    -D Trilinos_ENABLE_Anasazi:BOOL=ON \
+    -D Trilinos_ENABLE_AztecOO:BOOL=ON \
+    -D Trilinos_ENABLE_Belos:BOOL=ON \
+    -D Trilinos_ENABLE_Epetra:BOOL=ON \
+    -D Trilinos_ENABLE_EpetraExt:BOOL=ON \
+    -D Trilinos_ENABLE_Galeri:BOOL=OFF \
     -D Trilinos_ENABLE_Ifpack:BOOL=ON \
-    -D Trilinos_ENABLE_ThreadPool:BOOL=ON \
+    -D Trilinos_ENABLE_Isorropia:BOOL=OFF \
+    -D Trilinos_ENABLE_Kokkos:BOOL=ON \
     -D Trilinos_ENABLE_ML:BOOL=ON \
+    -D Trilinos_ENABLE_TESTS:BOOL=OFF \
+    -D Trilinos_ENABLE_Teuchos:BOOL=ON \
+    -D Trilinos_ENABLE_ThreadPool:BOOL=ON \
+    -D Trilinos_ENABLE_Tpetra:BOOL=ON \
     -D Trilinos_ENABLE_Triutils:BOOL=ON \
     -D Trilinos_ENABLE_Zoltan:BOOL=ON \
-    -D Trilinos_ENABLE_Galeri:BOOL=OFF \
-    -D Trilinos_ENABLE_Isorropia:BOOL=OFF \
+    \
     -D Trilinos_EXTRA_LINK_FLAGS:STRING="-lpthread" \
-    -D TPL_ENABLE_UMFPACK:BOOL=ON \
-    -D UMFPACK_LIBRARY_DIRS:PATH=/umfpack_library_path/ \
-    -D UMFPACK_INCLUDE_DIRS:PATH=/umfpack_include_path/ \
     -D TPL_ENABLE_Pthread:BOOL=ON \
+    \
     -D TPL_ENABLE_BLAS:BOOL=ON \
-    -D BLAS_LIBRARY_DIRS:PATH=/blas_library_path/ \
-    -D BLAS_LIBRARY_NAMES:STRING="blas_library_name" \
+    -D BLAS_INCLUDE_DIRS:PATH=/blas/include/dir/ \
+    -D BLAS_LIBRARY_DIRS:PATH=/blas/lib/dir/ \
+    -D BLAS_LIBRARY_NAMES:STRING="blas" \
+    \
     -D TPL_ENABLE_LAPACK:BOOL=ON \
-    -D LAPACK_LIBRARY_DIRS:PATH=/lapack_library_path/ \
-    -D LAPACK_LIBRARY_NAMES:STRING="lapack_library_name" \
-    -D TPL_ENABLE_MPI:BOOL=ON \
-    -D TPL_ENABLE_ParMETIS:BOOL=ON \
-    -D ParMETIS_LIBRARY_DIRS:PATH=/parmetis_library_path/ \
-    -D METIS_LIBRARY_DIRS:PATH=/metis_library_path/ \
+    -D LAPACK_INCLUDE_DIRS:PATH=/lapack/include/dir/ \
+    -D LAPACK_LIBRARY_DIRS:PATH=/lapack/lib/dir/ \
+    -D LAPACK_LIBRARY_NAMES:STRING="lapack" \
+    \
     -D TPL_ENABLE_HDF5:BOOL=ON \
-    -D MPI_BASE_DIR:PATH=/mpi_library_path/ \
-    -D MPI_BIN_DIR:PATH=/mpi_binary_path/ \
+    -D HDF5_INCLUDE_DIRS:PATH/hdf5/include/dir/ \
+    -D HDF5_LIBRARY_DIRS:PATH=/hdf5/lib/dir/ \
+    \
+    -D TPL_ENABLE_UMFPACK:BOOL=ON \
+    -D UMFPACK_INCLUDE_DIRS:PATH=/umfpack/include/dir/ \
+    -D UMFPACK_LIBRARY_DIRS:PATH=/umfpack/lib/dir/ \
+    -D UMFPACK_LIBRARY_NAMES:STRING="umfpack;amd" \
+    \
+    -D TPL_ENABLE_MPI:BOOL=ON \
+    -D MPI_BASE_DIR:PATH=/usr/lib/openmpi/ \
+    -D MPI_BIN_DIR:PATH=/usr/bin \
+    \
+    -D TPL_ENABLE_ParMETIS:BOOL=ON \
+    -D ParMETIS_LIBRARY_DIRS:PATH=/parmetis/lib/dir/ \
+    \
     -D CMAKE_INSTALL_PREFIX:PATH=./ \
     $EXTRA_ARGS \
-    /trilinos_source_path/
-\end{verbatim}
+    ../trilinos/
+\end{lstlisting}
 
-Simply modify the paths and names of libraries according to your particular configuration and run the shell script.
-For example, instead of \verb!lapack_library_name! you should type the name of your lapack library without the
-\verb!lib! prefix and the \verb!.a! suffix. The prefix and suffix are automatically added by CMake.
+Simply modify the paths of libraries according to your particular configuration and run the shell script (\verb!chmod +x do-configure && ./do-configure!). For example, instead of \verb!lapack_library_name! you should type the name of your lapack library without the
+\verb!lib! prefix and the \verb!.a! suffix. The prefix and suffix are automatically added by CMake.\\
+If SuiteSparse was compiled from source the \verb!UMFPACK_LIBRARY_NAMES! variable has to be modified so that it reads \verb!"umfpack;suitesparseconfig;cholmod;colamd;amd"!\\
+As an alternative to the above script, you can run
+\begin{lstlisting}
+ccmake ../lifev
+\end{lstlisting}
+to get a graphical configuration menu (however \verb!ccmake! needs \verb!libncurses! to be installed), with many more options.
+
 After the configuration is done, just type
-\begin{verbatim}
+\begin{lstlisting}
 make
-\end{verbatim}
+\end{lstlisting}
 that  will compile the static files and further
-\begin{verbatim}
+\begin{lstlisting}
 make install
-\end{verbatim}
+\end{lstlisting}
 that will create and install the library files
 in two subdirectories \verb|lib| and \verb|include|, where
 it will respectively pack the objects files into library files (.a and .la files)
 and copy the include files ( .h or .hpp files ).
 
-The trilinos library is now installed in the build directory you created.
+The Trilinos library is now installed in the build directory you created.
 
 \subsection{Compilation from git}
 \label{sec:compile-cvs}
@@ -277,20 +285,13 @@ repositories without password.
 
 It is now time to download and compile the code.
 Just type
-\begin{verbatim}
+\begin{lstlisting}
 git clone git@cmcsforge.epfl.ch:lifev.git lifev
-\end{verbatim}
-where developername is your account name on cmcsforge. Place yourself in the new directory
-
-\begin{verbatim}
+\end{lstlisting}
+and go to the newly created directory
+\begin{lstlisting}
 cd lifev
-\end{verbatim}
-and type
-\begin{verbatim}
-git clone git@cmcsforge.epfl.ch:lifev.git cmake
-\end{verbatim}
-
-
+\end{lstlisting}
 
 Second, you must make a build directory apart from the
 lifev sources directory, for example in your home you can have a
@@ -298,92 +299,76 @@ lifev sources directory, for example in your home you can have a
 an optimized version subdirectory \verb!opt! or the debugging mode
 subdirectory \verb!debug!, or something similar according to your own taste.
 
-
-Third, you have to execute the
-\verb+do-configure+ shell script in the \verb!opt! directory.
+Third, you have to execute the following
+\verb+do-configure+ shell script (again, modified to suite your configuration) in the \verb!opt! directory.
 It will automatically check the availability of the needed components
 for \lifev compilation :
 
 
-\begin{verbatim}
+\begin{lstlisting}
+#!/bin/bash
+
+EXTRA_ARGS=$@
+
+TRILINOS_BUILD_DIR=/trilinos/build/dir/
+
 cmake \
-    -D CMAKE_BUILD_TYPE:STRING=RELEASE \
-    \
-    -D TPL_ENABLE_MPI:BOOL=ON \
-    \
-    -D ParMETIS_INCLUDE_DIRS:PATH=/parmetis_include_path/ \
-    -D ParMETIS_LIBRARY_DIRS:PATH=/parmetis_library_path/ \
-    \
-    -D TPL_ENABLE_UMFPACK:BOOL=ON \
-    \
-    -D TPL_ENABLE_BLAS:BOOL=ON \
-    -D BLAS_LIBRARY_DIRS:PATH=/blas_library_path/ \
-    -D BLAS_LIBRARY_NAMES:STRING="blas_library_name" \
-    -D TPL_ENABLE_LAPACK:BOOL=ON \
-    -D LAPACK_LIBRARY_DIRS:PATH=/lapack_library_path/ \
-    -D LAPACK_LIBRARY_NAMES:STRING="lapack_library_name" \
-    -D TPL_ENABLE_Boost:BOOL=ON \
-    -D TPL_Boost_INCLUDE_DIRS:STRING=/boost_include_path/ \
-    \
-    -D TPL_ENABLE_Trilinos:STRING=ON \
-    -D Trilinos_INCLUDE_DIRS:PATH=/trilinos_include_path/ \
-    -D Trilinos_LIBRARY_DIRS:PATH=/trilinos_library_path/ \
-    \
-    -D LifeV_VERBOSE_CONFIGURE:BOOL=OFF \
-    -D CMAKE_VERBOSE_MAKEFILE:BOOL=ON \
-    \
-    -D LifeV_ENABLE_STRONG_CXX_COMPILE_WARNINGS:BOOL=OFF \
-    \
-    -D LifeV_ENABLE_ALL_PACKAGES:BOOL=ON \
-    -D LifeV_ENABLE_TESTS:BOOL=ON \
-    -D LifeV_ENABLE_EXAMPLES:BOOL=ON \
-    -D CMAKE_INSTALL_PREFIX:PATH=$MY_LIB_DIR \
-    $* \
-    $BASE_DIR/lifev
-\end{verbatim}
+-D CMAKE_BUILD_TYPE:STRING=RELEASE \
+\
+-D TPL_ENABLE_MPI:BOOL=ON \
+\
+-D ParMETIS_INCLUDE_DIRS:PATH=/parmetis/include/dir/ \
+-D ParMETIS_LIBRARY_DIRS:PATH=/parmetis/lib/dir/ \
+\
+-D TPL_ENABLE_BLAS:BOOL=ON \
+-D BLAS_INCLUDE_DIRS:PATH=/blas/include/dir/ \
+-D BLAS_LIBRARY_DIRS:PATH=/blas/lib/dir/ \
+-D BLAS_LIBRARY_NAMES:STRING="blas" \
+\
+-D TPL_ENABLE_LAPACK:BOOL=ON \
+-D LAPACK_INCLUDE_DIRS:PATH=/lapack/include/dir/ \
+-D LAPACK_LIBRARY_DIRS:PATH=/lapack/lib/dir/ \
+-D LAPACK_LIBRARY_NAMES:STRING="lapack" \
+\
+-D TPL_ENABLE_HDF5:BOOL=ON \
+-D HDF5_INCLUDE_DIRS:PATH=/hdf5/include/dir/ \
+-D HDF5_LIBRARY_DIRS:PATH=/hdf5/lib/dir/ \
+\
+-D TPL_ENABLE_Boost:BOOL=ON \
+-D Boost_INCLUDE_DIRS:PATH=/boost/include/dir/ \
+\
+-D TPL_ENABLE_Trilinos:STRING=ON \
+-D Trilinos_DIR:PATH=$TRILINOS_BUILD_DIR/lib/cmake/Trilinos \
+-D Trilinos_INCLUDE_DIRS:PATH=$TRILINOS_BUILD_DIR/include/ \
+-D Trilinos_LIBRARY_DIRS:PATH=$TRILINOS_BUILD_DIR/lib/ \
+\
+-D LifeV_VERBOSE_CONFIGURE:BOOL=OFF \
+-D CMAKE_VERBOSE_MAKEFILE:BOOL=OFF \
+\
+-D LifeV_ENABLE_STRONG_CXX_COMPILE_WARNINGS:BOOL=OFF \
+\
+-D LifeV_ENABLE_ALL_PACKAGES:BOOL=ON \
+-D LifeV_ENABLE_TESTS:BOOL=ON \
+-D LifeV_ENABLE_EXAMPLES:BOOL=ON \
+\
+-D CMAKE_INSTALL_PREFIX:PATH=./ \
+$EXTRA_ARGS \
+../lifev
+\end{lstlisting}
 
-Do the same in the \verb!debug! directory, replacing the first line by  \begin{verbatim}    -D CMAKE_BUILD_TYPE:STRING=DEBUG\  \end{verbatim}
-
-
-%\begin{verbatim}
-%./configure \
-%    --with-trilinos-lib=/your_trilinos_library_path/ \
-%    --with-trilinos-include=/your_trilinos_include_path/ \
-%    --enable-opt \
-%    --with-mpi=/usr/lib/openmpi \
-%    --with-mpi-lib=/usr/lib/openmpi/lib \
-%    --with-mpi-include=/usr/include/openmpi \
-%    --with-parmetis-include=/your_parmetis_include_path/ \
-%    --with-parmetis-lib=/your_parmetis_library_path/ \
-%    --with-umfpack-include=/your_umfpack_include_path/ \
-%    --with-umfpack-lib=/your_umfpack_library_path/ \
-%    --with-amd-include=/your_amd_include_path/ \
-%    --with-amd-lib=/your_amd_library_path/ \
-%    --with-hdf5=/usr \
-%    --prefix=/your_lifeV_library_install_path/
-%    CXXFLAGS ="-O2"
-%\end{verbatim}
-
-%\noindent to configure with optimized libraries, or change the line \verb!--enable-opt! to
-%\verb!--enable-debug! and \verb!CXXFLAGS="-g2 -O0"! to build the libraries
-%in debugging mode.
-%
-%Remember to specify the
-%path to your build directory (external to the sources directory) with the flag \verb!--prefix!.
-%
-%Change the path and name of mpi, mpi library and include if yours is different.
-%You can check for additional flags for mpi typing \verb!mpicc -show!.
+Do the same in the \verb!debug! directory, replacing the first line by \begin{lstlisting}    -D CMAKE_BUILD_TYPE:STRING=DEBUG \  \end{lstlisting}
 
 
 \noindent Finally, you just have to use \ixv{make} to compile \lifev libraries and documentation.
 Enter
-\begin{verbatim}
-make -j 4
+\begin{lstlisting}
+make -j n
 make install
-\end{verbatim}
+\end{lstlisting}
 
-\noindent Be careful because \verb!do-configure! will fail if you have already compiled
-\lifev in the source directory. Therefore is not a good idea to build in the sources.
+\noindent where \verb!n! is the number of parallel jobs.\\
+Be careful because \verb!do-configure! will fail if you have already compiled
+\lifev in the source directory. Therefore is not a good idea to build inside the sources.
 
 \subsection{Compilation from Official Distribution}
 \label{sec:comp-from-offic}
@@ -397,15 +382,15 @@ Here is what you have to do:
 \begin{enumerate}
 \item download \lifev release \verb!lifev-x.y.z.tar.gz!
 \item unpack it
-\begin{verbatim}
+\begin{lstlisting}
 tar -xzf lifev-x.y.z.tar.gz
-\end{verbatim}
+\end{lstlisting}
 \item configure it following the instructions of the previous section,
 \item compile and install it
-\begin{verbatim}
-make -j 4
+\begin{lstlisting}
+make -j n
 make install
-\end{verbatim}
+\end{lstlisting}
 \end{enumerate}
 
 
@@ -413,7 +398,7 @@ make install
 
 \noindent \lifev comes with testsuites covering a lot of features. They are located in different directories, mainly depending on the physical or technical aspects they are concerned with. For example, you can find a number of tests in the \verb+core+
 directory (\verb+lifev/lifev/core/testsuite+) but \verb+darcy, fsi, navier_stokes, structure+ are other directories where you can find tests.%It is located in the directory \verb+testsuite+
-%\begin{verbatim}
+%\begin{lstlisting}
 %|-- data
 %|-- test_bdf
 %|-- test_darcy
@@ -432,29 +417,29 @@ directory (\verb+lifev/lifev/core/testsuite+) but \verb+darcy, fsi, navier_stoke
 %|-- test_p2
 %|-- test_postproc
 %`-- test_q1
-%\end{verbatim}
+%\end{lstlisting}
 
 All these tests are automatically compiled once you have installed \lifev. To run them just type
-\begin{verbatim}
+\begin{lstlisting}
 make test
-\end{verbatim}
+\end{lstlisting}
 
 
 
 %\noindent In order to compile a testsuite, you need the following steps
-%\begin{verbatim}
+%\begin{lstlisting}
 %cd <lifev-directory>/testsuite
 %make check
-%\end{verbatim}
+%\end{lstlisting}
 %where the lifev-directory is the directory where you unpacked \lifev.
 %
 %\noindent If you just want to compile a specific test, say \verb+test_darcy+
-%\begin{verbatim}
+%\begin{lstlisting}
 %cd lifev-directory/testsuite/data
 %make check
 %cd lifev-directory/testsuite/test_darcy
 %make test_darcy OR make check
-%\end{verbatim}
+%\end{lstlisting}
 
 %
 %%%%%%%%%%%%% Some Settings for emacs and auc-TeX
