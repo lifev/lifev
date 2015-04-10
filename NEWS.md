@@ -1,3 +1,10 @@
+LifeV 3.8.8:
+============
+
+* updated tutorial, in particular added Laplacian with expression templates
+* polished latex in doxigen
+* in ETA: integrate with volume flags
+
 LifeV 3.8.7:
 ============
 
