@@ -201,8 +201,8 @@ void FSIHandler::setup ( )
 	setupExporters( );
 
 	// Data needed by the Newton algorithm
-	M_relativeTolerance = M_datafile ( "newton/abstol", 1.e-4);
-	M_absoluteTolerance = M_datafile ( "newton/reltol", 1.e-4);
+	M_relativeTolerance = M_datafile ( "newton/reltol", 1.e-4);
+	M_absoluteTolerance = M_datafile ( "newton/abstol", 1.e-4);
 	M_etaMax = M_datafile ( "newton/etamax", 1e-4);
 	M_maxiterNonlinear = M_datafile ( "newton/maxiter", 10);
 

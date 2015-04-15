@@ -152,6 +152,7 @@ Int NonLinearRichardson ( VectorEpetra& sol,
         output << std::scientific;
         output << "# time = ";
         output << time << "   " << "initial norm_res " <<  normRes
+        	   << " rel tol = " << reltol
                << " stop tol = " << stop_tol
                << "initial norm_sol "
                << solNormInf << std::endl;
@@ -165,6 +166,8 @@ Int NonLinearRichardson ( VectorEpetra& sol,
             std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
             std::cout << "      Non-Linear Richardson: iteration  =      " << iter << std::endl
                       << "                             residual   =      " << normRes << std::endl
+                      << "                             rel tol    =      " << reltol << std::endl
+            		  << "                             abs tol    =      " << abstol << std::endl
                       << "                             tolerance  =      " << stop_tol << std::endl;
             std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
             std::cout << std::endl;
