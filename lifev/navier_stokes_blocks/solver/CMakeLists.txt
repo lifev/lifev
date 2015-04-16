@@ -7,6 +7,7 @@ SET(solver_HEADERS
   solver/aPCDOperator.hpp
   solver/Stabilization.hpp
   solver/StabilizationSUPG.hpp
+  solver/StabilizationSUPG_semi_implicit.hpp
   solver/StabilizationSUPGALE.hpp
 CACHE INTERNAL "")
 
@@ -16,6 +17,7 @@ SET(solver_SOURCES
   solver/aSIMPLEOperator.cpp
   solver/aPCDOperator.cpp
   solver/StabilizationSUPG.cpp
+  solver/StabilizationSUPG_semi_implicit.cpp
   solver/StabilizationSUPGALE.cpp
 CACHE INTERNAL "")
 
