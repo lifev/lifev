@@ -36,7 +36,7 @@
    For reference, see Paper 
  
    * D. Forti, L. Dede, Semi–implicit BDF time discretization of the Navier–Stokes equations with VMS–LES modeling in
-   a High Performance Computing framework. Submitted, availale as MATHICSE report, 2015.
+   a High Performance Computing framework. Submitted, available as MATHICSE report, 2015.
    
    * Y. Bazilevs, V.M. Calo, J.A. Cottrell, T.J.R. Hughes, A. Reali, and G. Scovazzi. <i>Variational multiscale
    residual-based turbulence modeling for large eddy simulation of incompressible flows</i>. Comput. Methods Appl. Mech. Engr. 197(1):173–201, 2007.
@@ -136,29 +136,25 @@ public:
     //! Build the graphs of each single block
     void buildGraphs();
 
-    //! Updates the jacobian matrix
+    //! Updates the system matrix in Navier-Stokes simulations in fixed coordinates
+    //  with semi-implicit treatment of the convective term.
     /*!
-       @param velocity_previous_newton_step velocity from the previous Newton step
-       @param pressure_previous_newton_step pressure from the previous Newton step
-       @param velocity_rhs velocity term from approximation time derivative
+        @param velocityExtrapolated extrapolation of the fluid velocity
      */
-    void apply_matrix(	const vector_Type& velocity_previous_newton_step,
-	  	  	  	  		const vector_Type& pressure_previous_newton_step,
-	  	  	  	  		const vector_Type& velocity_rhs );
+    void apply_matrix( const vector_Type& velocityExtrapolated );
 
-    //! Adds to the residual the contribution coming from the SUPG stabilization
+    //! Adds to the right hand side the contribution coming from the SUPG stabilization
+    //  in Navier-Stokes simulations in fixed coordinates. Used for NS semi-implicit
     /*!
-       @param residual_velocity velocity component of the residual
-       @param residual_pressure pressure component of the residual
-       @param velocity_previous_newton_step velocity from the previous Newton step
-       @param pressure_previous_newton_step pressure from the previous Newton step
-       @param velocity_rhs velocity term from approximation time derivative
+        @param rhs_velocity velocity component of the right hand side
+        @param rhs_pressure pressure component of the right hand side
+        @param velocity_extrapolated velocity extrapolated
+        @param velocity_rhs velocity term from approximation time derivative
      */
-    void apply_vector( vectorPtr_Type& residual_velocity,
-			  	   	   vectorPtr_Type& residual_pressure,
-			  	   	   const vector_Type& velocity_previous_newton_step,
-			  	   	   const vector_Type& pressure_previous_newton_step,
-			  	   	   const vector_Type& velocity_rhs);
+    void apply_vector( vectorPtr_Type& rhs_velocity,
+                       vectorPtr_Type& rhs_pressure,
+                       const vector_Type& velocityExtrapolated,
+                       const vector_Type& velocity_rhs);
 
     void setVelocitySpace(fespacePtr_Type velocityFESpace){ M_uFESpace = velocityFESpace;}
 

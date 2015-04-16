@@ -103,6 +103,27 @@ public:
     							const vector_Type& /*velocity_previous_newton_step*/,
     							const vector_Type& /*pressure_previous_newton_step*/,
     							const vector_Type& /*velocity_rhs*/) {};
+    
+    //! Updates the system matrix in Navier-Stokes simulations in fixed coordinates
+    //  with semi-implicit treatment of the convective term.
+    /*!
+     @param velocityExtrapolated extrapolation of the fluid velocity
+     */
+    virtual void apply_matrix(	const vector_Type& /*velocityExtrapolated*/ ) {};
+
+    
+    //! Adds to the right hand side the contribution coming from the SUPG stabilization
+    //  in Navier-Stokes simulations in fixed coordinates. Usef for NS semi-implicit
+    /*!
+     @param rhs_velocity velocity component of the right hand side
+     @param rhs_pressure pressure component of the right hand side
+     @param velocity_extrapolated velocity extrapolated
+     @param velocity_rhs velocity term from approximation time derivative
+     */
+    virtual void apply_vector( 	vectorPtr_Type& /*rhs_velocity*/,
+                                vectorPtr_Type& /*rhs_pressure*/,
+                                const vector_Type& /*velocity_extrapolated*/,
+                                const vector_Type& /*velocity_rhs*/) {};
 
     //! Updates the jacobian matrix in Navier-Stokes simulations in ALE coordinates
     /*!
