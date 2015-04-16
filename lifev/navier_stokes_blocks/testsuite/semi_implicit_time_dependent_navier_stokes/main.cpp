@@ -124,14 +124,14 @@ main ( int argc, char** argv )
     if (exporterType.compare ("hdf5") == 0)
     {
     	exporter.reset ( new ExporterHDF5<mesh_Type > ( dataFile, outputName ) );
-    	exporter->setPostDir ( "./" ); // This is a test to see if M_post_dir is working
+    	exporter->setPostDir ( "./" );
     	exporter->setMeshProcId ( localMeshPtr, Comm->MyPID() );
     }
 #endif
     else if(exporterType.compare ("vtk") == 0)
     {
     	exporter.reset ( new ExporterVTK<mesh_Type > ( dataFile, outputName ) );
-    	exporter->setPostDir ( "./" ); // This is a test to see if M_post_dir is working
+    	exporter->setPostDir ( "./" );
     	exporter->setMeshProcId ( localMeshPtr, Comm->MyPID() );
     }
 

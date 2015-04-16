@@ -5,7 +5,7 @@
 
 * #offline partitioner details
 [offline_partitioner]
-useOfflinePartitionedMesh = true                  					# true for loading an already partitioned mesh, false to partition the mesh online
+useOfflinePartitionedMesh = false                  					# true for loading an already partitioned mesh, false to partition the mesh online
 num_parts = 18                                     					# must be the same of the number of parts when we partioned offline the mesh
 hdf5_file_name = cylinder_coarse_18_MeshPartitionTool_ParMETIS.h5                       # file generated running test partion_io (main_write) - REQUIRED - 
 io_class = new                                    					# possibilities: old or new, use new
@@ -16,6 +16,12 @@ multimesh  = false
 start      = 0
 save       = 1
 filename   = result_fluid
+
+[newton]
+
+    convectiveImplicit      =  false
+
+[../]
 
 [fluid]
 
@@ -29,8 +35,8 @@ filename   = result_fluid
 
     [../time_discretization]
     initialtime     = 0.0
-    endtime         = 0.001
-    timestep        = 0.001
+    endtime         = 5.0
+    timestep        = 0.01
 
     BDF_order       = 2
 
@@ -40,9 +46,14 @@ filename   = result_fluid
     mesh_type       = .mesh
 
     vel_order       = P2
-    pres_order      = P1
+    pres_order      = P2
     stiff_strain    = true
-   
+
+    [../stabilization]
+    use             = true
+    type            = SUPG_SEMI_IMPLICIT
+    vel_order       = 2
+
 
     [../miscellaneous]
     verbose         = 1

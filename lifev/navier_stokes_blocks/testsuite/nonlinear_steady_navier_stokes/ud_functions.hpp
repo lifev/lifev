@@ -55,8 +55,8 @@ Real fZero (const Real& t, const Real& x, const Real& y, const Real& z, const ID
 
 Real inflow_up (const Real& t, const Real& x, const Real& y, const Real& /*z*/, const ID& i)
 {
-    Real max_peak  = 10;//630;
-    Real Tr        = 0.01;
+    Real max_peak  = 30;//630;
+    Real Tr        = 0.5;
     Real peak      = 0.0;
     Real xc        = 0.0;
     Real yc        = 27.15;
