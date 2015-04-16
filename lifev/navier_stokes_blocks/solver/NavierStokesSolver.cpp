@@ -69,6 +69,9 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
 
     M_fullyImplicit = M_dataFile ( "newton/convectiveImplicit", false);
 
+    M_monolithicMap.reset( new map_Type ( M_velocityFESpace->map() ) );
+    *M_monolithicMap += M_pressureFESpace->map();
+    
     if ( M_fullyImplicit )
     {
     	M_displayer.leaderPrint ( " F - solving nonlinear Navier-Stokes\n");
@@ -81,9 +84,6 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
 
     	if (M_comm->MyPID() == 0)
     		M_out_res.open ("residualsNewton");
-
-    	M_monolithicMap.reset( new map_Type ( M_velocityFESpace->map() ) );
-    	*M_monolithicMap += M_pressureFESpace->map();
 
     	M_solution.reset( new vector_Type ( *M_monolithicMap ) );
     	M_solution->zero();
@@ -470,7 +470,8 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 	*M_block00 *= M_alpha/M_timeStep;
 	*M_block00 += *M_A;
 	*M_block00 += *M_C;
-	M_block00->globalAssemble();
+    if ( !M_useStabilization )
+        M_block00->globalAssemble();
 
 	// Get the right hand side with inertia contribution
 	M_rhs.reset( new vector_Type ( M_velocityFESpace->map(), Unique ) );
@@ -478,6 +479,43 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 
 	if ( !M_steady )
 		*M_rhs = *M_Mu* (*rhs_velocity);
+    
+    if ( !M_fullyImplicit && M_useStabilization )
+    {
+        M_displayer.leaderPrint ( "\tF - Assembling semi-implicit SUPG terms... ");
+        LifeChrono chrono;
+        chrono.start();
+        
+        M_stabilization->apply_matrix( *u_star );
+        
+        *M_block00 += *M_stabilization->block_00();
+        M_block00->globalAssemble();
+        
+        M_block01->zero();
+        *M_block01 += *M_Btranspose;
+        *M_block01 += *M_stabilization->block_01();
+        M_block01->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
+        
+        M_block10->zero();
+        *M_block10 += *M_B;
+        *M_block10 += *M_stabilization->block_10();
+        M_block10->globalAssemble(M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
+        
+        M_block11->zero();
+        *M_block11 += *M_stabilization->block_11();
+        M_block11->globalAssemble();
+        
+        M_rhs_pressure.reset( new vector_Type ( M_pressureFESpace->map(), Unique ) );
+        M_rhs_pressure->zero();
+
+        M_stabilization->apply_vector( M_rhs, M_rhs_pressure, *u_star, *rhs_velocity);
+        M_rhs->globalAssemble();
+        M_rhs_pressure->globalAssemble();
+        
+        chrono.stop();
+        M_displayer.leaderPrintMax ( " done in ", chrono.diff() ) ;
+
+    }
 }
 
 void NavierStokesSolver::applyGravityForce ( const Real& gravity, const Real& gravityDirection)
@@ -496,14 +534,7 @@ void NavierStokesSolver::applyBoundaryConditions ( bcPtr_Type & bc, const Real& 
 {
 	updateBCHandler(bc);
 	bcManage ( *M_block00, *M_rhs, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 1.0, time );
-
-	for (BCHandler::bcBaseIterator_Type it = bc->begin(); it != bc->end(); ++it)
-	{
-		if ( it->type() != Essential)
-			continue;
-
-		bcManageMatrix( *M_block01, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 0.0, 0.0);
-	}
+    bcManageMatrix( *M_block01, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 0.0, 0.0);
 }
 
 void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
@@ -519,6 +550,9 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
     operData(0,0) = M_block00->matrixPtr();
     operData(0,1) = M_block01->matrixPtr();
     operData(1,0) = M_block10->matrixPtr();
+    if ( M_useStabilization )
+        operData(1,1) = M_block11->matrixPtr();
+    
     M_oper->setUp(operData, M_displayer.comm());
     chrono.stop();
     M_displayer.leaderPrintMax(" done in " , chrono.diff() );
@@ -531,7 +565,15 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
 
     if ( std::strcmp(M_prec->Label(),"aSIMPLEOperator")==0 )
     {
-    	M_prec->setUp(M_block00, M_block10, M_block01);
+        if (M_useStabilization)
+        {
+            M_prec->setUp(M_block00, M_block10, M_block01, M_block11);
+        }
+        else
+        {
+            M_prec->setUp(M_block00, M_block10, M_block01);
+        }
+
     	M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
     	M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
     	M_prec->updateApproximatedMomentumOperator();
@@ -568,15 +610,33 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
     BlockEpetra_Map upMap;
     upMap.setUp ( M_velocityFESpace->map().map(Unique), M_pressureFESpace->map().map(Unique));
 
-    BlockEpetra_MultiVector up(upMap, 1), rhs(upMap, 1);
-    rhs.block(0).Update(1.0, M_rhs->epetraVector(), 0.);
+    if ( M_useStabilization )
+    {
+        vector_Type rhs ( *M_monolithicMap, Unique );
+        vector_Type sol ( *M_monolithicMap, Unique );
+     
+        rhs.zero();
+        sol.zero();
+        
+        rhs.subset ( *M_rhs, M_velocityFESpace->map(), 0, 0 );
+        rhs.subset ( *M_rhs_pressure, M_pressureFESpace->map(), 0, M_velocityFESpace->map().mapSize() );
+        
+        M_invOper->ApplyInverse(rhs.epetraVector(), sol.epetraVector());
+        
+        M_velocity->subset ( sol, M_velocityFESpace->map(), 0, 0 );
+        M_pressure->subset ( sol, M_pressureFESpace->map(), M_velocityFESpace->map().mapSize(), 0 );
+    }
+    else
+    {
+        BlockEpetra_MultiVector up(upMap, 1), rhs(upMap, 1);
+        rhs.block(0).Update(1.0, M_rhs->epetraVector(), 0.);
+    
+        // Solving the linear system
+        M_invOper->ApplyInverse(rhs,up);
 
-    // Solving the linear system
-    M_invOper->ApplyInverse(rhs,up);
-
-    M_velocity->epetraVector().Update(1.0,up.block(0),0.0);
-    M_pressure->epetraVector().Update(1.0,up.block(1),0.0);
-
+        M_velocity->epetraVector().Update(1.0,up.block(0),0.0);
+        M_pressure->epetraVector().Update(1.0,up.block(1),0.0);
+    }
 }
 
 void NavierStokesSolver::iterate_nonlinear( bcPtr_Type & bc, const Real& time )
@@ -784,7 +844,7 @@ void NavierStokesSolver::evalResidual(vector_Type& residual, const vector_Type& 
 				trace ( grad ( M_fespaceUETA, *u_km1 ) ) * phi_i
 		) >> res_pressure;
 	}
-
+    
 	if ( M_useStabilization )
 	{
 		M_displayer.leaderPrint ( "[F] - Assembly residual of the stabilization \n" ) ;

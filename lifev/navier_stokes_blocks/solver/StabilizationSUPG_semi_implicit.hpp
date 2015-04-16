@@ -79,7 +79,7 @@
 namespace LifeV
 {
 
-class SquareRoot
+class SquareRoot_supg_semi_implicit
 {
 public:
     typedef Real return_Type;
@@ -89,9 +89,9 @@ public:
         return std::sqrt(a);
     }
 
-    SquareRoot() {}
-    SquareRoot (const SquareRoot&) {}
-    ~SquareRoot() {}
+    SquareRoot_supg_semi_implicit() {}
+    SquareRoot_supg_semi_implicit (const SquareRoot_supg_semi_implicit&) {}
+    ~SquareRoot_supg_semi_implicit() {}
 };
 
 class StabilizationSUPG_semi_implicit : public Stabilization

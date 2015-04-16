@@ -72,6 +72,7 @@
 
 #include <lifev/navier_stokes_blocks/solver/Stabilization.hpp>
 #include <lifev/navier_stokes_blocks/solver/StabilizationSUPG.hpp>
+#include <lifev/navier_stokes_blocks/solver/StabilizationSUPG_semi_implicit.hpp>
 #include <lifev/navier_stokes_blocks/solver/StabilizationSUPGALE.hpp>
 
 namespace LifeV
@@ -375,6 +376,7 @@ private:
 	// vectors
 	vectorPtr_Type M_uExtrapolated;
 	vectorPtr_Type M_rhs;
+    vectorPtr_Type M_rhs_pressure;
     vectorPtr_Type M_velocity;
     vectorPtr_Type M_pressure;
     vectorPtr_Type M_velocityRhs;

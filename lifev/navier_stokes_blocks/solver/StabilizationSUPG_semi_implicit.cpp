@@ -43,7 +43,7 @@ void StabilizationSUPG_semi_implicit::buildGraphs()
 	
 	velocity_extrapolated_rep += 1;
 	
-	boost::shared_ptr<SquareRoot> squareroot(new SquareRoot());
+	boost::shared_ptr<SquareRoot_supg_semi_implicit> squareroot(new SquareRoot_supg_semi_implicit());
 
 	{
 		using namespace ExpressionAssembly;
@@ -139,7 +139,7 @@ void StabilizationSUPG_semi_implicit::apply_matrix( const vector_Type& velocityE
 	M_block_11->zero();
 
 	vector_Type velocity_extrapolated_rep( velocityExtrapolated, Repeated);
-	boost::shared_ptr<SquareRoot> squareroot(new SquareRoot());
+	boost::shared_ptr<SquareRoot_supg_semi_implicit> squareroot(new SquareRoot_supg_semi_implicit());
 
 	using namespace ExpressionAssembly;
 
@@ -195,7 +195,7 @@ void StabilizationSUPG_semi_implicit::apply_matrix( const vector_Type& velocityE
               ) >> M_block_11;
 	
     M_block_11->globalAssemble();
-
+    
 }
 
 void StabilizationSUPG_semi_implicit::apply_vector( vectorPtr_Type& rhs_velocity,
@@ -208,7 +208,7 @@ void StabilizationSUPG_semi_implicit::apply_vector( vectorPtr_Type& rhs_velocity
     vector_Type velocity_rhs_rep( velocity_rhs, Repeated);
     vector_Type velocity_extrapolated_rep( velocityExtrapolated, Repeated);
 
-	boost::shared_ptr<SquareRoot> squareroot(new SquareRoot());
+	boost::shared_ptr<SquareRoot_supg_semi_implicit> squareroot(new SquareRoot_supg_semi_implicit());
 
     using namespace ExpressionAssembly;
 
