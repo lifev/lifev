@@ -79,6 +79,9 @@ public:
     //! Build the graphs of each single block
     virtual void buildGraphs() = 0;
 
+    //! @name Interfaces for the NS in fixed domain, fully implicit
+    //@{
+    
     //! Updates the jacobian matrix in Navier-Stokes simulations in fixed coordinates
     /*!
        @param velocity_previous_newton_step velocity from the previous Newton step
@@ -104,6 +107,11 @@ public:
     							const vector_Type& /*pressure_previous_newton_step*/,
     							const vector_Type& /*velocity_rhs*/) {};
     
+    //@}
+    
+    //! @name Interfaces for the NS in fixed domain, semi-implicit
+    //@{
+    
     //! Updates the system matrix in Navier-Stokes simulations in fixed coordinates
     //  with semi-implicit treatment of the convective term.
     /*!
@@ -125,6 +133,11 @@ public:
                                 const vector_Type& /*velocity_extrapolated*/,
                                 const vector_Type& /*velocity_rhs*/) {};
 
+    //@}
+    
+    //! @name Interfaces for the NS in moving domain, fully implicit
+    //@{
+    
     //! Updates the jacobian matrix in Navier-Stokes simulations in ALE coordinates
     /*!
      * @param convective_velocity_previous_newton_step convective velocity from the previous Newton step
@@ -154,6 +167,8 @@ public:
     						    const vector_Type& /*pressure_previous_newton_step*/,
     						    const vector_Type& /*velocity_rhs*/) {};
 
+    //@}
+    
     //! Set the constant C_I for the supg
     virtual void setConstant (const int & value) = 0;;
 
