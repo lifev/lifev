@@ -87,11 +87,12 @@ public:
        @param velocity_previous_newton_step velocity from the previous Newton step
        @param pressure_previous_newton_step pressure from the previous Newton step
        @param velocity_rhs velocity term from approximation time derivative
-     */
-    virtual void apply_matrix(	const vector_Type& /*velocity_previous_newton_step*/,
-    							const vector_Type& /*pressure_previous_newton_step*/,
-    							const vector_Type& /*velocity_rhs*/ ) {};
-
+     
+    virtual void apply_matrix(	const vector_Type& velocity_previous_newton_step,
+    							const vector_Type& pressure_previous_newton_step,
+    							const vector_Type& velocity_rhs ) {};
+    */
+    
     //! Adds to the residual the contribution coming from the SUPG stabilization
     //  in Navier-Stokes simulations in fixed coordinates
     /*!
@@ -133,6 +134,21 @@ public:
                                 const vector_Type& /*velocity_extrapolated*/,
                                 const vector_Type& /*velocity_rhs*/) {};
 
+    //@}
+    
+    //! @name Interfaces for the NS in fixed domain, VMSLES semi-implicit
+    //@{
+    
+    //! Updates the system matrix in Navier-Stokes simulations in fixed coordinates
+    //  with semi-implicit treatment of the convective term.
+    /*!
+     @param velocityExtrapolated extrapolation of the fluid velocity
+     @param pressureExtrapolated extrapolation of the fluid pressure
+     @param velocity_rhs velocity term from approximation time derivative
+     */
+    virtual void apply_matrix(	const vector_Type& /*velocityExtrapolated*/,
+                                const vector_Type& /*pressureExtrapolated*/,
+                                const vector_Type& /*velocity_rhs*/) {};
     //@}
     
     //! @name Interfaces for the NS in moving domain, fully implicit
