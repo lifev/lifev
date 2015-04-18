@@ -16,7 +16,8 @@ NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commP
         M_steady ( dataFile("fluid/miscellaneous/steady", false) ),
         M_density ( dataFile("fluid/physics/density", 1.0 ) ),
         M_viscosity ( dataFile("fluid/physics/viscosity", 0.035 ) ),
-        M_useStabilization ( dataFile("fluid/stabilization/use", false) )
+        M_useStabilization ( dataFile("fluid/stabilization/use", false) ),
+        M_stabilizationType ( dataFile("fluid/stabilization/type", "none") )
 {
 	M_prec.reset ( Operators::NSPreconditionerFactory::instance().createObject (dataFile("fluid/preconditionerType","none")));
 }
@@ -482,11 +483,14 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
     
     if ( !M_fullyImplicit && M_useStabilization )
     {
-        M_displayer.leaderPrint ( "\tF - Assembling semi-implicit SUPG terms... ");
+        M_displayer.leaderPrint ( "\tF - Assembling semi-implicit stabilization terms... ");
         LifeChrono chrono;
         chrono.start();
         
-        M_stabilization->apply_matrix( *u_star );
+        if ( M_stabilizationType.compare("SUPG_SEMI_IMPLICIT")==0  )
+            M_stabilization->apply_matrix( *u_star );
+        else if ( M_stabilizationType.compare("VMSLES_SEMI_IMPLICIT")==0 )
+            M_stabilization->apply_matrix( *u_star, *M_pressure_extrapolated, *rhs_velocity);
         
         *M_block00 += *M_stabilization->block_00();
         M_block00->globalAssemble();
@@ -509,6 +513,7 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
         M_rhs_pressure->zero();
 
         M_stabilization->apply_vector( M_rhs, M_rhs_pressure, *u_star, *rhs_velocity);
+        
         M_rhs->globalAssemble();
         M_rhs_pressure->globalAssemble();
         

@@ -154,6 +154,8 @@ public:
 	void applyGravityForce ( const Real& gravity, const Real& gravityDirection);
 
 	void updateConvectiveTerm ( const vectorPtr_Type& velocity);
+    
+    void setExtrapolatedPressure( const vectorPtr_Type& pressure_extrapolated ) { M_pressure_extrapolated = pressure_extrapolated; }
 
 	//! Evaluates the fluid residual in FSI simulations
 	/*!
@@ -390,6 +392,8 @@ private:
 
     vectorPtr_Type M_velocity_old_newton;
     vectorPtr_Type M_pressure_old_newton;
+    
+    vectorPtr_Type M_pressure_extrapolated;
 
 	//! Displayer to print in parallel (only PID 0 will print)
 	Displayer M_displayer;
@@ -437,6 +441,8 @@ private:
     boost::shared_ptr<Stabilization> M_stabilization;
 
     bool M_useStabilization;
+    
+    std::string M_stabilizationType;
 
 }; // class NavierStokesSolver
 

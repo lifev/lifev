@@ -94,6 +94,9 @@ main ( int argc, char** argv )
     ns.setParameters();
     ns.buildSystem();
 
+    bool useStabilization = dataFile("fluid/stabilization/use", false);
+    std::string stabilizationType = dataFile("fluid/stabilization/type", "none");
+        
     // Time handler objects to deal with time advancing and extrapolation
     TimeAndExtrapolationHandler timeVelocity;
     Real dt       = dataFile("fluid/time_discretization/timestep",0.0);
@@ -114,7 +117,23 @@ main ( int argc, char** argv )
     	initialStateVelocity.push_back(velocityInitial);
 
     timeVelocity.initialize(initialStateVelocity);
-
+        
+    TimeAndExtrapolationHandler timePressure;
+    if ( useStabilization && stabilizationType.compare("VMSLES_SEMI_IMPLICIT")==0 )
+    {
+        timePressure.setBDForder(orderBDF);
+        timePressure.setMaximumExtrapolationOrder(orderBDF);
+        timePressure.setTimeStep(dt);
+        
+        vector_Type pressureInitial ( ns.pFESpace()->map() );
+        std::vector<vector_Type> initialStatePressure;
+        pressureInitial.zero();
+        for ( UInt i = 0; i < orderBDF; ++i )
+            initialStatePressure.push_back(pressureInitial);
+        
+        timePressure.initialize(initialStatePressure);
+    }
+        
     // Exporter
     std::string outputName = dataFile ( "exporter/filename", "result");
     boost::shared_ptr< Exporter<mesh_Type > > exporter;
@@ -157,8 +176,12 @@ main ( int argc, char** argv )
     Real time = t0 + dt;
 
     vectorPtr_Type u_star( new vector_Type(ns.uFESpace()->map(), Unique ) );
+    vectorPtr_Type p_star( new vector_Type(ns.pFESpace()->map(), Unique ) );
     vectorPtr_Type rhs_velocity( new vector_Type(ns.uFESpace()->map(), Unique ) );
-
+    
+    if ( useStabilization && stabilizationType.compare("VMSLES_SEMI_IMPLICIT")==0 )
+        vectorPtr_Type p_star( new vector_Type(ns.pFESpace()->map(), Unique ) );
+        
     ns.setAlpha(timeVelocity.alpha());
     ns.setTimeStep(dt);
 
@@ -174,8 +197,14 @@ main ( int argc, char** argv )
     	rhs_velocity->zero();
     	timeVelocity.extrapolate (orderBDF, *u_star);
     	timeVelocity.rhsContribution (*rhs_velocity);
-
-    	ns.updateSystem ( u_star, rhs_velocity );
+        
+        if ( useStabilization && stabilizationType.compare("VMSLES_SEMI_IMPLICIT")==0 )
+        {
+            timePressure.extrapolate (orderBDF,*p_star);
+            ns.setExtrapolatedPressure(p_star);
+        }
+        
+        ns.updateSystem ( u_star, rhs_velocity );
     	ns.iterate( bc, time );
 
         ns.updateVelocity(velocity);
@@ -189,6 +218,9 @@ main ( int argc, char** argv )
         exporter->postProcess ( time );
         
         timeVelocity.shift(*velocity);
+        
+        if ( useStabilization && stabilizationType.compare("VMSLES_SEMI_IMPLICIT")==0 )
+            timePressure.shift(*pressure);
         
     }
 
