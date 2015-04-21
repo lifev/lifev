@@ -17,18 +17,26 @@ SET(expression_HEADERS
 	expression/EvaluationInterpolateValue.hpp
 	expression/EvaluationMatrix.hpp
 	expression/EvaluationMeas.hpp
+	expression/EvaluationMeasBDCurrentFE.hpp
 	expression/EvaluationOuterProduct.hpp
 	expression/EvaluationPhiI.hpp
 	expression/EvaluationPhiJ.hpp
 	expression/EvaluationPosition.hpp
 	expression/EvaluationProduct.hpp
 	expression/EvaluationPower.hpp
+	expression/EvaluationSquareRoot.hpp
+	expression/EvaluationCubicRoot.hpp
+	expression/EvaluationArcTan.hpp
+	expression/EvaluationDerivativeArcTan.hpp
 	expression/EvaluationLogarithm.hpp
 	expression/EvaluationExponential.hpp
 	expression/EvaluationNormal.hpp
 	expression/EvaluationScalar.hpp
 	expression/EvaluationSubstraction.hpp
 	expression/EvaluationTranspose.hpp
+	expression/EvaluationNormalize.hpp
+	expression/EvaluationMinusTransposed.hpp
+	expression/EvaluationInverse.hpp
 	expression/EvaluationSymmetricTensor.hpp
 	expression/EvaluationDeterminant.hpp
 	expression/EvaluationTrace.hpp
@@ -51,6 +59,7 @@ SET(expression_HEADERS
 	expression/ExpressionInterpolateValue.hpp
 	expression/ExpressionMatrix.hpp
 	expression/ExpressionMeas.hpp
+	expression/ExpressionMeasBDCurrentFE.hpp
 	expression/ExpressionOuterProduct.hpp
 	expression/ExpressionPhiI.hpp
 	expression/ExpressionPhiJ.hpp
@@ -58,11 +67,18 @@ SET(expression_HEADERS
 	expression/ExpressionNormal.hpp
 	expression/ExpressionProduct.hpp
 	expression/ExpressionPower.hpp
+	expression/ExpressionSquareRoot.hpp
+	expression/ExpressionCubicRoot.hpp
+	expression/ExpressionArcTan.hpp
+	expression/ExpressionDerivativeArcTan.hpp
 	expression/ExpressionLogarithm.hpp
 	expression/ExpressionExponential.hpp
 	expression/ExpressionScalar.hpp
 	expression/ExpressionSubstraction.hpp
 	expression/ExpressionTranspose.hpp
+	expression/ExpressionNormalize.hpp
+	expression/ExpressionMinusTransposed.hpp
+	expression/ExpressionInverse.hpp
 	expression/ExpressionSymmetricTensor.hpp
 	expression/ExpressionDeterminant.hpp
 	expression/ExpressionTrace.hpp
@@ -85,6 +101,15 @@ SET(expression_HEADERS
 	expression/RequestLoopElement.hpp
 	expression/RequestLoopVolumeID.hpp
 	expression/RequestLoopFaceID.hpp
+	expression/Evaluate.hpp
+	expression/EvaluateNodalExpressionVectorElement.hpp
+	expression/EvaluateNodalExpressionVectorElementFaceID.hpp
+	expression/ExpressionVectorFromNonConstantScalar.hpp
+	expression/EvaluationVectorFromNonConstantScalar.hpp
+	expression/ExpressionVectorFromNonConstantMatrix.hpp
+	expression/EvaluationVectorFromNonConstantMatrix.hpp
+	expression/ExpressionPatchArea.hpp
+	expression/EvaluationPatchArea.hpp
 CACHE INTERNAL "")
 
 SET(expression_SOURCES ""

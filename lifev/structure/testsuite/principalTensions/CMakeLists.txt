@@ -125,3 +125,17 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(dataStress2ndExpo
   SOURCE_FILES data2ndExpo
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+TRIBITS_ADD_EXECUTABLE_AND_TEST(
+  TensionsAnistropic
+  NAME Anisotropic
+  SOURCES mainAnisotropic.cpp ud_functions.cpp
+  ARGS "-f dataHolzapfel"
+  NUM_MPI_PROCS 2
+  COMM serial mpi
+  )
+
+TRIBITS_COPY_FILES_TO_BINARY_DIR(dataHolzapfelEvaluateStress
+  SOURCE_FILES dataHolzapfel
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+)

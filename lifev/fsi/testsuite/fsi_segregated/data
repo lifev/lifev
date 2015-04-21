@@ -205,12 +205,15 @@ filter_singletons      = false
 
 [./physics]
 material_flag   = '1' # '1 2'
-solidType       = linearVenantKirchhoff
-lawType         = linear
-young           = 4.0E6 #,1.9E9
-poisson         = 0.45 #,0.30
-density         = 1.2					# density
+density     = 1.2
 thickness	= 0.1
+
+[../model]
+constitutiveLaw     = isotropic
+young     		= 4.e+6
+poisson   		= 0.45
+solidTypeIsotropic 	= linearVenantKirchhoff 		# linearVenantKirchhoff / nonLinearVenantKirchhoff / neoHookean / exponential
+
 
 [../time_discretization]
 timestep        = 0.001

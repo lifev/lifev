@@ -1,0 +1,11 @@
+/* Define to disable the anisotropic folder */
+//#cmakedefine ENABLE_ANISOTROPIC_LAW
+
+/* Define to color mesh according to marker */
+//#cmakedefine COLORING_MESH
+
+/* Define to compute jacobian */
+//#cmakedefine COMPUTATION_JACOBIAN
+
+/* Define to export of vectors for debug purposes */
+//#cmakedefine EXPORTVECTORS

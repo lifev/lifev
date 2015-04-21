@@ -185,4 +185,28 @@ Real ResistanceBCs::outPressure6 (const Real& /*t*/, const Real& /*x*/, const Re
 }
 
 std::vector<Real> ResistanceBCs::outputVector;
+
+
+// Implicit resistance type
+
+ImplicitResistance::ImplicitResistance() :
+    bcVectorResistance( ),
+    coefficient       ( 0 ),
+    fluidVector       ( )
+{
+}
+
+
+void ImplicitResistance::setQuantities ( FSIOperator& _oper,
+                                         const Real resistance )
+{
+    // Imposing resistance BCs
+    fluidVector.reset( new FSIOperator::vector_Type( _oper.uFESpacePtr()->map(), Repeated ) );
+    fluidVector->epetraVector().PutScalar(0.0);
+
+    bcVectorResistance.setRhsVector( *fluidVector,_oper.uFESpacePtr()->dof().numTotalDof(),1);
+    bcVectorResistance.setResistanceCoeff( resistance );
+
+}
+
 }

@@ -365,7 +365,7 @@ public:
       @param index of the row to be extracted
       @return extracted row
     */
-    VectorSmall<Dim2> extract ( UInt const& i ) const
+    VectorSmall<Dim2> extractRow ( UInt const& i ) const
     {
         VectorSmall<Dim2> row;
         for ( UInt j = 0; j < Dim2; j++ )
@@ -373,6 +373,21 @@ public:
             row[j] = M_coords[i][j];
         }
         return ( row );
+    }
+
+    //! Extraction of a column
+    /*!
+      @param index of the column to be extracted
+      @return extracted column
+    */
+    VectorSmall<Dim1> extractColumn ( UInt const& j ) const
+    {
+        VectorSmall<Dim1> column;
+        for ( UInt i = 0; i < Dim1; i++ )
+        {
+            column[i] = M_coords[i][j];
+        }
+        return ( column );
     }
 
     //! Extraction of a component
@@ -519,6 +534,28 @@ public:
         minusT *= 1.0 / det;
 
         return minusT;
+    }
+
+
+    //! This method
+    //! In this method, which is based on cofactor and determinant,
+    //! given a matrix, its inverse is computed explicitly
+    //! for matrices of dimensions 1 2 3
+    //! This method is mainly used for structural problems.
+    /*!
+      @return a small matrix containing the inverse
+    */
+    MatrixSmall<Dim1, Dim2> inverse() const
+    {
+        ASSERT ( Dim2 == Dim1, "This method is based on the cofactor and determinant methods which are defined only for squared matrices!");
+
+        //Create the matrix to store the cofactor
+        //In this case it is a copy of the current matrix
+        MatrixSmall<Dim1, Dim2> minusT (*this);
+
+        minusT = this->minusTransposed();
+
+        return minusT.transpose( );
     }
 
 

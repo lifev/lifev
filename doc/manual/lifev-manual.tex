@@ -3,14 +3,48 @@
 \usepackage{rcs}
 \usepackage[top=3.6cm,bottom=3.6cm,right=3.2cm,left=3.5cm]{geometry}
 \usepackage{bm}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{epsfig}
+\usepackage{hyperref}
 
-\RCS $Revision: 1.8 $
-\RCS $Date: 2012-08-16 17:00:00$
+\RCS $Revision: 1.9 $
+\RCS $Date: 2015-01-14 11:00:00$
 \RCS $State: Exp $
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % New user defined commands
 %%%%%%N%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\definecolor{listinggray}{gray}{0.9}
+\definecolor{darkgreen}{rgb}{0,0.7,0} 
+\definecolor{lbcolor}{rgb}{0.9,0.9,0.9}
+\lstset{
+    backgroundcolor=\color{lbcolor},
+    tabsize=4,    
+    %   rulecolor=,
+    language=[GNU]C++,
+    basicstyle=\scriptsize,
+    upquote=true,
+    aboveskip={1.5\baselineskip},
+    columns=fixed,
+    showstringspaces=false,
+    extendedchars=false,
+    breaklines=true,
+    prebreak = \raisebox{0ex}[0ex][0ex]{\ensuremath{\hookleftarrow}},
+    frame=single,
+    numbers=left,
+    showtabs=false,
+    showspaces=false,
+    showstringspaces=false,
+    identifierstyle=\ttfamily,
+    keywordstyle=\color[rgb]{0,0,1},
+    commentstyle=\color[rgb]{0.026,0.112,0.095},
+    stringstyle=\color[rgb]{0.627,0.126,0.941},
+    numberstyle=\color[rgb]{0.205, 0.142, 0.73},
+    %        \lstdefinestyle{C++}{language=C++,style=numbers}’.
+}
 
 %\newcommand{\Div} {\operatorname{div}}
 \newcommand{\Grad} {\boldsymbol{\nabla}}
@@ -109,7 +143,7 @@
 \newcommand{\invND}{{S'}_\mf^{-1}(\lambda^k)}
 \newcommand{\invNN}{{S'}_\mf^{-1}(\lambda^k) + S'_\ms^{-1}(\lambda^k)}
 
-
+ 
 
 \title{\lifetitle{LifeV User Manual}
 {G. Fourestey, S. Deparis}
@@ -127,11 +161,11 @@
 
 \phantom{dummy text}
 \vfill
-This manual is for LifeV (version 2.2.1, March 2012), %1.3.1, October 2010), 
-a library for scientific computing 
+This manual is for LifeV (version 3.8.3, January 2015),
+a library for scientific computing
 using finite elements, specially aimed at fluid-structure interaction and blood flow simulation.
 
-Copyright (C) 2001- 2012 EPFL, INRIA, Polytechnico Di Milano.
+Copyright (C) 2001- 2015 EPFL, INRIA, Politecnico di Milano.
 
 \tableofcontents
 
@@ -142,9 +176,13 @@ Copyright (C) 2001- 2012 EPFL, INRIA, Polytechnico Di Milano.
 \include{lifev-install}
 \include{lifev-examples}
 
-\bibliographystyle{plain}
+%\appendix
+%\include{tablesAppendix}
+
+\bibliographystyle{abbrv}
 \bibliography{lifev}
 
-\printindex
+%\printindex
 
 \end{document}
+ 

@@ -142,7 +142,7 @@ VectorEpetra::VectorEpetra ( const Epetra_MultiVector&          vector,
 {
     ASSERT (M_epetraMap->map(M_mapType).get()!=0, "Error! The stored MapEpetra does not have valid map pointer.\n");
 
-    assert ( this->blockMap().SameAs (vector.Map() ) );
+    assert ( M_epetraMap->map ( mapType )->SameAs (vector.Map() ) );
 
     M_epetraVector.reset( new vector_type ( *M_epetraMap->map ( mapType ) ) );
     M_epetraVector->Update (1., vector, 0.);

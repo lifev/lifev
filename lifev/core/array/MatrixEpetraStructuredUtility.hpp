@@ -480,7 +480,7 @@ void createInvSquaredDiagBlock ( const MatrixEpetraStructuredView<DataType>& src
                     // ZERO ON DIAGONAL TEST
                     ASSERT ( srcValues[j] != 0, "You cannot ask for inverse squared diagonal block when there are zeros on the diagonal" );
 
-                    diagValue = 1 / sqrt (srcValues[j]);
+                    diagValue = 1 / std::sqrt (srcValues[j]);
                     j = numSrcEntries; //Exit the loop
                 }
             }

@@ -28,12 +28,13 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
     @file
     @brief Test for PartitionIO class - cut and write
 
-    @author Radu Popescu <radu.popescu@epfl.ch>
-    @maintainer Radu Popescu <radu.popescu@epfl.ch>
+    @author Paolo Tricerri <paolo.tricerri@epfl.ch>
+    @maintainer Paolo Tricerri <paolo.tricerri@epfl.ch>
     @date 10-05-2012
 
     Partition a mesh using a single (MPI) process and save mesh parts
-    to an HDF5 file.
+    to an HDF5 file. The example is very similar to the testsuite/offline_partitionin_io
+    but it reads the infos it needs from data file instead of having some hardcoded variables.
  */
 
 #include <lifev/core/LifeV.hpp>
@@ -45,13 +46,13 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef LIFEV_HAS_HDF5
 
-#warning warning you should reconfigure LifeV with  -D TPL_ENABLE_HDF5:BOOL=ON 
+#warning warning you should reconfigure LifeV with  -D TPL_ENABLE_HDF5:BOOL=ON
 
 #endif // od ifndef LIFEV_HAS_HDF5
 
 #ifndef HAVE_MPI
 
-#warning warning you should reconfigure LifeV with  -D TPL_ENABLE_MPI:BOOL=ON 
+#warning warning you should reconfigure LifeV with  -D TPL_ENABLE_MPI:BOOL=ON
 
 #else
 
