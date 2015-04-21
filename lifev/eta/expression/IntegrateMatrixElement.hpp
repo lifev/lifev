@@ -579,12 +579,12 @@ addTo (MatrixType& mat)
     // Defaulted to true for security
     bool isPreviousAdapted (true);
 
-//    std::cout << "M_regionFlag is " << M_regionFlag << std::endl;
-
     for (UInt iElement (0); iElement < nbElements; ++iElement)
     {
         // Extracting the marker
         UInt markerID = M_testSpace->mesh()->element ( iElement ).markerID( );
+
+//        std::cout << "M_regionFlag is " << M_regionFlag << " markerID is " << markerID << " ID " << M_mesh->comm()->MyPID() << " element " << iElement << std::endl;
 
 
         if ( M_regionFlag == 0 )

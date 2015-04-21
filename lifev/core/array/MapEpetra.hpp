@@ -169,7 +169,7 @@ public:
                 const Int offset,
                 const Int maxId);
 
-private:
+//private:
     //! Constructor from raw Epetra_Map
     /*!
       This constructor should be used only inside this class,
