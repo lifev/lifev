@@ -198,9 +198,9 @@ public:
       @param yCoord Shared pointer on a vector of the y coordinates of the vertices of the mesh
       @param zCoord Shared pointer on a vector of the z coordinates of the vertices of the mesh
      */
-    void setVerticesCoordinates (boost::shared_ptr<vector<Real> > xCoord,
-                                 boost::shared_ptr<vector<Real> > yCoord,
-                                 boost::shared_ptr<vector<Real> > zCoord);
+    void setVerticesCoordinates (boost::shared_ptr<std::vector<Real> > xCoord,
+                                 boost::shared_ptr<std::vector<Real> > yCoord,
+                                 boost::shared_ptr<std::vector<Real> > zCoord);
 
     //@}
 
@@ -260,9 +260,9 @@ private:
     bool                    M_analyze;
 
     bool                    M_visualizationDataAvailable;
-    boost::shared_ptr<vector<Real> > M_xCoord;
-    boost::shared_ptr<vector<Real> > M_yCoord;
-    boost::shared_ptr<vector<Real> > M_zCoord;
+    boost::shared_ptr<std::vector<Real> > M_xCoord;
+    boost::shared_ptr<std::vector<Real> > M_yCoord;
+    boost::shared_ptr<std::vector<Real> > M_zCoord;
 
 };
 

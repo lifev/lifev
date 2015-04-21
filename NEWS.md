@@ -1,7 +1,63 @@
+LifeV 3.8.7:
+============
+
+changes in MapEpetra:
+
+# typedefs: should end with _Type and use uppercase for the first letter of new word, such as commPtr_Type, rather than comm_ptrtype
+
+# Added checks on the validity of the comm pointer before using it.
+
+# Construction of import/export outer pointers should be done at construction time, otherwise the trick of the double pointer does not work. Check example:
+
+        MapEpetra map1;
+        MapEpetra map2(10,0,comm);
+        map1 = map2;
+        const Epetra_Export& ex1 = map1.exporter();
+        const Epetra_Export& ex2 = map2.exporter();
+
+        std::cout << "&ex1 = " << &ex1 << "\n";
+        std::cout << "&ex2 = " << &ex2 << "\n";
+
+# Binary operators + and | should not be method, but outside routines.
+
+
+
+LifeV 3.8.6:
+============
+
+* Bug fix in operator -= of MatrixEpetra class
+
+* fix missing std::
+
+* Tests for exporters are now in a single source file, namely in exporterAll
+
+* ETA is not experimental anymore
+
+
+
+LifeV 3.8.5:
+============
+
+* Added VerifySolution class for easier check of result based on scalar product between solution vectors
+
+* lighter FSI test for segregated method
+
+* ETA (expression template assembly) is not experimental anymore
+
+* Merged new Eletrophysiology module, cf https://cmcsforge.epfl.ch/issues/124 . Experimental since it compiles only with c++11
+
+* fixed several std:: namespaces
+
+* Enhanced import/export in tests, including export of P2 fields
+
+* Bugfix of operator-= in MatrixEpetra class
+
+
 LifeV 3.8.5:
 ============
 
 * Fixed dependicies of Navier-Stokes example to ETA
+
 * ETA is now in production
 
 LifeV 3.8.4:

@@ -38,9 +38,7 @@
     This class manages the distribution of elements of matrices or vectors on a parallel machine
  */
 
-
 #include <Epetra_Util.h>
-
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
@@ -51,58 +49,56 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-MapEpetra::MapEpetra() :
-    M_repeatedMapEpetra(),
-    M_uniqueMapEpetra(),
-    M_exporter(),
-    M_importer(),
-    M_commPtr()
-{}
+
+MapEpetra::MapEpetra () :
+    M_exporter (new boost::shared_ptr<Epetra_Export>()),
+    M_importer (new boost::shared_ptr<Epetra_Import>())
+{
+    // Nothing to be done here
+}
 
 MapEpetra::MapEpetra ( Int  numGlobalElements,
                        Int  numMyElements,
                        Int* myGlobalElements,
-                       const comm_ptrtype& commPtr ) :
-    M_repeatedMapEpetra(),
-    M_uniqueMapEpetra(),
-    M_exporter(),
-    M_importer(),
+                       const commPtr_Type& commPtr ) :
     M_commPtr ( commPtr )
 {
+    ASSERT (M_commPtr.get()!=0, "Error! The communicator pointer is not valid.\n");
+
     createMap ( numGlobalElements,
                 numMyElements,
                 myGlobalElements,
                 *commPtr );
 }
 
-MapEpetra::MapEpetra ( mapData_Type const& mapData, comm_ptrtype const& commPtr ) :
-    M_repeatedMapEpetra(),
-    M_uniqueMapEpetra(),
-    M_exporter(),
-    M_importer(),
-    M_commPtr ( commPtr )
+MapEpetra::MapEpetra ( mapData_Type const& mapData, commPtr_Type const& commPtr ) :
+    M_exporter (new boost::shared_ptr<Epetra_Export>()),
+    M_importer (new boost::shared_ptr<Epetra_Import>()),
+    M_commPtr  ( commPtr )
 {
+    ASSERT (M_commPtr.get()!=0, "Error! The communicator pointer is not valid.\n");
+
     M_uniqueMapEpetra.reset ( new Epetra_Map ( -1,
                                                mapData.unique.size(),
-                                               &mapData.unique[ 0 ],
+                                               mapData.unique.data(),
                                                0,
                                                *M_commPtr ) );
     M_repeatedMapEpetra.reset ( new Epetra_Map ( -1,
                                                  mapData.repeated.size(),
-                                                 &mapData.repeated[ 0 ],
+                                                 mapData.repeated.data(),
                                                  0,
                                                  *M_commPtr ) );
 }
 
 MapEpetra::MapEpetra ( const Int numGlobalElements,
                        const Int /*notUsed*/,
-                       const comm_ptrtype& commPtr ) :
-    M_repeatedMapEpetra(),
-    M_uniqueMapEpetra(),
-    M_exporter(),
-    M_importer(),
-    M_commPtr ( commPtr )
+                       const commPtr_Type& commPtr ) :
+    M_exporter (new boost::shared_ptr<Epetra_Export>()),
+    M_importer (new boost::shared_ptr<Epetra_Import>()),
+    M_commPtr  ( commPtr )
 {
+    ASSERT (M_commPtr.get()!=0, "Error! The communicator pointer is not valid.\n");
+
     std::vector<Int> myGlobalElements ( numGlobalElements );
 
     for ( Int i = 0; i < numGlobalElements; ++i )
@@ -115,13 +111,13 @@ MapEpetra::MapEpetra ( const Int numGlobalElements,
 }
 
 MapEpetra::MapEpetra ( const Int           size,
-                       const comm_ptrtype& commPtr ) :
-    M_repeatedMapEpetra(),
-    M_uniqueMapEpetra(),
-    M_exporter(),
-    M_importer(),
-    M_commPtr ( commPtr )
+                       const commPtr_Type& commPtr ) :
+    M_exporter (new boost::shared_ptr<Epetra_Export>()),
+    M_importer (new boost::shared_ptr<Epetra_Import>()),
+    M_commPtr  ( commPtr )
 {
+    ASSERT (M_commPtr.get()!=0, "Error! The communicator pointer is not valid.\n");
+
     Int numGlobalElements ( size );
     Int numMyElements    ( numGlobalElements );
     std::vector<Int>  myGlobalElements ( size );
@@ -148,22 +144,15 @@ MapEpetra::MapEpetra ( const Int           size,
                                                *commPtr ) );
 }
 
-MapEpetra::MapEpetra ( const map_type map ) :
-    M_repeatedMapEpetra ( new map_type ( map ) ),
-    M_uniqueMapEpetra(),
-    M_exporter(),
-    M_importer(),
-    M_commPtr()
+MapEpetra::MapEpetra ( const map_Type map ) :
+    M_repeatedMapEpetra ( new map_Type ( map ) ),
+    M_commPtr(map.Comm().Clone())
 {
-    uniqueMap();
+    uniqueMap ();
 }
 
 MapEpetra::MapEpetra ( const Epetra_BlockMap& blockMap, const Int offset, const Int maxId) :
-    M_repeatedMapEpetra(),
-    M_uniqueMapEpetra(),
-    M_exporter(),
-    M_importer(),
-    M_commPtr()
+    M_commPtr(blockMap.Comm().Clone())
 {
     std::vector<Int> myGlobalElements;
     Int* sourceGlobalElements ( blockMap.MyGlobalElements() );
@@ -185,16 +174,15 @@ MapEpetra::MapEpetra ( const Epetra_BlockMap& blockMap, const Int offset, const 
     createMap ( -1,
                 myGlobalElements.size(),
                 &myGlobalElements.front(),
-                blockMap.Comm() );
+                *M_commPtr );
 }
 
 // ===================================================
 // Operators
 // ===================================================
-MapEpetra&
-MapEpetra::operator = ( const MapEpetra& epetraMap )
-{
 
+MapEpetra& MapEpetra::operator= (const MapEpetra& epetraMap)
+{
     if ( this != &epetraMap )
     {
         M_repeatedMapEpetra = epetraMap.M_repeatedMapEpetra;
@@ -207,9 +195,7 @@ MapEpetra::operator = ( const MapEpetra& epetraMap )
     return *this;
 }
 
-
-MapEpetra&
-MapEpetra::operator += ( const MapEpetra& epetraMap )
+MapEpetra& MapEpetra::operator+= ( const MapEpetra& epetraMap )
 {
     if ( ! epetraMap.getUniqueMap() )
     {
@@ -220,6 +206,12 @@ MapEpetra::operator += ( const MapEpetra& epetraMap )
     {
         this->operator = ( epetraMap );
         return *this;
+    }
+
+    if (M_commPtr.get()==0)
+    {
+        // In case this map was created with default constructor
+        M_commPtr = epetraMap.M_commPtr;
     }
 
     Int*             pointer;
@@ -239,7 +231,7 @@ MapEpetra::operator += ( const MapEpetra& epetraMap )
         map.push_back ( *pointer + numGlobalElements );
     }
 
-    M_repeatedMapEpetra.reset ( new Epetra_Map (-1, map.size(), &map[0], 0, epetraMap.getRepeatedMap()->Comm() ) );
+    M_repeatedMapEpetra.reset ( new Epetra_Map (-1, map.size(), map.data(), 0, *M_commPtr ) );
 
     map.resize (0);
     pointer = getUniqueMap()->MyGlobalElements();
@@ -255,25 +247,15 @@ MapEpetra::operator += ( const MapEpetra& epetraMap )
         map.push_back ( *pointer + numGlobalElements );
     }
 
-    M_uniqueMapEpetra.reset ( new Epetra_Map ( -1, map.size(), &map[0], 0, epetraMap.getRepeatedMap()->Comm() ) );
+    M_uniqueMapEpetra.reset ( new Epetra_Map ( -1, map.size(), map.data(), 0, *M_commPtr ) );
 
-    M_exporter.reset();
-    M_importer.reset();
+    M_exporter.reset (new boost::shared_ptr<Epetra_Export>());
+    M_importer.reset (new boost::shared_ptr<Epetra_Import>());
 
     return *this;
 }
 
-MapEpetra
-MapEpetra::operator + ( const MapEpetra& epetraMap )
-{
-    MapEpetra map ( *this );
-    map += epetraMap;
-    createImportExport();
-    return map;
-}
-
-MapEpetra&
-MapEpetra::operator += ( Int const size )
+MapEpetra& MapEpetra::operator += ( Int const size )
 {
     MapEpetra  lagrMap ( size, commPtr() );
 
@@ -283,27 +265,17 @@ MapEpetra::operator += ( Int const size )
     return *this;
 }
 
-MapEpetra
-MapEpetra::operator +  ( Int const size )
-{
-    MapEpetra map ( *this );
-    map += size;
-    createImportExport();
-    return map;
-}
-
 // ===================================================
 // Methods
 // ===================================================
-boost::shared_ptr<MapEpetra>
-MapEpetra::createRootMap ( Int const root )   const
+
+boost::shared_ptr<MapEpetra> MapEpetra::createRootMap (Int const root) const
 {
     boost::shared_ptr<MapEpetra> rootMap ( new MapEpetra ( Epetra_Util::Create_Root_Map ( *getUniqueMap(), root ) ) );
     return rootMap;
 }
 
-bool
-MapEpetra::mapsAreSimilar ( MapEpetra const& epetraMap ) const
+bool MapEpetra::mapsAreSimilar ( MapEpetra const& epetraMap ) const
 {
     if ( this == &epetraMap )
     {
@@ -316,8 +288,11 @@ MapEpetra::mapsAreSimilar ( MapEpetra const& epetraMap ) const
 
 #ifdef HAVE_HDF5
 
-void MapEpetra::exportToHDF5 ( std::string const& fileName, std::string const& mapName, bool const& truncate )
+void MapEpetra::exportToHDF5 ( std::string const& fileName, std::string const& mapName, bool const truncate )
 {
+    ASSERT (M_commPtr.get()!=0, "Error! The stored communicator pointer is not valid.\n");
+    ASSERT (M_uniqueMapEpetra.get()!=0 && M_repeatedMapEpetra.get()!=0, "Error! One (or both) the map pointers are not valid.\n");
+
     EpetraExt::HDF5 HDF5 ( *M_commPtr );
 
     if ( truncate )
@@ -349,6 +324,8 @@ void MapEpetra::exportToHDF5 ( std::string const& fileName, std::string const& m
 
 void MapEpetra::importFromHDF5 ( std::string const& fileName, std::string const& mapName )
 {
+    ASSERT (M_commPtr.get()!=0, "Error! The stored communicator pointer is not valid.\n");
+
     EpetraExt::HDF5 HDF5 ( *M_commPtr );
 
     // Open an existing file
@@ -366,13 +343,13 @@ void MapEpetra::importFromHDF5 ( std::string const& fileName, std::string const&
     HDF5.Read ( ( mapName + "Unique" ).c_str(), importedMap );
 
     // Copy the loaded map to the member object
-    M_uniqueMapEpetra.reset ( new map_type ( *importedMap ) );
+    M_uniqueMapEpetra.reset ( new map_Type ( *importedMap ) );
 
     // Read the repeated map from the file
     HDF5.Read ( ( mapName + "Repeated" ).c_str(), importedMap );
 
     // Copy the loaded matrix to the member object
-    M_repeatedMapEpetra.reset ( new map_type ( *importedMap ) );
+    M_repeatedMapEpetra.reset ( new map_Type ( *importedMap ) );
 
     // Close the file
     HDF5.Close();
@@ -381,8 +358,7 @@ void MapEpetra::importFromHDF5 ( std::string const& fileName, std::string const&
 
 #endif // HAVE_HDF5
 
-void
-MapEpetra::showMe ( std::ostream& output ) const
+void MapEpetra::showMe ( std::ostream& output ) const
 {
     output << "unique map:" << std::endl;
     output << *getUniqueMap();
@@ -393,8 +369,8 @@ MapEpetra::showMe ( std::ostream& output ) const
 // ===================================================
 // Get Methods
 // ===================================================
-MapEpetra::map_ptrtype const&
-MapEpetra::map ( MapEpetraType mapType )   const
+
+const MapEpetra::mapPtr_Type& MapEpetra::map (MapEpetraType mapType) const
 {
     switch ( mapType )
     {
@@ -406,24 +382,36 @@ MapEpetra::map ( MapEpetraType mapType )   const
     return getUniqueMap();
 }
 
-Epetra_Export const&
-MapEpetra::exporter()
+const Epetra_Export& MapEpetra::exporter()
 {
+    ASSERT (M_uniqueMapEpetra.get()!=0 && M_repeatedMapEpetra.get()!=0, "Error! One (or both) the map pointers are not valid.\n");
+
     createImportExport();
+
     return **M_exporter;
 }
 
-Epetra_Import const&
-MapEpetra::importer()
+const Epetra_Import& MapEpetra::importer()
 {
+    ASSERT (M_uniqueMapEpetra.get()!=0 && M_repeatedMapEpetra.get()!=0, "Error! One (or both) the map pointers are not valid.\n");
+
     createImportExport();
+
     return **M_importer;
 }
 
 // ===================================================
 // Set Methods
 // ===================================================
-void MapEpetra::setMap ( map_ptrtype map, MapEpetraType mapType )
+
+void MapEpetra::setComm (commPtr_Type const& commPtr)
+{
+    ASSERT (commPtr.get()!=0, "Error! The communicator pointer is not valid.\n");
+
+    M_commPtr = commPtr;
+}
+
+void MapEpetra::setMap ( mapPtr_Type map, MapEpetraType mapType )
 {
     switch ( mapType )
     {
@@ -437,23 +425,17 @@ void MapEpetra::setMap ( map_ptrtype map, MapEpetraType mapType )
 // ===================================================
 // Private Methods
 // ===================================================
-MapEpetra::MapEpetra ( const MapEpetra& epetraMap ) :
-    M_repeatedMapEpetra(),
-    M_uniqueMapEpetra(),
-    M_exporter(),
-    M_importer()
+
+MapEpetra::MapEpetra (const MapEpetra& epetraMap)
 {
     this->operator= ( epetraMap );
 }
 
-
-void
-MapEpetra::createMap ( Int  numGlobalElements,
-                       Int  numMyElements,
-                       Int* myGlobalElements,
-                       const comm_type& comm )
+void MapEpetra::createMap (Int  numGlobalElements,
+                           Int  numMyElements,
+                           Int* myGlobalElements,
+                           const comm_Type& comm)
 {
-
     if ( numMyElements != 0 && myGlobalElements == 0 ) // linearMap
         M_repeatedMapEpetra.reset ( new Epetra_Map ( numGlobalElements,
                                                      numMyElements,
@@ -469,29 +451,19 @@ MapEpetra::createMap ( Int  numGlobalElements,
     uniqueMap();
 }
 
-
-void
-MapEpetra::uniqueMap()
+void MapEpetra::uniqueMap()
 {
     M_uniqueMapEpetra.reset ( new Epetra_Map ( Epetra_Util::Create_OneToOne_Map ( *getRepeatedMap(), false ) ) );
-    M_exporter.reset();
-    M_importer.reset();
-    return;
+
+    M_exporter.reset (new boost::shared_ptr<Epetra_Export>());
+    M_importer.reset (new boost::shared_ptr<Epetra_Import>());
 }
 
-void
-MapEpetra::createImportExport()
+void MapEpetra::createImportExport()
 {
-
     if ( !getRepeatedMap() || !getUniqueMap() )
     {
         return;
-    }
-
-    // The exporter is needed to import to a repeated vector
-    if ( M_exporter.get() == 0 )
-    {
-        M_exporter.reset ( new boost::shared_ptr<Epetra_Export> );
     }
 
     if ( M_exporter->get() == 0 )
@@ -499,16 +471,10 @@ MapEpetra::createImportExport()
         M_exporter->reset ( new Epetra_Export ( *getRepeatedMap(), *getUniqueMap() ) );
     }
 
-    if ( M_importer.get() == 0 )
-    {
-        M_importer.reset ( new boost::shared_ptr<Epetra_Import> );
-    }
-
     if ( M_importer->get() == 0 )
     {
         M_importer->reset ( new Epetra_Import ( *getRepeatedMap(), *getUniqueMap() ) );
     }
-
 }
 
 void
@@ -526,7 +492,30 @@ MapEpetra::bubbleSort (Epetra_IntSerialDenseVector& elements)
             }
 }
 
+// ===================================================
+// External operators
+// ===================================================
 
+MapEpetra operator+ (const MapEpetra& map1, const MapEpetra& map2)
+{
+    MapEpetra mapOut (map1);
+    mapOut += map2;
+
+    return mapOut;
+}
+
+MapEpetra operator+ (const MapEpetra& map, Int size)
+{
+    MapEpetra mapOut (map);
+    mapOut += size;
+
+    return mapOut;
+}
+
+MapVector<MapEpetra> operator| (const MapEpetra& map1, const MapEpetra& map2)
+{
+    return MapVector<MapEpetra> (map1, map2);
+}
 
 } // end namespace LifeV
 

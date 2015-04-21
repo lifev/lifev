@@ -55,6 +55,14 @@ public:
     typedef typename super::meshPtr_Type  meshPtr_Type;
     typedef typename super::vectorPtr_Type vectorPtr_Type;
     typedef typename super::commPtr_Type commPtr_Type;
+
+
+    //@}
+
+    //! @name Static members
+
+    //! returns the type of the map to use for the VectorEpetra
+    static MapEpetraType const MapType;
     //@}
 
     //! @name Constructors
@@ -96,6 +104,10 @@ private:
 // IMPLEMENTATION
 // ======================
 
+template<typename MeshType>
+MapEpetraType const ExporterEmpty<MeshType>::MapType (Unique);
+
+
 // ======================
 // Constructors
 // ======================
@@ -127,7 +139,7 @@ ExporterEmpty<MeshType>::ExporterEmpty (const GetPot& dfile, const std::string& 
 template<typename MeshType>
 MapEpetraType ExporterEmpty<MeshType>::mapType() const
 {
-    return Unique;
+    return MapType;
 }
 
 } // Namespace LifeV

@@ -1,0 +1,111 @@
+<ParameterList>
+	<!-- LinearSolver parameters -->
+    <Parameter name="surfaceVolumeRatio" type="double" value="1400.0"/>
+    <Parameter name="membraneCapacitance" type="double" value="1.0"/>
+    <Parameter name="k" type="double" value="8.0"  />
+    <Parameter name="a" type="double" value="0.1"  />
+    <Parameter name="epsilon" type="double" value="0.01"  />
+    <Parameter name="timeStep" type="double" value="0.01"  />
+    <Parameter name="endTime" type="double" value="5."  />
+    <Parameter name="saveStep" type="double" value="0.1"  />
+    <Parameter name="longitudinalDiffusion" type="double" value="0.0001"  />
+    <Parameter name="transversalDiffusion" type="double" value="0.0001"  />
+    <Parameter name="elementsOrder" type="string" value="P1"  />
+    <Parameter name="mesh_name" type="string" value="lid32.mesh"  />
+    <Parameter name="mesh_path" type="string" value="../Meshes/"  />
+    <Parameter name="fiber_X" type="double" value="0.707106781187"  />
+    <Parameter name="fiber_Y" type="double" value="0.707106781187"  />
+    <Parameter name="fiber_Z" type="double" value="0.0"  />
+    <Parameter name="Reuse Preconditioner" type="bool" value="false"/>
+    <Parameter name="Max Iterations For Reuse" type="int" value="80"/>
+    <Parameter name="Quit On Failure" type="bool" value="false"/>
+    <Parameter name="Silent" type="bool" value="false"/>
+	<Parameter name="Solver Type" type="string" value="AztecOO"/>
+	
+	<Parameter name="OutputFile" type="string" value="MM_tt_"/>
+	
+	<Parameter name="StartFile" type="string" value="MMStartSplitting"/>
+	<Parameter name="StartIteration" type="string" value="00050"/>
+
+	<!-- Pacing parameters-->
+	<Parameter name="pacingProtocol" type="bool" value="false"/>
+	
+	<Parameter name="stimulusStart" type="double" value="0."/>
+	<Parameter name="stimulusStop" type="double" value="1."/>
+	
+	<Parameter name="pacingPeriod" type="double" value="350."/>
+	<Parameter name="pacingPeriodMin" type="double" value="80."/>
+	<Parameter name="pacingDelta" type="double" value="10."/>
+	<Parameter name="stimulusNumber" type="int" value="2"/>
+	
+	<Parameter name="pacingSite_X" type="double" value="0."/>
+	<Parameter name="pacingSite_Y" type="double" value="0."/>
+	<Parameter name="pacingSite_Z" type="double" value="0."/>
+	
+	<Parameter name="stimulusRadius" type="double" value="0.15"/>
+	<Parameter name="stimulusValue" type="double" value="1."/>
+	
+	<Parameter name="NbStimulusPeriod" type="int" value="21"/>
+	<Parameter name="stimulus0" type="double" value="300"/>
+	<Parameter name="stimulus1" type="double" value="250"/>
+	<Parameter name="stimulus2" type="double" value="200"/>
+	<Parameter name="stimulus3" type="double" value="175"/>
+	<Parameter name="stimulus4" type="double" value="150"/>
+	<Parameter name="stimulus5" type="double" value="125"/>
+	<Parameter name="stimulus6" type="double" value="300"/>
+	<Parameter name="stimulus7" type="double" value="250"/>
+	<Parameter name="stimulus8" type="double" value="200"/>
+	<Parameter name="stimulus9" type="double" value="175"/>
+	<Parameter name="stimulus10" type="double" value="150"/>
+	<Parameter name="stimulus11" type="double" value="125"/>
+	<Parameter name="stimulus12" type="double" value="200"/>
+	<Parameter name="stimulus13" type="double" value="175"/>
+	<Parameter name="stimulus14" type="double" value="150"/>
+	<Parameter name="stimulus15" type="double" value="125"/>
+	<Parameter name="stimulus16" type="double" value="300"/>
+	<Parameter name="stimulus17" type="double" value="250"/>
+	<Parameter name="stimulus18" type="double" value="200"/>
+	<Parameter name="stimulus19" type="double" value="175"/>
+	<Parameter name="stimulus20" type="double" value="150"/>
+
+	
+	<!-- Post-processing parameters-->
+	<Parameter name="threshold" type="double" value="0.15"/>
+	    
+	<!-- Pseudo-ECG parameters-->
+	<Parameter name="ecg_position_X" type="double" value="1.0"/>
+	<Parameter name="ecg_position_Y" type="double" value="1.0"/>
+	<Parameter name="ecg_position_Z" type="double" value="0.5"/>
+	
+	<!-- Mesh parameters -->
+	<Parameter name="meshDim_X" type="int" value="32"  />
+	<Parameter name="meshDim_Y" type="int" value="32"  />
+	<Parameter name="meshDim_Z" type="int" value="2"  />
+	
+	<Parameter name="domain_X" type="double" value="1."  />
+	<Parameter name="domain_Y" type="double" value="1."  />
+	<Parameter name="domain_Z" type="double" value="0.0625"  />
+	
+	<!-- Operator specific parameters (AztecOO) -->
+	<ParameterList name="Solver: Operator List">
+
+		<!-- Trilinos parameters -->
+		<ParameterList name="Trilinos: AztecOO List">
+    		<Parameter name="solver" type="string" value="gmres"/>
+	    	<Parameter name="conv" type="string" value="rhs"/>
+    		<Parameter name="scaling" type="string" value="none"/>
+	    	<Parameter name="output" type="string" value="all"/>
+    		<Parameter name="tol" type="double" value="1.e-10"/>
+	    	<Parameter name="max_iter" type="int" value="200"/>
+    		<Parameter name="kspace" type="int" value="100"/>
+    		<!-- az_aztec_defs.h -->
+    		<!-- #define AZ_classic 0 /* Does double classic */ -->
+	    	<Parameter name="orthog" type="int" value="0"/>
+	    	<!-- az_aztec_defs.h -->
+	    	<!-- #define AZ_resid 0 -->
+    		<Parameter name="aux_vec" type="int" value="0"/>
+    	</ParameterList>
+    </ParameterList>
+</ParameterList>
+
+

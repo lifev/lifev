@@ -73,10 +73,13 @@ public:
     //@{
 
     //! Simple constructor with a shared_ptr on the mesh
-    RequestLoopElement (const boost::shared_ptr<MeshType>& mesh) : M_mesh (mesh) {}
+    RequestLoopElement ( const boost::shared_ptr<MeshType>& mesh, const UInt regionFlag = 0 )
+        : M_mesh ( mesh ), M_regionFlag ( regionFlag )
+        { }
 
     //! Copy constructor
-    RequestLoopElement (const RequestLoopElement& loop) : M_mesh (loop.M_mesh) {}
+    RequestLoopElement (const RequestLoopElement& loop)
+        : M_mesh ( loop.M_mesh ), M_regionFlag ( loop.M_regionFlag ) {}
 
     //@}
 
@@ -88,6 +91,12 @@ public:
     const boost::shared_ptr<MeshType>& mesh() const
     {
         return M_mesh;
+    }
+
+    //! Getter for the mesh pointer
+    const UInt regionFlag() const
+    {
+        return M_regionFlag;
     }
 
     //@}
@@ -105,6 +114,8 @@ private:
 
     // Pointer on the mesh
     boost::shared_ptr<MeshType> M_mesh;
+    const UInt M_regionFlag;
+
 };
 
 
@@ -126,9 +137,9 @@ private:
  */
 template< typename MeshType >
 RequestLoopElement<MeshType>
-elements (const boost::shared_ptr<MeshType>& mesh)
+elements (const boost::shared_ptr<MeshType>& mesh, const UInt flag = 0 )
 {
-    return RequestLoopElement<MeshType> (mesh);
+    return RequestLoopElement<MeshType> ( mesh, flag );
 }
 
 

@@ -43,6 +43,11 @@
 
 #include <lifev/core/LifeV.hpp>
 #include "../importExport/TestImportExport.hpp"
+#include <lifev/core/filter/ExporterEnsight.hpp>
+#include <lifev/core/filter/ExporterVTK.hpp>
+typedef LifeV::ExporterVTK<TestImportExport::mesh_Type> exporter1_Type;
+typedef LifeV::ExporterEnsight<TestImportExport::mesh_Type> exporter2_Type;
+
 
 using namespace LifeV;
 
@@ -87,8 +92,6 @@ main ( int argc, char** argv )
 
     bool passed (false);
 
-    typedef ExporterVTK<mesh_Type> exporter1_Type;
-    typedef ExporterEnsight<mesh_Type> exporter2_Type;
     passed = testImportExport.run<exporter1_Type, exporter2_Type > ( command_line, "import" );
 
     // ----- End of test calls -----

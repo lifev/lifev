@@ -63,9 +63,11 @@ VectorEpetra::VectorEpetra ( const MapEpetra& map,
                              const combineMode_Type combineMode ) :
     M_epetraMap   ( new MapEpetra ( map ) ),
     M_mapType     ( mapType ),
-    M_epetraVector ( new vector_type ( *M_epetraMap->map (M_mapType) ) ),
     M_combineMode ( combineMode )
 {
+    ASSERT (M_epetraMap->map(M_mapType).get()!=0, "Error! The stored MapEpetra does not have valid map pointer.\n");
+
+    M_epetraVector.reset( new vector_type ( *M_epetraMap->map (M_mapType) ) );
 }
 
 VectorEpetra::VectorEpetra ( const boost::shared_ptr<MapEpetra>& map,
@@ -73,25 +75,31 @@ VectorEpetra::VectorEpetra ( const boost::shared_ptr<MapEpetra>& map,
                              const combineMode_Type combineMode ) :
     M_epetraMap   ( map ),
     M_mapType     ( mapType ),
-    M_epetraVector ( new vector_type ( *M_epetraMap->map (M_mapType) ) ),
     M_combineMode ( combineMode )
 {
+    ASSERT (M_epetraMap->map(M_mapType).get()!=0, "Error! The stored MapEpetra does not have valid map pointer.\n");
+
+    M_epetraVector.reset( new vector_type ( *M_epetraMap->map (M_mapType) ) );
 }
 
 VectorEpetra::VectorEpetra ( const VectorEpetra& vector) :
     M_epetraMap   ( vector.M_epetraMap ),
     M_mapType     ( vector.M_mapType ),
-    M_epetraVector ( new vector_type ( vector.epetraVector() ) ), //This make a true copy!
     M_combineMode ( vector.M_combineMode )
 {
+    if (vector.epetraVectorPtr().get()!=0)
+        M_epetraVector.reset( new vector_type ( vector.epetraVector() ) );   //This make a true copy!
 }
 
 VectorEpetra::VectorEpetra ( const VectorEpetra& vector, const MapEpetraType& mapType) :
     M_epetraMap   ( vector.M_epetraMap ),
     M_mapType     ( mapType ),
-    M_epetraVector ( new vector_type ( *M_epetraMap->map ( M_mapType ) ) ),
     M_combineMode ( vector.M_combineMode )
 {
+    ASSERT (M_epetraMap->map(M_mapType).get()!=0, "Error! The stored MapEpetra does not have valid map pointer.\n");
+
+    M_epetraVector.reset( new vector_type ( *M_epetraMap->map ( M_mapType ) ) );
+
     operator = (vector);
 }
 
@@ -99,9 +107,12 @@ VectorEpetra::VectorEpetra ( const VectorEpetra& vector, const MapEpetraType& ma
                              const combineMode_Type& combineMode ) :
     M_epetraMap   ( vector.M_epetraMap ),
     M_mapType     ( mapType ),
-    M_epetraVector ( new vector_type ( *M_epetraMap->map ( M_mapType ) ) ),
     M_combineMode ( vector.M_combineMode )
 {
+    ASSERT (M_epetraMap->map(M_mapType).get()!=0, "Error! The stored MapEpetra does not have valid map pointer.\n");
+
+    M_epetraVector.reset( new vector_type ( *M_epetraMap->map ( M_mapType ) ) );
+
     if (mapType == vector.M_mapType)
     {
         *M_epetraVector = vector.epetraVector();
@@ -127,22 +138,28 @@ VectorEpetra::VectorEpetra ( const Epetra_MultiVector&          vector,
                              const combineMode_Type             combineMode ) :
     M_epetraMap   ( map ),
     M_mapType     ( mapType ),
-    M_epetraVector ( new vector_type ( *map->map ( mapType ) ) ),
     M_combineMode ( combineMode )
 {
-    assert ( this->blockMap().SameAs (vector.Map() ) );
+    ASSERT (M_epetraMap->map(M_mapType).get()!=0, "Error! The stored MapEpetra does not have valid map pointer.\n");
+
+    assert ( M_epetraMap->map ( mapType )->SameAs (vector.Map() ) );
+
+    M_epetraVector.reset( new vector_type ( *M_epetraMap->map ( mapType ) ) );
     M_epetraVector->Update (1., vector, 0.);
 }
 
 VectorEpetra::VectorEpetra ( const VectorEpetra& vector, const Int& reduceToProc) :
-    M_epetraMap   ( vector.M_epetraMap->createRootMap ( reduceToProc ) ),
     M_mapType     ( Unique ),
-    M_epetraVector ( new vector_type ( *M_epetraMap->map ( M_mapType ) ) ),
     M_combineMode ( vector.M_combineMode )
 {
+    ASSERT (vector.map().map(M_mapType).get()!=0, "Error! The stored MapEpetra does not have valid map pointer.\n");
+
+    M_epetraMap = vector.M_epetraMap->createRootMap ( reduceToProc );
+
+    M_epetraVector.reset( new vector_type ( *M_epetraMap->map (M_mapType) ) );
+
     operator = ( vector );
 }
-
 
 // ===================================================
 // Operators

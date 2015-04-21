@@ -2,8 +2,7 @@ INCLUDE(TribitsAddExecutableAndTest)
 INCLUDE(TribitsCopyFilesToBinaryDir)
 
 ADD_SUBDIRECTORIES(
-  exporterEnsight
-  exporterVTK
+  exporterAll
   getPot
   translator
 )

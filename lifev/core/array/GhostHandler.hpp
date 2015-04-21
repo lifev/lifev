@@ -865,7 +865,7 @@ typename GhostHandler<MeshType>::map_Type& GhostHandler<MeshType>::ghostMapOnPoi
     std::vector<Int> myGlobalElements ( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
 
     // generate map
-    map_Type::map_ptrtype repeatedMap ( new Epetra_Map ( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
+    map_Type::mapPtr_Type repeatedMap ( new Epetra_Map ( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap ( repeatedMap, Repeated );
 
     return *M_ghostMapOnPoints;
@@ -936,7 +936,7 @@ typename GhostHandler<MeshType>::map_Type& GhostHandler<MeshType>::ghostMapOnPoi
     std::vector<Int> myGlobalElements ( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
 
     // generate map
-    map_Type::map_ptrtype repeatedMap ( new Epetra_Map ( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
+    map_Type::mapPtr_Type repeatedMap ( new Epetra_Map ( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap ( repeatedMap, Repeated );
 
     return *M_ghostMapOnPoints;
@@ -1031,7 +1031,7 @@ typename GhostHandler<MeshType>::map_Type& GhostHandler<MeshType>::ghostMapOnEdg
 
         mapData.repeated.assign ( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
 
-        map_Type::map_ptrtype repeatedMap ( new Epetra_Map ( -1,
+        map_Type::mapPtr_Type repeatedMap ( new Epetra_Map ( -1,
                                                              mapData.repeated.size(),
                                                              &mapData.repeated[0],
                                                              0,
@@ -1089,7 +1089,7 @@ typename GhostHandler<MeshType>::map_Type& GhostHandler<MeshType>::ghostMapOnEle
     std::vector<Int> myGlobalElements ( map.begin(), map.end() );
 
     // generate map
-    map_Type::map_ptrtype repeatedMap ( new Epetra_Map ( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
+    map_Type::mapPtr_Type repeatedMap ( new Epetra_Map ( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap ( repeatedMap, Repeated );
 
     return *M_ghostMapOnElementsFV;
@@ -1182,7 +1182,7 @@ typename GhostHandler<MeshType>::map_Type& GhostHandler<MeshType>::ghostMapOnEle
     std::vector<Int> myGlobalElements ( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
 
     // generate map
-    map_Type::map_ptrtype repeatedMap ( new Epetra_Map ( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
+    map_Type::mapPtr_Type repeatedMap ( new Epetra_Map ( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap ( repeatedMap, Repeated );
 
     return *M_ghostMapOnElementsFE;

@@ -1,0 +1,49 @@
+	# -*- getpot -*- (GetPot mode activation for emacs)
+#----------------------------------------------------------------
+#      Data file for electrophysiology benchmark
+#----------------------------------------------------------------
+
+
+[exporter]
+multimesh  = false
+save       = 1
+post_dir = ./
+type = hdf5
+
+[prec]
+    reuse           = true
+    prectype        = ML
+
+    [./ML] # preconditioner for the first factor in case our choice was ML
+    displayList = false
+    default_parameter_list = SA    # Domain-decomposition
+    prec_type =  MGV               # Multigrid, single V-cycle
+    max_levels = 5
+    inc_or_dec = increasing
+
+    [./energy_minimization]
+    enable = true
+    type   = 3
+
+    [../repartition]
+    enable              = 1
+    max_min_ratio       = 1.3
+    min_per_proc        = 500
+    partitioner         = ParMETIS #Zoltan: to be implemented
+
+    [../aggregation]
+    type                = METIS
+    treshold            = 0.0
+    nodes_per_aggregate = 32
+
+    [../coarse]
+    max_size            = 500
+    type                = self
+
+    [../smoother]
+    type        = Gauss-Seidel           # Gauss-Seidel smoother
+    pre_or_post = both
+
+    [../] # end of ML
+[../] # prec
+

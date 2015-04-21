@@ -1,0 +1,20 @@
+<!-- Stimulation Parameters -->
+	<ParameterList name="Stimulation protocol : Parameter list">
+    <Parameter name="starting_time_stimulus" type="double" value="1.0"/>
+    <Parameter name="stimulus_amplitude" type="double" value="0.1"/>
+	<Parameter name="tShortS1S1" type="double" value="30e3"/>
+	<Parameter name="stimulus_interval" type="double" value="40.0"/>
+	<Parameter name="stIntS1S2" type="double" value="35.0"/>
+	<Parameter name="stIntS2S3" type="double" value="25.0"/>
+	<Parameter name="stIntS3S4" type="double" value="15.0"/>
+	<Parameter name="nbStimMax" type="int" value="4000"/>
+	<Parameter name="repeatSt" type="int" value="2"/>
+	<Parameter name="pacPro" type="string" value="FCL-ExtraSt"/>
+	<Parameter name="pacProType" type="string" value="S1-S2-S3"/>
+	<Parameter name="iStim" type="double" value="-1.0"/>
+	<Parameter name="duration_stimulus" type="double" value="0.5"/>
+	<Parameter name="pacing_site_X" type="double" value="0.0"/>
+	<Parameter name="pacing_site_Y" type="double" value="3.75"/>
+	<Parameter name="pacing_site_Z" type="double" value="3.75"/>
+    <Parameter name="applied_current_radius" type="double" value="0.1"/>
+</ParameterList>

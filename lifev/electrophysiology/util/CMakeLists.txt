@@ -1,0 +1,20 @@
+SET(util_HEADERS
+  util/ElectrophysiologyUtility.hpp
+  util/HeartUtility.hpp
+CACHE INTERNAL "")
+
+SET(util_SOURCES
+CACHE INTERNAL "")
+
+
+SET(LOCAL_HEADERS)
+FOREACH(INC ${util_HEADERS})
+  STRING(REPLACE "util/" "" LOCAL_INC ${INC})
+  SET(LOCAL_HEADERS ${LOCAL_HEADERS} ${LOCAL_INC})
+ENDFOREACH()
+
+INSTALL(
+  FILES ${LOCAL_HEADERS}
+  DESTINATION "${${PROJECT_NAME}_INSTALL_INCLUDE_DIR}/lifev/electrophysiology/util"
+  COMPONENT ${PACKAGE_NAME}
+)

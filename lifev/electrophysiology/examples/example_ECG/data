@@ -1,0 +1,32 @@
+	# -*- getpot -*- (GetPot mode activation for emacs)
+#----------------------------------------------------------------
+#      Data file for heart test
+#----------------------------------------------------------------
+
+[exporter]
+multimesh  = false
+save       = 1
+post_dir = ./
+type = hdf5
+
+[discretization]
+
+[./space]
+mesh_dir        = ./
+mesh_file       = lid16.mesh #leftAtrium.mesh
+mesh_type       = .mesh
+hasFibers = 0
+fibers_dir = ./Mesh/
+fibers_file = canineHeartfibers
+fibers_format =  0  # 1 Ensight 0 BB
+
+verbose         = 1 # verbose during mesh-reading
+diagonalize     = 1 #0 # weight, 0=off
+
+
+[../time]
+
+initialtime		= 0
+endtime			= 400
+timestep		= 0.01
+BDF_order		= 1
