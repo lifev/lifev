@@ -1,3 +1,15 @@
+LifeV 3.10.0:
+============
+
+The branch developed at CMCS has been merged to master. Some additional feautures include:
+
+* new expressions in ETA and correction of few others
+* structure module has been extensively developed and tested. Please refer to papers by Paolo Tricerri et al.
+* addition of several structural laws
+* Reconstruction of strains for different consitutive laws. Postprocessing quantities directly with LifeV instead of Paraview when possible
+* inclusion of multimechanism and anysotropy
+
+
 LifeV 3.8.8:
 ============
 
