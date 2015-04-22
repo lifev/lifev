@@ -73,14 +73,18 @@ public:
     //@{
 
     //! Simple constructor with a shared_ptr on the mesh
-    RequestLoopElement ( const boost::shared_ptr<MeshType>& mesh, const UInt regionFlag = 0 )
-        : M_mesh ( mesh ), M_regionFlag ( regionFlag )
+    RequestLoopElement ( const boost::shared_ptr<MeshType>& mesh, const UInt regionFlag = 0, const UInt * const volumeElements = NULL )
+        : M_mesh ( mesh ), M_regionFlag ( regionFlag ), M_volumeElements( volumeElements )
         { }
 
     //! Copy constructor
     RequestLoopElement (const RequestLoopElement& loop)
-        : M_mesh ( loop.M_mesh ), M_regionFlag ( loop.M_regionFlag ) {}
+        : M_mesh ( loop.M_mesh ), M_regionFlag ( loop.M_regionFlag ), M_volumeElements( loop.M_volumeElements ) { }
 
+    ~RequestLoopElement()
+    {
+        delete M_volumeElements;
+    }
     //@}
 
 
@@ -93,10 +97,16 @@ public:
         return M_mesh;
     }
 
-    //! Getter for the mesh pointer
+    //! Getter for the flag of the region of integration
     const UInt regionFlag() const
     {
         return M_regionFlag;
+    }
+
+    //! Getter for the flag of the region of integration
+    const UInt * const getElementsRegionFlag() const
+    {
+        return M_volumeElements;
     }
 
     //@}
@@ -114,7 +124,10 @@ private:
 
     // Pointer on the mesh
     boost::shared_ptr<MeshType> M_mesh;
-    const UInt M_regionFlag;
+
+    // Data for integration on one subRegion, flag and elements on which perform the integration
+    const UInt                  M_regionFlag;
+    const UInt * const          M_volumeElements;
 
 };
 
@@ -137,9 +150,9 @@ private:
  */
 template< typename MeshType >
 RequestLoopElement<MeshType>
-elements (const boost::shared_ptr<MeshType>& mesh, const UInt flag = 0 )
+elements (const boost::shared_ptr<MeshType>& mesh, const UInt flag = 0, const UInt * const volumeElements = NULL )
 {
-    return RequestLoopElement<MeshType> ( mesh, flag );
+    return RequestLoopElement<MeshType> ( mesh, flag, volumeElements );
 }
 
 

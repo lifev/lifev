@@ -107,7 +107,8 @@ public:
                             const ExpressionType& expression,
                             const UInt offsetUp = 0,
                             const UInt offsetLeft = 0,
-                            const UInt regionFlag = 0 );
+                            const UInt regionFlag = 0,
+                            const UInt * const volumeElements = NULL );
 
     //! Full data constructor
     IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
@@ -118,7 +119,8 @@ public:
                             const OpenMPParameters& ompParams,
                             const UInt offsetUp = 0,
                             const UInt offsetLeft = 0,
-                            const UInt regionFlag = 0 );
+                            const UInt regionFlag = 0,
+                            const UInt * const volumeElements = NULL );
 
     //! Copy constructor
     IntegrateMatrixElement (const IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>& integrator);
@@ -280,9 +282,9 @@ private:
     // Data for multi-threaded assembly
     OpenMPParameters M_ompParams;
 
-    // Data for integration on one subRegion
+    // Data for integration on one subRegion, flag and elements on which perform the integration
     const UInt M_regionFlag;
-
+    const UInt * const M_volumeElements;
 };
 
 
@@ -303,7 +305,8 @@ IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
                         const ExpressionType& expression,
                         const UInt offsetUp,
                         const UInt offsetLeft,
-                        const UInt regionFlag )
+                        const UInt regionFlag,
+                        const UInt * const volumeElements )
     :   M_mesh (mesh),
         M_qrAdapter (qrAdapter),
         M_testSpace (testSpace),
@@ -319,8 +322,8 @@ IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
         M_offsetUp (offsetUp),
         M_offsetLeft (offsetLeft),
         M_ompParams(),
-        M_regionFlag( regionFlag )
-
+        M_regionFlag( regionFlag ),
+        M_volumeElements(volumeElements)
 {
     switch (MeshType::geoShape_Type::BasRefSha::S_shape)
     {
@@ -364,7 +367,8 @@ IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
                         const OpenMPParameters& ompParams,
                         const UInt offsetUp,
                         const UInt offsetLeft,
-                        const UInt regionFlag )
+                        const UInt regionFlag,
+                        const UInt * const volumeElements )
     :   M_mesh (mesh),
         M_qrAdapter (qrAdapter),
         M_testSpace (testSpace),
@@ -379,7 +383,8 @@ IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
         M_offsetUp (offsetUp),
         M_offsetLeft (offsetLeft),
         M_ompParams (ompParams),
-        M_regionFlag( regionFlag )
+        M_regionFlag( regionFlag ),
+        M_volumeElements(volumeElements)
 {
     switch (MeshType::geoShape_Type::BasRefSha::S_shape)
     {
@@ -433,7 +438,8 @@ IntegrateMatrixElement (const IntegrateMatrixElement<MeshType, TestSpaceType, So
         M_offsetLeft (integrator.M_offsetLeft),
 
         M_ompParams (integrator.M_ompParams),
-        M_regionFlag( integrator.M_regionFlag )
+        M_regionFlag( integrator.M_regionFlag ),
+        M_volumeElements( integrator.M_volumeElements )
 {
     switch (MeshType::geoShape_Type::BasRefSha::S_shape)
     {
