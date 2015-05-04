@@ -29,7 +29,7 @@ public:
     //! @name Public Types
     //@{
 
-    typedef  LinearOperator                            super;
+    typedef  LinearOperatorAlgebra                     super;
     typedef  Epetra_MultiVector                        vector_Type;
     typedef  boost::shared_ptr<vector_Type>            vectorPtr_Type;
     typedef  Epetra_Map                                map_Type;

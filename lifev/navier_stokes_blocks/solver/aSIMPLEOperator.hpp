@@ -36,7 +36,7 @@ public:
     typedef  boost::shared_ptr<vector_Type>            vectorPtr_Type;
     typedef  Epetra_Map                                map_Type;
     typedef  boost::shared_ptr<map_Type> 			   mapPtr_Type;
-    typedef  LinearOperator                            super;
+    typedef  LinearOperatorAlgebra                     super;
     typedef  Epetra_CrsMatrix                          matrix_Type;
     typedef  boost::shared_ptr<matrix_Type>            matrixPtr_Type;
     typedef  MatrixEpetra<Real>                        matrixEpetra_Type;

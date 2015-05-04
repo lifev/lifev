@@ -37,7 +37,7 @@
 #ifndef NSPRECONDITIONEROPERATOR_HPP
 #define NSPRECONDITIONEROPERATOR_HPP 1
 
-#include <lifev/core/linear_algebra/LinearOperator.hpp>
+#include <lifev/core/linear_algebra/LinearOperatorAlgebra.hpp>
 #include <lifev/core/util/Factory.hpp>
 #include <lifev/core/util/FactorySingleton.hpp>
 #include <Teuchos_ParameterList.hpp>
@@ -54,7 +54,7 @@ namespace LifeV
 namespace Operators
 {
 
-class NavierStokesPreconditionerOperator : public LinearOperator
+class NavierStokesPreconditionerOperator : public LinearOperatorAlgebra
 {
 public:
 

@@ -13,7 +13,7 @@
 
 #include <lifev/core/linear_algebra/BlockEpetra_Map.hpp>
 #include <lifev/core/linear_algebra/BlockEpetra_MultiVector.hpp>
-#include <lifev/core/linear_algebra/LinearOperator.hpp>
+#include <lifev/core/linear_algebra/LinearOperatorAlgebra.hpp>
 
 namespace LifeV
 {
@@ -27,13 +27,13 @@ namespace Operators
  * The Transpose is not supported yet.
  */
 
-class NavierStokesOperator: public LinearOperator
+class NavierStokesOperator: public LinearOperatorAlgebra
 {
 public:
     
     //! @name Public Typedefs
     //@{
-    typedef LinearOperator super;
+    typedef LinearOperatorAlgebra super;
     typedef super::comm_Type comm_Type;
     typedef super::commPtr_Type commPtr_Type;
     typedef super::map_Type map_Type;

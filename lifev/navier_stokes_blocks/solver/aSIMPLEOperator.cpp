@@ -3,8 +3,8 @@
 #include <lifev/core/linear_algebra/IfpackPreconditioner.hpp>
 #include <lifev/core/linear_algebra/MLPreconditioner.hpp>
 #include <lifev/core/linear_algebra/TwoLevelPreconditioner.hpp>
-#include <lifev/core/linear_algebra/AztecooOperator.hpp>
-#include <lifev/core/linear_algebra/BelosOperator.hpp>
+#include <lifev/core/linear_algebra/AztecooOperatorAlgebra.hpp>
+#include <lifev/core/linear_algebra/BelosOperatorAlgebra.hpp>
 #include <lifev/core/linear_algebra/ApproximatedInvertibleRowMatrix.hpp>
 
 namespace LifeV
