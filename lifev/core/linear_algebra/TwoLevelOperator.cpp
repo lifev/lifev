@@ -14,7 +14,7 @@ namespace Operators
 {
 
 TwoLevelOperator::TwoLevelOperator():
-		LinearOperator()
+		LinearOperatorAlgebra()
 { }
 
 TwoLevelOperator::~TwoLevelOperator()
@@ -175,17 +175,17 @@ bool TwoLevelOperator::HasNormInf() const
 	return M_fineLevelOper->HasNormInf();
 }
 
-const LinearOperator::comm_Type & TwoLevelOperator::Comm() const
+const LinearOperatorAlgebra::comm_Type & TwoLevelOperator::Comm() const
 {
 	return M_fineLevelOper->Comm();
 }
 
-const LinearOperator::map_Type & TwoLevelOperator::OperatorDomainMap() const
+const LinearOperatorAlgebra::map_Type & TwoLevelOperator::OperatorDomainMap() const
 {
 	return M_fineLevelOper->OperatorDomainMap();
 }
 
-const LinearOperator::map_Type & TwoLevelOperator::OperatorRangeMap() const
+const LinearOperatorAlgebra::map_Type & TwoLevelOperator::OperatorRangeMap() const
 {
 	return M_fineLevelOper->OperatorRangeMap();
 }

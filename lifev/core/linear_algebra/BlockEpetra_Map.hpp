@@ -17,7 +17,7 @@
 #ifndef BLOCKEPETRA_MAP_HPP_
 #define BLOCKEPETRA_MAP_HPP_
 
-#include <lifev/core/linear_algebra/LinearOperator.hpp>
+#include <lifev/core/linear_algebra/LinearOperatorAlgebra.hpp>
 #include <Epetra_Import.h>
 
 
@@ -39,10 +39,10 @@ public:
 
 	//@name Public Typedefs
 	//@{
-	typedef Operators::LinearOperator::comm_Type comm_Type;
-	typedef Operators::LinearOperator::map_Type    map_Type;
-	typedef Operators::LinearOperator::mapPtr_Type mapPtr_Type;
-	typedef Operators::LinearOperator::constMapPtr_Type constMapPtr_Type;
+	typedef Operators::LinearOperatorAlgebra::comm_Type comm_Type;
+	typedef Operators::LinearOperatorAlgebra::map_Type    map_Type;
+	typedef Operators::LinearOperatorAlgebra::mapPtr_Type mapPtr_Type;
+	typedef Operators::LinearOperatorAlgebra::constMapPtr_Type constMapPtr_Type;
 	typedef std::vector<mapPtr_Type> mapPtrContainer_Type;
 	typedef mapPtrContainer_Type::iterator        mapPtrIterator_Type;
 	typedef mapPtrContainer_Type::const_iterator  mapPtrConstIterator_Type;

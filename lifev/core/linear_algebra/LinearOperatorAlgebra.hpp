@@ -5,8 +5,8 @@
  *      Author: uvilla
  */
 
-#ifndef LINEAR_OPERATOR_HPP_
-#define LINEAR_OPERATOR_HPP_
+#ifndef LINEAR_OPERATOR_ALGEBRA_HPP_
+#define LINEAR_OPERATOR_ALGEBRA_HPP_
 
 #include <boost/shared_ptr.hpp>
 
@@ -47,7 +47,7 @@ namespace Operators
  *
  *
  */
-class LinearOperator : public Epetra_Operator
+class LinearOperatorAlgebra : public Epetra_Operator
 {
 public:
 
@@ -67,7 +67,7 @@ public:
     //! @name Destructor
     //@{
     //! Destructor
-    virtual ~LinearOperator() {};
+    virtual ~LinearOperatorAlgebra() {};
     //@}
 
     //! @name Attribute set methods
@@ -175,11 +175,11 @@ public:
 
 //! @class IdentityOperator
 /*! @brief Identity operator x = I*x. */
-class IdentityOperator : public LinearOperator
+class IdentityOperator : public LinearOperatorAlgebra
 {
 public:
 
-    typedef LinearOperator super;
+    typedef LinearOperatorAlgebra super;
     typedef super::map_Type map_Type;
     typedef super::mapPtr_Type mapPtr_Type;
     typedef super::vector_Type vector_Type;
@@ -240,11 +240,11 @@ private:
 
 //! @class NullOperator
 /*! @brief Null operator 0 = Z*x. */
-class NullOperator : public LinearOperator
+class NullOperator : public LinearOperatorAlgebra
 {
 public:
 
-    typedef LinearOperator super;
+    typedef LinearOperatorAlgebra super;
     typedef super::map_Type map_Type;
     typedef super::mapPtr_Type mapPtr_Type;
     typedef super::vector_Type vector_Type;
@@ -308,4 +308,4 @@ private:
 
 } /*end namespace Operators*/
 } /*end namespace */
-#endif /* LINEAR_OPERATOR_HPP_ */
+#endif /* LINEAR_OPERATOR_ALGEBRA_HPP_ */

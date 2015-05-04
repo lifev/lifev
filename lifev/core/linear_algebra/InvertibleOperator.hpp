@@ -11,7 +11,7 @@
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_RCPDecl.hpp>
 
-#include <lifev/core/linear_algebra/LinearOperator.hpp>
+#include <lifev/core/linear_algebra/LinearOperatorAlgebra.hpp>
 #include <lifev/core/util/FactorySingleton.hpp>
 #include <lifev/core/util/Factory.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
@@ -21,10 +21,10 @@ namespace LifeV
 namespace Operators
 {
 //! @class InvertibleOperator
-/*! @brief Abstract class which defines the interface of an Invertible Linear Operator.
+/*! @brief Abstract class which defines the interface of an Invertible Linear Operator Algebra.
  *
  */
-class InvertibleOperator : public LinearOperator
+class InvertibleOperator : public LinearOperatorAlgebra
 {
 public:
 

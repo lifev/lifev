@@ -5,7 +5,7 @@
  *      Author: uvilla
  */
 
-#include <lifev/core/linear_algebra/LinearOperator.hpp>
+#include <lifev/core/linear_algebra/LinearOperatorAlgebra.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
 
 namespace LifeV
@@ -13,12 +13,12 @@ namespace LifeV
 namespace Operators
 {
 
-int LinearOperator::apply(const VectorEpetra & X, VectorEpetra & Y) const
+int LinearOperatorAlgebra::apply(const VectorEpetra & X, VectorEpetra & Y) const
 {
 	return Apply(X.epetraVector(), Y.epetraVector());
 }
 
-int LinearOperator::applyInverse(const VectorEpetra & X, VectorEpetra & Y)
+int LinearOperatorAlgebra::applyInverse(const VectorEpetra & X, VectorEpetra & Y)
 {
     return ApplyInverse(X.epetraVector(), Y.epetraVector());
 }

@@ -8,7 +8,7 @@
 #ifndef COMPOSITEOPERATOR_HPP_
 #define COMPOSITEOPERATOR_HPP_
 
-#include <lifev/core/linear_algebra/LinearOperator.hpp>
+#include <lifev/core/linear_algebra/LinearOperatorAlgebra.hpp>
 
 namespace LifeV
 {
@@ -16,7 +16,7 @@ namespace LifeV
 namespace Operators
 {
 
-class CompositeOperator : public LinearOperator
+class CompositeOperator : public LinearOperatorAlgebra
 {
 public:
     CompositeOperator();

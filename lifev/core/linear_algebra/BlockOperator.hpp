@@ -13,7 +13,7 @@
 
 #include <lifev/core/linear_algebra/BlockEpetra_Map.hpp>
 #include <lifev/core/linear_algebra/BlockEpetra_MultiVector.hpp>
-#include <lifev/core/linear_algebra/LinearOperator.hpp>
+#include <lifev/core/linear_algebra/LinearOperatorAlgebra.hpp>
 
 namespace LifeV
 {
@@ -22,18 +22,18 @@ namespace Operators
 {
 //! @class BlockOperator
 /*! @brief A abstract class for handling n-by-m block operators
- * This class inherits from LifeV::LinearOperator.
+ * This class inherits from LifeV::LinearOperatorAlgebra.
  *
  * The Transpose is not supported yet.
  */
 
-class BlockOperator: public LinearOperator
+class BlockOperator: public LinearOperatorAlgebra
 {
 public:
 
     //! @name Public Typedefs
     //@{
-    typedef LinearOperator super;
+    typedef LinearOperatorAlgebra super;
     typedef super::comm_Type comm_Type;
     typedef super::commPtr_Type commPtr_Type;
     typedef super::map_Type map_Type;

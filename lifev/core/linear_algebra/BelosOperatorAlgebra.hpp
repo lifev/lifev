@@ -15,8 +15,8 @@
  * the preconditioner in the form of a LinearOperator.
  */
 
-#ifndef BELOS_OPERATOR_HPP_
-#define BELOS_OPERATOR_HPP_
+#ifndef BELOS_OPERATOR_ALGEBRA_HPP_
+#define BELOS_OPERATOR_ALGEBRA_HPP_
 
 #include <BelosEpetraAdapter.hpp>
 #include <BelosSolverManager.hpp>
@@ -36,7 +36,7 @@ namespace Operators
  *
  */
 
-class BelosOperator : public InvertibleOperator
+class BelosOperatorAlgebra : public InvertibleOperator
 {
 public:
 
@@ -62,8 +62,8 @@ public:
 
     //! null constructor and destructor
     //@{
-    BelosOperator();
-    ~BelosOperator() {};
+    BelosOperatorAlgebra();
+    ~BelosOperatorAlgebra() {};
     //@}
     static solverManagerMap_Type * singletonSolverManagerMap();
     static precSideMap_Type      * singletonPrecSideMap();
@@ -85,10 +85,10 @@ protected:
     static std::auto_ptr<precSideMap_Type> S_precSideMap;
 };
 
-inline InvertibleOperator* createBelosOperator() { return new BelosOperator(); }
+inline InvertibleOperator* createBelosOperatorAlgebra() { return new BelosOperatorAlgebra(); }
 namespace
 {
-    static bool registerBelos = InvertibleOperatorFactory::instance().registerProduct( "Belos", &createBelosOperator );
+    static bool registerBelos = InvertibleOperatorFactory::instance().registerProduct( "Belos", &createBelosOperatorAlgebra );
 }
 
 

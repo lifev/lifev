@@ -14,7 +14,7 @@ namespace Operators
 {
 
 ApproximatedInvertibleRowMatrix::ApproximatedInvertibleRowMatrix():
-	LinearOperator(),
+	LinearOperatorAlgebra(),
 	usePreconditionerAsApproximatedInverse(false)
 { }
 
@@ -110,17 +110,17 @@ bool ApproximatedInvertibleRowMatrix::HasNormInf() const
 	return M_rowMatrix->HasNormInf();
 }
 
-const LinearOperator::comm_Type & ApproximatedInvertibleRowMatrix::Comm() const
+const LinearOperatorAlgebra::comm_Type & ApproximatedInvertibleRowMatrix::Comm() const
 {
 	return M_rowMatrix->Comm();
 }
 
-const LinearOperator::map_Type & ApproximatedInvertibleRowMatrix::OperatorDomainMap() const
+const LinearOperatorAlgebra::map_Type & ApproximatedInvertibleRowMatrix::OperatorDomainMap() const
 {
 	return M_rowMatrix->OperatorDomainMap();
 }
 
-const LinearOperator::map_Type & ApproximatedInvertibleRowMatrix::OperatorRangeMap() const
+const LinearOperatorAlgebra::map_Type & ApproximatedInvertibleRowMatrix::OperatorRangeMap() const
 {
 	return M_rowMatrix->OperatorRangeMap();
 }

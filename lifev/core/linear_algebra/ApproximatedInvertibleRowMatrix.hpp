@@ -20,7 +20,7 @@
 #ifndef APPROXIMATEDINVERTIBLEROWMATRIX_H_
 #define APPROXIMATEDINVERTIBLEROWMATRIX_H_
 
-#include <lifev/core/linear_algebra/LinearOperator.hpp>
+#include <lifev/core/linear_algebra/LinearOperatorAlgebra.hpp>
 #include <lifev/core/linear_algebra/RowMatrixPreconditioner.hpp>
 #include <lifev/core/linear_algebra/InvertibleOperator.hpp>
 
@@ -84,7 +84,7 @@ namespace Operators
  *
  */
 
-class ApproximatedInvertibleRowMatrix : public LinearOperator
+class ApproximatedInvertibleRowMatrix : public LinearOperatorAlgebra
 {
 public:
 

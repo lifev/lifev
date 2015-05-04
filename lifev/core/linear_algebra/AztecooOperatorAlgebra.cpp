@@ -1,4 +1,4 @@
-#include <lifev/core/linear_algebra/AztecooOperator.hpp>
+#include <lifev/core/linear_algebra/AztecooOperatorAlgebra.hpp>
 
 namespace LifeV
 {
@@ -6,14 +6,14 @@ namespace LifeV
 namespace Operators
 {
 
-AztecooOperator::AztecooOperator():
+AztecooOperatorAlgebra::AztecooOperatorAlgebra():
 		InvertibleOperator(),
 		M_linSolver(new SolverType)
 {
-	M_name = "AztecooOperator";
+	M_name = "AztecooOperatorAlgebra";
 }
 
-int AztecooOperator::doApplyInverse(const vector_Type& X, vector_Type& Y) const
+int AztecooOperatorAlgebra::doApplyInverse(const vector_Type& X, vector_Type& Y) const
 {
 	vector_Type Xcopy(X);
 	Y.PutScalar(0.0);

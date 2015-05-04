@@ -18,7 +18,7 @@
 #ifndef TWOLEVELOPERATOR_HPP_
 #define TWOLEVELOPERATOR_HPP_
 
-#include <lifev/core/linear_algebra/LinearOperator.hpp>
+#include <lifev/core/linear_algebra/LinearOperatorAlgebra.hpp>
 
 namespace LifeV
 {
@@ -29,10 +29,10 @@ namespace Operators
 /*!
  * @brief It defines a two level methods to approximately apply the inverse of a fine level operator.
  *
- * It implements the public interface of \c LinearOperator and it defines the public methods to set information
+ * It implements the public interface of \c LinearOperatorAlgebra and it defines the public methods to set information
  * the fine level operator and smoother, the coarse level solver, the extension and restriction operators.
  */
-class TwoLevelOperator : public LinearOperator
+class TwoLevelOperator : public LinearOperatorAlgebra
 {
 public:
 	TwoLevelOperator();

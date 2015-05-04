@@ -17,7 +17,7 @@
 #include <Epetra_CrsMatrix.h>
 #include <Teuchos_ParameterList.hpp>
 
-#include <lifev/core/linear_algebra/LinearOperator.hpp>
+#include <lifev/core/linear_algebra/LinearOperatorAlgebra.hpp>
 #include <lifev/core/util/FactorySingleton.hpp>
 #include <lifev/core/util/Factory.hpp>
 
@@ -42,7 +42,7 @@ namespace Operators
  * Concrete instances of the \c RowMatrixPreconditioner class should implement the protected method \c myCompute.
  */
 
-class RowMatrixPreconditioner : public LinearOperator
+class RowMatrixPreconditioner : public LinearOperatorAlgebra
 {
 public:
 
@@ -54,7 +54,7 @@ public:
     //@}
 
     //! Empty constructor
-    RowMatrixPreconditioner(): LinearOperator() {};
+    RowMatrixPreconditioner(): LinearOperatorAlgebra() {};
 
 
     //! Destructor

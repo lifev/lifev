@@ -16,24 +16,24 @@
 #include <BelosMinresSolMgr.hpp>
 #include <BelosTFQMRSolMgr.hpp>
 
-#include<lifev/core/linear_algebra/BelosOperator.hpp>
+#include<lifev/core/linear_algebra/BelosOperatorAlgebra.hpp>
 
 namespace LifeV
 {
 namespace Operators
 {
 
-std::auto_ptr<BelosOperator::solverManagerMap_Type> BelosOperator::S_solverManagerMap(BelosOperator::singletonSolverManagerMap());
-std::auto_ptr<BelosOperator::precSideMap_Type> BelosOperator::S_precSideMap(BelosOperator::singletonPrecSideMap());
+std::auto_ptr<BelosOperatorAlgebra::solverManagerMap_Type> BelosOperatorAlgebra::S_solverManagerMap(BelosOperatorAlgebra::singletonSolverManagerMap());
+std::auto_ptr<BelosOperatorAlgebra::precSideMap_Type> BelosOperatorAlgebra::S_precSideMap(BelosOperatorAlgebra::singletonPrecSideMap());
 
-BelosOperator::BelosOperator():
+BelosOperatorAlgebra::BelosOperatorAlgebra():
         InvertibleOperator(),
         M_linProblem(Teuchos::rcp(new LinearProblem))
 {
-    M_name = "BelosOperator";
+    M_name = "BelosOperatorAlgebra";
 }
 
-int BelosOperator::doApplyInverse(const vector_Type& X, vector_Type& Y) const
+int BelosOperatorAlgebra::doApplyInverse(const vector_Type& X, vector_Type& Y) const
 {
 
     Teuchos::RCP<vector_Type> Xcopy(new vector_Type(X) );
@@ -56,12 +56,12 @@ int BelosOperator::doApplyInverse(const vector_Type& X, vector_Type& Y) const
 
 }
 
-void BelosOperator::doSetOperator()
+void BelosOperatorAlgebra::doSetOperator()
 {
     M_linProblem->setOperator(M_oper);
 }
 
-void BelosOperator::doSetPreconditioner()
+void BelosOperatorAlgebra::doSetPreconditioner()
 {
     M_belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( M_prec ) );
     
@@ -86,7 +86,7 @@ void BelosOperator::doSetPreconditioner()
     
 }
 
-void BelosOperator::doSetParameterList()
+void BelosOperatorAlgebra::doSetParameterList()
 {
     if(! M_pList->sublist("options").isParameter("Verbosity"))
         M_pList->sublist("options").set( "Verbosity", Belos::Errors + Belos::Warnings +
@@ -120,7 +120,7 @@ void BelosOperator::doSetParameterList()
 //============================================================================//
 //                     Protected or Private Methods                           //
 //============================================================================//
-void BelosOperator::allocateSolver(const SolverManagerType & solverManagerType)
+void BelosOperatorAlgebra::allocateSolver(const SolverManagerType & solverManagerType)
 {
        // If a SolverManager already exists we simply clean it!
         if ( !M_solverManager.is_null() )
@@ -171,7 +171,7 @@ void BelosOperator::allocateSolver(const SolverManagerType & solverManagerType)
 
 }
 
-BelosOperator::solverManagerMap_Type * BelosOperator::singletonSolverManagerMap()
+BelosOperatorAlgebra::solverManagerMap_Type * BelosOperatorAlgebra::singletonSolverManagerMap()
 {
     solverManagerMap_Type * map(new solverManagerMap_Type);
     (*map)["BlockCG"] = BlockCG;
@@ -188,7 +188,7 @@ BelosOperator::solverManagerMap_Type * BelosOperator::singletonSolverManagerMap(
     return map;
 }
 
-BelosOperator::precSideMap_Type * BelosOperator::singletonPrecSideMap()
+BelosOperatorAlgebra::precSideMap_Type * BelosOperatorAlgebra::singletonPrecSideMap()
 {
     precSideMap_Type * map(new precSideMap_Type);
     (*map)["None"] = None;

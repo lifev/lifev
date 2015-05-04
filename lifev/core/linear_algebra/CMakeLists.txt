@@ -1,14 +1,14 @@
 SET(linear_algebra_HEADERS
   linear_algebra/ApproximatedInvertibleRowMatrix.hpp
-  linear_algebra/AztecooOperator.hpp
-  linear_algebra/BelosOperator.hpp
+  linear_algebra/AztecooOperatorAlgebra.hpp
+  linear_algebra/BelosOperatorAlgebra.hpp
   linear_algebra/BlockEpetra_Map.hpp
   linear_algebra/BlockEpetra_MultiVector.hpp
   linear_algebra/BlockOperator.hpp
   linear_algebra/CompositeOperator.hpp
   linear_algebra/IfpackPreconditioner.hpp
   linear_algebra/InvertibleOperator.hpp
-  linear_algebra/LinearOperator.hpp
+  linear_algebra/LinearOperatorAlgebra.hpp
   linear_algebra/LumpedOperator.hpp
   linear_algebra/MLPreconditioner.hpp
   linear_algebra/RowMatrixPreconditioner.hpp
@@ -18,15 +18,15 @@ CACHE INTERNAL "")
 
 SET(linear_algebra_SOURCES
   linear_algebra/ApproximatedInvertibleRowMatrix.cpp
-  linear_algebra/AztecooOperator.cpp
-  linear_algebra/BelosOperator.cpp
+  linear_algebra/AztecooOperatorAlgebra.cpp
+  linear_algebra/BelosOperatorAlgebra.cpp
   linear_algebra/BlockEpetra_Map.cpp
   linear_algebra/BlockEpetra_MultiVector.cpp
   linear_algebra/BlockOperator.cpp
   linear_algebra/CompositeOperator.cpp
   linear_algebra/IfpackPreconditioner.cpp
   linear_algebra/InvertibleOperator.cpp
-  linear_algebra/LinearOperator.cpp
+  linear_algebra/LinearOperatorAlgebra.cpp
   linear_algebra/LumpedOperator.cpp
   linear_algebra/MLPreconditioner.cpp
   linear_algebra/TwoLevelOperator.cpp

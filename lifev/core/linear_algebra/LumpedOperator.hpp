@@ -14,7 +14,7 @@
 #include <Epetra_CrsMatrix.h>
 #include <Epetra_Vector.h>
 
-#include <lifev/core/linear_algebra/LinearOperator.hpp>
+#include <lifev/core/linear_algebra/LinearOperatorAlgebra.hpp>
 
 namespace LifeV
 {
@@ -34,7 +34,7 @@ namespace Operators
  * one obtained using the Trapezoidal quadrature rule.
  */
 
-class LumpedOperator: public LinearOperator
+class LumpedOperator: public LinearOperatorAlgebra
 {
 public:
 

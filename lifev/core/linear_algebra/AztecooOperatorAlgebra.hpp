@@ -16,8 +16,8 @@
  * AztecOO will use unpreconditioned Krylov methods.
  */
 
-#ifndef AZTECOO_OPERATOR_HPP
-#define AZTECOO_OPERATOR_HPP
+#ifndef AZTECOO_OPERATOR_ALGEBRA_HPP
+#define AZTECOO_OPERATOR_ALGEBRA_HPP
 
 #include <AztecOO.h>
 #include <Teuchos_ParameterList.hpp>
@@ -36,13 +36,13 @@ namespace Operators
  * For a description of the class functionality, please refer to the parent class InvertibleOperator.
  *
  */
-class AztecooOperator : public InvertibleOperator
+class AztecooOperatorAlgebra : public InvertibleOperator
 {
 public:
     typedef AztecOO SolverType;
     typedef boost::shared_ptr<SolverType> SolverType_ptr;
 
-    AztecooOperator();
+    AztecooOperatorAlgebra();
 
     int numberOfIterations()
     {
@@ -59,10 +59,10 @@ protected:
     SolverType_ptr                              M_linSolver;
 };
 
-inline InvertibleOperator* createAztecooOperator() { return new AztecooOperator(); }
+inline InvertibleOperator* createAztecooOperatorAlgebra() { return new AztecooOperatorAlgebra(); }
 namespace
 {
-    static bool registerAztecoo = InvertibleOperatorFactory::instance().registerProduct( "AztecOO", &createAztecooOperator );
+    static bool registerAztecoo = InvertibleOperatorFactory::instance().registerProduct( "AztecOO", &createAztecooOperatorAlgebra );
 }
 
 
