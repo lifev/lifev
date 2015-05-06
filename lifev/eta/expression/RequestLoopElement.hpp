@@ -73,17 +73,19 @@ public:
     //@{
 
     //! Simple constructor with a shared_ptr on the mesh
-    RequestLoopElement ( const boost::shared_ptr<MeshType>& mesh, const UInt regionFlag = 0, const UInt * const volumeElements = NULL )
-        : M_mesh ( mesh ), M_regionFlag ( regionFlag ), M_volumeElements( volumeElements )
+    RequestLoopElement ( const boost::shared_ptr<MeshType>& mesh, const UInt regionFlag = 0,
+                         const UInt numVolumes = 0, const UInt * volumeElements = nullptr )
+        : M_mesh ( mesh ), M_regionFlag ( regionFlag ), M_volumeElements( volumeElements ), M_numVolumes( numVolumes )
         { }
 
     //! Copy constructor
     RequestLoopElement (const RequestLoopElement& loop)
-        : M_mesh ( loop.M_mesh ), M_regionFlag ( loop.M_regionFlag ), M_volumeElements( loop.M_volumeElements ) { }
+        : M_mesh ( loop.M_mesh ), M_regionFlag ( loop.M_regionFlag ), M_numVolumes( loop.M_numVolumes ),
+          M_volumeElements( loop.M_volumeElements ) { }
 
     ~RequestLoopElement()
     {
-        delete M_volumeElements;
+        M_volumeElements = nullptr;
     }
     //@}
 
@@ -103,8 +105,13 @@ public:
         return M_regionFlag;
     }
 
+    const UInt numVolumes() const
+    {
+        return M_numVolumes;
+    }
+
     //! Getter for the flag of the region of integration
-    const UInt * const getElementsRegionFlag() const
+    const UInt * getElementsRegionFlag() const
     {
         return M_volumeElements;
     }
@@ -112,7 +119,6 @@ public:
     //@}
 
 private:
-
 
     //! @name Private Methods
     //@{
@@ -127,7 +133,8 @@ private:
 
     // Data for integration on one subRegion, flag and elements on which perform the integration
     const UInt                  M_regionFlag;
-    const UInt * const          M_volumeElements;
+    const UInt                  M_numVolumes;
+    const UInt *                M_volumeElements;
 
 };
 
@@ -150,9 +157,12 @@ private:
  */
 template< typename MeshType >
 RequestLoopElement<MeshType>
-elements (const boost::shared_ptr<MeshType>& mesh, const UInt flag = 0, const UInt * const volumeElements = NULL )
+elements (const boost::shared_ptr<MeshType>& mesh, const UInt flag = 0, const UInt numVolumes = 0, const UInt * volumeElements = nullptr )
 {
-    return RequestLoopElement<MeshType> ( mesh, flag, volumeElements );
+    if ( volumeElements != nullptr )
+        std::cout << "Sono in ELEMENTS " << volumeElements[0] << std::endl;
+
+    return RequestLoopElement<MeshType> ( mesh, flag, numVolumes, volumeElements );
 }
 
 

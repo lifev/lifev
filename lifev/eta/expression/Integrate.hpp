@@ -114,7 +114,8 @@ integrate ( const RequestLoopElement<MeshType>& request,
 {
     return IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>
            ( request.mesh(), qrAdapterBase.implementation(), testSpace,
-             solutionSpace, expression, offsetUp, offsetLeft, request.regionFlag(), request.getElementsRegionFlag() );
+             solutionSpace, expression, offsetUp, offsetLeft,
+             request.numVolumes(), request.regionFlag(), request.getElementsRegionFlag() );
 }
 
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
@@ -138,7 +139,8 @@ integrate ( const RequestLoopElement<MeshType>& request,
 {
     return IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterNeverAdapt>
            ( request.mesh(), QRAdapterNeverAdapt (quadrature),
-             testSpace, solutionSpace, expression, offsetUp, offsetLeft, request.regionFlag(), request.getElementsRegionFlag() );
+             testSpace, solutionSpace, expression, offsetUp, offsetLeft, request.regionFlag(),
+             request.numVolumes(), request.getElementsRegionFlag() );
 }
 
 //! Integrate function for matricial expressions (multi-threaded path)
@@ -180,7 +182,7 @@ integrate ( const RequestLoopElement<MeshType>& request,
 {
     return IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterNeverAdapt>
            (request.mesh(), qrAdapterBase.implementation(), testSpace, solutionSpace, expression,
-            ompParams, offsetUp, offsetLeft, request.regionFlag(), request.getElementsRegionFlag() );
+            ompParams, offsetUp, offsetLeft, request.regionFlag(), request.numVolumes(), request.getElementsRegionFlag() );
 }
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
 IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterNeverAdapt>
@@ -205,7 +207,7 @@ integrate ( const RequestLoopElement<MeshType>& request,
 {
     return IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterNeverAdapt>
            (request.mesh(), QRAdapterNeverAdapt (quadrature), testSpace, solutionSpace, expression,
-            ompParams, offsetUp, offsetLeft, request.regionFlag(), request.getElementsRegionFlag() );
+            ompParams, offsetUp, offsetLeft, request.regionFlag(), request.numVolumes(), request.getElementsRegionFlag() );
 }
 
 
