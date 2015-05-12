@@ -105,7 +105,7 @@ public:
     typedef LifeV::RegionMesh<LinearTetra>                              mesh_Type;
 
     // Filters
-    typedef typename LifeV::Exporter<mesh_Type  >                       filter_Type;
+    typedef LifeV::Exporter<mesh_Type  >                       filter_Type;
     typedef boost::shared_ptr< LifeV::Exporter<mesh_Type  > >           filterPtr_Type;
 
     typedef LifeV::ExporterEmpty<mesh_Type >                            emptyFilter_Type;
