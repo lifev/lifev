@@ -11,7 +11,15 @@
 
 namespace LifeV
 {
+//! MeshVolumeSubdivision.
+/*!
+    @author
+    Constructs local arrays containing the volumes ID corresponding to the Physical Entities specified by different regionflags
 
+    @warning
+    it supposes the regionFlags are > 0
+
+ */
 template<typename MeshType>
 class MeshVolumeSubdivision
 {
@@ -181,7 +189,7 @@ countElementPerFlag()
         // Extracting the marker
         UInt markerID = M_mesh->element( iElement ).markerID( );
 
-        if( iElement> 0 && oldMarkerID != markerID )
+        if( oldMarkerID != markerID )
         {
                 for( UInt iRegion(0); iRegion < M_numSubregions; iRegion++ )
                 {
@@ -226,7 +234,7 @@ fillElementPerFlag()
         // Extracting the marker
         UInt markerID = M_mesh->element( iElement ).markerID( );
 
-        if( iElement> 0 && oldMarkerID != markerID )
+        if( oldMarkerID != markerID )
         {
                 for( UInt iRegion(0); iRegion < M_numSubregions; iRegion++ )
                 {
@@ -242,8 +250,6 @@ fillElementPerFlag()
             counters[numRegion]++;
             oldMarkerID = markerID;
     }
-
-//    for ( UInt iRegion = 0; iRegion < M_numSubregions; iRegion++ )
 
 }
 
@@ -323,6 +329,7 @@ printElementPerFlag()
 
         }
     }
+
 }
 
 
@@ -334,17 +341,6 @@ makeSubDivision()
     countElementPerFlag();
     allocatePerElements();
     fillElementPerFlag();
-
-    const UInt* b1 = getSubmesh( 0 );
-    const UInt* b2 = getSubmesh( 1 );
-
-    if( b1 != nullptr )
-        std::cout << b1[0] << " ";
-    if( b2 != nullptr )
-        std::cout << b2[0];
-
-    std::cout << std::endl << std::endl;
-
 
 }
 
