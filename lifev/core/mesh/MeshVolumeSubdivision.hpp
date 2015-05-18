@@ -28,7 +28,7 @@ public:
     MeshVolumeSubdivision( boost::shared_ptr< Epetra_Comm > _comm, meshPtr_Type _mesh,
                      UInt _numSubregions = 1, bool _verbose = false );
     MeshVolumeSubdivision( boost::shared_ptr< Epetra_Comm > _comm, meshPtr_Type _mesh,
-                     Epetra_IntSerialDenseVector _regionFlags, UInt _numSubregions = 1, bool _verbose = false );
+                           Epetra_IntSerialDenseVector _regionFlags, UInt _numSubregions = 1, bool _verbose = false );
 
     ~MeshVolumeSubdivision();
 
@@ -174,13 +174,12 @@ countElementPerFlag()
     UInt oldMarkerID = 0;
     UInt numRegion = 0;
 
+    std::cout << std::endl << "TOTAL NUMBER OF ELEMENTS proc " << M_comm->MyPID()  << ": " << nbElements << std::endl << std::endl;
+
     for (UInt iElement(0); iElement < nbElements; iElement++)
     {
-//        std::cout << "Extracting the marker " << iElement << std::endl;
         // Extracting the marker
         UInt markerID = M_mesh->element( iElement ).markerID( );
-
-//        std::cout << "Checking the marker " << iElement << std::endl;
 
         if( iElement> 0 && oldMarkerID != markerID )
         {
@@ -224,12 +223,9 @@ fillElementPerFlag()
 
     for (UInt iElement(0); iElement < nbElements; iElement++)
     {
-//        std::cout << "Extracting the marker " << iElement << std::endl;
         // Extracting the marker
         UInt markerID = M_mesh->element( iElement ).markerID( );
 
-
-//        std::cout << "Checking the marker " << iElement << std::endl;
         if( iElement> 0 && oldMarkerID != markerID )
         {
                 for( UInt iRegion(0); iRegion < M_numSubregions; iRegion++ )
@@ -246,6 +242,8 @@ fillElementPerFlag()
             counters[numRegion]++;
             oldMarkerID = markerID;
     }
+
+//    for ( UInt iRegion = 0; iRegion < M_numSubregions; iRegion++ )
 
 }
 
@@ -290,7 +288,14 @@ allocatePerElements()
 
     for( UInt iRegion(0); iRegion < M_numSubregions; iRegion++ )
     {
-        M_elements[iRegion] = new UInt[M_numElementPerFlag( iRegion ) ];
+        if( M_numElementPerFlag( iRegion ) > 0 )
+        {
+            M_elements[iRegion] = new UInt[M_numElementPerFlag( iRegion ) ];
+        }
+        else
+        {
+            M_elements[iRegion] = nullptr;
+        }
     }
 
 
@@ -329,6 +334,18 @@ makeSubDivision()
     countElementPerFlag();
     allocatePerElements();
     fillElementPerFlag();
+
+    const UInt* b1 = getSubmesh( 0 );
+    const UInt* b2 = getSubmesh( 1 );
+
+    if( b1 != nullptr )
+        std::cout << b1[0] << " ";
+    if( b2 != nullptr )
+        std::cout << b2[0];
+
+    std::cout << std::endl << std::endl;
+
+
 }
 
 template<typename MeshType>
