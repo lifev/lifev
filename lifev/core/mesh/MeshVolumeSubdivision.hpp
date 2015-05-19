@@ -182,7 +182,10 @@ countElementPerFlag()
     UInt oldMarkerID = 0;
     UInt numRegion = 0;
 
-    std::cout << std::endl << "TOTAL NUMBER OF ELEMENTS proc " << M_comm->MyPID()  << ": " << nbElements << std::endl << std::endl;
+    if (M_verbose)
+    {
+        std::cout << std::endl << "TOTAL NUMBER OF ELEMENTS proc " << M_comm->MyPID()  << ": " << nbElements << std::endl << std::endl;
+    }
 
     for (UInt iElement(0); iElement < nbElements; iElement++)
     {
@@ -206,7 +209,10 @@ countElementPerFlag()
 
     }
 
-    printNumElementPerFlag();
+    if( M_verbose )
+    {
+        printNumElementPerFlag();
+    }
 
 }
 

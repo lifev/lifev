@@ -1,0 +1,40 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for the Laplacian example
+#-------------------------------------------------
+
+[finite_element]
+    degree                       = P1
+
+[mesh]
+    verbose                      = false
+    mesh_dir			=  ./
+    mesh_file       	=  2cube1.mesh # noFlags.mesh # 
+    mesh_type       	= .mesh
+	
+[../]
+	
+[prec]
+    prectype                     = Ifpack # Ifpack or ML
+    displayList                  = false
+
+    [./ifpack]
+        overlap                  = 2
+
+        [./fact]
+            ilut_level-of-fill   = 1
+            drop_tolerance       = 1.e-5
+            relax_value          = 0
+
+        [../amesos]
+            solvertype           = Amesos_KLU # Amesos_KLU or Amesos_Umfpack
+
+        [../partitioner]
+            overlap              = 2
+
+        [../schwarz]
+            reordering_type      = none #metis, rcm, none
+            filter_singletons    = true
+
+		[../]
+[../]

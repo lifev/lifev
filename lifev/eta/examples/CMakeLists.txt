@@ -7,4 +7,5 @@ ADD_SUBDIRECTORIES(
   laplacian
   example_biPhasic
   stokes_repeated_mesh
+  mesh_volume_subdivision
 )
