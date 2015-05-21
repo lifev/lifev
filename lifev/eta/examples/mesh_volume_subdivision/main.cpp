@@ -43,7 +43,7 @@
     in this way are saved and can be checked. Then the full matrix is assembled using the standard
     integrate and both results are exported to check the correctness.
     The check is coded for the mesh 4cube1.mesh which correspond to have a [0,1]^3 cube divided in
-    4 regions respectively
+    4 regions respectively. The diffusion coefficients are read from datafile.
  */
 
 #include <Epetra_ConfigDefs.h>
@@ -567,6 +567,7 @@ int main ( int argc, char** argv )
     systemMatrixTotal->spy("matrixClassicFull" + convertNumProc.str() );
     matrixMeshSubFull->spy("matrixMeshSubFull" + convertNumProc.str() );
 
+    solutionLap->zero();
 
     linearSolver.setOperator ( systemMatrixTotal );
     linearSolver.setPreconditioner ( precPtr );

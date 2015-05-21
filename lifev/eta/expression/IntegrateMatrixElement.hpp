@@ -144,14 +144,7 @@ public:
     {
         if ( mat.filled() )
         {
-            if( !M_integrateOnSubdomains )
-            {
-                addToClosed (mat);
-            }
-            else
-            {
-                addToSubdomain(mat);
-            }
+            addToClosed (mat);
         }
         else
         {
@@ -172,14 +165,7 @@ public:
     {
         if (mat->filled() )
         {
-            if( !M_integrateOnSubdomains )
-            {
-                addToClosed (mat);
-            }
-            else
-            {
-                addToSubdomain(mat);
-            }
+            addToClosed (mat);
         }
         else
         {
