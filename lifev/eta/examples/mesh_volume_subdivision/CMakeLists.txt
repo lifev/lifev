@@ -19,6 +19,6 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(
 TRIBITS_COPY_FILES_TO_BINARY_DIR(
   solverparamlist_ETA_laplacian
   CREATE_SYMLINK
-  SOURCE_FILES SolverParamList.xml 2cube1.mesh
+  SOURCE_FILES SolverParamList.xml 4cube1.mesh
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 )

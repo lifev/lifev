@@ -7,19 +7,25 @@
     degree                       = P1
 
 [mesh]
+    mesh_dir					 = ./
+    mesh_file       			 = 4cube1.mesh
+    mesh_type       			 = .mesh
+    overlap                      = 0
     verbose                      = false
-    mesh_dir			=  ./
-    mesh_file       	=  2cube1.mesh # noFlags.mesh # 
-    mesh_type       	= .mesh
-	
-[../]
-	
+
+[../physicalParameters]
+    numSubregions				 = 4
+	mu1 						 = 1.0
+	mu2 						 = 5.0
+	mu3 						 = 15.0
+	mu4 						 = 10.0
+
 [prec]
     prectype                     = Ifpack # Ifpack or ML
     displayList                  = false
 
     [./ifpack]
-        overlap                  = 2
+        overlap                  = 0
 
         [./fact]
             ilut_level-of-fill   = 1

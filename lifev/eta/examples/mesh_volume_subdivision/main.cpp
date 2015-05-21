@@ -31,14 +31,19 @@
     @author Niccolo' Dal Santo <niccolo.dalsanto@epfl.ch>
     @date 19-05-2015
 
-    This code aims shows how to integrate over a portion of the domain indetified by a flag
-    for a laplace problem
+    This code aims aims at showing how to assemble a stiffness matrix as sum of
+    matrices related to subdomains. This is done by a extension of the method integrate
+    that computes the stiffness matrix only over a sbuset of the volumes identified by a
+    specific physical flag. The volume subdivision is done through the class
+    lifev/core/mesh/MeshVolumeSubdivision
 
     The macro TESTMESHSUB allows to check the correctness of the local matrices by comparing
-    them to the ones computed by the usual integrate (simply by defining for every domain a
-    diffusion coefficient that is an indicator function on that subdomain). The matrices computed
-    in these ways are saved and can be checked through matlab (need to uncomment). Then the
-    full matrix is assembled using the standard integrate and both results are exported to check the correctness.
+    them to the ones computed by the usual integrate (simply by defining for every subdomain a
+    diffusion coefficient that is an indicator function on it). The matrices computed
+    in this way are saved and can be checked. Then the full matrix is assembled using the standard
+    integrate and both results are exported to check the correctness.
+    The check is coded for the mesh 4cube1.mesh which correspond to have a [0,1]^3 cube divided in
+    4 regions respectively
  */
 
 #include <Epetra_ConfigDefs.h>
@@ -92,53 +97,56 @@ Real sourceFunction (const Real& /*t*/, const Real& x, const Real& y, const Real
     return 100.;
 }
 
-Real mu1 = 1.;
-Real mu2 = 20.;
+const int BACK   = 101;
+const int FRONT  = 102;
+const int LEFT   = 103;
+const int RIGHT  = 104;
+const int BOTTOM = 105;
+const int TOP    = 106;
 
 #define TESTMESHSUB
 
-#ifdef TESTMESHSUB
-    const int BACK   = 101;
-    const int FRONT  = 102;
-    const int LEFT   = 103;
-    const int RIGHT  = 104;
-    const int BOTTOM = 105;
-    const int TOP    = 106;
 
-    const int firstRegionFlag = 1001;
-    const int secondRegionFlag = 1002;
+Real diffusion4Function1 (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& /*i*/)
+{
+    if( z<0.5 && y < 0.5 ) return 1.0;
 
-    Real diffusionFunction1 (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& /*i*/)
-    {
-        if( z<0.5 ) return 1.0;
+    return 0.;
+}
+Real diffusion4Function2 (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& /*i*/)
+{
+    if( z>0.5 && y < 0.5 ) return 1.0;
 
-        return 0.;
-    }
-    Real diffusionFunction2 (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& /*i*/)
-    {
-        if( z>0.5 ) return 1.0;
+    return 0.;
+}
 
-        return 0.;
-    }
+Real diffusion4Function3 (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& /*i*/)
+{
+    if( z<0.5 && y > 0.5 ) return 1.0;
 
-    Real diffusionFunctionTotal (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& /*i*/)
-    {
-        if( z>=0.5 ) return mu1;
+    return 0.;
+}
+Real diffusion4Function4 (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& /*i*/)
+{
+    if( z>0.5 && y > 0.5 ) return 1.0;
 
-        return mu2;
-    }
+    return 0.;
+}
 
+Real mu1 = 1.0;
+Real mu2 = 1.0;
+Real mu3 = 1.0;
+Real mu4 = 1.0;
 
-#else
-    // Cube's walls identifiers
-    const int BACK   = 1;
-    const int FRONT  = 2;
-    const int LEFT   = 3;
-    const int RIGHT  = 4;
-    const int BOTTOM = 5;
-    const int TOP    = 6;
+Real diffusion4FunctionTotal (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& /*i*/)
+{
+    if( z<0.5 && y < 0.5 ) return mu1;
+    if( z>0.5 && y < 0.5 ) return mu2;
+    if( z<0.5 && y > 0.5 ) return mu3;
 
-#endif
+    return mu4;
+}
+
 
 int main ( int argc, char** argv )
 {
@@ -191,8 +199,6 @@ int main ( int argc, char** argv )
         std::cout << " done" << std::endl;
     }
 
-
-
     // +-----------------------------------------------+
     // |         Building FE space and matrix          |
     // +-----------------------------------------------+
@@ -235,30 +241,36 @@ int main ( int argc, char** argv )
         std::cout << "-- Subdividing the mesh... " << std::flush;
     }
 
+    int numSubregions = dataFile( "physicalParameters/numSubregions", 1 );
+
     typedef LifeV::MeshVolumeSubdivision<RegionMesh<LinearTetra> >          meshSub_Type;
     typedef boost::shared_ptr<meshSub_Type>                                 meshSubPtr_Type;
 
+    // suppose we are running the test with 4cube1.mesh,
+    // so we have 4 subregions identified by the flags 1001,1002,1003,1004
+    Epetra_IntSerialDenseVector regions(numSubregions);
 
-    meshSubPtr_Type meshSub;
-    Epetra_IntSerialDenseVector regions(2);
     regions(0) = 1001;
     regions(1) = 1002;
+    regions(2) = 1003;
+    regions(3) = 1004;
 
-    meshSub.reset( new meshSub_Type( Comm, localMeshPtr, regions, 2 ) );
+    meshSubPtr_Type meshSub;
+    meshSub.reset( new meshSub_Type( Comm, localMeshPtr, regions, numSubregions ) );
 
     meshSub->makeSubDivision();
 
+//    meshSub->printNumElementPerFlag();
 
     if ( verbose )
     {
         std::cout << "-- Assembling the Laplace submatrices... " << std::flush;
     }
 
-    Int numElementsRegion1 = meshSub->getNumElements( 0 );
-    Int numElementsRegion2 = meshSub->getNumElements( 1 );
-
     matrixPtr_Type systemMatrixMeshSub1( new matrix_Type( ETuFESpace->map(), 100 ) );
     matrixPtr_Type systemMatrixMeshSub2( new matrix_Type( ETuFESpace->map(), 100 ) );
+    matrixPtr_Type systemMatrixMeshSub3( new matrix_Type( ETuFESpace->map(), 100 ) );
+    matrixPtr_Type systemMatrixMeshSub4( new matrix_Type( ETuFESpace->map(), 100 ) );
 
     {
         using namespace ExpressionAssembly;
@@ -268,9 +280,7 @@ int main ( int argc, char** argv )
             std::cout << "Building with MeshSub" << std::endl;
         }
 
-        int flag = 0;
-
-        integrate ( elements ( localMeshPtr, firstRegionFlag,
+        integrate ( elements ( localMeshPtr, meshSub->getFlag(0),
                                meshSub->getNumElements( 0 ), meshSub->getSubmesh( 0 ),
                                true ),
                 uFESpace->qr(),
@@ -280,9 +290,7 @@ int main ( int argc, char** argv )
                 )
                 >> systemMatrixMeshSub1;
 
-        flag = 1;
-
-        integrate ( elements ( localMeshPtr, secondRegionFlag,
+        integrate ( elements ( localMeshPtr, meshSub->getFlag(1),
                                meshSub->getNumElements( 1 ), meshSub->getSubmesh( 1 ),
                                true ),
                 uFESpace->qr(),
@@ -292,15 +300,45 @@ int main ( int argc, char** argv )
                 )
                 >> systemMatrixMeshSub2;
 
+        integrate ( elements ( localMeshPtr, meshSub->getFlag(2),
+                               meshSub->getNumElements( 2 ), meshSub->getSubmesh( 2 ),
+                               true ),
+                uFESpace->qr(),
+                ETuFESpace,
+                ETuFESpace,
+                value(1.0) * dot( grad( phi_j ), grad( phi_i ) )
+                )
+                >> systemMatrixMeshSub3;
+
+        integrate ( elements ( localMeshPtr, meshSub->getFlag(3),
+                               meshSub->getNumElements( 3 ), meshSub->getSubmesh( 3 ),
+                               true ),
+                uFESpace->qr(),
+                ETuFESpace,
+                ETuFESpace,
+                value(1.0) * dot( grad( phi_j ), grad( phi_i ) )
+                )
+                >> systemMatrixMeshSub4;
+
     }
 
     systemMatrixMeshSub1->globalAssemble();
     systemMatrixMeshSub2->globalAssemble();
+    systemMatrixMeshSub3->globalAssemble();
+    systemMatrixMeshSub4->globalAssemble();
+
+    // diffusion parameters
+    mu1 = dataFile( "physicalParameters/mu1", 1 );
+    mu2 = dataFile( "physicalParameters/mu2", 1 );
+    mu3 = dataFile( "physicalParameters/mu3", 1 );
+    mu4 = dataFile( "physicalParameters/mu4", 1 );
 
     matrixPtr_Type matrixMeshSubFull( new matrix_Type( ETuFESpace->map(), 100 ) );
 
-    *matrixMeshSubFull += ( *systemMatrixMeshSub1 ) * mu2;
-    *matrixMeshSubFull += ( *systemMatrixMeshSub2 ) * mu1;
+    *matrixMeshSubFull += ( *systemMatrixMeshSub1 ) * mu1;
+    *matrixMeshSubFull += ( *systemMatrixMeshSub2 ) * mu2;
+    *matrixMeshSubFull += ( *systemMatrixMeshSub3 ) * mu3;
+    *matrixMeshSubFull += ( *systemMatrixMeshSub4 ) * mu4;
 
     if (verbose)
     {
@@ -432,21 +470,22 @@ int main ( int argc, char** argv )
 
     exporter.postProcess( 0.0 );
 
-
 #ifdef TESTMESHSUB
-
-    boost::shared_ptr<laplacianFunctor< Real > >  laplacianDiffusionFunctor1 ( new laplacianFunctor< Real >( diffusionFunction1 ) );
-    boost::shared_ptr<laplacianFunctor< Real > >  laplacianDiffusionFunctor2 ( new laplacianFunctor< Real >( diffusionFunction2 ) );
-    boost::shared_ptr<laplacianFunctor< Real > >  laplacianDiffusionFunctorTotal ( new laplacianFunctor< Real >( diffusionFunctionTotal ) );
-
 
     matrixPtr_Type standardSystemMatrix1( new matrix_Type( ETuFESpace->map(), 100 ) );
     matrixPtr_Type standardSystemMatrix2( new matrix_Type( ETuFESpace->map(), 100 ) );
+    matrixPtr_Type standardSystemMatrix3( new matrix_Type( ETuFESpace->map(), 100 ) );
+    matrixPtr_Type standardSystemMatrix4( new matrix_Type( ETuFESpace->map(), 100 ) );
     matrixPtr_Type systemMatrixTotal( new matrix_Type( ETuFESpace->map(), 100 ) );
+
+    boost::shared_ptr<laplacianFunctor< Real > >  laplacianDiffusionFunctor1 ( new laplacianFunctor< Real >( diffusion4Function1 ) );
+    boost::shared_ptr<laplacianFunctor< Real > >  laplacianDiffusionFunctor2 ( new laplacianFunctor< Real >( diffusion4Function2 ) );
+    boost::shared_ptr<laplacianFunctor< Real > >  laplacianDiffusionFunctor3 ( new laplacianFunctor< Real >( diffusion4Function3 ) );
+    boost::shared_ptr<laplacianFunctor< Real > >  laplacianDiffusionFunctor4 ( new laplacianFunctor< Real >( diffusion4Function4 ) );
+    boost::shared_ptr<laplacianFunctor< Real > >  laplacianDiffusionFunctorTotal ( new laplacianFunctor< Real >( diffusion4FunctionTotal ) );
 
     {
         using namespace ExpressionAssembly;
-
         integrate (
                 elements ( localMeshPtr ),
                 uFESpace->qr(),
@@ -470,6 +509,24 @@ int main ( int argc, char** argv )
                 uFESpace->qr(),
                 ETuFESpace,
                 ETuFESpace,
+                eval(laplacianDiffusionFunctor3, X) * dot ( grad ( phi_i ) , grad ( phi_j ) )
+        )
+                >> standardSystemMatrix3;
+
+        integrate (
+                elements ( localMeshPtr ),
+                uFESpace->qr(),
+                ETuFESpace,
+                ETuFESpace,
+                eval(laplacianDiffusionFunctor4, X) * dot ( grad ( phi_i ) , grad ( phi_j ) )
+        )
+            >> standardSystemMatrix4;
+
+        integrate (
+                elements ( localMeshPtr ),
+                uFESpace->qr(),
+                ETuFESpace,
+                ETuFESpace,
                 eval(laplacianDiffusionFunctorTotal, X) * dot ( grad ( phi_i ) , grad ( phi_j ) )
         )
                 >> systemMatrixTotal;
@@ -483,22 +540,33 @@ int main ( int argc, char** argv )
 
     bcManage ( *standardSystemMatrix1, *rhsLap, *uFESpace->mesh(), uFESpace->dof(), bcHandler, uFESpace->feBd(), 1.0, 0.0 );
     bcManage ( *standardSystemMatrix2, *rhsLap, *uFESpace->mesh(), uFESpace->dof(), bcHandler, uFESpace->feBd(), 1.0, 0.0 );
+    bcManage ( *standardSystemMatrix3, *rhsLap, *uFESpace->mesh(), uFESpace->dof(), bcHandler, uFESpace->feBd(), 1.0, 0.0 );
+    bcManage ( *standardSystemMatrix4, *rhsLap, *uFESpace->mesh(), uFESpace->dof(), bcHandler, uFESpace->feBd(), 1.0, 0.0 );
     bcManage ( *systemMatrixTotal, *rhsLap, *uFESpace->mesh(), uFESpace->dof(), bcHandler, uFESpace->feBd(), 1.0, 0.0 );
 
     bcManage ( *systemMatrixMeshSub1, *rhsLap, *uFESpace->mesh(), uFESpace->dof(), bcHandler, uFESpace->feBd(), 1.0, 0.0 );
     bcManage ( *systemMatrixMeshSub2, *rhsLap, *uFESpace->mesh(), uFESpace->dof(), bcHandler, uFESpace->feBd(), 1.0, 0.0 );
+    bcManage ( *systemMatrixMeshSub3, *rhsLap, *uFESpace->mesh(), uFESpace->dof(), bcHandler, uFESpace->feBd(), 1.0, 0.0 );
+    bcManage ( *systemMatrixMeshSub4, *rhsLap, *uFESpace->mesh(), uFESpace->dof(), bcHandler, uFESpace->feBd(), 1.0, 0.0 );
 
     standardSystemMatrix1->globalAssemble();
     standardSystemMatrix2->globalAssemble();
+    standardSystemMatrix3->globalAssemble();
+    standardSystemMatrix4->globalAssemble();
     systemMatrixTotal->globalAssemble();
 
-//    standardSystemMatrix1->spy("matrixClassic1" + convertNumProc.str()  );
-//    standardSystemMatrix2->spy("matrixClassic2" + convertNumProc.str() );
-//    systemMatrixTotal->spy("matrixTotal" + convertNumProc.str() );
-//
-//    systemMatrixMeshSub1->spy("matrixMeshSub1" + convertNumProc.str()) ;
-//    systemMatrixMeshSub2->spy("matrixMeshSub2" + convertNumProc.str() );
-//    matrixMeshSubFull->spy("matrixMeshSubFull" + convertNumProc.str());
+    standardSystemMatrix1->spy("matrixClassic1" + convertNumProc.str()  );
+    standardSystemMatrix2->spy("matrixClassic2" + convertNumProc.str() );
+    standardSystemMatrix3->spy("matrixClassic3" + convertNumProc.str()  );
+    standardSystemMatrix4->spy("matrixClassic4" + convertNumProc.str() );
+    systemMatrixMeshSub1->spy("matrixMeshSub1" + convertNumProc.str()) ;
+    systemMatrixMeshSub2->spy("matrixMeshSub2" + convertNumProc.str() );
+    systemMatrixMeshSub3->spy("matrixMeshSub3" + convertNumProc.str()) ;
+    systemMatrixMeshSub4->spy("matrixMeshSub4" + convertNumProc.str() );
+
+    systemMatrixTotal->spy("matrixClassicFull" + convertNumProc.str() );
+    matrixMeshSubFull->spy("matrixMeshSubFull" + convertNumProc.str() );
+
 
     linearSolver.setOperator ( systemMatrixTotal );
     linearSolver.setPreconditioner ( precPtr );
@@ -507,6 +575,10 @@ int main ( int argc, char** argv )
     exporter.postProcess( 1.0 );
 
 #endif
+
+
+
+
 
     exporter.closeFile();
 

@@ -16,9 +16,6 @@ namespace LifeV
     @author
     Constructs local arrays containing the volumes ID corresponding to the Physical Entities specified by different regionflags
 
-    @warning
-    it supposes the regionFlags are > 0
-
  */
 template<typename MeshType>
 class MeshVolumeSubdivision
@@ -55,6 +52,7 @@ public:
     UInt makeSubDivision();
     const UInt getNumElements( UInt flag ) const;
     const UInt * getSubmesh( UInt flag ) const;
+    const UInt getFlag( UInt flag ) const;
 
 private:
 
@@ -163,14 +161,16 @@ assignRegionFlags( Epetra_IntSerialDenseVector _regionFlags )
     M_readRegionFlags = true;
 }
 
-
-
-
 template<typename MeshType>
 UInt
 MeshVolumeSubdivision<MeshType>::
 countElementPerFlag()
 {
+
+    if( M_verbose )
+    {
+        std::cout << "Counting elements per flag" << std::endl;
+    }
 
     if ( !M_readRegionFlags )
     {
@@ -179,7 +179,7 @@ countElementPerFlag()
     }
 
     UInt nbElements ( M_mesh->numElements() );
-    UInt oldMarkerID = 0;
+    UInt oldMarkerID = M_mesh->element( 0 ).markerID( ) + 1;
     UInt numRegion = 0;
 
     if (M_verbose)
@@ -199,7 +199,7 @@ countElementPerFlag()
                     if( M_regionFlags( iRegion ) == markerID )
                     {
                         numRegion = iRegion;
-                        iRegion = M_numSubregions;
+                        iRegion = M_numSubregions;  // exit from internal loop
                     }
                 }
         }
@@ -222,6 +222,11 @@ UInt
 MeshVolumeSubdivision<MeshType>::
 fillElementPerFlag()
 {
+
+    if( M_verbose )
+    {
+        std::cout << "Filling elements per flag" << std::endl;
+    }
 
     if ( !M_readRegionFlags )
     {
@@ -298,6 +303,11 @@ MeshVolumeSubdivision<MeshType>::
 allocatePerElements()
 {
 
+    if( M_verbose )
+    {
+        std::cout << "Allocating for the elements" << std::endl;
+    }
+
     for( UInt iRegion(0); iRegion < M_numSubregions; iRegion++ )
     {
         if( M_numElementPerFlag( iRegion ) > 0 )
@@ -309,7 +319,6 @@ allocatePerElements()
             M_elements[iRegion] = nullptr;
         }
     }
-
 
 }
 
@@ -332,7 +341,6 @@ printElementPerFlag()
                       << " element " << iElement
                       << " globally in the mpi local mesh " << (M_elements[iRegion])[ iElement ]
                       << std::endl;
-
         }
     }
 
@@ -366,9 +374,13 @@ getSubmesh( UInt flag ) const
     return M_elements[flag];
 }
 
-
-
-
+template<typename MeshType>
+const UInt
+MeshVolumeSubdivision<MeshType>::
+getFlag( UInt flag ) const
+{
+    return M_regionFlags( flag );
+}
 
 
 
