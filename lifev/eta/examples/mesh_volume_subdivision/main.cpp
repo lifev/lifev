@@ -31,9 +31,10 @@
     @author Niccolo' Dal Santo <niccolo.dalsanto@epfl.ch>
     @date 19-05-2015
 
-    This code aims aims at showing how to assemble a stiffness matrix as sum of
-    matrices related to subdomains. This is done by a extension of the method integrate
-    that computes the stiffness matrix only over a sbuset of the volumes identified by a
+    This code aims at showing how to assemble a stiffness matrix as sum of
+    matrices corresponding to the restriction of the bilinear form to subdomains.
+    This is done by a extension of the method integrate
+    that computes the stiffness matrix only over a subset of the volumes identified by a
     specific physical flag. The volume subdivision is done through the class
     lifev/core/mesh/MeshVolumeSubdivision
 
@@ -41,9 +42,9 @@
     them to the ones computed by the usual integrate (simply by defining for every subdomain a
     diffusion coefficient that is an indicator function on it). The matrices computed
     in this way are saved and can be checked. Then the full matrix is assembled using the standard
-    integrate and both results are exported to check the correctness.
+    integrate and both results are exported in paraview.
     The check is coded for the mesh 4cube1.mesh which correspond to have a [0,1]^3 cube divided in
-    4 regions respectively. The diffusion coefficients are read from datafile.
+    4 regions. The diffusion coefficients are read from datafile.
  */
 
 #include <Epetra_ConfigDefs.h>
