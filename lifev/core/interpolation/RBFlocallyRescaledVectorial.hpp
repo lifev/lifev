@@ -61,8 +61,8 @@ public:
     typedef MapEpetra                                                             map_Type;
     typedef boost::shared_ptr<MapEpetra>                                          mapPtr_Type;
 
-    typedef GhostHandler<mesh_Type>                                               neighbors_Type;
-    typedef boost::shared_ptr<neighbors_Type>                                     neighborsPtr_Type;
+    typedef GhostHandler<mesh_Type>                                               neighboring_Type;
+    typedef boost::shared_ptr<neighboring_Type>                                   neighboringPtr_Type;
 
     typedef LifeV::Preconditioner                                                 basePrec_Type;
     typedef boost::shared_ptr<basePrec_Type>                                      basePrecPtr_Type;
@@ -141,7 +141,7 @@ private:
     vectorPtr_Type      M_rbf_one;
     mapPtr_Type         M_interpolationOperatorMap;
     mapPtr_Type         M_projectionOperatorMap;
-    neighborsPtr_Type   M_neighbors;
+    neighboringPtr_Type M_neighbors;
     vectorPtr_Type      M_unknownField_rbf;
 
     matrixPtr_Type      M_interpolationOperatorVecMap;
@@ -149,6 +149,7 @@ private:
 
     vectorPtr_Type      M_solOnGamma;
     mapPtr_Type         M_gammaMapUnknownVectorial;
+    UInt                M_links;
 
 };
 
@@ -177,6 +178,7 @@ void RBFlocallyRescaledVectorial<mesh_Type>::setupRBFData (vectorPtr_Type KnownF
     M_unknownField = UnknownField;
     M_datafile     = datafile;
     M_belosList    = belosList;
+    M_links = M_datafile("interpolation/n_links",1);
 }
 
 template <typename Mesh>
@@ -195,7 +197,7 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
 	this->identifyNodes (M_localMeshKnown, M_GIdsKnownMesh, M_knownField);
 
 	// Object needed to find neighbors by mesh connectivity
-	M_neighbors.reset ( new neighbors_Type ( M_fullMeshKnown, M_localMeshKnown, M_knownField->mapPtr(), M_knownField->mapPtr()->commPtr() ) );
+	M_neighbors.reset ( new neighboring_Type ( M_fullMeshKnown, M_localMeshKnown, M_knownField->mapPtr(), M_knownField->mapPtr()->commPtr() ) );
     if (M_flags[0] == -1)
     {
         M_neighbors->setUpNeighbors ();
@@ -218,7 +220,12 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
     for (boost::unordered_set<ID>::iterator it = M_GIdsKnownMesh.begin(); it != M_GIdsKnownMesh.end(); ++it)
     {
         GlobalID[k] = *it;
-        MatrixGraph[k] = M_neighbors->pointPointNeighborsList() [GlobalID[k]];
+
+        neighbors_Type Neighbors;
+        Neighbors = M_neighbors->circleNeighbors ( *it, M_links );
+        Neighbors.insert ( *it );
+        MatrixGraph[k] = Neighbors;
+
         MatrixGraph[k].insert (GlobalID[k]);
         RBF_radius[k] = computeRBFradius ( M_fullMeshKnown, M_fullMeshKnown, MatrixGraph[k], GlobalID[k]);
         ElementsPerRow[k] = MatrixGraph[k].size();
