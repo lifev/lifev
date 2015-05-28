@@ -5,7 +5,7 @@ SET(TEX_FILES
 )
 
 SET(FILES_lifev-manual
-  lifev-manual.tex lifev-install.tex lifev-examples.tex cavity.tex navierstokes.tex fsi.tex BCCond.fig  BCHandler.fig  BasElSha.fig  Fem_nodes.fig  mixed_pattern.fig  theFE.fig BCCond.eps BasElSha.eps NSCode_mesh_types.eps theFE.eps BCHandler.eps Fem_nodes.eps mixed_pattern.eps BCCond.pdf BasElSha.pdf NSCode_mesh_types.pdf theFE.pdf BCHandler.pdf Fem_nodes.pdf mixed_pattern.pdf cavityFigure.pdf_t cavityFigure.pdf ALEmapping.pdf
+  lifev-manual.tex lifev-install.tex lifev-examples.tex laplacian.tex cavity.tex navierstokes.tex fsi.tex BCCond.fig  BCHandler.fig  BasElSha.fig  Fem_nodes.fig  mixed_pattern.fig  theFE.fig BCCond.eps BasElSha.eps NSCode_mesh_types.eps theFE.eps BCHandler.eps Fem_nodes.eps mixed_pattern.eps BCCond.pdf BasElSha.pdf NSCode_mesh_types.pdf theFE.pdf BCHandler.pdf Fem_nodes.pdf mixed_pattern.pdf cavityFigure.pdf_t cavityFigure.pdf ALEmapping.pdf
 )
 
 SET(FILES_lifev-dev

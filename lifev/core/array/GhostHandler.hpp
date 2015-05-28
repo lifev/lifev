@@ -92,6 +92,7 @@ public:
     typedef std::vector<idListPtr_Type> vertexPartition_Type;
     typedef boost::shared_ptr<vertexPartition_Type> vertexPartitionPtr_Type;
     typedef std::vector<markerID_Type> markerIDList_Type;
+    typedef std::vector<int> markerIDListSigned_Type;
 
     //@}
 
@@ -222,7 +223,7 @@ public:
     /*!
      * @param flags. The list of MarkerIDs to restrict to.
      */
-    void createPointPointNeighborsList (markerIDList_Type const& flags);
+    void createPointPointNeighborsList (markerIDListSigned_Type const& flags);
 
     //! Create neighbors to a given point, with a specified number of generations
     /*!
@@ -647,7 +648,7 @@ void GhostHandler<MeshType>::createPointPointNeighborsList()
 namespace
 {
 
-inline bool isInside ( markerID_Type const& pointMarker, std::vector<markerID_Type> const& markerIDList )
+inline bool isInside ( markerID_Type const& pointMarker, std::vector<int> const& markerIDList )
 {
     for ( UInt i = 0; i < markerIDList.size(); ++i)
         if ( pointMarker == markerIDList[i] )
@@ -660,7 +661,7 @@ inline bool isInside ( markerID_Type const& pointMarker, std::vector<markerID_Ty
 }
 
 template <typename MeshType>
-void GhostHandler<MeshType>::createPointPointNeighborsList (markerIDList_Type const& flags)
+void GhostHandler<MeshType>::createPointPointNeighborsList (markerIDListSigned_Type const& flags)
 {
     M_pointPointNeighborsList.resize ( M_fullMesh->numGlobalPoints() );
     // generate point neighbors by watching edges
@@ -865,7 +866,7 @@ typename GhostHandler<MeshType>::map_Type& GhostHandler<MeshType>::ghostMapOnPoi
     std::vector<Int> myGlobalElements ( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
 
     // generate map
-    map_Type::map_ptrtype repeatedMap ( new Epetra_Map ( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
+    map_Type::mapPtr_Type repeatedMap ( new Epetra_Map ( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap ( repeatedMap, Repeated );
 
     return *M_ghostMapOnPoints;
@@ -936,7 +937,7 @@ typename GhostHandler<MeshType>::map_Type& GhostHandler<MeshType>::ghostMapOnPoi
     std::vector<Int> myGlobalElements ( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
 
     // generate map
-    map_Type::map_ptrtype repeatedMap ( new Epetra_Map ( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
+    map_Type::mapPtr_Type repeatedMap ( new Epetra_Map ( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap ( repeatedMap, Repeated );
 
     return *M_ghostMapOnPoints;
@@ -1031,7 +1032,7 @@ typename GhostHandler<MeshType>::map_Type& GhostHandler<MeshType>::ghostMapOnEdg
 
         mapData.repeated.assign ( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
 
-        map_Type::map_ptrtype repeatedMap ( new Epetra_Map ( -1,
+        map_Type::mapPtr_Type repeatedMap ( new Epetra_Map ( -1,
                                                              mapData.repeated.size(),
                                                              &mapData.repeated[0],
                                                              0,
@@ -1089,7 +1090,7 @@ typename GhostHandler<MeshType>::map_Type& GhostHandler<MeshType>::ghostMapOnEle
     std::vector<Int> myGlobalElements ( map.begin(), map.end() );
 
     // generate map
-    map_Type::map_ptrtype repeatedMap ( new Epetra_Map ( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
+    map_Type::mapPtr_Type repeatedMap ( new Epetra_Map ( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap ( repeatedMap, Repeated );
 
     return *M_ghostMapOnElementsFV;
@@ -1182,7 +1183,7 @@ typename GhostHandler<MeshType>::map_Type& GhostHandler<MeshType>::ghostMapOnEle
     std::vector<Int> myGlobalElements ( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
 
     // generate map
-    map_Type::map_ptrtype repeatedMap ( new Epetra_Map ( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
+    map_Type::mapPtr_Type repeatedMap ( new Epetra_Map ( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap ( repeatedMap, Repeated );
 
     return *M_ghostMapOnElementsFE;

@@ -1,0 +1,56 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Davide Forti
+#           Date: 02-21-2013
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### DATA FILE #####################################################################################
+###################################################################################################
+
+[fine]
+    [./space_discretization]
+       	mesh_dir                 = ./
+       	mesh_file                = fitta.mesh
+       	mesh_type                = .mesh
+
+[coarse]
+    [./space_discretization]
+       	mesh_dir                 = ./
+       	mesh_file                = lasca.mesh
+       	mesh_type                = .mesh
+
+[interpolation]
+    interpolation_Type           = RBFlocallyRescaledVectorial # RBFlocallyRescaledVectorial, RBFrescaledVectorial, RBFvectorial, RBFhtpVectorial
+    basis 			 = TPS                         # BW, TPS, IMQ to be used only when using RBFvectorial
+
+[prec]
+    prectype                     = Ifpack # Ifpack or ML
+    displayList                  = false
+
+    [./ifpack]
+        overlap                  = 2
+
+        [./fact]
+            ilut_level-of-fill   = 1
+            drop_tolerance       = 0.0
+            relax_value          = 0
+
+        [../amesos]
+            solvertype           = Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+
+        [../partitioner]
+            overlap              = 2
+
+        [../schwarz]
+            reordering_type      = none #metis, rcm, none
+            filter_singletons    = true
+
+		[../]
+	[../]
+
+

@@ -105,6 +105,8 @@ int main (int argc, char** argv)
 
     GetPot datafile ( "data" );
     string dirname = datafile ( "mesh_dir", "." ); //"../data/mesh/mesh++/";
+    if (*dirname.rbegin() != '/');
+        dirname += "/";
     string fname = dirname + datafile ( "mesh_file", "cube_47785.m++" ); //dirname+"cube_47785.m++";
     string outfile = "testBuilders.dat";
     ofstream ofile (outfile.c_str() );

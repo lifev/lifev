@@ -42,15 +42,15 @@
 #define LIFEV_MAKE_VERSION( a,b,c ) (((a) << 16) | ((b) << 8) | (c))
 
 #if !defined(LIFEV_VERSION_MAJOR)
-#define LIFEV_VERSION_MAJOR 1
+#define LIFEV_VERSION_MAJOR 3
 #endif
 
 #if !defined(LIFEV_VERSION_MINOR)
-#define LIFEV_VERSION_MINOR 3
+#define LIFEV_VERSION_MINOR 10
 #endif
 
 #if !defined(LIFEV_VERSION_MICRO)
-#define LIFEV_VERSION_MICRO 1
+#define LIFEV_VERSION_MICRO 0
 #endif
 
 #if !defined(LIFEV_VERSION)

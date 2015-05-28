@@ -115,6 +115,10 @@ ADD_SUBDIRECTORY(linear_algebra)
 SET(HEADERS ${HEADERS} ${linear_algebra_HEADERS})
 SET(SOURCES ${SOURCES} ${linear_algebra_SOURCES})
 
+ADD_SUBDIRECTORY(interpolation)
+SET(HEADERS ${HEADERS} ${interpolation_HEADERS})
+SET(SOURCES ${SOURCES} ${interpolation_SOURCES})
+
 ADD_SUBDIRECTORY(mesh)
 SET(HEADERS ${HEADERS} ${mesh_HEADERS})
 SET(SOURCES ${SOURCES} ${mesh_SOURCES})

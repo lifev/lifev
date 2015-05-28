@@ -44,6 +44,7 @@
 #include <lifev/eta/fem/QRAdapterBase.hpp>
 
 #include <lifev/eta/expression/ExpressionToEvaluation.hpp>
+#include <lifev/eta/expression/EvaluationPhiI.hpp>
 
 #include <lifev/eta/array/ETVectorElemental.hpp>
 

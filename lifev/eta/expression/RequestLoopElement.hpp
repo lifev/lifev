@@ -73,11 +73,23 @@ public:
     //@{
 
     //! Simple constructor with a shared_ptr on the mesh
-    RequestLoopElement (const boost::shared_ptr<MeshType>& mesh) : M_mesh (mesh) {}
+    RequestLoopElement ( const boost::shared_ptr<MeshType>& mesh, const UInt regionFlag = 0,
+                         const UInt numVolumes = 0, const UInt * volumeElements = nullptr,
+                         const bool integrateOnSubdomains = false )
+        : M_mesh ( mesh ), M_regionFlag ( regionFlag ), M_volumeElements( volumeElements ), M_numVolumes( numVolumes ),
+          M_integrateOnSubdomains( integrateOnSubdomains )
+        { }
 
     //! Copy constructor
-    RequestLoopElement (const RequestLoopElement& loop) : M_mesh (loop.M_mesh) {}
+    RequestLoopElement (const RequestLoopElement& loop)
+        : M_mesh ( loop.M_mesh ), M_regionFlag ( loop.M_regionFlag ), M_numVolumes( loop.M_numVolumes ),
+          M_volumeElements( loop.M_volumeElements ), M_integrateOnSubdomains( loop.M_integrateOnSubdomains )
+          { }
 
+    ~RequestLoopElement()
+    {
+        M_volumeElements = nullptr;
+    }
     //@}
 
 
@@ -90,10 +102,31 @@ public:
         return M_mesh;
     }
 
+    //! Getter for the flag of the region of integration
+    const UInt regionFlag() const
+    {
+        return M_regionFlag;
+    }
+
+    const UInt numVolumes() const
+    {
+        return M_numVolumes;
+    }
+
+    //! Getter for the flag of the region of integration
+    const UInt * getElementsRegionFlag() const
+    {
+        return M_volumeElements;
+    }
+
+    const bool getIfSubDomain() const
+    {
+        return M_integrateOnSubdomains;
+    }
+
     //@}
 
 private:
-
 
     //! @name Private Methods
     //@{
@@ -105,6 +138,13 @@ private:
 
     // Pointer on the mesh
     boost::shared_ptr<MeshType> M_mesh;
+
+    // Data for integration on one subRegion, flag and elements on which iterate
+    const UInt                  M_regionFlag;
+    const UInt                  M_numVolumes;
+    const UInt *                M_volumeElements;
+    const bool                  M_integrateOnSubdomains;
+
 };
 
 
@@ -126,9 +166,11 @@ private:
  */
 template< typename MeshType >
 RequestLoopElement<MeshType>
-elements (const boost::shared_ptr<MeshType>& mesh)
+elements (const boost::shared_ptr<MeshType>& mesh, const UInt flag = 0, const UInt numVolumes = 0,
+          const UInt * volumeElements = nullptr, const bool subDomain = false )
 {
-    return RequestLoopElement<MeshType> (mesh);
+
+    return RequestLoopElement<MeshType> ( mesh, flag, numVolumes, volumeElements, subDomain );
 }
 
 

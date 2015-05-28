@@ -91,7 +91,7 @@ int main ( int argc, char* argv[] )
     GhostHandler<mesh_Type> ghostObj ( fullMeshPtr, localMeshPtr, FESpaceP1->mapPtr(), Comm );
 
     // Creating node-node map over the interface
-    std::vector<markerID_Type> interfaceMarkers (2);
+    std::vector<int> interfaceMarkers (2);
     interfaceMarkers[0] = 20;
     interfaceMarkers[1] = 1;
     ghostObj.createPointPointNeighborsList ( interfaceMarkers );

@@ -1,0 +1,26 @@
+
+DOFInterface* files should be moved to FSI module. 
+In order to do this we need to factor out specific 
+routines in exporterHDF5 and maybe some other files.
+One option is to create an exporterHDF5_FSI that
+derives from exporterHDF5.
+
+Activation of BOOST spirit should depend on standard 
+defined cmake variables.
+
+(I've made Boost spirit enabled by default. It can be disabled
+by the user: -D LifeV_Core_ENABLE_SPIRIT_PARSER:BOOL=OFF
+or if the detected Boost version is too old. --Radu)
+
+Do we want to move to the pedantic compilation?
+Right now, it is activated by default, to remove it specify:
+ -D LifeV_ENABLE_STRONG_CXX_COMPILE_WARNINGS:BOOL=OFF \
+
+Right now, FindTPLTrilinos.cmake will not remove duplicate includes and libraries.
+there is a limitation in TrilinosConfig.cmake that does not
+allow to get single TPL information. TriBITS should be
+improved to make this possible (eg. generate TrilinosTPL.cmake
+with <TPL>_INCLUDE_DIR and <TPL>_LIBRARY_DIR).
+
+Understand why in each module/CMakeLists.txt we need the line
+SET(${PACKAGE_NAME}_VERSION "3.0")

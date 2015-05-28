@@ -169,9 +169,9 @@ public:
     //! @name Public Types
     //@{
 
-    typedef MapEpetra map_type;
+    typedef MapEpetra map_Type;
 
-    typedef FESpace<mesh_type, map_type> fespace_type;
+    typedef FESpace<mesh_type, map_Type> fespace_type;
     typedef boost::shared_ptr<fespace_type>              fespace_ptrType;
 
     typedef typename solver_type::vector_type vector_type;
@@ -238,7 +238,7 @@ public:
     //@{
 
     //! Return the map of the unknown FE space
-    inline map_type map() const
+    inline map_Type map() const
     {
         return M_fespace->map();
     }
