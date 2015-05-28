@@ -4,7 +4,7 @@
         <Parameter name="Max Iterations For Reuse" type="int" value="80"/>
         <Parameter name="Quit On Failure" type="bool" value="false"/>
         <Parameter name="Silent" type="bool" value="false"/>
-	<Parameter name="Solver Type" type="string" value="Belos"/>
+	    <Parameter name="Solver Type" type="string" value="Belos"/>
         <Parameter name="Block Size" type="int" value="2"/>
 	
 	<!-- Operator specific parameters (Belos) -->
@@ -15,7 +15,7 @@
 		<!-- Trilinos parameters -->
 		<ParameterList name="Trilinos: Belos List">
     		<Parameter name="Flexible Gmres" type="bool" value="false"/>
-	    	<Parameter name="Convergence Tolerance" type="double" value="1e-10"/>
+	    	<Parameter name="Convergence Tolerance" type="double" value="1e-6"/>
     		<Parameter name="Maximum Iterations" type="int" value="1000"/>
 	    	<Parameter name="Output Frequency" type="int" value="1"/>
     		<Parameter name="Block Size" type="int" value="1"/>

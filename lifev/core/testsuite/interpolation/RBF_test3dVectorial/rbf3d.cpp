@@ -29,7 +29,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 @brief
 
 @author Davide Forti <davide.forti@epfl.ch>
-@date 02-21-2013
+@date 05-28-2015
 */
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -50,15 +50,10 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #include <lifev/core/interpolation/RBFInterpolation.hpp>
-#include <lifev/core/interpolation/RBFhtpVectorial.hpp>
 #include <lifev/core/interpolation/RBFlocallyRescaledVectorial.hpp>
-#include <lifev/core/interpolation/RBFrescaledVectorial.hpp>
-//#include <lifev/core/interpolation/RBFvectorial.hpp>
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
 #include <Teuchos_RCP.hpp>
-
-#define PI 3.14159265
 
 //Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"
@@ -81,6 +76,26 @@ double fz (double x, double y, double z)
     return sin (z) + x + y ;
 }
 
+Real exact_sol (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
+{
+	switch (i)
+	{
+	case 0:
+		return sin (x) + y + z;
+		break;
+	case 1:
+		return sin (y) + x + z;
+		break;
+	case 2:
+		return sin (z) + x + y ;
+		break;
+	default:
+		ERROR_MSG ("This entry is not allowed: ud_functions.hpp");
+		return 0.;
+		break;
+	}
+}
+
 int main (int argc, char** argv )
 {
     typedef VectorEpetra                          vector_Type;
@@ -89,6 +104,7 @@ int main (int argc, char** argv )
     typedef boost::shared_ptr< mesh_Type >        meshPtr_Type;
     typedef RBFInterpolation<mesh_Type>           interpolation_Type;
     typedef boost::shared_ptr<interpolation_Type> interpolationPtr_Type;
+    typedef FESpace< RegionMesh<LinearTetra>, MapEpetra > FESpace_Type;
 
     boost::shared_ptr<Epetra_Comm> Comm;
 #ifdef HAVE_MPI
@@ -102,6 +118,7 @@ int main (int argc, char** argv )
     GetPot command_line (argc, argv);
     GetPot dataFile ( command_line.follow ("data_rbf3d", 2, "-f", "--file" ) );
 
+    // BELOS XML file
     Teuchos::RCP< Teuchos::ParameterList > belosList = Teuchos::rcp ( new Teuchos::ParameterList );
     belosList = Teuchos::getParametersFromXmlFile ( "SolverParamList_rbf3d.xml" );
 
@@ -119,13 +136,11 @@ int main (int argc, char** argv )
     // PARTITIONING MESHES
     MeshPartitioner<mesh_Type>   Solid_mesh_part;
     boost::shared_ptr<mesh_Type> Solid_localMesh;
-    Solid_mesh_part.setPartitionOverlap (2);
     Solid_mesh_part.doPartition (Solid_mesh_ptr, Comm);
     Solid_localMesh = Solid_mesh_part.meshPartition();
 
     MeshPartitioner<mesh_Type>   Fluid_mesh_part;
     boost::shared_ptr<mesh_Type> Fluid_localMesh;
-    Fluid_mesh_part.setPartitionOverlap (2);
     Fluid_mesh_part.doPartition (Fluid_mesh_ptr, Comm);
     Fluid_localMesh = Fluid_mesh_part.meshPartition();
 
@@ -134,30 +149,8 @@ int main (int argc, char** argv )
     vectorPtr_Type Solid_vector (new vector_Type (Solid_fieldFESpace->map(), Unique) );
     vectorPtr_Type Solid_vector_one (new vector_Type (Solid_fieldFESpace->map(), Unique) );
 
-    for ( UInt j = 0; j < 3; ++j)
-        for ( UInt i = 0; i < Solid_vector->epetraVector().MyLength(); ++i )
-            if( Solid_vector->blockMap().GID (i) < Solid_mesh_ptr->pointList.size())
-                if (Solid_vector->blockMap().LID (static_cast<EpetraInt_Type> ( Solid_vector->blockMap().GID(i) + Solid_vector->size()/3*j ) ) != -1)
-                {
-                    switch (j)
-                    {
-                    case(0):
-                        (*Solid_vector) [Solid_vector->blockMap().GID (i) + Solid_vector->size()/3*j ] = fx ( Solid_mesh_ptr->point (Solid_vector->blockMap().GID (i) ).x(),
-                                                                                                              Solid_mesh_ptr->point (Solid_vector->blockMap().GID (i) ).y(),
-                                                                                                              Solid_mesh_ptr->point (Solid_vector->blockMap().GID (i) ).z() );
-                        break;
-                    case(1):
-                        (*Solid_vector) [Solid_vector->blockMap().GID (i) + Solid_vector->size()/3*j ] = fy ( Solid_mesh_ptr->point (Solid_vector->blockMap().GID (i) ).x(),
-                                                                                                              Solid_mesh_ptr->point (Solid_vector->blockMap().GID (i) ).y(),
-                                                                                                              Solid_mesh_ptr->point (Solid_vector->blockMap().GID (i) ).z() );
-                        break;
-                    case(2):
-                        (*Solid_vector) [Solid_vector->blockMap().GID (i) + Solid_vector->size()/3*j ] = fz ( Solid_mesh_ptr->point (Solid_vector->blockMap().GID (i) ).x(),
-                                                                                                              Solid_mesh_ptr->point (Solid_vector->blockMap().GID (i) ).y(),
-                                                                                                              Solid_mesh_ptr->point (Solid_vector->blockMap().GID (i) ).z() );
-                        break;
-                    }
-                }
+    // GET THE EXACT SOLUTION THAT WILL BE INTERPOLATED
+    Solid_fieldFESpace->interpolate ( static_cast<FESpace_Type::function_Type> ( exact_sol ), *Solid_vector, 0.0 );
 
     // EXPORTING THE DEFINED FIELD
     ExporterHDF5<mesh_Type> Solid_exporter (dataFile, Solid_localMesh, "Input field", Comm->MyPID() );
@@ -167,32 +160,36 @@ int main (int argc, char** argv )
     Solid_exporter.postProcess (0);
     Solid_exporter.closeFile();
 
+    // CREATING A FE-SPACE FOR THE GRID ON WHICH WE WANT TO INTERPOLATE THE DATA. INITIALIZING THE SOLUTION VECTOR.
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > Fluid_fieldFESpace (new FESpace<mesh_Type, MapEpetra> (Fluid_localMesh, "P1", 3, Comm) );
     vectorPtr_Type Fluid_solution (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
 
+    // NUMBER OF FLAGS CONSIDERED: THE DOFS WHOSE FLAG IS 1 AND 20 ARE TAKEN INTO ACCOUNT
+    // NOTE: from mesh to mesh the vector of flag has to contain one element with value -1
     int nFlags = 2;
     std::vector<int> flags (nFlags);
     flags[0] = 1;
     flags[1] = 20;
 
+    // INITIALIZE THE INTERPOLANT
     interpolationPtr_Type RBFinterpolant;
 
+    // READING FROM DATAFILE WHICH INTERPOLANT HAS TO BE USED
     RBFinterpolant.reset ( interpolation_Type::InterpolationFactory::instance().createObject (dataFile("interpolation/interpolation_Type","none")));
 
+    // SET UP FOR THE INTERPOLANT: GLOBAL AND LOCAL MESHES PLUS THE VECTOR OF FLAGS
     RBFinterpolant->setup(Solid_mesh_ptr, Solid_localMesh, Fluid_mesh_ptr, Fluid_localMesh, flags);
 
-    if(dataFile("interpolation/interpolation_Type","none")=="RBFvectorial")
-        RBFinterpolant->setBasis(dataFile("interpolation/basis","none"));
-
-    if(dataFile("interpolation/interpolation_Type","none")!="RBFlocallyRescaledVectorial")
-        RBFinterpolant->setRadius((double) MeshUtility::MeshStatistics::computeSize (*Solid_mesh_ptr).maxH);
-
+    // PASSING THE VECTOR WITH THE DATA, THE ONE THAT WILL STORE THE SOLUTION, THE DATAFILE AND THE BELOS LIST
     RBFinterpolant->setupRBFData (Solid_vector, Fluid_solution, dataFile, belosList);
 
+    // CREATING THE RBF OPERATORS
     RBFinterpolant->buildOperators();
 
+    // PERFORMING INTERPOLATION
     RBFinterpolant->interpolate();
 
+    // GET THE SOLUTION
     RBFinterpolant->solution (Fluid_solution);
 
     // COMPUTING THE ERROR
@@ -200,6 +197,8 @@ int main (int argc, char** argv )
     vectorPtr_Type myError (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
     vectorPtr_Type rbfError (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
 
+    // NOTE: HERE WE DO NOT USE THE INTERPOLATE METHOD OF THE FESPACE CLASS SINCE WE WANT THAT THE EXACT SOLUTION
+    // IS DEFINED JUST AT THE INTERFACE BETWEEN THE MESHES
     for ( UInt j = 0; j < 3; ++j)
         for ( UInt i = 0; i < Fluid_exact_solution->epetraVector().MyLength(); ++i )
             if ( Fluid_exact_solution->blockMap().GID (i) < Fluid_mesh_ptr->pointList.size())
@@ -222,6 +221,7 @@ int main (int argc, char** argv )
                         (*myError) [myError->blockMap().GID (i) + Fluid_exact_solution->size()/3*j ] = (*Fluid_exact_solution) [Fluid_exact_solution->blockMap().GID (i) + Fluid_exact_solution->size()/3*j ] - (*Fluid_solution) [Fluid_solution->blockMap().GID (i) + Fluid_exact_solution->size()/3*j ];
                     }
 
+    // COMPUTING SOME ERRORS
     Real err_Inf = myError->normInf();
     Real err_L2  = myError->norm2()/Solid_mesh_ptr->numVertices();
 
