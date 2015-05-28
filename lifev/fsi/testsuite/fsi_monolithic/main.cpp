@@ -145,10 +145,10 @@ public:
     {
         using namespace LifeV;
 
-        FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct ( "linearVenantKirchhoff", &FSIOperator::createVenantKirchhoffLinear );
-        FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct ( "exponential", &FSIOperator::createExponentialMaterialNonLinear );
-        FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct ( "neoHookean", &FSIOperator::createNeoHookeanMaterialNonLinear );
-        FSIOperator::solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct ( "nonLinearVenantKirchhoff", &FSIOperator::createVenantKirchhoffNonLinear );
+        FSIOperator::solid_Type::material_Type::isotropicLaw_Type::StructureIsotropicMaterialFactory::instance().registerProduct ( "linearVenantKirchhoff", &FSIOperator::createVenantKirchhoffLinear );
+        FSIOperator::solid_Type::material_Type::isotropicLaw_Type::StructureIsotropicMaterialFactory::instance().registerProduct ( "exponential", &FSIOperator::createExponentialMaterialNonLinear );
+        FSIOperator::solid_Type::material_Type::isotropicLaw_Type::StructureIsotropicMaterialFactory::instance().registerProduct ( "neoHookean", &FSIOperator::createNeoHookeanMaterialNonLinear );
+        FSIOperator::solid_Type::material_Type::isotropicLaw_Type::StructureIsotropicMaterialFactory::instance().registerProduct ( "nonLinearVenantKirchhoff", &FSIOperator::createVenantKirchhoffNonLinear );
 
         std::cout << "register MonolithicGE : " << FSIMonolithicGE::S_register << std::endl;
         std::cout << "register MonolithicGI : " << FSIMonolithicGI::S_register << std::endl;
@@ -239,7 +239,7 @@ public:
         // load using ensight/hdf5
         M_saveEvery = data_file ("exporter/saveEvery", 1);
 
-        M_fsi->initialize();
+        M_fsi->initializeMonolithicOperator();
 
         M_velAndPressure.reset ( new vector_Type ( M_fsi->FSIOper()->fluid().getMap(), M_exporterFluid->mapType() ) );
 

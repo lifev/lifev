@@ -150,8 +150,8 @@ AssemblyPolicyNavierStokesSemiImplicit< mesh_Type >::assembleSystem ( matrixPtr_
 
     if ( preconditioner->preconditionerType() == "PCD" )
     {
-    	PreconditionerPCD* pcdPtr = dynamic_cast<PreconditionerPCD*> ( preconditioner.get() );
-    	pcdPtr->updateBeta ( beta );
+        PreconditionerPCD* pcdPtr = dynamic_cast<PreconditionerPCD*> ( preconditioner.get() );
+        pcdPtr->updateBeta ( beta );
     }
 }
 

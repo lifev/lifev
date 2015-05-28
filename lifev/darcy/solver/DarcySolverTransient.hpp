@@ -609,7 +609,7 @@ setMass ( const scalarFctPtr_Type& massFct )
         const Real massValue = M_massFct->eval ( iElem, barycenter );
 
         // Compute the mass matrix for the primal variable.
-        mass ( massValue, localMassMatrix, this->M_primalField->getFESpace().fe(), 0, 0);
+        AssemblyElemental::mass ( massValue, localMassMatrix, this->M_primalField->getFESpace().fe(), 0, 0);
 
         // Save the computed mass matrix.
         M_localMassMatrix.push_back ( localMassMatrix );

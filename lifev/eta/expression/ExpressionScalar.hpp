@@ -120,6 +120,86 @@ value (const Real& myValue)
 }
 
 
+//! class ExpressionScalar  Class representing a scalar constant in an expression.
+/*!
+  @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+*/
+
+template<typename VectorType>
+class ExpressionExtractScalar : public ExpressionBase<ExpressionExtractScalar<VectorType> >
+{
+public:
+
+    //! @name Public Types
+    //@{
+
+    typedef ExpressionBase<ExpressionExtractScalar<VectorType> > base_Type;
+    typedef boost::shared_ptr<VectorType>                        containerPtr_Type;
+
+    //@}
+
+
+    //! @name Constructors & Destructor
+    //@{
+
+    //! Constructor using the value of the scalar
+    ExpressionExtractScalar (const VectorType& myVector)
+        : base_Type(), M_vector (new VectorType (myVector) ) {}
+
+    //! Copy constructor
+    ExpressionExtractScalar (const ExpressionExtractScalar<VectorType>& expr)
+        : base_Type(), M_vector ( expr.vector() ) {}
+
+    //! Destructor
+    ~ExpressionExtractScalar() {}
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
+    //! Display method
+    static void display (std::ostream& out = std::cout);
+
+    //@}
+
+
+    //! @name Get Methods
+    //@{
+
+    //! Getter for the value of the scalar
+    const containerPtr_Type vector() const
+    {
+        return M_vector;
+    } ;
+
+    //@}
+
+private:
+
+    //! @name Private Methods
+    //@{
+
+    //! No empty constructor
+    ExpressionExtractScalar();
+
+    //@}
+
+    containerPtr_Type M_vector;
+};
+
+//! Simple function to be used in the construction of an expression
+/*!
+  @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+*/
+template<typename VectorType>
+inline ExpressionExtractScalar<VectorType>
+parameter (const VectorType& myVector)
+{
+    return ExpressionExtractScalar<VectorType> ( myVector );
+}
+
 } // Namespace ExpressionAssembly
 
 } // Namespace LifeV

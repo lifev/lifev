@@ -1,11 +1,14 @@
 #cmakedefine LIFEV_HAS_CORE
+#cmakedefine LIFEV_HAS_ETA
 #cmakedefine LIFEV_HAS_BCINTERFACE
 #cmakedefine LIFEV_HAS_ONEDFSI
 #cmakedefine LIFEV_HAS_ZERODIMENSIONAL
 #cmakedefine LIFEV_HAS_LEVELSET
 #cmakedefine LIFEV_HAS_DARCY
 #cmakedefine LIFEV_HAS_NAVIERSTOKES
+#cmakedefine LIFEV_HAS_ETA
 #cmakedefine LIFEV_HAS_STRUCTURE
+#cmakedefine LIFEV_HAS_ELECTROPHYSIOLOGY
 #cmakedefine LIFEV_HAS_HEART
 #cmakedefine LIFEV_HAS_FSI
 #cmakedefine LIFEV_HAS_MULTISCALE

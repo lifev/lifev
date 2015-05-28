@@ -46,9 +46,9 @@
 
 #define OUTLET 3
 #define INLET 2
-#define FLUIDINTERFACE 1
-#define SOLIDINTERFACE 1
-#define OUTERWALL 10
+#define FLUIDINTERFACE 100
+#define SOLIDINTERFACE 100
+#define OUTERWALL 1000
 #define RING  2
 #define RING2 3
 #define INOUTEDGE 20
@@ -107,7 +107,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension (FSIOperator& _oper)
         debugStream (10000) << "EJ harmonic extension\n";
         FSIExactJacobian* EJOper = dynamic_cast<FSIExactJacobian*> (&_oper);
         EJOper->setStructureDispToHarmonicExtension (_oper.lambdaFluidRepeated() );
-        BCh_he->addBC ("Interface", 1, Essential, Full,
+        BCh_he->addBC ("Interface", FLUIDINTERFACE, Essential, Full,
                        *EJOper->bcvStructureDispToHarmonicExtension(), 3);
     }
     else if (_oper.data().method() == "fixedPoint")
@@ -116,7 +116,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension (FSIOperator& _oper)
         FSIFixedPoint* FPOper = dynamic_cast<FSIFixedPoint*> (&_oper);
 
         FPOper->setStructureDispToHarmonicExtension (_oper.lambdaFluidRepeated() );
-        BCh_he->addBC ("Interface", 1, Essential, Full,
+        BCh_he->addBC ("Interface", FLUIDINTERFACE, Essential, Full,
                        *FPOper->bcvStructureDispToHarmonicExtension(), 3);
     }
 
@@ -169,14 +169,14 @@ FSIOperator::fluidBchandlerPtr_Type BCh_fluid (FSIOperator& _oper)
         _oper.setSolidLoadToStructure ( _oper.minusSigmaFluidRepeated() );
         _oper.setStructureToFluidParameters();
 
-        BCh_fluid->addBC ("Interface",   1,  Robin, Full,
+        BCh_fluid->addBC ("Interface",   FLUIDINTERFACE,  Robin, Full,
                           *_oper.bcvStructureToFluid(),  3);
-        BCh_fluid->addBC ("Interface",   1,  Natural, Full,
+        BCh_fluid->addBC ("Interface",   FLUIDINTERFACE,  Natural, Full,
                           *_oper.bcvSolidLoadToStructure(), 3);
     }
     else
     {
-        BCh_fluid->addBC ("Interface",   1,  Essential, Full,
+        BCh_fluid->addBC ("Interface",   FLUIDINTERFACE,  Essential, Full,
                           *_oper.bcvStructureToFluid(),  3);
     }
     return BCh_fluid;
@@ -244,7 +244,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_fluidLin (FSIOperator& _oper)
     {
         FSIExactJacobian* EJOper = dynamic_cast<FSIExactJacobian*> (&_oper);
         EJOper->setDerHarmonicExtensionVelToFluid (_oper.derVeloFluidMesh() );
-        BCh_fluidLin->addBC ("Interface", 1, Essential  , Full,
+        BCh_fluidLin->addBC ("Interface", FLUIDINTERFACE, Essential  , Full,
                              *_oper.bcvDerHarmonicExtensionVelToFluid(), 3);
     }
 
@@ -289,7 +289,7 @@ FSIOperator::solidBchandlerPtr_Type BCh_solid (FSIOperator& _oper)
         FSIExactJacobian*  EJOper = dynamic_cast<FSIExactJacobian*> (&_oper);
         EJOper->setFluidLoadToStructure (_oper.sigmaSolidRepeated() );
 
-        BCh_solid->addBC ("Interface", 1, Natural,   Full,
+        BCh_solid->addBC ("Interface", SOLIDINTERFACE, Natural,   Full,
                           *EJOper->bcvFluidLoadToStructure(), 3);
     }
     else if (_oper.data().method() == "fixedPoint")
@@ -298,7 +298,7 @@ FSIOperator::solidBchandlerPtr_Type BCh_solid (FSIOperator& _oper)
 
         FPOper->setFluidLoadToStructure (_oper.sigmaSolidRepeated() );
 
-        BCh_solid->addBC ("Interface", 1, Natural, Full,
+        BCh_solid->addBC ("Interface", FLUIDINTERFACE, Natural, Full,
                           *FPOper->bcvFluidLoadToStructure(), 3);
     }
 
@@ -337,7 +337,7 @@ FSIOperator::solidBchandlerPtr_Type BCh_solidLin (FSIOperator& _oper)
     {
         FSIExactJacobian*  EJOper = dynamic_cast<FSIExactJacobian*> (&_oper);
         EJOper->setDerFluidLoadToStructure (_oper.sigmaSolidRepeated() );
-        BCh_solidLin->addBC ("Interface", 1, Natural,   Full,
+        BCh_solidLin->addBC ("Interface", SOLIDINTERFACE, Natural,   Full,
                              *EJOper->bcvDerFluidLoadToStructure(), 3);
     }
 

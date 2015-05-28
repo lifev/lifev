@@ -10,14 +10,14 @@ git remote add github git@github.com:lifev/lifev.git
 
    cd top_srcdir
 
-1- update Version.cmake
+1- update Version.cmake and lifev/core/LifeVersion.hpp and run astyle, cf. https://cmcsforge.epfl.ch/projects/lifev-dev/wiki/A-Style
 
 2- update NEWS.md
 
 3- commit Version.cmake and NEWS.md
-   X_Y_Z=3.8.3
+   X_Y_Z=3.10.0
 
-   git commit -m"Releasing ${X_Y_Z}" Version.cmake NEWS.md HOWTO.release
+   git commit -m"Releasing ${X_Y_Z}" Version.cmake NEWS.md HOWTO.release  lifev/core/LifeVersion.hpp
 
 
 4- tag master with the tag LifeV-X.Y.Z

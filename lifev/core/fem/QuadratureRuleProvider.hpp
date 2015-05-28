@@ -34,53 +34,68 @@
     A more detailed description of the file (if necessary)
  */
 
-#ifndef QUADRATURERULEPROVIDER_H
-#define QUADRATURERULEPROVIDER_H 1
+#ifndef QUADRATURE_RULE_PROVIDER_H
+#define QUADRATURE_RULE_PROVIDER_H 1
 
 #include <lifev/core/LifeV.hpp>
 
 #include <lifev/core/fem/QuadratureRule.hpp>
 
+#include <lifev/core/fem/QRKeast.hpp>
+
 namespace LifeV
 {
 
-//! QuadratureRuleProvider - Short description of the class
+//! QuadratureRuleProvider - This class is used to generate quadrature rules
 /*!
     @author Samuel Quinodoz
-    @see Reference to papers (if available)
 
-    Here write a long and detailed description of the class.
+    Thanks to this class, it is possible to adopt the best suitable quadrature
+    rule for each case, depending on the degree of the expression to be
+    integrated.
 
-    For this purpose you can use a lot of standard HTML code.
-    Here there is a list with some useful examples:
+    Two important methods are provided:
+    <ul>
+    <li> provideExactness that attempts to give, for a given shape and exactness
+    the best suitable quadrature rule (i.e. with the lowest possible number of points)
+    <li> provideMaximal that returns the highest order quadrature available for the
+    given shape.
+    </ul>
 
-    For bold text use: <b>BOLD TEXT</b>
+    These two methods are influenced by the 3 behaviors available, which
+    give the way to handle special situations:
+    <ul>
+        <li> NoPreciseExactness: if the exactness required is not available,
+        but more precise quadrature rule exist. There are 3 possible behaviors:
+        <ol>
+             <li> ErrorNoPrecise: display an error and abort.
+             <li> WarningAndReturnSup: display a warning and return a more precise quadrature.
+             <li> ReturnSup: (default) return a more precise quadrature.
+        </ol>
+        <li> TooHighExactness: if there is no quadrature precise enough available.
+        3 behaviors are possible:
+        <ol>
+             <li> ErrorTooHigh: (default) display an error and abort.
+             <li> WarningAndReturnMax: display a warning and return the best quadrature available.
+             <li> ReturnMax: return the best quadrature available.
+        </ol>
+        <li> NegativeWeight: sometimes, the quadrature with the least number of
+        points contains negative weights. 3 possible choices are available in that
+        case:
+        <ol>
+             <li> Accept: (default) return the quadrature with negative weight.
+             <li> WarningAndAccept: issue a warning and return the quadrature with negative weight.
+             <li> Reject: search the quadrature only among the ones with positive weights only.
+        </ol>
+    </ul>
 
-    For empatyze a word type @e followed by the word
+    These 3 behaviors can be changed via the ad-hoc setter.
 
-    For verbatim a word type @c followed by the word
+    <b> Remark </b> When running in parallel, it is a good practice
+    to issue warning only with the leader process. Do not "Reject"
+    negative quadratures with only one process (different processes
+    would have different quadratures!).
 
-    For vertical space (empty lines) use: <br>
-
-    For creating list type:
-    <ol>
-        <li> First element of the enumerated list
-        <ul>
-             <li> First element of the dotted sublist.
-             <li> Second element of the dotted sublist
-        </ul>
-        <li> Second element of the enumerated list
-        <li> Third element of the enumerated list
-    </ol>
-
-    For writing a warning type: @warning followed by the description
-    of the warning
-
-    It is possible to use a lot of other standard HTML commands.
-    Visit http://www.stack.nl/~dimitri/doxygen/htmlcmds.html for
-    a detailed list.
-
-    For any other kind of information visit www.doxygen.org.
  */
 class QuadratureRuleProvider
 {
@@ -89,40 +104,26 @@ public:
     //! @name Public Types
     //@{
 
-    //@}
-
-
-    //! @name Constructor & Destructor
-    //@{
-
-    //! Destructor
-    virtual ~QuadratureRuleProvider();
+    enum NoPreciseExactness { ErrorNoPrecise, WarningAndReturnSup, ReturnSup };
+    enum TooHighExactness { ErrorTooHigh, WarningAndReturnMax, ReturnMax };
+    enum NegativeWeight { Accept, WarningAndAccept, Reject};
 
     //@}
-
 
 
     //! @name Methods
     //@{
 
-    //! Provide a quadrature rule with the given exactness (abort if not available)
+    //! Provide a quadrature rule with the given exactness
     /*!
       Given a shape, this method will try to return a quadrature rule that has the
       given exactness. If such a quadrature rule is not defined, the program will
       abort.
      */
-    static const QuadratureRule& provideExactness (const ReferenceShapes& shape, const UInt& exactness);
+    static QuadratureRule provideExactness (const ReferenceShapes& shape, const UInt& exactness);
 
     //! Provide the quadrature rule with the highest exactness available.
-    static const QuadratureRule& provideMaximal (const ReferenceShapes& shape);
-
-    //! Provide a quadrature with the given exactness (or the maximal one if not available)
-    /*
-      Given a shape, this method tries to return a quadrature with the given exactness.
-      If such a quadrature is not defined, the quadrature with the highest exactness for
-      the shape is returned.
-     */
-    static const QuadratureRule& provideExactnessMax (const ReferenceShapes& shape, const UInt& exactness);
+    static QuadratureRule provideMaximal (const ReferenceShapes& shape);
 
     //@}
 
@@ -137,13 +138,37 @@ public:
     //! @name Set Methods
     //@{
 
+
+    /*!
+      Setter for the behavior in case a quadrature rule with the precise exactness
+      required could not be found.
+     */
+    static void setBehaviorNoPreciseExactness ( const NoPreciseExactness& behavior)
+    {
+        S_BehaviorNoPreciseExactness = behavior;
+    }
+
+    /*!
+      Setter for the behavior in case the exactness required cannot be achieved
+      by a known quadrature rule.
+     */
+    static void setBehaviorTooHighExactness ( const TooHighExactness& behavior)
+    {
+        S_BehaviorTooHighExactness = behavior;
+    }
+
+    /*!
+      Setter for the behavior in case the quadrature rule asked for has
+      negative weights for some quadrature nodes.
+     */
+    static void setBehaviorNegativeWeight ( const NegativeWeight& behavior)
+    {
+        S_BehaviorNegativeWeight = behavior;
+    }
+
+
     //@}
 
-
-    //! @name Get Methods
-    //@{
-
-    //@}
 
 private:
 
@@ -154,28 +179,33 @@ private:
     QuadratureRuleProvider();
 
     //! Copy Constructor
-    QuadratureRuleProvider ( const QuadratureRuleProvider& T );
+    QuadratureRuleProvider ( const QuadratureRuleProvider&);
+
+    //! Destructor
+    virtual ~QuadratureRuleProvider();
 
     //! Method for the differentShapes
 
-    static const QuadratureRule& provideExactnessTetra (const UInt& exactness);
-    static const QuadratureRule& provideExactnessPrism (const UInt& exactness);
-    static const QuadratureRule& provideExactnessHexa (const UInt& exactness);
-    static const QuadratureRule& provideExactnessQuad (const UInt& exactness);
-    static const QuadratureRule& provideExactnessTriangle (const UInt& exactness);
-    static const QuadratureRule& provideExactnessLine (const UInt& exactness);
-    static const QuadratureRule& provideExactnessPoint (const UInt& exactness);
+    static QuadratureRule provideExactnessTetra (const UInt& exactness);
+    static QuadratureRule provideExactnessPrism (const UInt& exactness);
+    static QuadratureRule provideExactnessHexa (const UInt& exactness);
+    static QuadratureRule provideExactnessQuad (const UInt& exactness);
+    static QuadratureRule provideExactnessTriangle (const UInt& exactness);
+    static QuadratureRule provideExactnessLine (const UInt& exactness);
+    static QuadratureRule provideExactnessPoint (const UInt& exactness);
+
+    static QuadratureRule provideExactnessTetraNoNeg (const UInt& exactness);
+    static QuadratureRule provideExactnessTriangleNoNeg (const UInt& exactness);
+
+    static void manageNoPreciseExactnessCase();
+    static void manageTooHighExactnessCase();
+    static void manageWarningNegativeWeight();
 
     //@}
 
-    static const UInt S_maxExactnessTetra;
-    static const UInt S_maxExactnessPrism;
-    static const UInt S_maxExactnessHexa;
-    static const UInt S_maxExactnessQuad;
-    static const UInt S_maxExactnessTriangle;
-    static const UInt S_maxExactnessLine;
-    // No static for point, it is always exact!
-
+    static NoPreciseExactness S_BehaviorNoPreciseExactness;
+    static TooHighExactness S_BehaviorTooHighExactness;
+    static NegativeWeight S_BehaviorNegativeWeight;
 };
 
 } // Namespace LifeV

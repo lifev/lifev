@@ -53,7 +53,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef HAVE_HDF5
 
-#warning warning you should reconfigure with --with-hdf5=... flag
+#warning warning you should reconfigure Trilinos with  -D TPL_ENABLE_HDF5:BOOL=ON
 
 #else
 
@@ -98,6 +98,13 @@ public:
     typedef std::vector<std::vector<Int> > graph_Type;
     typedef boost::shared_ptr<graph_Type> graphPtr_Type;
     typedef boost::shared_ptr<std::vector<meshPtr_Type> > serial_meshPtr_Type;
+
+    //! @name Static members
+
+    //! returns the type of the map to use for the VectorEpetra
+    static MapEpetraType const MapType;
+    //@}
+
     //@}
 
     //! @name Constructor & Destructor
@@ -243,6 +250,8 @@ protected:
 
 };
 
+template<typename MeshType>
+MapEpetraType const ExporterHDF5<MeshType>::MapType (Unique);
 
 
 // ===================================================
@@ -576,7 +585,7 @@ void ExporterHDF5<MeshType>::setDataFromGetPot ( const GetPot& dataFile, const s
 template<typename MeshType>
 MapEpetraType ExporterHDF5<MeshType>::mapType() const
 {
-    return Unique;
+    return MapType;
 }
 
 // ===================================================
@@ -953,7 +962,7 @@ void ExporterHDF5<MeshType>::writeVector (const exporterData_Type& dvar)
     // Using auxiliary arrays:
     Real**                                  ArrayOfPointers (new Real*[nDimensions]);
     boost::shared_array< boost::shared_ptr<vector_Type> >
-    		ArrayOfVectors (new boost::shared_ptr<vector_Type>[nDimensions]);
+    ArrayOfVectors (new boost::shared_ptr<vector_Type>[nDimensions]);
 
     Int MyLDA;
 

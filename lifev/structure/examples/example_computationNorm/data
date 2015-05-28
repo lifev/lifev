@@ -1,0 +1,38 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Name Surname <name.surname@epfl.ch>
+#           Date: 00-00-0000
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### DATA FILE #####################################################################################
+###################################################################################################
+#-------------------------------------------------
+#      Data file for Structure Solver
+#-------------------------------------------------
+
+[importer]
+type         = hdf5 #ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
+filename     = inflation
+initialSol   = 00009
+initialTime  = 0.9
+
+[solid]
+
+[./space_discretization]
+mesh_type   = .mesh
+mesh_dir  	= ./
+mesh_file 	= veryFine.mesh
+order     	= P1
+
+
+[../miscellaneous]
+factor    	= 1
+verbose   	= 1
+
+[../]
+

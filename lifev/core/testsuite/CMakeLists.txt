@@ -18,8 +18,9 @@ ADD_SUBDIRECTORIES(
   repeated_mesh
   region_marker_id
   template_test
+  verify_solution
   vector_container
-)
+ )
 
 IF(TPL_ENABLE_HDF5)
     ADD_SUBDIRECTORIES(

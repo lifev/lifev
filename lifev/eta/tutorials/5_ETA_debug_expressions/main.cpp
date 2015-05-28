@@ -111,7 +111,7 @@ int main ( int argc, char** argv )
 
     const UInt Nelements (10);
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
+    boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type ( Comm ) );
 
     regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                     2.0,   2.0,   2.0,
@@ -158,6 +158,11 @@ int main ( int argc, char** argv )
         std::cout << " -- Defining the matrix ... " << std::flush;
     }
 
+    if (verbose)
+    {
+        std::cout << " -- Defining the matrix ... " << std::flush;
+    }
+
     boost::shared_ptr<matrix_Type> scalarMatrix (new matrix_Type ( scalarSpace->map() ) );
 
     *scalarMatrix *= 0.0;
@@ -167,6 +172,34 @@ int main ( int argc, char** argv )
         std::cout << " done! " << std::endl;
     }
 
+    if (verbose)
+    {
+        std::cout << " done! " << std::endl;
+    }
+
+    // ---------------------------------------------------------------
+    // We can now start the assembly. To understand whether an
+    // expression is valid, the critical observation is that every
+    // piece of expression is associated to a "fictitious" type (in
+    // the sense that it is not the type of the expression in the
+    // C++ sense), which matches the mathematical type.
+    //
+    // For example, in the case of a scalar finite element space, the
+    // basis functions are scalar quantities, while their gradients
+    // are vectorial quantities.
+    //
+    // With this in mind, we can now formulate the rules for an
+    // expression to be valid:
+    //
+    // Rule A: The combinaisons between two expressions (through an
+    // operator or a function) must be valid. For example, it is not
+    // possible to sum a vectorial quantity and a scalar quantity.
+    //
+    // Rule B: The overall expression must be a scalar quantity. For
+    // example, it not possible to integrate simply grad(phi_i)).
+    //
+    //
+    // ---------------------------------------------------------------
 
     // ---------------------------------------------------------------
     // We can now start the assembly. To understand whether an

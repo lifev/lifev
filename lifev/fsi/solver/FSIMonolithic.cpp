@@ -200,6 +200,8 @@ FSIMonolithic::setupFluidSolid ( UInt const fluxes )
     M_offset = M_uFESpace->dof().numTotalDof() * nDimensions + fluxes +  M_pFESpace->dof().numTotalDof();
     M_solidAndFluidDim = M_offset + M_dFESpace->dof().numTotalDof() * nDimensions;
     M_BCh_d->setOffset (M_offset);
+
+    M_fluxes = fluxes;
 }
 
 // ===================================================
@@ -404,18 +406,46 @@ evalResidual ( const vector_Type& sol, const vectorPtr_Type& rhs, vector_Type& r
     {
         diagonalScale (*rhs, M_monolithicMatrix->matrix() );
     }
-    if (! (M_data->dataSolid()->solidType().compare ("exponential") && M_data->dataSolid()->solidType().compare ("neoHookean") ) )
+
+    // case of nonlinear laws
+    if ( ! ( M_data->dataSolid()->lawType().compare ("nonlinear") ) )
     {
-        M_solid->apply (sol * M_solid->rescaleFactor(), res);
+        // need to set correctly the vectors to remove offset
+        // Extract the right proportion
+        vectorPtr_Type solidPart ( new vector_Type ( M_dFESpace->map() ) );
+        solidPart->subset (sol, M_offset );
+
+        vectorPtr_Type resSolidPart ( new vector_Type ( M_dFESpace->map() ) );
+        resSolidPart->subset (res, M_offset );
+
+        // Multiplying it by the rescale factor
+        *solidPart *= M_solid->rescaleFactor();
+
+        // Computing residual
+        M_solid->apply (*solidPart, *resSolidPart);
+
+        resSolidPart->globalAssemble();
+
+        // reassembling them in the right places
+        // Only the residual is needed since the sol is not touched inside the solid part
+        // sol.subset( *solidPart, solidPart->map(), UInt(0), M_offset);
+        res.subset ( *resSolidPart, resSolidPart->map(), UInt (0), M_offset);
+
+        res.globalAssemble();
+
         M_fluidBlock->globalAssemble();
 
         res += ( (*M_fluidBlock) * sol);
+
+        M_monolithicMatrix->coupling()->globalAssemble();
 
         res += *M_monolithicMatrix->coupling() * sol;
     }
     else
     {
+        // this works for the linear elastic case where the matrix is not touched
         res = * (M_monolithicMatrix->matrix() ) * sol;
+
         res -= *rhs; // Ax-b
     }
 }
@@ -425,11 +455,29 @@ FSIMonolithic::
 updateSolidSystem ( vectorPtr_Type& rhsFluidCoupling )
 {
     Real coefficient ( M_data->dataSolid()->dataTime()->timeStep() * M_data->dataSolid()->dataTime()->timeStep() * M_solid->rescaleFactor() /  M_solidTimeAdvance->coefficientSecondDerivative ( 0 ) );
+
     M_solidTimeAdvance->updateRHSContribution ( M_data->dataSolid()->dataTime()->timeStep() );
-    *rhsFluidCoupling += *M_solid->massMatrix() * ( M_solidTimeAdvance->rhsContributionSecondDerivative() * coefficient );
-    // TODO NOTE: this mass * vector multiplication in serial may lead to a NaN for unclear reasons
-    // (both the matrix and the vector does not contain a NaN before the multiplication..)
+
+    // Extract the right portion from th right hand side contribution
+    vectorPtr_Type solidPortionRHSSecondDerivative ( new vector_Type ( M_dFESpace->map() ) );
+    solidPortionRHSSecondDerivative->subset (M_solidTimeAdvance->rhsContributionSecondDerivative(), M_offset );
+
+    // Create a matrix of the size of the structure
+    boost::shared_ptr<MatrixEpetra<Real> >  solidMassMatrix (new MatrixEpetra<Real> ( M_solid->map(), 1 ) );
+    *solidMassMatrix *= 0.0;
+    *solidMassMatrix += *M_solid->massMatrix();
+    solidMassMatrix->globalAssemble();
+
+    vectorPtr_Type solidPortionRHSFluidCoupling ( new vector_Type ( M_dFESpace->map() ) );
+    *solidPortionRHSFluidCoupling *= 0.0;
+
+    // Computing the vector
+    *solidPortionRHSFluidCoupling = *solidMassMatrix * ( *solidPortionRHSSecondDerivative * coefficient );
+
+    // Putting it in the right place
+    rhsFluidCoupling->subset ( *solidPortionRHSFluidCoupling, solidPortionRHSFluidCoupling->map(), UInt (0), M_offset);
 }
+
 
 void FSIMonolithic::setVectorInStencils ( const vectorPtr_Type& vel,
                                           const vectorPtr_Type& pressure,
@@ -510,6 +558,43 @@ void FSIMonolithic::finalizeRestart( )
     M_ALETimeAdvance->updateRHSFirstDerivative ( M_data->dataFluid()->dataTime()->timeStep() );
 }
 
+void FSIMonolithic::initializeMonolithicOperator ( std::vector< vectorPtr_Type> u0,
+                                                   std::vector< vectorPtr_Type> ds0,
+                                                   std::vector< vectorPtr_Type> df0)
+{
+    UInt i;
+    if (!u0.size() || !ds0.size() || !df0.size() )
+    {
+        if ( this->isFluid() )
+        {
+            for (i = 0; i < M_fluidTimeAdvance->size(); ++i)
+            {
+                vectorPtr_Type vec (new vector_Type ( *M_monolithicMap ) );
+                u0.push_back (vec); // couplingVariableMap()
+            }
+            for (i = 0; i < M_ALETimeAdvance->size(); ++i)
+            {
+                vectorPtr_Type vec (new vector_Type ( M_mmFESpace->map() ) );
+                df0.push_back (vec); // couplingVariableMap()
+            }
+        }
+        if ( this->isSolid() )
+        {
+            for (i = 0; i < M_solidTimeAdvance->size(); ++i)
+            {
+                vectorPtr_Type vec (new vector_Type ( *M_monolithicMap ) );
+                ds0.push_back (vec); // couplingVariableMap()
+            }
+        }
+        initializeTimeAdvance (u0, ds0, df0);
+        //  M_oper->initializeBDF(*u0);
+    }
+    else
+    {
+        initializeTimeAdvance (u0, ds0, df0); // couplingVariableMap()//copy
+    }
+
+}
 
 void
 FSIMonolithic::
@@ -531,6 +616,13 @@ FSIMonolithic::variablesInit (const std::string& dOrder)
                                                          dOrder,
                                                          3,
                                                          M_epetraComm) );
+
+    M_dETFESpace.reset (new ETFESpace<mesh_Type, MapEpetra, 3, 3> (M_solidLocalMesh,
+                                                                   & (M_dFESpace->refFE() ),
+                                                                   & (M_dFESpace->fe().geoMap() ),
+                                                                   M_epetraComm) );
+
+
     // INITIALIZATION OF THE VARIABLES
     M_lambdaFluid.reset (new vector_Type (*M_fluidInterfaceMap, Unique) );
     M_lambdaFluidRepeated.reset (new vector_Type (*M_fluidInterfaceMap, Repeated) );
@@ -587,26 +679,75 @@ FSIMonolithic::assembleSolidBlock ( UInt iter, const vector_Type& solution )
         updateSolidSystem (this->M_rhs);
     }
 
+    // Resetting the solidBlockPrec term
+    M_solidBlockPrec.reset (new matrix_Type (*M_monolithicMap, 1) );
+    *M_solidBlockPrec *= 0.0;
 
-    if (M_data->dataSolid()->solidType().compare ("exponential") && M_data->dataSolid()->solidType().compare ("neoHookean") )
+    // When ET for structures is used, there is not offset parameter. This is why
+    // we need to extract portions of vector and mount them in the proper parts.
+    // Extractig the right portion from the total solution of the solid part
+    vectorPtr_Type solidPortion ( new vector_Type ( M_dFESpace->map() ) );
+    solidPortion->subset (solution, M_offset );
+
+    //Multiplying it by the rescale factor
+    *solidPortion *= M_solid->rescaleFactor();
+
+    // Start building a block matrix to handle easily the assembled part
+    // in the structure module.
+    //1. Create the correct global map for fluxes
+    MapEpetra mapEpetraFluxes ( M_fluxes, M_epetraComm );
+
+    //2. Construct a global MapVector with all the maps
+    // The globalMatrix will be adjusted according to the monolithic solver
+    // that is used.
+    matrixBlockPtr_Type globalMatrixWithOnlyStructure;
+
+    //The map is composed of ( u , p , fluxes, solid, interface, d_f )
+    if ( !M_data->method().compare ("monolithicGI") )
     {
-        M_solid->material()->computeStiffness (solution * M_solid->rescaleFactor(), 1., M_data->dataSolid(), M_solid->mapMarkersVolumes(), M_solid->displayerPtr() );
-        M_solidBlockPrec.reset (new matrix_Type (*M_monolithicMap, 1) );
-        *M_solidBlockPrec += *M_solid->massMatrix();
-        *M_solidBlockPrec += *M_solid->material()->stiffMatrix();
-        M_solidBlockPrec->globalAssemble();
-        *M_solidBlockPrec *= M_solid->rescaleFactor();
+        globalMatrixWithOnlyStructure.reset (new matrixBlock_Type ( M_uFESpace->map() | M_pFESpace->map() | mapEpetraFluxes | M_dFESpace->map()
+                                                                    | * (M_monolithicMatrix->interfaceMap() ) |  M_mmFESpace->map() ) );
     }
+    //The map is composed of ( u , p , fluxes, solid, interface )
     else
     {
-        M_solid->material()->updateJacobianMatrix ( solution * M_solid->rescaleFactor(), dataSolid(), M_solid->mapMarkersVolumes(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
-        M_solidBlockPrec.reset (new matrix_Type (*M_monolithicMap, 1) );
-        *M_solidBlockPrec += *M_solid->massMatrix();
-        *M_solidBlockPrec += *M_solid->material()->jacobian(); //stiffMatrix();
-        M_solidBlockPrec->globalAssemble();
-        *M_solidBlockPrec *= M_solid->rescaleFactor();
+        globalMatrixWithOnlyStructure.reset (new matrixBlock_Type ( M_uFESpace->map() | M_pFESpace->map() | mapEpetraFluxes | M_dFESpace->map()
+                                                                    | * (M_monolithicMatrix->interfaceMap() ) ) );
     }
 
+    // In the case of LE it does not do anything.
+    M_solid->material()->updateJacobianMatrix ( *solidPortion, dataSolid(), M_solid->mapMarkersVolumes(), M_solid->mapMarkersIndexes(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
+
+    //Need to inglobe it into a boost::shared to avoid memeory leak
+    boost::shared_ptr<MatrixEpetra<Real> >  solidMatrix (new MatrixEpetra<Real> ( M_solid->map(), 1 ) );
+    *solidMatrix *= 0.0;
+
+    *solidMatrix += *M_solid->massMatrix();
+    *solidMatrix += * (M_solid->material()->jacobian() );
+
+    solidMatrix->globalAssemble();
+
+    MatrixEpetra<Real>* rawPointerToMatrix = new MatrixEpetra<Real> ( *solidMatrix );
+
+    matrixBlockView_Type structurePart (* (globalMatrixWithOnlyStructure->block (3, 3) ) );
+
+    structurePart.setup (UInt (0), UInt (0), UInt (3 * M_dFESpace->dof().numTotalDof() ), UInt (3 * M_dFESpace->dof().numTotalDof() ), rawPointerToMatrix);
+
+    using namespace MatrixEpetraStructuredUtility;
+
+    //3. Put the matrix assembled in the solid in the proper vector
+    copyBlock ( structurePart, * (globalMatrixWithOnlyStructure->block (3, 3) ) );
+
+    globalMatrixWithOnlyStructure->globalAssemble();
+
+    //Summing the local matrix into the global
+    *M_solidBlockPrec += *globalMatrixWithOnlyStructure;
+
+    M_solidBlockPrec->globalAssemble();
+
+    *M_solidBlockPrec *= M_solid->rescaleFactor();
+
+    delete rawPointerToMatrix;
 }
 
 void

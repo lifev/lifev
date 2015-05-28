@@ -290,11 +290,11 @@ PreconditionerPCD::buildPreconditioner ( matrixPtr_type& oper )
         timer.start();
         precForBlock3.reset ( PRECFactory::instance().createObject ( M_fluidPrec ) );
         precForBlock3->setDataFromGetPot ( M_dataFile, M_fluidPrecDataSection );
-//        if ( M_fluidPrec == "ML2" )
-//        {
-//            PreconditionerML2* tmpPrecPtr = dynamic_cast<PreconditionerML2*> ( precForBlock3.get() );
-//            tmpPrecPtr->setFESpace ( M_uFESpace, M_pFESpace );
-//        }
+        //        if ( M_fluidPrec == "ML2" )
+        //        {
+        //            PreconditionerML2* tmpPrecPtr = dynamic_cast<PreconditionerML2*> ( precForBlock3.get() );
+        //            tmpPrecPtr->setFESpace ( M_uFESpace, M_pFESpace );
+        //        }
         if ( M_fluidPrec == "LinearSolver" )
         {
             this->pushBack ( p3, precForBlock3, vectorStructure, 0, oper->map(), notInversed, notTransposed );
@@ -790,11 +790,11 @@ PreconditionerPCD::buildPreconditioner ( matrixPtr_type& oper )
         timer.start();
         precForBlock3.reset ( PRECFactory::instance().createObject ( M_fluidPrec ) );
         precForBlock3->setDataFromGetPot ( M_dataFile, M_fluidPrecDataSection );
-//        if ( M_fluidPrec == "ML2" )
-//        {
-//            PreconditionerML2* tmpPrecPtr = dynamic_cast<PreconditionerML2*> ( precForBlock3.get() );
-//            tmpPrecPtr->setFESpace ( M_uFESpace, M_pFESpace );
-//        }
+        //        if ( M_fluidPrec == "ML2" )
+        //        {
+        //            PreconditionerML2* tmpPrecPtr = dynamic_cast<PreconditionerML2*> ( precForBlock3.get() );
+        //            tmpPrecPtr->setFESpace ( M_uFESpace, M_pFESpace );
+        //        }
         if ( M_fluidPrec == "LinearSolver" )
         {
             this->pushBack ( p3, precForBlock3, vectorStructure, 0, oper->map(), notInversed, notTransposed );

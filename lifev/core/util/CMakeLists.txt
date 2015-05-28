@@ -19,6 +19,7 @@ SET(util_HEADERS
   util/FactoryPolicy.hpp
   util/WallClock.hpp
   util/OpenMPParameters.hpp
+  util/VerifySolutions.hpp
 CACHE INTERNAL "")
 
 SET(util_SOURCES
@@ -33,6 +34,7 @@ SET(util_SOURCES
   util/Displayer.cpp
   util/WallClock.cpp
   util/OpenMPParameters.cpp
+  util/VerifySolutions.cpp
 CACHE INTERNAL "")
 
 

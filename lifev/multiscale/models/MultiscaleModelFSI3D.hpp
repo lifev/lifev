@@ -53,12 +53,20 @@
 // and in the future can be removed.
 #define FSI_WITH_BOUNDARYAREA
 
+// This macro enable/disable the stress computation in the structural solver.
+#define FSI_WITH_STRESSOUTPUT
+
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #ifdef HAVE_HDF5
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
 
 #include <lifev/core/algorithm/NonLinearRichardson.hpp>
+
+#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionParserFSI3D.hpp>
+#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionParserSolverFSI3D.hpp>
+#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionSolverDefinedFSI3D.hpp>
+#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionUserDefinedFSI3D.hpp>
 #include <lifev/bc_interface/3D/bc/BCInterface3D.hpp>
 
 #include <lifev/fsi/solver/FSIMonolithic.hpp>
@@ -70,6 +78,11 @@
 #include <lifev/fsi/solver/MonolithicBlockComposedDN.hpp>
 #include <lifev/fsi/solver/MonolithicBlockComposedNN.hpp>
 #include <lifev/fsi/solver/MonolithicBlockComposedDNND.hpp>
+
+#ifdef FSI_WITH_STRESSOUTPUT
+#include <lifev/structure/solver/WallTensionEstimator.hpp>
+#include <lifev/structure/solver/WallTensionEstimatorData.hpp>
+#endif
 
 #include <lifev/multiscale/models/MultiscaleModel.hpp>
 #include <lifev/multiscale/framework/MultiscaleInterface.hpp>
@@ -102,7 +115,6 @@ class FSI3DBoundaryAreaFunction;
  *  @see Full description of the Geometrical Multiscale Framework: \cite Malossi-Thesis
  *  @see Methodology: \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D \cite Malossi2011Algorithms3D1DFSI \cite BlancoMalossi2012
  *  @see Applications: \cite Malossi2011Algorithms3D1DFSIAortaIliac \cite LassilaMalossi2012IdealLeftVentricle \cite BonnemainMalossi2012LVAD
- *
  */
 class MultiscaleModelFSI3D: public virtual multiscaleModel_Type,
     public virtual MultiscaleInterface
@@ -172,6 +184,11 @@ public:
     typedef boost::shared_ptr< boundaryAreaFunction_Type >     boundaryAreaFunctionPtr_Type;
     typedef std::vector< boundaryAreaFunctionPtr_Type >        boundaryAreaFunctionsContainer_Type;
     typedef boundaryAreaFunctionsContainer_Type::iterator      boundaryAreaFunctionsContainerIterator_Type;
+#endif
+
+#ifdef FSI_WITH_STRESSOUTPUT
+    typedef WallTensionEstimator< mesh_Type >                  wallTensionEstimator_Type;
+    typedef boost::shared_ptr< wallTensionEstimator_Type >     wallTensionEstimatorPtr_Type;
 #endif
 
     //@}
@@ -536,27 +553,41 @@ private:
     std::vector< bool >                     M_boundaryFlagsAreaPerturbed;
 #endif
 
+#ifdef FSI_WITH_STRESSOUTPUT
+    wallTensionEstimatorPtr_Type            M_wallTensionEstimator;
+#endif
+
     // Post processing members
-    vectorPtr_Type                         M_fluidVelocity;
-    vectorPtr_Type                         M_fluidPressure;
-    vectorPtr_Type                         M_fluidDisplacement;
-    vectorPtr_Type                         M_solidVelocity;
-    vectorPtr_Type                         M_solidDisplacement;
+    vectorPtr_Type                          M_fluidVelocity;
+    vectorPtr_Type                          M_fluidPressure;
+    vectorPtr_Type                          M_fluidDisplacement;
+    vectorPtr_Type                          M_solidVelocity;
+    vectorPtr_Type                          M_solidDisplacement;
 
-    vectorPtr_Type                         M_stateVariable;
+#ifdef FSI_WITH_STRESSOUTPUT
+    vectorPtr_Type                          M_solidStressXX;
+    vectorPtr_Type                          M_solidStressXY;
+    vectorPtr_Type                          M_solidStressXZ;
+    vectorPtr_Type                          M_solidStressYY;
+    vectorPtr_Type                          M_solidStressYZ;
+    vectorPtr_Type                          M_solidStressZZ;
+    vectorPtr_Type                          M_solidStressVonMises;
+#endif
 
-    UInt                                   M_nonLinearRichardsonIteration;
+    vectorPtr_Type                          M_stateVariable;
+
+    UInt                                    M_nonLinearRichardsonIteration;
 
     // Boundary Conditions
-    bcInterfacePtr_Type                    M_fluidBC;
-    bcInterfacePtr_Type                    M_solidBC;
-    bcInterfacePtr_Type                    M_harmonicExtensionBC;
+    bcInterfacePtr_Type                     M_fluidBC;
+    bcInterfacePtr_Type                     M_solidBC;
+    bcInterfacePtr_Type                     M_harmonicExtensionBC;
 
     // Linear problem
-    bcPtr_Type                             M_linearFluidBC;
-    bcPtr_Type                             M_linearSolidBC;
-    vectorPtr_Type                         M_linearRHS;
-    vectorPtr_Type                         M_linearSolution;
+    bcPtr_Type                              M_linearFluidBC;
+    bcPtr_Type                              M_linearSolidBC;
+    vectorPtr_Type                          M_linearRHS;
+    vectorPtr_Type                          M_linearSolution;
 };
 
 

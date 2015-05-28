@@ -59,13 +59,14 @@ Real f (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 Real u1 (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
 Real fZero (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real outerWallPressure (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real epsilon (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real pressureInitial (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
 // Initial velocity
 Real u0 (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 Real p0 (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
-Real E (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
-Real hydrostatic (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
-
+Real E  (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 Real hydro (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
 Real u2 (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
@@ -75,19 +76,39 @@ Real d0 (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i
 
 Real w0 (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
-Real uInterpolated (const Real& time, const Real& x, const Real& y, const Real& z, const ID& i);
-
-Real aortaPhisPress (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
-
-Real u2normal (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
-
-Real fluxFunction (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
-
-Real fluxFunctionAneurysm (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
+Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
 
 Real aneurismFluxInVectorial (const Real&  t, const Real& x, const Real& y, const Real& z, const ID& i);
 
 Real squareSinusoidalFluxFunction (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
+
+//Fiber Directions
+Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
+Real Family2 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
+Real Family3 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
+Real Family4 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
+Real Family5 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
+Real Family6 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
+
+class fibersDirectionList
+{
+public:
+
+    typedef boost::function<Real (  Real const&, Real const&, Real const&, Real const&, ID const& ) > fiberFunction_Type;
+    typedef boost::shared_ptr<fiberFunction_Type>                                       fiberFunctionPtr_Type;
+    typedef std::map< std::string, fiberFunctionPtr_Type>                               mapNameDefinitionFiberFunction_Type;
+
+    fibersDirectionList();
+
+    ~fibersDirectionList();
+
+    fiberFunctionPtr_Type fiberDefinition( const std::string nameFamily );
+    void setupFiberDefinitions( const UInt nbFamilies );
+
+private:
+    mapNameDefinitionFiberFunction_Type     M_mapNameDefinition;
+};
+
 }
 
 

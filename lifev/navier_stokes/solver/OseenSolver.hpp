@@ -1227,13 +1227,13 @@ OseenSolver<MeshType, SolverType>::buildSystem()
         // stiffness matrix
         chronoStiff.start();
         if ( M_stiffStrain )
-            stiff_strain ( 2.0 * M_oseenData->viscosity(),
-                           M_elementMatrixStiff,
-                           M_velocityFESpace.fe() );
+            AssemblyElemental::stiff_strain ( 2.0 * M_oseenData->viscosity(),
+                                              M_elementMatrixStiff,
+                                              M_velocityFESpace.fe() );
         else
-            stiff ( M_oseenData->viscosity(),
-                    M_elementMatrixStiff,
-                    M_velocityFESpace.fe(), 0, 0, M_velocityFESpace.fieldDim() );
+            AssemblyElemental::stiff ( M_oseenData->viscosity(),
+                                       M_elementMatrixStiff,
+                                       M_velocityFESpace.fe(), 0, 0, M_velocityFESpace.fieldDim() );
         //stiff_div( 0.5*M_velocityFESpace.fe().diameter(), M_elementMatrixStiff, M_velocityFESpace.fe() );
         chronoStiff.stop();
 
@@ -1241,9 +1241,9 @@ OseenSolver<MeshType, SolverType>::buildSystem()
         if ( !M_steady )
         {
             chronoMass.start();
-            mass ( M_oseenData->density(),
-                   M_elementMatrixMass,
-                   M_velocityFESpace.fe(), 0, 0, M_velocityFESpace.fieldDim() );
+            AssemblyElemental::mass ( M_oseenData->density(),
+                                      M_elementMatrixMass,
+                                      M_velocityFESpace.fe(), 0, 0, M_velocityFESpace.fieldDim() );
             chronoMass.stop();
         }
 
@@ -1310,11 +1310,11 @@ OseenSolver<MeshType, SolverType>::buildSystem()
 
             // divergence
             chronoGrad.start();
-            grad ( iComponent, 1.0,
-                   M_elementMatrixGradient,
-                   M_velocityFESpace.fe(),
-                   M_pressureFESpace.fe(),
-                   iComponent, 0 );
+            AssemblyElemental::grad ( iComponent, 1.0,
+                                      M_elementMatrixGradient,
+                                      M_velocityFESpace.fe(),
+                                      M_pressureFESpace.fe(),
+                                      iComponent, 0 );
             chronoGrad.stop();
 
             chronoGradAssemble.start();
@@ -1514,30 +1514,30 @@ updateSystem ( const Real         alpha,
             if (M_oseenData->conservativeFormulation() )
             {
                 // ALE term: - rho div(w) u v
-                mass_divw ( - M_oseenData->density(),
-                            M_wLoc,
-                            M_elementMatrixStiff,
-                            M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
+                AssemblyElemental::mass_divw ( - M_oseenData->density(),
+                                               M_wLoc,
+                                               M_elementMatrixStiff,
+                                               M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
             }
 
             // ALE stab implicit: 0.5 rho div u w v
-            mass_divw ( 0.5 * M_oseenData->density(),
-                        M_uLoc,
-                        M_elementMatrixStiff,
-                        M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
+            AssemblyElemental::mass_divw ( 0.5 * M_oseenData->density(),
+                                           M_uLoc,
+                                           M_elementMatrixStiff,
+                                           M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
 
             // Stabilising term: -rho div(u^n) u v
             if ( M_divBetaUv )
-                mass_divw ( -0.5 * M_oseenData->density(),
-                            M_uLoc,
-                            M_elementMatrixStiff,
-                            M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
+                AssemblyElemental::mass_divw ( -0.5 * M_oseenData->density(),
+                                               M_uLoc,
+                                               M_elementMatrixStiff,
+                                               M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
 
             // compute local convective terms
-            advection ( M_oseenData->density(),
-                        M_elementRightHandSide,
-                        M_elementMatrixStiff,
-                        M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
+            AssemblyElemental::advection ( M_oseenData->density(),
+                                           M_elementRightHandSide,
+                                           M_elementMatrixStiff,
+                                           M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
 
             // loop on components
             for ( UInt iComponent = 0; iComponent < numVelocityComponent; ++iComponent )
@@ -1968,7 +1968,7 @@ OseenSolver<MeshType, SolverType>::removeMean ( vector_Type& x )
         M_elementMatrixPreconditioner.zero();
         // mass
         chrono.start();
-        mass ( 1, M_elementMatrixPreconditioner, M_pressureFESpace.fe(), 0, 0, M_velocityFESpace.fieldDim() );
+        AssemblyElemental::mass ( 1, M_elementMatrixPreconditioner, M_pressureFESpace.fe(), 0, 0, M_velocityFESpace.fieldDim() );
         chrono.stop();
 
         chrono.start();

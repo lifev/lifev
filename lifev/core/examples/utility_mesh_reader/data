@@ -1,0 +1,20 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for Laplacian test
+#-------------------------------------------------
+
+[mesh]
+   mesh_type  = .mesh
+   mesh_dir   = ./
+   mesh_file  = cube4x4.mesh  # mesh file
+   mesh_edges = all         # update all edges elements
+   mesh_faces = all         # update all edges elements
+   interfaceList = '30'
+   boundaryList = '10, 20'
+
+[discretization]
+	order = P1              # for the dummy fespace
+	
+[exporter]
+type = hdf5
+multimesh = false

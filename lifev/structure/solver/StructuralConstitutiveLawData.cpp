@@ -65,7 +65,25 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData() :
     M_gamma                            ( ),
     M_order                            ( ),
     M_verbose                          ( ),
-    M_vectorMaterialFlags              ( )
+    M_solidTypeIsotropic               ( ),
+    M_constitutiveLaw                  ( ),
+    M_solidTypeAnisotropic             ( ),
+    M_numberFibers                     ( 0 ),
+    M_stiffnessParametersFibers        ( ),
+    M_nonlinearityParametersFibers     ( ),
+    M_characteristicStretch            ( ),
+    M_distributionParametersFibers     ( ),
+    M_epsilon                          ( 0 ),
+    M_fiberActivation                  ( ),
+    M_toleranceActivation              ( ),
+    M_lawType                          ( ),
+    M_useExactJacobian                 ( false ),
+    M_vectorMaterialFlags              ( ),
+    M_maxSubIterationNumber            ( ),
+    M_absoluteTolerance                ( ),
+    M_relativeTolerance                ( ),
+    M_errorTolerance                   ( ),
+    M_NonLinearLineSearch              ( )
 {
 }
 
@@ -83,7 +101,26 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData ( const StructuralC
     M_gamma                            ( structuralConstitutiveLawData.M_gamma ),
     M_order                            ( structuralConstitutiveLawData.M_order ),
     M_verbose                          ( structuralConstitutiveLawData.M_verbose ),
-    M_vectorMaterialFlags              ( structuralConstitutiveLawData.M_vectorMaterialFlags )
+    M_solidTypeIsotropic               ( structuralConstitutiveLawData.M_solidTypeIsotropic ),
+    M_constitutiveLaw                  ( structuralConstitutiveLawData.M_constitutiveLaw ),
+    M_solidTypeAnisotropic             ( structuralConstitutiveLawData.M_solidTypeAnisotropic ),
+    M_numberFibers                     ( structuralConstitutiveLawData.M_numberFibers ),
+    M_stiffnessParametersFibers        ( structuralConstitutiveLawData.M_stiffnessParametersFibers ),
+    M_nonlinearityParametersFibers     ( structuralConstitutiveLawData.M_nonlinearityParametersFibers ),
+    M_characteristicStretch            ( structuralConstitutiveLawData.M_characteristicStretch ),
+    M_distributionParametersFibers     ( structuralConstitutiveLawData.M_distributionParametersFibers ),
+    M_epsilon                          ( structuralConstitutiveLawData.M_epsilon ),
+    M_fiberActivation                  ( structuralConstitutiveLawData.M_fiberActivation ),
+    M_toleranceActivation              ( structuralConstitutiveLawData.M_toleranceActivation ),
+    M_lawType                          ( structuralConstitutiveLawData.M_lawType ),
+    M_useExactJacobian                 ( structuralConstitutiveLawData.M_useExactJacobian ),
+    M_vectorMaterialFlags              ( structuralConstitutiveLawData.M_vectorMaterialFlags ),
+    M_maxSubIterationNumber            ( structuralConstitutiveLawData.M_maxSubIterationNumber ),
+    M_absoluteTolerance                ( structuralConstitutiveLawData.M_absoluteTolerance ),
+    M_relativeTolerance                ( structuralConstitutiveLawData.M_relativeTolerance ),
+    M_errorTolerance                   ( structuralConstitutiveLawData.M_errorTolerance ),
+    M_NonLinearLineSearch              ( structuralConstitutiveLawData.M_NonLinearLineSearch )
+
 {
 }
 
@@ -108,7 +145,25 @@ StructuralConstitutiveLawData::operator= ( const StructuralConstitutiveLawData& 
         M_gamma                            = structuralConstitutiveLawData.M_gamma;
         M_order                            = structuralConstitutiveLawData.M_order;
         M_verbose                          = structuralConstitutiveLawData.M_verbose;
+        M_solidTypeIsotropic               = structuralConstitutiveLawData.M_solidTypeIsotropic;
+        M_constitutiveLaw                  = structuralConstitutiveLawData.M_constitutiveLaw;
+        M_solidTypeAnisotropic             = structuralConstitutiveLawData.M_solidTypeAnisotropic;
+        M_numberFibers                     = structuralConstitutiveLawData.M_numberFibers;
+        M_stiffnessParametersFibers        = structuralConstitutiveLawData.M_stiffnessParametersFibers;
+        M_nonlinearityParametersFibers     = structuralConstitutiveLawData.M_nonlinearityParametersFibers;
+        M_characteristicStretch            = structuralConstitutiveLawData.M_characteristicStretch;
+        M_distributionParametersFibers     = structuralConstitutiveLawData.M_distributionParametersFibers;
+        M_epsilon                          = structuralConstitutiveLawData.M_epsilon;
+        M_fiberActivation                  = structuralConstitutiveLawData.M_fiberActivation;
+        M_toleranceActivation              = structuralConstitutiveLawData.M_toleranceActivation;
+        M_lawType                          = structuralConstitutiveLawData.M_lawType;
+        M_useExactJacobian                 = structuralConstitutiveLawData.M_useExactJacobian;
         M_vectorMaterialFlags              = structuralConstitutiveLawData.M_vectorMaterialFlags;
+        M_maxSubIterationNumber            = structuralConstitutiveLawData.M_maxSubIterationNumber;
+        M_absoluteTolerance                = structuralConstitutiveLawData.M_absoluteTolerance;
+        M_relativeTolerance                = structuralConstitutiveLawData.M_relativeTolerance;
+        M_errorTolerance                   = structuralConstitutiveLawData.M_errorTolerance;
+        M_NonLinearLineSearch              = structuralConstitutiveLawData.M_NonLinearLineSearch;
     }
 
     return *this;
@@ -132,13 +187,68 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
     }
 
     // physics
-    M_solidType = dataFile ( ( section + "/physics/solidType" ).data(), "NO_DEFAULT_SOLID_TYPE" );
+    M_solidTypeIsotropic = dataFile ( ( section + "/model/solidTypeIsotropic" ).data(), "NO_DEFAULT_SOLID_TYPE_ISOTROPIC" );
+
+    // Reading the type of anisotropic part and the number of fibers
+    M_constitutiveLaw = dataFile ( ( section + "/model/constitutiveLaw" ).data(), "isotropic" );
+
+    if(  !M_constitutiveLaw.compare("anisotropic") ) // anisotropic laws
+    {
+        M_solidTypeAnisotropic = dataFile ( ( section + "/model/solidTypeAnisotropic" ).data(), "NO_DEFAULT_SOLID_TYPE_ANISOTROPIC" );
+        M_numberFibers = dataFile ( ( section + "/model/fibers/numberFamilies" ).data(), 0 );
+
+        ASSERT( M_numberFibers, " The number of fibers of the anisotropic law has to be different from 0!" );
+    }
+
+    // The check can be done on the isotropic part since the anisotropic is for sure nonlinear
+    if( !M_solidTypeIsotropic.compare("linearVenantKirchhoff") )
+      {
+           M_lawType = "linear";
+      }
+    else
+      {
+          M_lawType = "nonlinear";
+      }
+
+    if(  !M_constitutiveLaw.compare("anisotropic") ) // anisotropic laws => no LE
+      {
+          ASSERT ( M_lawType.compare ("linear"), "The Linear Elastic law cannot be used with anisotropic laws");
+      }
+
     M_externalPressure = dataFile ( ( section + "/physics/externalPressure" ).data(), 0. );
     M_density   = dataFile ( ( section + "/physics/density"   ).data(), 1. );
     M_thickness = dataFile ( ( section + "/physics/thickness" ).data(), 0.1 );
 
+
     UInt materialsNumber = dataFile.vector_variable_size ( ( section + "/physics/material_flag" ).data() );
 
+    if( !M_constitutiveLaw.compare("anisotropic") )
+      {
+          UInt numberOfStiffnesses = dataFile.vector_variable_size ( ( section + "/model/fibers/stiffness" ).data() );
+          UInt numberOfNonlinearities = dataFile.vector_variable_size ( ( section + "/model/fibers/nonlinearity" ).data() );
+
+
+          ASSERT( M_numberFibers  , " The number of fiber families is equal to zero, change the variable constitutiveLaw from anisotropic to isotropic " );
+          ASSERT( ( M_numberFibers == numberOfStiffnesses ) && ( M_numberFibers == numberOfNonlinearities ), " Inconsistency in the set up of the fiber parameters" );
+
+          if( !M_solidTypeAnisotropic.compare("multimechanism") ||
+              !M_solidTypeAnisotropic.compare("holzapfelGeneralized") )
+          {
+              UInt numberStretches = dataFile.vector_variable_size ( ( section + "/model/fibers/stretch" ).data() );
+              ASSERT( ( M_numberFibers == numberOfStiffnesses ) &&
+                      ( M_numberFibers == numberOfNonlinearities ) &&
+                      ( M_numberFibers == numberStretches ) , " Inconsistency in the set up of the fiber parameters" );
+          }
+
+          if( !M_solidTypeAnisotropic.compare("distributedHolzapfel") )
+          {
+              UInt numberOfDistribution   = dataFile.vector_variable_size ( ( section + "/model/fibers/distribution" ).data() );
+              ASSERT( ( M_numberFibers == numberOfStiffnesses ) && ( M_numberFibers == numberOfNonlinearities )
+                      && ( M_numberFibers == numberOfDistribution ), " Inconsistency in the set up of the fiber parameters" );
+          }
+      }
+
+    // Reading the material for isotropic laws
     ASSERT ( materialsNumber, "Set the materrial_flag variable in [solid]/physics");
 
     if ( materialsNumber == 0 )
@@ -149,12 +259,12 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
         M_vectorMaterialFlags.resize (1);
 
         M_vectorMaterialFlags[0] = 1;
-        M_young[1]   = dataFile ( ( section + "/physics/young"   ).data(), 0. );
-        M_poisson[1] = dataFile ( ( section + "/physics/poisson" ).data(), 0. );
+        M_young[1]   = dataFile ( ( section + "/model/young"   ).data(), 0. );
+        M_poisson[1] = dataFile ( ( section + "/model/poisson" ).data(), 0. );
 
-        M_bulk[1] = dataFile ( ( section + "/physics/bulk"   ).data(), 1e9 );
-        M_alpha[1] = dataFile ( ( section + "/physics/alpha" ).data(), 3e6 );
-        M_gamma[1] = dataFile ( ( section + "/physics/gamma" ).data(), 0.8 );
+        M_bulk[1] = dataFile ( ( section + "/model/bulk"   ).data(), 0. );
+        M_alpha[1] = dataFile ( ( section + "/model/alpha" ).data(), 0. );
+        M_gamma[1] = dataFile ( ( section + "/model/gamma" ).data(), 0. );
     }
     else
     {
@@ -172,14 +282,47 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
             material            = dataFile ( ( section + "/physics/material_flag" ).data(), 0., i );
 
             M_vectorMaterialFlags[i] = material;
-            M_young[material]   = dataFile ( ( section + "/physics/young"         ).data(), 0., i );
-            M_poisson[material] = dataFile ( ( section + "/physics/poisson"       ).data(), 0., i );
+            M_young[material]   = dataFile ( ( section + "/model/young"         ).data(), 0., i );
+            M_poisson[material] = dataFile ( ( section + "/model/poisson"       ).data(), 0., i );
 
-            M_bulk[material] = dataFile ( ( section + "/physics/bulk"         ).data(), 1e9, i );
-            M_alpha[material] = dataFile ( ( section + "/physics/alpha"       ).data(), 3e6, i );
-            M_gamma[material] = dataFile ( ( section + "/physics/gamma"       ).data(), 0.8, i );
+            M_bulk[material] = dataFile ( ( section + "/model/bulk"         ).data(), 0.0, i );
+            M_alpha[material] = dataFile ( ( section + "/model/alpha"       ).data(), 0.0, i );
+            M_gamma[material] = dataFile ( ( section + "/model/gamma"       ).data(), 0.0, i );
         }
     }
+
+    if( !M_constitutiveLaw.compare("anisotropic") )
+      {
+          M_stiffnessParametersFibers .resize ( M_numberFibers  );
+          M_nonlinearityParametersFibers .resize ( M_numberFibers  );
+          M_distributionParametersFibers .resize ( M_numberFibers  );
+
+          if( !M_solidTypeAnisotropic.compare("multimechanism") ||
+              !M_solidTypeAnisotropic.compare("holzapfelGeneralized") )
+          {
+              M_characteristicStretch .resize ( M_numberFibers  );
+          }
+
+          for ( UInt i (0) ; i < M_numberFibers ; ++i )
+          {
+              M_stiffnessParametersFibers[ i ]      = dataFile ( ( section + "/model/fibers/stiffness"    ).data(), 0., i );
+              M_nonlinearityParametersFibers[ i ]   = dataFile ( ( section + "/model/fibers/nonlinearity" ).data(), 0., i );
+
+              if( !M_solidTypeAnisotropic.compare("multimechanism") ||
+                  !M_solidTypeAnisotropic.compare("holzapfelGeneralized") )
+              {
+                  M_characteristicStretch[ i ]   = dataFile ( ( section + "/model/fibers/stretch" ).data(), 0., i );
+              }
+
+              if( !M_solidTypeAnisotropic.compare("distributedHolzapfel") )
+              {
+                  M_distributionParametersFibers[ i ]   = dataFile ( ( section + "/model/fibers/distribution" ).data(), 0., i );
+              }
+          }
+          M_epsilon = dataFile ( ( section + "/model/fibers/smoothness"   ).data(), 0. );
+          M_fiberActivation = dataFile ( ( section + "/model/fiberActivation" ).data(), "implicit" );
+          M_toleranceActivation = dataFile ( ( section + "/model/fibers/tolActivation"   ).data(), 0.001 );
+      }
 
     // space_discretization
     M_order            = dataFile ( ( section + "/space_discretization/order" ).data(), "P1" );
@@ -187,6 +330,14 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
     // miscellaneous
     M_verbose          = dataFile ( ( section + "/miscellaneous/verbose" ).data(), 0 );
     M_useExactJacobian = dataFile ( ( section + "/useExactJacobian"      ).data(), false );
+
+    // Problem - Non Linear Richardson Parameters
+    M_maxSubIterationNumber = dataFile ( ( section + "/newton/maxSubIter" ).data(), 300 );
+    M_absoluteTolerance = dataFile ( ( section + "/newton/abstol" ).data(), 1.e-07 );
+    M_relativeTolerance = dataFile ( ( section + "/newton/reltol" ).data(), 1.e-07 );
+    M_errorTolerance = dataFile ( ( section + "/newton/etamax" ).data(), 1.e-03 );
+    M_NonLinearLineSearch = static_cast<Int> ( dataFile ( ( section + "/newton/NonLinearLineSearch" ).data(), 0 ) );
+
 }
 
 void
@@ -242,6 +393,42 @@ StructuralConstitutiveLawData::showMe ( std::ostream& output ) const
     output << "\n*** Values for data [solid/time_discretization]\n\n";
     M_time->showMe ( output );
     M_timeAdvance->showMe ( output );
+
+    output << " Informations on the constitutive law " << std::endl;
+    output << " Type of constitutive law " << M_constitutiveLaw << std::endl;
+    output << " Isotropic Part:  " << M_solidTypeIsotropic << std::endl;
+
+    if( !M_constitutiveLaw.compare("anisotropic") )
+      {
+          output << " Anisotropic Part:  " << M_solidTypeAnisotropic << std::endl;
+
+          for ( UInt i (0) ; i < M_numberFibers ; ++i )
+          {
+              std::cout << i + 1 << "-th coupled of parameters ( stiffness, nonlinearity ) : ( " << M_stiffnessParametersFibers[ i ]
+                        << ", " << M_nonlinearityParametersFibers[ i ] << " ); " << std::endl;
+          }
+
+          if( !M_solidTypeAnisotropic.compare("multimechanism") ||
+              !M_solidTypeAnisotropic.compare("holzapfelGeneralized"))
+          {
+              for ( UInt i (0) ; i < M_numberFibers ; ++i )
+              {
+                  std::cout << i + 1
+                            << "-th characteristic stretch : " << M_characteristicStretch[ i ]
+                            << std::endl;
+              }
+          }
+
+          if( !M_solidTypeAnisotropic.compare("distributedHolzapfel") )
+          {
+              for ( UInt i (0) ; i < M_numberFibers ; ++i )
+              {
+                  std::cout << i + 1
+                            << "-th distribution: " << M_distributionParametersFibers[ i ]
+                            << std::endl;
+              }
+          }
+      }
 }
 
 // ===================================================

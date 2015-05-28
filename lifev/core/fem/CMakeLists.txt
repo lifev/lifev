@@ -21,8 +21,11 @@ SET(fem_HEADERS
   fem/FEFunction.hpp
   fem/FESpace.hpp
   fem/GeometricMap.hpp
+  fem/GradientRecovery.hpp
   fem/HyperbolicFluxNumerical.hpp
+  fem/QRKeast.hpp
   fem/PostProcessingBoundary.hpp
+  fem/QRKeast.hpp
   fem/QuadraturePoint.hpp
   fem/QuadratureRule.hpp
   fem/QuadratureRuleProvider.hpp
@@ -63,6 +66,7 @@ SET(fem_SOURCES
   fem/QuadratureRuleProvider.cpp
   fem/ReferenceElement.cpp
   fem/ReferenceFE.cpp
+  fem/QRKeast.cpp
   fem/ReferenceFEHdiv.cpp
   fem/ReferenceFEHybrid.cpp
   fem/ReferenceFEScalar.cpp

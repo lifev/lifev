@@ -242,6 +242,7 @@ private:
 
     //!@name Private Methods
     //@{
+    void myCreateParametersList (const GetPot& dataFile, const std::string& section, const std::string& subSection);
 
     Int createPrec (operatorPtr_Type& oper,
                     boost::shared_ptr<Preconditioner>& prec);

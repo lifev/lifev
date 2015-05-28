@@ -114,8 +114,8 @@ OneDFSISolver::buildConstantMatrices()
         M_feSpacePtr->fe().update ( M_feSpacePtr->mesh()->edgeList ( iElement ), UPDATE_DPHI | UPDATE_WDET );
 
         // update the mass and grad matrices
-        mass ( 1, *M_elementalMassMatrixPtr, M_feSpacePtr->fe(), 0, 0 );
-        grad ( 0 , -1, *M_elementalGradientMatrixPtr, M_feSpacePtr->fe(), M_feSpacePtr->fe(), 0, 0 );
+        AssemblyElemental::mass ( 1, *M_elementalMassMatrixPtr, M_feSpacePtr->fe(), 0, 0 );
+        AssemblyElemental::grad ( 0 , -1, *M_elementalGradientMatrixPtr, M_feSpacePtr->fe(), M_feSpacePtr->fe(), 0, 0 );
 
         // assemble the mass and grad matrices
         assembleMatrix ( *M_homogeneousMassMatrixPtr, *M_elementalMassMatrixPtr, M_feSpacePtr->fe(), M_feSpacePtr->dof() , 0, 0, 0, 0 );
@@ -383,8 +383,8 @@ OneDFSISolver::viscoelasticFlowRateCorrection ( const vector_Type& newArea, cons
         M_elementalStiffnessMatrixPtr->zero();
 
         // Assemble the elemental matrix
-        mass (  massCoefficient,      *M_elementalMassMatrixPtr,      M_feSpacePtr->fe(), 0, 0 );
-        stiff ( stiffnessCoefficient, *M_elementalStiffnessMatrixPtr, M_feSpacePtr->fe(), 0, 0 );
+        AssemblyElemental::mass (  massCoefficient,      *M_elementalMassMatrixPtr,      M_feSpacePtr->fe(), 0, 0 );
+        AssemblyElemental::stiff ( stiffnessCoefficient, *M_elementalStiffnessMatrixPtr, M_feSpacePtr->fe(), 0, 0 );
 
         // Assemble the stiffness matrix
         assembleMatrix ( massMatrix,      *M_elementalMassMatrixPtr,      M_feSpacePtr->fe(), M_feSpacePtr->dof(), 0, 0, 0, 0 );
@@ -469,7 +469,7 @@ OneDFSISolver::postProcess ( const solution_Type& solution, const Real& time )
     {
         std::string file = M_physicsPtr->data()->postprocessingDirectory() + "/" + M_physicsPtr->data()->postprocessingFile() + "_" + i->first + ".mfile";
         outfile.open ( file.c_str(), std::ios::app );
-        outfile.setf ( ios::scientific, ios::floatfield );
+        outfile.setf ( std::ios::scientific, std::ios::floatfield );
 
         outfile << time << " ";
         for ( UInt iNode (0); iNode < static_cast< UInt > ( (*i->second).size() ); ++iNode )
@@ -774,12 +774,12 @@ OneDFSISolver::updateElementalMatrices ( const Real& dFdU, const Real& dSdU )
     M_elementalDivergenceMatrixPtr->zero();
 
     // Update the mass matrix
-    mass ( dSdU, *M_elementalMassMatrixPtr, M_feSpacePtr->fe(), 0, 0 );
+    AssemblyElemental::mass ( dSdU, *M_elementalMassMatrixPtr, M_feSpacePtr->fe(), 0, 0 );
     //    std::cout << "Elem Stiff matrix :" << std::endl;
     //    M_elementalMassMatrixPtr->showMe( std::cout );
 
     // Update the stiffness matrix
-    stiff ( dFdU, *M_elementalStiffnessMatrixPtr, M_feSpacePtr->fe(), 0 , 0 );
+    AssemblyElemental::stiff ( dFdU, *M_elementalStiffnessMatrixPtr, M_feSpacePtr->fe(), 0 , 0 );
     //AssemblyElemental::stiffness( *M_elementalStiffnessMatrixPtr, M_feSpacePtr->fe(), M_coeffStiff, 0 );
     //    std::cout << "Elem Stiff matrix :" << std::endl;
     //    M_elementalStiffnessMatrixPtr->showMe( std::cout );
@@ -796,7 +796,7 @@ OneDFSISolver::updateElementalMatrices ( const Real& dFdU, const Real& dSdU )
       is added to correspond to the described operator.
       (There is a minus in the elemOper implementation).
     */
-    grad ( 0, -dFdU, *M_elementalGradientMatrixPtr, M_feSpacePtr->fe(), M_feSpacePtr->fe(), 0, 0 );
+    AssemblyElemental::grad ( 0, -dFdU, *M_elementalGradientMatrixPtr, M_feSpacePtr->fe(), M_feSpacePtr->fe(), 0, 0 );
     //    std::cout << "Elem Grad matrix :" << std::endl;
     //    M_elementalGradientMatrixPtr->showMe( std::cout );
 
@@ -810,7 +810,7 @@ OneDFSISolver::updateElementalMatrices ( const Real& dFdU, const Real& dSdU )
 
       BEWARE : same remarks as grad (see above).
     */
-    div ( 0, -dSdU, *M_elementalDivergenceMatrixPtr, M_feSpacePtr->fe(), M_feSpacePtr->fe(), 0, 0 );
+    AssemblyElemental::div ( 0, -dSdU, *M_elementalDivergenceMatrixPtr, M_feSpacePtr->fe(), M_feSpacePtr->fe(), 0, 0 );
     //    std::cout << "Elem Div matrix :" << std::endl;
     //    M_elementalDivergenceMatrixPtr->showMe( std::cout );
 }
@@ -885,9 +885,9 @@ OneDFSISolver::inertialFlowRateCorrection ( const vector_Type& flux )
         // Update the current element
         M_feSpacePtr->fe().update ( M_feSpacePtr->mesh()->edgeList (iElement), UPDATE_DPHI | UPDATE_WDET );
 
-        mass (   coeffMass,  elmatMassLHS,  M_feSpacePtr->fe(), 0, 0 );
-        stiff (   coeffStiff, elmatStiffLHS, M_feSpacePtr->fe(), 0, 0 );
-        stiff ( - coeffStiff, elmatStiffRHS, M_feSpacePtr->fe(), 0, 0 );
+        AssemblyElemental::mass (   coeffMass,  elmatMassLHS,  M_feSpacePtr->fe(), 0, 0 );
+        AssemblyElemental::stiff (   coeffStiff, elmatStiffLHS, M_feSpacePtr->fe(), 0, 0 );
+        AssemblyElemental::stiff ( - coeffStiff, elmatStiffRHS, M_feSpacePtr->fe(), 0, 0 );
 
         // assemble the mass and grad matrices
         assembleMatrix ( matrixLHS, elmatMassLHS, M_feSpacePtr->fe(), M_feSpacePtr->dof(), 0, 0, 0, 0 );
@@ -1031,8 +1031,8 @@ OneDFSISolver::longitudinalFlowRateCorrection()
         // Update the current element
         M_feSpacePtr->fe().update ( M_feSpacePtr->mesh()->edgeList (iElement), UPDATE_DPHI | UPDATE_WDET );
 
-        mass ( coeffMassLHS, elmatMassLHS, M_feSpacePtr->fe(), 0, 0 );
-        mass ( coeffMassRHS, elmatMassRHS, M_feSpacePtr->fe(), 0, 0 );
+        AssemblyElemental::mass ( coeffMassLHS, elmatMassLHS, M_feSpacePtr->fe(), 0, 0 );
+        AssemblyElemental::mass ( coeffMassRHS, elmatMassRHS, M_feSpacePtr->fe(), 0, 0 );
 
         // assemble the mass and grad matrices
         //assemb_mat( massLHS, elmatMassLHS, M_feSpacePtr->fe(), M_feSpacePtr->dof() , 0, 0 );

@@ -79,13 +79,13 @@ public:
     //@{
 
     //! Flag for the global current FE
-    const static flag_Type S_globalUpdateFlag;
+    const static flag_Type S_globalUpdateFlag = ET_UPDATE_NONE;
 
     //! Flag for the test current FE
-    const static flag_Type S_testUpdateFlag;
+    const static flag_Type S_testUpdateFlag = ET_UPDATE_NONE;
 
     //! Flag fot the solution current FE
-    const static flag_Type S_solutionUpdateFlag;
+    const static flag_Type S_solutionUpdateFlag = ET_UPDATE_NONE;
 
     //@}
 
@@ -117,7 +117,7 @@ public:
     void update (const UInt& /*iElement*/) {}
 
     //! Display method
-    static void display (ostream& out = std::cout)
+    static void display (std::ostream& out = std::cout)
     {
         out << "phi_j";
     }
@@ -171,16 +171,6 @@ private:
 };
 
 
-template<UInt solutionDim>
-const flag_Type EvaluationPhiJ<solutionDim>::S_globalUpdateFlag = ET_UPDATE_NONE;
-
-template<UInt solutionDim>
-const flag_Type EvaluationPhiJ<solutionDim>::S_testUpdateFlag = ET_UPDATE_NONE;
-
-template<UInt solutionDim>
-const flag_Type EvaluationPhiJ<solutionDim>::S_solutionUpdateFlag = ET_UPDATE_NONE;
-
-
 //! Evaluation of the basis function phi_j in the case of a scalar FE.
 /*!
   @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
@@ -208,13 +198,13 @@ public:
     //@{
 
     //! Flag for the global current FE
-    const static flag_Type S_globalUpdateFlag;
+    const static flag_Type S_globalUpdateFlag = ET_UPDATE_NONE;
 
     //! Flag for the test current FE
-    const static flag_Type S_testUpdateFlag;
+    const static flag_Type S_testUpdateFlag = ET_UPDATE_NONE;
 
     //! Flag fot the solution current FE
-    const static flag_Type S_solutionUpdateFlag;
+    const static flag_Type S_solutionUpdateFlag = ET_UPDATE_NONE;
 
     //@}
 
@@ -246,7 +236,7 @@ public:
     void update (const UInt& /*iElement*/) {}
 
     //! Display method
-    static void display (ostream& out = std::cout)
+    static void display (std::ostream& out = std::cout)
     {
         out << "phi_j";
     }

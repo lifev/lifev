@@ -231,11 +231,13 @@ void MonolithicBlockMatrix::applyBoundaryConditions (const Real& time, vectorPtr
 
 void MonolithicBlockMatrix::applyBoundaryConditions (const Real& time, vectorPtr_Type& rhs, const UInt block)
 {
+
     bcManage ( *M_globalMatrix , *rhs, *super_Type::M_FESpace[block]->mesh(), super_Type::M_FESpace[block]->dof(), *super_Type::M_bch[block], super_Type::M_FESpace[block]->feBd(), 1., time);
 }
 
 void MonolithicBlockMatrix::applyBoundaryConditions (const Real& time, const UInt block)
 {
+
     bcManageMatrix ( *M_globalMatrix , *super_Type::M_FESpace[block]->mesh(), super_Type::M_FESpace[block]->dof(), *super_Type::M_bch[block], super_Type::M_FESpace[block]->feBd(), 1., time);
 }
 

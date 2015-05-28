@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief File containing the expression to represent a vectorial constant
+    @brief File containing the expression to represent a matricial constant
 
     @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
 
@@ -38,7 +38,7 @@
 
 #include <lifev/core/LifeV.hpp>
 
-#include <lifev/eta/array/MatrixSmall.hpp>
+#include <lifev/core/array/MatrixSmall.hpp>
 
 #include <lifev/eta/expression/ExpressionBase.hpp>
 
@@ -120,7 +120,6 @@ private:
     ExpressionMatrix();
 
     //@}
-
     MatrixSmall<MatrixDim1, MatrixDim2> M_value;
 };
 

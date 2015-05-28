@@ -1,9 +1,11 @@
 SET(fem_HEADERS
   fem/AssemblyElementalStructure.hpp
+  fem/ExpressionDefinitions.hpp
 CACHE INTERNAL "")
 
 SET(fem_SOURCES
   fem/AssemblyElementalStructure.cpp
+  fem/ExpressionDefinitions.cpp
 CACHE INTERNAL "")
 
 SET(LOCAL_HEADERS)

@@ -44,7 +44,7 @@ restart    = false   # restart the computations (see also importer)
 #Tstart     = 0.005 # restart from time Tstart
 
 [interface] # mesh dependent flags for the interface.
-fluid_flag      =  1 # default: 1
+fluid_flag      =  100 # default: 1
 #solid_flag      =  1 # default: fluid_flag
 #harmonic_flag   =  1 # default: fluid_flag
 tolerance       =  0 # how far points are to be considered the same on the interface
@@ -89,7 +89,7 @@ max_iter_reuse = 100
 [../space_discretization]
 mesh_type = .mesh
 mesh_dir  = ./ # the directory where the mesh file is
-mesh_file = tube20.mesh #carotid_fluid.mesh #tube_curve20.mesh  # mesh file
+mesh_file = tube_coarse.mesh #carotid_fluid.mesh #tube_curve20.mesh  # mesh file
 stiff_strain=true
 vel_order		= P1		# P1, P1Bubble, P2
 press_order		= P1			# P1, P2
@@ -205,11 +205,15 @@ filter_singletons      = false
 
 [./physics]
 material_flag   = '1' # '1 2'
-solidType       = linearVenantKirchhoff
-young           = 4.0E6 #,1.9E9
-poisson         = 0.45 #,0.30
-density         = 1.2					# density
+density     = 1.2
 thickness	= 0.1
+
+[../model]
+constitutiveLaw     = isotropic
+young     		= 4.e+6
+poisson   		= 0.45
+solidTypeIsotropic 	= linearVenantKirchhoff 		# linearVenantKirchhoff / nonLinearVenantKirchhoff / neoHookean / exponential
+
 
 [../time_discretization]
 timestep        = 0.001
@@ -222,7 +226,7 @@ BDF_order       = 2
 [../space_discretization]
 mesh_type = .mesh
 mesh_dir  = ./  # the directory where the mesh file is
-mesh_file = vessel20.mesh #carotid_solid.mesh #vessel_curve20.mesh  # mesh
+mesh_file = vessel_coarse.mesh #carotid_solid.mesh #vessel_curve20.mesh  # mesh
 order     = P1
 
 [../miscellaneous]
@@ -250,6 +254,7 @@ reuse           = true
 [../prec]
 prectype        = Ifpack
 overlap         = 2
+xmlName                 = xmlParameters.xml
 
 [./ifpack]
 

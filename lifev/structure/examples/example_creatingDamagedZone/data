@@ -1,0 +1,50 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Library
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Umberto Villa <uvilla@emory.edu>
+#                 Tiziano Passerini <tiziano@mathcs.emory.edu>
+#           Date: 10-12-2010
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### TESTSUITE: STRUCTURE MECHANICS ################################################################
+###################################################################################################
+#-------------------------------------------------
+#      Data file for Structure Solver
+#-------------------------------------------------
+
+
+[exporter]
+modifiedMesh = 4proc.mesh
+name = 4proc
+type = hdf5
+
+
+[solid]
+
+[./physics]
+material_flag   = '1 2' # the two flags that will be in the modified mesh please
+
+[../model]
+contitutiveLaw = isotropic
+young     	= '0.0 0.0'
+poisson   	= '0.0 0.0'
+bulk		= '0.0 0.0'
+alpha 		= '0.0 0.0'
+gamma		= '0.0 0.0'
+solidTypeIsotropic 	= exponential
+
+[../space_discretization]
+mesh_dir  	= ./
+mesh_type   = .mesh
+mesh_file 	= solidHalfThorus.mesh
+order     	= P1
+
+
+[./]
+
+
+

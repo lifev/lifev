@@ -1,0 +1,11 @@
+<!-- Model Parameters -->
+    <ParameterList name="Hodgkin Huxley: Parameter list"> 	
+    <Parameter name="gNa" type="double" value="120.0"/> 	
+    <Parameter name="gK"  type="double" value="36.0" /> 
+    <Parameter name="gL"  type="double" value="0.3"  /> 
+    <Parameter name="vNa" type="double" value="115.0"/> 
+    <Parameter name="vK"  type="double" value="-12.0"/>
+    <Parameter name="vL"  type="double" value="10.6" />
+    </ParameterList> 
+
+	

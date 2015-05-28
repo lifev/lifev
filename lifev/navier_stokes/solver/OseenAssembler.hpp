@@ -1,4 +1,3 @@
-
 //@HEADER
 /*
 ************************************************************************
@@ -45,6 +44,7 @@
 #include <lifev/core/fem/Assembly.hpp>
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/fem/AssemblyElemental.hpp>
+#include <lifev/core/fem/BCHandler.hpp>
 #include <lifev/core/fem/QuadratureRuleProvider.hpp>
 
 #include <boost/shared_ptr.hpp>
@@ -261,8 +261,8 @@ public:
 
 private:
 
-    typedef CurrentFE                                    currentFE_Type;
-    typedef boost::scoped_ptr<currentFE_Type>            currentFEPtr_Type;
+    typedef CurrentFE                            currentFE_Type;
+    typedef boost::scoped_ptr<currentFE_Type>    currentFEPtr_Type;
 
     typedef MatrixElemental                              localMatrix_Type;
     typedef boost::scoped_ptr<localMatrix_Type>          localMatrixPtr_Type;
@@ -288,7 +288,6 @@ private:
     // Beta FE space
     fespacePtr_Type M_betaFESpace;
 
-
     // CurrentFE
     currentFEPtr_Type M_viscousCFE;
 
@@ -299,6 +298,7 @@ private:
     currentFEPtr_Type M_divergencePCFE;
 
     currentFEPtr_Type M_massCFE;
+    currentFEPtr_Type M_massBetaCFE;
     currentFEPtr_Type M_massPressureCFE;
 
     currentFEPtr_Type M_convectionUCFE;
@@ -318,6 +318,7 @@ private:
     localMatrixPtr_Type M_localDivergence;
 
     localMatrixPtr_Type M_localMass;
+
     localMatrixPtr_Type M_localMassPressure;
 
     localMatrixPtr_Type M_localConvection;
@@ -342,6 +343,7 @@ OseenAssembler() :
     M_divergenceUCFE(),
     M_divergencePCFE(),
     M_massCFE(),
+    M_massBetaCFE(),
     M_massPressureCFE(),
     M_convectionUCFE(),
     M_convectionBetaCFE(),
@@ -383,56 +385,63 @@ setup (const fespacePtr_Type& uFESpace, const fespacePtr_Type& pFESpace, const f
 
     M_viscousCFE.reset (new currentFE_Type (M_uFESpace->refFE(),
                                             M_uFESpace->fe().geoMap(),
-                                            QuadratureRuleProvider::provideExactnessMax (TETRA, 2 * uDegree - 2) ) );
+                                            QuadratureRuleProvider::provideExactness (TETRA, 2 * uDegree - 2) ) );
 
     M_gradPressureUCFE.reset (new currentFE_Type (M_uFESpace->refFE(),
                                                   M_uFESpace->fe().geoMap(),
-                                                  QuadratureRuleProvider::provideExactnessMax (TETRA, uDegree + pDegree - 1) ) );
+                                                  QuadratureRuleProvider::provideExactness (TETRA, uDegree + pDegree - 1) ) );
 
     M_gradPressurePCFE.reset (new currentFE_Type (M_pFESpace->refFE(),
                                                   M_uFESpace->fe().geoMap(),
-                                                  QuadratureRuleProvider::provideExactnessMax (TETRA, uDegree + pDegree - 1) ) );
+                                                  QuadratureRuleProvider::provideExactness (TETRA, uDegree + pDegree - 1) ) );
 
     M_divergenceUCFE.reset (new currentFE_Type (M_uFESpace->refFE(),
                                                 M_uFESpace->fe().geoMap(),
-                                                QuadratureRuleProvider::provideExactnessMax (TETRA, uDegree + pDegree - 1) ) );
+                                                QuadratureRuleProvider::provideExactness (TETRA, uDegree + pDegree - 1) ) );
 
 
     M_divergencePCFE.reset (new currentFE_Type (M_pFESpace->refFE(),
                                                 M_uFESpace->fe().geoMap(),
-                                                QuadratureRuleProvider::provideExactnessMax (TETRA, uDegree + pDegree - 1) ) );
+                                                QuadratureRuleProvider::provideExactness (TETRA, uDegree + pDegree - 1) ) );
 
     M_massCFE.reset (new currentFE_Type (M_uFESpace->refFE(),
                                          M_uFESpace->fe().geoMap(),
-                                         QuadratureRuleProvider::provideExactnessMax (TETRA, 2 * uDegree) ) );
+                                         QuadratureRuleProvider::provideExactness (TETRA, 2 * uDegree) ) );
+
+    M_massBetaCFE.reset (new currentFE_Type (M_betaFESpace->refFE(),
+                                             M_uFESpace->fe().geoMap(),
+                                             QuadratureRuleProvider::provideExactness (TETRA, 2 * uDegree) ) );
 
     M_massPressureCFE.reset (new currentFE_Type (M_pFESpace->refFE(),
                                                  M_pFESpace->fe().geoMap(),
-                                                 QuadratureRuleProvider::provideExactnessMax (TETRA, 2 * pDegree) ) );
+                                                 QuadratureRuleProvider::provideExactness (TETRA, 2 * pDegree) ) );
 
     M_convectionUCFE.reset (new currentFE_Type (M_uFESpace->refFE(),
                                                 M_uFESpace->fe().geoMap(),
-                                                QuadratureRuleProvider::provideExactnessMax (TETRA, 2 * uDegree + betaDegree - 1) ) );
+                                                QuadratureRuleProvider::provideExactness (TETRA, 2 * uDegree + betaDegree - 1) ) );
 
     M_convectionBetaCFE.reset (new currentFE_Type (M_betaFESpace->refFE(),
                                                    M_uFESpace->fe().geoMap(),
-                                                   QuadratureRuleProvider::provideExactnessMax (TETRA, 2 * uDegree + betaDegree - 1) ) );
+                                                   QuadratureRuleProvider::provideExactness (TETRA, 2 * uDegree + betaDegree - 1) ) );
 
     M_convectionRhsUCFE.reset (new currentFE_Type (M_betaFESpace->refFE(),
                                                    M_uFESpace->fe().geoMap(),
-                                                   QuadratureRuleProvider::provideExactnessMax (TETRA, 2 * betaDegree + betaDegree - 1) ) );
+                                                   QuadratureRuleProvider::provideExactness (TETRA, 2 * betaDegree + betaDegree - 1) ) );
 
     M_localViscous.reset (new localMatrix_Type (M_uFESpace->fe().nbFEDof(),
                                                 M_uFESpace->fieldDim(),
                                                 M_uFESpace->fieldDim() ) );
+
     M_localGradPressure.reset (new localMatrix_Type (M_uFESpace->fe().nbFEDof(), nDimensions, 0,
                                                      M_pFESpace->fe().nbFEDof(), 0, 1) );
 
     M_localDivergence.reset (new localMatrix_Type (M_uFESpace->fe().nbFEDof(), 0, nDimensions,
                                                    M_pFESpace->fe().nbFEDof(), 1, 0) );
+
     M_localMass.reset (new localMatrix_Type (M_uFESpace->fe().nbFEDof(),
                                              M_uFESpace->fieldDim(),
                                              M_uFESpace->fieldDim() ) );
+
     M_localMassPressure.reset (new localMatrix_Type (M_pFESpace->fe().nbFEDof(),
                                                      M_pFESpace->fieldDim(),
                                                      M_pFESpace->fieldDim() ) );
@@ -776,7 +785,7 @@ addNewtonConvection ( matrixType& matrix, const vectorType& beta, const UInt& of
         // Clean the local matrix
         M_localConvection->zero();
 
-        VectorElemental betaLocal ( M_uFESpace->fe().nbFEDof(), M_uFESpace->fieldDim() );
+        localVector_Type betaLocal ( M_uFESpace->fe().nbFEDof(), M_uFESpace->fieldDim() );
 
         // Create local vector
         for ( UInt iNode = 0 ; iNode < M_uFESpace->fe().nbFEDof() ; iNode++ )
@@ -928,7 +937,7 @@ addConvectionRhs (vectorType& rhs, const Real& coefficient, const vectorType& ve
             }
         }
 
-        source_advection (coefficient, localVelocity, localVelocity, *M_localConvectionRhs, *M_convectionRhsUCFE);
+        AssemblyElemental::source_advection (coefficient, localVelocity, localVelocity, *M_localConvectionRhs, *M_convectionRhsUCFE);
 
         // Here add in the global rhs
         for (UInt iterFDim (0); iterFDim < fieldDim; ++iterFDim)

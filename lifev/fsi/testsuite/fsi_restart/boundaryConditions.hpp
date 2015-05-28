@@ -119,7 +119,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFlux (bool /*isOpen=true*/)
     return BCh_fluid;
 }
 
-FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid (FSIOperator& _oper, bool const& isOpen = true)
+FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid (FSIOperator& _oper, bool const& /*isOpen = true*/)
 {
     // Boundary conditions for the fluid velocity
     debugStream ( 10000 ) << "Boundary condition for the fluid\n";

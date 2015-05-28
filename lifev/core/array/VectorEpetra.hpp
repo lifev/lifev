@@ -67,7 +67,7 @@ public:
     //@{
 
     typedef Epetra_FEVector                  vector_type;
-    typedef boost::shared_ptr< vector_type > Vector_PtrType;
+    typedef boost::shared_ptr< vector_type > vectorPtr_Type;
     typedef Real                             data_type;
     typedef Epetra_CombineMode               combineMode_Type;
 
@@ -628,6 +628,9 @@ public:
      */
     void abs ( VectorEpetra& vector );
 
+    //! Apply the square root to of each element in the vector
+    void sqrt ();
+
     //! Compute the scalar product of two vectors
     /*!
       @param vector Second vector for the scalar product
@@ -660,6 +663,8 @@ public:
       @param output Stream where the informations must be printed
      */
     void showMe ( std::ostream& output = std::cout ) const;
+
+    void apply (const boost::function1<Real, Real>& f);
 
     //@}
 
@@ -715,7 +720,7 @@ public:
     }
 
     //! Return the shared pointer on the raw VectorEpetra
-    const Vector_PtrType& epetraVectorPtr() const
+    const vectorPtr_Type& epetraVectorPtr() const
     {
         return M_epetraVector;
     }
@@ -750,6 +755,11 @@ public:
         return * ( M_epetraMap->map ( M_mapType ) );
     }
 
+
+    inline void setMapType (MapEpetraType type)
+    {
+        M_mapType = type;
+    }
     //! Return the size of the vector
     Int size() const;
 
@@ -804,7 +814,7 @@ private:
 
     boost::shared_ptr< MapEpetra > M_epetraMap;
     MapEpetraType                  M_mapType;
-    Vector_PtrType                 M_epetraVector;
+    vectorPtr_Type                 M_epetraVector;
     combineMode_Type               M_combineMode;
 };
 
@@ -816,3 +826,4 @@ VectorEpetra operator* ( const VectorEpetra::data_type& scalar, const VectorEpet
 } // end namespace LifeV
 
 #endif
+

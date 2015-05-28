@@ -67,19 +67,19 @@ public:
 
     explicit NeighborMarker ( markerID_Type& p ) : Marker<FlagPolicy> ( p ) {}
 
-    NeighborMarker<FlagPolicy> & operator=( NeighborMarker<FlagPolicy> const & marker )
+    NeighborMarker<FlagPolicy>& operator= ( NeighborMarker<FlagPolicy> const& marker )
     {
-        setPointNeighbors( marker.pointNeighbors() );
-        Marker<FlagPolicy>::operator=( marker );
+        setPointNeighbors ( marker.pointNeighbors() );
+        Marker<FlagPolicy>::operator= ( marker );
         return *this;
     }
 
-    neighbors_Type & pointNeighbors ()
+    neighbors_Type& pointNeighbors ()
     {
         return M_pointNeighbors;
     }
 
-    neighbors_Type const & pointNeighbors () const
+    neighbors_Type const& pointNeighbors () const
     {
         return M_pointNeighbors;
     }

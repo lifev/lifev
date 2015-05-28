@@ -54,6 +54,7 @@ FSIOperator::FSIOperator() :
     M_uFESpace                           ( ),
     M_pFESpace                           ( ),
     M_dFESpace                           ( ),
+    M_dETFESpace                         ( ),
     M_mmFESpace                          ( ),
     M_fluidMesh                          ( ),
     M_solidMesh                          ( ),
@@ -172,7 +173,7 @@ FSIOperator::setDataFile ( const GetPot& dataFile )
     M_aleOrder               =  dataFile ( "fluid/space_discretization/ale_order", "P1");
     M_solidTimeAdvanceMethod =  dataFile ( "solid/time_discretization/method", "BDF");
     M_ALETimeAdvanceMethod   = dataFile ("mesh_motion/time_discretization/method", "BDF");
-    M_structureNonLinear     = M_data->dataSolid()->solidType().compare ("linearVenantKirchhoff");
+    M_structureNonLinear     = M_data->dataSolid()->lawType().compare ("linear");
     this->setupTimeAdvance ( dataFile );
 }
 
@@ -360,6 +361,12 @@ FSIOperator::setupFEspace()
                                                                //*bdQr_struct,
                                                                3,
                                                                M_epetraComm) );
+
+        M_dETFESpace.reset ( new ETFESpace<mesh_Type, MapEpetra, 3, 3> ( M_solidLocalMesh,
+                                                                         & (M_dFESpace->refFE() ),
+                                                                         & (M_dFESpace->fe().geoMap() ),
+                                                                         M_epetraComm) );
+
     }
     else
     {
@@ -370,6 +377,12 @@ FSIOperator::setupFEspace()
                                                              *bdQr_struct,
                                                              3,
                                                              M_epetraComm) );
+
+        M_dETFESpace.reset (new ETFESpace<mesh_Type, MapEpetra, 3, 3> (M_solidMesh,
+                                                                       & (M_dFESpace->refFE() ),
+                                                                       & (M_dFESpace->fe().geoMap() ),
+                                                                       M_epetraComm) );
+
     }
     M_epetraWorldComm->Barrier();
 }
@@ -492,7 +505,7 @@ FSIOperator::setupFluidSolid ( UInt const fluxes )
     }
 
     M_solid.reset ( new solid_Type( ) );
-    M_solid->setup ( M_data->dataSolid(), M_dFESpace, M_epetraComm );
+    M_solid->setup ( M_data->dataSolid(), M_dFESpace, M_dETFESpace, M_epetraComm );
 
     M_epetraWorldComm->Barrier();
 }
@@ -650,7 +663,7 @@ FSIOperator::initialize ( fluid_Type::function_Type const& u0,
     debugStream ( 6220 ) << "FSI:: solid init \n";
     if (this->isSolid() )
     {
-        solid().initialize (d0, w0, w0);
+        solid().initialize (d0 /*, w0, w0*/);
     }
     debugStream ( 6220 ) << "FSI:: fluid init \n";
     if (this->isFluid() )
@@ -790,9 +803,9 @@ FSIOperator::initializeFluid ( const vector_Type& velAndPressure,
 
 void
 FSIOperator::initializeSolid ( vectorPtr_Type displacement,
-                               vectorPtr_Type velocity )
+                               vectorPtr_Type /*velocity*/ )
 {
-    this->solid().initialize ( displacement, velocity);
+    this->solid().initialize ( displacement /*, velocity*/);
 }
 
 void
@@ -801,6 +814,7 @@ FSIOperator::moveMesh ( const vector_Type& dep )
     displayer().leaderPrint ("FSI-  Moving the mesh ...                      ");
     M_fluidLocalMesh->meshTransformer().moveMesh (dep,  this->M_mmFESpace->dof().numTotalDof() );
     displayer().leaderPrint ( "done\n" );
+
     M_fluid->setRecomputeMatrix ( true );
 }
 
@@ -1068,14 +1082,13 @@ FSIOperator::bcManageVectorRHS ( const fluidBchandlerPtr_Type& bcHandlerFluid, c
 
     bcManageRhs ( rhs, *M_dFESpace->mesh(), M_dFESpace->dof(),  *bcHandlerSolid, M_dFESpace->feBd(), 1., 0. );
 }
-
 void
 FSIOperator::setAlphafCoef( )
 {
     Real h = 0.1, R = 0.5;
     M_alphaFCoef  =  M_ALETimeAdvance->coefficientSecondDerivative ( 0 ) * (this->dataSolid()->rho() * h) / this->dataFluid()->dataTime()->timeStep();
     M_alphaFCoef += h * M_data->dataSolid()->young (1) * this->dataFluid()->dataTime()->timeStep() /
-                    (pow (R, 2) * (1 - pow (M_data->dataSolid()->poisson (1), 2) ) );
+                    (std::pow (R, 2) * (1 - std::pow (M_data->dataSolid()->poisson (1), 2) ) );
     M_alphaFCoef /= M_ALETimeAdvance->coefficientFirstDerivative ( 0 );
 }
 

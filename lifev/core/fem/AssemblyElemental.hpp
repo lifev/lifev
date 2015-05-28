@@ -99,6 +99,71 @@ void mass (MatrixElemental& localMass,
            const Real& coefficient,
            const UInt& fieldDim);
 
+//! Elementary weighted mass for constant mass coefficient
+/*!
+  This function assembles the local mass matrix when the mass coefficient is constant.
+
+  @param localMass The local matrix to be filled (not cleaned by this function)
+  @param massCFE The currentFE structure already updated for the assembly. It requires
+  phi and wDetJacobian to be accessible.
+  @param coefficient The mass coefficient
+  @param fieldDim The dimension of the FE space (scalar/vectorial)
+ */
+template<typename localVector>
+void weightedMass (MatrixElemental& localMass,
+                   const CurrentFE& massCFE,
+                   const Real& coefficient,
+                   const localVector& localValues,
+                   const UInt& fieldDim)
+{
+    const UInt nbFEDof (massCFE.nbFEDof() );
+    const UInt nbQuadPt (massCFE.nbQuadPt() );
+    Real localValue (0);
+    Real localCoefficient (0);
+
+    // Assemble the local mass
+    for (UInt iterFDim (0); iterFDim < fieldDim; ++iterFDim)
+    {
+        // Extract the view of the matrix
+        MatrixElemental::matrix_view localView = localMass.block (iterFDim, iterFDim);
+
+        // Loop over the basis functions
+        for (UInt iDof (0); iDof < nbFEDof ; ++iDof)
+        {
+            // Build the local matrix only where needed:
+            // Lower triangular + diagonal parts
+            for (UInt jDof (0); jDof <= iDof; ++jDof)
+            {
+                localValue = 0.0;
+
+                //Loop on the quadrature nodes
+                for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
+                {
+                    localCoefficient = 0.0;
+                    for (UInt iterDim (0); iterDim < fieldDim; ++iterDim)
+                    {
+                        localCoefficient += localValues[iQuadPt][iterDim] * localValues[iQuadPt][iterDim];
+                    }
+
+                    localValue += coefficient * localCoefficient
+                                  * massCFE.phi (iDof, iQuadPt)
+                                  * massCFE.phi (jDof, iQuadPt)
+                                  * massCFE.wDetJacobian (iQuadPt);
+                }
+
+                // Add on the local matrix
+                localView (iDof, jDof) += localValue;
+
+                if (iDof != jDof)
+                {
+                    localView (jDof, iDof) += localValue;
+                }
+            }
+        }
+    }
+}
+
+
 //! Elementary stiffness for constant coefficient
 /*!
   This function assembles the local stiffness matrix when the coefficient is constant.
@@ -385,7 +450,6 @@ void bodyForces (VectorElemental& localForce,
                  const function_Type& fun,
                  const Real& t,
                  const UInt& fieldDim);
-}
 
 //----------------------------------------------------------------------
 //
@@ -1027,6 +1091,8 @@ for \f$ w \in H(div, K) \f$ and \f$ g \f$ a constant vector.
 void source_Hdiv ( const Vector& source , VectorElemental& elvec, const CurrentFE& dualFE, int iblock = 0 );
 
 //!@}
+
+} // end namespace AssemblyElemental
 
 } // namespace LifeV
 #endif

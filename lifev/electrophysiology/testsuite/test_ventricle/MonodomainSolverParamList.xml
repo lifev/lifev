@@ -1,0 +1,44 @@
+<ParameterList>	<!-- LinearSolver parameters -->
+    <Parameter name="surfaceVolumeRatio" type="double" value="1400.0"/>
+    <Parameter name="timeStep" type="double" value="0.02"  />
+    <Parameter name="endTime" type="double" value="3.02"  />
+    <Parameter name="saveStep" type="double" value="1.0"  />
+    <Parameter name="longitudinalDiffusion" type="double" value="1.3342"  /><!-- k Ohm ^-1 cm ^ -1-->
+    <Parameter name="transversalDiffusion" type="double" value ="0.17606"  /><!--k Ohm ^-1 cm ^ -1-->
+    <Parameter name="elementsOrder" type="string" value="P1"  />
+    <Parameter name="mesh_name" type="string" value="idealized.mesh"  />
+    <Parameter name="mesh_path" type="string" value="./"  />
+    <Parameter name="solid_fiber_field" type="string" value="fibers"/>
+    <Parameter name="solid_fiber_file" type="string" value="FiberDirection"  />
+    
+    <Parameter name="Reuse Preconditioner" type="bool" value="true"/>
+    <Parameter name="Max Iterations For Reuse" type="int" value="80"/>
+    <Parameter name="Quit On Failure" type="bool" value="false"/>
+    <Parameter name="Silent" type="bool" value="true"/>
+	<Parameter name="Solver Type" type="string" value="AztecOO"/>
+	<Parameter name="OutputFile" type="string" value="Output"/>
+	<Parameter name="OutputTimeSteps" type="string" value="TimeSteps1"/>
+	
+	<!-- Operator specific parameters (AztecOO) -->
+	<ParameterList name="Solver: Operator List">
+
+		<!-- Trilinos parameters -->
+		<ParameterList name="Trilinos: AztecOO List">
+    		<Parameter name="solver" type="string" value="cg"/>
+	    	<Parameter name="conv" type="string" value="rhs"/>
+    		<Parameter name="scaling" type="string" value="none"/>
+	    	<Parameter name="output" type="string" value="none"/>
+    		<Parameter name="tol" type="double" value="1.e-10"/>
+	    	<Parameter name="max_iter" type="int" value="200"/>
+    		<Parameter name="kspace" type="int" value="100"/>
+    		<!-- az_aztec_defs.h -->
+    		<!-- #define AZ_classic 0 /* Does double classic */ -->
+	    	<Parameter name="orthog" type="int" value="0"/>
+	    	<!-- az_aztec_defs.h -->
+	    	<!-- #define AZ_resid 0 -->
+    		<Parameter name="aux_vec" type="int" value="0"/>
+    	</ParameterList>
+    </ParameterList>
+</ParameterList>
+
+

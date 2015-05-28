@@ -198,16 +198,16 @@ void readMesh ( RegionMesh<LinearTriangle, MC>& mesh, const MeshData& data )
     if ( data.meshType() == ".msh" )
     {
         std::ifstream ifile;
-        ifile.open ( ( data.meshDir() + data.meshFile()).c_str() );
+        ifile.open ( ( data.meshDir() + data.meshFile() ).c_str() );
         ASSERT (ifile.is_open(), "Error! Unable to read mesh file.\n");
 
         // Checking whether it is Gmsh or FreeFem mesh format
-        if (ifile.get()=='$')
+        if (ifile.get() == '$')
         {
             // Gmsh files start with '$MeshFormat'
             ifile.close();
             BareMesh<LinearTriangle> bareMesh;
-            MeshIO::ReadGmshFile (data.meshDir() + data.meshFile(),bareMesh,0,data.verbose());
+            MeshIO::ReadGmshFile (data.meshDir() + data.meshFile(), bareMesh, 0, data.verbose() );
             convertBareMesh ( bareMesh, mesh, data.verbose() );
         }
         else

@@ -41,6 +41,7 @@
 #include <lifev/eta/expression/ExpressionBase.hpp>
 #include <lifev/eta/expression/ExpressionScalar.hpp>
 #include <lifev/eta/expression/ExpressionVector.hpp>
+#include <lifev/eta/expression/ExpressionMatrix.hpp>
 
 namespace LifeV
 {
@@ -204,6 +205,22 @@ ExpressionProduct<LExpressionType, ExpressionVector<Vdim> >
 operator* (const ExpressionBase<LExpressionType>& l, const VectorSmall<Vdim>& r)
 {
     return ExpressionProduct<LExpressionType, ExpressionVector<Vdim> > (l.cast(), ExpressionVector<Vdim> (r) );
+}
+
+// "Specialization" for the case of a matrix
+template< typename RExpressionType, UInt Dim1 , UInt Dim2 >
+ExpressionProduct<ExpressionMatrix<Dim1, Dim2>, RExpressionType>
+operator* (const MatrixSmall<Dim1, Dim2>&  l, const ExpressionBase<RExpressionType>& r)
+{
+    return ExpressionProduct<ExpressionMatrix<Dim1, Dim2>, RExpressionType> (ExpressionMatrix<Dim1, Dim2> (l), r.cast() );
+}
+
+// "Specialization" for the case of a matrix
+template< typename LExpressionType, UInt Dim1, UInt Dim2 >
+ExpressionProduct<LExpressionType, ExpressionMatrix<Dim1, Dim2> >
+operator* (const ExpressionBase<LExpressionType>& l, const MatrixSmall<Dim1, Dim2>& r)
+{
+    return ExpressionProduct<LExpressionType, ExpressionMatrix<Dim1, Dim2> > (l.cast(), ExpressionMatrix<Dim1, Dim2> (r) );
 }
 
 

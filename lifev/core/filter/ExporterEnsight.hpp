@@ -66,6 +66,12 @@ public:
     typedef typename super::exporterData_Type exporterData_Type;
     //@}
 
+    //! @name Static members
+
+    //! returns the type of the map to use for the VectorEpetra
+    static MapEpetraType const MapType;
+    //@}
+
     //! @name Constructors and destructor
     //@{
     //! Default constructor
@@ -157,7 +163,7 @@ public:
     //! returns the type of the map to use for the VectorEpetra
     MapEpetraType mapType() const
     {
-        return Repeated;
+        return MapType;
     }
 
     //@}
@@ -296,6 +302,9 @@ private:
 // ==============
 // Implementation
 // ==============
+
+template<typename MeshType>
+MapEpetraType const ExporterEnsight<MeshType>::MapType (Repeated);
 
 // ==============
 // Constructors

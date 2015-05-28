@@ -64,6 +64,14 @@
 #include <life/lifealg/PreconditionerPCD.hpp>
 #endif
 
+//To handle ET for FSI
+#include <lifev/core/array/MatrixEpetraStructured.hpp>
+#include <lifev/core/array/MatrixEpetraStructuredUtility.hpp>
+#include <lifev/core/array/MatrixEpetraStructuredView.hpp>
+#include <lifev/core/array/VectorEpetraStructured.hpp>
+#include <lifev/core/array/VectorEpetraStructuredView.hpp>
+
+
 namespace LifeV
 {
 
@@ -110,6 +118,10 @@ public:
     typedef FactorySingleton< Factory< FSIMonolithic, std::string > > factory_Type;
     typedef SolverAztecOO                                             solver_Type;
 
+    // Added due to ET
+    typedef MatrixEpetraStructured<Real>                              matrixBlock_Type;
+    typedef MatrixEpetraStructuredView<Real>                          matrixBlockView_Type;
+    typedef boost::shared_ptr<matrixBlock_Type>                      matrixBlockPtr_Type;
     //@}
 
     // constructors
@@ -218,6 +230,8 @@ public:
             M_BCh_u = M_BCh_flux;
         }
         M_BCh_flux.reset();
+
+
     }
 
 #ifdef HAVE_TRILINOS_ANASAZI
@@ -328,6 +342,7 @@ public:
     void setFluidBC     ( const fluidBchandlerPtr_Type& bc_fluid )
     {
         super_Type::setFluidBC (bc_fluid);
+
         if (M_BChs.size() )
         {
             UInt nfluxes (M_BChs[1]->numberOfBCWithType (Flux) );
@@ -343,6 +358,7 @@ public:
             M_monolithicMatrix->setConditions (M_BChs);
             M_precPtr->setConditions (M_BChs);
         }
+
     }
 
 
@@ -469,6 +485,8 @@ public:
     virtual void setALEVectorInStencil ( const vectorPtr_Type& fluidDisp, const UInt iter, const bool lastVector) = 0;
 
     void finalizeRestart();
+
+    void initializeMonolithicOperator ( std::vector< vectorPtr_Type> u0, std::vector< vectorPtr_Type> ds0, std::vector< vectorPtr_Type> df0);
 
     //@}
 

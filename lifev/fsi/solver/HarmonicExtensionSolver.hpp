@@ -365,7 +365,7 @@ void HarmonicExtensionSolver<Mesh, SolverType>::computeMatrix( )
         // Updating derivatives
         M_FESpace.fe().updateFirstDerivQuadPt ( M_FESpace.mesh()->volumeList ( i ) );
         M_elmat.zero();
-        stiff ( M_diffusion, M_elmat, M_FESpace.fe(), 0, 0, 3 );
+        AssemblyElemental::stiff ( M_diffusion, M_elmat, M_FESpace.fe(), 0, 0, 3 );
         // Assembling
         for ( UInt j = 0; j < M_FESpace.fieldDim(); ++j )
         {
