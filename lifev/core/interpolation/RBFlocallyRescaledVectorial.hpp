@@ -532,6 +532,14 @@ void RBFlocallyRescaledVectorial<mesh_Type>::identifyNodes (meshPtr_Type LocalMe
     }
     else
     {
+	// Checking which points have to be considered. 
+	// TODO: here the code could be otimized but currently it is 
+	// not since we want to keep the code general, i.e., such
+	// that it works for mesh to mesh and also for interface to interface.
+	// In the case interface to interface we do not have to loop all over
+	// the vertices, but on the boundary faces. 
+	// TODO: works just for P1 now since we ask for the markerID of the 
+	// points.
         for ( UInt i = 0; i < LocalMesh->numVertices(); ++i )
             if ( this->isInside (LocalMesh->point (i).markerID(), M_flags) )
                 if (CheckVector->blockMap().LID ( static_cast<EpetraInt_Type> (LocalMesh->point (i).id()) ) != -1)
@@ -544,13 +552,13 @@ void RBFlocallyRescaledVectorial<mesh_Type>::identifyNodes (meshPtr_Type LocalMe
 template <typename mesh_Type>
 bool RBFlocallyRescaledVectorial<mesh_Type>::isInside (ID pointMarker, flagContainer_Type flags)
 {
-    int check = 0;
+    // Checking if the point with id number ID has to be considered
     for (UInt i = 0; i < flags.size(); ++i)
         if (pointMarker == flags[i])
         {
-            ++check;
+	    return true;
         }
-    return (check > 0) ? true : false;
+    return false;
 }
 
 
