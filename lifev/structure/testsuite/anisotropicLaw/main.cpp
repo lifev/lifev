@@ -301,7 +301,7 @@ Structure::run3d()
     //! #################################################################################
     //! BOUNDARY CONDITIONS
     //! #################################################################################
-    vector <ID> compx (1), compy (1), compz (1), compxy (2), compxz (2), compyz (2);
+    std::vector <ID> compx (1), compy (1), compz (1), compxy (2), compxz (2), compyz (2);
     compx[0] = 0;
     compy[0] = 1, compz[0] = 2;
     compxy[0] = 0;

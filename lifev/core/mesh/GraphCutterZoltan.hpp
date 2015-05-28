@@ -443,7 +443,7 @@ void GraphCutterZoltan<MeshType>::getNeighbourList (void* data,
             int pid = 0;
             for (int i = 0; i < object->numProcessors(); ++i)
             {
-                UInt ie = *iter;
+                Int ie = *iter;
                 if (ie >= object->firstIndex (i)
                         &&
                         ie <= object->lastIndex (i) )
@@ -685,7 +685,7 @@ void GraphCutterZoltan<MeshType>::buildPartitionTable()
     M_comm->Barrier();
     if (numProcessors() > 1)
     {
-        for (UInt i = 0; i < numProcessors(); ++i)
+        for (Int i = 0; i < numProcessors(); ++i)
         {
             int currentSize = 0;
             if (i == M_myPID)

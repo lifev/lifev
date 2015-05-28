@@ -1586,7 +1586,7 @@ void MeshPartitioner<MeshType>::markGhostEntities()
         for ( UInt e = 0; e < (*M_meshPartitions) [ i ]->numElements(); e++ )
         {
             typename MeshType::element_Type& element = (*M_meshPartitions) [ i ]->element ( e );
-            if ( M_entityPID.elements[ element.id() ] != static_cast<UInt> ( procId ) )
+            if ( M_entityPID.elements[ element.id() ] != procId )
             {
                 element.setFlag ( EntityFlags::GHOST );
             }
@@ -1595,7 +1595,7 @@ void MeshPartitioner<MeshType>::markGhostEntities()
         for ( UInt f = 0; f < (*M_meshPartitions) [ i ]->numFacets(); f++ )
         {
             typename MeshType::facet_Type& facet = (*M_meshPartitions) [ i ]->facet ( f );
-            if ( M_entityPID.facets[ facet.id() ] != static_cast<UInt> ( procId ) )
+            if ( M_entityPID.facets[ facet.id() ] != procId )
             {
                 facet.setFlag ( EntityFlags::GHOST );
             }
@@ -1604,7 +1604,7 @@ void MeshPartitioner<MeshType>::markGhostEntities()
         for ( UInt r = 0; r < (*M_meshPartitions) [ i ]->numRidges(); r++ )
         {
             typename MeshType::ridge_Type& ridge = (*M_meshPartitions) [ i ]->ridge ( r );
-            if ( M_entityPID.ridges[ ridge.id() ] != static_cast<UInt> ( procId ) )
+            if ( M_entityPID.ridges[ ridge.id() ] != procId )
             {
                 ridge.setFlag ( EntityFlags::GHOST );
             }
@@ -1613,7 +1613,7 @@ void MeshPartitioner<MeshType>::markGhostEntities()
         for ( UInt p = 0; p < (*M_meshPartitions) [ i ]->numPoints(); p++ )
         {
             typename MeshType::point_Type& point = (*M_meshPartitions) [ i ]->point ( p );
-            if ( M_entityPID.points[ point.id() ] != static_cast<UInt> ( procId ) )
+            if ( M_entityPID.points[ point.id() ] != procId )
             {
                 point.setFlag ( EntityFlags::GHOST );
             }

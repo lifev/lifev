@@ -121,6 +121,7 @@ FSIOperator::FSIOperator() :
     M_betaMean                           ( ),
     M_epetraComm                         ( ),
     M_epetraWorldComm                    ( ),
+    M_structureNonLinear                 (false),
     //begin of private members
     M_lambdaSolid                        ( ),
     M_lambdaSolidRepeated                ( ),
@@ -143,8 +144,7 @@ FSIOperator::FSIOperator() :
     M_linearSolid                        ( false ),
     M_fluidLeader                        ( ),
     M_solidLeader                        ( ),
-    M_aleOrder                           ( std::string ("P1") ),
-    M_structureNonLinear                 (false)
+    M_aleOrder                           ( std::string ("P1") )
 {
 }
 
@@ -1787,7 +1787,7 @@ FSIOperator::interpolateInterfaceDofs ( const FESpace<mesh_Type, MapEpetra>& _fe
     assert (_vec1.mapType() == Repeated);
     assert (_vec2.mapType() == Unique);
 
-    typedef mesh_Type::elementShape_Type GeoShape; // Element shape
+    //typedef mesh_Type::elementShape_Type GeoShape; // Element shape
 
 
     UInt nDofPerVert1  = _fespace1.refFE().nbDofPerVertex(); // number of DOF per vertex

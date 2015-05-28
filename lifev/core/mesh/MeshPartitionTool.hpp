@@ -328,7 +328,7 @@ void MeshPartitionTool < MeshType >::run()
         {
             M_secondStageParts->resize (graph->size() );
             // For each set of elements in graph perform a second stage partitioning
-            for (Int i = 0; i < graph->size(); ++i)
+            for (size_t i = 0; i < graph->size(); ++i)
             {
                 const idListPtr_Type& currentIds = graph->at (i);
                 partitionGraphParMETIS (currentIds, *M_originalMesh,
@@ -489,7 +489,7 @@ MeshPartitionTool < MeshType >::globalToLocal (const Int curPart)
         M_meshPartBuilder->globalToLocalElement();
     idTable_Type& currentGraph = * (M_secondStageParts->at (curPart) );
 
-    for (Int i = 0; i < currentGraph.size(); ++i)
+    for (size_t i = 0; i < currentGraph.size(); ++i)
     {
         int currentSize = currentGraph[i]->size();
         idList_Type& currentElements = * (currentGraph[i]);

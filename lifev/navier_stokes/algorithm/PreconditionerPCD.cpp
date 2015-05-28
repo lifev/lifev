@@ -67,11 +67,11 @@ PreconditionerPCD::PreconditionerPCD ( boost::shared_ptr<Epetra_Comm> comm ) :
     M_setFpBoundaryConditions    ( false ),
     M_setMpBoundaryConditions    ( false ),
     M_fullFactorization          ( false ),
+    M_schurOperatorReverseOrder  ( false ),
     M_useStiffStrain             ( false ),
     M_enableTransient            ( true ),
     M_divergenceCoeff            ( 1.0 ),
     M_recomputeNormalVectors     ( true ),
-    M_schurOperatorReverseOrder  ( false ),
     M_inflowBoundaryType         ( "Robin" ),
     M_outflowBoundaryType        ( "Neumann" ),
     M_characteristicBoundaryType ( "Neumann" )
@@ -1240,14 +1240,14 @@ PreconditionerPCD::setBCByBoundaryType ( matrixPtr_type Ap, UInt ApOffset,
     outflowBoundary        = & ( bcHandler.findBCWithFlag ( 2 ) );
     characteristicBoundary = & ( bcHandler.findBCWithFlag ( 3 ) );
 
-    bcFlag_Type elementMarker; //will store the marker of the element
+//    bcFlag_Type elementMarker; //will store the marker of the element
 
     // Loop on boundary faces
     for ( ID iBoundaryElement = 0 ; iBoundaryElement < M_pFESpace->mesh()->numBoundaryFacets(); ++iBoundaryElement )
     {
         // construction of localToGlobalMapOnBElem (this part should be moved in DOF.hpp)
         M_pFESpace->feBd().update ( M_pFESpace->mesh()->boundaryFacet ( iBoundaryElement ), UPDATE_W_ROOT_DET_METRIC ); // updating finite element information
-        elementMarker = M_pFESpace->mesh()->boundaryFacet ( iBoundaryElement ).markerID(); // We keep the element marker
+//        elementMarker = M_pFESpace->mesh()->boundaryFacet ( iBoundaryElement ).markerID(); // We keep the element marker
 
 
         //vector containing the local to global map on each element

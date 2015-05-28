@@ -121,7 +121,7 @@ public:
     }
 
     //! Display method
-    static void display (ostream& out = std::cout )
+    static void display (std::ostream& out = std::cout )
     {
         out << " cbrt( " ;
         EvaluationBaseType::display (out);
@@ -214,7 +214,7 @@ const flag_Type EvaluationCubicRoot<EvaluationBaseType>::S_solutionUpdateFlag
     = EvaluationBaseType::S_solutionUpdateFlag;
 
 
-/* 
+/*
      This expression is a specialization of the cubic root expression
      for the structure module to have a fast computation of the isochoric
      change of variable used in the structure module for the constitutive models
@@ -281,7 +281,7 @@ public:
     }
 
     //! Display method
-    static void display (ostream& out = std::cout )
+    static void display (std::ostream& out = std::cout )
     {
         out << " IsoCoV( " ;
         EvaluationBaseType::display (out);

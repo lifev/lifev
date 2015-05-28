@@ -259,8 +259,6 @@ Structure::run3d()
     typedef std::vector<fiberFunctionPtr_Type>                          vectorFiberFunction_Type;
     typedef boost::shared_ptr<vectorFiberFunction_Type>                 vectorFiberFunctionPtr_Type;
 
-    typedef std::vector<vectorPtr_Type>                                 listOfFiberDirections_Type;
-
     // General typedefs
     typedef StructuralOperator<mesh_Type >::vector_Type vector_Type;
     typedef boost::shared_ptr<vector_Type>                        vectorPtr_Type;
@@ -481,10 +479,10 @@ Structure::run3d()
 
     ExpressionVectorFromNonConstantScalar<ExpressionMeas, 3  > vMeas( meas_K );
     evaluateNode( elements ( dETFESpace->mesh() ),
-		  fakeQuadratureRule,
-		  dETFESpace,
-		  dot( vMeas , phi_i )
-		  ) >> patchAreaVector;
+      fakeQuadratureRule,
+      dETFESpace,
+      dot( vMeas , phi_i )
+      ) >> patchAreaVector;
     patchAreaVector->globalAssemble();
 
     std::string const nameField =  dataFile ( "importer/nameField", "displacement");

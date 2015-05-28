@@ -112,9 +112,6 @@ Int main (Int argc, char** argv)
     // *********************************
     // Useful typedefs
     // *********************************
-    typedef MultiscaleModelFSI1D::physics_Type       physics_Type;
-    typedef MultiscaleModelFSI1D::flux_Type          flux_Type;
-    typedef MultiscaleModelFSI1D::source_Type        source_Type;
 
     typedef MultiscaleModelFSI1D::bc_Type            bc_Type;
     typedef bc_Type::bcFunction_Type                 bcFunction_Type;

@@ -325,7 +325,7 @@ Int GraphCutterParMETIS<MeshType>::partitionHierarchical()
     {
         const idList_Type& currentVertices = * (tempVertexPartition->at (i) );
         idListPtr_Type subdomainVertexMap (new idList_Type (currentVertices.size() ) );
-        for (Int k = 0; k < currentVertices.size(); ++k)
+        for (size_t k = 0; k < currentVertices.size(); ++k)
         {
             subdomainVertexMap->at (k) = currentVertices[k];
         }
