@@ -508,7 +508,7 @@ void RBFvectorial<mesh_Type>::identifyNodes (meshPtr_Type LocalMesh, boost::unor
     if (M_flags[0] == -1)
     {
         for ( UInt i = 0; i < LocalMesh->numVertices(); ++i )
-            if (CheckVector->blockMap().LID (LocalMesh->point (i).id() ) != -1)
+            if (CheckVector->blockMap().LID ( static_cast<EpetraInt_Type> (LocalMesh->point (i).id()) ) != -1)
             {
                 GID_nodes.insert (LocalMesh->point (i).id() );
             }
@@ -517,7 +517,7 @@ void RBFvectorial<mesh_Type>::identifyNodes (meshPtr_Type LocalMesh, boost::unor
     {
         for ( UInt i = 0; i < LocalMesh->numVertices(); ++i )
             if ( this->isInside (LocalMesh->point (i).markerID(), M_flags) )
-                if (CheckVector->blockMap().LID (LocalMesh->point (i).id() ) != -1)
+                if (CheckVector->blockMap().LID ( static_cast<EpetraInt_Type> (LocalMesh->point (i).id()) ) != -1)
                 {
                     GID_nodes.insert (LocalMesh->point (i).id() );
                 }

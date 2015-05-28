@@ -499,7 +499,7 @@ void RBFlocallyRescaledVectorial<mesh_Type>::buildUnknownVectorialInterfaceMap()
     boost::unordered_set<ID> GID_vectorial;
     for ( UInt i = 0; i < M_localMeshUnknown->numVertices(); ++i )
         if ( this->isInside (M_localMeshUnknown->point (i).markerID(), M_flags) )
-            if (M_unknownField->blockMap().LID (M_localMeshUnknown->point (i).id() ) != -1)
+            if (M_unknownField->blockMap().LID ( static_cast<EpetraInt_Type> (M_localMeshUnknown->point (i).id()) ) != -1)
                 for(int nDim = 0; nDim < 3; ++nDim)
                     GID_vectorial.insert (M_localMeshUnknown->point (i).id() + nDim*M_fullMeshUnknown->numVertices());
 
@@ -525,7 +525,7 @@ void RBFlocallyRescaledVectorial<mesh_Type>::identifyNodes (meshPtr_Type LocalMe
     if (M_flags[0] == -1)
     {
         for ( UInt i = 0; i < LocalMesh->numVertices(); ++i )
-            if (CheckVector->blockMap().LID (LocalMesh->point (i).id() ) != -1)
+            if (CheckVector->blockMap().LID ( static_cast<EpetraInt_Type> ( LocalMesh->point (i).id() ) ) != -1)
             {
                 GID_nodes.insert (LocalMesh->point (i).id() );
             }
@@ -534,7 +534,7 @@ void RBFlocallyRescaledVectorial<mesh_Type>::identifyNodes (meshPtr_Type LocalMe
     {
         for ( UInt i = 0; i < LocalMesh->numVertices(); ++i )
             if ( this->isInside (LocalMesh->point (i).markerID(), M_flags) )
-                if (CheckVector->blockMap().LID (LocalMesh->point (i).id() ) != -1)
+                if (CheckVector->blockMap().LID ( static_cast<EpetraInt_Type> (LocalMesh->point (i).id()) ) != -1)
                 {
                     GID_nodes.insert (LocalMesh->point (i).id() );
                 }

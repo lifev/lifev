@@ -137,7 +137,7 @@ int main (int argc, char** argv )
     for ( UInt j = 0; j < 3; ++j)
         for ( UInt i = 0; i < Solid_vector->epetraVector().MyLength(); ++i )
             if( Solid_vector->blockMap().GID (i) < Solid_mesh_ptr->pointList.size())
-                if (Solid_vector->blockMap().LID (Solid_vector->blockMap().GID(i) + Solid_vector->size()/3*j ) != -1)
+                if (Solid_vector->blockMap().LID (static_cast<EpetraInt_Type> ( Solid_vector->blockMap().GID(i) + Solid_vector->size()/3*j ) ) != -1)
                 {
                     switch (j)
                     {
@@ -204,7 +204,7 @@ int main (int argc, char** argv )
         for ( UInt i = 0; i < Fluid_exact_solution->epetraVector().MyLength(); ++i )
             if ( Fluid_exact_solution->blockMap().GID (i) < Fluid_mesh_ptr->pointList.size())
                 if ( Fluid_mesh_ptr->point (Fluid_exact_solution->blockMap().GID (i) ).markerID() == 1 || Fluid_mesh_ptr->point (Fluid_exact_solution->blockMap().GID (i) ).markerID() == 20 )
-                    if ( Fluid_exact_solution->blockMap().LID (Fluid_exact_solution->blockMap().GID (i) + Fluid_exact_solution->size()/3*j ) != -1)
+                    if ( Fluid_exact_solution->blockMap().LID ( static_cast<EpetraInt_Type> ( Fluid_exact_solution->blockMap().GID (i) + Fluid_exact_solution->size()/3*j ) ) != -1)
                     {
                         switch (j)
                         {

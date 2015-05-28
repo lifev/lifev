@@ -240,7 +240,7 @@ void RBFhtpVectorial<Mesh>::buildInterpolationMatrix()
 
     for ( int i = 0 ; i < M_projectionOperator->matrixPtr()->Map().NumMyElements(); ++i )
     {
-        if(solutionOne->blockMap().LID (solutionOne->blockMap().GID (i) ) != -1)
+        if(solutionOne->blockMap().LID ( static_cast<EpetraInt_Type> (solutionOne->blockMap().GID (i)) ) != -1)
         {
             Indices[0] = M_projectionOperator->matrixPtr()->RowMap().GID(i);
             Values = 1/((*solutionOne)[Indices[0]]);
@@ -470,7 +470,7 @@ void RBFhtpVectorial<mesh_Type>::identifyNodes (meshPtr_Type LocalMesh, boost::u
     if (M_flags[0] == -1)
     {
         for ( UInt i = 0; i < LocalMesh->numVertices(); ++i )
-            if (CheckVector->blockMap().LID (LocalMesh->point (i).id() ) != -1)
+            if (CheckVector->blockMap().LID ( static_cast<EpetraInt_Type> (LocalMesh->point (i).id()) ) != -1)
             {
                 GID_nodes.insert (LocalMesh->point (i).id() );
             }
@@ -479,7 +479,7 @@ void RBFhtpVectorial<mesh_Type>::identifyNodes (meshPtr_Type LocalMesh, boost::u
     {
         for ( UInt i = 0; i < LocalMesh->numVertices(); ++i )
             if ( this->isInside (LocalMesh->point (i).markerID(), M_flags) )
-                if (CheckVector->blockMap().LID (LocalMesh->point (i).id() ) != -1)
+                if (CheckVector->blockMap().LID ( static_cast<EpetraInt_Type> (LocalMesh->point (i).id()) ) != -1)
                 {
                     GID_nodes.insert (LocalMesh->point (i).id() );
                 }

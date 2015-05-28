@@ -160,7 +160,6 @@ int main (int argc, char** argv )
 
     RBFinterpolant->buildOperators();
 
-    /*
     RBFinterpolant->interpolate();
 
     RBFinterpolant->solution (Solid_solution);
@@ -210,7 +209,6 @@ int main (int argc, char** argv )
         std::cout << "Error, norm_Inf = " <<  err_Inf  << std::endl;
         std::cout << "Error, normL2   = " <<  err_L2   << std::endl;
     }
-	*/
 
 #ifdef HAVE_MPI
     MPI_Finalize();

@@ -167,7 +167,7 @@ VectorEpetra::VectorEpetra ( const VectorEpetra& vector, const Int& reduceToProc
 VectorEpetra::data_type&
 VectorEpetra::operator[] ( const UInt row )
 {
-    Int lrow = blockMap().LID (row);
+    Int lrow = blockMap().LID (static_cast<EpetraInt_Type> (row));
 
 #ifdef HAVE_LIFEV_DEBUG
     if ( lrow < 0 )
@@ -183,7 +183,7 @@ VectorEpetra::operator[] ( const UInt row )
 const VectorEpetra::data_type&
 VectorEpetra::operator[] ( const UInt row ) const
 {
-    Int lrow = blockMap().LID (row);
+    Int lrow = blockMap().LID (static_cast<EpetraInt_Type> (row));
 
 #ifdef HAVE_LIFEV_DEBUG
     if ( lrow < 0 )
@@ -200,14 +200,14 @@ VectorEpetra::operator[] ( const UInt row ) const
 VectorEpetra::data_type&
 VectorEpetra::operator() ( const UInt row )
 {
-    return operator[] (row);
+    return operator[] (static_cast<EpetraInt_Type> (row));
 }
 
 
 const VectorEpetra::data_type&
 VectorEpetra::operator() ( const UInt row ) const
 {
-    return operator[] (row);
+    return operator[] (static_cast<EpetraInt_Type> (row));
 }
 
 // copies the value of a vector u. If the map is not the same,
