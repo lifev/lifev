@@ -56,7 +56,7 @@ public:
 
     typedef std::vector<int>                                                      flagContainer_Type;
 
-    typedef boost::unordered_set<ID>                                                          idContainer_Type;
+    typedef boost::unordered_set<ID>                                              idContainer_Type;
 
     typedef MapEpetra                                                             map_Type;
     typedef boost::shared_ptr<MapEpetra>                                          mapPtr_Type;
@@ -191,15 +191,19 @@ void RBFlocallyRescaledVectorial<Mesh>::buildOperators()
 template <typename Mesh>
 void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
 {
-    this->identifyNodes (M_localMeshKnown, M_GIdsKnownMesh, M_knownField);
-    M_neighbors.reset ( new neighbors_Type ( M_fullMeshKnown, M_localMeshKnown, M_knownField->mapPtr(), M_knownField->mapPtr()->commPtr() ) );
+    // Identifying dofs to be taken into account
+	this->identifyNodes (M_localMeshKnown, M_GIdsKnownMesh, M_knownField);
+
+	// Object needed to find neighbors by mesh connectivity
+	M_neighbors.reset ( new neighbors_Type ( M_fullMeshKnown, M_localMeshKnown, M_knownField->mapPtr(), M_knownField->mapPtr()->commPtr() ) );
     if (M_flags[0] == -1)
     {
         M_neighbors->setUpNeighbors ();
     }
     else
     {
-        M_neighbors->createPointPointNeighborsList (M_flags);
+    	// List of neighbors, for each dof finding its neighbors
+    	M_neighbors->createPointPointNeighborsList (M_flags);
     }
 
     int LocalNodesNumber = M_GIdsKnownMesh.size();
@@ -520,7 +524,7 @@ void RBFlocallyRescaledVectorial<mesh_Type>::buildUnknownVectorialInterfaceMap()
 
 
 template <typename mesh_Type>
-void RBFlocallyRescaledVectorial<mesh_Type>::identifyNodes (meshPtr_Type LocalMesh, boost::unordered_set<ID>& GID_nodes, vectorPtr_Type CheckVector)
+inline void RBFlocallyRescaledVectorial<mesh_Type>::identifyNodes (meshPtr_Type LocalMesh, boost::unordered_set<ID>& GID_nodes, vectorPtr_Type CheckVector)
 {
     if (M_flags[0] == -1)
     {
@@ -550,7 +554,7 @@ void RBFlocallyRescaledVectorial<mesh_Type>::identifyNodes (meshPtr_Type LocalMe
 }
 
 template <typename mesh_Type>
-bool RBFlocallyRescaledVectorial<mesh_Type>::isInside (ID pointMarker, flagContainer_Type flags)
+inline bool RBFlocallyRescaledVectorial<mesh_Type>::isInside (ID pointMarker, flagContainer_Type flags)
 {
     // Checking if the point with id number ID has to be considered
     for (UInt i = 0; i < flags.size(); ++i)
