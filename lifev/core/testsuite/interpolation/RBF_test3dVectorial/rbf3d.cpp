@@ -51,6 +51,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #include <lifev/core/interpolation/RBFInterpolation.hpp>
 #include <lifev/core/interpolation/RBFlocallyRescaledVectorial.hpp>
+#include <lifev/core/interpolation/RBFrescaledVectorial.hpp>
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
 #include <Teuchos_RCP.hpp>
@@ -178,14 +179,13 @@ int main (int argc, char** argv )
 
     // SET UP FOR THE INTERPOLANT: GLOBAL AND LOCAL MESHES PLUS THE VECTOR OF FLAGS
     RBFinterpolant->setup(Solid_mesh_ptr, Solid_localMesh, Fluid_mesh_ptr, Fluid_localMesh, flags);
-
+    
     // PASSING THE VECTOR WITH THE DATA, THE ONE THAT WILL STORE THE SOLUTION, THE DATAFILE AND THE BELOS LIST
     RBFinterpolant->setupRBFData (Solid_vector, Fluid_solution, dataFile, belosList);
 
     // CREATING THE RBF OPERATORS
     RBFinterpolant->buildOperators();
 
-    /*
     // PERFORMING INTERPOLATION
     RBFinterpolant->interpolate();
 
@@ -240,7 +240,7 @@ int main (int argc, char** argv )
     Fluid_exporter.addVariable (ExporterData<mesh_Type>::VectorField, "Error", Fluid_fieldFESpace, myError, UInt (0) );
     Fluid_exporter.postProcess (0);
     Fluid_exporter.closeFile();
-	*/
+
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif

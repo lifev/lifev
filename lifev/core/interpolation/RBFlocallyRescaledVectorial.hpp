@@ -150,7 +150,7 @@ private:
     vectorPtr_Type      M_solOnGamma;
     mapPtr_Type         M_gammaMapUnknownVectorial;
     UInt                M_links;
-
+    Real                M_radius;
 };
 
 template <typename mesh_Type>
@@ -227,7 +227,13 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
         Neighbors = M_neighbors->circleNeighbors ( *it, M_links );
         Neighbors.insert ( *it );
         MatrixGraph[k] = Neighbors;
-
+        
+        RBF_radius[k] = computeRBFradius ( M_fullMeshKnown, M_fullMeshKnown, Neighbors, GlobalID[k]);
+        neighbors_Type NeighborsR;
+        NeighborsR = M_neighbors->neighborsWithinRadius ( GlobalID[k], RBF_radius[k] );
+        NeighborsR.insert ( GlobalID[k] );
+        MatrixGraph[k] = NeighborsR;
+        
         /*
         // Lines below can be used to check whether the neighbors are taken correctly
         if ( GlobalID[k] == (1262-1) )
@@ -239,9 +245,6 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
         }
 		*/
 
-        // Compute the radius for each point
-        RBF_radius[k] = computeRBFradius ( M_fullMeshKnown, M_fullMeshKnown, MatrixGraph[k], GlobalID[k]);
-
         // Number of nonzero entries per row
         ElementsPerRow[k] = MatrixGraph[k].size();
 
@@ -251,13 +254,12 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
         }
         ++k;
     }
-
+    
     // Map of the interpolation operator
     M_interpolationOperatorMap.reset (new map_Type (-1, LocalNodesNumber, GlobalID, M_knownField->mapPtr()->commPtr() ) );
 
     // Matrix for interpolation operator
     M_interpolationOperator.reset (new matrix_Type (*M_interpolationOperatorMap, ElementsPerRow) );
-
 
     int* Indices = new int[Max_entries];
     double* Values = new double[Max_entries];
@@ -276,7 +278,7 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
                                M_fullMeshKnown->point (*it).x(),
                                M_fullMeshKnown->point (*it).y(),
                                M_fullMeshKnown->point (*it).z(),
-                               RBF_radius[i]);
+                               RBF_radius[i] );
             ++k;
         }
         M_interpolationOperator->matrixPtr()->InsertGlobalValues (GlobalID[i], k, Values, Indices);
@@ -337,10 +339,13 @@ void RBFlocallyRescaledVectorial<mesh_Type>::projectionOperator()
         neighbors_Type Neighbors;
         Neighbors = M_neighbors->circleNeighbors ( nearestPoint, M_links );
         Neighbors.insert ( nearestPoint );
-        MatrixGraph[k] = Neighbors;
-
-        // RBF_radius[k] = computeRBFradius ( M_fullMeshKnown, M_fullMeshUnknown, MatrixGraph[k], GlobalID[k]);
-        RBF_radius[k] = computeRBFradius ( M_fullMeshKnown, M_fullMeshKnown, MatrixGraph[k], nearestPoint);
+        
+        RBF_radius[k] = computeRBFradius ( M_fullMeshKnown, M_fullMeshUnknown, Neighbors, GlobalID[k]);
+        neighbors_Type NeighborsR;
+        NeighborsR = M_neighbors->neighborsWithinRadius ( nearestPoint, RBF_radius[k] );
+        NeighborsR.insert ( nearestPoint );
+        MatrixGraph[k] = NeighborsR;
+        
         ElementsPerRow[k] = MatrixGraph[k].size();
         if (ElementsPerRow[k] > Max_entries)
         {
@@ -435,6 +440,7 @@ void RBFlocallyRescaledVectorial<mesh_Type>::interpolateCostantField()
 
     M_rbf_one.reset (new vector_Type (*M_projectionOperatorMap) );
     M_projectionOperator->multiply (false, *gamma_one, *M_rbf_one);
+    M_rbf_one->spy("M_rbf_one");
 }
 
 template <typename mesh_Type>
@@ -615,7 +621,7 @@ inline bool RBFlocallyRescaledVectorial<mesh_Type>::isInside (ID pointMarker, fl
 template <typename mesh_Type>
 inline double RBFlocallyRescaledVectorial<mesh_Type>::rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius)
 {
-    double distance = sqrt ( (x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) + (z1 - z2)*(z1 - z2) );
+    double distance = std::sqrt ( (x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) + (z1 - z2)*(z1 - z2) );
     return (1 - distance / radius) * (1 - distance / radius) * (1 - distance / radius) * (1 - distance / radius) * (4 * distance / radius + 1);
 }
 
