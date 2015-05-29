@@ -285,6 +285,7 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
     }
     // This is a squared matrix
     M_interpolationOperator->globalAssemble();
+    M_interpolationOperator->exportToHDF5("InputField", "M_interpolationOperator", false);
     delete[] Indices;
     delete[] Values;
     delete[] ElementsPerRow;
@@ -440,7 +441,6 @@ void RBFlocallyRescaledVectorial<mesh_Type>::interpolateCostantField()
 
     M_rbf_one.reset (new vector_Type (*M_projectionOperatorMap) );
     M_projectionOperator->multiply (false, *gamma_one, *M_rbf_one);
-    M_rbf_one->spy("M_rbf_one");
 }
 
 template <typename mesh_Type>

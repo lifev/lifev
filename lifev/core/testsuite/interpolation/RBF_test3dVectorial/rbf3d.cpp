@@ -154,7 +154,7 @@ int main (int argc, char** argv )
     Solid_fieldFESpace->interpolate ( static_cast<FESpace_Type::function_Type> ( exact_sol ), *Solid_vector, 0.0 );
 
     // EXPORTING THE DEFINED FIELD
-    ExporterHDF5<mesh_Type> Solid_exporter (dataFile, Solid_localMesh, "Input field", Comm->MyPID() );
+    ExporterHDF5<mesh_Type> Solid_exporter (dataFile, Solid_localMesh, "InputField", Comm->MyPID() );
     Solid_exporter.setMeshProcId (Solid_localMesh, Comm->MyPID() );
     Solid_exporter.exportPID (Solid_localMesh, Comm, true );
     Solid_exporter.addVariable (ExporterData<mesh_Type>::VectorField, "f(x,y,z)", Solid_fieldFESpace, Solid_vector, UInt (0) );
