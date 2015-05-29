@@ -219,14 +219,16 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
 
     for (boost::unordered_set<ID>::iterator it = M_GIdsKnownMesh.begin(); it != M_GIdsKnownMesh.end(); ++it)
     {
-        GlobalID[k] = *it;
+    	// Selecting each dof taken into account
+    	GlobalID[k] = *it;
 
+    	// For each of them, identify the neighbors within a certain number of circles M_links
         neighbors_Type Neighbors;
         Neighbors = M_neighbors->circleNeighbors ( *it, M_links );
         Neighbors.insert ( *it );
         MatrixGraph[k] = Neighbors;
 
-        MatrixGraph[k].insert (GlobalID[k]);
+        // Compute the radius
         RBF_radius[k] = computeRBFradius ( M_fullMeshKnown, M_fullMeshKnown, MatrixGraph[k], GlobalID[k]);
         ElementsPerRow[k] = MatrixGraph[k].size();
         if (ElementsPerRow[k] > Max_entries)
@@ -344,15 +346,18 @@ void RBFlocallyRescaledVectorial<mesh_Type>::projectionOperator()
 }
 
 template <typename mesh_Type>
-double RBFlocallyRescaledVectorial<mesh_Type>::computeRBFradius (meshPtr_Type MeshNeighbors, meshPtr_Type MeshGID, idContainer_Type Neighbors, ID GlobalID)
+inline double RBFlocallyRescaledVectorial<mesh_Type>::computeRBFradius (meshPtr_Type MeshNeighbors, meshPtr_Type MeshGID, idContainer_Type Neighbors, ID GlobalID)
 {
     double r = 0;
     double r_max = 0;
     for (idContainer_Type::iterator it = Neighbors.begin(); it != Neighbors.end(); ++it)
     {
-        r = std::sqrt ( pow ( MeshGID->point ( GlobalID ).x() - MeshNeighbors->point ( *it ).x(), 2 )
-                        + pow ( MeshGID->point ( GlobalID ).y() - MeshNeighbors->point ( *it ).y(), 2 )
-                        + pow ( MeshGID->point ( GlobalID ).z() - MeshNeighbors->point ( *it ).z(), 2 ) );
+        r = std::sqrt (  ( MeshGID->point ( GlobalID ).x() - MeshNeighbors->point ( *it ).x() ) * 
+                         ( MeshGID->point ( GlobalID ).x() - MeshNeighbors->point ( *it ).x() ) + 
+                         ( MeshGID->point ( GlobalID ).y() - MeshNeighbors->point ( *it ).y() ) *
+                         ( MeshGID->point ( GlobalID ).y() - MeshNeighbors->point ( *it ).y() ) +
+                         ( MeshGID->point ( GlobalID ).z() - MeshNeighbors->point ( *it ).z() ) *
+			 ( MeshGID->point ( GlobalID ).z() - MeshNeighbors->point ( *it ).z() ) );
         r_max = ( r > r_max ) ? r : r_max;
     }
     return r_max;
