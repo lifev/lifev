@@ -166,10 +166,9 @@ int main (int argc, char** argv )
 
     // NUMBER OF FLAGS CONSIDERED: THE DOFS WHOSE FLAG IS 1 AND 20 ARE TAKEN INTO ACCOUNT
     // NOTE: from mesh to mesh the vector of flag has to contain one element with value -1
-    int nFlags = 2;
+    int nFlags = 1;
     std::vector<int> flags (nFlags);
     flags[0] = 1;
-    flags[1] = 20;
 
     // INITIALIZE THE INTERPOLANT
     interpolationPtr_Type RBFinterpolant;
@@ -186,6 +185,7 @@ int main (int argc, char** argv )
     // CREATING THE RBF OPERATORS
     RBFinterpolant->buildOperators();
 
+    /*
     // PERFORMING INTERPOLATION
     RBFinterpolant->interpolate();
 
@@ -202,7 +202,7 @@ int main (int argc, char** argv )
     for ( UInt j = 0; j < 3; ++j)
         for ( UInt i = 0; i < Fluid_exact_solution->epetraVector().MyLength(); ++i )
             if ( Fluid_exact_solution->blockMap().GID (i) < Fluid_mesh_ptr->pointList.size())
-                if ( Fluid_mesh_ptr->point (Fluid_exact_solution->blockMap().GID (i) ).markerID() == 1 || Fluid_mesh_ptr->point (Fluid_exact_solution->blockMap().GID (i) ).markerID() == 20 )
+                if ( Fluid_mesh_ptr->point ( Fluid_exact_solution->blockMap().GID (i) ).markerID() == 1  )
                     if ( Fluid_exact_solution->blockMap().LID ( static_cast<EpetraInt_Type> ( Fluid_exact_solution->blockMap().GID (i) + Fluid_exact_solution->size()/3*j ) ) != -1)
                     {
                         switch (j)
@@ -240,7 +240,7 @@ int main (int argc, char** argv )
     Fluid_exporter.addVariable (ExporterData<mesh_Type>::VectorField, "Error", Fluid_fieldFESpace, myError, UInt (0) );
     Fluid_exporter.postProcess (0);
     Fluid_exporter.closeFile();
-
+	*/
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif

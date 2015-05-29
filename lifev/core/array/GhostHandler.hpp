@@ -711,7 +711,11 @@ neighbors_Type GhostHandler<MeshType>::circleNeighbors ( UInt globalID, UInt nCi
                 newNeighbors.insert (*ii);
             }
         }
-        neighbors = newNeighbors;
+
+        for (neighbors_Type::iterator it = newNeighbors.begin(); it != newNeighbors.end(); ++it)
+        {
+        	neighbors.insert(*it);
+        }
     }
 
     return neighbors;

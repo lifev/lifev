@@ -228,6 +228,17 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
         Neighbors.insert ( *it );
         MatrixGraph[k] = Neighbors;
 
+        /*
+        // Lines below can be used to check whether the neighbors are taken correctly
+        if ( GlobalID[k] == (1262-1) )
+        {
+        	for (neighbors_Type::iterator it = Neighbors.begin(); it != Neighbors.end(); ++it)
+        	{
+        		std::cout << " " << (*it+1) << " ";
+        	}
+        }
+		*/
+
         // Compute the radius for each point
         RBF_radius[k] = computeRBFradius ( M_fullMeshKnown, M_fullMeshKnown, MatrixGraph[k], GlobalID[k]);
 
@@ -270,6 +281,7 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
         }
         M_interpolationOperator->matrixPtr()->InsertGlobalValues (GlobalID[i], k, Values, Indices);
     }
+    // This is a squared matrix
     M_interpolationOperator->globalAssemble();
     delete[] Indices;
     delete[] Values;
@@ -280,17 +292,20 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
 template <typename mesh_Type>
 void RBFlocallyRescaledVectorial<mesh_Type>::projectionOperator()
 {
-
+    // Identifying dofs to be taken into account
     this->identifyNodes (M_localMeshUnknown, M_GIdsUnknownMesh, M_unknownField);
 
+    // Total number of dofs taken into account
     int LocalNodesNumber = M_GIdsUnknownMesh.size();
 
-    std::vector<double>   RBF_radius (LocalNodesNumber);
+    std::vector<double>  RBF_radius (LocalNodesNumber);
     std::vector<boost::unordered_set<ID> > MatrixGraph (LocalNodesNumber);
     int* ElementsPerRow = new int[LocalNodesNumber];
     int* GlobalID = new int[LocalNodesNumber];
     int k = 0;
     int Max_entries = 0;
+
+    // I need to find the closest point in the "known mesh" to use its radius
     double d;
     double d_min;
     int nearestPoint;
@@ -303,19 +318,29 @@ void RBFlocallyRescaledVectorial<mesh_Type>::projectionOperator()
         {
             if ( M_flags[0] == -1 || this->isInside (M_fullMeshKnown->point (j).markerID(), M_flags) )
             {
-                d = std::sqrt ( pow (M_fullMeshKnown->point (j).x() - M_fullMeshUnknown->point (GlobalID[k]).x(), 2)
-                                + pow (M_fullMeshKnown->point (j).y() - M_fullMeshUnknown->point (GlobalID[k]).y(), 2)
-                                + pow (M_fullMeshKnown->point (j).z() - M_fullMeshUnknown->point (GlobalID[k]).z(), 2) );
+                d = std::sqrt ( ( M_fullMeshKnown->point (j).x() - M_fullMeshUnknown->point (GlobalID[k]).x() ) *
+                		        ( M_fullMeshKnown->point (j).x() - M_fullMeshUnknown->point (GlobalID[k]).x() ) +
+                                ( M_fullMeshKnown->point (j).y() - M_fullMeshUnknown->point (GlobalID[k]).y() ) *
+                                ( M_fullMeshKnown->point (j).y() - M_fullMeshUnknown->point (GlobalID[k]).y() ) +
+                                ( M_fullMeshKnown->point (j).z() - M_fullMeshUnknown->point (GlobalID[k]).z() ) *
+                                ( M_fullMeshKnown->point (j).z() - M_fullMeshUnknown->point (GlobalID[k]).z() ) );
                 if (d < d_min)
                 {
                     d_min = d;
+                    // fino qui ho verificato che j e nearestPoint coincidono
                     nearestPoint = M_fullMeshKnown->point (j).id();
                 }
             }
         }
-        MatrixGraph[k] = M_neighbors->pointPointNeighborsList() [nearestPoint];
-        MatrixGraph[k].insert (nearestPoint);
-        RBF_radius[k] = computeRBFradius ( M_fullMeshKnown, M_fullMeshUnknown, MatrixGraph[k], GlobalID[k]);
+
+        // For each of them, identify the neighbors on the other mesh within a certain number of circles M_links
+        neighbors_Type Neighbors;
+        Neighbors = M_neighbors->circleNeighbors ( nearestPoint, M_links );
+        Neighbors.insert ( nearestPoint );
+        MatrixGraph[k] = Neighbors;
+
+        // RBF_radius[k] = computeRBFradius ( M_fullMeshKnown, M_fullMeshUnknown, MatrixGraph[k], GlobalID[k]);
+        RBF_radius[k] = computeRBFradius ( M_fullMeshKnown, M_fullMeshKnown, MatrixGraph[k], nearestPoint);
         ElementsPerRow[k] = MatrixGraph[k].size();
         if (ElementsPerRow[k] > Max_entries)
         {
@@ -366,7 +391,7 @@ inline double RBFlocallyRescaledVectorial<mesh_Type>::computeRBFradius (meshPtr_
                          ( MeshGID->point ( GlobalID ).y() - MeshNeighbors->point ( *it ).y() ) *
                          ( MeshGID->point ( GlobalID ).y() - MeshNeighbors->point ( *it ).y() ) +
                          ( MeshGID->point ( GlobalID ).z() - MeshNeighbors->point ( *it ).z() ) *
-			 ( MeshGID->point ( GlobalID ).z() - MeshNeighbors->point ( *it ).z() ) );
+			             ( MeshGID->point ( GlobalID ).z() - MeshNeighbors->point ( *it ).z() ) );
         r_max = ( r > r_max ) ? r : r_max;
     }
     return r_max;
