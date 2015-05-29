@@ -228,9 +228,12 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
         Neighbors.insert ( *it );
         MatrixGraph[k] = Neighbors;
 
-        // Compute the radius
+        // Compute the radius for each point
         RBF_radius[k] = computeRBFradius ( M_fullMeshKnown, M_fullMeshKnown, MatrixGraph[k], GlobalID[k]);
+
+        // Number of nonzero entries per row
         ElementsPerRow[k] = MatrixGraph[k].size();
+
         if (ElementsPerRow[k] > Max_entries)
         {
             Max_entries = ElementsPerRow[k];
@@ -238,15 +241,21 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
         ++k;
     }
 
+    // Map of the interpolation operator
     M_interpolationOperatorMap.reset (new map_Type (-1, LocalNodesNumber, GlobalID, M_knownField->mapPtr()->commPtr() ) );
+
+    // Matrix for interpolation operator
     M_interpolationOperator.reset (new matrix_Type (*M_interpolationOperatorMap, ElementsPerRow) );
+
 
     int* Indices = new int[Max_entries];
     double* Values = new double[Max_entries];
 
+    // Loop over all the dofs taken into account by the interpolation
     for ( int i = 0 ; i < LocalNodesNumber; ++i )
     {
         k = 0;
+        // For each i-th dof, evaluate the rbf between the dof and its neighbors
         for ( boost::unordered_set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
         {
             Indices[k] = *it;
@@ -579,10 +588,10 @@ inline bool RBFlocallyRescaledVectorial<mesh_Type>::isInside (ID pointMarker, fl
 
 
 template <typename mesh_Type>
-double RBFlocallyRescaledVectorial<mesh_Type>::rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius)
+inline double RBFlocallyRescaledVectorial<mesh_Type>::rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius)
 {
-    double distance = sqrt ( pow (x1 - x2, 2) + pow (y1 - y2, 2) + pow (z1 - z2, 2) );
-    return pow (1 - distance / radius, 4) * (4 * distance / radius + 1);
+    double distance = sqrt ( (x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) + (z1 - z2)*(z1 - z2) );
+    return (1 - distance / radius) * (1 - distance / radius) * (1 - distance / radius) * (1 - distance / radius) * (4 * distance / radius + 1);
 }
 
 template <typename mesh_Type>
