@@ -108,9 +108,11 @@ public:
 
     void getinterpolationOperatorMap(mapPtr_Type& map)
     {
-        map.reset(new map_Type(*M_interpolationOperatorMap));
-        *map += *M_interpolationOperatorMap;
-        *map += *M_interpolationOperatorMap;
+        std::cout << "Mappa scalare" << M_interpolationOperatorMap->map(Unique)->NumMyElements();
+        map.reset(new map_Type(*M_interpolationOperatorMapVectorial) );
+        //map.reset(new map_Type(*M_interpolationOperatorMap));
+        //*map += *M_interpolationOperatorMap;
+        //*map += *M_interpolationOperatorMap;
     }
 
     void getSolutionOnGamma (vectorPtr_Type& GammaSolution) { GammaSolution.reset(new vector_Type ( *M_solOnGamma ) ); }
@@ -140,6 +142,7 @@ private:
     vectorPtr_Type      M_RhsOne;
     vectorPtr_Type      M_rbf_one;
     mapPtr_Type         M_interpolationOperatorMap;
+    mapPtr_Type         M_interpolationOperatorMapVectorial;
     mapPtr_Type         M_projectionOperatorMap;
     neighboringPtr_Type M_neighbors;
     vectorPtr_Type      M_unknownField_rbf;
@@ -214,14 +217,23 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
     std::vector<boost::unordered_set<ID> > MatrixGraph (LocalNodesNumber);
     int* ElementsPerRow = new int[LocalNodesNumber];
     int* GlobalID = new int[LocalNodesNumber];
+    int* GlobalID_vectorial = new int[LocalNodesNumber*3];
     int k = 0;
+    int f = 0;
     int Max_entries = 0;
 
     for (boost::unordered_set<ID>::iterator it = M_GIdsKnownMesh.begin(); it != M_GIdsKnownMesh.end(); ++it)
     {
     	// Selecting each dof taken into account
     	GlobalID[k] = *it;
-
+        
+        // Vectorial map
+        // std::cout << "M_knownField->size() = " << M_knownField->size() << "\n";
+        GlobalID_vectorial[f] = *it;
+        GlobalID_vectorial[f+LocalNodesNumber] = *it+(M_knownField->size()/3);
+        GlobalID_vectorial[f+2*LocalNodesNumber] = *it+(2*M_knownField->size()/3);
+        ++f;
+         
     	// For each of them, identify the neighbors within a certain number of circles M_links
         neighbors_Type Neighbors;
         Neighbors = M_neighbors->circleNeighbors ( *it, M_links );
@@ -254,9 +266,12 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
         }
         ++k;
     }
-    
+
     // Map of the interpolation operator
     M_interpolationOperatorMap.reset (new map_Type (-1, LocalNodesNumber, GlobalID, M_knownField->mapPtr()->commPtr() ) );
+
+    // Map of the interpolation operator
+    M_interpolationOperatorMapVectorial.reset (new map_Type (-1, LocalNodesNumber*3, GlobalID_vectorial , M_knownField->mapPtr()->commPtr() ) );
 
     // Matrix for interpolation operator
     M_interpolationOperator.reset (new matrix_Type (*M_interpolationOperatorMap, ElementsPerRow) );
@@ -283,13 +298,16 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
         }
         M_interpolationOperator->matrixPtr()->InsertGlobalValues (GlobalID[i], k, Values, Indices);
     }
+    
     // This is a squared matrix
     M_interpolationOperator->globalAssemble();
-    M_interpolationOperator->exportToHDF5("InputField", "M_interpolationOperator", false);
+    // M_interpolationOperator->exportToHDF5("InputField", "M_interpolationOperator", false);
     delete[] Indices;
     delete[] Values;
     delete[] ElementsPerRow;
     delete[] GlobalID;
+    delete[] GlobalID_vectorial;
+    
 }
 
 template <typename mesh_Type>
