@@ -320,7 +320,7 @@ public:
       @param filename file where the matrix will be saved
      */
     void spy ( std::string const& fileName );
-
+    
 #ifdef HAVE_HDF5
     //! Save the matrix into a HDF5 (.h5) file
     /*!
@@ -594,6 +594,14 @@ public:
      */
     const MapEpetra& rangeMap() const;
     const boost::shared_ptr< const MapEpetra >& rangeMapPtr() const;
+    
+    //! Restrict the matrix to the dofs contained in the input map
+    /*!
+     @param map        MapEpetra that contains the indices
+     @param matrix_out Matrix restricted
+     */
+    void restrict ( const boost::shared_ptr<MapEpetra>& map,
+                    boost::shared_ptr<MatrixEpetra<DataType> > & matrix_out );
 
     //@}
 
@@ -1733,6 +1741,33 @@ MatrixEpetra<DType>* PtAP (const MatrixEpetra<DType>& A, const MatrixEpetra<DTyp
     return matrix;
 }
 
+template <typename DataType>
+void MatrixEpetra<DataType>::restrict ( const boost::shared_ptr<MapEpetra>& map,
+                                        boost::shared_ptr<MatrixEpetra<DataType> > & matrix_out )
+{
+    // 1) create matrix P and R
+    MatrixEpetra<DataType> P (*M_rangeMap, 50 );
+    MatrixEpetra<DataType> R (*map, 50 );
+    double value = 1.0;
+    for(int i = 0 ; i < map->map(Unique)->NumMyElements(); ++i)
+    {
+        P.addToCoefficient(map->map(Unique)->GID(i),map->map(Unique)->GID(i),value);
+        R.addToCoefficient(map->map(Unique)->GID(i),map->map(Unique)->GID(i),value);
+    }
+        
+    P.globalAssemble( map, M_rangeMap );
+    R.globalAssemble( M_rangeMap, map );
+    
+    // 3) Perform tmp = matrix x P
+    MatrixEpetra<DataType> tmp (*M_rangeMap, 50 );
+    this->multiply(false, P, false, tmp, false);
+    tmp.globalAssemble( map, M_rangeMap );
+    
+    // 4) Perform restricted_matrix = R x tmp
+    matrix_out.reset(new MatrixEpetra<DataType> (*map, 50 ));
+    R.multiply(false, tmp, false, *matrix_out, false);
+    matrix_out->globalAssemble();
+}
 
 } // end namespace LifeV
 //@@
