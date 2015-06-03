@@ -443,9 +443,26 @@ void FSIHandler::buildInterfaceMaps ()
 	{
 		M_displayer.leaderPrint ( " Using nonconforming meshes " ) ;
 
+		// Reading xml parameter file for solver of the interpolation
+		Teuchos::RCP< Teuchos::ParameterList > belosList = Teuchos::rcp ( new Teuchos::ParameterList );
+		belosList = Teuchos::getParametersFromXmlFile ( "SolverParamList_rbf3d.xml" );
+
+		// Flags of the coupling
+		int nFlags = 2;
+		std::vector<int> flags (nFlags);
+		flags[0] = 1;
+		flags[1] = 20;
+
 		// Creating fluid to structure interpolation operator
+		M_FluidToStructureInterpolant.reset ( interpolation_Type::InterpolationFactory::instance().createObject (M_datafile("interpolation/interpolation_Type","none")));
+		M_FluidToStructureInterpolant->setup( M_fluidMesh, M_fluidLocalMesh, M_structureMesh, M_structureLocalMesh, flags);
+		M_FluidToStructureInterpolant->setupRBFData (M_fluidVelocity, M_structureDisplacement, M_dataFile, belosList);
+		M_FluidToStructureInterpolant->buildOperators();
+
+		M_displayer.leaderPrint ( " DONE!! " ) ;
 
 	}
+
 
 	int kkkkk;
 	std::cin >> kkkkk;

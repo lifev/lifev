@@ -87,6 +87,13 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/filter/PartitionIO.hpp>
 #include <lifev/fsi_blocks/filter/DOFInterfaceIO.hpp>
 
+// Includes needed by interpolation when using nonconforming meshes
+#include <Teuchos_ParameterList.hpp>
+#include <Teuchos_XMLParameterListHelpers.hpp>
+#include <Teuchos_RCP.hpp>
+#include <lifev/core/interpolation/RBFInterpolation.hpp>
+#include <lifev/core/interpolation/RBFlocallyRescaledVectorial.hpp>
+
 namespace LifeV
 {
 
@@ -134,6 +141,9 @@ public:
 
 	typedef Teuchos::ParameterList parameterList_Type;
 	typedef boost::shared_ptr<parameterList_Type> parameterListPtr_Type;
+
+	typedef RBFInterpolation<mesh_Type>           interpolation_Type;
+	typedef boost::shared_ptr<interpolation_Type> interpolationPtr_Type;
 
     //! Constructor
     FSIHandler(const commPtr_Type& communicator);
@@ -357,7 +367,8 @@ private:
 	bool M_moveMesh;
 
 	bool M_nonconforming;
-
+	interpolationPtr_Type M_FluidToStructureInterpolant;
+	interpolationPtr_Type M_structureToFluidInterpolant;
 };
 
 } // end namespace LifeV

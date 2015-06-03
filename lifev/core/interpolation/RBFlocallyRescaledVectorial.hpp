@@ -108,7 +108,6 @@ public:
 
     void getinterpolationOperatorMap(mapPtr_Type& map)
     {
-        std::cout << "Mappa scalare" << M_interpolationOperatorMap->map(Unique)->NumMyElements();
         map.reset(new map_Type(*M_interpolationOperatorMapVectorial) );
         //map.reset(new map_Type(*M_interpolationOperatorMap));
         //*map += *M_interpolationOperatorMap;
@@ -177,8 +176,8 @@ void RBFlocallyRescaledVectorial<mesh_Type>::setup ( meshPtr_Type fullMeshKnown,
 template <typename mesh_Type>
 void RBFlocallyRescaledVectorial<mesh_Type>::setupRBFData (vectorPtr_Type KnownField, vectorPtr_Type UnknownField, GetPot datafile, parameterList_Type belosList)
 {
-    M_knownField   = KnownField;
-    M_unknownField = UnknownField;
+    M_knownField.reset( new vector_Type ( *KnownField ) );
+    M_unknownField.reset( new vector_Type ( *UnknownField ) );
     M_datafile     = datafile;
     M_belosList    = belosList;
     M_links = M_datafile("interpolation/n_links",1);

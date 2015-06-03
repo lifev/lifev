@@ -63,7 +63,7 @@ Real pressure (const Real& t, const Real& x, const Real& y, const Real& z, const
 
 Real inflow (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 {
-    Real Q_hat = 5.0;
+    Real Q_hat = 1.0;
     Real Tr    = 0.01;
     Real Q     = 0;
     
