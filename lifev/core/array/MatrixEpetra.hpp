@@ -1758,12 +1758,12 @@ void MatrixEpetra<DataType>::restrict ( const boost::shared_ptr<MapEpetra>& map,
     P.globalAssemble( map, M_rangeMap );
     R.globalAssemble( M_rangeMap, map );
     
-    // 3) Perform tmp = matrix x P
+    // 2) Perform tmp = matrix x P
     MatrixEpetra<DataType> tmp (*M_rangeMap, 50 );
     this->multiply(false, P, false, tmp, false);
     tmp.globalAssemble( map, M_rangeMap );
     
-    // 4) Perform restricted_matrix = R x tmp
+    // 3) Perform restricted_matrix = R x tmp
     matrix_out.reset(new MatrixEpetra<DataType> (*map, 50 ));
     R.multiply(false, tmp, false, *matrix_out, false);
     matrix_out->globalAssemble();
