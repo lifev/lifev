@@ -61,7 +61,8 @@ M_usePartitionedMeshes ( false ),
 M_subiterateFluidDirichlet ( false ),
 M_gravity ( 0.0 ),
 M_considerGravity ( false ),
-M_moveMesh ( true )
+M_moveMesh ( true ),
+M_nonconforming ( true )
 {
 }
 
@@ -407,6 +408,7 @@ void FSIHandler::initializeTimeAdvance ( )
 
 void FSIHandler::buildInterfaceMaps ()
 {
+	M_nonconforming = M_datafile("interface/nonconforming", false);
 	markerID_Type interface = M_datafile("interface/flag", 1);
 	Real tolerance = M_datafile("interface/tolerance", 1.0);
 	Int flag = M_datafile("interface/fluid_vertex_flag", 123);
@@ -414,26 +416,40 @@ void FSIHandler::buildInterfaceMaps ()
 	M_displayer.leaderPrintMax ( " Flag of the interface = ", interface ) ;
 	M_displayer.leaderPrintMax ( " Tolerance for dofs on the interface = ", tolerance ) ;
 
-	if ( !M_usePartitionedMeshes )
+	if ( !M_nonconforming )
 	{
-		M_dofStructureToFluid.reset ( new DOFInterface3Dto3D );
-		M_dofStructureToFluid->setup ( M_fluid->uFESpace()->refFE(), M_fluid->uFESpace()->dof(), M_displacementFESpaceSerial->refFE(), M_displacementFESpaceSerial->dof() );
-		M_dofStructureToFluid->update ( *M_fluid->uFESpace()->mesh(), interface, *M_displacementFESpaceSerial->mesh(),  interface, tolerance, &flag);
-		M_localDofMap.reset(new std::map<UInt, UInt> ( M_dofStructureToFluid->localDofMap ( ) ) );
+		if ( !M_usePartitionedMeshes )
+		{
+			M_dofStructureToFluid.reset ( new DOFInterface3Dto3D );
+			M_dofStructureToFluid->setup ( M_fluid->uFESpace()->refFE(), M_fluid->uFESpace()->dof(), M_displacementFESpaceSerial->refFE(), M_displacementFESpaceSerial->dof() );
+			M_dofStructureToFluid->update ( *M_fluid->uFESpace()->mesh(), interface, *M_displacementFESpaceSerial->mesh(),  interface, tolerance, &flag);
+			M_localDofMap.reset(new std::map<UInt, UInt> ( M_dofStructureToFluid->localDofMap ( ) ) );
+		}
+		else
+		{
+			const std::string interfaceHdf5File (M_datafile ("offlinePartioner/interfacePartitioned", "interface.h5") );
+			boost::shared_ptr<Epetra_MpiComm> comm = boost::dynamic_pointer_cast<Epetra_MpiComm>(M_comm);
+			DOFInterfaceIO interfaceIO (interfaceHdf5File, comm);
+			interfaceIO.read (M_localDofMap);
+		}
+
+		createInterfaceMaps ( *M_localDofMap );
+
+		constructInterfaceMap ( *M_localDofMap, M_displacementFESpace->map().map(Unique)->NumGlobalElements()/nDimensions );
+
+		M_displayer.leaderPrintMax ( " Number of DOFs on the interface = ", M_lagrangeMap->mapSize() ) ;
 	}
 	else
 	{
-		const std::string interfaceHdf5File (M_datafile ("offlinePartioner/interfacePartitioned", "interface.h5") );
-		boost::shared_ptr<Epetra_MpiComm> comm = boost::dynamic_pointer_cast<Epetra_MpiComm>(M_comm);
-		DOFInterfaceIO interfaceIO (interfaceHdf5File, comm);
-		interfaceIO.read (M_localDofMap);
+		M_displayer.leaderPrint ( " Using nonconforming meshes " ) ;
+
+		// Creating fluid to structure interpolation operator
+
 	}
 
-	createInterfaceMaps ( *M_localDofMap );
+	int kkkkk;
+	std::cin >> kkkkk;
 
-	constructInterfaceMap ( *M_localDofMap, M_displacementFESpace->map().map(Unique)->NumGlobalElements()/nDimensions );
-
-	M_displayer.leaderPrintMax ( " Number of DOFs on the interface = ", M_lagrangeMap->mapSize() ) ;
 }
 
 void FSIHandler::createInterfaceMaps(std::map<ID, ID> const& locDofMap)

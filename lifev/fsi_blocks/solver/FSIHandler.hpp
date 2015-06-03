@@ -356,6 +356,8 @@ private:
 
 	bool M_moveMesh;
 
+	bool M_nonconforming;
+
 };
 
 } // end namespace LifeV

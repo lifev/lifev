@@ -26,11 +26,11 @@
     		mesh_dir        = ./
     		mesh_file       = tube20.mesh
     		mesh_type       = .mesh
-    		vel_order       = P2
+    		vel_order       = P1
     		pres_order      = P1
     		
     	[../stabilization]
-    	    use             = false
+    	    use             = true
     	    type            = SUPGALE
     	    vel_order       = 1	
 
@@ -44,7 +44,7 @@
     		mesh_dir        = ./
     		mesh_file       = vessel20.mesh
     		mesh_type       = .mesh
-    		order           = P2
+    		order           = P1
 
     	[../time_discretization]
 		method              = BDF
@@ -73,7 +73,7 @@
 [ale]
 
 	[./space_discretization]
-		order			= P2
+		order			= P1
 
 	[./]
 
@@ -82,7 +82,8 @@
 [interface]
 	flag        	  =  1       # default: 1, the mesh flag of the interface
 	tolerance         =  0       # how far points are to be considered the same on the interface
-	fluid_vertex_flag = 13       # tells wether the in/out ring curves on the interface
+	fluid_vertex_flag = 13       # tells whether the in/out ring curves on the interface
+	nonconforming     = true     # tells whether the meshes are conformin at the interface (true works just with P1)
 
 [../]
 
