@@ -10,14 +10,14 @@ TRIBITS_ADD_EXECUTABLE_AND_TEST(
 )
 
 TRIBITS_COPY_FILES_TO_BINARY_DIR(
-  data_ETA_laplacian
+  data_ETA_mesh_volume_subdivision
   CREATE_SYMLINK
   SOURCE_FILES data
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 TRIBITS_COPY_FILES_TO_BINARY_DIR(
-  solverparamlist_ETA_laplacian
+  solverparamlist_ETA_mesh_volume_subdivision
   CREATE_SYMLINK
   SOURCE_FILES SolverParamList.xml 4cube1.mesh
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
