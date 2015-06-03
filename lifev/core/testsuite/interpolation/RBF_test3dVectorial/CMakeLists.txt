@@ -12,21 +12,25 @@ TRIBITS_ADD_EXECUTABLE_AND_TEST(
   )
 
 TRIBITS_COPY_FILES_TO_BINARY_DIR(data_test_rbf3d_vectorial
+  CREATE_SYMLINK
   SOURCE_FILES data_rbf3d
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 TRIBITS_COPY_FILES_TO_BINARY_DIR(SolverParamList_rbf3d_vectorial
+  CREATE_SYMLINK
   SOURCE_FILES SolverParamList_rbf3d.xml
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 TRIBITS_COPY_FILES_TO_BINARY_DIR(vessel20_3d_rbf_vectorial.mesh
+  CREATE_SYMLINK
   SOURCE_FILES vessel20.mesh
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi/data/mesh/inria/
 )
 
 TRIBITS_COPY_FILES_TO_BINARY_DIR(tube20_circ_3d_rbf_vectorial.mesh
+  CREATE_SYMLINK
   SOURCE_FILES tube20_circ.mesh
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi/data/mesh/inria/
 )
