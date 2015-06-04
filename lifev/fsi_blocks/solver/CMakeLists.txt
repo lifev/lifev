@@ -3,6 +3,7 @@ SET(solver_HEADERS
   solver/FSIcouplingCE.hpp
   solver/ALESolver.hpp
   solver/FSIApplyOperator.hpp
+  solver/FSIApplyOperatorNonConforming.hpp
   solver/DirichletNeumannPreconditioner.hpp
 CACHE INTERNAL "")
 
@@ -11,6 +12,7 @@ SET(solver_SOURCES
   solver/FSIcouplingCE.cpp
   solver/ALESolver.cpp
   solver/FSIApplyOperator.cpp	
+  solver/FSIApplyOperatorNonConforming.cpp	
   solver/DirichletNeumannPreconditioner.cpp
 CACHE INTERNAL "")
 
