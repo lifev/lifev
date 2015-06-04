@@ -820,7 +820,6 @@ FSIHandler::solveFSIproblem ( )
 		UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
 											M_nonLinearLineSearch, 0, 2, M_out_res, M_time);
 
-		/*
 		iterChrono.stop();
 		M_displayer.leaderPrint ( "\n" ) ;
 		M_displayer.leaderPrintMax ( "FSI - timestep solved in ", iterChrono.diff() ) ;
@@ -848,7 +847,6 @@ FSIHandler::solveFSIproblem ( )
 		M_fluidTimeAdvance->shift(*M_fluidVelocity);
 		M_structureTimeAdvance->shiftRight(*M_structureDisplacement);
 		M_aleTimeAdvance->shiftRight(*M_fluidDisplacement);
-		*/
 
 		M_exporterFluid->postProcess(M_time);
 		M_exporterStructure->postProcess(M_time);
@@ -1398,7 +1396,7 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 		M_invOper->setOperator(M_applyOperatorJacobian);
 	}
 
-	ASSERT(0!=0,"Stop programmato");
+	//ASSERT(0!=0,"Stop programmato");
 
 	//---------------------------------------------------//
 	// First: set the fluid blocks in the preconditioner //
