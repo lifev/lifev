@@ -171,6 +171,23 @@ public:
 						   const vectorPtr_Type& rhs_velocity,
 						   vectorPtr_Type& residual);
 
+	//! Evaluates the fluid residual in FSI simulations
+	/*!
+	 * @param convective_velocity difference between fluid velocity and mesh velocity at previous Newton iteration
+	 * @param velocity_km1 fluid velocity at previous Newton iteration
+	 * @param pressure_km1 fluid pressure at previous Newton iteration
+	 * @param pressure_km1 terms of bdf associated to the rhs
+	 * @param residualVelocity residual associated to the fluid momentum equation
+	 * @param residualPressure residual associated to the fluid continuity equation
+	 */
+	void evaluateResidual( const vectorPtr_Type& convective_velocity,
+						   const vectorPtr_Type& velocity_km1,
+						   const vectorPtr_Type& pressure_km1,
+						   const vectorPtr_Type& rhs_velocity,
+						   vectorPtr_Type& residualVelocity,
+						   vectorPtr_Type& residualPressure);
+
+
 	void updateStabilization( const vector_Type& convective_velocity_previous_newton_step,
 							  const vector_Type& velocity_previous_newton_step,
 							  const vector_Type& pressure_previous_newton_step,
@@ -315,6 +332,8 @@ public:
     {
     	return M_useStabilization;
     }
+
+    void assembleInterfaceMass( matrixPtr_Type& mass_interface, const mapPtr_Type& interface_map, markerID_Type interfaceFlag );
 
 private:
 

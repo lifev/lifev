@@ -691,6 +691,67 @@ void NavierStokesSolver::evaluateResidual( const vectorPtr_Type& convective_velo
 					   	   	   	   	   	   const vectorPtr_Type& velocity_km1,
 					   	   	   	   	   	   const vectorPtr_Type& pressure_km1,
 					   	   	   	   	   	   const vectorPtr_Type& rhs_velocity,
+					   	   	   	   	   	   vectorPtr_Type& residualVelocity,
+					   	   	   	   	   	   vectorPtr_Type& residualPressure)
+{
+	residualVelocity->zero();
+	residualPressure->zero();
+
+	// Get repeated versions of input vectors for the assembly
+	vectorPtr_Type convective_velocity_repeated ( new vector_Type (*convective_velocity, Repeated) );
+	vectorPtr_Type u_km1_repeated ( new vector_Type (*velocity_km1, Repeated) );
+	vectorPtr_Type p_km1_repeated ( new vector_Type (*pressure_km1, Repeated) );
+	vectorPtr_Type rhs_velocity_repeated ( new vector_Type (*rhs_velocity, Repeated) );
+
+	{
+		using namespace ExpressionAssembly;
+
+		if ( M_stiffStrain )
+		{
+			integrate ( elements ( M_fespaceUETA->mesh() ),
+					M_velocityFESpace->qr(),
+					M_fespaceUETA,
+					M_density * value ( M_alpha / M_timeStep ) * dot ( value ( M_fespaceUETA, *u_km1_repeated ), phi_i ) -
+					M_density * dot ( value ( M_fespaceUETA, *rhs_velocity_repeated ), phi_i ) +
+					value ( 0.5 ) * M_viscosity * dot ( grad ( phi_i )  + transpose ( grad ( phi_i ) ), grad ( M_fespaceUETA, *u_km1_repeated ) + transpose ( grad ( M_fespaceUETA, *u_km1_repeated ) ) ) +
+					M_density * dot ( value ( M_fespaceUETA, *convective_velocity_repeated ) * grad ( M_fespaceUETA, *u_km1_repeated ), phi_i ) +
+					value ( -1.0 ) * value ( M_fespacePETA, *p_km1_repeated ) * div ( phi_i )
+			) >> residualVelocity;
+		}
+		else
+		{
+			integrate ( elements ( M_fespaceUETA->mesh() ),
+					M_velocityFESpace->qr(),
+					M_fespaceUETA,
+					M_density * value ( M_alpha / M_timeStep ) * dot ( value ( M_fespaceUETA, *u_km1_repeated ), phi_i ) -
+					M_density * dot ( value ( M_fespaceUETA, *rhs_velocity_repeated ), phi_i ) +
+					M_viscosity * dot ( grad ( phi_i ), grad ( M_fespaceUETA, *u_km1_repeated ) + transpose ( grad ( M_fespaceUETA, *u_km1_repeated ) ) ) +
+					M_density * dot ( value ( M_fespaceUETA, *convective_velocity_repeated ) * grad ( M_fespaceUETA, *u_km1_repeated ), phi_i ) +
+					value ( -1.0 ) * value ( M_fespacePETA, *p_km1_repeated ) * div ( phi_i )
+			) >> residualVelocity;
+		}
+
+		integrate ( elements ( M_fespaceUETA->mesh() ),
+				M_pressureFESpace->qr(),
+				M_fespacePETA,
+				trace ( grad ( M_fespaceUETA, *u_km1_repeated ) ) * phi_i
+		) >> residualPressure;
+	}
+
+	if ( M_useStabilization )
+	{
+		M_displayer.leaderPrint ( "[F] - Assembly residual of the stabilization \n" ) ;
+		M_stabilization->apply_vector(residualVelocity, residualPressure, *convective_velocity, *velocity_km1, *pressure_km1, *rhs_velocity);
+	}
+
+	residualVelocity->globalAssemble();
+	residualPressure->globalAssemble();
+}
+
+void NavierStokesSolver::evaluateResidual( const vectorPtr_Type& convective_velocity,
+					   	   	   	   	   	   const vectorPtr_Type& velocity_km1,
+					   	   	   	   	   	   const vectorPtr_Type& pressure_km1,
+					   	   	   	   	   	   const vectorPtr_Type& rhs_velocity,
 					   	   	   	   	   	   vectorPtr_Type& residual)
 {
 	residual->zero();
@@ -754,6 +815,32 @@ void NavierStokesSolver::evaluateResidual( const vectorPtr_Type& convective_velo
 	residual->subset ( *res_velocity, M_velocityFESpace->map(), 0, 0 );
 	residual->subset ( *res_pressure, M_pressureFESpace->map(), 0, M_velocityFESpace->map().mapSize() );
 
+}
+
+void NavierStokesSolver::assembleInterfaceMass( matrixPtr_Type& mass_interface, const mapPtr_Type& interface_map, markerID_Type interfaceFlag )
+{
+	// INITIALIZE MATRIX WITH THE MAP OF THE INTERFACE
+	matrixPtr_Type fluid_interfaceMass( new matrix_Type ( M_velocityFESpace->map(), 50 ) );
+	fluid_interfaceMass->zero();
+
+	// ASSEMBLE MASS MATRIX AT THE INTERFACE
+	QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
+	{
+		using namespace ExpressionAssembly;
+		integrate ( boundary (M_fespaceUETA->mesh(), interfaceFlag ),
+					myBDQR,
+					M_fespaceUETA,
+					M_fespaceUETA,
+					//Boundary Mass
+					dot(phi_i,phi_j)
+				  )
+				  >> fluid_interfaceMass;
+	}
+	fluid_interfaceMass->globalAssemble();
+
+	// RESTRICT MATRIX TO INTERFACE DOFS ONLY
+	mass_interface.reset(new matrix_Type ( *interface_map, 50 ) );
+	fluid_interfaceMass->restrict ( interface_map, mass_interface );
 }
 
 void NavierStokesSolver::evalResidual(vector_Type& residual, const vector_Type& solution, const UInt iter_newton)

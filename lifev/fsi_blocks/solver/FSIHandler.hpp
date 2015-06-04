@@ -94,6 +94,10 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/interpolation/RBFInterpolation.hpp>
 #include <lifev/core/interpolation/RBFlocallyRescaledVectorial.hpp>
 
+#include <lifev/core/algorithm/LinearSolver.hpp>
+
+#include <lifev/fsi_blocks/solver/FSIApplyOperatorNonConforming.hpp>
+
 namespace LifeV
 {
 
@@ -144,6 +148,14 @@ public:
 
 	typedef RBFInterpolation<mesh_Type>           interpolation_Type;
 	typedef boost::shared_ptr<interpolation_Type> interpolationPtr_Type;
+
+	typedef LifeV::Preconditioner            basePrec_Type;
+	typedef boost::shared_ptr<basePrec_Type> basePrecPtr_Type;
+
+	typedef LifeV::PreconditionerIfpack  prec_Type;
+	typedef boost::shared_ptr<prec_Type> precPtr_Type;
+
+	typedef Teuchos::RCP< Teuchos::ParameterList > parameterListRCP_Type;
 
     //! Constructor
     FSIHandler(const commPtr_Type& communicator);
@@ -234,6 +246,10 @@ private:
     void structureToInterface (vector_Type& VectorOnGamma, const vector_Type& VectorOnStructure);
 
     void initializeExtrapolation( );
+
+    void assembleStructureInterfaceMass ( );
+
+    void applyInverseFluidMassOnGamma ( const vectorPtr_Type& lambda, vectorPtr_Type& strongLambda );
 
     //! communicator
     commPtr_Type M_comm;
@@ -331,6 +347,9 @@ private:
 	// Operator to compute the residual of the FSI
 	boost::shared_ptr<LifeV::Operators::FSIApplyOperator> M_applyOperatorResidual;
 
+	// Operator to apply Jacobian of the FSI in the nonconforming case
+	boost::shared_ptr<LifeV::Operators::FSIApplyOperatorNonConforming> M_applyOperatorJacobianNonConforming;
+
 	// Preconditioner operator
 	boost::shared_ptr<LifeV::Operators::DirichletNeumannPreconditioner> M_prec;
 
@@ -371,6 +390,9 @@ private:
 	bool M_nonconforming;
 	interpolationPtr_Type M_FluidToStructureInterpolant;
 	interpolationPtr_Type M_StructureToFluidInterpolant;
+
+	matrixPtr_Type M_interface_mass_structure;
+	matrixPtr_Type M_interface_mass_fluid;
 };
 
 } // end namespace LifeV
