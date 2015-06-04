@@ -711,6 +711,8 @@ FSIHandler::updateRhsCouplingVelocities_nonconforming ( )
 	// Restrict the vector to the dofs of fluid interface map
 	M_rhsCouplingVelocities.reset( new VectorEpetra ( *M_lagrangeMap ) );
 	M_rhsCouplingVelocities->subset ( *rhsStructureVelocity_onFluid, *M_lagrangeMap, 0, 0);
+
+	*M_rhsCouplingVelocities *= -1.0; // to do formally the same thing as in the conforming case
 }
 
 void
