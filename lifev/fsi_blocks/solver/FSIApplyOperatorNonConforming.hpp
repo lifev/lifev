@@ -111,6 +111,13 @@ public:
     //! Set the monolithic map
     void setMonolithicMap(const mapEpetraPtr_Type& monolithicMap);
 
+    //! Set the map of each component of the residual
+    void setMaps( const mapEpetraPtr_Type& fluid_velocity_map,
+    			  const mapEpetraPtr_Type& fluid_pressure_map,
+    			  const mapEpetraPtr_Type& structure_displacement_map,
+    			  const mapEpetraPtr_Type& lagrange_multipliers_map,
+    			  const mapEpetraPtr_Type& ALE_map);
+
     //@}
 
     // @name Update approximations of the block preconditioners
@@ -147,13 +154,24 @@ private:
 
     bool M_useTranspose;
 
-    // @name Approximation of the blocks
+    // @name Maps
     //@{
+
+    mapEpetraPtr_Type M_u_map;
+    mapEpetraPtr_Type M_p_map;
+    mapEpetraPtr_Type M_ds_map;
+    mapEpetraPtr_Type M_lambda_map;
+    mapEpetraPtr_Type M_ale_map;
 
     //@}
 
-    // @name Parameter list of each block
+    // @name Offsets
     //@{
+
+    UInt M_fluidVelocity;
+    UInt M_fluid;
+    UInt M_structure;
+    UInt M_lambda;
 
     //@}
 

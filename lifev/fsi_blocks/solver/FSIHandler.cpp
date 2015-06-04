@@ -1360,6 +1360,13 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 {
 	if ( M_nonconforming )
 	{
+		M_applyOperatorJacobianNonConforming->setMonolithicMap ( M_monolithicMap );
+		M_applyOperatorJacobianNonConforming->setMaps ( M_fluid->uFESpace()->mapPtr(),
+														M_fluid->pFESpace()->mapPtr(),
+														M_displacementFESpace->mapPtr(),
+														M_lagrangeMap,
+														M_aleFESpace->mapPtr());
+
 		M_invOper->setOperator(M_applyOperatorJacobianNonConforming);
 	}
 	else
@@ -1398,11 +1405,10 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 	smallThingsChrono.stop();
 	M_displayer.leaderPrintMax ( "done in ", smallThingsChrono.diff() ) ;
 
-	//----------------------------------------------//
-	// Third: set the solver of the jacobian system //
-	//----------------------------------------------//
+	//------------------------------------------------------//
+	// Third: set the preconditioner of the jacobian system //
+	//------------------------------------------------------//
 
-	M_invOper->setOperator(M_applyOperatorJacobian);
 	M_invOper->setPreconditioner(M_prec);
 
 	//-------------------------//
