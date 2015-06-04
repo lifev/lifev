@@ -462,10 +462,10 @@ void FSIHandler::buildInterfaceMaps ()
 
 		M_displayer.leaderPrint ( "\n\n Creating structure to fluid interpolant \n\n" ) ;
 		// Creating structure to fluid interpolation operator
-		M_structureToFluidInterpolant.reset ( interpolation_Type::InterpolationFactory::instance().createObject (M_datafile("interpolation/interpolation_Type","none")));
-		M_structureToFluidInterpolant->setup( M_structureMesh, M_structureLocalMesh, M_fluidMesh, M_fluidLocalMesh, flags);
-		M_structureToFluidInterpolant->setupRBFData ( M_structureDisplacement, M_fluidVelocity, M_datafile, belosList);
-		M_structureToFluidInterpolant->buildOperators();
+		M_StructureToFluidInterpolant.reset ( interpolation_Type::InterpolationFactory::instance().createObject (M_datafile("interpolation/interpolation_Type","none")));
+		M_StructureToFluidInterpolant->setup( M_structureMesh, M_structureLocalMesh, M_fluidMesh, M_fluidLocalMesh, flags);
+		M_StructureToFluidInterpolant->setupRBFData ( M_structureDisplacement, M_fluidVelocity, M_datafile, belosList);
+		M_StructureToFluidInterpolant->buildOperators();
 	}
 }
 
@@ -691,6 +691,29 @@ FSIHandler::updateRhsCouplingVelocities ( )
 }
 
 void
+FSIHandler::updateRhsCouplingVelocities_nonconforming ( )
+{
+	// M_fluidVelocity  M_structureDisplacement
+
+	vectorPtr_Type rhsStructureVelocity ( new vector_Type ( M_structureTimeAdvance->rhsContributionFirstDerivative(), Unique, Add ) );
+
+	// Update known field for the interpolation
+	M_StructureToFluidInterpolant->updateRhs ( rhsStructureVelocity );
+	M_StructureToFluidInterpolant->interpolate();
+
+	// Will be a vector defined on the fluid grid that is zero everywhere but on the interface has the interpolated values
+	vectorPtr_Type rhsStructureVelocity_onFluid ( new vector_Type ( M_fluid->uFESpace()->map(), Unique ) );
+	rhsStructureVelocity_onFluid->zero();
+
+	// Getting the solution
+	M_StructureToFluidInterpolant->solution (rhsStructureVelocity_onFluid);
+
+	// Restrict the vector to the dofs of fluid interface map
+	M_rhsCouplingVelocities.reset( new VectorEpetra ( *M_lagrangeMap ) );
+	M_rhsCouplingVelocities->subset ( *rhsStructureVelocity_onFluid, *M_lagrangeMap, 0, 0);
+}
+
+void
 FSIHandler::structureToInterface (vector_Type& VectorOnGamma, const vector_Type& VectorOnStructure)
 {
     if (VectorOnStructure.mapType() == Repeated)
@@ -748,7 +771,7 @@ FSIHandler::solveFSIproblem ( )
 
 	if ( M_nonconforming )
 	{
-		M_prec->setCouplingOperators_nonconforming(M_FluidToStructureInterpolant, M_structureToFluidInterpolant);
+		M_prec->setCouplingOperators_nonconforming(M_FluidToStructureInterpolant, M_StructureToFluidInterpolant);
 	}
 	else
 	{
@@ -760,7 +783,6 @@ FSIHandler::solveFSIproblem ( )
 									M_coupling->structureDisplacementToFluidDisplacement() );
 	}
 
-    /*
 	M_prec->setMonolithicMap ( M_monolithicMap );
 
 	for ( ; M_time <= M_t_end + M_dt / 2.; M_time += M_dt)
@@ -772,6 +794,7 @@ FSIHandler::solveFSIproblem ( )
 
 		updateSystem ( );
 
+		/*
 		if ( M_extrapolateInitialGuess && M_time == (M_t_zero + M_dt) )
 		{
 			M_displayer.leaderPrint ( "FSI - initializing extrapolation of initial guess\n" ) ;
@@ -820,14 +843,16 @@ FSIHandler::solveFSIproblem ( )
 		M_fluidTimeAdvance->shift(*M_fluidVelocity);
 		M_structureTimeAdvance->shiftRight(*M_structureDisplacement);
 		M_aleTimeAdvance->shiftRight(*M_fluidDisplacement);
+		*/
 
 		M_exporterFluid->postProcess(M_time);
 		M_exporterStructure->postProcess(M_time);
+
 	}
 
 	M_exporterFluid->closeFile();
 	M_exporterStructure->closeFile();
-	*/
+
 }
 
 void
@@ -1231,7 +1256,10 @@ FSIHandler::updateSystem ( )
 	// Get the right hand side of the structural part and apply the BC on it TODO now it also applies bc on the matrix, remove!!
 	getRhsStructure ( );
 
-	updateRhsCouplingVelocities ( );
+	if ( M_nonconforming )
+		updateRhsCouplingVelocities_nonconforming ( );
+	else
+		updateRhsCouplingVelocities ( );
 }
 
 void

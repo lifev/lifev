@@ -229,6 +229,8 @@ private:
 
     void updateRhsCouplingVelocities ( );
 
+    void updateRhsCouplingVelocities_nonconforming ( );
+
     void structureToInterface (vector_Type& VectorOnGamma, const vector_Type& VectorOnStructure);
 
     void initializeExtrapolation( );
@@ -368,7 +370,7 @@ private:
 
 	bool M_nonconforming;
 	interpolationPtr_Type M_FluidToStructureInterpolant;
-	interpolationPtr_Type M_structureToFluidInterpolant;
+	interpolationPtr_Type M_StructureToFluidInterpolant;
 };
 
 } // end namespace LifeV
