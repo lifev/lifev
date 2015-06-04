@@ -1360,12 +1360,32 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 {
 	if ( M_nonconforming )
 	{
+		M_applyOperatorJacobianNonConforming->setComm ( M_comm );
 		M_applyOperatorJacobianNonConforming->setMonolithicMap ( M_monolithicMap );
 		M_applyOperatorJacobianNonConforming->setMaps ( M_fluid->uFESpace()->mapPtr(),
 														M_fluid->pFESpace()->mapPtr(),
 														M_displacementFESpace->mapPtr(),
 														M_lagrangeMap,
 														M_aleFESpace->mapPtr());
+
+		if ( M_fluid->useStabilization() )
+			M_applyOperatorJacobianNonConforming->setFluidBlocks ( M_fluid->block00(), M_fluid->block01(), M_fluid->block10(), M_fluid->block11());
+		else
+			M_applyOperatorJacobianNonConforming->setFluidBlocks ( M_fluid->block00(), M_fluid->block01(), M_fluid->block10() );
+
+		M_applyOperatorJacobianNonConforming->setStructureBlock ( M_matrixStructure );
+
+		M_applyOperatorJacobianNonConforming->setALEBlock ( M_ale->matrix() );
+
+		M_applyOperatorJacobianNonConforming->setUseShapeDerivatives ( M_useShapeDerivatives );
+
+		M_applyOperatorJacobianNonConforming->setInterpolants ( M_FluidToStructureInterpolant, M_StructureToFluidInterpolant );
+
+		if ( M_useShapeDerivatives )
+		{
+			M_applyOperatorJacobianNonConforming->setShapeDerivativesBlocks ( M_ale->shapeDerivativesVelocity(),
+																			  M_ale->shapeDerivativesPressure() );
+		}
 
 		M_invOper->setOperator(M_applyOperatorJacobianNonConforming);
 	}

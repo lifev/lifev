@@ -70,6 +70,46 @@ FSIApplyOperatorNonConforming::setMaps( const mapEpetraPtr_Type& fluid_velocity_
 	M_Y_geometry.reset( new VectorEpetra_Type (*M_ale_map, Unique) );
 }
 
+void
+FSIApplyOperatorNonConforming::setShapeDerivativesBlocks( const matrixEpetraPtr_Type & shapeVelocity,
+   											   	   	   	  const matrixEpetraPtr_Type & shapePressure)
+{
+	M_shapeVelocity = shapeVelocity;
+	M_shapePressure = shapePressure;
+}
+
+void
+FSIApplyOperatorNonConforming::setFluidBlocks ( const matrixEpetraPtr_Type & block00,
+												const matrixEpetraPtr_Type & block01,
+												const matrixEpetraPtr_Type & block10)
+{
+	M_F_00 = block00;
+	M_F_01 = block01;
+	M_F_10 = block10;
+	M_useStabilization = false;
+}
+
+void
+FSIApplyOperatorNonConforming::setFluidBlocks ( const matrixEpetraPtr_Type & block00,
+												const matrixEpetraPtr_Type & block01,
+												const matrixEpetraPtr_Type & block10,
+												const matrixEpetraPtr_Type & block11)
+{
+	M_F_00 = block00;
+	M_F_01 = block01;
+	M_F_10 = block10;
+	M_F_11 = block11;
+	M_useStabilization = true;
+}
+
+void
+FSIApplyOperatorNonConforming::setInterpolants ( interpolationPtr_Type fluidToStructure,
+        										 interpolationPtr_Type structureToFluid)
+{
+	M_FluidToStructureInterpolant = fluidToStructure;
+	M_StructureToFluidInterpolant = structureToFluid;
+}
+
 inline int
 FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) const
 {

@@ -118,6 +118,34 @@ public:
     			  const mapEpetraPtr_Type& lagrange_multipliers_map,
     			  const mapEpetraPtr_Type& ALE_map);
 
+    //! Set the shape derivatives
+    void setUseShapeDerivatives( bool use ) { M_useShapeDerivatives = use; };
+
+    //! Set the shape derivatives
+    void setShapeDerivativesBlocks( const matrixEpetraPtr_Type & ShapeVelocity,
+    								const matrixEpetraPtr_Type & ShapePressure);
+
+    //! Copy the pointer of the interpolation objects
+    void setInterpolants( interpolationPtr_Type fluidToStructure,
+    		              interpolationPtr_Type structureToFluid);
+
+    //! Set the blocks of the fluid Jacobian when stabilization is used
+    void setFluidBlocks (   const matrixEpetraPtr_Type &  block00,
+							const matrixEpetraPtr_Type &  block01,
+							const matrixEpetraPtr_Type &  block10,
+							const matrixEpetraPtr_Type &  block11);
+
+    //! Set the blocks of the fluid Jacobian when stabilization is not used
+    void setFluidBlocks ( 	const matrixEpetraPtr_Type &  block00,
+							const matrixEpetraPtr_Type &  block01,
+							const matrixEpetraPtr_Type &  block10);
+
+    //! Set the block of the Jacobian of the structure
+    void setStructureBlock ( const matrixEpetraPtr_Type &   structure ) { M_S = structure;};
+
+    //! Set the block of the Jacobian of the ALE
+    void setALEBlock ( const matrixEpetraPtr_Type & ale ) { M_G = ale;};
+
     //@}
 
     // @name Update approximations of the block preconditioners
@@ -178,7 +206,30 @@ private:
     // @name Parameter list of each block
     //@{
 
+    //! Fluid blocks
+
+    matrixEpetraPtr_Type M_F_00;
+    matrixEpetraPtr_Type M_F_01;
+    matrixEpetraPtr_Type M_F_10;
+    matrixEpetraPtr_Type M_F_11;
+
+    //! Shape derivatives
+
+    matrixEpetraPtr_Type M_shapeVelocity;
+    matrixEpetraPtr_Type M_shapePressure;
+
     //! Structure block
+
+    matrixEpetraPtr_Type M_S;
+
+    //! ALE block
+
+    matrixEpetraPtr_Type M_G;
+
+    //! Interpolants
+
+    interpolationPtr_Type M_FluidToStructureInterpolant;
+    interpolationPtr_Type M_StructureToFluidInterpolant;
 
     //@}
 
@@ -202,6 +253,12 @@ private:
     boost::shared_ptr<VectorEpetra_Type > M_Y_displacement;
     boost::shared_ptr<VectorEpetra_Type > M_Y_lambda;
     boost::shared_ptr<VectorEpetra_Type > M_Y_geometry;
+
+    //! If using the stabilization for the fluid
+    bool M_useStabilization;
+
+    //! If using the shape derivatives for the Jacobian
+    bool M_useShapeDerivatives;
 
 };
 
