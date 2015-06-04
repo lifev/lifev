@@ -1361,6 +1361,7 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 	if ( M_nonconforming )
 	{
 		M_applyOperatorJacobianNonConforming->setComm ( M_comm );
+		M_applyOperatorJacobianNonConforming->setDatafile ( M_datafile );
 		M_applyOperatorJacobianNonConforming->setMonolithicMap ( M_monolithicMap );
 		M_applyOperatorJacobianNonConforming->setMaps ( M_fluid->uFESpace()->mapPtr(),
 														M_fluid->pFESpace()->mapPtr(),

@@ -21,6 +21,10 @@
 
 #include <lifev/core/interpolation/RBFInterpolation.hpp>
 #include <lifev/core/interpolation/RBFlocallyRescaledVectorial.hpp>
+#include <Teuchos_ParameterList.hpp>
+#include <Teuchos_XMLParameterListHelpers.hpp>
+#include <Teuchos_RCP.hpp>
+#include <lifev/core/algorithm/LinearSolver.hpp>
 
 #ifndef _FSIAPPLYOPERATORNONCONFORMING_H_
 #define _FSIAPPLYOPERATORNONCONFORMING_H_
@@ -50,6 +54,15 @@ public:
     typedef  VectorEpetra                              VectorEpetra_Type;
     typedef  boost::shared_ptr<VectorEpetra_Type>      VectorEpetraPtr_Type;
     typedef  boost::shared_ptr<RBFInterpolation<RegionMesh<LinearTetra> > > interpolationPtr_Type;
+
+	typedef LifeV::Preconditioner                  basePrec_Type;
+	typedef boost::shared_ptr<basePrec_Type>       basePrecPtr_Type;
+	typedef LifeV::PreconditionerIfpack            prec_Type;
+	typedef boost::shared_ptr<prec_Type>           precPtr_Type;
+	typedef Teuchos::RCP< Teuchos::ParameterList > parameterListRCP_Type;
+
+	typedef boost::shared_ptr<GetPot> datafilePtr_Type;
+
     //@}
 
     //! @name Constructors
@@ -147,11 +160,17 @@ public:
     //! Set the block of the Jacobian of the ALE
     void setALEBlock ( const matrixEpetraPtr_Type & ale ) { M_G = ale;};
 
+    //! Set the datafile needed by the solver of the interface mass
+    void setDatafile( const GetPot& dataFile) { M_datafile = dataFile;};
+
     //@}
 
-    // @name Update approximations of the block preconditioners
+    // @name Others
     //@{
 
+    //! Apply the inverse of the fluid interface mass to a vector
+    //  defined on the fluid interface
+    void applyInverseInterfaceFluidMass(const VectorEpetraPtr_Type&X, VectorEpetraPtr_Type&Y) const;
 
     //@}
 
@@ -215,6 +234,11 @@ private:
     matrixEpetraPtr_Type M_F_10;
     matrixEpetraPtr_Type M_F_11;
 
+    //! Interface masses
+
+    matrixEpetraPtr_Type M_fluid_interface_mass;
+    matrixEpetraPtr_Type M_structure_interface_mass;
+
     //! Shape derivatives
 
     matrixEpetraPtr_Type M_shapeVelocity;
@@ -237,6 +261,8 @@ private:
 
     mapEpetraPtr_Type M_monolithicMap;
 
+    //! datafile
+    GetPot M_datafile;
 
     //! Label
     const std::string M_label;
