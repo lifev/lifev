@@ -617,10 +617,10 @@ void
 FSIHandler::getMatrixStructure ( )
 {
 	M_matrixStructure.reset (new matrix_Type ( M_displacementFESpace->map(), 1 ) );
-	*M_matrixStructure *= 0.0;
+	M_matrixStructure->zero();
 
 	vectorPtr_Type solidPortion ( new vector_Type ( M_displacementFESpace->map() ) );
-	*solidPortion *= 0;
+	solidPortion->zero();
 
 	M_structure->material()->updateJacobianMatrix ( *solidPortion, M_dataStructure, M_structure->mapMarkersVolumes(), M_structure->mapMarkersIndexes(), M_structure->displayerPtr() );
 	*M_matrixStructure += *M_structure->massMatrix();
@@ -724,7 +724,6 @@ FSIHandler::solveFSIproblem ( )
 	M_solution.reset ( new VectorEpetra ( *M_monolithicMap ) );
 	*M_solution *= 0;
 
-	/*
 	// Apply boundary conditions for the ale problem (the matrix will not change during the simulation)
 	M_ale->applyBoundaryConditions ( *M_aleBC );
 
@@ -747,13 +746,21 @@ FSIHandler::solveFSIproblem ( )
 	smallThingsChrono.stop();
 	M_displayer.leaderPrintMax ( "done in ", smallThingsChrono.diff() ) ;
 
-	// Set the coupling blocks in the preconditioner
-	M_prec->setCouplingBlocks ( M_coupling->lambdaToFluidMomentum(),
-								M_coupling->lambdaToStructureMomentum(),
-								M_coupling->structureDisplacementToLambda(),
-								M_coupling->fluidVelocityToLambda(),
-								M_coupling->structureDisplacementToFluidDisplacement() );
+	if ( M_nonconforming )
+	{
+		M_prec->setCouplingOperators_nonconforming(M_FluidToStructureInterpolant, M_structureToFluidInterpolant);
+	}
+	else
+	{
+		// Set the coupling blocks in the preconditioner
+		M_prec->setCouplingBlocks ( M_coupling->lambdaToFluidMomentum(),
+									M_coupling->lambdaToStructureMomentum(),
+									M_coupling->structureDisplacementToLambda(),
+									M_coupling->fluidVelocityToLambda(),
+									M_coupling->structureDisplacementToFluidDisplacement() );
+	}
 
+    /*
 	M_prec->setMonolithicMap ( M_monolithicMap );
 
 	for ( ; M_time <= M_t_end + M_dt / 2.; M_time += M_dt)
