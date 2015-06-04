@@ -1366,7 +1366,8 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 														M_fluid->pFESpace()->mapPtr(),
 														M_displacementFESpace->mapPtr(),
 														M_lagrangeMap,
-														M_aleFESpace->mapPtr());
+														M_aleFESpace->mapPtr(),
+														M_structureInterfaceMap);
 
 		if ( M_fluid->useStabilization() )
 			M_applyOperatorJacobianNonConforming->setFluidBlocks ( M_fluid->block00(), M_fluid->block01(), M_fluid->block10(), M_fluid->block11());

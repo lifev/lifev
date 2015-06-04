@@ -116,7 +116,8 @@ public:
     			  const mapEpetraPtr_Type& fluid_pressure_map,
     			  const mapEpetraPtr_Type& structure_displacement_map,
     			  const mapEpetraPtr_Type& lagrange_multipliers_map,
-    			  const mapEpetraPtr_Type& ALE_map);
+    			  const mapEpetraPtr_Type& ALE_map,
+				  const mapEpetraPtr_Type& structure_interface_map);
 
     //! Set the shape derivatives
     void setUseShapeDerivatives( bool use ) { M_useShapeDerivatives = use; };
@@ -190,6 +191,7 @@ private:
     mapEpetraPtr_Type M_ds_map;
     mapEpetraPtr_Type M_lambda_map;
     mapEpetraPtr_Type M_ale_map;
+    mapEpetraPtr_Type M_structure_interface_map;
 
     //@}
 

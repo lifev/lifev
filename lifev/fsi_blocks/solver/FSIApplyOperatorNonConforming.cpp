@@ -41,7 +41,8 @@ FSIApplyOperatorNonConforming::setMaps( const mapEpetraPtr_Type& fluid_velocity_
 										const mapEpetraPtr_Type& fluid_pressure_map,
 										const mapEpetraPtr_Type& structure_displacement_map,
 										const mapEpetraPtr_Type& lagrange_multipliers_map,
-										const mapEpetraPtr_Type& ALE_map)
+										const mapEpetraPtr_Type& ALE_map,
+										const mapEpetraPtr_Type& structure_interface_map)
 {
 	// Setting maps
 	M_u_map = fluid_velocity_map;
@@ -49,6 +50,7 @@ FSIApplyOperatorNonConforming::setMaps( const mapEpetraPtr_Type& fluid_velocity_
 	M_ds_map = structure_displacement_map;
 	M_lambda_map = lagrange_multipliers_map;
 	M_ale_map = ALE_map;
+	M_structure_interface_map = structure_interface_map;
 
 	// Setting offsets
 	M_fluidVelocity = M_u_map->mapSize();
@@ -129,6 +131,12 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 	M_X_lambda->subset(X_vectorEpetra, *M_lambda_map, M_structure, 0 );
 
 	M_X_geometry->subset(X_vectorEpetra, *M_ale_map, M_lambda , 0 );
+
+	//---------------------------------------------//
+	// Applying the Jacobian to the fluid velocity //
+	//---------------------------------------------//
+
+
 
 //	Output vector
 
