@@ -190,7 +190,7 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 		}
 		else
 		{
-			*M_Y_velocity  = (*M_F_00) * (*M_X_velocity ) /*+ (*M_F_01) * (*M_X_pressure)*/ + lambda_omega_f;
+			*M_Y_velocity  = (*M_F_00) * (*M_X_velocity ) + (*M_F_01) * (*M_X_pressure) + lambda_omega_f;
 			*M_Y_pressure  = (*M_F_10) * (*M_X_velocity ) + (*M_F_11) * (*M_X_pressure);
 		}
 	}
