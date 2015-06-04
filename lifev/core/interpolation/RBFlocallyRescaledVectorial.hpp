@@ -650,18 +650,19 @@ inline double RBFlocallyRescaledVectorial<mesh_Type>::rbf (double x1, double y1,
 template <typename mesh_Type>
 void RBFlocallyRescaledVectorial<mesh_Type>::updateRhs(vectorPtr_Type newRhs)
 {
-    *M_RhsF1 *= 0;
+    M_RhsF1->zero();
     M_RhsF1->subset (*newRhs, *M_interpolationOperatorMap, 0, 0);
-    *M_RhsF2 *= 0;
+    M_RhsF2->zero();
     M_RhsF2->subset (*newRhs, *M_interpolationOperatorMap, newRhs->size()/3, 0);
-    *M_RhsF3 *= 0;
+    M_RhsF3->zero();
     M_RhsF3->subset (*newRhs, *M_interpolationOperatorMap, newRhs->size()/3*2, 0);
 }
 
 template <typename mesh_Type>
 void RBFlocallyRescaledVectorial<mesh_Type>::solution (vectorPtr_Type& Solution)
 {
-    Solution = M_unknownField;
+    Solution->zero();
+    *Solution += *M_unknownField;
 }
 
 template <typename mesh_Type>
