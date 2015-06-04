@@ -88,7 +88,7 @@ protected:
 inline InvertibleOperator* createBelosOperatorAlgebra() { return new BelosOperatorAlgebra(); }
 namespace
 {
-    static bool registerBelos = InvertibleOperatorFactory::instance().registerProduct( "Belos", &createBelosOperatorAlgebra );
+    static bool registerBelosAlgebra = InvertibleOperatorFactory::instance().registerProduct( "Belos", &createBelosOperatorAlgebra );
 }
 
 

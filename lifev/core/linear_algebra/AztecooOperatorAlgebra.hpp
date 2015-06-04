@@ -62,7 +62,7 @@ protected:
 inline InvertibleOperator* createAztecooOperatorAlgebra() { return new AztecooOperatorAlgebra(); }
 namespace
 {
-    static bool registerAztecoo = InvertibleOperatorFactory::instance().registerProduct( "AztecOO", &createAztecooOperatorAlgebra );
+    static bool registerAztecooAlgebra = InvertibleOperatorFactory::instance().registerProduct( "AztecOO", &createAztecooOperatorAlgebra );
 }
 
 
