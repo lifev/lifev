@@ -1368,6 +1368,8 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 														M_aleFESpace->mapPtr(),
 														M_structureInterfaceMap);
 
+		M_applyOperatorJacobianNonConforming->setInterfaceMassMatrices (  M_interface_mass_fluid, M_interface_mass_structure );
+
 		if ( M_fluid->useStabilization() )
 			M_applyOperatorJacobianNonConforming->setFluidBlocks ( M_fluid->block00(), M_fluid->block01(), M_fluid->block10(), M_fluid->block11());
 		else
@@ -1402,36 +1404,36 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 	// First: set the fluid blocks in the preconditioner //
 	//---------------------------------------------------//
 
-	if ( !M_fluid->useStabilization() )
-		M_prec->setFluidBlocks( M_fluid->block00(), M_fluid->block01(), M_fluid->block10() );
-	else
-		M_prec->setFluidBlocks( M_fluid->block00(), M_fluid->block01(), M_fluid->block10(), M_fluid->block11() );
-
-	if (M_useShapeDerivatives)
-	{
-		M_prec->setShapeDerivativesBlocks(M_ale->shapeDerivativesVelocity(), M_ale->shapeDerivativesPressure());
-	}
-
-	M_prec->setDomainMap(M_applyOperatorJacobian->OperatorDomainBlockMapPtr());
-	M_prec->setRangeMap(M_applyOperatorJacobian->OperatorRangeBlockMapPtr());
-
-	//--------------------------------------------------------------------------------//
-	// Second: update the operators associated to shur complements and fluid momentum //
-	//--------------------------------------------------------------------------------//
-
-	LifeChrono smallThingsChrono;
-	M_displayer.leaderPrint ( "\n Set preconditioner for the fluid momentum and the shur complements\n" ) ;
-	M_displayer.leaderPrint ( "\t Set and approximate fluid momentum in the preconditioner.. " ) ;
-	smallThingsChrono.start();
-	M_prec->updateApproximatedFluidOperator();
-	smallThingsChrono.stop();
-	M_displayer.leaderPrintMax ( "done in ", smallThingsChrono.diff() ) ;
+//	if ( !M_fluid->useStabilization() )
+//		M_prec->setFluidBlocks( M_fluid->block00(), M_fluid->block01(), M_fluid->block10() );
+//	else
+//		M_prec->setFluidBlocks( M_fluid->block00(), M_fluid->block01(), M_fluid->block10(), M_fluid->block11() );
+//
+//	if (M_useShapeDerivatives)
+//	{
+//		M_prec->setShapeDerivativesBlocks(M_ale->shapeDerivativesVelocity(), M_ale->shapeDerivativesPressure());
+//	}
+//
+//	M_prec->setDomainMap(M_applyOperatorJacobian->OperatorDomainBlockMapPtr());
+//	M_prec->setRangeMap(M_applyOperatorJacobian->OperatorRangeBlockMapPtr());
+//
+//	//--------------------------------------------------------------------------------//
+//	// Second: update the operators associated to shur complements and fluid momentum //
+//	//--------------------------------------------------------------------------------//
+//
+//	LifeChrono smallThingsChrono;
+//	M_displayer.leaderPrint ( "\n Set preconditioner for the fluid momentum and the shur complements\n" ) ;
+//	M_displayer.leaderPrint ( "\t Set and approximate fluid momentum in the preconditioner.. " ) ;
+//	smallThingsChrono.start();
+//	M_prec->updateApproximatedFluidOperator();
+//	smallThingsChrono.stop();
+//	M_displayer.leaderPrintMax ( "done in ", smallThingsChrono.diff() ) ;
 
 	//------------------------------------------------------//
 	// Third: set the preconditioner of the jacobian system //
 	//------------------------------------------------------//
 
-	M_invOper->setPreconditioner(M_prec);
+//	M_invOper->setPreconditioner(M_prec);
 
 	//-------------------------//
 	// Forth: solve the system //

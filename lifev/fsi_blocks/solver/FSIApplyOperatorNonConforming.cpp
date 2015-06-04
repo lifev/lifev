@@ -140,6 +140,14 @@ FSIApplyOperatorNonConforming::applyInverseInterfaceFluidMass(const VectorEpetra
 	solver.solve ( Y );
 }
 
+void
+FSIApplyOperatorNonConforming::setInterfaceMassMatrices (  const matrixEpetraPtr_Type &  fluid_interface_mass,
+    								 	 	 	 	 	   const matrixEpetraPtr_Type &  structure_interface_mass)
+{
+	M_fluid_interface_mass     = fluid_interface_mass;
+	M_structure_interface_mass = structure_interface_mass;
+}
+
 inline int
 FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) const
 {
@@ -182,7 +190,7 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 		}
 		else
 		{
-			*M_Y_velocity  = (*M_F_00) * (*M_X_velocity ) + (*M_F_01) * (*M_X_pressure) + lambda_omega_f;
+			*M_Y_velocity  = (*M_F_00) * (*M_X_velocity ) /*+ (*M_F_01) * (*M_X_pressure)*/ + lambda_omega_f;
 			*M_Y_pressure  = (*M_F_10) * (*M_X_velocity ) + (*M_F_11) * (*M_X_pressure);
 		}
 	}

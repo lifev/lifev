@@ -3,7 +3,7 @@
 	<Parameter name="Reuse Preconditioner" type="bool" value="true"/>
         <Parameter name="Max Iterations For Reuse" type="int" value="80"/>
         <Parameter name="Quit On Failure" type="bool" value="false"/>
-        <Parameter name="Silent" type="bool" value="false"/>
+        <Parameter name="Silent" type="bool" value="true"/>
 	    <Parameter name="Solver Type" type="string" value="Belos"/>
         <Parameter name="Block Size" type="int" value="2"/>
 	
@@ -21,8 +21,8 @@
     		<Parameter name="Block Size" type="int" value="1"/>
 	    	<Parameter name="Num Blocks" type="int" value="1000"/>
     		<Parameter name="Maximum Restarts" type="int" value="0"/>
-	    	<Parameter name="Output Style" type="int" value="1"/>
-    		<Parameter name="Verbosity" type="int" value="35"/>
+	    	<Parameter name="Output Style" type="int" value="0"/>
+    		<Parameter name="Verbosity" type="int" value="0"/>
     	</ParameterList>
     </ParameterList>
 </ParameterList>

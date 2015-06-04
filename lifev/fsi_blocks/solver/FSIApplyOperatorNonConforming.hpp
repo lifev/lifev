@@ -113,9 +113,9 @@ public:
     //! return a reference to the Epetra_Comm communicator associated with this operator
     const comm_Type & Comm() const {return *M_comm;}
     //! Returns the Epetra_Map object associated with the domain of this operator
-    const map_Type & OperatorDomainMap() const {return *(M_operatorDomainMap->monolithicMap());}
+    const map_Type & OperatorDomainMap() const {return *(M_monolithicMap->map(Unique));}
     //! Returns the Epetra_Map object associated with the range of this operator
-    const map_Type & OperatorRangeMap() const {return *(M_operatorRangeMap->monolithicMap());}
+    const map_Type & OperatorRangeMap() const {return *(M_monolithicMap->map(Unique));}
     //@}
 
     // @name Set
@@ -165,6 +165,10 @@ public:
 
     //! Set the timestep
     void setTimeStep( Real timeStep ) { M_timeStep = timeStep;};
+
+    //! Set the blocks of the fluid Jacobian when stabilization is used
+    void setInterfaceMassMatrices (  const matrixEpetraPtr_Type &  fluid_interface_mass,
+    								 const matrixEpetraPtr_Type &  structure_interface_mass);
 
     //@}
 
