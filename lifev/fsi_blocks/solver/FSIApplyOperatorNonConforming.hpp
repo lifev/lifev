@@ -163,6 +163,9 @@ public:
     //! Set the datafile needed by the solver of the interface mass
     void setDatafile( const GetPot& dataFile) { M_datafile = dataFile;};
 
+    //! Set the timestep
+    void setTimeStep( Real timeStep ) { M_timeStep = timeStep;};
+
     //@}
 
     // @name Others
@@ -287,6 +290,8 @@ private:
 
     //! If using the shape derivatives for the Jacobian
     bool M_useShapeDerivatives;
+
+    Real M_timeStep;
 
 };
 

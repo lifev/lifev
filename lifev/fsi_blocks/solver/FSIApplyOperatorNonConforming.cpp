@@ -170,6 +170,9 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 	// Applying the Jacobian to the fluid velocity and pressure //
 	//----------------------------------------------------------//
 
+	M_Y_velocity->zero();
+	M_Y_pressure->zero();
+
 	if ( M_useStabilization )
 	{
 		if ( M_useShapeDerivatives )
@@ -201,6 +204,7 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 	// Applying the Jacobian to the structure displacement //
 	//-----------------------------------------------------//
 
+	M_Y_displacement->zero();
 	*M_Y_displacement = *M_S * ( *M_X_displacement );
 
 	// From weak to strong form of the stresses lambda,
@@ -234,6 +238,29 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 	X_lambda_weak_omega_s->subset(*X_lambda_weak_gamma_s, *M_structure_interface_map, 0, 0);
 
 	*M_Y_displacement -= *X_lambda_weak_omega_s;
+
+	//---------------------------------------//
+	// Applying the Jacobian to the stresses //
+	//---------------------------------------//
+
+	M_Y_lambda->zero();
+	M_Y_lambda->subset(*M_X_velocity, *M_lambda_map, 0, 0);
+
+	VectorEpetraPtr_Type structure_vel( new VectorEpetra_Type ( *M_ds_map ) );
+	structure_vel->zero();
+	*structure_vel += *M_X_displacement;
+	*structure_vel /= M_timeStep;
+	M_StructureToFluidInterpolant->updateRhs(structure_vel);
+	M_StructureToFluidInterpolant->interpolate();
+
+	VectorEpetraPtr_Type structure_vel_omega_f ( new VectorEpetra_Type ( *M_u_map ) );
+	structure_vel_omega_f->zero();
+	M_StructureToFluidInterpolant->solution(structure_vel_omega_f);
+	VectorEpetraPtr_Type structure_vel_gamma_f ( new VectorEpetra_Type ( *M_lambda_map ) );
+	structure_vel_gamma_f->zero();
+	structure_vel_gamma_f->subset(*structure_vel_omega_f, *M_lambda_map, 0, 0);
+
+	*M_Y_lambda -= *structure_vel_gamma_f;
 
 //	Output vector
 
