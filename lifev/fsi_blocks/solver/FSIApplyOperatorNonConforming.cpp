@@ -132,9 +132,47 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 
 	M_X_geometry->subset(X_vectorEpetra, *M_ale_map, M_lambda , 0 );
 
-	//---------------------------------------------//
-	// Applying the Jacobian to the fluid velocity //
-	//---------------------------------------------//
+	// M_X_lambda is defined just at the fluid interface, but for coding reasons
+	// I need to have it on the whole fluid domain, i.e., vector of zeros with
+	// nonzero entries only at the interface
+	VectorEpetra_Type lambda_omega_f(*M_u_map);
+	lambda_omega_f.subset(*M_X_lambda, *M_lambda_map, 0, 0);
+
+	//----------------------------------------------------------//
+	// Applying the Jacobian to the fluid velocity and pressure //
+	//----------------------------------------------------------//
+
+	if ( M_useStabilization )
+	{
+		if ( M_useShapeDerivatives )
+		{
+			*M_Y_velocity  = (*M_F_00) * (*M_X_velocity ) + (*M_F_01) * (*M_X_pressure) + lambda_omega_f + (*M_shapeVelocity) * (*M_X_geometry);
+			*M_Y_pressure  = (*M_F_10) * (*M_X_velocity ) + (*M_F_11) * (*M_X_pressure) + (*M_shapePressure) * (*M_X_geometry);
+		}
+		else
+		{
+			*M_Y_velocity  = (*M_F_00) * (*M_X_velocity ) + (*M_F_01) * (*M_X_pressure) + lambda_omega_f;
+			*M_Y_pressure  = (*M_F_10) * (*M_X_velocity ) + (*M_F_11) * (*M_X_pressure);
+		}
+	}
+	else
+	{
+		if ( M_useShapeDerivatives )
+		{
+			*M_Y_velocity  = (*M_F_00) * (*M_X_velocity ) + (*M_F_01) * (*M_X_pressure) + lambda_omega_f + (*M_shapeVelocity) * (*M_X_geometry);
+			*M_Y_pressure  = (*M_F_10) * (*M_X_velocity ) + (*M_shapePressure) * (*M_X_geometry);
+		}
+		else
+		{
+			*M_Y_velocity  = (*M_F_00) * (*M_X_velocity ) + (*M_F_01) * (*M_X_pressure) + lambda_omega_f;
+			*M_Y_pressure  = (*M_F_10) * (*M_X_velocity );
+		}
+	}
+
+	//-----------------------------------------------------//
+	// Applying the Jacobian to the structure displacement //
+	//-----------------------------------------------------//
+
 
 
 
