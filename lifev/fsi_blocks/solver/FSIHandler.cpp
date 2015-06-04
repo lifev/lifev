@@ -587,10 +587,29 @@ FSIHandler::assembleCoupling ( )
 void
 FSIHandler::buildMonolithicMap ( )
 {
+	// Fluid velocity
 	M_monolithicMap.reset( new map_Type ( M_fluid->uFESpace()->map() ) );
+
+	// Fluid pressure
 	*M_monolithicMap += M_fluid->pFESpace()->map();
+
+	// Structure displacement
 	*M_monolithicMap += M_displacementFESpace->map();
-	*M_monolithicMap += *M_lagrangeMap;
+
+	// Weak stresses
+	if ( M_nonconforming )
+	{
+		// The fluid is the slave and its interface dofs are used for the lagrange multipliers
+		M_FluidToStructureInterpolant->getinterpolationOperatorMap(M_lagrangeMap);
+		M_displayer.leaderPrintMax ("\nNumber of DOFs at the fluid interface: ", M_lagrangeMap->map(Unique)->NumGlobalElements());
+		*M_monolithicMap += *M_lagrangeMap;
+	}
+	else
+	{
+		*M_monolithicMap += *M_lagrangeMap;
+	}
+
+	// ALE
 	*M_monolithicMap += M_aleFESpace->map();
 }
 
@@ -705,6 +724,7 @@ FSIHandler::solveFSIproblem ( )
 	M_solution.reset ( new VectorEpetra ( *M_monolithicMap ) );
 	*M_solution *= 0;
 
+	/*
 	// Apply boundary conditions for the ale problem (the matrix will not change during the simulation)
 	M_ale->applyBoundaryConditions ( *M_aleBC );
 
@@ -800,6 +820,7 @@ FSIHandler::solveFSIproblem ( )
 
 	M_exporterFluid->closeFile();
 	M_exporterStructure->closeFile();
+	*/
 }
 
 void
