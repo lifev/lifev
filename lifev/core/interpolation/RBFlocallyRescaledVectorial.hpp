@@ -227,7 +227,6 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
     	GlobalID[k] = *it;
         
         // Vectorial map
-        // std::cout << "M_knownField->size() = " << M_knownField->size() << "\n";
         GlobalID_vectorial[f] = *it;
         GlobalID_vectorial[f+LocalNodesNumber] = *it+(M_knownField->size()/3);
         GlobalID_vectorial[f+2*LocalNodesNumber] = *it+(2*M_knownField->size()/3);
@@ -347,7 +346,6 @@ void RBFlocallyRescaledVectorial<mesh_Type>::projectionOperator()
                 if (d < d_min)
                 {
                     d_min = d;
-                    // fino qui ho verificato che j e nearestPoint coincidono
                     nearestPoint = M_fullMeshKnown->point (j).id();
                 }
             }
@@ -480,6 +478,7 @@ void RBFlocallyRescaledVectorial<mesh_Type>::interpolate()
     precRawPtr->setDataFromGetPot ( M_datafile, "prec" );
     precPtr.reset ( precRawPtr );
 
+    // Solving for component x
     LinearSolver solverRBF1;
     solverRBF1.setCommunicator ( M_knownField->mapPtr()->commPtr() );
     solverRBF1.setParameters ( *M_belosList );
@@ -489,6 +488,7 @@ void RBFlocallyRescaledVectorial<mesh_Type>::interpolate()
     solverRBF1.setRightHandSide (M_RhsF1);
     solverRBF1.solve (gamma_f1);
 
+    // Solving for component y
     LinearSolver solverRBF2;
     solverRBF2.setCommunicator ( M_knownField->mapPtr()->commPtr() );
     solverRBF2.setParameters ( *M_belosList );
@@ -498,6 +498,7 @@ void RBFlocallyRescaledVectorial<mesh_Type>::interpolate()
     solverRBF2.setRightHandSide (M_RhsF2);
     solverRBF2.solve (gamma_f2);
 
+    // Solving for component z
     LinearSolver solverRBF3;
     solverRBF3.setCommunicator ( M_knownField->mapPtr()->commPtr() );
     solverRBF3.setParameters ( *M_belosList );
@@ -515,6 +516,7 @@ void RBFlocallyRescaledVectorial<mesh_Type>::interpolate()
 
     M_projectionOperator->multiply (false, *gamma_f1, *rbf_f1);
 
+    // Rescaling component x
     *solution1 = *rbf_f1;
     *solution1 /= *M_rbf_one;
 
@@ -526,6 +528,7 @@ void RBFlocallyRescaledVectorial<mesh_Type>::interpolate()
 
     M_projectionOperator->multiply (false, *gamma_f2, *rbf_f2);
 
+    // Rescaling component y
     *solution2 = *rbf_f2;
     *solution2 /= *M_rbf_one;
 
@@ -537,6 +540,7 @@ void RBFlocallyRescaledVectorial<mesh_Type>::interpolate()
 
     M_projectionOperator->multiply (false, *gamma_f3, *rbf_f3);
 
+    // Rescaling component z
     *solution3 = *rbf_f3;
     *solution3 /= *M_rbf_one;
 
@@ -545,6 +549,7 @@ void RBFlocallyRescaledVectorial<mesh_Type>::interpolate()
     M_unknownField_rbf->subset (*rbf_f2, *M_projectionOperatorMap, 0, M_unknownField->size()/3);
     M_unknownField_rbf->subset (*rbf_f3, *M_projectionOperatorMap, 0, M_unknownField->size()/3*2);
 
+    // Solution of the interpolation problem
     M_unknownField->subset (*solution1, *M_projectionOperatorMap, 0, 0);
     M_unknownField->subset (*solution2, *M_projectionOperatorMap, 0, M_unknownField->size()/3);
     M_unknownField->subset (*solution3, *M_projectionOperatorMap, 0, M_unknownField->size()/3*2);
