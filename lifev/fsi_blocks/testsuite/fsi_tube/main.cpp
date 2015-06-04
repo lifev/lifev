@@ -161,13 +161,14 @@ main ( int argc, char** argv )
     // Create blocks for the coupling //
     // -------------------------------//
 
-    fsi.assembleCoupling ( );
+    if ( !dataFile( "interface/nonconforming", false ) )
+    	fsi.assembleCoupling ( );
 
     // ----------//
     // Time Loop //
     // ----------//
 
-    fsi.solveFSIproblem ( );
+    // fsi.solveFSIproblem ( );
 
     }
 

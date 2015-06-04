@@ -466,15 +466,7 @@ void FSIHandler::buildInterfaceMaps ()
 		M_structureToFluidInterpolant->setup( M_structureMesh, M_structureLocalMesh, M_fluidMesh, M_fluidLocalMesh, flags);
 		M_structureToFluidInterpolant->setupRBFData ( M_structureDisplacement, M_fluidVelocity, M_datafile, belosList);
 		M_structureToFluidInterpolant->buildOperators();
-
-		std::cout << " DONE!! \n";
-
 	}
-
-
-	int kkkkk;
-	std::cin >> kkkkk;
-
 }
 
 void FSIHandler::createInterfaceMaps(std::map<ID, ID> const& locDofMap)
