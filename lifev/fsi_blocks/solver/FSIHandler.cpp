@@ -453,13 +453,21 @@ void FSIHandler::buildInterfaceMaps ()
 		flags[0] = 1;
 		flags[1] = 20;
 
+		M_displayer.leaderPrint ( "\n\n Creating fluid to structure interpolant \n\n" ) ;
 		// Creating fluid to structure interpolation operator
 		M_FluidToStructureInterpolant.reset ( interpolation_Type::InterpolationFactory::instance().createObject (M_datafile("interpolation/interpolation_Type","none")));
 		M_FluidToStructureInterpolant->setup( M_fluidMesh, M_fluidLocalMesh, M_structureMesh, M_structureLocalMesh, flags);
-		M_FluidToStructureInterpolant->setupRBFData (M_fluidVelocity, M_structureDisplacement, M_dataFile, belosList);
+		M_FluidToStructureInterpolant->setupRBFData (M_fluidVelocity, M_structureDisplacement, M_datafile, belosList);
 		M_FluidToStructureInterpolant->buildOperators();
 
-		M_displayer.leaderPrint ( " DONE!! " ) ;
+		M_displayer.leaderPrint ( "\n\n Creating structure to fluid interpolant \n\n" ) ;
+		// Creating structure to fluid interpolation operator
+		M_structureToFluidInterpolant.reset ( interpolation_Type::InterpolationFactory::instance().createObject (M_datafile("interpolation/interpolation_Type","none")));
+		M_structureToFluidInterpolant->setup( M_structureMesh, M_structureLocalMesh, M_fluidMesh, M_fluidLocalMesh, flags);
+		M_structureToFluidInterpolant->setupRBFData ( M_structureDisplacement, M_fluidVelocity, M_datafile, belosList);
+		M_structureToFluidInterpolant->buildOperators();
+
+		std::cout << " DONE!! \n";
 
 	}
 
