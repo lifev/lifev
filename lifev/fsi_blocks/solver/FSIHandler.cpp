@@ -1381,6 +1381,8 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 
 		M_applyOperatorJacobianNonConforming->setUseShapeDerivatives ( M_useShapeDerivatives );
 
+		M_applyOperatorJacobianNonConforming->setTimeStep(M_dt);
+
 		M_applyOperatorJacobianNonConforming->setInterpolants ( M_FluidToStructureInterpolant, M_StructureToFluidInterpolant );
 
 		if ( M_useShapeDerivatives )
