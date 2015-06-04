@@ -262,6 +262,21 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 
 	*M_Y_lambda -= *structure_vel_gamma_f;
 
+	//----------------------------------//
+	// Applying the Jacobian to the ALE //
+	//----------------------------------//
+
+	M_Y_geometry->zero();
+	*M_Y_geometry = ( *M_G ) * ( *M_X_geometry );
+
+	M_StructureToFluidInterpolant->updateRhs(M_X_displacement);
+	M_StructureToFluidInterpolant->interpolate();
+
+	VectorEpetraPtr_Type tmp ( new VectorEpetra_Type ( *M_ale_map ) );
+	M_StructureToFluidInterpolant->solution(tmp);
+
+	*M_Y_geometry -= *tmp;
+
 //	Output vector
 
 	VectorEpetra_Type Y_vectorEpetra(Y, M_monolithicMap, Unique);
@@ -270,8 +285,8 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 	Y_vectorEpetra.subset(*M_Y_velocity, M_Y_velocity->map(), 0, 0 );
 	Y_vectorEpetra.subset(*M_Y_pressure, M_Y_pressure->map(), 0, M_fluidVelocity );
 	Y_vectorEpetra.subset(*M_Y_displacement, M_Y_displacement->map(), 0, M_fluid );
-	Y_vectorEpetra.subset(*M_Y_lambda, M_Y_lambda->map(), 0, M_fluid + M_structure );
-	Y_vectorEpetra.subset(*M_Y_geometry, M_Y_geometry->map(), 0, M_fluid + M_structure + M_lambda );
+	Y_vectorEpetra.subset(*M_Y_lambda, M_Y_lambda->map(), 0, M_structure );
+	Y_vectorEpetra.subset(*M_Y_geometry, M_Y_geometry->map(), 0, M_lambda );
 
 	Y = dynamic_cast<Epetra_MultiVector &>( Y_vectorEpetra.epetraVector() );
 
