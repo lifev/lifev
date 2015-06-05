@@ -170,6 +170,8 @@ public:
     void setInterfaceMassMatrices (  const matrixEpetraPtr_Type &  fluid_interface_mass,
     								 const matrixEpetraPtr_Type &  structure_interface_mass);
 
+    void setCoefficientFirstDerivative (Real coefficientFirstDerivative){ M_coefficientFirstDerivative = coefficientFirstDerivative;};
+
     //@}
 
     // @name Others
@@ -296,6 +298,8 @@ private:
     bool M_useShapeDerivatives;
 
     Real M_timeStep;
+
+    Real M_coefficientFirstDerivative;
 
 };
 

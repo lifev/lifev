@@ -814,7 +814,7 @@ FSIHandler::solveFSIproblem ( )
 		// Apply current BC to the solution vector
 		applyBCsolution ( M_solution );
 
-		M_maxiterNonlinear = 10;
+		M_maxiterNonlinear = 3;
 
 		// Using the solution at the previous timestep as initial guess -> TODO: extrapolation
 		UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
@@ -1149,6 +1149,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		structure_vel->zero();
 		*structure_vel += *structure_displacement_km1;
 		*structure_vel /= M_dt;
+		*structure_vel *= M_structureTimeAdvance->coefficientFirstDerivative ( 0 );
 
 		vectorPtr_Type res_couplingVel_omega_f ( new vector_Type ( M_fluid->uFESpace()->map() ) );
 		res_couplingVel_omega_f->zero();
@@ -1196,6 +1197,9 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		residual.subset(*residual_structure_displacement, M_displacementFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() );
 		residual.subset(*velocity_km1_gamma, *M_lagrangeMap, 0, offset_lagrange );
 		residual.subset(*res_ALE, M_aleFESpace->map(), 0, offset );
+
+		residual.spy("Residuale");
+
 	}
 	else
 	{
@@ -1235,11 +1239,14 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		// Forth: compute the residual //
 		//-----------------------------//
 
+		M_applyOperatorResidual->setMonolithicMap(M_monolithicMap);
 		M_applyOperatorResidual->Apply(solution.epetraVector(), residual.epetraVector());
 		residual -= *rightHandSide;
 
 		// Adding contribution from the fluid
 		residual += *fluid_residual;
+
+		residual.spy("Residuale");
 	}
 
 	applyBCresidual ( residual );
@@ -1346,6 +1353,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	if ( !M_nonconforming )
 		initializeApplyOperatorJacobian();
 
+
 	if ( std::strcmp(M_prec->preconditionerTypeFluid(),"aPCDOperator")==0 )
 	{
 		M_fluid->updatePCD(M_beta_star);
@@ -1356,9 +1364,12 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 void
 FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol )
 {
+	increment.zero();
+
 	if ( M_nonconforming )
 	{
 		M_applyOperatorJacobianNonConforming->setComm ( M_comm );
+		M_applyOperatorJacobianNonConforming->setTimeStep ( M_dt );
 		M_applyOperatorJacobianNonConforming->setDatafile ( M_datafile );
 		M_applyOperatorJacobianNonConforming->setMonolithicMap ( M_monolithicMap );
 		M_applyOperatorJacobianNonConforming->setMaps ( M_fluid->uFESpace()->mapPtr(),
@@ -1384,6 +1395,8 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 		M_applyOperatorJacobianNonConforming->setTimeStep(M_dt);
 
 		M_applyOperatorJacobianNonConforming->setInterpolants ( M_FluidToStructureInterpolant, M_StructureToFluidInterpolant );
+
+		M_applyOperatorJacobianNonConforming->setCoefficientFirstDerivative ( M_structureTimeAdvance->coefficientFirstDerivative ( 0 ) );
 
 		if ( M_useShapeDerivatives )
 		{
@@ -1414,8 +1427,10 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
     
     if ( M_nonconforming)
     {
+    	M_prec->setCoefficientFirstDerivative ( M_structureTimeAdvance->coefficientFirstDerivative ( 0 ) );
     	M_prec->setVelocityFESpace ( M_fluid->uFESpace() );
     	M_prec->setBCInterface ( M_interfaceFluidBC );
+    	M_prec->setTimeStep ( M_dt );
     	M_prec->setMonolithicMap ( M_monolithicMap );
     }
     else
@@ -1594,7 +1609,7 @@ FSIHandler::initializeApplyOperatorJacobian ( )
         operDataJacobian(0,4) = M_ale->shapeDerivativesVelocity()->matrixPtr();  // shape derivatives
         operDataJacobian(1,4) = M_ale->shapeDerivativesPressure()->matrixPtr();  // shape derivatives
     }
-
+    M_applyOperatorJacobian->setMonolithicMap(M_monolithicMap);
 	M_applyOperatorJacobian->setUp(operDataJacobian, M_comm);
 }
 

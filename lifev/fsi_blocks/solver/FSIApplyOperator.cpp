@@ -133,7 +133,13 @@ int FSIApplyOperator::Apply(const vector_Type & X, vector_Type & Y) const
     if (M_useTranspose)
         error = applyTranspose(X,Y);
     else
-        error = applyNoTranspose(X,Y);
+    {
+    	const VectorEpetra_Type X_vectorEpetra(X, M_monolithicMap, Unique);
+    	X_vectorEpetra.spy("X_vectorEpetraAPPLY");
+    	error = applyNoTranspose(X,Y);
+    	const VectorEpetra_Type Y_vectorEpetra(Y, M_monolithicMap, Unique);
+    	Y_vectorEpetra.spy("Y_vectorEpetraAPPLY");
+    }
     return error;
 }
 

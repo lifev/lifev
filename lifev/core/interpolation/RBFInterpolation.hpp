@@ -118,7 +118,7 @@ public:
 
     virtual void solutionrbf (vectorPtr_Type & ) {};
 
-    virtual void updateRhs(vectorPtr_Type newRhs) {};
+    virtual void updateRhs(const vectorPtr_Type& ) {};
 
     virtual void setRadius ( double ){};
 

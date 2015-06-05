@@ -14,6 +14,8 @@
 #include <lifev/core/linear_algebra/BlockEpetra_Map.hpp>
 #include <lifev/core/linear_algebra/BlockEpetra_MultiVector.hpp>
 #include <lifev/core/linear_algebra/LinearOperatorAlgebra.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
 
 namespace LifeV
 {
@@ -42,6 +44,11 @@ public:
     typedef super::operatorPtr_Type operatorPtr_Type;
     typedef super::vector_Type vector_Type;
     typedef super::vectorPtr_Type vectorPtr_Type;
+
+    typedef  MapEpetra                                 mapEpetra_Type;
+    typedef  boost::shared_ptr<mapEpetra_Type>         mapEpetraPtr_Type;
+    typedef  VectorEpetra                       VectorEpetra_Type;
+    typedef  boost::shared_ptr<VectorEpetra_Type>      VectorEpetraPtr_Type;
 
     typedef boost::numeric::ublas::matrix<operatorPtr_Type> operatorPtrContainer_Type;
     typedef std::vector<vectorPtr_Type> vectorPtrContainer_Type;
@@ -100,6 +107,9 @@ public:
      * Not Supported yet
      */
     int SetUseTranspose(bool useTranspose);
+
+    //! Set the monolithic map
+    void setMonolithicMap(const mapEpetraPtr_Type& monolithicMap){ M_monolithicMap = monolithicMap; };
 
     //! Compute Y = Op*X;
     virtual int Apply(const vector_Type & X, vector_Type & Y) const;
@@ -173,6 +183,8 @@ private:
     boost::shared_ptr<BlockEpetra_Map> M_domainMap;
     //! Range Map
     boost::shared_ptr<BlockEpetra_Map> M_rangeMap;
+
+    mapEpetraPtr_Type M_monolithicMap;
     //@}
 
     //! block operator represented like a dense matrix of pointers to Operators

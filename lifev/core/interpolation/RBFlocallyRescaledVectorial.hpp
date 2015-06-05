@@ -104,7 +104,7 @@ public:
 
     void solutionrbf (vectorPtr_Type& Solution_rbf);
 
-    void updateRhs(vectorPtr_Type newRhs);
+    void updateRhs(const vectorPtr_Type& newRhs);
 
     void getinterpolationOperatorMap(mapPtr_Type& map)
     {
@@ -648,7 +648,7 @@ inline double RBFlocallyRescaledVectorial<mesh_Type>::rbf (double x1, double y1,
 }
 
 template <typename mesh_Type>
-void RBFlocallyRescaledVectorial<mesh_Type>::updateRhs(vectorPtr_Type newRhs)
+void RBFlocallyRescaledVectorial<mesh_Type>::updateRhs(const vectorPtr_Type& newRhs)
 {
     M_RhsF1->zero();
     M_RhsF1->subset (*newRhs, *M_interpolationOperatorMap, 0, 0);

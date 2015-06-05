@@ -135,6 +135,7 @@ FSIApplyOperatorNonConforming::applyInverseInterfaceFluidMass(const VectorEpetra
 	Y->zero();
 
 	// Solve system
+	M_fluid_interface_mass->spy("InterfaceMass");
 	solver.setOperator ( M_fluid_interface_mass );
 	solver.setRightHandSide ( X );
 	solver.solve ( Y );
@@ -148,7 +149,7 @@ FSIApplyOperatorNonConforming::setInterfaceMassMatrices (  const matrixEpetraPtr
 	M_structure_interface_mass = structure_interface_mass;
 }
 
-inline int
+int
 FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) const
 {
 	ASSERT_PRE(X.NumVectors() == Y.NumVectors(), "X and Y must have the same number of vectors");
@@ -157,21 +158,29 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 
 	const VectorEpetra_Type X_vectorEpetra(X, M_monolithicMap, Unique);
 
+	X_vectorEpetra.spy("X_vectorEpetraAPPLY");
+
 	//! Extract each component of the input vector
+	M_X_velocity->zero();
 	M_X_velocity->subset(X_vectorEpetra, *M_u_map, 0, 0);
 
+	M_X_pressure->zero();
 	M_X_pressure->subset(X_vectorEpetra, *M_p_map, M_fluidVelocity, 0 );
 
+	M_X_displacement->zero();
 	M_X_displacement->subset(X_vectorEpetra, *M_ds_map, M_fluid, 0 );
 
+	M_X_lambda->zero();
 	M_X_lambda->subset(X_vectorEpetra, *M_lambda_map, M_structure, 0 );
 
+	M_X_geometry->zero();
 	M_X_geometry->subset(X_vectorEpetra, *M_ale_map, M_lambda , 0 );
 
 	// M_X_lambda is defined just at the fluid interface, but for coding reasons
 	// I need to have it on the whole fluid domain, i.e., vector of zeros with
 	// nonzero entries only at the interface
 	VectorEpetra_Type lambda_omega_f(*M_u_map);
+	lambda_omega_f.zero();
 	lambda_omega_f.subset(*M_X_lambda, *M_lambda_map, 0, 0);
 
 	//----------------------------------------------------------//
@@ -225,10 +234,12 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 	// Interpolate from fluid to structure interface,
 	// need to have vector defined on omega fluid
 	VectorEpetraPtr_Type X_lambda_strong_omega_f ( new VectorEpetra_Type ( *M_u_map ) );
+	X_lambda_strong_omega_f->zero();
 	X_lambda_strong_omega_f->subset(*X_lambda_strong, *M_lambda_map, 0, 0);
 	M_FluidToStructureInterpolant->updateRhs(X_lambda_strong_omega_f);
 	M_FluidToStructureInterpolant->interpolate();
 	VectorEpetraPtr_Type X_lambda_strong_omega_s ( new VectorEpetra_Type ( *M_ds_map ) );
+	X_lambda_strong_omega_s->zero();
 	M_FluidToStructureInterpolant->solution(X_lambda_strong_omega_s);
 
 	// Restrict X_lambda_strong_omega_s to Gamma S
@@ -243,6 +254,7 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 
 	// Expand vector to whole omega S
 	VectorEpetraPtr_Type X_lambda_weak_omega_s ( new VectorEpetra_Type ( *M_ds_map ) );
+	X_lambda_weak_omega_s->zero();
 	X_lambda_weak_omega_s->subset(*X_lambda_weak_gamma_s, *M_structure_interface_map, 0, 0);
 
 	*M_Y_displacement -= *X_lambda_weak_omega_s;
@@ -258,6 +270,7 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 	structure_vel->zero();
 	*structure_vel += *M_X_displacement;
 	*structure_vel /= M_timeStep;
+	*structure_vel *= M_coefficientFirstDerivative;
 	M_StructureToFluidInterpolant->updateRhs(structure_vel);
 	M_StructureToFluidInterpolant->interpolate();
 
@@ -281,6 +294,7 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 	M_StructureToFluidInterpolant->interpolate();
 
 	VectorEpetraPtr_Type tmp ( new VectorEpetra_Type ( *M_ale_map ) );
+	tmp->zero();
 	M_StructureToFluidInterpolant->solution(tmp);
 
 	*M_Y_geometry -= *tmp;
@@ -288,6 +302,7 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 //	Output vector
 
 	VectorEpetra_Type Y_vectorEpetra(Y, M_monolithicMap, Unique);
+	Y_vectorEpetra.zero();
 
 	//! Copy the single contributions into the optput vector
 	Y_vectorEpetra.subset(*M_Y_velocity, M_Y_velocity->map(), 0, 0 );
@@ -295,6 +310,8 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 	Y_vectorEpetra.subset(*M_Y_displacement, M_Y_displacement->map(), 0, M_fluid );
 	Y_vectorEpetra.subset(*M_Y_lambda, M_Y_lambda->map(), 0, M_structure );
 	Y_vectorEpetra.subset(*M_Y_geometry, M_Y_geometry->map(), 0, M_lambda );
+
+	Y_vectorEpetra.spy("Y_vectorEpetraAPPLY");
 
 	Y = dynamic_cast<Epetra_MultiVector &>( Y_vectorEpetra.epetraVector() );
 
