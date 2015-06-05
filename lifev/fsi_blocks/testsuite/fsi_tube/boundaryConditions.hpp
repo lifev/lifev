@@ -124,6 +124,17 @@ bcPtr_Type BCh_PCD ()
     return bc;
 }
 
+bcPtr_Type BCh_interfaceFluid ()
+{
+    BCFunctionBase zero_function (fZero);
+
+    bcPtr_Type bc (new BCHandler );
+
+    bc->addBC ("Interface", FLUIDINTERFACE, Essential, Full, zero_function, 3);
+
+    return bc;
+}
+
 }
 
 #endif

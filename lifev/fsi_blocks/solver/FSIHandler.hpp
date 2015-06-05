@@ -175,6 +175,8 @@ public:
 
     void setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& fluidBC_residual, const bcPtr_Type& structureBC, const bcPtr_Type& aleBC);
 
+    void setFluidInterfaceBoundaryConditions ( const bcPtr_Type& interfaceFluidBC ) { M_interfaceFluidBC = interfaceFluidBC; };
+
     // update all the bc handlers
     void updateBoundaryConditions( );
 
@@ -295,6 +297,7 @@ private:
     bcPtr_Type M_fluidBC_residual;
     bcPtr_Type M_structureBC;
     bcPtr_Type M_aleBC;
+    bcPtr_Type M_interfaceFluidBC;
 
 	//! Displayer to print in parallel (only PID 0 will print)
 	Displayer M_displayer;

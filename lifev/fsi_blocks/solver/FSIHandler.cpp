@@ -1398,8 +1398,6 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 		M_invOper->setOperator(M_applyOperatorJacobian);
 	}
 
-	//ASSERT(0!=0,"Stop programmato");
-
 	//---------------------------------------------------//
 	// First: set the fluid blocks in the preconditioner //
 	//---------------------------------------------------//
@@ -1416,10 +1414,14 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
     
     if ( M_nonconforming)
     {
-        M_prec->setMonolithicMap ( M_monolithicMap );
+    	M_prec->setVelocityFESpace ( M_fluid->uFESpace() );
+    	M_prec->setBCInterface ( M_interfaceFluidBC );
+    	M_prec->setMonolithicMap ( M_monolithicMap );
     }
     else
     {
+    	M_prec->setVelocityFESpace ( M_fluid->uFESpace() );
+    	M_prec->setBCInterface ( M_interfaceFluidBC );
         M_prec->setDomainMap(M_applyOperatorJacobian->OperatorDomainBlockMapPtr());
         M_prec->setRangeMap(M_applyOperatorJacobian->OperatorRangeBlockMapPtr());
     }
@@ -1442,7 +1444,7 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 	// Third: set the preconditioner of the jacobian system //
 	//------------------------------------------------------//
 
-//	M_invOper->setPreconditioner(M_prec);
+    M_invOper->setPreconditioner(M_prec);
 
 	//-------------------------//
 	// Forth: solve the system //

@@ -137,8 +137,11 @@ main ( int argc, char** argv )
     boost::shared_ptr<BCHandler> structureBC ( new BCHandler (*BCh_structure () ) );
     boost::shared_ptr<BCHandler> aleBC ( new BCHandler (*BCh_ale () ) );
     boost::shared_ptr<BCHandler> pcdBC ( new BCHandler (*BCh_PCD () ) );
+    boost::shared_ptr<BCHandler> interfaceFluidBC ( new BCHandler (*BCh_interfaceFluid ( ) ) );
 
     fsi.setBoundaryConditions(fluidBC, fluidBC_residual, structureBC, aleBC);
+
+    fsi.setFluidInterfaceBoundaryConditions(interfaceFluidBC);
 
     std::string preconditioner = dataFile("fluid/preconditionerType","none");
 
