@@ -367,7 +367,7 @@
             <Parameter name="max_iter" type="int" value="200"/>
             <Parameter name="output" type="string" value="all_res"/>
             <Parameter name="scaling" type="string" value="none"/>
-            <Parameter name="solver" type="string" value="gmres"/>
+            <Parameter name="solver" type="string" value="gmresr"/>
             <Parameter name="tol" type="double" value="1e-06"/>
         </ParameterList>
     </ParameterList>
