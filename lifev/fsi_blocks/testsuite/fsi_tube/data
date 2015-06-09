@@ -83,7 +83,7 @@
 	tolerance             =  0       # how far points are to be considered the same on the interface
 	fluid_vertex_flag     = 13       # tells whether the in/out ring curves on the interface
 	nonconforming         = false    # tells whether the meshes are conformin at the interface (true works just with P1)
-	lambda_num_structure  = false    # if true the lagrange multip. are numbered wrt the structure, if false wrt to the fluid
+	lambda_num_structure  = false     # if true the lagrange multip. are numbered wrt the structure, if false wrt to the fluid
 
 [../]
 
