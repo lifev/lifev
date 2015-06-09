@@ -10,7 +10,6 @@
 [fluid]
 
 	 preconditionerType       = SIMPLE # PCD or SIMPLE
-     subiterateFluidDirichlet = false 
      
     	[./physics]
     		density         = 1.0    # density, settings used in the paper
@@ -18,7 +17,7 @@
 
     	[../time_discretization]
     		initialtime     = 0.0
-    		endtime	        = 0.0002
+    		endtime	        = 0.0005
     		timestep	    = 0.0001
     		BDF_order       = 2
 
@@ -26,11 +25,11 @@
     		mesh_dir        = ./
     		mesh_file       = tube20.mesh
     		mesh_type       = .mesh
-    		vel_order       = P2
+    		vel_order       = P1
     		pres_order      = P1
     		
     	[../stabilization]
-    	    use             = false
+    	    use             = true
     	    type            = SUPGALE
     	    vel_order       = 1	
 
@@ -44,12 +43,12 @@
     		mesh_dir        = ./
     		mesh_file       = vessel20.mesh
     		mesh_type       = .mesh
-    		order           = P2
+    		order           = P1
 
     	[../time_discretization]
 		method              = BDF
 		initialtime 		= 0.
-		endtime     		= 0.0002
+		endtime     		= 0.0005
 		timestep    		= 0.0001
 		BDF_order   		= 2
 
@@ -73,17 +72,18 @@
 [ale]
 
 	[./space_discretization]
-		order			= P2
+		order			= P1
 
 	[./]
 
 [../]
 
 [interface]
-	flag        	  =  1       # default: 1, the mesh flag of the interface
-	tolerance         =  0       # how far points are to be considered the same on the interface
-	fluid_vertex_flag = 13       # tells whether the in/out ring curves on the interface
-	nonconforming     = false     # tells whether the meshes are conformin at the interface (true works just with P1)
+	flag        	      =  1       # default: 1, the mesh flag of the interface
+	tolerance             =  0       # how far points are to be considered the same on the interface
+	fluid_vertex_flag     = 13       # tells whether the in/out ring curves on the interface
+	nonconforming         = false    # tells whether the meshes are conformin at the interface (true works just with P1)
+	lambda_num_structure  = false    # if true the lagrange multip. are numbered wrt the structure, if false wrt to the fluid
 
 [../]
 

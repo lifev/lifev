@@ -396,6 +396,9 @@ private:
 
 	matrixPtr_Type M_interface_mass_structure;
 	matrixPtr_Type M_interface_mass_fluid;
+
+	bool M_lambda_num_structure;
+
 };
 
 } // end namespace LifeV

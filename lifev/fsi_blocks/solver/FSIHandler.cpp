@@ -63,7 +63,8 @@ M_subiterateFluidDirichlet ( false ),
 M_gravity ( 0.0 ),
 M_considerGravity ( false ),
 M_moveMesh ( true ),
-M_nonconforming ( true )
+M_nonconforming ( false ),
+M_lambda_num_structure ( false )
 {
 }
 
@@ -410,6 +411,7 @@ void FSIHandler::initializeTimeAdvance ( )
 void FSIHandler::buildInterfaceMaps ()
 {
 	M_nonconforming = M_datafile("interface/nonconforming", false);
+	M_lambda_num_structure = M_datafile("interface/lambda_num_structure", true);
 	markerID_Type interface = M_datafile("interface/flag", 1);
 	Real tolerance = M_datafile("interface/tolerance", 1.0);
 	Int flag = M_datafile("interface/fluid_vertex_flag", 123);
@@ -436,7 +438,10 @@ void FSIHandler::buildInterfaceMaps ()
 
 		createInterfaceMaps ( *M_localDofMap );
 
-		constructInterfaceMap ( *M_localDofMap, M_displacementFESpace->map().map(Unique)->NumGlobalElements()/nDimensions );
+		if ( M_lambda_num_structure )
+			constructInterfaceMap ( *M_localDofMap, M_displacementFESpace->map().map(Unique)->NumGlobalElements()/nDimensions );
+		else
+			constructInterfaceMap ( *M_localDofMap, M_fluid->uFESpace()->map().map(Unique)->NumGlobalElements()/nDimensions );
 
 		M_displayer.leaderPrintMax ( " Number of DOFs on the interface = ", M_lagrangeMap->mapSize() ) ;
 	}
@@ -523,11 +528,31 @@ void FSIHandler::constructInterfaceMap ( const std::map<ID, ID>& locDofMap,
 	Int numtasks = M_comm->NumProc(); // Numero di processi
 	int* numInterfaceDof (new int[numtasks]); // vettore lungo tanti quanti sono i processi
 	int pid = M_comm->MyPID(); // ID processo
-	int numMyElements = M_structureInterfaceMap->map (Unique)->NumMyElements(); // numero di elementi sul processo
-	numInterfaceDof[pid] = numMyElements; // Ogni processore mette nella propria posizione il numero di elementi di interfaccia che ha
-	MapEpetra subMap (*M_structureInterfaceMap->map (Unique), (UInt) 0, subdomainMaxId);
+	int numMyElements;
 
-	M_numerationInterface.reset (new VectorEpetra (subMap, Unique) );
+	if ( M_lambda_num_structure )
+	{
+		numMyElements = M_structureInterfaceMap->map (Unique)->NumMyElements(); // numero di elementi sul processo
+	}
+	else
+	{
+		numMyElements = M_fluidInterfaceMap->map (Unique)->NumMyElements(); // numero di elementi sul processo
+	}
+
+	numInterfaceDof[pid] = numMyElements; // Ogni processore mette nella propria posizione il numero di elementi di interfaccia che ha
+
+	mapPtr_Type subMap;
+
+	if ( M_lambda_num_structure )
+	{
+		subMap.reset ( new map_Type ( *M_structureInterfaceMap->map (Unique), (UInt) 0, subdomainMaxId) );
+	}
+	else
+	{
+		subMap.reset ( new map_Type (*M_fluidInterfaceMap->map (Unique), (UInt) 0, subdomainMaxId) );
+	}
+
+	M_numerationInterface.reset (new VectorEpetra (*subMap, Unique) );
 
 	for (int j = 0; j < numtasks; ++j)
 	{
@@ -546,36 +571,79 @@ void FSIHandler::constructInterfaceMap ( const std::map<ID, ID>& locDofMap,
 
 	UInt l = 0;
 
-	Real M_interface = (UInt) M_structureInterfaceMap->map (Unique)->NumGlobalElements() / nDimensions; // Quanti dof ci sono nella mappa scalare di interfaccia
-	for (l = 0, ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
+	if ( M_lambda_num_structure )
 	{
-		if (M_structureInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second) ) >= 0)
-		{
-			(*M_numerationInterface) [ITrow->second ] = l + (int) (numInterfaceDof[pid] / nDimensions);
-			if ( (int) (*M_numerationInterface) (ITrow->second ) != floor (l + numInterfaceDof[pid] / nDimensions + 0.2) )
-			{
-				std::cout << "ERROR! the numeration of the coupling map is not correct" << std::endl;
-			}
-			++l;
-		}
-	}
-
-	std::vector<int> couplingVector;
-	couplingVector.reserve ( (int) (M_structureInterfaceMap->map (Unique)->NumMyElements() ) );
-
-	for (UInt dim = 0; dim < nDimensions; ++dim)
-	{
-		for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
+		Real M_interface = (UInt) M_structureInterfaceMap->map (Unique)->NumGlobalElements() / nDimensions; // Quanti dof ci sono nella mappa scalare di interfaccia
+		for (l = 0, ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
 		{
 			if (M_structureInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second) ) >= 0)
 			{
-				couplingVector.push_back ( (*M_numerationInterface) (ITrow->second ) + dim * M_interface );
+				(*M_numerationInterface) [ITrow->second ] = l + (int) (numInterfaceDof[pid] / nDimensions);
+				if ( (int) (*M_numerationInterface) (ITrow->second ) != floor (l + numInterfaceDof[pid] / nDimensions + 0.2) )
+				{
+					std::cout << "ERROR! the numeration of the coupling map is not correct" << std::endl;
+				}
+				++l;
 			}
 		}
-	}// so the map for the coupling part of the matrix is just Unique
 
-	M_lagrangeMap.reset (new MapEpetra (-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], M_comm) );
+		std::vector<int> couplingVector;
+		couplingVector.reserve ( (int) (M_structureInterfaceMap->map (Unique)->NumMyElements() ) );
+
+		for (UInt dim = 0; dim < nDimensions; ++dim)
+		{
+			for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
+			{
+				if (M_structureInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second) ) >= 0)
+				{
+					couplingVector.push_back ( (*M_numerationInterface) (ITrow->second ) + dim * M_interface );
+				}
+			}
+		}// so the map for the coupling part of the matrix is just Unique
+
+		M_lagrangeMap.reset (new MapEpetra (-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], M_comm) );
+	}
+	else
+	{
+		Real M_interface = (UInt) M_fluidInterfaceMap->map (Unique)->NumGlobalElements() / nDimensions; // Quanti dof ci sono nella mappa scalare di interfaccia
+		for (l = 0, ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
+		{
+			if (M_fluidInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->first) ) >= 0)
+			{
+				(*M_numerationInterface) [ITrow->first ] = l + (int) (numInterfaceDof[pid] / nDimensions);
+				if ( (int) (*M_numerationInterface) (ITrow->first ) != floor (l + numInterfaceDof[pid] / nDimensions + 0.2) )
+				{
+					std::cout << "ERROR! the numeration of the coupling map is not correct" << std::endl;
+				}
+				++l;
+			}
+		}
+
+		std::vector<int> couplingVector;
+		couplingVector.reserve ( (int) (M_fluidInterfaceMap->map (Unique)->NumMyElements() ) );
+
+		for (UInt dim = 0; dim < nDimensions; ++dim)
+		{
+			for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
+			{
+				if (M_fluidInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->first) ) >= 0)
+				{
+					couplingVector.push_back ( (*M_numerationInterface) (ITrow->first ) + dim * M_interface );
+				}
+			}
+		}// so the map for the coupling part of the matrix is just Unique
+
+		M_lagrangeMap.reset (new MapEpetra (-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], M_comm) );
+	}
+
+	std::cout << M_numerationInterface->epetraVector();
+	std::cout << *(M_lagrangeMap->map(Unique));
+
 	delete [] numInterfaceDof;
+
+	int aaaaaa;
+	std::cin >> aaaaaa;
+
 }
 
 void
@@ -583,8 +651,11 @@ FSIHandler::assembleCoupling ( )
 {
 	M_coupling.reset ( new FSIcouplingCE ( M_comm ) );
 
-	M_coupling->setUp ( M_dt, M_structureInterfaceMap->mapSize()/3.0 , M_structureTimeAdvance->coefficientFirstDerivative ( 0 ),
-						M_lagrangeMap, M_fluid->uFESpace(), M_displacementFESpace, M_numerationInterface );
+	if ( M_lambda_num_structure )
+	{
+		M_coupling->setUp ( M_dt, M_structureInterfaceMap->mapSize()/3.0 , M_structureTimeAdvance->coefficientFirstDerivative ( 0 ),
+							M_lagrangeMap, M_fluid->uFESpace(), M_displacementFESpace, M_numerationInterface );
+	}
 
 	M_coupling->buildBlocks ( *M_localDofMap );
 
@@ -673,24 +744,27 @@ FSIHandler::getRhsStructure ( )
 void
 FSIHandler::updateRhsCouplingVelocities ( )
 {
-	vector_Type rhsStructureVelocity (M_structureTimeAdvance->rhsContributionFirstDerivative(), Unique, Add);
-	vector_Type lambda (*M_structureInterfaceMap, Unique);
-	structureToInterface ( lambda, rhsStructureVelocity);
-	M_rhsCouplingVelocities.reset( new VectorEpetra ( *M_lagrangeMap ) );
-	M_rhsCouplingVelocities->zero();
-
-	std::map<ID, ID>::const_iterator ITrow;
-
-	UInt interface (M_structureInterfaceMap->mapSize()/3.0 );
-	UInt totalDofs (M_displacementFESpace->dof().numTotalDof() );
-
-	for (UInt dim = 0; dim < 3; ++dim)
+	if ( M_lambda_num_structure )
 	{
-		for ( ITrow = M_localDofMap->begin(); ITrow != M_localDofMap->end() ; ++ITrow)
+		vector_Type rhsStructureVelocity (M_structureTimeAdvance->rhsContributionFirstDerivative(), Unique, Add);
+		vector_Type lambda (*M_structureInterfaceMap, Unique);
+		structureToInterface ( lambda, rhsStructureVelocity);
+		M_rhsCouplingVelocities.reset( new VectorEpetra ( *M_lagrangeMap ) );
+		M_rhsCouplingVelocities->zero();
+
+		std::map<ID, ID>::const_iterator ITrow;
+
+		UInt interface (M_structureInterfaceMap->mapSize()/3.0 );
+		UInt totalDofs (M_displacementFESpace->dof().numTotalDof() );
+
+		for (UInt dim = 0; dim < 3; ++dim)
 		{
-			if (M_structureInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second ) ) >= 0 )
+			for ( ITrow = M_localDofMap->begin(); ITrow != M_localDofMap->end() ; ++ITrow)
 			{
-					(*M_rhsCouplingVelocities) [  (int) (*M_numerationInterface) [ITrow->second ] + dim * interface ] = -lambda ( ITrow->second + dim * totalDofs );
+				if (M_structureInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second ) ) >= 0 )
+				{
+						(*M_rhsCouplingVelocities) [  (int) (*M_numerationInterface) [ITrow->second ] + dim * interface ] = -lambda ( ITrow->second + dim * totalDofs );
+				}
 			}
 		}
 	}
