@@ -278,20 +278,15 @@ void RBFlocallyRescaledVectorial<Mesh>::buildInterpolationOperatorMap()
 	std::vector<int> couplingVector;
 	couplingVector.reserve ( (int) (M_knownInterfaceMap->map (Unique)->NumMyElements() ) );
 
-	for (UInt dim = 0; dim < nDimensions; ++dim)
+	for ( ITrow = M_GIdsKnownMesh.begin(); ITrow != M_GIdsKnownMesh.end() ; ++ITrow)
 	{
-		for ( ITrow = M_GIdsKnownMesh.begin(); ITrow != M_GIdsKnownMesh.end() ; ++ITrow)
+		if (M_knownInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (*ITrow) ) >= 0)
 		{
-			if (M_knownInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (*ITrow) ) >= 0)
-			{
-				couplingVector.push_back ( (*M_numerationInterfaceKnown) (*ITrow ) + dim * M_interface );
-			}
+			couplingVector.push_back ( (*M_numerationInterfaceKnown) (*ITrow ) );
 		}
-	}// so the map for the coupling part of the matrix is just Unique
+	}
 
 	M_interpolationOperatorMap.reset (new MapEpetra (-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], M_knownField->mapPtr()->commPtr() ) );
-
-	std::cout << *(M_interpolationOperatorMap->map(Unique));
 
 	delete [] numInterfaceDof;
 }
@@ -325,24 +320,16 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
 
     std::vector<double>   RBF_radius (LocalNodesNumber);
     std::vector<boost::unordered_set<ID> > MatrixGraph (LocalNodesNumber);
-    int* ElementsPerRow = new int[LocalNodesNumber];
     int* GlobalID = new int[LocalNodesNumber];
 
     int k = 0;
-    int f = 0;
     int Max_entries = 0;
 
-    for (boost::unordered_set<ID>::iterator it = M_GIdsKnownMesh.begin(); it != M_GIdsKnownMesh.end(); ++it)
+    for (std::set<ID>::iterator it = M_GIdsKnownMesh.begin(); it != M_GIdsKnownMesh.end(); ++it)
     {
     	// Selecting each dof taken into account
     	GlobalID[k] = *it;
         
-        // Vectorial map
-        GlobalID_vectorial[f] = *it;
-        GlobalID_vectorial[f+LocalNodesNumber] = *it+(M_knownField->size()/3);
-        GlobalID_vectorial[f+2*LocalNodesNumber] = *it+(2*M_knownField->size()/3);
-        ++f;
-         
     	// For each of them, identify the neighbors within a certain number of circles M_links
         neighbors_Type Neighbors;
         Neighbors = M_neighbors->circleNeighbors ( *it, M_links );
@@ -355,58 +342,63 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
         NeighborsR.insert ( GlobalID[k] );
         MatrixGraph[k] = NeighborsR;
 
-        // Number of nonzero entries per row
-        ElementsPerRow[k] = MatrixGraph[k].size();
-
-        if (ElementsPerRow[k] > Max_entries)
-        {
-            Max_entries = ElementsPerRow[k];
-        }
         ++k;
     }
 
-    // Map of the interpolation operator
-    M_interpolationOperatorMap.reset (new map_Type (-1, LocalNodesNumber, GlobalID, M_knownField->mapPtr()->commPtr() ) );
-
-    // Map of the interpolation operator
-    M_interpolationOperatorMapVectorial.reset (new map_Type (-1, LocalNodesNumber*3, GlobalID_vectorial , M_knownField->mapPtr()->commPtr() ) );
-
     // Matrix for interpolation operator
-    M_interpolationOperator.reset (new matrix_Type (*M_interpolationOperatorMap, ElementsPerRow) );
+    M_interpolationOperator.reset (new matrix_Type (*M_interpolationOperatorMap, 100) );
+    Real Values;
+    std::cout << M_numerationInterfaceKnown->epetraVector();
 
-    int* Indices = new int[Max_entries];
-    double* Values = new double[Max_entries];
+    vector_Type test(*M_numerationInterfaceKnown,0);
+
+    std::cout << test.epetraVector();
+
+    M_interpolationOperator->zero();
 
     // Loop over all the dofs taken into account by the interpolation
     for ( int i = 0 ; i < LocalNodesNumber; ++i )
     {
         k = 0;
+
+        if (GlobalID[i] == 9 )
+        {
+        	std::cout << "\n\n Linea dof 9, che locale e' " << (*M_numerationInterfaceKnown)( GlobalID[i] ) << "\n\n";
+        }
+
         // For each i-th dof, evaluate the rbf between the dof and its neighbors
         for ( boost::unordered_set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
         {
-            Indices[k] = *it;
-            Values[k]  = rbf ( M_fullMeshKnown->point (GlobalID[i]).x(),
-                               M_fullMeshKnown->point (GlobalID[i]).y(),
-                               M_fullMeshKnown->point (GlobalID[i]).z(),
-                               M_fullMeshKnown->point (*it).x(),
-                               M_fullMeshKnown->point (*it).y(),
-                               M_fullMeshKnown->point (*it).z(),
-                               RBF_radius[i] );
-            ++k;
+//        	if ( M_numerationInterfaceKnown->map().map (Unique)->LID ( static_cast<EpetraInt_Type> (*it) ) >= 0 )
+//        	{
+        		Values = rbf (  M_fullMeshKnown->point (GlobalID[i]).x(),
+        						M_fullMeshKnown->point (GlobalID[i]).y(),
+        						M_fullMeshKnown->point (GlobalID[i]).z(),
+        						M_fullMeshKnown->point (*it).x(),
+        						M_fullMeshKnown->point (*it).y(),
+        						M_fullMeshKnown->point (*it).z(),
+        						RBF_radius[i] );
+
+            	if (GlobalID[i] == 9 )
+            	{
+            		std::cout << "(" << *it << ", " << (*M_numerationInterfaceKnown)(*it) << ", " << Values << ")  ";
+            	}
+
+            	//M_interpolationOperator->matrixPtr()->InsertGlobalValues ()
+
+//				M_interpolationOperator->addToCoefficient( (*M_numerationInterfaceKnown)( GlobalID[i] ),
+//														   *it,
+//														   Values );
+
+//        	}
         }
-        M_interpolationOperator->matrixPtr()->InsertGlobalValues (GlobalID[i], k, Values, Indices);
     }
     
-    // This is a squared matrix
     M_interpolationOperator->globalAssemble();
+    M_interpolationOperator->spy("M_interpolationOperator2procs");
     // M_interpolationOperator->exportToHDF5("InputField", "M_interpolationOperator", false);
-    delete[] Indices;
-    delete[] Values;
-    delete[] ElementsPerRow;
+
     delete[] GlobalID;
-    delete[] GlobalID_vectorial;
-    */
-    
 }
 
 template <typename mesh_Type>
@@ -506,7 +498,6 @@ void RBFlocallyRescaledVectorial<mesh_Type>::projectionOperator()
 template <typename mesh_Type>
 inline double RBFlocallyRescaledVectorial<mesh_Type>::computeRBFradius (meshPtr_Type MeshNeighbors, meshPtr_Type MeshGID, idContainer_Type Neighbors, ID GlobalID)
 {
-	/*
     double r = 0;
     double r_max = 0;
     for (idContainer_Type::iterator it = Neighbors.begin(); it != Neighbors.end(); ++it)
@@ -520,7 +511,6 @@ inline double RBFlocallyRescaledVectorial<mesh_Type>::computeRBFradius (meshPtr_
         r_max = ( r > r_max ) ? r : r_max;
     }
     return r_max;
-    */
 }
 
 template <typename mesh_Type>
@@ -756,10 +746,8 @@ inline bool RBFlocallyRescaledVectorial<mesh_Type>::isInside (ID pointMarker, fl
 template <typename mesh_Type>
 inline double RBFlocallyRescaledVectorial<mesh_Type>::rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius)
 {
-	/*
     double distance = std::sqrt ( (x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2) + (z1 - z2)*(z1 - z2) );
     return (1 - distance / radius) * (1 - distance / radius) * (1 - distance / radius) * (1 - distance / radius) * (4 * distance / radius + 1);
-    */
 }
 
 template <typename mesh_Type>
