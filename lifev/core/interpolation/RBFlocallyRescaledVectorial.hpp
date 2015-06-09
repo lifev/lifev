@@ -208,8 +208,8 @@ void RBFlocallyRescaledVectorial<Mesh>::buildOperators()
 {
     this->interpolationOperator();
     this->projectionOperator();
-//    this->buildRhs();
-//    this->interpolateCostantField();
+    this->buildRhs();
+    this->interpolateCostantField();
 }
 
 template <typename Mesh>
@@ -538,7 +538,6 @@ void RBFlocallyRescaledVectorial<mesh_Type>::projectionOperator()
         ++k;
     }
 
-    std::cout << M_numerationInterfaceUnknown->epetraVector();
     M_projectionOperator.reset (new matrix_Type (*M_projectionOperatorMap, 100) );
 
     Real Values;
@@ -586,23 +585,34 @@ inline double RBFlocallyRescaledVectorial<mesh_Type>::computeRBFradius (meshPtr_
 template <typename mesh_Type>
 void RBFlocallyRescaledVectorial<mesh_Type>::buildRhs()
 {
-	/*
+    M_RhsOne.reset (new vector_Type (*M_interpolationOperatorMap) );
+    *M_RhsOne += 1;
+    
     M_RhsF1.reset (new vector_Type (*M_interpolationOperatorMap) );
     M_RhsF2.reset (new vector_Type (*M_interpolationOperatorMap) );
     M_RhsF3.reset (new vector_Type (*M_interpolationOperatorMap) );
-    M_RhsOne.reset (new vector_Type (*M_interpolationOperatorMap) );
 
-    M_RhsF1->subset (*M_knownField, *M_interpolationOperatorMap, 0, 0);
-    M_RhsF2->subset (*M_knownField, *M_interpolationOperatorMap, M_knownField->size()/3, 0);
-    M_RhsF3->subset (*M_knownField, *M_interpolationOperatorMap, M_knownField->size()/3*2, 0);
-    *M_RhsOne += 1;
-    */
+    UInt offset = M_knownField->size()/3;
+    
+    for(int i = 0; i < M_numerationInterfaceKnown->epetraVector().MyLength(); ++i)
+    {
+        (*M_RhsF1)[(*M_numerationInterfaceKnown)[M_numerationInterfaceKnown->blockMap().GID(i)]]
+        = (*M_knownField)(M_numerationInterfaceKnown->blockMap().GID(i));
+        
+        (*M_RhsF2)[(*M_numerationInterfaceKnown)[M_numerationInterfaceKnown->blockMap().GID(i)]]
+        = (*M_knownField)(M_numerationInterfaceKnown->blockMap().GID(i) + offset);
+        
+        (*M_RhsF3)[(*M_numerationInterfaceKnown)[M_numerationInterfaceKnown->blockMap().GID(i)]]
+        = (*M_knownField)(M_numerationInterfaceKnown->blockMap().GID(i) + 2*offset);
+        
+//        std::cout << "GID = " << M_numerationInterfaceKnown->blockMap().GID(i)
+//        << ", Value =" << (*M_numerationInterfaceKnown)[M_numerationInterfaceKnown->blockMap().GID(i)] << std::endl;
+    }
 }
 
 template <typename mesh_Type>
 void RBFlocallyRescaledVectorial<mesh_Type>::interpolateCostantField()
 {
-	/*
     vectorPtr_Type gamma_one;
     gamma_one.reset (new vector_Type (*M_interpolationOperatorMap) );
 
@@ -624,7 +634,8 @@ void RBFlocallyRescaledVectorial<mesh_Type>::interpolateCostantField()
 
     M_rbf_one.reset (new vector_Type (*M_projectionOperatorMap) );
     M_projectionOperator->multiply (false, *gamma_one, *M_rbf_one);
-    */
+    
+    M_rbf_one->spy("M_rbf_one");
 }
 
 template <typename mesh_Type>
