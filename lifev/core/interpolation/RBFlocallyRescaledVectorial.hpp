@@ -162,8 +162,11 @@ private:
 
     // Added for maps
 
-    mapPtr_Type         M_knownInterfaceMap;
-    vectorPtr_Type      M_numerationInterfaceKnown;
+    mapPtr_Type                 M_knownInterfaceMap;
+    vectorPtr_Type              M_numerationInterfaceKnown;
+    std::vector<vectorPtr_Type> M_numerationInterfaceKnownColumns;
+    
+    int M_pid;
 };
 
 template <typename mesh_Type>
@@ -234,7 +237,8 @@ void RBFlocallyRescaledVectorial<Mesh>::buildInterpolationOperatorMap()
 	Int numtasks = M_knownField->mapPtr()->commPtr()->NumProc(); // Numero di processi
 	int* numInterfaceDof (new int[numtasks]); // vettore lungo tanti quanti sono i processi
 	int pid = M_knownField->mapPtr()->commPtr()->MyPID(); // ID processo
-	int numMyElements;
+    M_pid = pid;
+    int numMyElements;
 
 	numMyElements = M_knownInterfaceMap->map (Unique)->NumMyElements(); // numero di elementi sul processo
 	numInterfaceDof[pid] = numMyElements; // Ogni processore mette nella propria posizione il numero di elementi di interfaccia che ha
@@ -275,6 +279,11 @@ void RBFlocallyRescaledVectorial<Mesh>::buildInterpolationOperatorMap()
 		}
 	}
 
+    M_numerationInterfaceKnownColumns.resize(numtasks);
+    
+    for (int j = 0; j < numtasks ; ++j)
+        (M_numerationInterfaceKnownColumns[j]).reset(new vector_Type ( *M_numerationInterfaceKnown, j ) );
+    
 	std::vector<int> couplingVector;
 	couplingVector.reserve ( (int) (M_knownInterfaceMap->map (Unique)->NumMyElements() ) );
 
@@ -348,29 +357,15 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
     // Matrix for interpolation operator
     M_interpolationOperator.reset (new matrix_Type (*M_interpolationOperatorMap, 100) );
     Real Values;
-    std::cout << M_numerationInterfaceKnown->epetraVector();
-
-    vector_Type test(*M_numerationInterfaceKnown,0);
-
-    std::cout << test.epetraVector();
-
+    
     M_interpolationOperator->zero();
 
     // Loop over all the dofs taken into account by the interpolation
     for ( int i = 0 ; i < LocalNodesNumber; ++i )
     {
-        k = 0;
-
-        if (GlobalID[i] == 9 )
-        {
-        	std::cout << "\n\n Linea dof 9, che locale e' " << (*M_numerationInterfaceKnown)( GlobalID[i] ) << "\n\n";
-        }
-
         // For each i-th dof, evaluate the rbf between the dof and its neighbors
         for ( boost::unordered_set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
         {
-//        	if ( M_numerationInterfaceKnown->map().map (Unique)->LID ( static_cast<EpetraInt_Type> (*it) ) >= 0 )
-//        	{
         		Values = rbf (  M_fullMeshKnown->point (GlobalID[i]).x(),
         						M_fullMeshKnown->point (GlobalID[i]).y(),
         						M_fullMeshKnown->point (GlobalID[i]).z(),
@@ -379,25 +374,15 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
         						M_fullMeshKnown->point (*it).z(),
         						RBF_radius[i] );
 
-            	if (GlobalID[i] == 9 )
-            	{
-            		std::cout << "(" << *it << ", " << (*M_numerationInterfaceKnown)(*it) << ", " << Values << ")  ";
-            	}
-
-            	//M_interpolationOperator->matrixPtr()->InsertGlobalValues ()
-
-//				M_interpolationOperator->addToCoefficient( (*M_numerationInterfaceKnown)( GlobalID[i] ),
-//														   *it,
-//														   Values );
-
-//        	}
+                M_interpolationOperator->addToCoefficient( (*M_numerationInterfaceKnown)( GlobalID[i] ),
+                                                           (*(M_numerationInterfaceKnownColumns[M_pid]))(*it),
+                                                           Values );
         }
     }
     
     M_interpolationOperator->globalAssemble();
-    M_interpolationOperator->spy("M_interpolationOperator2procs");
-    // M_interpolationOperator->exportToHDF5("InputField", "M_interpolationOperator", false);
 
+    // M_interpolationOperator->exportToHDF5("InputField", "M_interpolationOperator", false);
     delete[] GlobalID;
 }
 
