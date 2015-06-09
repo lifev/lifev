@@ -83,7 +83,7 @@
 	flag        	  =  1       # default: 1, the mesh flag of the interface
 	tolerance         =  0       # how far points are to be considered the same on the interface
 	fluid_vertex_flag = 13       # tells whether the in/out ring curves on the interface
-	nonconforming     = true     # tells whether the meshes are conformin at the interface (true works just with P1)
+	nonconforming     = false     # tells whether the meshes are conformin at the interface (true works just with P1)
 
 [../]
 

@@ -21,7 +21,7 @@
 [solid]
     [./space_discretization]
        	mesh_dir                 = ./
-       	mesh_file                = solido.mesh
+       	mesh_file                = tube20_circ.mesh
        	mesh_type                = .mesh
 
 [interpolation]

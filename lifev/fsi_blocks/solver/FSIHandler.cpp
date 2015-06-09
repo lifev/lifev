@@ -516,13 +516,15 @@ void FSIHandler::createInterfaceMaps(std::map<ID, ID> const& locDofMap)
 void FSIHandler::constructInterfaceMap ( const std::map<ID, ID>& locDofMap,
 										 const UInt subdomainMaxId )
 {
+	// subdomainMaxId viene passato come M_displacementFESpace->map().map(Unique)->NumGlobalElements()/nDimensions
+
 	std::map<ID, ID>::const_iterator ITrow;
 
-	Int numtasks = M_comm->NumProc();
-	int* numInterfaceDof (new int[numtasks]);
-	int pid = M_comm->MyPID();
-	int numMyElements = M_structureInterfaceMap->map (Unique)->NumMyElements();
-	numInterfaceDof[pid] = numMyElements;
+	Int numtasks = M_comm->NumProc(); // Numero di processi
+	int* numInterfaceDof (new int[numtasks]); // vettore lungo tanti quanti sono i processi
+	int pid = M_comm->MyPID(); // ID processo
+	int numMyElements = M_structureInterfaceMap->map (Unique)->NumMyElements(); // numero di elementi sul processo
+	numInterfaceDof[pid] = numMyElements; // Ogni processore mette nella propria posizione il numero di elementi di interfaccia che ha
 	MapEpetra subMap (*M_structureInterfaceMap->map (Unique), (UInt) 0, subdomainMaxId);
 
 	M_numerationInterface.reset (new VectorEpetra (subMap, Unique) );
@@ -544,7 +546,7 @@ void FSIHandler::constructInterfaceMap ( const std::map<ID, ID>& locDofMap,
 
 	UInt l = 0;
 
-	Real M_interface = (UInt) M_structureInterfaceMap->map (Unique)->NumGlobalElements() / nDimensions;
+	Real M_interface = (UInt) M_structureInterfaceMap->map (Unique)->NumGlobalElements() / nDimensions; // Quanti dof ci sono nella mappa scalare di interfaccia
 	for (l = 0, ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
 	{
 		if (M_structureInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second) ) >= 0)
@@ -573,6 +575,7 @@ void FSIHandler::constructInterfaceMap ( const std::map<ID, ID>& locDofMap,
 	}// so the map for the coupling part of the matrix is just Unique
 
 	M_lagrangeMap.reset (new MapEpetra (-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], M_comm) );
+	delete [] numInterfaceDof;
 }
 
 void

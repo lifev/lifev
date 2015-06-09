@@ -1,6 +1,7 @@
 SET(interpolation_HEADERS
   interpolation/RBFInterpolation.hpp
   interpolation/RBFlocallyRescaledScalar.hpp
+  interpolation/RBFlocallyRescaledVectorial.hpp
 CACHE INTERNAL "")
 
 SET(interpolation_SOURCES
