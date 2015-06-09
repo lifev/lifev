@@ -851,7 +851,7 @@ addToSubdomain ( MatrixType& mat )
             UInt iElement = M_volumeElements[iVolumeElement];
 
             // Extracting the marker
-            UInt markerID = M_testSpace->mesh()->element ( iElement ).markerID( );
+            // UInt markerID = M_testSpace->mesh()->element ( iElement ).markerID( );
 
             // Update the quadrature rule adapter
             M_qrAdapter.update (iElement);
