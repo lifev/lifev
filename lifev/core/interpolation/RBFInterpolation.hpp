@@ -136,6 +136,8 @@ public:
 
     virtual void buildKnownInterfaceMap(){};
 
+    virtual void buildInterpolationOperatorMap(){};
+
 private:
 
 };

@@ -124,6 +124,8 @@ public:
 
     void buildKnownInterfaceMap();
 
+    void buildInterpolationOperatorMap();
+
 private:
 
     meshPtr_Type        M_fullMeshKnown;
@@ -161,7 +163,7 @@ private:
     // Added for maps
 
     mapPtr_Type         M_knownInterfaceMap;
-
+    vectorPtr_Type      M_numerationInterfaceKnown;
 };
 
 template <typename mesh_Type>
@@ -222,9 +224,76 @@ void RBFlocallyRescaledVectorial<Mesh>::buildKnownInterfaceMap()
 	}
 
 	M_knownInterfaceMap.reset ( new MapEpetra ( -1, static_cast<int> (dofKnown.size() ), pointerToDofs, M_knownField->mapPtr()->commPtr() ) );
+}
 
-	std::cout << *(M_knownInterfaceMap->map(Unique));
+template <typename Mesh>
+void RBFlocallyRescaledVectorial<Mesh>::buildInterpolationOperatorMap()
+{
+	std::set<ID>::const_iterator ITrow;
 
+	Int numtasks = M_knownField->mapPtr()->commPtr()->NumProc(); // Numero di processi
+	int* numInterfaceDof (new int[numtasks]); // vettore lungo tanti quanti sono i processi
+	int pid = M_knownField->mapPtr()->commPtr()->MyPID(); // ID processo
+	int numMyElements;
+
+	numMyElements = M_knownInterfaceMap->map (Unique)->NumMyElements(); // numero di elementi sul processo
+	numInterfaceDof[pid] = numMyElements; // Ogni processore mette nella propria posizione il numero di elementi di interfaccia che ha
+
+	mapPtr_Type subMap;
+	subMap.reset ( new map_Type ( *M_knownInterfaceMap->map (Unique), (UInt) 0, M_knownField->size()/nDimensions) );
+
+	M_numerationInterfaceKnown.reset (new VectorEpetra (*subMap, Unique) );
+
+	for (int j = 0; j < numtasks; ++j)
+	{
+		M_knownField->mapPtr()->commPtr()->Broadcast ( &numInterfaceDof[j], 1, j);
+	}
+
+	for (int j = numtasks - 1; j > 0 ; --j)
+	{
+		numInterfaceDof[j] = numInterfaceDof[j - 1];
+	}
+	numInterfaceDof[0] = 0;
+	for (int j = 1; j < numtasks ; ++j)
+	{
+		numInterfaceDof[j] += numInterfaceDof[j - 1];
+	}
+
+	UInt l = 0;
+
+	Real M_interface = (UInt) M_knownInterfaceMap->map (Unique)->NumGlobalElements() / nDimensions; // Quanti dof ci sono nella mappa scalare di interfaccia
+	for (l = 0, ITrow = M_GIdsKnownMesh.begin(); ITrow != M_GIdsKnownMesh.end() ; ++ITrow)
+	{
+		if (M_knownInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (*ITrow) ) >= 0)
+		{
+			(*M_numerationInterfaceKnown) [*ITrow ] = l + (int) (numInterfaceDof[pid] / nDimensions);
+			if ( (int) (*M_numerationInterfaceKnown) (*ITrow ) != floor (l + numInterfaceDof[pid] / nDimensions + 0.2) )
+			{
+				std::cout << "ERROR! the numeration of the coupling map is not correct" << std::endl;
+			}
+			++l;
+		}
+	}
+
+	std::vector<int> couplingVector;
+	couplingVector.reserve ( (int) (M_knownInterfaceMap->map (Unique)->NumMyElements() ) );
+
+	for (UInt dim = 0; dim < nDimensions; ++dim)
+	{
+		for ( ITrow = M_GIdsKnownMesh.begin(); ITrow != M_GIdsKnownMesh.end() ; ++ITrow)
+		{
+			if (M_knownInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (*ITrow) ) >= 0)
+			{
+				couplingVector.push_back ( (*M_numerationInterfaceKnown) (*ITrow ) + dim * M_interface );
+			}
+		}
+	}// so the map for the coupling part of the matrix is just Unique
+
+	M_interpolationOperatorMap.reset (new MapEpetra (-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], M_knownField->mapPtr()->commPtr() ) );
+
+	std::cout << *(M_interpolationOperatorMap->map(Unique));
+
+	delete [] numInterfaceDof;
 }
 
 template <typename Mesh>
@@ -236,7 +305,10 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
 	// This map will be used to select dofs from the whole vector as right hand side
 	buildKnownInterfaceMap();
 
-	/*
+	// Building map that will be used to close the matrix, this map will be ordered from
+	// 1 to the number of DOFs at the interface
+	buildInterpolationOperatorMap();
+
 	// Object needed to find neighbors by mesh connectivity
 	M_neighbors.reset ( new neighboring_Type ( M_fullMeshKnown, M_localMeshKnown, M_knownField->mapPtr(), M_knownField->mapPtr()->commPtr() ) );
     if (M_flags[0] == -1)
@@ -255,7 +327,7 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
     std::vector<boost::unordered_set<ID> > MatrixGraph (LocalNodesNumber);
     int* ElementsPerRow = new int[LocalNodesNumber];
     int* GlobalID = new int[LocalNodesNumber];
-    int* GlobalID_vectorial = new int[LocalNodesNumber*3];
+
     int k = 0;
     int f = 0;
     int Max_entries = 0;
@@ -282,17 +354,6 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
         NeighborsR = M_neighbors->neighborsWithinRadius ( GlobalID[k], RBF_radius[k] );
         NeighborsR.insert ( GlobalID[k] );
         MatrixGraph[k] = NeighborsR;
-        
-
-        // Lines below can be used to check whether the neighbors are taken correctly
-//        if ( GlobalID[k] == (1262-1) )
-//        {
-//        	for (neighbors_Type::iterator it = Neighbors.begin(); it != Neighbors.end(); ++it)
-//        	{
-//        		std::cout << " " << (*it+1) << " ";
-//        	}
-//        }
-
 
         // Number of nonzero entries per row
         ElementsPerRow[k] = MatrixGraph[k].size();
