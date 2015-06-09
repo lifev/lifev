@@ -167,9 +167,10 @@ int main (int argc, char** argv )
 
     // NUMBER OF FLAGS CONSIDERED: THE DOFS WHOSE FLAG IS 1 AND 20 ARE TAKEN INTO ACCOUNT
     // NOTE: from mesh to mesh the vector of flag has to contain one element with value -1
-    int nFlags = 1;
+    int nFlags = 2;
     std::vector<int> flags (nFlags);
     flags[0] = 1;
+    flags[1] = 20;
 
     // INITIALIZE THE INTERPOLANT
     interpolationPtr_Type RBFinterpolant;
@@ -186,6 +187,7 @@ int main (int argc, char** argv )
     // CREATING THE RBF OPERATORS
     RBFinterpolant->buildOperators();
 
+    /*
     // PERFORMING INTERPOLATION
     RBFinterpolant->interpolate();
 
@@ -240,6 +242,7 @@ int main (int argc, char** argv )
     Fluid_exporter.addVariable (ExporterData<mesh_Type>::VectorField, "Error", Fluid_fieldFESpace, myError, UInt (0) );
     Fluid_exporter.postProcess (0);
     Fluid_exporter.closeFile();
+	*/
 
 #ifdef HAVE_MPI
     MPI_Finalize();

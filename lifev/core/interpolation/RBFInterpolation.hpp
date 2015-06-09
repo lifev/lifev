@@ -102,7 +102,7 @@ public:
 
     virtual void interpolateCostantField() {};
 
-    virtual void identifyNodes (meshPtr_Type LocalMesh, boost::unordered_set<ID>& GID_nodes, vectorPtr_Type CheckVector) {};
+    virtual void identifyNodes (meshPtr_Type LocalMesh, std::set<ID>& GID_nodes, vectorPtr_Type CheckVector) {};
 
     virtual bool isInside (ID pointMarker, flagContainer_Type Flags) {};
 
@@ -131,6 +131,10 @@ public:
     virtual void getSolutionOnGamma(vectorPtr_Type& ) { };
 
     virtual void buildUnknownVectorialInterfaceMap(){};
+
+    // Methods added after changing the maps
+
+    virtual void buildKnownInterfaceMap(){};
 
 private:
 
