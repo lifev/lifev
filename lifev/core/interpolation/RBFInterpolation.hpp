@@ -136,7 +136,11 @@ public:
 
     virtual void buildKnownInterfaceMap(){};
 
+    virtual void buildUnknownInterfaceMap(){};
+    
     virtual void buildInterpolationOperatorMap(){};
+    
+    virtual void buildProjectionOperatorMap(){};
 
 private:
 

@@ -123,8 +123,12 @@ public:
     // Methods added after changing the maps
 
     void buildKnownInterfaceMap();
+    
+    void buildUnknownInterfaceMap();
 
     void buildInterpolationOperatorMap();
+    
+    void buildProjectionOperatorMap();
 
 private:
 
@@ -163,7 +167,9 @@ private:
     // Added for maps
 
     mapPtr_Type                 M_knownInterfaceMap;
+    mapPtr_Type                 M_unknownInterfaceMap;
     vectorPtr_Type              M_numerationInterfaceKnown;
+    vectorPtr_Type              M_numerationInterfaceUnknown;
     std::vector<vectorPtr_Type> M_numerationInterfaceKnownColumns;
     
     int M_pid;
@@ -201,7 +207,7 @@ template <typename Mesh>
 void RBFlocallyRescaledVectorial<Mesh>::buildOperators()
 {
     this->interpolationOperator();
-//    this->projectionOperator();
+    this->projectionOperator();
 //    this->buildRhs();
 //    this->interpolateCostantField();
 }
@@ -229,6 +235,29 @@ void RBFlocallyRescaledVectorial<Mesh>::buildKnownInterfaceMap()
 	M_knownInterfaceMap.reset ( new MapEpetra ( -1, static_cast<int> (dofKnown.size() ), pointerToDofs, M_knownField->mapPtr()->commPtr() ) );
 }
 
+template <typename Mesh>
+void RBFlocallyRescaledVectorial<Mesh>::buildUnknownInterfaceMap()
+{
+    std::vector<int> dofUnknown;
+    dofUnknown.reserve ( M_GIdsUnknownMesh.size() );
+    
+    std::set<ID>::const_iterator i;
+    
+    for (UInt dim = 0; dim < nDimensions; ++dim)
+        for ( i = M_GIdsUnknownMesh.begin(); i != M_GIdsUnknownMesh.end(); ++i )
+        {
+            dofUnknown.push_back ( *i + dim * M_unknownField->size()/nDimensions );
+        }
+    
+    int* pointerToDofs (0);
+    if (dofUnknown.size() > 0)
+    {
+        pointerToDofs = &dofUnknown[0];
+    }
+
+    M_unknownInterfaceMap.reset ( new MapEpetra ( -1, static_cast<int> (dofUnknown.size() ), pointerToDofs, M_unknownField->mapPtr()->commPtr() ) );
+}
+    
 template <typename Mesh>
 void RBFlocallyRescaledVectorial<Mesh>::buildInterpolationOperatorMap()
 {
@@ -296,8 +325,73 @@ void RBFlocallyRescaledVectorial<Mesh>::buildInterpolationOperatorMap()
 	}
 
 	M_interpolationOperatorMap.reset (new MapEpetra (-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], M_knownField->mapPtr()->commPtr() ) );
-
+    
 	delete [] numInterfaceDof;
+}
+    
+template <typename Mesh>
+void RBFlocallyRescaledVectorial<Mesh>::buildProjectionOperatorMap()
+{
+    std::set<ID>::const_iterator ITrow;
+    
+    Int numtasks = M_unknownField->mapPtr()->commPtr()->NumProc(); // Numero di processi
+    int* numInterfaceDof (new int[numtasks]); // vettore lungo tanti quanti sono i processi
+    int pid = M_unknownField->mapPtr()->commPtr()->MyPID(); // ID processo
+    int numMyElements;
+    
+    numMyElements = M_unknownInterfaceMap->map (Unique)->NumMyElements(); // numero di elementi sul processo
+    numInterfaceDof[pid] = numMyElements; // Ogni processore mette nella propria posizione il numero di elementi di interfaccia che ha
+    
+    mapPtr_Type subMap;
+    subMap.reset ( new map_Type ( *M_unknownInterfaceMap->map (Unique), (UInt) 0, M_unknownField->size()/nDimensions) );
+    
+    M_numerationInterfaceUnknown.reset (new VectorEpetra (*subMap, Unique) );
+    
+    for (int j = 0; j < numtasks; ++j)
+    {
+        M_unknownField->mapPtr()->commPtr()->Broadcast ( &numInterfaceDof[j], 1, j);
+    }
+    
+    for (int j = numtasks - 1; j > 0 ; --j)
+    {
+        numInterfaceDof[j] = numInterfaceDof[j - 1];
+    }
+    numInterfaceDof[0] = 0;
+    for (int j = 1; j < numtasks ; ++j)
+    {
+        numInterfaceDof[j] += numInterfaceDof[j - 1];
+    }
+    
+    UInt l = 0;
+    
+    Real M_interface = (UInt) M_unknownInterfaceMap->map (Unique)->NumGlobalElements() / nDimensions; // Quanti dof ci sono nella mappa scalare di interfaccia
+    for (l = 0, ITrow = M_GIdsUnknownMesh.begin(); ITrow != M_GIdsUnknownMesh.end() ; ++ITrow)
+    {
+        if (M_unknownInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (*ITrow) ) >= 0)
+        {
+            (*M_numerationInterfaceUnknown) [*ITrow ] = l + (int) (numInterfaceDof[pid] / nDimensions);
+            if ( (int) (*M_numerationInterfaceUnknown) (*ITrow ) != floor (l + numInterfaceDof[pid] / nDimensions + 0.2) )
+            {
+                std::cout << "ERROR! the numeration of the coupling map is not correct" << std::endl;
+            }
+            ++l;
+        }
+    }
+    
+    std::vector<int> couplingVector;
+    couplingVector.reserve ( (int) (M_unknownInterfaceMap->map (Unique)->NumMyElements() ) );
+    
+    for ( ITrow = M_GIdsUnknownMesh.begin(); ITrow != M_GIdsUnknownMesh.end() ; ++ITrow)
+    {
+        if (M_unknownInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (*ITrow) ) >= 0)
+        {
+            couplingVector.push_back ( (*M_numerationInterfaceUnknown) (*ITrow ) );
+        }
+    }
+    
+    M_projectionOperatorMap.reset (new MapEpetra (-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], M_unknownField->mapPtr()->commPtr() ) );
+    
+    delete [] numInterfaceDof;
 }
 
 template <typename Mesh>
@@ -389,26 +483,27 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
 template <typename mesh_Type>
 void RBFlocallyRescaledVectorial<mesh_Type>::projectionOperator()
 {
-	/*
     // Identifying dofs to be taken into account
     this->identifyNodes (M_localMeshUnknown, M_GIdsUnknownMesh, M_unknownField);
 
+    buildUnknownInterfaceMap();
+    
+    buildProjectionOperatorMap();
+    
     // Total number of dofs taken into account
     int LocalNodesNumber = M_GIdsUnknownMesh.size();
 
     std::vector<double>  RBF_radius (LocalNodesNumber);
     std::vector<boost::unordered_set<ID> > MatrixGraph (LocalNodesNumber);
-    int* ElementsPerRow = new int[LocalNodesNumber];
     int* GlobalID = new int[LocalNodesNumber];
     int k = 0;
-    int Max_entries = 0;
-
+    
     // I need to find the closest point in the "known mesh" to use its radius
     double d;
     double d_min;
     int nearestPoint;
 
-    for (boost::unordered_set<ID>::iterator it = M_GIdsUnknownMesh.begin(); it != M_GIdsUnknownMesh.end(); ++it)
+    for (std::set<ID>::iterator it = M_GIdsUnknownMesh.begin(); it != M_GIdsUnknownMesh.end(); ++it)
     {
         GlobalID[k] = *it;
         d_min = 100;
@@ -440,44 +535,34 @@ void RBFlocallyRescaledVectorial<mesh_Type>::projectionOperator()
         NeighborsR = M_neighbors->neighborsWithinRadius ( nearestPoint, RBF_radius[k] );
         NeighborsR.insert ( nearestPoint );
         MatrixGraph[k] = NeighborsR;
-        
-        ElementsPerRow[k] = MatrixGraph[k].size();
-        if (ElementsPerRow[k] > Max_entries)
-        {
-            Max_entries = ElementsPerRow[k];
-        }
         ++k;
     }
 
-    M_projectionOperatorMap.reset (new map_Type (-1, LocalNodesNumber, GlobalID, M_unknownField->mapPtr()->commPtr() ) );
-    M_projectionOperator.reset (new matrix_Type (*M_projectionOperatorMap, ElementsPerRow) );
+    std::cout << M_numerationInterfaceUnknown->epetraVector();
+    M_projectionOperator.reset (new matrix_Type (*M_projectionOperatorMap, 100) );
 
-    int* Indices = new int[Max_entries];
-    double* Values = new double[Max_entries];
+    Real Values;
 
     for ( int i = 0 ; i < LocalNodesNumber; ++i )
     {
-        k = 0;
         for ( boost::unordered_set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
         {
-            Indices[k] = *it;
-            Values[k]  = rbf ( M_fullMeshUnknown->point (GlobalID[i]).x(),
-                               M_fullMeshUnknown->point (GlobalID[i]).y(),
-                               M_fullMeshUnknown->point (GlobalID[i]).z(),
-                               M_fullMeshKnown->point (*it).x(),
-                               M_fullMeshKnown->point (*it).y(),
-                               M_fullMeshKnown->point (*it).z(),
-                               RBF_radius[i]);
-            ++k;
+            Values  = rbf ( M_fullMeshUnknown->point (GlobalID[i]).x(),
+                            M_fullMeshUnknown->point (GlobalID[i]).y(),
+                            M_fullMeshUnknown->point (GlobalID[i]).z(),
+                            M_fullMeshKnown->point (*it).x(),
+                            M_fullMeshKnown->point (*it).y(),
+                            M_fullMeshKnown->point (*it).z(),
+                            RBF_radius[i]);
+            
+            M_projectionOperator->addToCoefficient( (*M_numerationInterfaceUnknown)( GlobalID[i] ),
+                                                      (*(M_numerationInterfaceKnownColumns[M_pid]))(*it),
+                                                      Values );
         }
-        M_projectionOperator->matrixPtr()->InsertGlobalValues (GlobalID[i], k, Values, Indices);
     }
     M_projectionOperator->globalAssemble (M_interpolationOperatorMap, M_projectionOperatorMap);
-    delete[] Indices;
-    delete[] Values;
-    delete[] ElementsPerRow;
+    
     delete[] GlobalID;
-    */
 }
 
 template <typename mesh_Type>
