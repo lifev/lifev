@@ -656,10 +656,6 @@ FSIHandler::assembleCoupling ( )
 	}
 
 	M_coupling->buildBlocks ( *M_localDofMap, M_lambda_num_structure );
-
-	int aaaaaa;
-	std::cin >> aaaaaa;
-
 }
 
 void
@@ -765,6 +761,30 @@ FSIHandler::updateRhsCouplingVelocities ( )
 				if (M_structureInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second ) ) >= 0 )
 				{
 						(*M_rhsCouplingVelocities) [  (int) (*M_numerationInterface) [ITrow->second ] + dim * interface ] = -lambda ( ITrow->second + dim * totalDofs );
+				}
+			}
+		}
+	}
+	else
+	{
+		vector_Type rhsStructureVelocity (M_structureTimeAdvance->rhsContributionFirstDerivative(), Unique, Add);
+		vector_Type lambda (*M_structureInterfaceMap, Unique);
+		structureToInterface ( lambda, rhsStructureVelocity);
+		M_rhsCouplingVelocities.reset( new VectorEpetra ( *M_lagrangeMap ) );
+		M_rhsCouplingVelocities->zero();
+
+		std::map<ID, ID>::const_iterator ITrow;
+
+		UInt interface (M_fluidInterfaceMap->mapSize()/3.0 );
+		UInt totalDofs (M_displacementFESpace->dof().numTotalDof() );
+
+		for (UInt dim = 0; dim < 3; ++dim)
+		{
+			for ( ITrow = M_localDofMap->begin(); ITrow != M_localDofMap->end() ; ++ITrow)
+			{
+				if (M_fluidInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->first ) ) >= 0 )
+				{
+					(*M_rhsCouplingVelocities) [  (int) (*M_numerationInterface) [ITrow->first ] + dim * interface ] = -lambda ( ITrow->second + dim * totalDofs );
 				}
 			}
 		}
