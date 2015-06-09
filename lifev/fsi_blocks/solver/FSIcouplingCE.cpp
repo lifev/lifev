@@ -27,60 +27,123 @@ FSIcouplingCE::setUp ( const Real& timeStep, const Real& interfaceDofs, const Re
 }
 
 void
-FSIcouplingCE::buildBlocks ( std::map<ID, ID> const& localDofMap )
+FSIcouplingCE::buildBlocks ( std::map<ID, ID> const& localDofMap, const bool& lambda_num_structure )
 {
+	// if lambda_num_structure = true, lambda follows the numeration of the structure
+	// if lambda_num_structure = false, lambda follows the numeration of the fluid
+
 	Real value = 1.0;
 	std::map<ID, ID>::const_iterator ITrow;
 
 	M_lambdaToFluidMomentum.reset ( new MatrixEpetra<Real> ( M_fluidVelocityFESpace->map() ) );
-	for (UInt dim = 0; dim < 3; ++dim)
+
+	if ( lambda_num_structure )
 	{
-		for (ITrow = localDofMap.begin(); ITrow != localDofMap.end(); ++ITrow)
+		for (UInt dim = 0; dim < 3; ++dim)
 		{
-			if ( M_numerationInterface->map().map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second) ) >= 0 )
+			for (ITrow = localDofMap.begin(); ITrow != localDofMap.end(); ++ITrow)
 			{
-				M_lambdaToFluidMomentum->addToCoefficient( ITrow->first + dim * M_fluidVelocityFESpace->dof().numTotalDof(),
-														   (int) (*M_numerationInterface)[ITrow->second] + dim * M_interface,
-														   value );
+				if ( M_numerationInterface->map().map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second) ) >= 0 )
+				{
+					M_lambdaToFluidMomentum->addToCoefficient( ITrow->first + dim * M_fluidVelocityFESpace->dof().numTotalDof(),
+															   (int) (*M_numerationInterface)[ITrow->second] + dim * M_interface,
+															   value );
+				}
 			}
 		}
 	}
+	else
+	{
+		for (UInt dim = 0; dim < 3; ++dim)
+		{
+			for (ITrow = localDofMap.begin(); ITrow != localDofMap.end(); ++ITrow)
+			{
+				if ( M_numerationInterface->map().map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->first) ) >= 0 )
+				{
+					M_lambdaToFluidMomentum->addToCoefficient( ITrow->first + dim * M_fluidVelocityFESpace->dof().numTotalDof(),
+															   (int) (*M_numerationInterface)[ITrow->first] + dim * M_interface,
+															   value );
+				}
+			}
+		}
+	}
+
 	M_lambdaToFluidMomentum->globalAssemble(M_interfaceMap, M_fluidVelocityFESpace->mapPtr());
 
 	// ----------------------------------------------------------------------------------------------------------------------------
 
 	value = -1.0;
 	M_lambdaToStructureMomentum.reset ( new MatrixEpetra<Real> ( M_structureDisplacementFESpace->map() ) );
-	for (UInt dim = 0; dim < 3; ++dim)
+
+	if ( lambda_num_structure )
 	{
-		for (ITrow = localDofMap.begin(); ITrow != localDofMap.end(); ++ITrow)
+		for (UInt dim = 0; dim < 3; ++dim)
 		{
-			if ( M_numerationInterface->map().map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second) ) >= 0 )
+			for (ITrow = localDofMap.begin(); ITrow != localDofMap.end(); ++ITrow)
 			{
-				M_lambdaToStructureMomentum->addToCoefficient( ITrow->second + dim * M_structureDisplacementFESpace->dof().numTotalDof(),
-													 	 	   (int) (*M_numerationInterface)[ITrow->second] + dim * M_interface,
-													 	 	   value );
+				if ( M_numerationInterface->map().map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second) ) >= 0 )
+				{
+					M_lambdaToStructureMomentum->addToCoefficient( ITrow->second + dim * M_structureDisplacementFESpace->dof().numTotalDof(),
+																   (int) (*M_numerationInterface)[ITrow->second] + dim * M_interface,
+																   value );
+				}
 			}
 		}
 	}
+	else
+	{
+		for (UInt dim = 0; dim < 3; ++dim)
+		{
+			for (ITrow = localDofMap.begin(); ITrow != localDofMap.end(); ++ITrow)
+			{
+				if ( M_numerationInterface->map().map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->first) ) >= 0 )
+				{
+					M_lambdaToStructureMomentum->addToCoefficient( ITrow->second + dim * M_structureDisplacementFESpace->dof().numTotalDof(),
+																   (int) (*M_numerationInterface)[ITrow->first] + dim * M_interface,
+																   value );
+				}
+			}
+		}
+	}
+
 	M_lambdaToStructureMomentum->globalAssemble(M_interfaceMap, M_structureDisplacementFESpace->mapPtr());
 
 	// ----------------------------------------------------------------------------------------------------------------------------
 
 	value = 1.0;
 	M_fluidVelocityToLambda.reset ( new MatrixEpetra<Real> ( *M_interfaceMap ) );
-	for (UInt dim = 0; dim < 3; ++dim)
+
+	if ( lambda_num_structure )
 	{
-		for (ITrow = localDofMap.begin(); ITrow != localDofMap.end(); ++ITrow)
+		for (UInt dim = 0; dim < 3; ++dim)
 		{
-			if ( M_numerationInterface->map().map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second) ) >= 0 )
+			for (ITrow = localDofMap.begin(); ITrow != localDofMap.end(); ++ITrow)
 			{
-				M_fluidVelocityToLambda->addToCoefficient( (int) (*M_numerationInterface)[ITrow->second] + dim * M_interface,
-						                                   ITrow->first + dim * M_fluidVelocityFESpace->dof().numTotalDof(),
-						                                   value );
+				if ( M_numerationInterface->map().map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second) ) >= 0 )
+				{
+					M_fluidVelocityToLambda->addToCoefficient( (int) (*M_numerationInterface)[ITrow->second] + dim * M_interface,
+															   ITrow->first + dim * M_fluidVelocityFESpace->dof().numTotalDof(),
+															   value );
+				}
 			}
 		}
 	}
+	else
+	{
+		for (UInt dim = 0; dim < 3; ++dim)
+		{
+			for (ITrow = localDofMap.begin(); ITrow != localDofMap.end(); ++ITrow)
+			{
+				if ( M_numerationInterface->map().map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->first) ) >= 0 )
+				{
+					M_fluidVelocityToLambda->addToCoefficient( (int) (*M_numerationInterface)[ITrow->first] + dim * M_interface,
+															   ITrow->first + dim * M_fluidVelocityFESpace->dof().numTotalDof(),
+															   value );
+				}
+			}
+		}
+	}
+
 	M_fluidVelocityToLambda->globalAssemble(M_fluidVelocityFESpace->mapPtr(), M_interfaceMap);
 
 	// ----------------------------------------------------------------------------------------------------------------------------
@@ -89,36 +152,76 @@ FSIcouplingCE::buildBlocks ( std::map<ID, ID> const& localDofMap )
 	value /= M_timeStep;
 	value *= M_coefficientFirstDerivative;
 	M_structureDisplacementToLambda.reset ( new MatrixEpetra<Real> ( *M_interfaceMap ) );
-	for (UInt dim = 0; dim < 3; ++dim)
+
+	if ( lambda_num_structure )
 	{
-		for (ITrow = localDofMap.begin(); ITrow != localDofMap.end(); ++ITrow)
+		for (UInt dim = 0; dim < 3; ++dim)
 		{
-			if ( M_numerationInterface->map().map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second) ) >= 0 )
+			for (ITrow = localDofMap.begin(); ITrow != localDofMap.end(); ++ITrow)
 			{
-				M_structureDisplacementToLambda->addToCoefficient( (int) (*M_numerationInterface)[ITrow->second] + dim * M_interface,
-																   ITrow->second + dim * M_structureDisplacementFESpace->dof().numTotalDof(),
-																   value );
+				if ( M_numerationInterface->map().map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second) ) >= 0 )
+				{
+					M_structureDisplacementToLambda->addToCoefficient( (int) (*M_numerationInterface)[ITrow->second] + dim * M_interface,
+																	   ITrow->second + dim * M_structureDisplacementFESpace->dof().numTotalDof(),
+																	   value );
+				}
 			}
 		}
 	}
+	else
+	{
+		for (UInt dim = 0; dim < 3; ++dim)
+		{
+			for (ITrow = localDofMap.begin(); ITrow != localDofMap.end(); ++ITrow)
+			{
+				if ( M_numerationInterface->map().map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->first) ) >= 0 )
+				{
+					M_structureDisplacementToLambda->addToCoefficient( (int) (*M_numerationInterface)[ITrow->first] + dim * M_interface,
+																	   ITrow->second + dim * M_structureDisplacementFESpace->dof().numTotalDof(),
+																	   value );
+				}
+			}
+		}
+	}
+
 	M_structureDisplacementToLambda->globalAssemble(M_structureDisplacementFESpace->mapPtr(), M_interfaceMap);
 
 	// ----------------------------------------------------------------------------------------------------------------------------
 
 	value = -1.0;
 	M_structureDisplacementToFluidDisplacement.reset( new MatrixEpetra<Real> ( M_fluidVelocityFESpace->map() ) );
-	for (UInt dim = 0; dim < 3; ++dim)
+
+	if ( lambda_num_structure )
 	{
-		for (ITrow = localDofMap.begin(); ITrow != localDofMap.end(); ++ITrow)
+		for (UInt dim = 0; dim < 3; ++dim)
 		{
-			if ( M_numerationInterface->map().map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second) ) >= 0 )
+			for (ITrow = localDofMap.begin(); ITrow != localDofMap.end(); ++ITrow)
 			{
-				M_structureDisplacementToFluidDisplacement->addToCoefficient( ITrow->first + dim * M_fluidVelocityFESpace->dof().numTotalDof(),
-																			  ITrow->second + dim * M_structureDisplacementFESpace->dof().numTotalDof(),
-																			  value );
+				if ( M_numerationInterface->map().map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second) ) >= 0 )
+				{
+					M_structureDisplacementToFluidDisplacement->addToCoefficient( ITrow->first + dim * M_fluidVelocityFESpace->dof().numTotalDof(),
+																				  ITrow->second + dim * M_structureDisplacementFESpace->dof().numTotalDof(),
+																				  value );
+				}
 			}
 		}
 	}
+	else
+	{
+		for (UInt dim = 0; dim < 3; ++dim)
+		{
+			for (ITrow = localDofMap.begin(); ITrow != localDofMap.end(); ++ITrow)
+			{
+				if ( M_numerationInterface->map().map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->first) ) >= 0 )
+				{
+					M_structureDisplacementToFluidDisplacement->addToCoefficient( ITrow->first + dim * M_fluidVelocityFESpace->dof().numTotalDof(),
+																				  ITrow->second + dim * M_structureDisplacementFESpace->dof().numTotalDof(),
+																				  value );
+				}
+			}
+		}
+	}
+
 	M_structureDisplacementToFluidDisplacement->globalAssemble(M_structureDisplacementFESpace->mapPtr(), M_fluidVelocityFESpace->mapPtr());
 }
 

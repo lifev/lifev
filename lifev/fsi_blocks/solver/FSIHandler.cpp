@@ -636,14 +636,7 @@ void FSIHandler::constructInterfaceMap ( const std::map<ID, ID>& locDofMap,
 		M_lagrangeMap.reset (new MapEpetra (-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], M_comm) );
 	}
 
-	std::cout << M_numerationInterface->epetraVector();
-	std::cout << *(M_lagrangeMap->map(Unique));
-
 	delete [] numInterfaceDof;
-
-	int aaaaaa;
-	std::cin >> aaaaaa;
-
 }
 
 void
@@ -656,8 +649,16 @@ FSIHandler::assembleCoupling ( )
 		M_coupling->setUp ( M_dt, M_structureInterfaceMap->mapSize()/3.0 , M_structureTimeAdvance->coefficientFirstDerivative ( 0 ),
 							M_lagrangeMap, M_fluid->uFESpace(), M_displacementFESpace, M_numerationInterface );
 	}
+	else
+	{
+		M_coupling->setUp ( M_dt, M_fluidInterfaceMap->mapSize()/3.0 , M_structureTimeAdvance->coefficientFirstDerivative ( 0 ),
+							M_lagrangeMap, M_fluid->uFESpace(), M_displacementFESpace, M_numerationInterface );
+	}
 
-	M_coupling->buildBlocks ( *M_localDofMap );
+	M_coupling->buildBlocks ( *M_localDofMap, M_lambda_num_structure );
+
+	int aaaaaa;
+	std::cin >> aaaaaa;
 
 }
 

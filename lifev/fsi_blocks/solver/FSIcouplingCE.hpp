@@ -87,7 +87,7 @@ public:
     //! Destructor
     ~FSIcouplingCE();
 
-    void buildBlocks ( std::map<ID, ID> const& locDofMap );
+    void buildBlocks ( std::map<ID, ID> const& locDofMap, const bool& lambda_num_structure );
 
     void setUp ( const Real& timeStep, const Real& interfaceDofs, const Real& coefficientFirstDerivative,
     			 const mapPtr_Type& interfaceMap, const FESpacePtr_Type& fluidVelocityFESpace,
