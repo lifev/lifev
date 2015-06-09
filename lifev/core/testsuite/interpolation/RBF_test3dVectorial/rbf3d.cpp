@@ -149,6 +149,7 @@ int main (int argc, char** argv )
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > Solid_fieldFESpace (new FESpace<mesh_Type, MapEpetra> (Solid_localMesh, "P1", 3, Comm) );
     vectorPtr_Type Solid_vector (new vector_Type (Solid_fieldFESpace->map(), Unique) );
     vectorPtr_Type Solid_vector_one (new vector_Type (Solid_fieldFESpace->map(), Unique) );
+    *Solid_vector_one += 26.0;
 
     // GET THE EXACT SOLUTION THAT WILL BE INTERPOLATED
     Solid_fieldFESpace->interpolate ( static_cast<FESpace_Type::function_Type> ( exact_sol ), *Solid_vector, 0.0 );
@@ -182,17 +183,28 @@ int main (int argc, char** argv )
     RBFinterpolant->setup(Solid_mesh_ptr, Solid_localMesh, Fluid_mesh_ptr, Fluid_localMesh, flags);
     
     // PASSING THE VECTOR WITH THE DATA, THE ONE THAT WILL STORE THE SOLUTION, THE DATAFILE AND THE BELOS LIST
-    RBFinterpolant->setupRBFData (Solid_vector, Fluid_solution, dataFile, belosList);
+    RBFinterpolant->setupRBFData (Solid_vector_one, Fluid_solution, dataFile, belosList);
 
     // CREATING THE RBF OPERATORS
     RBFinterpolant->buildOperators();
 
-    // PERFORMING INTERPOLATION
+    // PERFORMING INTERPOLATION WITH A VECTOR OF ONE
     RBFinterpolant->interpolate();
 
     // GET THE SOLUTION
     RBFinterpolant->solution (Fluid_solution);
+    
+    Fluid_solution->spy("Fluid_solution");
 
+    // TESTING THE METHOD updateRhs
+    RBFinterpolant->updateRhs (Solid_vector);
+    
+    // PERFORMING INTERPOLATION WITH A VECTOR OF ONE
+    RBFinterpolant->interpolate();
+    
+    // GET THE SOLUTION
+    RBFinterpolant->solution (Fluid_solution);
+    
     // COMPUTING THE ERROR
     vectorPtr_Type Fluid_exact_solution (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
     vectorPtr_Type myError (new vector_Type (Fluid_fieldFESpace->map(), Unique) );

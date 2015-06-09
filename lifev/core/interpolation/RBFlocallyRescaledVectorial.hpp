@@ -822,14 +822,26 @@ inline double RBFlocallyRescaledVectorial<mesh_Type>::rbf (double x1, double y1,
 template <typename mesh_Type>
 void RBFlocallyRescaledVectorial<mesh_Type>::updateRhs(const vectorPtr_Type& newRhs)
 {
-	/*
     M_RhsF1->zero();
-    M_RhsF1->subset (*newRhs, *M_interpolationOperatorMap, 0, 0);
     M_RhsF2->zero();
-    M_RhsF2->subset (*newRhs, *M_interpolationOperatorMap, newRhs->size()/3, 0);
     M_RhsF3->zero();
-    M_RhsF3->subset (*newRhs, *M_interpolationOperatorMap, newRhs->size()/3*2, 0);
-    */
+ 
+    UInt offset = M_knownField->size()/3;
+    
+    for(int i = 0; i < M_numerationInterfaceKnown->epetraVector().MyLength(); ++i)
+    {
+        (*M_RhsF1)[(*M_numerationInterfaceKnown)[M_numerationInterfaceKnown->blockMap().GID(i)]]
+        = (*newRhs)(M_numerationInterfaceKnown->blockMap().GID(i));
+        
+        (*M_RhsF2)[(*M_numerationInterfaceKnown)[M_numerationInterfaceKnown->blockMap().GID(i)]]
+        = (*newRhs)(M_numerationInterfaceKnown->blockMap().GID(i) + offset);
+        
+        (*M_RhsF3)[(*M_numerationInterfaceKnown)[M_numerationInterfaceKnown->blockMap().GID(i)]]
+        = (*newRhs)(M_numerationInterfaceKnown->blockMap().GID(i) + 2*offset);
+        
+        //        std::cout << "GID = " << M_numerationInterfaceKnown->blockMap().GID(i)
+        //        << ", Value =" << (*M_numerationInterfaceKnown)[M_numerationInterfaceKnown->blockMap().GID(i)] << std::endl;
+    }
 }
 
 template <typename mesh_Type>
