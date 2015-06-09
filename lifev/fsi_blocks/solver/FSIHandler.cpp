@@ -423,7 +423,7 @@ void FSIHandler::buildInterfaceMaps ()
 		{
 			M_dofStructureToFluid.reset ( new DOFInterface3Dto3D );
 			M_dofStructureToFluid->setup ( M_fluid->uFESpace()->refFE(), M_fluid->uFESpace()->dof(), M_displacementFESpaceSerial->refFE(), M_displacementFESpaceSerial->dof() );
-			M_dofStructureToFluid->update ( *M_fluid->uFESpace()->mesh(), interface, *M_displacementFESpaceSerial->mesh(),  interface, tolerance, &flag);
+			M_dofStructureToFluid->update ( *M_fluid->uFESpace()->mesh(), interface, *M_displacementFESpaceSerial->mesh(), interface, tolerance, &flag);
 			M_localDofMap.reset(new std::map<UInt, UInt> ( M_dofStructureToFluid->localDofMap ( ) ) );
 		}
 		else
@@ -753,7 +753,7 @@ FSIHandler::solveFSIproblem ( )
 
 	buildMonolithicMap ( );
 	M_solution.reset ( new VectorEpetra ( *M_monolithicMap ) );
-	*M_solution *= 0;
+	M_solution->zero();
 
 	// Apply boundary conditions for the ale problem (the matrix will not change during the simulation)
 	M_ale->applyBoundaryConditions ( *M_aleBC );
@@ -1596,7 +1596,7 @@ FSIHandler::initializeApplyOperatorJacobian ( )
 	Operators::FSIApplyOperator::operatorPtrContainer_Type operDataJacobian(5,5);
 	operDataJacobian(0,0) = M_fluid->block00()->matrixPtr();
 	operDataJacobian(0,1) = M_fluid->block01()->matrixPtr();
-	operDataJacobian(0,3) = M_coupling->lambdaToFluidMomentum()->matrixPtr();
+    operDataJacobian(0,3) = M_coupling->lambdaToFluidMomentum()->matrixPtr();
 	operDataJacobian(1,0) = M_fluid->block10()->matrixPtr();
 	if ( M_fluid->useStabilization() )
 		operDataJacobian(1,1) = M_fluid->block11()->matrixPtr();

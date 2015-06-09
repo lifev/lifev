@@ -26,11 +26,11 @@
     		mesh_dir        = ./
     		mesh_file       = tube20.mesh
     		mesh_type       = .mesh
-    		vel_order       = P1
+    		vel_order       = P2
     		pres_order      = P1
     		
     	[../stabilization]
-    	    use             = true
+    	    use             = false
     	    type            = SUPGALE
     	    vel_order       = 1	
 
@@ -44,7 +44,7 @@
     		mesh_dir        = ./
     		mesh_file       = vessel20.mesh
     		mesh_type       = .mesh
-    		order           = P1
+    		order           = P2
 
     	[../time_discretization]
 		method              = BDF
@@ -73,7 +73,7 @@
 [ale]
 
 	[./space_discretization]
-		order			= P1
+		order			= P2
 
 	[./]
 
