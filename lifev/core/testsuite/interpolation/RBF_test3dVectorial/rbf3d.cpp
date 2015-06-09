@@ -187,7 +187,6 @@ int main (int argc, char** argv )
     // CREATING THE RBF OPERATORS
     RBFinterpolant->buildOperators();
 
-    /*
     // PERFORMING INTERPOLATION
     RBFinterpolant->interpolate();
 
@@ -242,7 +241,6 @@ int main (int argc, char** argv )
     Fluid_exporter.addVariable (ExporterData<mesh_Type>::VectorField, "Error", Fluid_fieldFESpace, myError, UInt (0) );
     Fluid_exporter.postProcess (0);
     Fluid_exporter.closeFile();
-	*/
 
 #ifdef HAVE_MPI
     MPI_Finalize();

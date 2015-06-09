@@ -634,14 +634,11 @@ void RBFlocallyRescaledVectorial<mesh_Type>::interpolateCostantField()
 
     M_rbf_one.reset (new vector_Type (*M_projectionOperatorMap) );
     M_projectionOperator->multiply (false, *gamma_one, *M_rbf_one);
-    
-    M_rbf_one->spy("M_rbf_one");
 }
 
 template <typename mesh_Type>
 void RBFlocallyRescaledVectorial<mesh_Type>::interpolate()
 {
-	/*
     vectorPtr_Type gamma_f1;
     gamma_f1.reset (new vector_Type (*M_interpolationOperatorMap) );
 
@@ -650,7 +647,6 @@ void RBFlocallyRescaledVectorial<mesh_Type>::interpolate()
 
     vectorPtr_Type gamma_f3;
     gamma_f3.reset (new vector_Type (*M_interpolationOperatorMap) );
-
 
     // Preconditioner
     prec_Type* precRawPtr;
@@ -725,32 +721,24 @@ void RBFlocallyRescaledVectorial<mesh_Type>::interpolate()
     *solution3 = *rbf_f3;
     *solution3 /= *M_rbf_one;
 
-    M_unknownField_rbf.reset (new vector_Type (M_unknownField->map() ) );
-    M_unknownField_rbf->subset (*rbf_f1, *M_projectionOperatorMap, 0, 0);
-    M_unknownField_rbf->subset (*rbf_f2, *M_projectionOperatorMap, 0, M_unknownField->size()/3);
-    M_unknownField_rbf->subset (*rbf_f3, *M_projectionOperatorMap, 0, M_unknownField->size()/3*2);
-
     // Solution of the interpolation problem
-    M_unknownField->subset (*solution1, *M_projectionOperatorMap, 0, 0);
-    M_unknownField->subset (*solution2, *M_projectionOperatorMap, 0, M_unknownField->size()/3);
-    M_unknownField->subset (*solution3, *M_projectionOperatorMap, 0, M_unknownField->size()/3*2);
-	*/
-
-//    /*
-//    mapPtr_Type solOnGammaMap;
-//
-//    solOnGammaMap.reset( new map_Type( *M_projectionOperatorMap ) );
-//    *solOnGammaMap += *M_projectionOperatorMap;
-//    *solOnGammaMap += *M_projectionOperatorMap;
-//    */
-//
-//    /*
-//    M_solOnGamma.reset(new vector_Type( *M_gammaMapUnknownVectorial ) );
-//
-//    M_solOnGamma->subset (*solution1, *M_projectionOperatorMap, 0, 0);
-//    M_solOnGamma->subset (*solution2, *M_projectionOperatorMap, 0, M_unknownField->size()/3);
-//    M_solOnGamma->subset (*solution3, *M_projectionOperatorMap, 0, 2*M_unknownField->size()/3);
-//    */
+    
+    UInt offset = M_unknownField->size()/3;
+    
+    for(int i = 0; i < M_numerationInterfaceUnknown->epetraVector().MyLength(); ++i)
+    {
+        (*M_unknownField)[M_numerationInterfaceUnknown->blockMap().GID(i)]
+        = (*solution1)((*M_numerationInterfaceUnknown)[M_numerationInterfaceUnknown->blockMap().GID(i)]);
+        
+        (*M_unknownField)[M_numerationInterfaceUnknown->blockMap().GID(i) + offset]
+        = (*solution2)((*M_numerationInterfaceUnknown)[M_numerationInterfaceUnknown->blockMap().GID(i)]);
+        
+        (*M_unknownField)[M_numerationInterfaceUnknown->blockMap().GID(i) + 2*offset]
+        = (*solution3)((*M_numerationInterfaceUnknown)[M_numerationInterfaceUnknown->blockMap().GID(i)]);
+        
+        //        std::cout << "GID = " << M_numerationInterfaceKnown->blockMap().GID(i)
+        //        << ", Value =" << (*M_numerationInterfaceKnown)[M_numerationInterfaceKnown->blockMap().GID(i)] << std::endl;
+    }
 }
 
 template <typename mesh_Type>
@@ -847,10 +835,8 @@ void RBFlocallyRescaledVectorial<mesh_Type>::updateRhs(const vectorPtr_Type& new
 template <typename mesh_Type>
 void RBFlocallyRescaledVectorial<mesh_Type>::solution (vectorPtr_Type& Solution)
 {
-	/*
     Solution->zero();
     *Solution += *M_unknownField;
-    */
 }
 
 template <typename mesh_Type>
