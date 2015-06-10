@@ -108,8 +108,6 @@ public:
 
     void getInterpolationOperatorMap ( mapPtr_Type& map ) { map.reset(new map_Type(*M_interpolationOperatorMap) ); };
 
-    void getSolutionOnGamma (vectorPtr_Type& GammaSolution) { GammaSolution.reset(new vector_Type ( *M_solOnGamma ) ); };
-
     void getprojectionOperatorMap (mapPtr_Type& map) { map.reset(new map_Type(*M_projectionOperatorMap)); };
 
     void buildUnknownVectorialInterfaceMap();
@@ -127,6 +125,8 @@ public:
     void getKnownInterfaceMap(mapPtr_Type& map){ map.reset ( new map_Type(*M_knownInterfaceMap) ); };
 
     void getNumerationInterfaceKnown(vectorPtr_Type& vector){ vector.reset ( new vector_Type ( *M_numerationInterfaceKnown ) ); };
+
+    void getSolutionOnGamma (vectorPtr_Type& GammaSolution) { GammaSolution.reset(new vector_Type ( *M_solutionOnGamma ) ); };
 
 private:
 
@@ -151,13 +151,13 @@ private:
     mapPtr_Type         M_interpolationOperatorMap;
     mapPtr_Type         M_interpolationOperatorMapVectorial;
     mapPtr_Type         M_projectionOperatorMap;
+    mapPtr_Type         M_projectionOperatorMapVectorial;
     neighboringPtr_Type M_neighbors;
     vectorPtr_Type      M_unknownField_rbf;
 
     matrixPtr_Type      M_interpolationOperatorVecMap;
     matrixPtr_Type      M_projectionOperatorVecMap;
 
-    vectorPtr_Type      M_solOnGamma;
     mapPtr_Type         M_gammaMapUnknownVectorial;
     UInt                M_links;
     Real                M_radius;
@@ -169,7 +169,7 @@ private:
     vectorPtr_Type              M_numerationInterfaceKnown;
     vectorPtr_Type              M_numerationInterfaceUnknown;
     std::vector<vectorPtr_Type> M_numerationInterfaceKnownColumns;
-    
+    vectorPtr_Type              M_solutionOnGamma;
     int M_pid;
 };
 
@@ -323,7 +323,11 @@ void RBFlocallyRescaledVectorial<Mesh>::buildInterpolationOperatorMap()
 	}
 
 	M_interpolationOperatorMap.reset (new MapEpetra (-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], M_knownField->mapPtr()->commPtr() ) );
-    
+
+	M_interpolationOperatorMapVectorial.reset ( new MapEpetra ( *M_interpolationOperatorMap ) );
+	*M_interpolationOperatorMapVectorial += *M_interpolationOperatorMap;
+	*M_interpolationOperatorMapVectorial += *M_interpolationOperatorMap;
+
 	delete [] numInterfaceDof;
 }
     
@@ -389,6 +393,10 @@ void RBFlocallyRescaledVectorial<Mesh>::buildProjectionOperatorMap()
     
     M_projectionOperatorMap.reset (new MapEpetra (-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], M_unknownField->mapPtr()->commPtr() ) );
     
+    M_projectionOperatorMapVectorial.reset ( new MapEpetra ( *M_projectionOperatorMap ) );
+    *M_projectionOperatorMapVectorial += *M_projectionOperatorMap;
+    *M_projectionOperatorMapVectorial += *M_projectionOperatorMap;
+
     delete [] numInterfaceDof;
 }
 
@@ -737,6 +745,18 @@ void RBFlocallyRescaledVectorial<mesh_Type>::interpolate()
         //        std::cout << "GID = " << M_numerationInterfaceKnown->blockMap().GID(i)
         //        << ", Value =" << (*M_numerationInterfaceKnown)[M_numerationInterfaceKnown->blockMap().GID(i)] << std::endl;
     }
+
+    // Storing also the solution on gamma
+
+    M_solutionOnGamma.reset ( new vector_Type ( *M_projectionOperatorMapVectorial ) );
+    M_solutionOnGamma->zero();
+
+    UInt offsetScalar = M_solutionOnGamma->size()/3;
+
+    M_solutionOnGamma->subset(*solution1, *M_projectionOperatorMap, 0, 0);
+    M_solutionOnGamma->subset(*solution2, *M_projectionOperatorMap, 0, offsetScalar );
+    M_solutionOnGamma->subset(*solution3, *M_projectionOperatorMap, 0, 2*offsetScalar);
+
 }
 
 template <typename mesh_Type>

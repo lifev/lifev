@@ -128,8 +128,6 @@ public:
 
     virtual void getprojectionOperatorMap(mapPtr_Type& ){ };
 
-    virtual void getSolutionOnGamma(vectorPtr_Type& ) { };
-
     virtual void buildUnknownVectorialInterfaceMap(){};
 
     // Methods added after changing the maps
@@ -145,6 +143,8 @@ public:
     virtual void getKnownInterfaceMap(mapPtr_Type& map){};
 
     virtual void getNumerationInterfaceKnown(vectorPtr_Type& vector){};
+
+    virtual void getSolutionOnGamma(vectorPtr_Type& ) { };
 
 private:
 
