@@ -1055,12 +1055,6 @@ FSIHandler::assembleStructureInterfaceMass()
 	M_interface_mass_structure.reset(new matrix_Type ( *M_mapStuctureGammaVectorial, 50 ) );
 	structure_interfaceMass->restrict ( M_mapStuctureGammaVectorial, M_numerationInterfaceStructure,
 										M_structureDisplacement->size()/3, M_interface_mass_structure );
-
-	M_interface_mass_structure->spy("ms");
-
-	int aaaaaaa;
-	std::cin >> aaaaaaa;
-
 }
 
 void
