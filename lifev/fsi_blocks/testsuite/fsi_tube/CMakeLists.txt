@@ -30,6 +30,11 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(mesh_fluid_tube
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi/data/mesh/inria
 )
 
+TRIBITS_COPY_FILES_TO_BINARY_DIR(mesh_fluid_tube_rotated
+  SOURCE_FILES tube20_rotated.mesh
+  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi/data/mesh/inria
+)
+
 TRIBITS_COPY_FILES_TO_BINARY_DIR(mesh_structure_tube
   SOURCE_FILES vessel20.mesh
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi/data/mesh/inria
