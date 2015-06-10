@@ -128,6 +128,10 @@ public:
 
     void getSolutionOnGamma (vectorPtr_Type& GammaSolution) { GammaSolution.reset(new vector_Type ( *M_solutionOnGamma ) ); };
 
+    void expandGammaToOmega_Known(const vectorPtr_Type& vectorOnGamma, vectorPtr_Type& vectorOnOmega);
+
+    void restrictOmegaToGamma_Known(const vectorPtr_Type& vectorOnOmega, vectorPtr_Type& vectorOnGamma);
+
 private:
 
     meshPtr_Type        M_fullMeshKnown;
@@ -861,6 +865,57 @@ void RBFlocallyRescaledVectorial<mesh_Type>::updateRhs(const vectorPtr_Type& new
         //        << ", Value =" << (*M_numerationInterfaceKnown)[M_numerationInterfaceKnown->blockMap().GID(i)] << std::endl;
     }
 }
+
+template <typename mesh_Type>
+void RBFlocallyRescaledVectorial<mesh_Type>::expandGammaToOmega_Known(const vectorPtr_Type& vectorOnGamma, vectorPtr_Type& vectorOnOmega)
+{
+	vectorOnOmega.reset ( new vector_Type ( M_knownField->map() ) );
+	vectorOnOmega->zero();
+
+	UInt offset = vectorOnOmega->size()/3;
+	UInt offsetGamma = vectorOnGamma->size()/3;
+
+	for(int i = 0; i < M_numerationInterfaceKnown->epetraVector().MyLength(); ++i)
+	{
+		(*vectorOnOmega)[M_numerationInterfaceKnown->blockMap().GID(i)]
+		                  = (*vectorOnGamma)((*M_numerationInterfaceKnown)[M_numerationInterfaceKnown->blockMap().GID(i)]);
+
+		(*vectorOnOmega)[M_numerationInterfaceKnown->blockMap().GID(i) + offset]
+		                  = (*vectorOnGamma)((*M_numerationInterfaceKnown)[M_numerationInterfaceKnown->blockMap().GID(i)] + offsetGamma );
+
+		(*vectorOnOmega)[M_numerationInterfaceKnown->blockMap().GID(i) + 2*offset]
+		                  = (*vectorOnGamma)((*M_numerationInterfaceKnown)[M_numerationInterfaceKnown->blockMap().GID(i)] + 2*offsetGamma);
+
+		//        std::cout << "GID = " << M_numerationInterfaceKnown->blockMap().GID(i)
+		//        << ", Value =" << (*M_numerationInterfaceKnown)[M_numerationInterfaceKnown->blockMap().GID(i)] << std::endl;
+	}
+}
+
+template <typename mesh_Type>
+void RBFlocallyRescaledVectorial<mesh_Type>::restrictOmegaToGamma_Known(const vectorPtr_Type& vectorOnOmega, vectorPtr_Type& vectorOnGamma)
+{
+	vectorOnGamma.reset ( new vector_Type ( *M_interpolationOperatorMapVectorial ) );
+	vectorOnGamma->zero();
+
+	UInt offset = vectorOnOmega->size()/3;
+	UInt offsetGamma = vectorOnGamma->size()/3;
+
+	for(int i = 0; i < M_numerationInterfaceKnown->epetraVector().MyLength(); ++i)
+	{
+		(*vectorOnGamma)[(*M_numerationInterfaceKnown)[M_numerationInterfaceKnown->blockMap().GID(i)]]
+		           = (*vectorOnOmega)(M_numerationInterfaceKnown->blockMap().GID(i));
+
+		(*vectorOnGamma)[(*M_numerationInterfaceKnown)[M_numerationInterfaceKnown->blockMap().GID(i)] + offsetGamma ]
+		           = (*vectorOnOmega)(M_numerationInterfaceKnown->blockMap().GID(i) + offset);
+
+		(*vectorOnGamma)[(*M_numerationInterfaceKnown)[M_numerationInterfaceKnown->blockMap().GID(i)] + 2*offsetGamma ]
+		           = (*vectorOnOmega)(M_numerationInterfaceKnown->blockMap().GID(i) + 2*offset);
+
+		//        std::cout << "GID = " << M_numerationInterfaceKnown->blockMap().GID(i)
+		//        << ", Value =" << (*M_numerationInterfaceKnown)[M_numerationInterfaceKnown->blockMap().GID(i)] << std::endl;
+	}
+}
+
 
 template <typename mesh_Type>
 void RBFlocallyRescaledVectorial<mesh_Type>::solution (vectorPtr_Type& Solution)

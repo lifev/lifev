@@ -174,14 +174,6 @@ int main (int argc, char** argv )
     // GET THE EXACT SOLUTION THAT WILL BE INTERPOLATED
     Solid_fieldFESpace->interpolate ( static_cast<FESpace_Type::function_Type> ( exact_sol ), *Solid_vector, 0.0 );
 
-    // EXPORTING THE DEFINED FIELD
-    ExporterHDF5<mesh_Type> Solid_exporter (dataFile, Solid_localMesh, "InputField", Comm->MyPID() );
-    Solid_exporter.setMeshProcId (Solid_localMesh, Comm->MyPID() );
-    Solid_exporter.exportPID (Solid_localMesh, Comm, true );
-    Solid_exporter.addVariable (ExporterData<mesh_Type>::VectorField, "f(x,y,z)", Solid_fieldFESpace, Solid_vector, UInt (0) );
-    Solid_exporter.postProcess (0);
-    Solid_exporter.closeFile();
-
     // CREATING A FE-SPACE FOR THE GRID ON WHICH WE WANT TO INTERPOLATE THE DATA. INITIALIZING THE SOLUTION VECTOR.
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > Fluid_fieldFESpace (new FESpace<mesh_Type, MapEpetra> (Fluid_localMesh, "P1", 3, Comm) );
     vectorPtr_Type Fluid_solution (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
@@ -207,6 +199,22 @@ int main (int argc, char** argv )
 
     // CREATING THE RBF OPERATORS
     RBFinterpolant->buildOperators();
+
+    // TESTING THE RESTRICTION AND EXPANDING METHODS
+    vectorPtr_Type solidVectorOnGamma;
+    vectorPtr_Type solidVectorOnOmega;
+
+    RBFinterpolant->restrictOmegaToGamma_Known(Solid_vector, solidVectorOnGamma);
+    RBFinterpolant->expandGammaToOmega_Known(solidVectorOnGamma, solidVectorOnOmega);
+
+    // EXPORTING THE DEFINED FIELD
+    ExporterHDF5<mesh_Type> Solid_exporter (dataFile, Solid_localMesh, "InputField", Comm->MyPID() );
+    Solid_exporter.setMeshProcId (Solid_localMesh, Comm->MyPID() );
+    Solid_exporter.exportPID (Solid_localMesh, Comm, true );
+    Solid_exporter.addVariable (ExporterData<mesh_Type>::VectorField, "f(x,y,z)", Solid_fieldFESpace, Solid_vector, UInt (0) );
+    Solid_exporter.addVariable (ExporterData<mesh_Type>::VectorField, "restrict-expand", Solid_fieldFESpace, solidVectorOnOmega, UInt (0) );
+    Solid_exporter.postProcess (0);
+    Solid_exporter.closeFile();
 
     // PERFORMING INTERPOLATION WITH A VECTOR OF ONE
     RBFinterpolant->interpolate();

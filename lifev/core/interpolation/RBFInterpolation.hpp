@@ -146,6 +146,10 @@ public:
 
     virtual void getSolutionOnGamma(vectorPtr_Type& ) { };
 
+    virtual void expandGammaToOmega_Known(const vectorPtr_Type&, vectorPtr_Type& ) { };
+
+    virtual void restrictOmegaToGamma_Known(const vectorPtr_Type&, vectorPtr_Type& ) { };
+
 private:
 
 };
