@@ -454,10 +454,10 @@ void FSIHandler::buildInterfaceMaps ()
 		belosList = Teuchos::getParametersFromXmlFile ( "SolverParamList_rbf3d.xml" );
 
 		// Flags of the coupling
-		int nFlags = 2;
+		int nFlags = 1;
 		std::vector<int> flags (nFlags);
 		flags[0] = 1;
-		flags[1] = 20;
+//		flags[1] = 20;
 
 		M_displayer.leaderPrint ( "\n\t Creating fluid to structure interpolant" ) ;
 		// Creating fluid to structure interpolation operator
