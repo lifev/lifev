@@ -140,7 +140,8 @@ public:
 
     //! Copy the pointer of the interpolation objects
     void setInterpolants( interpolationPtr_Type fluidToStructure,
-    		              interpolationPtr_Type structureToFluid);
+    		              interpolationPtr_Type structureToFluid,
+    		              bool useMasses);
 
     //! Set the blocks of the fluid Jacobian when stabilization is used
     void setFluidBlocks (   const matrixEpetraPtr_Type &  block00,
@@ -299,6 +300,8 @@ private:
     Real M_timeStep;
 
     Real M_coefficientFirstDerivative;
+
+    bool M_useMasses;
 
 };
 

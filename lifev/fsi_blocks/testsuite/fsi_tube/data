@@ -85,6 +85,7 @@
 	fluid_vertex_flag     = 20       # tells whether the in/out ring curves on the interface
 	nonconforming         = true     # tells whether the meshes are conformin at the interface (true works just with P1)
 	lambda_num_structure  = false    # if true the lagrange multip. are numbered wrt the structure, if false wrt to the fluid
+	useMasses             = true     # if true we interpolate the strong stresses, if false we interpolate the weak stresses
 
 [../]
 

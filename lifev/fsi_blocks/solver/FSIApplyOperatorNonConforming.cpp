@@ -104,10 +104,12 @@ FSIApplyOperatorNonConforming::setFluidBlocks ( const matrixEpetraPtr_Type & blo
 
 void
 FSIApplyOperatorNonConforming::setInterpolants ( interpolationPtr_Type fluidToStructure,
-        										 interpolationPtr_Type structureToFluid)
+        										 interpolationPtr_Type structureToFluid,
+        										 bool useMasses)
 {
 	M_FluidToStructureInterpolant = fluidToStructure;
 	M_StructureToFluidInterpolant = structureToFluid;
+	M_useMasses = useMasses;
 }
 
 void
@@ -133,7 +135,6 @@ FSIApplyOperatorNonConforming::applyInverseInterfaceFluidMass(const VectorEpetra
 	Y->zero();
 
 	// Solve system
-	M_fluid_interface_mass->spy("InterfaceMass");
 	solver.setOperator ( M_fluid_interface_mass );
 	solver.setRightHandSide ( X );
 	solver.solve ( Y );
@@ -225,49 +226,62 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 	// need to apply the inverse of the fluid interface
 	// mass
 
-//	VectorEpetraPtr_Type X_lambda_strong ( new VectorEpetra_Type ( *M_lambda_map ) );
-//	X_lambda_strong->zero();
-//	applyInverseInterfaceFluidMass(M_X_lambda, X_lambda_strong);
-//
-//	// Interpolate from fluid to structure interface,
-//	// need to have vector defined on omega fluid
-//	VectorEpetraPtr_Type X_lambda_strong_omega_f ( new VectorEpetra_Type ( *M_u_map ) );
-//	X_lambda_strong_omega_f->zero();
-//	X_lambda_strong_omega_f->subset(*X_lambda_strong, *M_lambda_map, 0, 0);
-//	M_FluidToStructureInterpolant->updateRhs(X_lambda_strong_omega_f);
-//	M_FluidToStructureInterpolant->interpolate();
-//	VectorEpetraPtr_Type X_lambda_strong_omega_s ( new VectorEpetra_Type ( *M_ds_map ) );
-//	X_lambda_strong_omega_s->zero();
-//	M_FluidToStructureInterpolant->solution(X_lambda_strong_omega_s);
-//
-//	// Restrict X_lambda_strong_omega_s to Gamma S
-//	VectorEpetraPtr_Type X_lambda_strong_gamma_s ( new VectorEpetra_Type ( *M_structure_interface_map ) );
-//	X_lambda_strong_gamma_s->zero();
-//	X_lambda_strong_gamma_s->subset(*X_lambda_strong_omega_s, *M_structure_interface_map, 0, 0);
-//
-//	// From strong to weak residual on Gamma S
-//	VectorEpetraPtr_Type X_lambda_weak_gamma_s ( new VectorEpetra_Type ( *M_structure_interface_map ) );
-//	X_lambda_weak_gamma_s->zero();
-//	*X_lambda_weak_gamma_s = *M_structure_interface_mass * (*X_lambda_strong_gamma_s);
-//
-//	// Expand vector to whole omega S
-//	VectorEpetraPtr_Type X_lambda_weak_omega_s ( new VectorEpetra_Type ( *M_ds_map ) );
-//	X_lambda_weak_omega_s->zero();
-//	X_lambda_weak_omega_s->subset(*X_lambda_weak_gamma_s, *M_structure_interface_map, 0, 0);
-//
-//	*M_Y_displacement -= *X_lambda_weak_omega_s;
+	if ( M_useMasses )
+	{
+		VectorEpetraPtr_Type X_lambda_strong ( new VectorEpetra_Type ( *M_lambda_map ) );
+		X_lambda_strong->zero();
+		applyInverseInterfaceFluidMass(M_X_lambda, X_lambda_strong);
 
+		// Interpolate from fluid to structure interface,
+		// need to have vector defined on omega fluid
+		VectorEpetraPtr_Type X_lambda_strong_omega_f ( new VectorEpetra_Type ( *M_u_map ) );
+		X_lambda_strong_omega_f->zero();
 
-	// WARNING: INTERPOLATING THE WEAK RESIDUAL
-    M_FluidToStructureInterpolant->updateRhs(lambda_omega_f);
+		M_FluidToStructureInterpolant->expandGammaToOmega_Known( X_lambda_strong, X_lambda_strong_omega_f );
 
-    M_FluidToStructureInterpolant->interpolate();
-    
-    VectorEpetraPtr_Type X_lambda_weak_omega_s ( new VectorEpetra_Type ( *M_ds_map ) );
+		M_FluidToStructureInterpolant->updateRhs(X_lambda_strong_omega_f);
 
-    M_FluidToStructureInterpolant->solution(X_lambda_weak_omega_s);
+		M_FluidToStructureInterpolant->interpolate();
 
-    *M_Y_displacement -= *X_lambda_weak_omega_s;
+		VectorEpetraPtr_Type X_lambda_strong_omega_s ( new VectorEpetra_Type ( *M_ds_map ) );
+
+		X_lambda_strong_omega_s->zero();
+
+		M_FluidToStructureInterpolant->solution(X_lambda_strong_omega_s);
+
+		// Restrict X_lambda_strong_omega_s to Gamma S
+		VectorEpetraPtr_Type X_lambda_strong_gamma_s;
+
+		M_StructureToFluidInterpolant->restrictOmegaToGamma_Known(X_lambda_strong_omega_s, X_lambda_strong_gamma_s);
+
+		// From strong to weak residual on Gamma S
+		VectorEpetraPtr_Type X_lambda_weak_gamma_s ( new VectorEpetra_Type ( X_lambda_strong_gamma_s->map() ) );
+
+		X_lambda_weak_gamma_s->zero();
+
+		*X_lambda_weak_gamma_s = *M_structure_interface_mass * (*X_lambda_strong_gamma_s);
+
+		// Expand vector to whole omega S
+		VectorEpetraPtr_Type X_lambda_weak_omega_s ( new VectorEpetra_Type ( *M_ds_map ) );
+
+		X_lambda_weak_omega_s->zero();
+
+		M_StructureToFluidInterpolant->expandGammaToOmega_Known( X_lambda_weak_gamma_s, X_lambda_weak_omega_s );
+
+		*M_Y_displacement -= *X_lambda_weak_omega_s;
+	}
+	else
+	{
+		M_FluidToStructureInterpolant->updateRhs(lambda_omega_f);
+
+		M_FluidToStructureInterpolant->interpolate();
+
+		VectorEpetraPtr_Type X_lambda_weak_omega_s ( new VectorEpetra_Type ( *M_ds_map ) );
+
+		M_FluidToStructureInterpolant->solution(X_lambda_weak_omega_s);
+
+		*M_Y_displacement -= *X_lambda_weak_omega_s;
+	}
 
 	//---------------------------------------//
 	// Applying the Jacobian to the stresses //

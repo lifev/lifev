@@ -403,6 +403,8 @@ private:
 	vectorPtr_Type M_numerationInterfaceFluid;
 	vectorPtr_Type M_numerationInterfaceStructure;
 
+	bool M_useMasses;
+
 };
 
 } // end namespace LifeV
