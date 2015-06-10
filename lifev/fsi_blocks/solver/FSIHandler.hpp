@@ -399,6 +399,10 @@ private:
 
 	bool M_lambda_num_structure;
 
+	mapPtr_Type M_lagrangeMapScalar;
+	vectorPtr_Type M_numerationInterfaceFluid;
+	vectorPtr_Type M_numerationInterfaceStructure;
+
 };
 
 } // end namespace LifeV

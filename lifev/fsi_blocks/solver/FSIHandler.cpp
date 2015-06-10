@@ -459,21 +459,36 @@ void FSIHandler::buildInterfaceMaps ()
 		flags[0] = 1;
 		flags[1] = 20;
 
-		M_displayer.leaderPrint ( "\n\n Creating fluid to structure interpolant \n\n" ) ;
+		M_displayer.leaderPrint ( "\n\t Creating fluid to structure interpolant" ) ;
 		// Creating fluid to structure interpolation operator
 		M_FluidToStructureInterpolant.reset ( interpolation_Type::InterpolationFactory::instance().createObject (M_datafile("interpolation/interpolation_Type","none")));
 		M_FluidToStructureInterpolant->setup( M_fluidMesh, M_fluidLocalMesh, M_structureMesh, M_structureLocalMesh, flags);
 		M_FluidToStructureInterpolant->setupRBFData (M_fluidVelocity, M_structureDisplacement, M_datafile, belosList);
 		M_FluidToStructureInterpolant->buildOperators();
 
-		M_displayer.leaderPrint ( "\n\n Creating structure to fluid interpolant \n\n" ) ;
+		M_FluidToStructureInterpolant->getKnownInterfaceMap(M_fluidInterfaceMap);
+
+
+		M_displayer.leaderPrint ( "\n\t Creating structure to fluid interpolant\n" ) ;
 		// Creating structure to fluid interpolation operator
 		M_StructureToFluidInterpolant.reset ( interpolation_Type::InterpolationFactory::instance().createObject (M_datafile("interpolation/interpolation_Type","none")));
 		M_StructureToFluidInterpolant->setup( M_structureMesh, M_structureLocalMesh, M_fluidMesh, M_fluidLocalMesh, flags);
 		M_StructureToFluidInterpolant->setupRBFData ( M_structureDisplacement, M_fluidVelocity, M_datafile, belosList);
 		M_StructureToFluidInterpolant->buildOperators();
 
-		M_StructureToFluidInterpolant->getinterpolationOperatorMap(M_structureInterfaceMap);
+		M_StructureToFluidInterpolant->getKnownInterfaceMap(M_structureInterfaceMap);
+
+		// Getting a scalar map that will be used for the lagrange multipliers
+		M_FluidToStructureInterpolant->getInterpolationOperatorMap( M_lagrangeMapScalar );
+
+		// Building map for the lagrange multipliers, vectorial
+		M_lagrangeMap.reset ( new MapEpetra ( *M_lagrangeMapScalar ) );
+		*M_lagrangeMap += *M_lagrangeMapScalar;
+		*M_lagrangeMap += *M_lagrangeMapScalar;
+
+		// Setting the vectors for the numeration of the interface in the fluid and the structure
+		M_FluidToStructureInterpolant->getNumerationInterfaceKnown(M_numerationInterfaceFluid);
+		M_StructureToFluidInterpolant->getNumerationInterfaceKnown(M_numerationInterfaceStructure);
 	}
 }
 
@@ -674,7 +689,7 @@ FSIHandler::buildMonolithicMap ( )
 	if ( M_nonconforming )
 	{
 		// The fluid is the slave and its interface dofs are used for the lagrange multipliers
-		M_FluidToStructureInterpolant->getinterpolationOperatorMap(M_lagrangeMap);
+		//M_FluidToStructureInterpolant->getinterpolationOperatorMap(M_lagrangeMap);
 		M_displayer.leaderPrintMax ("\nNumber of DOFs at the fluid interface: ", M_lagrangeMap->map(Unique)->NumGlobalElements());
 		*M_monolithicMap += *M_lagrangeMap;
 	}

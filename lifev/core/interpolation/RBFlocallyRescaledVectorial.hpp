@@ -106,17 +106,11 @@ public:
 
     void updateRhs(const vectorPtr_Type& newRhs);
 
-    void getinterpolationOperatorMap(mapPtr_Type& map)
-    {
-        map.reset(new map_Type(*M_interpolationOperatorMapVectorial) );
-        //map.reset(new map_Type(*M_interpolationOperatorMap));
-        //*map += *M_interpolationOperatorMap;
-        //*map += *M_interpolationOperatorMap;
-    }
+    void getInterpolationOperatorMap ( mapPtr_Type& map ) { map.reset(new map_Type(*M_interpolationOperatorMap) ); };
 
-    void getSolutionOnGamma (vectorPtr_Type& GammaSolution) { GammaSolution.reset(new vector_Type ( *M_solOnGamma ) ); }
+    void getSolutionOnGamma (vectorPtr_Type& GammaSolution) { GammaSolution.reset(new vector_Type ( *M_solOnGamma ) ); };
 
-    void getprojectionOperatorMap (mapPtr_Type& map) { map.reset(new map_Type(*M_projectionOperatorMap)); }
+    void getprojectionOperatorMap (mapPtr_Type& map) { map.reset(new map_Type(*M_projectionOperatorMap)); };
 
     void buildUnknownVectorialInterfaceMap();
 
@@ -129,6 +123,10 @@ public:
     void buildInterpolationOperatorMap();
     
     void buildProjectionOperatorMap();
+
+    void getKnownInterfaceMap(mapPtr_Type& map){ map.reset ( new map_Type(*M_knownInterfaceMap) ); };
+
+    void getNumerationInterfaceKnown(vectorPtr_Type& vector){ vector.reset ( new vector_Type ( *M_numerationInterfaceKnown ) ); };
 
 private:
 

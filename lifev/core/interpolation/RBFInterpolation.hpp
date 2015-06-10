@@ -124,7 +124,7 @@ public:
 
     virtual void approximateInverse ( ) {};
 
-    virtual void getinterpolationOperatorMap(mapPtr_Type&){ };
+    virtual void getInterpolationOperatorMap(mapPtr_Type&){ };
 
     virtual void getprojectionOperatorMap(mapPtr_Type& ){ };
 
@@ -141,6 +141,10 @@ public:
     virtual void buildInterpolationOperatorMap(){};
     
     virtual void buildProjectionOperatorMap(){};
+
+    virtual void getKnownInterfaceMap(mapPtr_Type& map){};
+
+    virtual void getNumerationInterfaceKnown(vectorPtr_Type& vector){};
 
 private:
 
