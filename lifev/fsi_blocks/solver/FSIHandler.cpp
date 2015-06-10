@@ -686,17 +686,8 @@ FSIHandler::buildMonolithicMap ( )
 	*M_monolithicMap += M_displacementFESpace->map();
 
 	// Weak stresses
-	if ( M_nonconforming )
-	{
-		// The fluid is the slave and its interface dofs are used for the lagrange multipliers
-		//M_FluidToStructureInterpolant->getinterpolationOperatorMap(M_lagrangeMap);
-		M_displayer.leaderPrintMax ("\nNumber of DOFs at the fluid interface: ", M_lagrangeMap->map(Unique)->NumGlobalElements());
-		*M_monolithicMap += *M_lagrangeMap;
-	}
-	else
-	{
-		*M_monolithicMap += *M_lagrangeMap;
-	}
+	M_displayer.leaderPrintMax ("\nNumber of DOFs of the Lagrange multipliers: ", M_lagrangeMap->map(Unique)->NumGlobalElements());
+	*M_monolithicMap += *M_lagrangeMap;
 
 	// ALE
 	*M_monolithicMap += M_aleFESpace->map();
@@ -862,6 +853,8 @@ FSIHandler::solveFSIproblem ( )
 	M_time = M_t_zero + M_dt;
 
 	buildMonolithicMap ( );
+
+	/*
 	M_solution.reset ( new VectorEpetra ( *M_monolithicMap ) );
 	M_solution->zero();
 
@@ -966,9 +959,9 @@ FSIHandler::solveFSIproblem ( )
 
 	}
 
+	*/
 	M_exporterFluid->closeFile();
 	M_exporterStructure->closeFile();
-
 }
 
 void
