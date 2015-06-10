@@ -41,8 +41,7 @@ FSIApplyOperatorNonConforming::setMaps( const mapEpetraPtr_Type& fluid_velocity_
 										const mapEpetraPtr_Type& fluid_pressure_map,
 										const mapEpetraPtr_Type& structure_displacement_map,
 										const mapEpetraPtr_Type& lagrange_multipliers_map,
-										const mapEpetraPtr_Type& ALE_map,
-										const mapEpetraPtr_Type& structure_interface_map)
+										const mapEpetraPtr_Type& ALE_map)
 {
 	// Setting maps
 	M_u_map = fluid_velocity_map;
@@ -50,7 +49,6 @@ FSIApplyOperatorNonConforming::setMaps( const mapEpetraPtr_Type& fluid_velocity_
 	M_ds_map = structure_displacement_map;
 	M_lambda_map = lagrange_multipliers_map;
 	M_ale_map = ALE_map;
-	M_structure_interface_map = structure_interface_map;
 
 	// Setting offsets
 	M_fluidVelocity = M_u_map->mapSize();
@@ -158,8 +156,6 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
     
 	const VectorEpetra_Type X_vectorEpetra(X, M_monolithicMap, Unique);
 
-	X_vectorEpetra.spy("X_vectorEpetraAPPLY");
-
 	//! Extract each component of the input vector
 	M_X_velocity->zero();
 	M_X_velocity->subset(X_vectorEpetra, *M_u_map, 0, 0);
@@ -179,9 +175,10 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 	// M_X_lambda is defined just at the fluid interface, but for coding reasons
 	// I need to have it on the whole fluid domain, i.e., vector of zeros with
 	// nonzero entries only at the interface
-	VectorEpetra_Type lambda_omega_f(*M_u_map);
-	lambda_omega_f.zero();
-	lambda_omega_f.subset(*M_X_lambda, *M_lambda_map, 0, 0);
+	VectorEpetraPtr_Type lambda_omega_f( new VectorEpetra_Type (*M_u_map) );
+	lambda_omega_f->zero();
+
+	M_FluidToStructureInterpolant->expandGammaToOmega_Known(M_X_lambda, lambda_omega_f);
 
 	//----------------------------------------------------------//
 	// Applying the Jacobian to the fluid velocity and pressure //
@@ -194,12 +191,12 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 	{
 		if ( M_useShapeDerivatives )
 		{
-			*M_Y_velocity  = (*M_F_00) * (*M_X_velocity ) + (*M_F_01) * (*M_X_pressure) + lambda_omega_f + (*M_shapeVelocity) * (*M_X_geometry);
+			*M_Y_velocity  = (*M_F_00) * (*M_X_velocity ) + (*M_F_01) * (*M_X_pressure) + *lambda_omega_f + (*M_shapeVelocity) * (*M_X_geometry);
 			*M_Y_pressure  = (*M_F_10) * (*M_X_velocity ) + (*M_F_11) * (*M_X_pressure) + (*M_shapePressure) * (*M_X_geometry);
 		}
 		else
 		{
-			*M_Y_velocity  = (*M_F_00) * (*M_X_velocity ) + (*M_F_01) * (*M_X_pressure) + lambda_omega_f;
+			*M_Y_velocity  = (*M_F_00) * (*M_X_velocity ) + (*M_F_01) * (*M_X_pressure) + *lambda_omega_f;
 			*M_Y_pressure  = (*M_F_10) * (*M_X_velocity ) + (*M_F_11) * (*M_X_pressure);
 		}
 	}
@@ -207,12 +204,12 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 	{
 		if ( M_useShapeDerivatives )
 		{
-			*M_Y_velocity  = (*M_F_00) * (*M_X_velocity ) + (*M_F_01) * (*M_X_pressure) + lambda_omega_f + (*M_shapeVelocity) * (*M_X_geometry);
+			*M_Y_velocity  = (*M_F_00) * (*M_X_velocity ) + (*M_F_01) * (*M_X_pressure) + *lambda_omega_f + (*M_shapeVelocity) * (*M_X_geometry);
 			*M_Y_pressure  = (*M_F_10) * (*M_X_velocity ) + (*M_shapePressure) * (*M_X_geometry);
 		}
 		else
 		{
-			*M_Y_velocity  = (*M_F_00) * (*M_X_velocity ) + (*M_F_01) * (*M_X_pressure) + lambda_omega_f;
+			*M_Y_velocity  = (*M_F_00) * (*M_X_velocity ) + (*M_F_01) * (*M_X_pressure) + *lambda_omega_f;
 			*M_Y_pressure  = (*M_F_10) * (*M_X_velocity );
 		}
 	}
@@ -227,72 +224,81 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 	// From weak to strong form of the stresses lambda,
 	// need to apply the inverse of the fluid interface
 	// mass
-	VectorEpetraPtr_Type X_lambda_strong ( new VectorEpetra_Type ( *M_lambda_map ) );
-	X_lambda_strong->zero();
-	applyInverseInterfaceFluidMass(M_X_lambda, X_lambda_strong);
 
-	// Interpolate from fluid to structure interface,
-	// need to have vector defined on omega fluid
-	VectorEpetraPtr_Type X_lambda_strong_omega_f ( new VectorEpetra_Type ( *M_u_map ) );
-	X_lambda_strong_omega_f->zero();
-	X_lambda_strong_omega_f->subset(*X_lambda_strong, *M_lambda_map, 0, 0);
-	M_FluidToStructureInterpolant->updateRhs(X_lambda_strong_omega_f);
-	M_FluidToStructureInterpolant->interpolate();
-	VectorEpetraPtr_Type X_lambda_strong_omega_s ( new VectorEpetra_Type ( *M_ds_map ) );
-	X_lambda_strong_omega_s->zero();
-	M_FluidToStructureInterpolant->solution(X_lambda_strong_omega_s);
+//	VectorEpetraPtr_Type X_lambda_strong ( new VectorEpetra_Type ( *M_lambda_map ) );
+//	X_lambda_strong->zero();
+//	applyInverseInterfaceFluidMass(M_X_lambda, X_lambda_strong);
+//
+//	// Interpolate from fluid to structure interface,
+//	// need to have vector defined on omega fluid
+//	VectorEpetraPtr_Type X_lambda_strong_omega_f ( new VectorEpetra_Type ( *M_u_map ) );
+//	X_lambda_strong_omega_f->zero();
+//	X_lambda_strong_omega_f->subset(*X_lambda_strong, *M_lambda_map, 0, 0);
+//	M_FluidToStructureInterpolant->updateRhs(X_lambda_strong_omega_f);
+//	M_FluidToStructureInterpolant->interpolate();
+//	VectorEpetraPtr_Type X_lambda_strong_omega_s ( new VectorEpetra_Type ( *M_ds_map ) );
+//	X_lambda_strong_omega_s->zero();
+//	M_FluidToStructureInterpolant->solution(X_lambda_strong_omega_s);
+//
+//	// Restrict X_lambda_strong_omega_s to Gamma S
+//	VectorEpetraPtr_Type X_lambda_strong_gamma_s ( new VectorEpetra_Type ( *M_structure_interface_map ) );
+//	X_lambda_strong_gamma_s->zero();
+//	X_lambda_strong_gamma_s->subset(*X_lambda_strong_omega_s, *M_structure_interface_map, 0, 0);
+//
+//	// From strong to weak residual on Gamma S
+//	VectorEpetraPtr_Type X_lambda_weak_gamma_s ( new VectorEpetra_Type ( *M_structure_interface_map ) );
+//	X_lambda_weak_gamma_s->zero();
+//	*X_lambda_weak_gamma_s = *M_structure_interface_mass * (*X_lambda_strong_gamma_s);
+//
+//	// Expand vector to whole omega S
+//	VectorEpetraPtr_Type X_lambda_weak_omega_s ( new VectorEpetra_Type ( *M_ds_map ) );
+//	X_lambda_weak_omega_s->zero();
+//	X_lambda_weak_omega_s->subset(*X_lambda_weak_gamma_s, *M_structure_interface_map, 0, 0);
+//
+//	*M_Y_displacement -= *X_lambda_weak_omega_s;
 
-	// Restrict X_lambda_strong_omega_s to Gamma S
-	VectorEpetraPtr_Type X_lambda_strong_gamma_s ( new VectorEpetra_Type ( *M_structure_interface_map ) );
-	X_lambda_strong_gamma_s->zero();
-	X_lambda_strong_gamma_s->subset(*X_lambda_strong_omega_s, *M_structure_interface_map, 0, 0);
 
-	// From strong to weak residual on Gamma S
-	VectorEpetraPtr_Type X_lambda_weak_gamma_s ( new VectorEpetra_Type ( *M_structure_interface_map ) );
-	X_lambda_weak_gamma_s->zero();
-	*X_lambda_weak_gamma_s = *M_structure_interface_mass * (*X_lambda_strong_gamma_s);
+	// WARNING: INTERPOLATING THE WEAK RESIDUAL
+    M_FluidToStructureInterpolant->updateRhs(lambda_omega_f);
 
-	// Expand vector to whole omega S
-	VectorEpetraPtr_Type X_lambda_weak_omega_s ( new VectorEpetra_Type ( *M_ds_map ) );
-	X_lambda_weak_omega_s->zero();
-	X_lambda_weak_omega_s->subset(*X_lambda_weak_gamma_s, *M_structure_interface_map, 0, 0);
-
-	*M_Y_displacement -= *X_lambda_weak_omega_s;
-    
-    /*
-    VectorEpetraPtr_Type X_lambdaPtr_omega_f ( new VectorEpetra_Type ( *M_u_map ) );
-    X_lambdaPtr_omega_f->zero();
-    *X_lambdaPtr_omega_f += lambda_omega_f;
-    
-    M_FluidToStructureInterpolant->updateRhs(X_lambdaPtr_omega_f);
     M_FluidToStructureInterpolant->interpolate();
     
     VectorEpetraPtr_Type X_lambda_weak_omega_s ( new VectorEpetra_Type ( *M_ds_map ) );
+
     M_FluidToStructureInterpolant->solution(X_lambda_weak_omega_s);
+
     *M_Y_displacement -= *X_lambda_weak_omega_s;
-    */
-    
+
 	//---------------------------------------//
 	// Applying the Jacobian to the stresses //
 	//---------------------------------------//
 
 	M_Y_lambda->zero();
-	M_Y_lambda->subset(*M_X_velocity, *M_lambda_map, 0, 0);
+
+	VectorEpetraPtr_Type M_Y_lambda_tmp;
+
+	M_FluidToStructureInterpolant->restrictOmegaToGamma_Known(M_X_velocity, M_Y_lambda_tmp);
+
+	*M_Y_lambda += *M_Y_lambda_tmp;
 
 	VectorEpetraPtr_Type structure_vel( new VectorEpetra_Type ( *M_ds_map ) );
 	structure_vel->zero();
+
 	*structure_vel += *M_X_displacement;
 	*structure_vel /= M_timeStep;
 	*structure_vel *= M_coefficientFirstDerivative;
+
 	M_StructureToFluidInterpolant->updateRhs(structure_vel);
 	M_StructureToFluidInterpolant->interpolate();
 
 	VectorEpetraPtr_Type structure_vel_omega_f ( new VectorEpetra_Type ( *M_u_map ) );
 	structure_vel_omega_f->zero();
 	M_StructureToFluidInterpolant->solution(structure_vel_omega_f);
+
 	VectorEpetraPtr_Type structure_vel_gamma_f ( new VectorEpetra_Type ( *M_lambda_map ) );
 	structure_vel_gamma_f->zero();
-	structure_vel_gamma_f->subset(*structure_vel_omega_f, *M_lambda_map, 0, 0);
+
+	M_FluidToStructureInterpolant->restrictOmegaToGamma_Known(structure_vel_omega_f, structure_vel_gamma_f);
 
 	*M_Y_lambda -= *structure_vel_gamma_f;
     
@@ -312,38 +318,9 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 
 	*M_Y_geometry -= *tmp;
 
-//	Output vector
-
+	//	Output vector
 	VectorEpetra_Type Y_vectorEpetra(Y, M_monolithicMap, Unique);
 	Y_vectorEpetra.zero();
-
-    
-// Test stupido per capire se le mappe sono ok
-    
-    /*
-    VectorEpetraPtr_Type tmp_gamma_f ( new VectorEpetra_Type ( M_X_lambda->map() ) );
-    tmp_gamma_f->zero();
-    *tmp_gamma_f += 1.0;
-
-    VectorEpetraPtr_Type tmp_omega_f ( new VectorEpetra_Type ( M_X_velocity->map() ) );
-    tmp_omega_f->zero();
-    tmp_omega_f->subset(*tmp_gamma_f, M_X_lambda->map(), 0, 0);
-    
-    M_FluidToStructureInterpolant->updateRhs(tmp_omega_f);
-    M_FluidToStructureInterpolant->interpolate();
-    
-    VectorEpetraPtr_Type tmp_omega_s ( new VectorEpetra_Type ( M_X_displacement->map() ) );
-    tmp_omega_s->zero();
-    M_FluidToStructureInterpolant->solution(tmp_omega_s);
-    
-    M_Y_displacement->zero();
-    *M_Y_displacement += *tmp_omega_s;
-    
-    M_Y_velocity->zero();
-    M_Y_pressure->zero();
-    M_Y_lambda->zero();
-    M_Y_geometry->zero();
-    */
      
 	//! Copy the single contributions into the optput vector
 	Y_vectorEpetra.subset(*M_Y_velocity, M_Y_velocity->map(), 0, 0 );
@@ -352,12 +329,6 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 	Y_vectorEpetra.subset(*M_Y_lambda, M_Y_lambda->map(), 0, M_structure );
 	Y_vectorEpetra.subset(*M_Y_geometry, M_Y_geometry->map(), 0, M_lambda );
 
-	Y_vectorEpetra.spy("Y_vectorEpetraAPPLY");
-
-    std::cout << "Spy apply nonconforming done\n";
-    int aaaaa;
-    std::cin >> aaaaa;
-    
 	Y = dynamic_cast<Epetra_MultiVector &>( Y_vectorEpetra.epetraVector() );
 
     return 0;

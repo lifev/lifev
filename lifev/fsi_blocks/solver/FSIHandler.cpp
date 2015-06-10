@@ -911,7 +911,6 @@ FSIHandler::solveFSIproblem ( )
 
 		M_maxiterNonlinear = 3;
 
-		/*
 		// Using the solution at the previous timestep as initial guess -> TODO: extrapolation
 		UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
 											M_nonLinearLineSearch, 0, 2, M_out_res, M_time);
@@ -946,9 +945,6 @@ FSIHandler::solveFSIproblem ( )
 
 		M_exporterFluid->postProcess(M_time);
 		M_exporterStructure->postProcess(M_time);
-
-		*/
-
 	}
 
 	M_exporterFluid->closeFile();
@@ -1150,6 +1146,8 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		// Residual, part 1: compute the fluid residual //
 		//----------------------------------------------//
 
+		M_displayer.leaderPrint ( "[FSI] - Computing residual of the fluid \n" ) ;
+
 		// Initialize vector for the fluid velocity residual
 		vectorPtr_Type velocity_residual( new vector_Type ( M_fluid->uFESpace()->map ( ) ) );
 		velocity_residual->zero();
@@ -1161,10 +1159,8 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		// Evaluate the residual coming from the fluid
 		M_fluid->evaluateResidual( M_beta_star, velocity_km1, pressure_km1, M_rhs_velocity, velocity_residual, fluid_pressure_residual);
 
-		// Evaluate the residual coming from the balance of normal stresses
 		vectorPtr_Type lambda_km1_omegaF ( new vector_Type ( M_fluid->uFESpace()->map() ) );
-		lambda_km1_omegaF->zero();
-		lambda_km1_omegaF->subset(*lambda_km1, *M_lagrangeMap, 0, 0);
+		M_FluidToStructureInterpolant->expandGammaToOmega_Known(lambda_km1, lambda_km1_omegaF);
 
 		// TODO: Maybe this part can be optimized, since it is not necessary to
 		// instantiate fluid_velocity_residual, but just velocity_residual could
@@ -1178,57 +1174,70 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		// Residual, part 2: compute the structure residual //
 		//--------------------------------------------------//
 
+		M_displayer.leaderPrint ( "[FSI] - Computing residual structure \n" ) ;
+
 		vectorPtr_Type structure_displacement_km1 ( new vector_Type ( M_displacementFESpace->map() ) );
 		structure_displacement_km1->zero();
 		UInt offset_displacment_structure = M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize();
 		structure_displacement_km1->subset( solution, M_displacementFESpace->map(), offset_displacment_structure, 0);
 
-		// Initialize vector for the fluid velocity residual
+		// Vector containing the residual of the structural part
 		vectorPtr_Type residual_structure_displacement( new vector_Type ( M_displacementFESpace->map() ) );
 		residual_structure_displacement->zero();
 
 		// Compute residual of the structure part only
 		*residual_structure_displacement = (*M_matrixStructure)*(*structure_displacement_km1);
 
-		M_displayer.leaderPrint ( "[FSI] - Assemble interface mass of the structure \n" ) ;
-		assembleStructureInterfaceMass ( ); // This has to be done not here, do not need to assemble it at each Newton and time step
+		// WARNING: INTERPOLATING THE WEAK RESIDUAL FOR THE MOMENT, LATER USING THE MASSES
 
-		M_displayer.leaderPrint ( "[FSI] - Assemble interface mass of the fluid \n" ) ;
-		M_fluid->assembleInterfaceMass ( M_interface_mass_fluid, M_lagrangeMap, M_datafile("interface/flag", 1) );
+		M_FluidToStructureInterpolant->updateRhs(lambda_km1_omegaF);
 
-		M_displayer.leaderPrint ( "[FSI] - From weak to strong residual - fluid \n\n" ) ;
-		vectorPtr_Type tmp_gamma_f ( new vector_Type ( M_lagrangeMap ) );
-		tmp_gamma_f->zero();
-		applyInverseFluidMassOnGamma( lambda_km1, tmp_gamma_f );
-
-		M_displayer.leaderPrint ( "[FSI] - Interpolating strong residual \n\n" ) ;
-		vectorPtr_Type tmp_omega_f ( new vector_Type ( M_fluid->uFESpace()->map() ) );
-		tmp_omega_f->zero ( );
-		tmp_omega_f->subset( *tmp_gamma_f, *M_lagrangeMap, 0, 0);
-		M_FluidToStructureInterpolant->updateRhs(tmp_omega_f);
 		M_FluidToStructureInterpolant->interpolate();
 
-		vectorPtr_Type tmp_omega_s ( new vector_Type ( M_displacementFESpace->map() ) );
-		tmp_omega_s->zero();
-		M_FluidToStructureInterpolant->solution(tmp_omega_s);
+		vectorPtr_Type structure_weak_residual ( new vector_Type ( M_displacementFESpace->map() ) );
+		structure_weak_residual->zero();
 
-		vectorPtr_Type tmp_gamma_s ( new vector_Type ( *M_structureInterfaceMap ) );
-		tmp_gamma_s->zero();
-		tmp_gamma_s->subset ( *tmp_omega_s, *M_structureInterfaceMap, 0, 0);
+		M_FluidToStructureInterpolant->solution(structure_weak_residual);
 
-		vectorPtr_Type out_gamma_s ( new vector_Type ( *M_structureInterfaceMap ) );
-		out_gamma_s->zero();
+//		M_displayer.leaderPrint ( "[FSI] - Assemble interface mass of the structure \n" ) ;
+//		assembleStructureInterfaceMass ( ); // This has to be done not here, do not need to assemble it at each Newton and time step
+//
+//		M_displayer.leaderPrint ( "[FSI] - Assemble interface mass of the fluid \n" ) ;
+//		M_fluid->assembleInterfaceMass ( M_interface_mass_fluid, M_lagrangeMap, M_datafile("interface/flag", 1) );
+//
+//		M_displayer.leaderPrint ( "[FSI] - From weak to strong residual - fluid \n\n" ) ;
+//		vectorPtr_Type tmp_gamma_f ( new vector_Type ( M_lagrangeMap ) );
+//		tmp_gamma_f->zero();
+//		applyInverseFluidMassOnGamma( lambda_km1, tmp_gamma_f );
+//
+//		M_displayer.leaderPrint ( "[FSI] - Interpolating strong residual \n\n" ) ;
+//		vectorPtr_Type tmp_omega_f ( new vector_Type ( M_fluid->uFESpace()->map() ) );
+//		tmp_omega_f->zero ( );
+//		tmp_omega_f->subset( *tmp_gamma_f, *M_lagrangeMap, 0, 0);
+//		M_FluidToStructureInterpolant->updateRhs(tmp_omega_f);
+//		M_FluidToStructureInterpolant->interpolate();
+//
+//		vectorPtr_Type tmp_omega_s ( new vector_Type ( M_displacementFESpace->map() ) );
+//		tmp_omega_s->zero();
+//		M_FluidToStructureInterpolant->solution(tmp_omega_s);
+//
+//		vectorPtr_Type tmp_gamma_s ( new vector_Type ( *M_structureInterfaceMap ) );
+//		tmp_gamma_s->zero();
+//		tmp_gamma_s->subset ( *tmp_omega_s, *M_structureInterfaceMap, 0, 0);
+//
+//		vectorPtr_Type out_gamma_s ( new vector_Type ( *M_structureInterfaceMap ) );
+//		out_gamma_s->zero();
+//
+//		M_displayer.leaderPrint ( "[FSI] - From strong to weak residual - structure \n\n" ) ;
+//		*out_gamma_s = (*M_interface_mass_structure) * ( *tmp_gamma_s );
+//
+//		*out_gamma_s *= -1.0;
+//
+//		vectorPtr_Type res_coupling_omega_s ( new vector_Type ( M_displacementFESpace->map() ) );
+//		res_coupling_omega_s->zero();
+//		res_coupling_omega_s->subset(*out_gamma_s, *M_structureInterfaceMap, 0, 0);
 
-		M_displayer.leaderPrint ( "[FSI] - From strong to weak residual - structure \n\n" ) ;
-		*out_gamma_s = (*M_interface_mass_structure) * ( *tmp_gamma_s );
-
-		*out_gamma_s *= -1.0;
-
-		vectorPtr_Type res_coupling_omega_s ( new vector_Type ( M_displacementFESpace->map() ) );
-		res_coupling_omega_s->zero();
-		res_coupling_omega_s->subset(*out_gamma_s, *M_structureInterfaceMap, 0, 0);
-
-		*residual_structure_displacement -= *res_coupling_omega_s;
+		*residual_structure_displacement -= *structure_weak_residual;
 
 		*residual_structure_displacement -= *M_rhsStructure;
 
@@ -1236,14 +1245,16 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		// Residual, part 3: compute the coupling residual //
 		//-------------------------------------------------//
 
-		M_displayer.leaderPrint ( "[FSI] - Computing residual coupling velocities \n\n" ) ;
+		M_displayer.leaderPrint ( "[FSI] - Computing residual coupling velocities \n" ) ;
 
 		vectorPtr_Type velocity_km1_gamma( new vector_Type ( *M_lagrangeMap ) );
 		velocity_km1_gamma->zero();
-		velocity_km1_gamma->subset( *velocity_km1, *M_lagrangeMap, 0, 0);
+
+		M_FluidToStructureInterpolant->restrictOmegaToGamma_Known(velocity_km1, velocity_km1_gamma);
 
 		vectorPtr_Type structure_vel( new vector_Type ( M_displacementFESpace->map() ) );
 		structure_vel->zero();
+
 		*structure_vel += *structure_displacement_km1;
 		*structure_vel /= M_dt;
 		*structure_vel *= M_structureTimeAdvance->coefficientFirstDerivative ( 0 );
@@ -1257,7 +1268,8 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 		vectorPtr_Type res_couplingVel_gamma_f ( new vector_Type ( *M_lagrangeMap ) );
 		res_couplingVel_gamma_f->zero();
-		res_couplingVel_gamma_f->subset(*res_couplingVel_omega_f, *M_lagrangeMap, 0, 0);
+
+		M_FluidToStructureInterpolant->restrictOmegaToGamma_Known(res_couplingVel_omega_f, res_couplingVel_gamma_f);
 
 		*velocity_km1_gamma -= *res_couplingVel_gamma_f;
 		*velocity_km1_gamma -= *M_rhsCouplingVelocities;
@@ -1266,28 +1278,37 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		// Residual, part 4: compute the ALE residual //
 		//--------------------------------------------//
 
-		M_displayer.leaderPrint ( "[FSI] - Computing residual ALE \n\n" ) ;
+		M_displayer.leaderPrint ( "[FSI] - Computing residual ALE \n" ) ;
 
 		M_StructureToFluidInterpolant->updateRhs ( structure_displacement_km1 );
+
 		M_StructureToFluidInterpolant->interpolate();
+
 		vectorPtr_Type res_ds_ale ( new vector_Type ( M_fluid->uFESpace()->map() ) );
+
 		res_ds_ale->zero();
+
 		M_StructureToFluidInterpolant->solution(res_ds_ale);
 
 		vectorPtr_Type res_ale_ale ( new vector_Type ( M_aleFESpace->map() ) );
+
 		res_ale_ale->zero();
+
 		*res_ale_ale = ( *M_ale->matrix ( ) ) * ( *meshDisplacement );
 
 		vectorPtr_Type res_ALE ( new vector_Type ( M_aleFESpace->map() ) );
+
 		res_ALE->zero();
+
 		*res_ALE -= *res_ds_ale;
+
 		*res_ALE += *res_ale_ale;
 
 		//---------------------------------------//
 		// Residual, part 5: monolithic residual //
 		//---------------------------------------//
 
-		M_displayer.leaderPrint ( "[FSI] - Gathering all components of the residual  \n\n" ) ;
+		M_displayer.leaderPrint ( "[FSI] - Gathering all components of the residual  \n" ) ;
 
 		residual.subset(*fluid_velocity_residual, M_fluid->uFESpace()->map(), 0, 0 );
 		residual.subset(*fluid_pressure_residual, M_fluid->pFESpace()->map(), 0, M_fluid->uFESpace()->map().mapSize() );
@@ -1473,8 +1494,7 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 														M_fluid->pFESpace()->mapPtr(),
 														M_displacementFESpace->mapPtr(),
 														M_lagrangeMap,
-														M_aleFESpace->mapPtr(),
-														M_structureInterfaceMap);
+														M_aleFESpace->mapPtr());
 
 		M_applyOperatorJacobianNonConforming->setInterfaceMassMatrices (  M_interface_mass_fluid, M_interface_mass_structure );
 
