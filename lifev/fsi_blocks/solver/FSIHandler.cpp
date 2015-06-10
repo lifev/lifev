@@ -854,7 +854,6 @@ FSIHandler::solveFSIproblem ( )
 
 	buildMonolithicMap ( );
 
-	/*
 	M_solution.reset ( new VectorEpetra ( *M_monolithicMap ) );
 	M_solution->zero();
 
@@ -882,7 +881,7 @@ FSIHandler::solveFSIproblem ( )
 
 	if ( M_nonconforming )
 	{
-		M_prec->setCouplingOperators_nonconforming(M_FluidToStructureInterpolant, M_StructureToFluidInterpolant);
+		M_prec->setCouplingOperators_nonconforming(M_FluidToStructureInterpolant, M_StructureToFluidInterpolant, M_lagrangeMap);
 	}
 	else
 	{
@@ -896,6 +895,7 @@ FSIHandler::solveFSIproblem ( )
 
 	M_prec->setMonolithicMap ( M_monolithicMap );
 
+	/*
 	for ( ; M_time <= M_t_end + M_dt / 2.; M_time += M_dt)
 	{
 		M_displayer.leaderPrint ( "\n-----------------------------------\n" ) ;
