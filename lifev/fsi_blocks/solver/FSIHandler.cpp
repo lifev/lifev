@@ -800,24 +800,14 @@ FSIHandler::updateRhsCouplingVelocities ( )
 void
 FSIHandler::updateRhsCouplingVelocities_nonconforming ( )
 {
-	// M_fluidVelocity  M_structureDisplacement
-
 	vectorPtr_Type rhsStructureVelocity ( new vector_Type ( M_structureTimeAdvance->rhsContributionFirstDerivative(), Unique, Add ) );
 
 	// Update known field for the interpolation
 	M_StructureToFluidInterpolant->updateRhs ( rhsStructureVelocity );
 	M_StructureToFluidInterpolant->interpolate();
 
-	// Will be a vector defined on the fluid grid that is zero everywhere but on the interface has the interpolated values
-	vectorPtr_Type rhsStructureVelocity_onFluid ( new vector_Type ( M_fluid->uFESpace()->map(), Unique ) );
-	rhsStructureVelocity_onFluid->zero();
-
-	// Getting the solution
-	M_StructureToFluidInterpolant->solution (rhsStructureVelocity_onFluid);
-
-	// Restrict the vector to the dofs of fluid interface map
-	M_rhsCouplingVelocities.reset( new VectorEpetra ( *M_lagrangeMap ) );
-	M_rhsCouplingVelocities->subset ( *rhsStructureVelocity_onFluid, *M_lagrangeMap, 0, 0);
+	// Get the vector on the fluid interface
+	M_StructureToFluidInterpolant->getSolutionOnGamma (M_rhsCouplingVelocities);
 
 	*M_rhsCouplingVelocities *= -1.0; // to do formally the same thing as in the conforming case
 }
@@ -895,7 +885,6 @@ FSIHandler::solveFSIproblem ( )
 
 	M_prec->setMonolithicMap ( M_monolithicMap );
 
-	/*
 	for ( ; M_time <= M_t_end + M_dt / 2.; M_time += M_dt)
 	{
 		M_displayer.leaderPrint ( "\n-----------------------------------\n" ) ;
@@ -905,6 +894,7 @@ FSIHandler::solveFSIproblem ( )
 
 		updateSystem ( );
 
+		/*
 		if ( M_extrapolateInitialGuess && M_time == (M_t_zero + M_dt) )
 		{
 			M_displayer.leaderPrint ( "FSI - initializing extrapolation of initial guess\n" ) ;
@@ -957,9 +947,10 @@ FSIHandler::solveFSIproblem ( )
 		M_exporterFluid->postProcess(M_time);
 		M_exporterStructure->postProcess(M_time);
 
+		*/
+
 	}
 
-	*/
 	M_exporterFluid->closeFile();
 	M_exporterStructure->closeFile();
 }
