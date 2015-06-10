@@ -333,7 +333,8 @@ public:
     	return M_useStabilization;
     }
 
-    void assembleInterfaceMass( matrixPtr_Type& mass_interface, const mapPtr_Type& interface_map, markerID_Type interfaceFlag );
+    void assembleInterfaceMass( matrixPtr_Type& mass_interface, const mapPtr_Type& interface_map,
+    						    markerID_Type interfaceFlag, const vectorPtr_Type& numerationInterface, const UInt& offset );
 
 private:
 

@@ -817,7 +817,9 @@ void NavierStokesSolver::evaluateResidual( const vectorPtr_Type& convective_velo
 
 }
 
-void NavierStokesSolver::assembleInterfaceMass( matrixPtr_Type& mass_interface, const mapPtr_Type& interface_map, markerID_Type interfaceFlag )
+void NavierStokesSolver::assembleInterfaceMass( matrixPtr_Type& mass_interface, const mapPtr_Type& interface_map,
+												markerID_Type interfaceFlag, const vectorPtr_Type& numerationInterface,
+												const UInt& offset)
 {
 	// INITIALIZE MATRIX WITH THE MAP OF THE INTERFACE
 	matrixPtr_Type fluid_interfaceMass( new matrix_Type ( M_velocityFESpace->map(), 50 ) );
@@ -840,7 +842,7 @@ void NavierStokesSolver::assembleInterfaceMass( matrixPtr_Type& mass_interface, 
 
 	// RESTRICT MATRIX TO INTERFACE DOFS ONLY
 	mass_interface.reset(new matrix_Type ( *interface_map, 50 ) );
-	fluid_interfaceMass->restrict ( interface_map, mass_interface );
+	fluid_interfaceMass->restrict ( interface_map, numerationInterface, offset, mass_interface );
 }
 
 void NavierStokesSolver::evalResidual(vector_Type& residual, const vector_Type& solution, const UInt iter_newton)
