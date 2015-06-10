@@ -894,7 +894,6 @@ FSIHandler::solveFSIproblem ( )
 
 		updateSystem ( );
 
-		/*
 		if ( M_extrapolateInitialGuess && M_time == (M_t_zero + M_dt) )
 		{
 			M_displayer.leaderPrint ( "FSI - initializing extrapolation of initial guess\n" ) ;
@@ -912,6 +911,7 @@ FSIHandler::solveFSIproblem ( )
 
 		M_maxiterNonlinear = 3;
 
+		/*
 		// Using the solution at the previous timestep as initial guess -> TODO: extrapolation
 		UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
 											M_nonLinearLineSearch, 0, 2, M_out_res, M_time);
