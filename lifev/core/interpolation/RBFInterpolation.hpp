@@ -150,6 +150,8 @@ public:
 
     virtual void restrictOmegaToGamma_Known(const vectorPtr_Type&, vectorPtr_Type& ) { };
 
+    virtual void getVectorialInterpolationMap ( mapPtr_Type& ) { };
+
 private:
 
 };

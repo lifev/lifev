@@ -132,6 +132,8 @@ public:
 
     void restrictOmegaToGamma_Known(const vectorPtr_Type& vectorOnOmega, vectorPtr_Type& vectorOnGamma);
 
+    void getVectorialInterpolationMap ( mapPtr_Type& map ) { map.reset ( new map_Type(*M_interpolationOperatorMapVectorial) ); };
+
 private:
 
     meshPtr_Type        M_fullMeshKnown;
