@@ -601,6 +601,8 @@ public:
      @param matrix_out Matrix restricted
      */
     void restrict ( const boost::shared_ptr<MapEpetra>& map,
+    				const boost::shared_ptr<VectorEpetra>& numeration,
+    				const UInt& offset,
                     boost::shared_ptr<MatrixEpetra<DataType> > & matrix_out );
 
     //@}
@@ -1743,16 +1745,24 @@ MatrixEpetra<DType>* PtAP (const MatrixEpetra<DType>& A, const MatrixEpetra<DTyp
 
 template <typename DataType>
 void MatrixEpetra<DataType>::restrict ( const boost::shared_ptr<MapEpetra>& map,
+										const boost::shared_ptr<VectorEpetra>& numeration,
+										const UInt& offset,
                                         boost::shared_ptr<MatrixEpetra<DataType> > & matrix_out )
 {
     // 1) create matrix P and R
     MatrixEpetra<DataType> P (*M_rangeMap, 50 );
     MatrixEpetra<DataType> R (*map, 50 );
     double value = 1.0;
-    for(int i = 0 ; i < map->map(Unique)->NumMyElements(); ++i)
+    int offsetMap = numeration->size();
+    for(int i = 0; i < numeration->epetraVector().MyLength(); ++i)
     {
-        P.addToCoefficient(map->map(Unique)->GID(i),map->map(Unique)->GID(i),value);
-        R.addToCoefficient(map->map(Unique)->GID(i),map->map(Unique)->GID(i),value);
+        P.addToCoefficient(numeration->blockMap().GID(i)           , (*numeration)[numeration->blockMap().GID(i)]              , value);
+        P.addToCoefficient(numeration->blockMap().GID(i) +   offset, (*numeration)[numeration->blockMap().GID(i)] + offsetMap  , value);
+        P.addToCoefficient(numeration->blockMap().GID(i) + 2*offset, (*numeration)[numeration->blockMap().GID(i)] + 2*offsetMap, value);
+
+        R.addToCoefficient((*numeration)[numeration->blockMap().GID(i)]              , numeration->blockMap().GID(i)           , value);
+        R.addToCoefficient((*numeration)[numeration->blockMap().GID(i)] + offsetMap  , numeration->blockMap().GID(i) + offset  , value);
+        R.addToCoefficient((*numeration)[numeration->blockMap().GID(i)] + 2*offsetMap, numeration->blockMap().GID(i) + 2*offset, value);
     }
         
     P.globalAssemble( map, M_rangeMap );
