@@ -346,7 +346,7 @@
     </ParameterList>
     
     <ParameterList name="MonolithicOperator">
-        <Parameter name="Linear Solver Type" type="string" value="AztecOO"/>
+        <Parameter name="Linear Solver Type" type="string" value="Belos"/>
         <ParameterList name="Belos">
             <Parameter name="Solver Type" type="string" value="BlockGmres"/>
             <Parameter name="Preconditioner Side" type="string" value="Right"/>
