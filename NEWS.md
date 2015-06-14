@@ -1,6 +1,11 @@
 LifeV 3.10.0:
 ============
 
+Fixed compilation error.
+
+LifeV 3.10.0:
+============
+
 The branch developed at CMCS has been merged to master. Some additional feautures include:
 
 * new expressions in ETA and correction of few others

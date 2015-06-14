@@ -422,7 +422,7 @@ main ( int argc, char** argv )
             std::cout << std::endl << "[[END_SIMULATION]]" << std::endl;
         }
 
-        exit_status = (linearSolver.numIterations() != 3 || precRawPtr->solverPtr()->numIterations() != 5);
+        exit_status = (linearSolver.numIterations() >= 6 || precRawPtr->solverPtr()->numIterations() >= 8);
 
     }
 

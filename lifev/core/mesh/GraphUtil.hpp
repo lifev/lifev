@@ -93,15 +93,13 @@ void partitionGraphParMETIS (const idListPtr_Type& vertexList,
                              const Teuchos::ParameterList& params,
                              idTablePtr_Type& vertexPartition,
                              commPtr_Type& comm);
-}
-};
 
 template <typename MeshType>
-void LifeV::GraphUtil::partitionGraphParMETIS (const idListPtr_Type& vertexList,
-                                               const MeshType& mesh,
-                                               const Teuchos::ParameterList& params,
-                                               idTablePtr_Type& vertexPartition,
-                                               commPtr_Type& comm)
+void partitionGraphParMETIS (const idListPtr_Type& vertexList,
+                             const MeshType& mesh,
+                             const Teuchos::ParameterList& params,
+                             idTablePtr_Type& vertexPartition,
+                             commPtr_Type& comm)
 {
     Int numProc = comm->NumProc();
     Int myPID = comm->MyPID();
@@ -237,7 +235,7 @@ void LifeV::GraphUtil::partitionGraphParMETIS (const idListPtr_Type& vertexList,
 
     idTablePtr_Type vertexIds (new idTable_Type (numParts) );
     // cycling on locally stored vertices
-    for (UInt i = 0; i < numParts; ++i)
+    for (Int i = 0; i < numParts; ++i)
     {
         vertexIds->at (i).reset (new idList_Type (0) );
         vertexIds->at (i)->reserve (vertexLocations.size() / numParts);
@@ -250,5 +248,9 @@ void LifeV::GraphUtil::partitionGraphParMETIS (const idListPtr_Type& vertexList,
 
     vertexPartition = vertexIds;
 }
+
+} // Namespace GraphUtil
+
+} // Namepsace LifeV
 
 #endif // GRAPH_UTIL_H

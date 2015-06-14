@@ -4100,8 +4100,8 @@ RegionMesh<GeoShapeType, MCType>::updateElementRidges (threeD_Type, bool ce, boo
 
     if (renumber && !ridgeList().empty() )
     {
-        ridgeList().reorderAccordingToFlag (EntityFlags::PHYSICAL_BOUNDARY, &Flag::testOneSet);
-        std::vector<ID>newToOld = ridgeList().resetId(); //reset the ids so that they are in accord with position in the container.
+        // Reorder the ridges so that boundary ridges come first (and adjust their localId accordingly)
+        std::vector<ID> newToOld = ridgeList().reorderAccordingToFlag (EntityFlags::PHYSICAL_BOUNDARY, &Flag::testOneSet).second;
         //Unfortunately I need oldToNew!
         std::vector<ID> oldToNew ( newToOld.size() );
         for (UInt j = 0; j < newToOld.size(); ++j)

@@ -174,12 +174,14 @@ const UInt MonolithicBlockComposed::whereIsBlock ( UInt position ) const
 {
     for (UInt i = 0; i < M_blockReordering->size(); i++)
     {
-        if ( (*M_blockReordering) [i] == position)
+        if ( (*M_blockReordering) [i] == static_cast<Int>(position) )
         {
             return i;
         }
     }
     ERROR_MSG ("requested a block that does not exist in MonolithicBlockComposed.cpp");
+
+    return 0; // To suppress compiler warning.
 }
 
 } // Namespace LifeV

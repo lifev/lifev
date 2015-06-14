@@ -366,14 +366,14 @@ Structure::run3d()
     cout.precision(16);
 
     // Interpolating the function and multiplying by the mass matrix
-    dFESpace->interpolate ( static_cast<typename FESpace<RegionMesh<LinearTetra> , MapEpetra>::function_Type> ( Private::lifeVedF ), *interpolatedF, 0.0);
+    dFESpace->interpolate ( static_cast< FESpace<RegionMesh<LinearTetra> , MapEpetra>::function_Type> ( Private::lifeVedF ), *interpolatedF, 0.0);
     *solutionLinearSystem = *( solid.massMatrix( ) ) * (*interpolatedF);
 
     // getting the vector from the expression template assembling
     *bodyForcePointer = solid.bodyForce();
 
     // computing the scalar product f \phi_i
-    dFESpace->l2ScalarProduct( static_cast<typename FESpace<RegionMesh<LinearTetra> , MapEpetra>::function_Type> ( Private::lifeVedF ), *scalarProduct, 0.0);
+    dFESpace->l2ScalarProduct( static_cast< FESpace<RegionMesh<LinearTetra> , MapEpetra>::function_Type> ( Private::lifeVedF ), *scalarProduct, 0.0);
 
 
     // Exporting the solution and the interpolation
