@@ -78,7 +78,7 @@ MultiscaleCouplingMeanNormalStressValve::setupCoupling()
         {
             std::cout << "!!! WARNING: MultiscaleCouplingMeanNormalStressValve does not work with more than two models !!!" << std::endl;
         }
-        if ( M_flowRateInterfaces != modelsNumber() )
+        if ( M_flowRateInterfaces != static_cast<Int>(modelsNumber()) )
         {
             std::cout << "!!! WARNING: MultiscaleCouplingMeanNormalStressValve does not work with stress boundary data !!!" << std::endl;
         }
@@ -123,7 +123,7 @@ MultiscaleCouplingMeanNormalStressValve::initializeCouplingVariables()
     {
         M_valveIsOpen = false;
         if ( myModelsNumber() > 0 )
-            for ( UInt i ( 0 ); i < M_flowRateInterfaces; ++i ) // Only the flow rate is set to zero
+            for ( Int i ( 0 ); i < M_flowRateInterfaces; ++i ) // Only the flow rate is set to zero
             {
                 localCouplingVariables ( 0 ) [i] = 0;
             }
@@ -247,7 +247,7 @@ MultiscaleCouplingMeanNormalStressValve::insertJacobianConstantCoefficients ( mu
                 UInt row    = M_couplingVariablesOffset;
                 UInt column = M_couplingVariablesOffset;
 
-                for ( UInt i ( 0 ); i < M_flowRateInterfaces + 1; ++i )
+                for ( Int i ( 0 ); i < M_flowRateInterfaces + 1; ++i )
                 {
                     jacobian.addToCoefficient ( row + i, column + i, 1 );
                 }

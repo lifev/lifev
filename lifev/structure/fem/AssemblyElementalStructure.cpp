@@ -1483,8 +1483,8 @@ void computeEigenvalues (const Epetra_SerialDenseMatrix& cauchy,
     Int Dim = cauchy.RowDim();
 
     //Arrays to store eigenvalues (their number = nDimensions)
-    double WR[nDimensions];
-    double WI[nDimensions];
+    double* WR = new double[nDimensions];
+    double* WI = new double[nDimensions];
 
     //Number of eigenvectors
     Int LDVR = nDimensions;
@@ -1493,15 +1493,15 @@ void computeEigenvalues (const Epetra_SerialDenseMatrix& cauchy,
     //Arrays to store eigenvectors
     Int length = nDimensions * 3;
 
-    double VR[length];
-    double VL[length];
+    double* VR = new double[length];
+    double* VL = new double[length];
 
     Int LWORK = 9;
     Int INFO = 0;
 
-    double WORK[LWORK];
+    double* WORK = new double[LWORK];
 
-    double A[length];
+    double* A = new double[length];
 
     for (UInt i (0); i < nDimensions; i++)
         for (UInt j (0); j < nDimensions; j++)
@@ -1509,7 +1509,7 @@ void computeEigenvalues (const Epetra_SerialDenseMatrix& cauchy,
             A[nDimensions * i + j] = cauchy (i, j);
         }
 
-    lapack.GEEV (JOBVL, JOBVR, Dim, A /*cauchy*/, Dim, &WR[0], &WI[0], VL, LDVL, VR, LDVR, WORK, LWORK, &INFO);
+    lapack.GEEV (JOBVL, JOBVR, Dim, A /*cauchy*/, Dim, WR, WI, VL, LDVL, VR, LDVR, WORK, LWORK, &INFO);
     ASSERT_PRE ( !INFO, "Calculation of the Eigenvalues failed!!!" );
 
     for ( UInt i (0); i < nDimensions; i++ )
@@ -1518,6 +1518,12 @@ void computeEigenvalues (const Epetra_SerialDenseMatrix& cauchy,
         eigenvaluesI[i] = WI[i];
     }
 
+    delete[] WR;
+    delete[] WI;
+    delete[] VL;
+    delete[] VR;
+    delete[] WORK;
+    delete[] A;
 }
 
 //! ***********************************************************************************************

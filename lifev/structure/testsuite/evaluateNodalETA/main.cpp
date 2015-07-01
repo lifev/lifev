@@ -105,7 +105,7 @@ public:
     typedef LifeV::RegionMesh<LinearTetra>                              mesh_Type;
 
     // Filters
-    typedef typename LifeV::Exporter<mesh_Type  >                       filter_Type;
+    typedef LifeV::Exporter<mesh_Type  >                       filter_Type;
     typedef boost::shared_ptr< LifeV::Exporter<mesh_Type  > >           filterPtr_Type;
 
     typedef LifeV::ExporterEmpty<mesh_Type >                            emptyFilter_Type;
@@ -153,10 +153,10 @@ private:
     void run3d();
 
     void checkResults( const Real a, const Real c,
-		       const Real e, const Real f,
-		       const Real g, const Real h, const Real i,
-		       const Real l, const Real m, const Real n,
-		       const Real o);
+           const Real e, const Real f,
+           const Real g, const Real h, const Real i,
+           const Real l, const Real m, const Real n,
+           const Real o);
 
 
 private:
@@ -193,7 +193,7 @@ Structure::Structure ( int                                   argc,
     parameters ( new Private() )
 {
     GetPot command_line (argc, argv);
-    string data_file_name = command_line.follow ("data", 2, "-f", "--file");
+    std::string data_file_name = command_line.follow ("data", 2, "-f", "--file");
     GetPot dataFile ( data_file_name );
     parameters->data_file_name = data_file_name;
 
@@ -424,15 +424,15 @@ Structure::run3d()
         atanStretchesVector[ k - 1 ].reset( new vector_Type( dScalarFESpace->map() ) );
         scalarExpressionMultimechanism[ k - 1 ].reset( new vector_Type( dScalarFESpace->map() ) );
 
-	Fa_col1[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
+  Fa_col1[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
         Fa_col2[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
         Fa_col3[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
 
-	Mith_col1[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
+  Mith_col1[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
         Mith_col2[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
         Mith_col3[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
 
-	FzeroAminusT_col1[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
+  FzeroAminusT_col1[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
         FzeroAminusT_col2[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
         FzeroAminusT_col3[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
 
@@ -585,14 +585,14 @@ Structure::run3d()
     // Definition of J_a
     vectorPtr_Type jacobianActivation( new vector_Type( dScalarETFESpace->map() ) );
     evaluateNode( elements ( dScalarETFESpace->mesh() ),
-		  fakeQuadratureRule,
-		  dScalarETFESpace,
-		  meas_K * JzeroA  * phi_i
-		  ) >> jacobianActivation;
-    jacobianActivation->globalAssemble();   
+      fakeQuadratureRule,
+      dScalarETFESpace,
+      meas_K * JzeroA  * phi_i
+      ) >> jacobianActivation;
+    jacobianActivation->globalAssemble();
     *( jacobianActivation ) = *( jacobianActivation ) / *patchAreaVectorScalar;
 
-    ExpressionDefinitions::interpolatedScalarValue_Type ithJzeroA = 
+    ExpressionDefinitions::interpolatedScalarValue_Type ithJzeroA =
       ExpressionDefinitions::interpolateScalarValue( dScalarETFESpace, *( jacobianActivation ) );
 
     ExpressionMultimechanism::activatedDeterminantF_Type Ja =
@@ -643,10 +643,10 @@ Structure::run3d()
     // The patch area in vectorial form
     ExpressionVectorFromNonConstantScalar<ExpressionMeas, 3  > vMeas( meas_K );
     evaluateNode( elements ( dETFESpace->mesh() ),
-		  fakeQuadratureRule,
-		  dETFESpace,
-		  dot( vMeas , phi_i )
-		  ) >> patchAreaVector;
+      fakeQuadratureRule,
+      dETFESpace,
+      dot( vMeas , phi_i )
+      ) >> patchAreaVector;
     patchAreaVector->globalAssemble();
 
     for( UInt i(0); i < pointerToVectorOfFamilies->size( ); i++ )
@@ -676,8 +676,8 @@ Structure::run3d()
         ExpressionMultimechanism::activatedFiber_Type activeIthFiber =
             ExpressionMultimechanism::activateFiberDirection( ithFzeroA, fiberIth );
 
-	ExpressionMultimechanism::normalizedVector_Type normalizedFiber =
-	  ExpressionMultimechanism::unitVector( activeIthFiber );
+  ExpressionMultimechanism::normalizedVector_Type normalizedFiber =
+    ExpressionMultimechanism::unitVector( activeIthFiber );
         // Definition of the tensor M = ithFiber \otimes ithFiber
         // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
         // For a more general case, the file ExpressionDefinitions.hpp should be changed
@@ -698,7 +698,7 @@ Structure::run3d()
                       dScalarETFESpace,
                       meas_K * IVithBar  * phi_i
                       ) >> stretchesVector[ i ];
-	stretchesVector[ i ]->globalAssemble();
+  stretchesVector[ i ]->globalAssemble();
 
         *( stretchesVector[ i ] ) = *( stretchesVector[ i ] ) / *patchAreaVectorScalar;
 
@@ -708,82 +708,82 @@ Structure::run3d()
                       meas_K * atan( IVithBar - value( dataStructure->ithCharacteristicStretch( i ) ),
                                      dataStructure->smoothness() , ( 1.0 / 3.14159265359 ), (1.0/2.0) ) * phi_i
                       ) >> atanStretchesVector[ i ];
-	atanStretchesVector[ i ]->globalAssemble();
+  atanStretchesVector[ i ]->globalAssemble();
 
         *( atanStretchesVector[ i ] ) = *( atanStretchesVector[ i ] ) / *patchAreaVectorScalar;
 
-	Real stretch = dataStructure->ithCharacteristicStretch( i );
-	Real pi = 3.14159265359;
+  Real stretch = dataStructure->ithCharacteristicStretch( i );
+  Real pi = 3.14159265359;
 
         evaluateNode( elements ( dScalarETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dScalarETFESpace,
                       meas_K *
-		      JzeroA * atan( IVithBar - value( stretch ) , dataStructure->smoothness(), ( 1 / pi ), ( 1.0/2.0 )  )  * JactiveEl *
+          JzeroA * atan( IVithBar - value( stretch ) , dataStructure->smoothness(), ( 1 / pi ), ( 1.0/2.0 )  )  * JactiveEl *
                       (value( 2.0 ) * value( dataStructure->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( stretch ) ) *
                        exp( value( dataStructure->ithNonlinearityFibers( i ) ) * ( IVithBar- value( stretch ) ) * ( IVithBar- value( stretch ) )  ) )  * phi_i
                       ) >> scalarExpressionMultimechanism[ i ];
-	scalarExpressionMultimechanism[ i ]->globalAssemble();
+  scalarExpressionMultimechanism[ i ]->globalAssemble();
 
         *( scalarExpressionMultimechanism[ i ] ) = *( scalarExpressionMultimechanism[ i ] ) / *patchAreaVectorScalar;
 
 
-	// exporting the components of the Piola-Kirchhoff tensor
-	// Definition of the expression definition the portion of the Piola-Kirchhoff
+  // exporting the components of the Piola-Kirchhoff tensor
+  // Definition of the expression definition the portion of the Piola-Kirchhoff
 
-	ExpressionMultimechanism::deformationActivatedTensor_Type Fa =
-	  ExpressionMultimechanism::createDeformationActivationTensor( F , FzeroAminus1);
+  ExpressionMultimechanism::deformationActivatedTensor_Type Fa =
+    ExpressionMultimechanism::createDeformationActivationTensor( F , FzeroAminus1);
 
-	typedef ExpressionProduct<ExpressionMultimechanism::deformationActivatedTensor_Type,
-				  ExpressionMultimechanism::activeNormalizedOuterProduct_Type>  productFaMith_Type;
+  typedef ExpressionProduct<ExpressionMultimechanism::deformationActivatedTensor_Type,
+          ExpressionMultimechanism::activeNormalizedOuterProduct_Type>  productFaMith_Type;
 
-	typedef ExpressionProduct< productFaMith_Type,
-				   ExpressionDefinitions::minusTransposedTensor_Type> firstPartPiolaMultimech_Type;
+  typedef ExpressionProduct< productFaMith_Type,
+           ExpressionDefinitions::minusTransposedTensor_Type> firstPartPiolaMultimech_Type;
 
-	productFaMith_Type FaMith( Fa, Mith );
-	firstPartPiolaMultimech_Type firstPartPiola( FaMith, FzeroAminusT );
+  productFaMith_Type FaMith( Fa, Mith );
+  firstPartPiolaMultimech_Type firstPartPiola( FaMith, FzeroAminusT );
 
-	//Extract columns
-	ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::deformationActivatedTensor_Type,3 ,3 > Fa_i1( Fa, 0 );
-	ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::deformationActivatedTensor_Type,3 ,3 > Fa_i2( Fa, 1 );
-	ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::deformationActivatedTensor_Type,3 ,3 > Fa_i3( Fa, 2 );
+  //Extract columns
+  ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::deformationActivatedTensor_Type,3 ,3 > Fa_i1( Fa, 0 );
+  ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::deformationActivatedTensor_Type,3 ,3 > Fa_i2( Fa, 1 );
+  ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::deformationActivatedTensor_Type,3 ,3 > Fa_i3( Fa, 2 );
 
-	ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::activeNormalizedOuterProduct_Type,3 ,3 > Mith_i1( Mith, 0 );
-	ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::activeNormalizedOuterProduct_Type,3 ,3 > Mith_i2( Mith, 1 );
-	ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::activeNormalizedOuterProduct_Type,3 ,3 > Mith_i3( Mith, 2 );
+  ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::activeNormalizedOuterProduct_Type,3 ,3 > Mith_i1( Mith, 0 );
+  ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::activeNormalizedOuterProduct_Type,3 ,3 > Mith_i2( Mith, 1 );
+  ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::activeNormalizedOuterProduct_Type,3 ,3 > Mith_i3( Mith, 2 );
 
-	ExpressionVectorFromNonConstantMatrix< ExpressionDefinitions::minusTransposedTensor_Type,3 ,3 > FzeroAminusT_i1( FzeroAminusT, 0 );
-	ExpressionVectorFromNonConstantMatrix< ExpressionDefinitions::minusTransposedTensor_Type,3 ,3 > FzeroAminusT_i2( FzeroAminusT, 1 );
-	ExpressionVectorFromNonConstantMatrix< ExpressionDefinitions::minusTransposedTensor_Type,3 ,3 > FzeroAminusT_i3( FzeroAminusT, 2 );
+  ExpressionVectorFromNonConstantMatrix< ExpressionDefinitions::minusTransposedTensor_Type,3 ,3 > FzeroAminusT_i1( FzeroAminusT, 0 );
+  ExpressionVectorFromNonConstantMatrix< ExpressionDefinitions::minusTransposedTensor_Type,3 ,3 > FzeroAminusT_i2( FzeroAminusT, 1 );
+  ExpressionVectorFromNonConstantMatrix< ExpressionDefinitions::minusTransposedTensor_Type,3 ,3 > FzeroAminusT_i3( FzeroAminusT, 2 );
 
-	ExpressionVectorFromNonConstantMatrix< firstPartPiolaMultimech_Type,3 ,3  > P_i1( firstPartPiola, 0 );
-	ExpressionVectorFromNonConstantMatrix< firstPartPiolaMultimech_Type,3 ,3 > P_i2( firstPartPiola, 1 );
-	ExpressionVectorFromNonConstantMatrix< firstPartPiolaMultimech_Type,3 ,3 > P_i3( firstPartPiola, 2 );
+  ExpressionVectorFromNonConstantMatrix< firstPartPiolaMultimech_Type,3 ,3  > P_i1( firstPartPiola, 0 );
+  ExpressionVectorFromNonConstantMatrix< firstPartPiolaMultimech_Type,3 ,3 > P_i2( firstPartPiola, 1 );
+  ExpressionVectorFromNonConstantMatrix< firstPartPiolaMultimech_Type,3 ,3 > P_i3( firstPartPiola, 2 );
 
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
                       meas_K *  dot ( Fa_i1, phi_i)
                       ) >> Fa_col1[ i ];
-	Fa_col1[ i ]->globalAssemble();
+  Fa_col1[ i ]->globalAssemble();
 
-	*(Fa_col1[i]) = *(Fa_col1[i]) / *patchAreaVector;
+  *(Fa_col1[i]) = *(Fa_col1[i]) / *patchAreaVector;
 
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
                       meas_K *  dot ( Fa_i2, phi_i)
                       ) >> Fa_col2[ i ];
-	Fa_col2[ i ]->globalAssemble();
-	*(Fa_col2[i]) = *(Fa_col2[i]) / *patchAreaVector;
+  Fa_col2[ i ]->globalAssemble();
+  *(Fa_col2[i]) = *(Fa_col2[i]) / *patchAreaVector;
 
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
                       meas_K *  dot ( Fa_i3, phi_i)
                       ) >> Fa_col3[ i ];
-	Fa_col3[ i ]->globalAssemble();
-	*(Fa_col3[i]) = *(Fa_col3[i]) / *patchAreaVector;
+  Fa_col3[ i ]->globalAssemble();
+  *(Fa_col3[i]) = *(Fa_col3[i]) / *patchAreaVector;
 
 
         evaluateNode( elements ( dETFESpace->mesh() ),
@@ -791,24 +791,24 @@ Structure::run3d()
                       dETFESpace,
                       meas_K *  dot ( Mith_i1, phi_i)
                       ) >> Mith_col1[ i ];
-	Mith_col1[ i ]->globalAssemble();
-	*(Mith_col1[i]) = *(Mith_col1[i]) / *patchAreaVector;
+  Mith_col1[ i ]->globalAssemble();
+  *(Mith_col1[i]) = *(Mith_col1[i]) / *patchAreaVector;
 
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
                       meas_K *  dot ( Mith_i2, phi_i)
                       ) >> Mith_col2[ i ];
-	Mith_col2[ i ]->globalAssemble();
-	*(Mith_col2[i]) = *(Mith_col2[i]) / *patchAreaVector;
+  Mith_col2[ i ]->globalAssemble();
+  *(Mith_col2[i]) = *(Mith_col2[i]) / *patchAreaVector;
 
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
                       meas_K *  dot ( Mith_i3, phi_i)
                       ) >> Mith_col3[ i ];
-	Mith_col3[ i ]->globalAssemble();
-	*(Mith_col3[i]) = *(Mith_col3[i]) / *patchAreaVector;
+  Mith_col3[ i ]->globalAssemble();
+  *(Mith_col3[i]) = *(Mith_col3[i]) / *patchAreaVector;
 
 
         evaluateNode( elements ( dETFESpace->mesh() ),
@@ -816,24 +816,24 @@ Structure::run3d()
                       dETFESpace,
                       meas_K *  dot ( FzeroAminusT_i1, phi_i)
                       ) >> FzeroAminusT_col1[ i ];
-	FzeroAminusT_col1[ i ]->globalAssemble();
-	*(FzeroAminusT_col1[i]) = *(FzeroAminusT_col1[i]) / *patchAreaVector;
+  FzeroAminusT_col1[ i ]->globalAssemble();
+  *(FzeroAminusT_col1[i]) = *(FzeroAminusT_col1[i]) / *patchAreaVector;
 
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
                       meas_K *  dot ( FzeroAminusT_i2, phi_i)
                       ) >> FzeroAminusT_col2[ i ];
-	FzeroAminusT_col2[ i ]->globalAssemble();
-	*(FzeroAminusT_col2[i]) = *(FzeroAminusT_col2[i]) / *patchAreaVector;
+  FzeroAminusT_col2[ i ]->globalAssemble();
+  *(FzeroAminusT_col2[i]) = *(FzeroAminusT_col2[i]) / *patchAreaVector;
 
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
                       meas_K *  dot ( FzeroAminusT_i3, phi_i)
                       ) >> FzeroAminusT_col3[ i ];
-	FzeroAminusT_col3[ i ]->globalAssemble();
-	*(FzeroAminusT_col3[i]) = *(FzeroAminusT_col3[i]) / *patchAreaVector;
+  FzeroAminusT_col3[ i ]->globalAssemble();
+  *(FzeroAminusT_col3[i]) = *(FzeroAminusT_col3[i]) / *patchAreaVector;
 
 
         evaluateNode( elements ( dETFESpace->mesh() ),
@@ -841,24 +841,24 @@ Structure::run3d()
                       dETFESpace,
                       meas_K *  dot ( P_i1, phi_i)
                       ) >> P_col1[ i ];
-	P_col1[ i ]->globalAssemble();
-	*(P_col1[i]) = *(P_col1[i]) / *patchAreaVector;
+  P_col1[ i ]->globalAssemble();
+  *(P_col1[i]) = *(P_col1[i]) / *patchAreaVector;
 
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
                       meas_K *  dot ( P_i2, phi_i)
                       ) >> P_col2[ i ];
-	P_col2[ i ]->globalAssemble();
-	*(P_col2[i]) = *(P_col2[i]) / *patchAreaVector;
+  P_col2[ i ]->globalAssemble();
+  *(P_col2[i]) = *(P_col2[i]) / *patchAreaVector;
 
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
                       meas_K *  dot ( P_i3, phi_i)
                       ) >> P_col3[ i ];
-	P_col3[ i ]->globalAssemble();
-	*(P_col3[i]) = *(P_col3[i]) / *patchAreaVector;
+  P_col3[ i ]->globalAssemble();
+  *(P_col3[i]) = *(P_col3[i]) / *patchAreaVector;
 
     }
 
@@ -880,21 +880,21 @@ Structure::run3d()
     MPI_Barrier (MPI_COMM_WORLD);
 
     checkResults( patchAreaVectorScalar->normInf(),
-		  patchAreaVector->normInf(),
-		  JacobianZero->normInf(), JacobianZeroA->normInf(), JacobianA->normInf(),
-		  atanStretchesVector[0]->normInf(),atanStretchesVector[1]->normInf(),
-		  scalarExpressionMultimechanism[0]->norm2(), scalarExpressionMultimechanism[1]->norm2(),
-		  Mith_col1[0]->normInf(), Mith_col1[1]->normInf());
+      patchAreaVector->normInf(),
+      JacobianZero->normInf(), JacobianZeroA->normInf(), JacobianA->normInf(),
+      atanStretchesVector[0]->normInf(),atanStretchesVector[1]->normInf(),
+      scalarExpressionMultimechanism[0]->norm2(), scalarExpressionMultimechanism[1]->norm2(),
+      Mith_col1[0]->normInf(), Mith_col1[1]->normInf());
 
     //!---------------------------------------------.-----------------------------------------------------
 }
 
 void
 Structure::checkResults(const Real a, const Real c,
-			const Real e, const Real f,
-			const Real g, const Real h, const Real i,
-			const Real l, const Real m, const Real n,
-			const Real o)
+      const Real e, const Real f,
+      const Real g, const Real h, const Real i,
+      const Real l, const Real m, const Real n,
+      const Real o)
 {
 
   if( std::fabs( a - 0.072916) < 1e-6 &&
@@ -924,11 +924,11 @@ main ( int argc, char** argv )
     boost::shared_ptr<Epetra_MpiComm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
     if ( Comm->MyPID() == 0 )
     {
-        cout << "% using MPI" << endl;
+        std::cout << "% using MPI" << std::endl;
     }
 #else
     boost::shared_ptr<Epetra_SerialComm> Comm ( new Epetra_SerialComm() );
-    cout << "% using serial Version" << endl;
+    std::cout << "% using serial Version" << std::endl;
 #endif
 
     Structure structure ( argc, argv, Comm );

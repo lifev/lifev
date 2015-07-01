@@ -46,18 +46,6 @@
 
 #include <lifev/core/solver/HyperbolicData.hpp>
 
-namespace
-{
-
-LifeV::Real _ZeroFun ( const LifeV::Real&, const LifeV::Real&,
-                       const LifeV::Real&, const LifeV::Real&,
-                       const LifeV::UInt& )
-{
-    return static_cast<LifeV::Real> ( 0. );
-}
-
-}
-
 // LifeV namespace.
 namespace LifeV
 {
