@@ -230,7 +230,6 @@ int main ( int argc, char** argv )
     typedef VectorEpetra                                                    vector_Type;
     typedef boost::shared_ptr<VectorEpetra>                                 vectorPtr_Type;
 
-
     // Declaring the problem's graph and matrix
     graphPtr_Type systemGraph;
     matrixPtr_Type systemMatrix;
@@ -315,15 +314,12 @@ int main ( int argc, char** argv )
                 >> systemMatrix;
     }
 
-//    systemMatrix->globalAssemble();
-
     initChrono.stop();
 
     if (verbose)
     {
         std::cout << " done in " << initChrono.diff() << " s!" << std::endl;
     }
-
 
     // +-----------------------------------------------+
     // |     Initializing vectors and exporter         |
@@ -349,7 +345,6 @@ int main ( int argc, char** argv )
 
     rhsLap->zero();
     solutionLap->zero();
-
 
     boost::shared_ptr<laplacianFunctor< Real > >  laplacianSourceFunctor ( new laplacianFunctor< Real >( sourceFunction ) );
 
@@ -385,6 +380,8 @@ int main ( int argc, char** argv )
     {
         std::cout << "-- Setting boundary conditions... " << std::flush;
     }
+    systemMatrix->globalAssemble();
+    rhsLap->globalAssemble();
 
     initChrono.reset();
     initChrono.start();
@@ -398,24 +395,14 @@ int main ( int argc, char** argv )
     bcHandler.addBC( "Left",   LEFT,   Essential, Full, ZeroBC, 1 );
     bcHandler.addBC( "Top",    TOP,    Essential, Full, ZeroBC, 1 );
 
-
     bcHandler.addBC( "Front",  FRONT,  Essential, Full, ZeroBC, 1 );
     bcHandler.addBC( "Right",  RIGHT,  Essential, Full, ZeroBC, 1 );
     bcHandler.addBC( "Bottom", BOTTOM, Essential, Full, ZeroBC, 1 );
 
     bcHandler.bcUpdate( *uFESpace->mesh(), uFESpace->feBd(), uFESpace->dof() );
 
-    systemMatrix->globalAssemble();
-
-    systemMatrix->spy("matrixClassicpreBC");
-
-
 
     bcManage ( *systemMatrix, *rhsLap, *uFESpace->mesh(), uFESpace->dof(), bcHandler, uFESpace->feBd(), 1.0, 0.0 );
-
-    systemMatrix->globalAssemble();
-//    rhsBC->globalAssemble();
-    rhsLap->globalAssemble();
 
     initChrono.stop();
 
@@ -423,7 +410,6 @@ int main ( int argc, char** argv )
     {
         std::cout << " done in " << initChrono.diff() << " s!" << std::endl;
     }
-
 
     // +-----------------------------------------------+
     // |       Setting solver and preconditioner       |
@@ -460,7 +446,6 @@ int main ( int argc, char** argv )
     precPtr.reset ( precRawPtr );
 
     linearSolver.setPreconditioner ( precPtr );
-
 
     initChrono.stop();
 
@@ -533,7 +518,6 @@ int main ( int argc, char** argv )
                 ) >> H1SeminormLap;
 
     }
-
 
     Comm->Barrier();
     Comm->SumAll (&L2ErrorLap, &TotL2ErrorLap, 1);

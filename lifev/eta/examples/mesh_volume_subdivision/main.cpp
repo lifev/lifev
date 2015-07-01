@@ -406,11 +406,10 @@ int main ( int argc, char** argv )
 
     bcHandler.bcUpdate( *uFESpace->mesh(), uFESpace->feBd(), uFESpace->dof() );
 
-    bcManage ( *matrixMeshSubFull, *rhsLap, *uFESpace->mesh(), uFESpace->dof(), bcHandler, uFESpace->feBd(), 1.0, 0.0 );
-
     matrixMeshSubFull->globalAssemble();
     rhsLap->globalAssemble();
 
+    bcManage ( *matrixMeshSubFull, *rhsLap, *uFESpace->mesh(), uFESpace->dof(), bcHandler, uFESpace->feBd(), 1.0, 0.0 );
 
     if (verbose)
     {
