@@ -10,6 +10,7 @@ NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commP
 		M_displayer(communicator),
 		M_graphIsBuilt(false),
         M_oper(new Operators::NavierStokesOperator),
+        M_operLoads(new Operators::NavierStokesOperator),
         M_invOper(),
         M_fullyImplicit(false),
         M_graphPCDisBuilt(false),
@@ -17,7 +18,8 @@ NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commP
         M_density ( dataFile("fluid/physics/density", 1.0 ) ),
         M_viscosity ( dataFile("fluid/physics/viscosity", 0.035 ) ),
         M_useStabilization ( dataFile("fluid/stabilization/use", false) ),
-        M_stabilizationType ( dataFile("fluid/stabilization/type", "none") )
+        M_stabilizationType ( dataFile("fluid/stabilization/type", "none") ),
+        M_computeAerodynamicLoads ( dataFile("fluid/compute_loads", false) )
 {
 	M_prec.reset ( Operators::NSPreconditionerFactory::instance().createObject (dataFile("fluid/preconditionerType","none")));
 }
@@ -537,6 +539,36 @@ void NavierStokesSolver::applyGravityForce ( const Real& gravity, const Real& gr
 
 void NavierStokesSolver::applyBoundaryConditions ( bcPtr_Type & bc, const Real& time )
 {
+	if ( M_computeAerodynamicLoads )
+	{
+		// M_displayer.leaderPrint( "\tNS operator - Compute Loads: TRUE");
+
+		M_block00_noBC.reset( new matrix_Type(M_velocityFESpace->map() ) );
+		M_block01_noBC.reset( new matrix_Type(M_velocityFESpace->map() ) );
+		M_block10_noBC.reset( new matrix_Type(M_pressureFESpace->map() ) );
+		M_block11_noBC.reset( new matrix_Type(M_pressureFESpace->map() ) );
+
+		M_block00_noBC->zero();
+		M_block10_noBC->zero();
+		M_block01_noBC->zero();
+		M_block11_noBC->zero();
+
+		*M_block00_noBC += *M_block00;
+		*M_block01_noBC += *M_block01;
+		*M_block10_noBC += *M_block10;
+		*M_block11_noBC += *M_block11;
+
+		// Right hand side
+		M_rhs_noBC.reset( new vector_Type ( M_velocityFESpace->map(), Unique ) );
+		M_rhs_noBC->zero();
+		*M_rhs_noBC += *M_rhs;
+
+		M_block00_noBC->globalAssemble();
+		M_block01_noBC->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
+		M_block10_noBC->globalAssemble(M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
+		M_block11_noBC->globalAssemble();
+	}
+
 	updateBCHandler(bc);
 	bcManage ( *M_block00, *M_rhs, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 1.0, time );
     bcManageMatrix( *M_block01, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 0.0, 0.0);
@@ -630,6 +662,37 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
         
         M_velocity->subset ( sol, M_velocityFESpace->map(), 0, 0 );
         M_pressure->subset ( sol, M_pressureFESpace->map(), M_velocityFESpace->map().mapSize(), 0 );
+
+        if ( M_computeAerodynamicLoads )
+        {
+        	// Computing Drag and Lift Forces
+        	Operators::NavierStokesOperator::operatorPtrContainer_Type operDataLoads(2,2);
+        	operDataLoads(0,0) = M_block00_noBC->matrixPtr();
+        	operDataLoads(0,1) = M_block01_noBC->matrixPtr();
+        	operDataLoads(1,0) = M_block10_noBC->matrixPtr();
+        	if ( M_useStabilization )
+        		operDataLoads(1,1) = M_block11_noBC->matrixPtr();
+
+        	M_operLoads->setUp(operDataLoads, M_displayer.comm());
+
+        	vector_Type rhs_noBC ( *M_monolithicMap, Unique );
+        	rhs_noBC.zero();
+
+        	rhs_noBC.subset ( *M_rhs_noBC, M_velocityFESpace->map(), 0, 0 );
+        	rhs_noBC.subset ( *M_rhs_pressure, M_pressureFESpace->map(), 0, M_velocityFESpace->map().mapSize() );
+
+        	vector_Type Ax ( *M_monolithicMap, Unique );
+        	Ax.zero();
+
+        	M_operLoads->Apply( sol.epetraVector(), Ax.epetraVector() );
+
+        	M_forces.reset ( new vector_Type ( *M_monolithicMap, Unique ) );
+        	M_forces->zero();
+
+        	*M_forces += rhs_noBC;
+        	*M_forces -= Ax;
+
+        }
     }
     else
     {

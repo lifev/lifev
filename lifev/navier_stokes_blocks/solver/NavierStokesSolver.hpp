@@ -396,6 +396,19 @@ private:
 	matrixPtr_Type M_block10;
 	matrixPtr_Type M_block11;
 
+	// Bool to check if we need to compute drag and lift
+	bool M_computeAerodynamicLoads;
+
+	// Navier-Stokes block matrices without boundary conditions applied
+	// used for estimation of drag and lift coefficients when needed
+	matrixPtr_Type M_block00_noBC;
+	matrixPtr_Type M_block01_noBC;
+	matrixPtr_Type M_block10_noBC;
+	matrixPtr_Type M_block11_noBC;
+	vectorPtr_Type M_rhs_noBC;
+	vectorPtr_Type M_forces;
+	boost::shared_ptr<LifeV::Operators::NavierStokesOperator> M_operLoads;
+
 	// vectors
 	vectorPtr_Type M_uExtrapolated;
 	vectorPtr_Type M_rhs;
