@@ -45,13 +45,6 @@
 
 #include "ud_functions.hpp"
 
-//#define OUTLET     5
-//#define INLET_UP   3
-//#define INLET_DOWN 4
-//#define WALL       210
-//#define INTERFACE  200
-//#define CONSTRAINT 6
-
 #define OUTLET 3
 #define INLET  2
 #define WALL   1
@@ -64,16 +57,9 @@ typedef boost::shared_ptr<BCHandler> bcPtr_Type;
 bcPtr_Type BCh_fluid ()
 {
     BCFunctionBase zero_function (fZero);
-//    BCFunctionBase inflow_function_up (inflow_up);
-//    BCFunctionBase inflow_function_down (inflow_down);
     BCFunctionBase inflow_function (inflow);
 
     bcPtr_Type bc (new BCHandler );
-
-//    bc->addBC ("InletUp",  	 INLET_UP,    Essential,    Full,   inflow_function_up,     3);
-//    bc->addBC ("InletDown",  INLET_DOWN,  Essential, 	Full,   inflow_function_down,   3);
-//    bc->addBC ("Wall",       WALL,        Essential,    Full,   zero_function,          3);
-//    bc->addBC ("Interface",  INTERFACE,   Essential,    Full,   zero_function,          3);
 
     bc->addBC ("Inflow",       INLET,  Essential, Full,   inflow_function, 3);
     bc->addBC ("Outflow",      OUTLET, Natural,   Normal, zero_function);

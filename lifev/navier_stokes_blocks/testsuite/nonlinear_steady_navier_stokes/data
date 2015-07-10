@@ -18,15 +18,14 @@ save       = 1
 filename   = steady_fluid
 
 [newton]
-	abstol          		=  1.e-5
-	reltol          		=  1.e-5
-	etamax          		=  1.e-5
+	abstol          		=  1.e-4
+	reltol          		=  1.e-4
+	etamax          		=  1.e-4
 	maxiter         		=  10
 	NonLinearLineSearch 	=  0
 	convectiveImplicit      =  true
 	
 [../]
-
 
 [fluid]
 

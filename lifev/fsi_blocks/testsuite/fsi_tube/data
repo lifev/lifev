@@ -1,15 +1,15 @@
 [offlinePartioner]
 	parts                 = 12
-	readPartitionedMeshes = false
-	fluidPartitionedMesh  = fluid_P2_12.h5
-	solidPartitionedMesh  = solid_P2_12.h5
+	readPartitionedMeshes = true
+	fluidPartitionedMesh  = fluido_P2_12.h5
+	solidPartitionedMesh  = solido_P2_12.h5
 	interfacePartitioned  = interface_P2_12.h5
 	
 [../]	
 	
 [fluid]
 
-	 preconditionerType       = SIMPLE # PCD or SIMPLE
+	preconditionerType       = SIMPLE # PCD or SIMPLE
      
     	[./physics]
     		density         = 1.0    # density, settings used in the paper

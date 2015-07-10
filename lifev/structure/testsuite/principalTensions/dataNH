@@ -31,9 +31,9 @@ material_flag   = 1
 
 [../model]
 constitutiveLaw = isotropic
-young     	= 8.e+6
-poisson   	= 0.49
-bulk		= 1.3333e+8
+young     	= 2.e+4 #8.e+6
+poisson   	= 0.0 #0.49
+bulk		= 1.e+6 #1.3333e+8
 alpha 		= 2.684564e+6
 gamma		= 1.0
 solidTypeIsotropic 	= neoHookean		# linearVenantKirchhoff / nonlinearVenantKirchhoff / neoHookean / expoenential
@@ -50,7 +50,7 @@ BDF_order   	= 2
 mesh_type = .mesh
 mesh_dir  	= ./
 mesh_file 	= cubeY4.mesh
-order     	= P1
+order     	= P2
 
 [../analysis]
 nameFile                = structure

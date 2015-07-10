@@ -251,12 +251,15 @@ struct Structure::Private
         switch (i)
         {
             case 0:
+            	//return 0.0;
                 return - 0.018542821 * ( x - 0.5 );
                 break;
             case 1:
+            	//return 0.05*y;
                 return  0.077904116 / 2.0  * ( y );
                 break;
             case 2:
+            	//return 0.0;
                 return - 0.018542821  * ( z + 0.5  );
                 break;
             default:
@@ -525,6 +528,10 @@ Structure::run3d()
     // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "dX2", dFESpace, dX_2, UInt (0) );
     // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "dX3", dFESpace, dX_3, UInt (0) );
 
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "sigma_1", dFESpace, sigma_1, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "sigma_2", dFESpace, sigma_2, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "sigma_3", dFESpace, sigma_3, UInt (0) );
+
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "eigenvalues", dFESpace, vectorEigenvalues, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "vonMises", dFESpace, solidTensions, UInt (0) );
     M_exporter->postProcess ( 0.0 );
@@ -572,47 +579,47 @@ Structure::run3d()
     LifeV::Real dt =  dataFile ( "solid/time_discretization/timestep", 0.0);
     std::string const nameField =  dataFile ( "solid/analysis/nameField", "NO_DEFAULT_VALUE");
 
-    if ( !tensionData->analysisType().compare ("istant") )
-    {
-        //Get the iteration number
-        iterationString = tensionData->iterStart (0);
-        LifeV::Real startTime = tensionData->initialTime (0);
-
-        // In the case of Exponential law we are checking the three ways
-        if( !dataStructure->solidTypeIsotropic().compare("exponential") )
-        {
-            /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
-            LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, solid->dFESpacePtr(), solidDisp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
-
-            //Read the variable
-            M_importer->readVariable (solutionDispl);
-            M_importer->closeFile();
-        }
-        else if ( !dataStructure->solidTypeIsotropic().compare("linearVenantKirchhoff") ) // LE
-        {
-            dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( Private::displacementLinearElastic ),
-                                    *solidDisp, 0.0 );
-        }
-        else if ( !dataStructure->solidTypeIsotropic().compare("nonLinearVenantKirchhoff") ) // SVK
-        {
-            dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( Private::displacementVenantKirchhoff ),
-                                    *solidDisp, 0.0 );
-        }
-        else if ( !dataStructure->solidTypeIsotropic().compare("nonLinearVenantKirchhoffPenalized") ) // SVKP
-        {
-            dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( Private::displacementVenantKirchhoffPenalized ),
-                                    *solidDisp, 0.0 );
-        }
-        else if ( !dataStructure->solidTypeIsotropic().compare("neoHookean") ) // NH
-        {
+//    if ( !tensionData->analysisType().compare ("istant") )
+//    {
+//        //Get the iteration number
+//        iterationString = tensionData->iterStart (0);
+//        LifeV::Real startTime = tensionData->initialTime (0);
+//
+//        // In the case of Exponential law we are checking the three ways
+//        if( !dataStructure->solidTypeIsotropic().compare("exponential") )
+//        {
+//            /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
+//            LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, solid->dFESpacePtr(), solidDisp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+//
+//            //Read the variable
+//            M_importer->readVariable (solutionDispl);
+//            M_importer->closeFile();
+//        }
+//        else if ( !dataStructure->solidTypeIsotropic().compare("linearVenantKirchhoff") ) // LE
+//        {
+//            dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( Private::displacementLinearElastic ),
+//                                    *solidDisp, 0.0 );
+//        }
+//        else if ( !dataStructure->solidTypeIsotropic().compare("nonLinearVenantKirchhoff") ) // SVK
+//        {
+//            dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( Private::displacementVenantKirchhoff ),
+//                                    *solidDisp, 0.0 );
+//        }
+//        else if ( !dataStructure->solidTypeIsotropic().compare("nonLinearVenantKirchhoffPenalized") ) // SVKP
+//        {
+//            dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( Private::displacementVenantKirchhoffPenalized ),
+//                                    *solidDisp, 0.0 );
+//        }
+//        else if ( !dataStructure->solidTypeIsotropic().compare("neoHookean") ) // NH
+//        {
             dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( Private::displacementNeoHookean ),
                                     *solidDisp, 0.0 );
-        }
-        else
-        {
-            dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( Private::displacementSecondOrderExponential ),
-                                    *solidDisp, 0.0 );
-        }
+//        }
+//        else
+//        {
+//            dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( Private::displacementSecondOrderExponential ),
+//                                    *solidDisp, 0.0 );
+//        }
 
         solidOperator.computeCauchyStressTensor( solidDisp, fakeQuadratureRule, sigma_1, sigma_2, sigma_3 );
         // Concluding reconstruction
@@ -620,6 +627,7 @@ Structure::run3d()
         *sigma_2 = *sigma_2 / *patchAreaVector;
         *sigma_3 = *sigma_3 / *patchAreaVector;
 
+        /*
         // Computing eigenvalues
         solidOperator.computePrincipalTensions( sigma_1, sigma_2, sigma_3, vectorEigenvalues );
 
@@ -660,74 +668,74 @@ Structure::run3d()
         // *dX_1 = solid->gradientX();
         // *dX_2 = solid->gradientY();
         // *dX_3 = solid->gradientZ();
+        */
 
+        M_exporter->postProcess ( 2.0 );
 
-        M_exporter->postProcess ( startTime );
-
-        if (verbose )
-        {
-            std::cout << "Analysis Completed!" << std::endl;
-        }
-
-        returnValue = EXIT_FAILURE;
-
-        if( !dataStructure->solidTypeIsotropic().compare("exponential") )
-        {
-            ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-            if ( !tensionData->recoveryVariable().compare ("displacement")  )
-            {
-                CheckResultDisplacement ( solid->principalStresses().norm2()  );
-            }
-            else if ( !tensionData->recoveryVariable().compare ("eigenvalues") )
-            {
-                CheckResultEigenvalues ( solid->principalStresses().norm2() );
-            }
-            else
-            {
-                CheckResultTensions ( solid->principalStresses().norm2(), vectorEigenvalues->norm2()  );
-            }
-        }
-
-        else if ( !dataStructure->solidTypeIsotropic().compare("linearVenantKirchhoff") ) // LE
-        {
-            checkLinearElastic( solid->principalStresses().norm2(), vectorEigenvalues->norm2() );
-        }
-        else if ( !dataStructure->solidTypeIsotropic().compare("nonLinearVenantKirchhoff") ) // SVK
-        {
-            checkVenantKirchhoff( solid->principalStresses().norm2(), vectorEigenvalues->norm2() );
-        }
-        else if ( !dataStructure->solidTypeIsotropic().compare("nonLinearVenantKirchhoffPenalized") ) // SVKP
-        {
-            checkVenantKirchhoffPenalized( solid->principalStresses().norm2(), vectorEigenvalues->norm2() );
-        }
-        else if ( !dataStructure->solidTypeIsotropic().compare("neoHookean") ) // NH
-        {
-            checkNeoHookean( solid->principalStresses().norm2(), vectorEigenvalues->norm2() );
-        }
-        else
-        {
-            check2ndOrderExponential( solid->principalStresses().norm2(), vectorEigenvalues->norm2() );
-        }
-        ///////// END OF CHECK
-
-        //Closing files
-        M_exporter->closeFile();
-        // exporterX->closeFile();
-        // exporterY->closeFile();
-        // exporterZ->closeFile();
-        // exporter.closeFile();
-
-
-    }
-    else
-    {
-        std::cout << "Work in progress! " << std::endl;
-    }
-
-    if (verbose )
-    {
-        std::cout << "finished" << std::endl;
-    }
+//        if (verbose )
+//        {
+//            std::cout << "Analysis Completed!" << std::endl;
+//        }
+//
+//        returnValue = EXIT_FAILURE;
+//
+//        if( !dataStructure->solidTypeIsotropic().compare("exponential") )
+//        {
+//            ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
+//            if ( !tensionData->recoveryVariable().compare ("displacement")  )
+//            {
+//                CheckResultDisplacement ( solid->principalStresses().norm2()  );
+//            }
+//            else if ( !tensionData->recoveryVariable().compare ("eigenvalues") )
+//            {
+//                CheckResultEigenvalues ( solid->principalStresses().norm2() );
+//            }
+//            else
+//            {
+//                CheckResultTensions ( solid->principalStresses().norm2(), vectorEigenvalues->norm2()  );
+//            }
+//        }
+//
+//        else if ( !dataStructure->solidTypeIsotropic().compare("linearVenantKirchhoff") ) // LE
+//        {
+//            checkLinearElastic( solid->principalStresses().norm2(), vectorEigenvalues->norm2() );
+//        }
+//        else if ( !dataStructure->solidTypeIsotropic().compare("nonLinearVenantKirchhoff") ) // SVK
+//        {
+//            checkVenantKirchhoff( solid->principalStresses().norm2(), vectorEigenvalues->norm2() );
+//        }
+//        else if ( !dataStructure->solidTypeIsotropic().compare("nonLinearVenantKirchhoffPenalized") ) // SVKP
+//        {
+//            checkVenantKirchhoffPenalized( solid->principalStresses().norm2(), vectorEigenvalues->norm2() );
+//        }
+//        else if ( !dataStructure->solidTypeIsotropic().compare("neoHookean") ) // NH
+//        {
+//            checkNeoHookean( solid->principalStresses().norm2(), vectorEigenvalues->norm2() );
+//        }
+//        else
+//        {
+//            check2ndOrderExponential( solid->principalStresses().norm2(), vectorEigenvalues->norm2() );
+//        }
+//        ///////// END OF CHECK
+//
+//        //Closing files
+//        M_exporter->closeFile();
+//        // exporterX->closeFile();
+//        // exporterY->closeFile();
+//        // exporterZ->closeFile();
+//        // exporter.closeFile();
+//
+//
+//    }
+//    else
+//    {
+//        std::cout << "Work in progress! " << std::endl;
+//    }
+//
+//    if (verbose )
+//    {
+//        std::cout << "finished" << std::endl;
+//    }
 
     MPI_Barrier (MPI_COMM_WORLD);
     //!---------------------------------------------.-----------------------------------------------------
