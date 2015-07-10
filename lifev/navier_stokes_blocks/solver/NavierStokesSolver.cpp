@@ -691,7 +691,6 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
 
         	*M_forces += rhs_noBC;
         	*M_forces -= Ax;
-
         }
     }
     else
@@ -705,6 +704,34 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
         M_velocity->epetraVector().Update(1.0,up.block(0),0.0);
         M_pressure->epetraVector().Update(1.0,up.block(1),0.0);
     }
+}
+
+VectorSmall<2> NavierStokesSolver::computeForces( BCHandler& bcHDrag,
+												  BCHandler& bcHLift )
+{
+	bcHDrag.bcUpdate ( *M_velocityFESpace->mesh(), M_velocityFESpace->feBd(), M_velocityFESpace->dof() );
+	bcHLift.bcUpdate ( *M_velocityFESpace->mesh(), M_velocityFESpace->feBd(), M_velocityFESpace->dof() );
+
+	vector_Type onesOnBodyDrag(*M_monolithicMap, Unique);
+	onesOnBodyDrag.zero();
+
+	vector_Type onesOnBodyLift(*M_monolithicMap, Unique);
+	onesOnBodyLift.zero();
+
+	bcManageRhs ( onesOnBodyDrag, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(),  bcHDrag, M_velocityFESpace->feBd(), 1., 0.);
+	bcManageRhs ( onesOnBodyLift, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(),  bcHLift, M_velocityFESpace->feBd(), 1., 0.);
+
+	Real drag (0.0);
+	Real lift (0.0);
+
+	drag = M_forces->dot(onesOnBodyDrag);
+	lift = M_forces->dot(onesOnBodyLift);
+
+	VectorSmall<2> Forces;
+	Forces[0] = drag;
+	Forces[1] = lift;
+
+	return Forces;
 }
 
 void NavierStokesSolver::iterate_nonlinear( bcPtr_Type & bc, const Real& time )

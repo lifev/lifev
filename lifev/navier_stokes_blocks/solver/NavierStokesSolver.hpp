@@ -157,6 +157,8 @@ public:
     
     void setExtrapolatedPressure( const vectorPtr_Type& pressure_extrapolated ) { M_pressure_extrapolated = pressure_extrapolated; }
 
+    VectorSmall<2> computeForces( BCHandler& bcHandlerDrag, BCHandler& bcHandlerLift);
+
 	//! Evaluates the fluid residual in FSI simulations
 	/*!
 	 * @param convective_velocity difference between fluid velocity and mesh velocity at previous Newton iteration
