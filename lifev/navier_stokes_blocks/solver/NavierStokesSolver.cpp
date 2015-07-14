@@ -742,6 +742,13 @@ void NavierStokesSolver::iterate_nonlinear( bcPtr_Type & bc, const Real& time )
 	UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
 			M_nonLinearLineSearch, 0, 2, M_out_res, 0.0);
 
+    if ( M_computeAerodynamicLoads )
+    {
+      M_forces.reset ( new vector_Type ( *M_monolithicMap, Unique ) );
+      M_forces->zero();
+      computeForcesNonLinear(M_forces, M_solution);
+    }
+
     if (status == EXIT_FAILURE)
     {
         M_displayer.leaderPrint(" WARNING: Newton  failed " );
@@ -933,6 +940,74 @@ void NavierStokesSolver::assembleInterfaceMass( matrixPtr_Type& mass_interface, 
 	// RESTRICT MATRIX TO INTERFACE DOFS ONLY
 	mass_interface.reset(new matrix_Type ( *interface_map, 50 ) );
 	fluid_interfaceMass->restrict ( interface_map, numerationInterface, offset, mass_interface );
+}
+
+void NavierStokesSolver::computeForcesNonLinear(vectorPtr_Type& force, const vectorPtr_Type& solution)
+{
+  // Forces to zero                                                                                                                                   
+  force->zero();
+
+  // Extract the velocity and the pressure from the solution vector                                                     
+  vectorPtr_Type u_km1 ( new vector_Type ( M_velocityFESpace->map(), Repeated ) );
+  vectorPtr_Type p_km1 ( new vector_Type ( M_pressureFESpace->map(), Repeated ) );
+  u_km1->zero();
+  p_km1->zero();
+  u_km1->subset ( *solution, M_velocityFESpace->map(), 0, 0 );
+  p_km1->subset ( *solution, M_pressureFESpace->map(), M_velocityFESpace->map().mapSize(), 0 );
+
+  // Force vector for the velocity and pressure components                                                                                           
+  vectorPtr_Type res_velocity ( new vector_Type ( M_velocityFESpace->map(), Unique ) );
+  vectorPtr_Type res_pressure ( new vector_Type ( M_pressureFESpace->map(), Unique ) );
+  res_velocity->zero();
+  res_pressure->zero();
+
+  vectorPtr_Type rhs_velocity_repeated;
+  rhs_velocity_repeated.reset( new vector_Type ( *M_velocityRhs, Repeated ) );
+
+  using namespace ExpressionAssembly;
+
+  if ( M_stiffStrain )
+  {
+      integrate ( elements ( M_fespaceUETA->mesh() ),
+		  M_velocityFESpace->qr(),
+		  M_fespaceUETA,
+		  M_density * value ( M_alpha / M_timeStep ) * dot ( value ( M_fespaceUETA, *u_km1 ), phi_i ) -
+		  M_density * dot ( value ( M_fespaceUETA, *rhs_velocity_repeated ), phi_i ) +
+		  value ( 0.5 ) * M_viscosity * dot ( grad ( phi_i )  + transpose ( grad ( phi_i ) ), grad ( M_fespaceUETA, *u_km1 ) + \
+						      transpose ( grad ( M_fespaceUETA, *u_km1 ) ) ) +
+		  M_density * dot ( value ( M_fespaceUETA, *u_km1 ) * grad ( M_fespaceUETA, *u_km1 ), phi_i ) +
+		  value ( -1.0 ) * value ( M_fespacePETA, *p_km1 ) * div ( phi_i )
+		  ) >> res_velocity;
+  }
+  else
+  {
+      integrate ( elements ( M_fespaceUETA->mesh() ),
+		  M_velocityFESpace->qr(),
+		  M_fespaceUETA,
+		  M_density * value ( M_alpha / M_timeStep ) * dot ( value ( M_fespaceUETA, *u_km1 ), phi_i ) -
+		  M_density * dot ( value ( M_fespaceUETA, *rhs_velocity_repeated ), phi_i ) +
+		  M_viscosity * dot ( grad ( phi_i ), grad ( M_fespaceUETA, *u_km1 ) + transpose ( grad ( M_fespaceUETA, *u_km1 ) ) ) +
+		  M_density * dot ( value ( M_fespaceUETA, *u_km1 ) * grad ( M_fespaceUETA, *u_km1 ), phi_i ) +
+		  value ( -1.0 ) * value ( M_fespacePETA, *p_km1 ) * div ( phi_i )
+		  ) >> res_velocity;
+  }
+      
+  integrate ( elements ( M_fespaceUETA->mesh() ),
+	      M_pressureFESpace->qr(),
+	      M_fespacePETA,
+	      trace ( grad ( M_fespaceUETA, *u_km1 ) ) * phi_i
+	      ) >> res_pressure;
+
+  if ( M_useStabilization )
+  {
+      M_stabilization->apply_vector(res_velocity, res_pressure, *u_km1, *p_km1, *rhs_velocity_repeated);
+  }
+
+  res_velocity->globalAssemble();
+  res_pressure->globalAssemble();
+
+  force->subset ( *res_velocity, M_velocityFESpace->map(), 0, 0 );
+  force->subset ( *res_pressure, M_pressureFESpace->map(), 0, M_velocityFESpace->map().mapSize() );
 }
 
 void NavierStokesSolver::evalResidual(vector_Type& residual, const vector_Type& solution, const UInt iter_newton)

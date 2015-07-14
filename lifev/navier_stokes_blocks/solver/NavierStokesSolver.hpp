@@ -159,6 +159,8 @@ public:
 
     VectorSmall<2> computeForces( BCHandler& bcHandlerDrag, BCHandler& bcHandlerLift);
 
+  void computeForcesNonLinear(vectorPtr_Type& force, const vectorPtr_Type& solution);
+
 	//! Evaluates the fluid residual in FSI simulations
 	/*!
 	 * @param convective_velocity difference between fluid velocity and mesh velocity at previous Newton iteration
