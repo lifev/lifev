@@ -131,6 +131,17 @@ void StabilizationSUPG_semi_implicit::buildGraphs()
 // This will be applicied to the system matrix
 void StabilizationSUPG_semi_implicit::apply_matrix( const vector_Type& velocityExtrapolated )
 {
+    if ( !M_useGraph )
+    {
+        M_block_00.reset (new matrix_Type ( M_uFESpace->map() ) );
+        
+        M_block_01.reset (new matrix_Type ( M_uFESpace->map() ) );
+        
+        M_block_10.reset (new matrix_Type ( M_pFESpace->map() ) );
+        
+        M_block_11.reset (new matrix_Type ( M_pFESpace->map() ) );
+    }
+    
 	// missing force
 
 	M_block_00->zero();
@@ -190,7 +201,7 @@ void StabilizationSUPG_semi_implicit::apply_matrix( const vector_Type& velocityE
 				M_fespacePETA, // test   q -> phi_i
 				M_fespacePETA, // trial  p^{n+1} -> phi_j
 	
-        TAU_M*dot(  grad(phi_i), grad(phi_j) )
+        TAU_M*dot(  grad(phi_j), grad(phi_i) )
 		     
               ) >> M_block_11;
 	

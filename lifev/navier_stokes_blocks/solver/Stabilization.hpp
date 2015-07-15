@@ -214,6 +214,8 @@ public:
 
     virtual void setETpressureSpace(const ETFESpacePtr_pressure & pressureEta_fespace) = 0;
 
+    virtual void setUseGraph (const bool& /*useGraph*/) {};
+    
     //! @name Getters
     //@{
 

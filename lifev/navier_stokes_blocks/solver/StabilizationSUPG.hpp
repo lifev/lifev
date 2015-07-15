@@ -182,7 +182,7 @@ public:
     void setETvelocitySpace(const ETFESpacePtr_velocity & velocityEta_fespace){ M_fespaceUETA = velocityEta_fespace;}
 
     void setETpressureSpace(const ETFESpacePtr_pressure & pressureEta_fespace){ M_fespacePETA = pressureEta_fespace;}
-
+    
     //! @name Getters
     //@{
 
@@ -248,7 +248,7 @@ private:
     matrixPtr_Type M_block_01;
     matrixPtr_Type M_block_10;
     matrixPtr_Type M_block_11;
-
+    
     //@}
 }; // class StabilizationSUPG
 

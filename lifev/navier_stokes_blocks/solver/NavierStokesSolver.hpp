@@ -440,7 +440,8 @@ private:
 	Real M_timeStep;
 
 	//! Booleans
-	bool M_graphIsBuilt;
+	bool M_useGraph;
+    bool M_graphIsBuilt;
 	bool M_graphPCDisBuilt;
 
     // Navoer Stokes operator

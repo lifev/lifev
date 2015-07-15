@@ -185,6 +185,8 @@ public:
 
     void setETpressureSpace(const ETFESpacePtr_pressure & pressureEta_fespace){ M_fespacePETA = pressureEta_fespace;}
 
+    void setUseGraph (const bool& useGraph) { M_useGraph = useGraph; }
+
     //! @name Getters
     //@{
 
@@ -250,6 +252,8 @@ private:
     matrixPtr_Type M_block_01;
     matrixPtr_Type M_block_10;
     matrixPtr_Type M_block_11;
+
+    bool M_useGraph;
 
     //@}
 }; // class StabilizationSUPG_semi_implicit

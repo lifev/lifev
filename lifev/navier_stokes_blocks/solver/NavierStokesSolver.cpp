@@ -56,7 +56,8 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
 	M_uExtrapolated->zero();
 
 	M_stiffStrain = M_dataFile("fluid/space_discretization/stiff_strain", true);
-
+    M_useGraph = M_dataFile("fluid/use_graph", true);
+    
     M_velocity.reset( new vector_Type(M_velocityFESpace->map()) );
     M_pressure.reset( new vector_Type(M_pressureFESpace->map()) );
 
@@ -106,6 +107,7 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
     	M_stabilization->setTimeStep ( M_dataFile ( "fluid/time_discretization/timestep", 0.001 ) );
     	M_stabilization->setETvelocitySpace ( M_fespaceUETA );
     	M_stabilization->setETpressureSpace ( M_fespacePETA );
+        M_stabilization->setUseGraph( M_useGraph );
     }
 
     M_displayer.leaderPrintMax ( " Number of DOFs for the velocity = ", M_velocityFESpace->dof().numTotalDof()*3 ) ;
@@ -358,21 +360,66 @@ void NavierStokesSolver::buildPCDGraphs()
 
 void NavierStokesSolver::buildSystem()
 {
-	if ( !M_graphIsBuilt )
+	if ( M_useGraph && !M_graphIsBuilt )
 		buildGraphs();
 
 	M_displayer.leaderPrint ( " F - Assembling constant terms... ");
 	LifeChrono chrono;
 	chrono.start();
+    
+    if ( M_useGraph )
+    {
+        M_Mu.reset (new matrix_Type ( M_velocityFESpace->map(), *M_Mu_graph ) );
+        M_Mu->zero();
+        
+        M_Btranspose.reset (new matrix_Type ( M_velocityFESpace->map(), *M_Btranspose_graph ) );
+        M_Btranspose->zero();
+        
+        M_B.reset (new matrix_Type ( M_pressureFESpace->map(), *M_B_graph ) );
+        M_B->zero();
+        
+        M_A.reset (new matrix_Type ( M_velocityFESpace->map(), *M_A_graph ) );
+        M_A->zero();
+        
+        M_C.reset (new matrix_Type ( M_velocityFESpace->map(), *M_C_graph ) );
+        M_C->zero();
+        
+        M_F.reset (new matrix_Type ( M_velocityFESpace->map(), *M_F_graph ) );
+        M_F->zero();
+        
+        M_Jacobian.reset (new matrix_Type ( M_velocityFESpace->map(), *M_Jacobian_graph ) );
+        M_Jacobian->zero();
+    }
+    else
+    {
+        M_Mu.reset (new matrix_Type ( M_velocityFESpace->map() ) );
+        M_Mu->zero();
+        
+        M_Btranspose.reset (new matrix_Type ( M_velocityFESpace->map() ) );
+        M_Btranspose->zero();
+        
+        M_B.reset (new matrix_Type ( M_pressureFESpace->map() ) );
+        M_B->zero();
+        
+        M_A.reset (new matrix_Type ( M_velocityFESpace->map() ) );
+        M_A->zero();
+        
+        M_C.reset (new matrix_Type ( M_velocityFESpace->map() ) );
+        M_C->zero();
+        
+        M_F.reset (new matrix_Type ( M_velocityFESpace->map() ) );
+        M_F->zero();
+        
+        M_Jacobian.reset (new matrix_Type ( M_velocityFESpace->map() ) );
+        M_Jacobian->zero();
+    }
 
 	{
 		using namespace ExpressionAssembly;
 
 		if ( !M_steady )
 		{
-			// Graph velocity mass -> block (0,0)
-			M_Mu.reset (new matrix_Type ( M_velocityFESpace->map(), *M_Mu_graph ) );
-			M_Mu->zero();
+			// Velocity mass -> block (0,0)
 			integrate ( elements (M_fespaceUETA->mesh() ),
 						M_velocityFESpace->qr(),
 						M_fespaceUETA,
@@ -382,28 +429,24 @@ void NavierStokesSolver::buildSystem()
 			M_Mu->globalAssemble();
 		}
 
-		M_Btranspose.reset (new matrix_Type ( M_velocityFESpace->map(), *M_Btranspose_graph ) );
-		M_Btranspose->zero();
 		integrate( elements(M_fespaceUETA->mesh()),
 				   M_velocityFESpace->qr(),
 				   M_fespaceUETA,
 				   M_fespacePETA,
 				   value(-1.0) * phi_j * div(phi_i)
-		) >> M_Btranspose;
+		         ) >> M_Btranspose;
+        
 		M_Btranspose->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
 
-		M_B.reset (new matrix_Type ( M_pressureFESpace->map(), *M_B_graph ) );
-		M_B->zero();
 		integrate( elements(M_fespaceUETA->mesh()),
 				   M_pressureFESpace->qr(),
 				   M_fespacePETA,
 				   M_fespaceUETA,
 				   phi_i * div(phi_j)
-		) >> M_B;
-		M_B->globalAssemble( M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
+                  ) >> M_B;
+		
+        M_B->globalAssemble( M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
 
-		M_A.reset (new matrix_Type ( M_velocityFESpace->map(), *M_A_graph ) );
-		M_A->zero();
 		if ( M_stiffStrain )
 		{
 			integrate( elements(M_fespaceUETA->mesh()),
@@ -422,26 +465,19 @@ void NavierStokesSolver::buildSystem()
 					   M_viscosity * dot( grad(phi_i) , grad(phi_j) + transpose(grad(phi_j)) )
 			) >> M_A;
 		}
-		M_A->globalAssemble();
-
-		M_C.reset (new matrix_Type ( M_velocityFESpace->map(), *M_C_graph ) );
-		M_C->zero();
-		M_C->globalAssemble();
-
-		M_F.reset (new matrix_Type ( M_velocityFESpace->map(), *M_F_graph ) );
-		M_F->zero();
-		M_F->globalAssemble();
-
-		M_Jacobian.reset (new matrix_Type ( M_velocityFESpace->map(), *M_Jacobian_graph ) );
-		M_Jacobian->zero();
-		M_Jacobian->globalAssemble();
-
+		
+        M_A->globalAssemble();
+		
 		M_block01->zero();
 		M_block10->zero();
 		*M_block01 += *M_Btranspose;
 		*M_block10 += *M_B;
-		M_block01->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
-		M_block10->globalAssemble(M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
+        
+        if ( !M_useStabilization )
+        {
+            M_block01->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
+            M_block10->globalAssemble(M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
+        }
 	}
 
 	chrono.stop();
@@ -545,29 +581,21 @@ void NavierStokesSolver::applyBoundaryConditions ( bcPtr_Type & bc, const Real& 
 
 		M_block00_noBC.reset( new matrix_Type(M_velocityFESpace->map() ) );
 		M_block01_noBC.reset( new matrix_Type(M_velocityFESpace->map() ) );
-		M_block10_noBC.reset( new matrix_Type(M_pressureFESpace->map() ) );
-		M_block11_noBC.reset( new matrix_Type(M_pressureFESpace->map() ) );
 
 		M_block00_noBC->zero();
-		M_block10_noBC->zero();
 		M_block01_noBC->zero();
-		M_block11_noBC->zero();
 
 		*M_block00_noBC += *M_block00;
 		*M_block01_noBC += *M_block01;
-		*M_block10_noBC += *M_block10;
-		*M_block11_noBC += *M_block11;
 
+        M_block00_noBC->globalAssemble();
+        M_block01_noBC->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
+        
 		// Right hand side
 		M_rhs_noBC.reset( new vector_Type ( M_velocityFESpace->map(), Unique ) );
 		M_rhs_noBC->zero();
 		*M_rhs_noBC += *M_rhs;
-
-		M_block00_noBC->globalAssemble();
-		M_block01_noBC->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
-		M_block10_noBC->globalAssemble(M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
-		M_block11_noBC->globalAssemble();
-	}
+    }
 
 	updateBCHandler(bc);
 	bcManage ( *M_block00, *M_rhs, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 1.0, time );
@@ -665,6 +693,16 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
 
         if ( M_computeAerodynamicLoads )
         {
+            M_forces.reset ( new vector_Type ( M_velocityFESpace->map(), Unique ) );
+            M_forces->zero();
+            
+            *M_forces += *M_rhs_noBC;
+            
+            *M_forces -= *M_block00_noBC * ( *M_velocity );
+            
+            *M_forces -= *M_block01_noBC * ( *M_pressure );
+            
+            /*
         	// Computing Drag and Lift Forces
         	Operators::NavierStokesOperator::operatorPtrContainer_Type operDataLoads(2,2);
         	operDataLoads(0,0) = M_block00_noBC->matrixPtr();
@@ -691,6 +729,7 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
 
         	*M_forces += rhs_noBC;
         	*M_forces -= Ax;
+            */
         }
     }
     else
@@ -712,10 +751,10 @@ VectorSmall<2> NavierStokesSolver::computeForces( BCHandler& bcHDrag,
 	bcHDrag.bcUpdate ( *M_velocityFESpace->mesh(), M_velocityFESpace->feBd(), M_velocityFESpace->dof() );
 	bcHLift.bcUpdate ( *M_velocityFESpace->mesh(), M_velocityFESpace->feBd(), M_velocityFESpace->dof() );
 
-	vector_Type onesOnBodyDrag(*M_monolithicMap, Unique);
+	vector_Type onesOnBodyDrag(M_velocityFESpace->map(), Unique);
 	onesOnBodyDrag.zero();
 
-	vector_Type onesOnBodyLift(*M_monolithicMap, Unique);
+	vector_Type onesOnBodyLift(M_velocityFESpace->map(), Unique);
 	onesOnBodyLift.zero();
 
 	bcManageRhs ( onesOnBodyDrag, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(),  bcHDrag, M_velocityFESpace->feBd(), 1., 0.);
