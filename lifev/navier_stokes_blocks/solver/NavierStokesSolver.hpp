@@ -264,6 +264,11 @@ public:
     	return M_rhs;
     }
 
+    vectorPtr_Type const& getRhsPressure() const
+    {
+    	return M_rhs_pressure;
+    }
+
     void setBCpcd(const bcPtr_Type & bc)
     {
     	M_bcPCD = bc;

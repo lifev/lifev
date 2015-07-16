@@ -1205,8 +1205,6 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 			M_fluid->assembleInterfaceMass ( M_interface_mass_fluid, M_lagrangeMap, M_datafile("interface/flag", 1),
 											 M_numerationInterfaceFluid, M_fluid->uFESpace()->map().mapSize()/3 );
 
-			M_interface_mass_fluid->spy("mass_fluid");
-
 			M_displayer.leaderPrint ( "[FSI] - From weak to strong residual - fluid \n" ) ;
 			vectorPtr_Type tmp_gamma_f ( new vector_Type ( M_lagrangeMap ) );
 			tmp_gamma_f->zero();
