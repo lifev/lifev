@@ -340,6 +340,8 @@ public:
     void assembleInterfaceMass( matrixPtr_Type& mass_interface, const mapPtr_Type& interface_map,
     						    markerID_Type interfaceFlag, const vectorPtr_Type& numerationInterface, const UInt& offset );
 
+    Displayer const& getDisplayer ( ) const { return M_displayer; }
+
 private:
 
 	// build the graphs
