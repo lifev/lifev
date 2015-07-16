@@ -7,5 +7,6 @@ ADD_SUBDIRECTORIES(
 	nonlinear_steady_navier_stokes
 	nonlinear_time_dependent_navier_stokes
 	Turek_Reynolds_20_semi_implicit
-        Turek_Reynolds_20
+    Turek_Reynolds_20
+    non_conforming_fluids
 )
