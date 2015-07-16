@@ -19,7 +19,8 @@ NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commP
         M_viscosity ( dataFile("fluid/physics/viscosity", 0.035 ) ),
         M_useStabilization ( dataFile("fluid/stabilization/use", false) ),
         M_stabilizationType ( dataFile("fluid/stabilization/type", "none") ),
-        M_computeAerodynamicLoads ( dataFile("fluid/compute_loads", false) )
+        M_computeAerodynamicLoads ( dataFile("fluid/compute_loads", false) ),
+        M_nonconforming ( dataFile("fluid/nonconforming", false) )
 {
 	M_prec.reset ( Operators::NSPreconditionerFactory::instance().createObject (dataFile("fluid/preconditionerType","none")));
 }
@@ -37,11 +38,35 @@ void NavierStokesSolver::setParameters( )
 	setSolversOptions(*solversOptions);
 }
 
-
-void NavierStokesSolver::setup(const meshPtr_Type& mesh)
+void NavierStokesSolver::setup(const meshPtr_Type& mesh, const int& id_domain)
 {
-	std::string uOrder = M_dataFile("fluid/space_discretization/vel_order","P1");
-	std::string pOrder = M_dataFile("fluid/space_discretization/pres_order","P1");
+	std::string uOrder;
+	std::string pOrder;
+
+	if ( !M_nonconforming )
+	{
+		uOrder = M_dataFile("fluid/space_discretization/vel_order","P1");
+		pOrder = M_dataFile("fluid/space_discretization/pres_order","P1");
+		M_stiffStrain = M_dataFile("fluid/space_discretization/stiff_strain", true);
+
+	}
+	else
+	{
+		if ( id_domain == 0 )
+		{
+			uOrder = M_dataFile("fluid/master_space_discretization/vel_order","P1");
+			pOrder = M_dataFile("fluid/master_space_discretization/pres_order","P1");
+			M_stiffStrain = M_dataFile("fluid/master_space_discretization/stiff_strain", true);
+		}
+		else if ( id_domain == 1 )
+		{
+			uOrder = M_dataFile("fluid/master_space_discretization/vel_order","P1");
+			pOrder = M_dataFile("fluid/slave_space_discretization/pres_order","P1");
+			M_stiffStrain = M_dataFile("fluid/slave_space_discretization/stiff_strain", true);
+		}
+	}
+
+	M_useGraph = M_dataFile("fluid/use_graph", true);
 
 	Int geoDimensions = mesh_Type::S_geoDimensions;
 
@@ -54,9 +79,6 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh)
 
 	M_uExtrapolated.reset( new vector_Type ( M_velocityFESpace->map(), Repeated ) );
 	M_uExtrapolated->zero();
-
-	M_stiffStrain = M_dataFile("fluid/space_discretization/stiff_strain", true);
-    M_useGraph = M_dataFile("fluid/use_graph", true);
     
     M_velocity.reset( new vector_Type(M_velocityFESpace->map()) );
     M_pressure.reset( new vector_Type(M_pressureFESpace->map()) );

@@ -122,7 +122,7 @@ public:
 	~NavierStokesSolver();
 
 	// Setup
-	void setup(const meshPtr_Type& mesh);
+	void setup(const meshPtr_Type& mesh, const int& id_domain = 36);
 
 	// Assemble constant terms
 	void buildSystem();
@@ -481,6 +481,8 @@ private:
     bool M_useStabilization;
     
     std::string M_stabilizationType;
+
+    bool M_nonconforming;
 
 }; // class NavierStokesSolver
 
