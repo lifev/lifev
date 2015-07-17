@@ -180,10 +180,10 @@ int main (int argc, char** argv )
 
     // NUMBER OF FLAGS CONSIDERED: THE DOFS WHOSE FLAG IS 1 AND 20 ARE TAKEN INTO ACCOUNT
     // NOTE: from mesh to mesh the vector of flag has to contain one element with value -1
-    int nFlags = 2;
+    int nFlags = 1;
     std::vector<int> flags (nFlags);
-    flags[0] = 1;
-    flags[1] = 20;
+    flags[0] = 100;
+    //flags[1] = 20;
 
     // INITIALIZE THE INTERPOLANT
     interpolationPtr_Type RBFinterpolant;
@@ -249,7 +249,7 @@ int main (int argc, char** argv )
     for ( UInt j = 0; j < 3; ++j)
         for ( UInt i = 0; i < Fluid_exact_solution->epetraVector().MyLength(); ++i )
             if ( Fluid_exact_solution->blockMap().GID (i) < Fluid_mesh_ptr->pointList.size())
-                if ( Fluid_mesh_ptr->point ( Fluid_exact_solution->blockMap().GID (i) ).markerID() == 1  )
+                if ( Fluid_mesh_ptr->point ( Fluid_exact_solution->blockMap().GID (i) ).markerID() == 100  )
                     if ( Fluid_exact_solution->blockMap().LID ( static_cast<EpetraInt_Type> ( Fluid_exact_solution->blockMap().GID (i) + Fluid_exact_solution->size()/3*j ) ) != -1)
                     {
                         switch (j)
