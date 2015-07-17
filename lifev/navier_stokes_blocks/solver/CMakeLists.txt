@@ -12,6 +12,7 @@ SET(solver_HEADERS
   solver/StabilizationSUPGALE.hpp
   solver/MultipleFluidsHandler.hpp
   solver/MultiFluidApplyOperator.hpp
+  solver/DirichletNeumannPreconditionerMultiFluid.hpp
 CACHE INTERNAL "")
 
 SET(solver_SOURCES
@@ -25,6 +26,7 @@ SET(solver_SOURCES
   solver/StabilizationSUPGALE.cpp
   solver/MultipleFluidsHandler.cpp
   solver/MultiFluidApplyOperator.cpp
+  solver/DirichletNeumannPreconditionerMultiFluid.cpp
 CACHE INTERNAL "")
 
 
