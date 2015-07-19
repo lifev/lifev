@@ -558,6 +558,7 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
         M_block01->zero();
         *M_block01 += *M_Btranspose;
         *M_block01 += *M_stabilization->block_01();
+        M_block01->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
         
         M_block10->zero();
         *M_block10 += *M_B;
@@ -621,7 +622,8 @@ void NavierStokesSolver::applyBoundaryConditions ( bcPtr_Type & bc, const Real& 
 	updateBCHandler(bc);
 	bcManage ( *M_block00, *M_rhs, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 1.0, time );
     bcManageMatrix( *M_block01, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 0.0, 0.0);
-    M_block01->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
+    //M_block01->spy("blocco01");
+    //M_block01->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
 }
 
 void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )

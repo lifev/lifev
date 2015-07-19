@@ -45,8 +45,8 @@ filename   = result_fluid
     mesh_file       = tube20.mesh
     mesh_type       = .mesh
 
-    vel_order       = P2
-    pres_order      = P2
+    vel_order       = P1
+    pres_order      = P1
     stiff_strain    = true
 
     [../stabilization]
