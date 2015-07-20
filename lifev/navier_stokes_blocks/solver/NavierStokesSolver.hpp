@@ -347,6 +347,21 @@ public:
 
     Displayer const& getDisplayer ( ) const { return M_displayer; }
 
+    matrixPtr_Type block00_noBC() const
+    {
+    	return M_block00_noBC;
+    }
+
+    matrixPtr_Type block01_noBC() const
+    {
+    	return M_block01_noBC;
+    }
+
+    vectorPtr_Type rhs_noBC() const
+    {
+    	return M_rhs_noBC;
+    }
+
 private:
 
 	// build the graphs

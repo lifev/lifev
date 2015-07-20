@@ -599,7 +599,7 @@ void NavierStokesSolver::applyBoundaryConditions ( bcPtr_Type & bc, const Real& 
 {
 	if ( M_computeAerodynamicLoads )
 	{
-		// M_displayer.leaderPrint( "\tNS operator - Compute Loads: TRUE");
+		M_displayer.leaderPrint( "\tNS operator - Compute Loads: TRUE");
 
 		M_block00_noBC.reset( new matrix_Type(M_velocityFESpace->map() ) );
 		M_block01_noBC.reset( new matrix_Type(M_velocityFESpace->map() ) );
