@@ -717,43 +717,51 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
 
         if ( M_computeAerodynamicLoads )
         {
-            M_forces.reset ( new vector_Type ( M_velocityFESpace->map(), Unique ) );
-            M_forces->zero();
-            
+        	// Computation of aerodynamic forces
+
+        	/* Residual form, see [Forti, Dede 2015] */
+        	/*
+
+			M_forces.reset ( new vector_Type ( M_velocityFESpace->map(), Unique ) );
+        	M_forces->zero();
+
             *M_forces += *M_rhs_noBC;
             
             *M_forces -= *M_block00_noBC * ( *M_velocity );
             
             *M_forces -= *M_block01_noBC * ( *M_pressure );
-            
-            /*
-        	// Computing Drag and Lift Forces
-        	Operators::NavierStokesOperator::operatorPtrContainer_Type operDataLoads(2,2);
-        	operDataLoads(0,0) = M_block00_noBC->matrixPtr();
-        	operDataLoads(0,1) = M_block01_noBC->matrixPtr();
-        	operDataLoads(1,0) = M_block10_noBC->matrixPtr();
-        	if ( M_useStabilization )
-        		operDataLoads(1,1) = M_block11_noBC->matrixPtr();
-
-        	M_operLoads->setUp(operDataLoads, M_displayer.comm());
-
-        	vector_Type rhs_noBC ( *M_monolithicMap, Unique );
-        	rhs_noBC.zero();
-
-        	rhs_noBC.subset ( *M_rhs_noBC, M_velocityFESpace->map(), 0, 0 );
-        	rhs_noBC.subset ( *M_rhs_pressure, M_pressureFESpace->map(), 0, M_velocityFESpace->map().mapSize() );
-
-        	vector_Type Ax ( *M_monolithicMap, Unique );
-        	Ax.zero();
-
-        	M_operLoads->Apply( sol.epetraVector(), Ax.epetraVector() );
-
-        	M_forces.reset ( new vector_Type ( *M_monolithicMap, Unique ) );
-        	M_forces->zero();
-
-        	*M_forces += rhs_noBC;
-        	*M_forces -= Ax;
             */
+
+        	/* Direct evaluation by integrals */
+
+        	vector_Type forces_rep( M_velocityFESpace->map(), Repeated );
+        	forces_rep.zero();
+
+        	vector_Type velo_rep ( *M_velocity, Repeated);
+        	vector_Type pres_rep ( *M_pressure, Repeated);
+
+        	QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
+        	MatrixSmall<3, 3> Eye;
+        	Eye *= 0.0;
+        	Eye[0][0] = 1;
+        	Eye[1][1] = 1;
+        	Eye[2][2] = 1;
+
+        	{
+        		using namespace ::LifeV::ExpressionAssembly;
+
+        		integrate ( boundary (M_fespaceUETA->mesh(), 6), // Note that 6 is for the toy problem, hardcoded! TODO: generalize to generic flag
+        		            myBDQR,
+        		            M_fespaceUETA,
+        		             value(M_viscosity)* dot( phi_i, ( grad(M_fespaceUETA, velo_rep) + transpose( grad(M_fespaceUETA, velo_rep) ) ) * Nface )
+        		            -dot( phi_i, value(M_fespacePETA, pres_rep) * Nface )
+        		          ) >> forces_rep;
+        	}
+
+        	forces_rep.globalAssemble();
+
+        	M_forces.reset ( new vector_Type ( forces_rep, Unique ) );
+        	*M_forces *= -1;
         }
     }
     else

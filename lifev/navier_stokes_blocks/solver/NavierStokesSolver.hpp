@@ -362,6 +362,11 @@ public:
     	return M_rhs_noBC;
     }
 
+    vectorPtr_Type getForces() const
+    {
+    	return M_forces;
+    }
+
 private:
 
 	// build the graphs
