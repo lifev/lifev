@@ -522,6 +522,21 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 				dot( M_density * value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) // semi-implicit treatment of the convective term
 		)
 		>> M_C;
+
+		QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
+
+		integrate( boundary(M_fespaceUETA->mesh(), 6),
+				   myBDQR,
+				   M_fespaceUETA,
+				   M_fespaceUETA,
+				    value(-1.0)*value(M_viscosity)*dot( phi_i, ( grad(phi_j) + transpose( grad(phi_j) ) ) * Nface )
+				   -value(M_viscosity)*dot( ( grad(phi_i) + transpose( grad(phi_i) ) ) * Nface, phi_j )
+				   -value(M_density)*dot( phi_i, dot( value(M_fespaceUETA, *M_uExtrapolated), Nface ) * phi_j )
+				   +value(30.0)*value(M_viscosity)/value(0.005)*dot( phi_i - dot( phi_i, Nface)*Nface, phi_j - dot( phi_j, Nface)*Nface )
+				   +value(30.0)*value(M_viscosity)/value(0.005)*( dot( phi_i, Nface)*dot( phi_j, Nface) )
+		)
+		>> M_C;
+
 	}
 	M_C->globalAssemble();
 
@@ -558,11 +573,41 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
         M_block01->zero();
         *M_block01 += *M_Btranspose;
         *M_block01 += *M_stabilization->block_01();
+
+        {
+        	using namespace ExpressionAssembly;
+
+        	QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
+
+        	integrate( boundary(M_fespaceUETA->mesh(), 6),
+        			   myBDQR,
+        			   M_fespaceUETA,
+        			   M_fespacePETA,
+        			   dot( phi_i, phi_j * Nface)
+        	)
+        	>> M_block01;
+        }
+
         M_block01->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
         
         M_block10->zero();
         *M_block10 += *M_B;
         *M_block10 += *M_stabilization->block_10();
+
+        {
+        	using namespace ExpressionAssembly;
+
+        	QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
+
+        	integrate( boundary(M_fespaceUETA->mesh(), 6),
+        			   myBDQR,
+        			   M_fespacePETA,
+        			   M_fespaceUETA,
+        			   value(-1.0)*dot(phi_i*Nface, phi_j)
+        	)
+        	>> M_block10;
+        }
+
         M_block10->globalAssemble(M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
         
         M_block11->zero();
