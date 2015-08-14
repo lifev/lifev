@@ -367,6 +367,8 @@ public:
     	return M_forces;
     }
 
+    void integrateForces ( const vectorPtr_Type & velocity, const vectorPtr_Type & pressure);
+
 private:
 
 	// build the graphs

@@ -1434,4 +1434,37 @@ void NavierStokesSolver::applyBoundaryConditionsJacobian ( bcPtr_Type & bc )
 	bcManageMatrix( *M_block01, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 0.0, 0.0);
 }
 
+void NavierStokesSolver::integrateForces ( const vectorPtr_Type & velocity, const vectorPtr_Type & pressure)
+{
+	vector_Type forces_rep( M_velocityFESpace->map(), Repeated );
+	forces_rep.zero();
+
+	vector_Type velo_rep ( *velocity, Repeated);
+	vector_Type pres_rep ( *pressure, Repeated);
+
+	QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
+	MatrixSmall<3, 3> Eye;
+	Eye *= 0.0;
+	Eye[0][0] = 1;
+	Eye[1][1] = 1;
+	Eye[2][2] = 1;
+
+	{
+		using namespace ::LifeV::ExpressionAssembly;
+
+		integrate ( boundary (M_fespaceUETA->mesh(), 6), // Note that 6 is for the toy problem, hardcoded! TODO: generalize to generic flag
+				myBDQR,
+				M_fespaceUETA,
+				value(M_viscosity)* dot( phi_i, ( grad(M_fespaceUETA, velo_rep) + transpose( grad(M_fespaceUETA, velo_rep) ) ) * Nface )
+				-dot( phi_i, value(M_fespacePETA, pres_rep) * Nface )
+		) >> forces_rep;
+	}
+
+	forces_rep.globalAssemble();
+
+	M_forces.reset ( new vector_Type ( forces_rep, Unique ) );
+	*M_forces *= -1;
+}
+
+
 }
