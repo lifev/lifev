@@ -64,13 +64,13 @@
 
 		[../physics]
 			density   		    = 1.2    # density, settings used in the paper
-			material_flag       = 1
-			use_thin  = true             # if true, using the thin layer structure. If false, not using the thin layer structure.
-		    h_thin    = 0.02             # thickness thin structure
-		    rho_thin  = 1.2				 # density thin structure
-		    LameI     = 1.14e+7			 # Lame I of the thin structure
-		    LameII    = 2.86e+6  	     # Lame II of the thin structure
-		    interface = 100.0            # flag of the interface
+			material_flag       = 1	
+			use_thin  			= true             # if true, using the thin layer structure. If false, not using the thin layer structure.
+		    h_thin    			= 0.02             # thickness thin structure
+		    rho_thin  			= 1.2				 # density thin structure
+		    young_thin          = 3.e+6  # Young's modulus thin layer
+		    poisson_thin        = 0.3    # poisson thin layer
+		    interface 			= 100.0            # flag of the interface
 		    
     	[../]
 
