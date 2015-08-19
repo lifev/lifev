@@ -371,12 +371,12 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
 		M_thinLayerLameI = young_thin / (2*(1.0+poisson_thin));
 		M_thinLayerLameII = (young_thin*poisson_thin) / ( (1.0+poisson_thin)*(1.0-poisson_thin) );
 
-		std::cout << "\n\nM_thinLayer = "          << M_thinLayer << "\n"
-				  << "\n\nM_thinLayerThickness = " << M_thinLayerThickness << "\n"
-				  << "\n\nM_thinLayerDensity = "   << M_thinLayerDensity << "\n"
-				  << "\n\nM_thinLayerLameI = "     << M_thinLayerLameI << "\n"
-				  << "\n\nM_thinLayerLameII = "    << M_thinLayerLameII << "\n"
-				  << "\n\nM_interfaceFlag = "      << M_interfaceFlag << "\n";
+//		std::cout << "\n\nM_thinLayer = "          << M_thinLayer << "\n"
+//				  << "\n\nM_thinLayerThickness = " << M_thinLayerThickness << "\n"
+//				  << "\n\nM_thinLayerDensity = "   << M_thinLayerDensity << "\n"
+//				  << "\n\nM_thinLayerLameI = "     << M_thinLayerLameI << "\n"
+//				  << "\n\nM_thinLayerLameII = "    << M_thinLayerLameII << "\n"
+//				  << "\n\nM_interfaceFlag = "      << M_interfaceFlag << "\n";
     }
 }
 
