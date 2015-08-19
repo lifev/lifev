@@ -429,9 +429,6 @@ private:
 	matrixPtr_Type M_block10;
 	matrixPtr_Type M_block11;
 
-	// Bool to check if we need to compute drag and lift
-	bool M_computeAerodynamicLoads;
-
 	// Navier-Stokes block matrices without boundary conditions applied
 	// used for estimation of drag and lift coefficients when needed
 	matrixPtr_Type M_block00_noBC;
@@ -512,6 +509,16 @@ private:
     std::string M_stabilizationType;
 
     bool M_nonconforming;
+
+    // Members for imposition of weak boundary conditions
+    bool M_imposeWeakBC;
+    UInt M_flagWeakBC;
+    Real M_meshSizeWeakBC;
+
+    // Members for computation of aerodynamic loads
+	bool M_computeAerodynamicLoads;
+	std::string M_methodAerodynamicLoads;
+	UInt M_flagBody;
 
 }; // class NavierStokesSolver
 
