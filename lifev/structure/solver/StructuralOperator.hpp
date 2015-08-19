@@ -853,6 +853,10 @@ protected:
 
 
     timeAdvancePtr_Type                  M_timeAdvance;
+
+    // Members added to have the thin layer
+
+    matrixPtr_Type                       M_massMatrixThin;
 };
 
 //====================================
