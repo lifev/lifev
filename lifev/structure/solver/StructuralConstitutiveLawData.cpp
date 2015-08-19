@@ -83,7 +83,13 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData() :
     M_absoluteTolerance                ( ),
     M_relativeTolerance                ( ),
     M_errorTolerance                   ( ),
-    M_NonLinearLineSearch              ( )
+    M_NonLinearLineSearch              ( ),
+    M_thinLayer						   ( false ),
+    M_thinLayerThickness			   ( ),
+    M_thinLayerDensity				   ( ),
+    M_thinLayerLameI				   ( ),
+    M_thinLayerLameII				   ( ),
+    M_interfaceFlag					   ( )
 {
 }
 
@@ -119,7 +125,13 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData ( const StructuralC
     M_absoluteTolerance                ( structuralConstitutiveLawData.M_absoluteTolerance ),
     M_relativeTolerance                ( structuralConstitutiveLawData.M_relativeTolerance ),
     M_errorTolerance                   ( structuralConstitutiveLawData.M_errorTolerance ),
-    M_NonLinearLineSearch              ( structuralConstitutiveLawData.M_NonLinearLineSearch )
+    M_NonLinearLineSearch              ( structuralConstitutiveLawData.M_NonLinearLineSearch ),
+    M_thinLayer						   ( structuralConstitutiveLawData.M_thinLayer ),
+    M_thinLayerThickness			   ( structuralConstitutiveLawData.M_thinLayerThickness ),
+    M_thinLayerDensity				   ( structuralConstitutiveLawData.M_thinLayerDensity ),
+    M_thinLayerLameI				   ( structuralConstitutiveLawData.M_thinLayerLameI ),
+    M_thinLayerLameII				   ( structuralConstitutiveLawData.M_thinLayerLameII ),
+    M_interfaceFlag                    ( structuralConstitutiveLawData.M_interfaceFlag)
 
 {
 }
@@ -164,6 +176,12 @@ StructuralConstitutiveLawData::operator= ( const StructuralConstitutiveLawData& 
         M_relativeTolerance                = structuralConstitutiveLawData.M_relativeTolerance;
         M_errorTolerance                   = structuralConstitutiveLawData.M_errorTolerance;
         M_NonLinearLineSearch              = structuralConstitutiveLawData.M_NonLinearLineSearch;
+        M_thinLayer						   = structuralConstitutiveLawData.M_thinLayer;
+        M_thinLayerThickness			   = structuralConstitutiveLawData.M_thinLayerThickness;
+        M_thinLayerDensity				   = structuralConstitutiveLawData.M_thinLayerDensity;
+        M_thinLayerLameI				   = structuralConstitutiveLawData.M_thinLayerLameI;
+        M_thinLayerLameII				   = structuralConstitutiveLawData.M_thinLayerLameII;
+        M_interfaceFlag					   = structuralConstitutiveLawData.M_interfaceFlag;
     }
 
     return *this;
@@ -338,6 +356,13 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
     M_errorTolerance = dataFile ( ( section + "/newton/etamax" ).data(), 1.e-03 );
     M_NonLinearLineSearch = static_cast<Int> ( dataFile ( ( section + "/newton/NonLinearLineSearch" ).data(), 0 ) );
 
+    // thin layer parameters
+    M_thinLayer = dataFile ( ( section + "/physics/use_thin" ).data(), false );
+    M_thinLayerThickness = dataFile ( ( section + "/physics/h_thin" ).data(), 0.001 );
+    M_thinLayerDensity = dataFile ( ( section + "/physics/rho_thin" ).data(), 1.2 );
+    M_thinLayerLameI = dataFile ( ( section + "/physics/LameI" ).data(), 1.14e+7 );
+    M_thinLayerLameII = dataFile ( ( section + "/physics/LameII" ).data(), 2.86e+6 );
+    M_interfaceFlag = dataFile ( ( section + "/physics/interface" ).data(), 1 );
 }
 
 void

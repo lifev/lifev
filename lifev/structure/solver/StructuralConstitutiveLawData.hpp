@@ -479,6 +479,60 @@ public:
         return M_vectorMaterialFlags;
     }
 
+    //! Get if using the thin layer
+    /*!
+     * @return using thin structure
+     */
+    const bool thinLayer() const
+    {
+    	return M_thinLayer;
+    }
+
+    //! Get the thin structure thickness
+    /*!
+     * @return thin structure thickness
+     */
+    Real thinStructureThickness() const
+    {
+    	return M_thinLayerThickness;
+    }
+
+    //! Get the thin structure density
+    /*!
+     * @return thin structure density
+     */
+    Real thinStructureDensity() const
+    {
+    	return M_thinLayerDensity;
+    }
+
+    //! Get the thin structure Lame I
+    /*!
+     * @return thin structure Lame I
+     */
+    Real lameI() const
+    {
+    	return M_thinLayerLameI;
+    }
+
+    //! Get the thin structure Lame II
+    /*!
+     * @return thin structure Lame II
+     */
+    Real lameII() const
+    {
+    	return M_thinLayerLameII;
+    }
+
+    //! Get the interface flag
+    /*!
+     * @return interface flag
+     */
+    UInt interfaceFlag() const
+    {
+    	return M_interfaceFlag;
+    }
+
     //@}
 
 private:
@@ -530,6 +584,16 @@ private:
     Real                   M_relativeTolerance;
     Real                   M_errorTolerance;
     UInt                   M_NonLinearLineSearch;
+
+    // Parameters used to deal with the thin layer
+
+    bool				   M_thinLayer;
+    Real 				   M_thinLayerThickness;
+    Real 				   M_thinLayerDensity;
+    Real 				   M_thinLayerLameI;
+    Real 				   M_thinLayerLameII;
+    UInt 				   M_interfaceFlag;
+
 };
 
 } // end namespace LifeV
