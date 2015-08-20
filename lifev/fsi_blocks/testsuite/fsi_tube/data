@@ -109,7 +109,7 @@
     save       = 1
     fluid_filename  = result_fluid_test
     structure_filename  = result_structure_test
-
+    save_every = 3
 [../]
 
 [newton]
@@ -121,7 +121,7 @@
 	output_Residuals    	=  true
 	output_Steps        	=  true
 	convectiveImplicit      =  true
-	useShapeDerivatives     =  true
+	useShapeDerivatives     =  false
 	extrapolateInitialGuess =  false
 	orderExtrapolation      =  2    # it can be 1, 2 or 3
 	

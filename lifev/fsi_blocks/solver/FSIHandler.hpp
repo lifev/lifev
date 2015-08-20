@@ -405,6 +405,10 @@ private:
 
 	bool M_useMasses;
 
+	// To handle the post-processing
+	int M_saveEvery;
+	int M_counterSaveEvery;
+
 };
 
 } // end namespace LifeV

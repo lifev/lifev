@@ -159,6 +159,10 @@ FSIHandler::readPartitionedMeshes( )
 
 void FSIHandler::setup ( )
 {
+	M_saveEvery = M_datafile ( "exporter/save_every", 1 );
+
+	M_counterSaveEvery = M_saveEvery;
+
 	M_usePartitionedMeshes = M_datafile ( "offlinePartioner/readPartitionedMeshes", false );
 
 	// Fluid
@@ -890,8 +894,12 @@ FSIHandler::solveFSIproblem ( )
 
 	M_prec->setMonolithicMap ( M_monolithicMap );
 
+	int time_step_count = 0;
+
 	for ( ; M_time <= M_t_end + M_dt / 2.; M_time += M_dt)
 	{
+		time_step_count += 1;
+
 		M_displayer.leaderPrint ( "\n-----------------------------------\n" ) ;
 		M_displayer.leaderPrintMax ( "FSI - solving now for time ", M_time ) ;
 		M_displayer.leaderPrint ( "\n" ) ;
@@ -948,8 +956,12 @@ FSIHandler::solveFSIproblem ( )
 		M_structureTimeAdvance->shiftRight(*M_structureDisplacement);
 		M_aleTimeAdvance->shiftRight(*M_fluidDisplacement);
 
-		M_exporterFluid->postProcess(M_time);
-		M_exporterStructure->postProcess(M_time);
+		if ( time_step_count == M_counterSaveEvery )
+		{
+			M_exporterFluid->postProcess(M_time);
+			M_exporterStructure->postProcess(M_time);
+			M_counterSaveEvery += M_saveEvery;
+		}
 	}
 
 	M_exporterFluid->closeFile();
