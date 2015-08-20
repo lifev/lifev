@@ -205,6 +205,8 @@ public:
     {
     	return M_block_11;
     }
+    
+    void setUseGraph (const bool& useGraph) { M_useGraph = useGraph; }
 
     //@}
 
@@ -248,6 +250,8 @@ private:
     matrixPtr_Type M_block_01;
     matrixPtr_Type M_block_10;
     matrixPtr_Type M_block_11;
+    
+    bool M_useGraph;
     
     //@}
 }; // class StabilizationSUPG

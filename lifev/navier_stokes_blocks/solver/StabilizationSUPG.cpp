@@ -140,7 +140,17 @@ void StabilizationSUPG::apply_matrix( const vector_Type& velocity_previous_newto
 		  	  	  	  	  	  	  	  const vector_Type& velocity_rhs)
 {
 	// missing force
-
+    if ( !M_useGraph )
+    {
+        M_block_00.reset (new matrix_Type ( M_uFESpace->map() ) );
+        
+        M_block_01.reset (new matrix_Type ( M_uFESpace->map() ) );
+        
+        M_block_10.reset (new matrix_Type ( M_pFESpace->map() ) );
+        
+        M_block_11.reset (new matrix_Type ( M_pFESpace->map() ) );
+    }
+    
 	M_block_00->zero();
 	M_block_01->zero();
 	M_block_10->zero();

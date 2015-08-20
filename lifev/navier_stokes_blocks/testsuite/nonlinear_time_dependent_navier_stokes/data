@@ -32,7 +32,8 @@ filename   = result_fluid
     options_preconditioner = solversOptionsFast
     preconditionerType     = SIMPLE # SIMPLE or PCD
     save_every             = 1
-    
+    use_graph              = false
+
     [./physics]
     density         = 1.0   # density
     viscosity       = 0.035 # viscosity
@@ -50,7 +51,7 @@ filename   = result_fluid
 
     vel_order       = P1
     pres_order      = P1
-    stiff_strain    = false
+    stiff_strain    = true
    
 	[../stabilization]
 	use             = true

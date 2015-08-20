@@ -153,7 +153,6 @@ main ( int argc, char** argv )
     LifeChrono iterChrono;
     Real time = t0 + dt;
 
-    vectorPtr_Type u_star( new vector_Type(ns.uFESpace()->map(), Unique ) );
     vectorPtr_Type rhs_velocity( new vector_Type(ns.uFESpace()->map(), Unique ) );
 
     ns.setAlpha(timeVelocity.alpha());

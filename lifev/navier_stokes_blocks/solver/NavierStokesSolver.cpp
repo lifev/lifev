@@ -139,6 +139,7 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh, const int& id_domain)
 
     M_displayer.leaderPrintMax ( " Number of DOFs for the velocity = ", M_velocityFESpace->dof().numTotalDof()*3 ) ;
     M_displayer.leaderPrintMax ( " Number of DOFs for the pressure = ", M_pressureFESpace->dof().numTotalDof() ) ;
+    
 }
 
 void NavierStokesSolver::setSolversOptions(const Teuchos::ParameterList& solversOptions)
@@ -1137,20 +1138,25 @@ void NavierStokesSolver::evalResidual(vector_Type& residual, const vector_Type& 
 	residual.zero();
 
 	// Extract the velocity and the pressure at the previous Newton step ( index k minus 1, i.e. km1)
-	vectorPtr_Type u_km1 ( new vector_Type ( M_velocityFESpace->map(), Repeated ) );
-	vectorPtr_Type p_km1 ( new vector_Type ( M_pressureFESpace->map(), Repeated ) );
-	u_km1->zero();
-	p_km1->zero();
-	u_km1->subset ( solution, M_velocityFESpace->map(), 0, 0 );
-	p_km1->subset ( solution, M_pressureFESpace->map(), M_velocityFESpace->map().mapSize(), 0 );
-
+    vectorPtr_Type u_km1_subs ( new vector_Type ( M_velocityFESpace->map(), Unique ) );
+    vectorPtr_Type p_km1_subs ( new vector_Type ( M_pressureFESpace->map(), Unique ) );
+    u_km1_subs->zero();
+    p_km1_subs->zero();
+    u_km1_subs->subset ( solution, M_velocityFESpace->map(), 0, 0 );
+    p_km1_subs->subset ( solution, M_pressureFESpace->map(), M_velocityFESpace->map().mapSize(), 0 );
+    
+    // Repeated vectors
+    vectorPtr_Type u_km1 ( new vector_Type ( *u_km1_subs, Repeated ) );
+	vectorPtr_Type p_km1 ( new vector_Type ( *p_km1_subs, Repeated ) );
+	
 	// Residual vector for the velocity and pressure components
-	vectorPtr_Type res_velocity ( new vector_Type ( M_velocityFESpace->map(), Unique ) );
-	vectorPtr_Type res_pressure ( new vector_Type ( M_pressureFESpace->map(), Unique ) );
+	vectorPtr_Type res_velocity ( new vector_Type ( M_velocityFESpace->map(), Repeated ) );
+	vectorPtr_Type res_pressure ( new vector_Type ( M_pressureFESpace->map(), Repeated ) );
 	res_velocity->zero();
 	res_pressure->zero();
 
 	vectorPtr_Type rhs_velocity_repeated;
+    
 	if ( !M_steady )
 	{
 		rhs_velocity_repeated.reset( new vector_Type ( *M_velocityRhs, Repeated ) );
@@ -1233,11 +1239,15 @@ void NavierStokesSolver::evalResidual(vector_Type& residual, const vector_Type& 
 
     res_velocity->globalAssemble();
     res_pressure->globalAssemble();
+    
+    // Residual vector for the velocity and pressure components
+    vector_Type res_velocity_unique ( *res_velocity, Unique );
+    vector_Type res_pressure_unique ( *res_pressure, Unique );
 
-    bcManageRhs ( *res_velocity, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *M_bc, M_velocityFESpace->feBd(), 0.0, 0.0 );
+    bcManageRhs ( res_velocity_unique, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *M_bc, M_velocityFESpace->feBd(), 0.0, 0.0 );
 
-    residual.subset ( *res_velocity, M_velocityFESpace->map(), 0, 0 );
-    residual.subset ( *res_pressure, M_pressureFESpace->map(), 0, M_velocityFESpace->map().mapSize() );
+    residual.subset ( res_velocity_unique, M_velocityFESpace->map(), 0, 0 );
+    residual.subset ( res_pressure_unique, M_pressureFESpace->map(), 0, M_velocityFESpace->map().mapSize() );
 
     // We need to update the linearized terms in the jacobian coming from the convective part
 
@@ -1247,7 +1257,7 @@ void NavierStokesSolver::evalResidual(vector_Type& residual, const vector_Type& 
     if ( M_useStabilization )
     {
     	M_stabilization->apply_matrix(*u_km1, *p_km1, *M_velocityRhs);
-
+        
     	*M_block00 += *M_stabilization->block_00();
     	M_block00->globalAssemble();
 
@@ -1291,8 +1301,8 @@ void NavierStokesSolver::updateConvectiveTerm ( const vectorPtr_Type& velocity)
                   )
                 >> M_C;
     }
-
-    // Assuming steady NS
+    M_C->globalAssemble();
+    
     M_block00->zero();
     if ( !M_steady )
     {
@@ -1323,7 +1333,8 @@ void NavierStokesSolver::updateJacobian( const vector_Type& u_k )
 		)
 		>> M_Jacobian;
 	}
-
+    M_Jacobian->globalAssemble();
+    
 	*M_block00 += *M_Jacobian;
 	if ( !M_useStabilization )
 		M_block00->globalAssemble( );
@@ -1431,6 +1442,25 @@ void NavierStokesSolver::solveJac( vector_Type& increment, const vector_Type& re
 
 	// Solving the linear system
 	M_invOper->ApplyInverse(residual.epetraVector(), increment.epetraVector());
+    
+    vector_Type increment_velocity ( M_velocityFESpace->map(), Unique ) ;
+    vector_Type increment_pressure ( M_pressureFESpace->map(), Unique ) ;
+    
+    increment_velocity.zero();
+    increment_pressure.zero();
+    
+    increment_velocity.subset(increment);
+    increment_pressure.subset(increment, M_velocityFESpace->dof().numTotalDof() * 3);
+    
+    Real normInf_velocity = increment_velocity.normInf();
+    Real normInf_pressure = increment_pressure.normInf();
+    
+    // Writing the norms into a file
+    if ( M_comm->MyPID()==0 )
+    {
+        std::cout << " normInf_velocity = " << normInf_velocity << ", normInf_pressure = " << normInf_pressure << "\n";
+    }
+    
 }
 
 void NavierStokesSolver::applyBoundaryConditionsJacobian ( bcPtr_Type & bc )
