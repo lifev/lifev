@@ -973,11 +973,13 @@ void NavierStokesSolver::evaluateResidual( const vectorPtr_Type& convective_velo
 					   	   	   	   	   	   const vectorPtr_Type& rhs_velocity,
 					   	   	   	   	   	   vectorPtr_Type& residual)
 {
+	// This methos is used in FSI to assemble the fluid residual component
+
 	residual->zero();
 
 	// Residual vector for the velocity and pressure components
-	vectorPtr_Type res_velocity ( new vector_Type ( M_velocityFESpace->map(), Unique ) );
-	vectorPtr_Type res_pressure ( new vector_Type ( M_pressureFESpace->map(), Unique ) );
+	vectorPtr_Type res_velocity ( new vector_Type ( M_velocityFESpace->map(), Repeated ) );
+	vectorPtr_Type res_pressure ( new vector_Type ( M_pressureFESpace->map(), Repeated ) );
 	res_velocity->zero();
 	res_pressure->zero();
 
@@ -1031,8 +1033,11 @@ void NavierStokesSolver::evaluateResidual( const vectorPtr_Type& convective_velo
 	res_velocity->globalAssemble();
 	res_pressure->globalAssemble();
 
-	residual->subset ( *res_velocity, M_velocityFESpace->map(), 0, 0 );
-	residual->subset ( *res_pressure, M_pressureFESpace->map(), 0, M_velocityFESpace->map().mapSize() );
+	vector_Type res_velocity_unique ( *res_velocity, Unique );
+	vector_Type res_pressure_unique ( *res_pressure, Unique );
+
+	residual->subset ( res_velocity_unique, M_velocityFESpace->map(), 0, 0 );
+	residual->subset ( res_pressure_unique, M_pressureFESpace->map(), 0, M_velocityFESpace->map().mapSize() );
 
 }
 

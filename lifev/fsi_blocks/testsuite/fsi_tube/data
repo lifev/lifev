@@ -10,6 +10,7 @@
 [fluid]
 
 	preconditionerType       = SIMPLE # PCD or SIMPLE
+    use_graph                = false
      
     	[./physics]
     		density         = 1.0    # density, settings used in the paper
@@ -65,7 +66,7 @@
 		[../physics]
 			density   		    = 1.2    # density, settings used in the paper
 			material_flag       = 1	
-			use_thin  			= true             # if true, using the thin layer structure. If false, not using the thin layer structure.
+			use_thin  			= false             # if true, using the thin layer structure. If false, not using the thin layer structure.
 		    h_thin    			= 0.02             # thickness thin structure
 		    rho_thin  			= 1.2				 # density thin structure
 		    young_thin          = 3.e+6  # Young's modulus thin layer
@@ -120,7 +121,7 @@
 	output_Residuals    	=  true
 	output_Steps        	=  true
 	convectiveImplicit      =  true
-	useShapeDerivatives     =  false
+	useShapeDerivatives     =  true
 	extrapolateInitialGuess =  false
 	orderExtrapolation      =  2    # it can be 1, 2 or 3
 	
