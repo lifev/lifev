@@ -161,6 +161,8 @@ void FSIHandler::setup ( )
 {
 	M_usePartitionedMeshes = M_datafile ( "offlinePartioner/readPartitionedMeshes", false );
 
+    M_restart = M_datafile ( "importer/restart", false );
+    
 	// Fluid
 	M_fluid.reset ( new NavierStokesSolver ( M_datafile, M_comm ) );
 	M_fluid->setup ( M_fluidLocalMesh );
@@ -183,6 +185,9 @@ void FSIHandler::setup ( )
 	M_extrapolateInitialGuess = M_datafile ( "newton/extrapolateInitialGuess", false );
 	M_orderExtrapolationInitialGuess = M_datafile ( "newton/orderExtrapolation", 3 );
 
+    // Exporters
+    setupExporters( );
+    
 	initializeTimeAdvance ( );
 
 	// Setting auxiliary variables for the fluid solver
@@ -199,9 +204,6 @@ void FSIHandler::setup ( )
 	// Ale
 	M_ale.reset( new ALESolver ( *M_aleFESpace, M_comm ) );
 	M_ale->setUp( M_datafile );
-
-	// Exporters
-	setupExporters( );
 
 	// Data needed by the Newton algorithm
 	M_relativeTolerance = M_datafile ( "newton/reltol", 1.e-4);
@@ -270,18 +272,15 @@ void FSIHandler::setupExporters( )
 	M_fluidDisplacement.reset ( new VectorEpetra ( M_aleFESpace->map(), M_exporterFluid->mapType() ) );
 	M_structureDisplacement.reset ( new VectorEpetra ( M_displacementFESpace->map(), M_exporterStructure->mapType() ) );
 
-	*M_fluidVelocity *= 0;
-	*M_fluidPressure *= 0;
-	*M_fluidDisplacement *= 0;
-	*M_structureDisplacement *= 0;
-
+    M_fluidVelocity->zero();
+    M_fluidPressure->zero();
+    M_fluidDisplacement->zero();
+    M_structureDisplacement->zero();
+    
 	M_exporterFluid->addVariable ( ExporterData<mesh_Type>::VectorField, "f - velocity", M_fluid->uFESpace(), M_fluidVelocity, UInt (0) );
 	M_exporterFluid->addVariable ( ExporterData<mesh_Type>::ScalarField, "f - pressure", M_fluid->pFESpace(), M_fluidPressure, UInt (0) );
 	M_exporterFluid->addVariable ( ExporterData<mesh_Type>::VectorField, "f - displacement", M_aleFESpace, M_fluidDisplacement, UInt (0) );
 	M_exporterStructure->addVariable ( ExporterData<mesh_Type>::VectorField, "s - displacement", M_displacementFESpace, M_structureDisplacement, UInt (0) );
-
-	M_exporterFluid->postProcess(M_t_zero);
-	M_exporterStructure->postProcess(M_t_zero);
 }
 
 void
@@ -354,58 +353,180 @@ void FSIHandler::initializeTimeAdvance ( )
 	M_t_zero   = M_datafile("fluid/time_discretization/initialtime",0.0);
 	M_t_end    = M_datafile("fluid/time_discretization/endtime",0.0);
 	M_orderBDF = M_datafile("fluid/time_discretization/BDF_order",2);
-
-	// Order of BDF and extrapolation for the velocity
+    const std::string timeAdvanceMethod =  M_datafile ( "solid/time_discretization/method", "BDF");
+    
+	// Initialize and create objects for the fluid time advance
 	M_fluidTimeAdvance->setBDForder(M_orderBDF);
 	M_fluidTimeAdvance->setMaximumExtrapolationOrder(M_orderBDF);
 	M_fluidTimeAdvance->setTimeStep(M_dt);
-
-	// Initialize time advance
-	vector_Type velocityInitial ( M_fluid->uFESpace()->map() );
-	std::vector<vector_Type> initialStateVelocity;
-	velocityInitial *= 0 ;
-	for ( UInt i = 0; i < M_orderBDF; ++i )
-		initialStateVelocity.push_back(velocityInitial);
-
+    vector_Type velocityInitial ( M_fluid->uFESpace()->map() );
+    std::vector<vector_Type> initialStateVelocity;
+    
+    // Initialize and create objects for the ALE time advance
+    M_aleTimeAdvance.reset ( TimeAdvanceFactory::instance().createObject ( timeAdvanceMethod ) );
+    M_aleTimeAdvance->setup (M_dataStructure->dataTimeAdvance()->orderBDF() , 1);
+    M_aleTimeAdvance->setTimeStep ( M_dt );
+    std::vector<vectorPtr_Type> df0;
+    
+    // Structure
+    M_structureTimeAdvance.reset ( TimeAdvanceFactory::instance().createObject ( timeAdvanceMethod ) );
+    UInt OrderDev = 2;
+    M_structureTimeAdvance->setup (M_dataStructure->dataTimeAdvance()->orderBDF() , OrderDev);
+    M_structureTimeAdvance->setTimeStep ( M_dt );
+    std::vector<vectorPtr_Type> uv0;
+    
+    if ( !M_restart )
+    {
+        // Fluid
+        velocityInitial.zero() ;
+        for ( UInt i = 0; i < M_orderBDF; ++i )
+            initialStateVelocity.push_back(velocityInitial);
+    
+        // ALE
+        vectorPtr_Type fluidDisp (new VectorEpetra (M_aleFESpace->map(), Unique) );
+        fluidDisp->zero();
+        for ( UInt previousPass = 0; previousPass < M_aleTimeAdvance->size() ; previousPass++)
+        {
+            df0.push_back (fluidDisp);
+        }
+        
+        // Structure
+        vectorPtr_Type disp (new VectorEpetra (M_displacementFESpace->map(), Unique) );
+        disp->zero();
+        for ( UInt previousPass = 0; previousPass < M_structureTimeAdvance->size() ; previousPass++)
+        {
+            uv0.push_back (disp);
+        }
+        
+    }
+    else
+    {
+        std::string const importerType       =  M_datafile ( "importer/type", "hdf5");
+        std::string const fileNameFluid      =  M_datafile ( "importer/fluid_filename", "SolutionRestarted");
+        std::string const fileNameStructure  =  M_datafile ( "importer/structure_filename", "SolutionRestarted");
+        std::string const initialLoaded      =  M_datafile ( "importer/initSol", "NO_DEFAULT_VALUE");
+        
+        M_importerFluid.reset ( new  ExporterHDF5<mesh_Type > ( M_datafile, fileNameFluid) );
+        M_importerFluid->setMeshProcId (M_fluid->uFESpace()->mesh(), M_comm->MyPID() );
+        
+        M_importerStructure.reset ( new  ExporterHDF5<mesh_Type > ( M_datafile, fileNameStructure) );
+        M_importerStructure->setMeshProcId (M_displacementFESpace->mesh(), M_comm->MyPID() );
+        
+        std::string iterationString;
+        iterationString = initialLoaded;
+        
+        
+        for (UInt iterInit = 0; iterInit < M_orderBDF; iterInit++ )
+        {
+            vectorPtr_Type velocityRestart;
+            velocityRestart.reset ( new vector_Type (M_fluid->uFESpace()->map(),  Unique ) );
+            velocityRestart->zero();
+            
+            vectorPtr_Type pressureRestart;
+            pressureRestart.reset ( new vector_Type (M_fluid->pFESpace()->map(),  Unique ) );
+            pressureRestart->zero();
+            
+            vectorPtr_Type aleRestart;
+            aleRestart.reset ( new vector_Type (M_aleFESpace->map(),  Unique ) );
+            aleRestart->zero();
+            
+            vectorPtr_Type structureRestart;
+            structureRestart.reset ( new vector_Type (M_displacementFESpace->map(),  Unique ) );
+            structureRestart->zero();
+            
+            LifeV::ExporterData<mesh_Type> velocityReader (LifeV::ExporterData<mesh_Type>::VectorField,
+                                                           std::string ("f - velocity." + iterationString),
+                                                           M_fluid->uFESpace(),
+                                                           velocityRestart,
+                                                           UInt (0),
+                                                           LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+            
+            LifeV::ExporterData<mesh_Type> pressureReader (LifeV::ExporterData<mesh_Type>::ScalarField,
+                                                           std::string ("f - pressure." + iterationString),
+                                                           M_fluid->pFESpace(),
+                                                           pressureRestart,
+                                                           UInt (0),
+                                                           LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+            
+            LifeV::ExporterData<mesh_Type> aleReader      (LifeV::ExporterData<mesh_Type>::VectorField,
+                                                           std::string ("f - displacement." + iterationString),
+                                                           M_aleFESpace,
+                                                           aleRestart,
+                                                           UInt (0),
+                                                           LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+            
+            LifeV::ExporterData<mesh_Type> structureReader(LifeV::ExporterData<mesh_Type>::VectorField,
+                                                           std::string ("s - displacement." + iterationString),
+                                                           M_displacementFESpace,
+                                                           structureRestart,
+                                                           UInt (0),
+                                                           LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+            
+            
+            M_importerFluid->readVariable (velocityReader);
+            M_importerFluid->readVariable (pressureReader);
+            M_importerFluid->readVariable (aleReader);
+            M_importerStructure->readVariable (structureReader);
+            
+            int iterations = std::atoi (iterationString.c_str() );
+            Real iterationsReal = iterations;
+            
+            if ( iterInit == 0 )
+            {
+                *M_fluidVelocity = *velocityRestart;
+                *M_fluidPressure = *pressureRestart;
+                *M_fluidDisplacement = *aleRestart;
+                *M_structureDisplacement = *structureRestart;
+            }
+            
+            iterations--;
+            
+            std::ostringstream iter;
+            iter.fill ( '0' );
+            iter << std::setw (5) << ( iterations );
+            iterationString = iter.str();
+            
+            initialStateVelocity.push_back(*velocityRestart);
+            df0.push_back (aleRestart);
+            uv0.push_back (structureRestart);
+        }
+        
+        // For BDF 1 it does not change anything, for BDF2 it is necessary
+        std::reverse(initialStateVelocity.begin(),initialStateVelocity.end());
+        std::reverse(df0.begin(),df0.end()); // verify here
+        std::reverse(uv0.begin(),uv0.end()); // verify here
+    }
+    
+    // Fluid
 	M_fluidTimeAdvance->initialize(initialStateVelocity);
 
-	// Structure
-	const std::string timeAdvanceMethod =  M_datafile ( "solid/time_discretization/method", "Newmark");
-	M_structureTimeAdvance.reset ( TimeAdvanceFactory::instance().createObject ( timeAdvanceMethod ) );
-	UInt OrderDev = 2;
-	M_structureTimeAdvance->setup (M_dataStructure->dataTimeAdvance()->orderBDF() , OrderDev);
-	M_structureTimeAdvance->setTimeStep ( M_dt );
-	vectorPtr_Type disp (new VectorEpetra (M_displacementFESpace->map(), Unique) );
-	*disp *= 0;
-	std::vector<vectorPtr_Type> uv0;
-	for ( UInt previousPass = 0; previousPass < M_structureTimeAdvance->size() ; previousPass++)
-	{
-		uv0.push_back (disp);
-	}
-	M_structureTimeAdvance->setInitialCondition (uv0);
+    // ALE
+    M_aleTimeAdvance->setInitialCondition (df0);
+    M_aleTimeAdvance->updateRHSContribution ( M_dt );
+    
+    // Structure
+    M_structureTimeAdvance->setInitialCondition (uv0);
 	M_structureTimeAdvance->updateRHSContribution ( M_dt );
 
-	// Ale - the same method as for the structure
-	M_aleTimeAdvance.reset ( TimeAdvanceFactory::instance().createObject ( timeAdvanceMethod ) );
-	M_aleTimeAdvance->setup (M_dataStructure->dataTimeAdvance()->orderBDF() , 1);
-	M_aleTimeAdvance->setTimeStep ( M_dt );
-	vectorPtr_Type fluidDisp (new VectorEpetra (M_aleFESpace->map(), Unique) );
-	*fluidDisp *= 0;
-	std::vector<vectorPtr_Type> df0;
-	for ( UInt previousPass = 0; previousPass < M_aleTimeAdvance->size() ; previousPass++)
-	{
-		df0.push_back (fluidDisp);
-	}
-	M_aleTimeAdvance->setInitialCondition (df0);
-	M_aleTimeAdvance->updateRHSContribution ( M_dt );
-
-	if ( M_extrapolateInitialGuess )
+	if ( !M_restart && M_extrapolateInitialGuess )
 	{
 		M_extrapolationSolution.reset( new TimeAndExtrapolationHandler ( ) );
 		M_extrapolationSolution->setBDForder(M_orderExtrapolationInitialGuess);
 		M_extrapolationSolution->setMaximumExtrapolationOrder(M_orderExtrapolationInitialGuess);
 		M_extrapolationSolution->setTimeStep(M_dt);
 	}
+    
+    // Post-Processing of the initial solution
+    if ( !M_restart )
+    {
+        M_exporterFluid->postProcess(M_t_zero);
+        M_exporterStructure->postProcess(M_t_zero);
+    }
+    else
+    {
+        M_exporterFluid->postProcess(M_t_zero);
+        M_exporterStructure->postProcess(M_t_zero);
+    }
 }
 
 void FSIHandler::buildInterfaceMaps ()
@@ -844,9 +965,19 @@ FSIHandler::solveFSIproblem ( )
 
 	buildMonolithicMap ( );
 
-	M_solution.reset ( new VectorEpetra ( *M_monolithicMap ) );
-	M_solution->zero();
+    M_solution.reset ( new VectorEpetra ( *M_monolithicMap ) );
+    M_solution->zero();
 
+    if ( M_restart )
+    {
+        M_solution.reset ( new VectorEpetra ( *M_monolithicMap ) );
+        M_fluidVelocity->subset(*M_solution, M_fluid->uFESpace()->map(), 0, 0);
+        M_fluidPressure->subset(*M_solution, M_fluid->pFESpace()->map(), 0, M_fluid->uFESpace()->map().mapSize());
+        M_structureDisplacement->subset(*M_solution, M_displacementFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize());
+        M_fluidDisplacement->subset(*M_solution, M_aleFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
+                                    M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize() );
+    }
+    
 	// Apply boundary conditions for the ale problem (the matrix will not change during the simulation)
 	M_ale->applyBoundaryConditions ( *M_aleBC );
 

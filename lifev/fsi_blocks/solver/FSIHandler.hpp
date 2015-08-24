@@ -404,6 +404,13 @@ private:
 	vectorPtr_Type M_numerationInterfaceStructure;
 
 	bool M_useMasses;
+    
+    // Members for the restarter
+    
+    bool M_restart;
+    
+    boost::shared_ptr<ExporterHDF5<mesh_Type > > M_importerFluid;     // Import just from solution in hdf5 format! I do not know
+    boost::shared_ptr<ExporterHDF5<mesh_Type > > M_importerStructure; // if the import with other filters works.
 
 };
 

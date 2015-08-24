@@ -1,0 +1,166 @@
+[offlinePartioner]
+	parts                 = 12
+	readPartitionedMeshes = false
+	fluidPartitionedMesh  = fluido_P2_12.h5
+	solidPartitionedMesh  = solido_P2_12.h5
+	interfacePartitioned  = interface_P2_12.h5
+	
+[../]	
+	
+[fluid]
+
+	preconditionerType       = SIMPLE # PCD or SIMPLE
+    use_graph               = false
+
+        [./physics]
+    		density         = 1.0    # density, settings used in the paper
+    		viscosity       = 0.03   # viscosity, settings used in the paper
+
+    	[../time_discretization]
+    		initialtime     = 0.005
+    		endtime	        = 0.01
+    		timestep	    = 0.001
+    		BDF_order       = 2		 # order 1 or 2 
+
+    	[../space_discretization]
+    		mesh_dir        = ./
+    		mesh_file       = tube20.mesh 		  # tube20_rotated.mesh can be used for nonconforming simulation
+    											  # tube20.mesh both for conforming and nonconforming
+    		mesh_type       = .mesh
+    		vel_order       = P2
+    		pres_order      = P1
+    		
+    	[../stabilization]
+    	    use             = false
+    	    type            = SUPGALE
+    	    vel_order       = 1	
+
+    	[../]
+
+[../]
+
+[solid]
+
+    	[./space_discretization]
+    		mesh_dir        = ./
+    		mesh_file       = vessel20.mesh
+    		mesh_type       = .mesh
+    		order           = P2
+
+    	[../time_discretization]
+			method              = BDF
+			initialtime 		= 0.005
+			endtime     		= 0.01
+			timestep    		= 0.001
+			BDF_order   		= 2		# order 1 or 2 
+
+	    [../model]
+			constitutiveLaw     = isotropic
+			young     		    = 3.e+6  # Young's modulus, settings used in the paper
+			poisson   		    = 0.3    # Poisson's ratio, settings used in the paper
+			bulk				= 1e7
+			alpha 			    = 2.5e6
+			gamma			    = 1.0
+			solidTypeIsotropic 	= linearVenantKirchhoff
+
+		[../physics]
+			density   		    = 1.2    # density, settings used in the paper
+			material_flag       = 1	
+			use_thin  			= false            # if true, using the thin layer structure. If false, not using the thin layer structure.
+		    h_thin    			= 0.02             # thickness thin structure
+		    rho_thin  			= 1.2			   # density thin structure
+		    young_thin          = 3.e+6            # Young's modulus thin layer
+		    poisson_thin        = 0.3              # poisson thin layer
+		    interface 			= 100.0            # flag of the interface
+		    
+    	[../]
+
+[../]
+
+[ale]
+
+	[./space_discretization]
+		order			= P2
+
+	[./]
+
+[../]
+
+[interface]
+	flag        	      =  1       # default: 1, the mesh flag of the interface
+	tolerance             =  0       # how far points are to be considered the same on the interface
+	fluid_vertex_flag     = 20       # tells whether the in/out ring curves on the interface
+	nonconforming         = false     # tells whether the meshes are conformin at the interface (true works just with P1)
+	lambda_num_structure  = false    # if true the lagrange multip. are numbered wrt the structure, if false wrt to the fluid
+	useMasses             = true     # if true we interpolate the strong stresses, if false we interpolate the weak stresses
+
+[../]
+
+[interpolation]
+    interpolation_Type           = RBFlocallyRescaledVectorial
+    n_links                      = 1
+   
+[../]
+    
+[exporter]
+    type       = hdf5
+    multimesh  = false
+    start      = 0
+    save       = 1
+    fluid_filename  = fluid_results_restarted
+    structure_filename  = structure_results_restarted
+
+[../]
+
+[importer]
+    restart             = true
+    type                = hdf5
+    multimesh           = false
+    initSol             = 00005
+    fluid_filename      = fluid_results
+    structure_filename  = structure_results
+
+[../]
+
+[newton]
+	abstol          		=  1.e-10
+	reltol          		=  1.e-5
+	etamax          		=  1.e-6
+	maxiter         		=  10
+	NonLinearLineSearch 	=  0
+	output_Residuals    	=  true
+	output_Steps        	=  true
+	convectiveImplicit      =  true
+	useShapeDerivatives     =  false
+	extrapolateInitialGuess =  false
+	orderExtrapolation      =  2    # it can be 1, 2 or 3
+	
+[../]
+
+# Section below needed by Interpolation only. TODO: use only one solver!
+[prec]
+    prectype                     = Ifpack # Ifpack or ML
+    displayList                  = false
+
+    [./ifpack]
+        overlap                  = 2
+
+        [./fact]
+            ilut_level-of-fill   = 1
+            drop_tolerance       = 0.0
+            relax_value          = 0
+
+        [../amesos]
+            solvertype           = Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+
+        [../partitioner]
+            overlap              = 2
+
+        [../schwarz]
+            reordering_type      = none #metis, rcm, none
+            filter_singletons    = true
+
+
+	[../]
+	
+[../]
