@@ -159,6 +159,10 @@ FSIHandler::readPartitionedMeshes( )
 
 void FSIHandler::setup ( )
 {
+	M_saveEvery = M_datafile ( "exporter/save_every", 1 );
+
+	M_counterSaveEvery = M_saveEvery;
+
 	M_usePartitionedMeshes = M_datafile ( "offlinePartioner/readPartitionedMeshes", false );
 
     M_restart = M_datafile ( "importer/restart", false );
@@ -1021,8 +1025,12 @@ FSIHandler::solveFSIproblem ( )
 
 	M_prec->setMonolithicMap ( M_monolithicMap );
 
+	int time_step_count = 0;
+
 	for ( ; M_time <= M_t_end + M_dt / 2.; M_time += M_dt)
 	{
+		time_step_count += 1;
+
 		M_displayer.leaderPrint ( "\n-----------------------------------\n" ) ;
 		M_displayer.leaderPrintMax ( "FSI - solving now for time ", M_time ) ;
 		M_displayer.leaderPrint ( "\n" ) ;
@@ -1045,7 +1053,7 @@ FSIHandler::solveFSIproblem ( )
 		// Apply current BC to the solution vector
 		applyBCsolution ( M_solution );
 
-		M_maxiterNonlinear = 3;
+		M_maxiterNonlinear = 10;
 
 		// Using the solution at the previous timestep as initial guess -> TODO: extrapolation
 		UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
@@ -1079,8 +1087,12 @@ FSIHandler::solveFSIproblem ( )
 		M_structureTimeAdvance->shiftRight(*M_structureDisplacement);
 		M_aleTimeAdvance->shiftRight(*M_fluidDisplacement);
 
-		M_exporterFluid->postProcess(M_time);
-		M_exporterStructure->postProcess(M_time);
+		if ( time_step_count == M_counterSaveEvery )
+		{
+			M_exporterFluid->postProcess(M_time);
+			M_exporterStructure->postProcess(M_time);
+			M_counterSaveEvery += M_saveEvery;
+		}
 	}
 
 	M_exporterFluid->closeFile();
@@ -1251,7 +1263,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	M_beta_star.reset ( new VectorEpetra ( M_fluid->uFESpace()->map ( ) ) );
 	M_beta_star->subset ( solution, 0);
 	vector_Type u_k ( *M_beta_star ); // Needed to update the Jacobian of the fluid
-	*M_beta_star -= meshVelocity;
+	*M_beta_star -= meshVelocity;	  // This is (u-w), fluid velocity minus fluid mesh velocity
 
 	//-------------------------------------------------------------------//
 	// Second: re-assemble the fluid blocks since we have moved the mesh //
@@ -1464,22 +1476,19 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		residual.subset(*residual_structure_displacement, M_displacementFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() );
 		residual.subset(*velocity_km1_gamma, *M_lagrangeMap, 0, offset_lagrange );
 		residual.subset(*res_ALE, M_aleFESpace->map(), 0, offset );
-
-		residual.spy("Residuale");
-
 	}
 	else
 	{
 		// Initialize vector for the fluid residual with map of the full residual
-		vectorPtr_Type fluid_residual( new vector_Type ( residual.map() ) );
+		vectorPtr_Type fluid_residual( new vector_Type ( residual.map(), Unique ) );
 		fluid_residual->zero();
 
 		// Get the fluid velocity at the previous Newton iteration
-		vectorPtr_Type velocity_km1( new vector_Type ( M_fluid->uFESpace()->map ( ) ) );
+		vectorPtr_Type velocity_km1( new vector_Type ( M_fluid->uFESpace()->map ( ), Unique ) );
 		velocity_km1->subset ( solution, 0);
 
 		// Get the fluid pressure at the previous Newton iteration
-		vectorPtr_Type pressure_km1( new vector_Type ( M_fluid->pFESpace()->map ( ) ) );
+		vectorPtr_Type pressure_km1( new vector_Type ( M_fluid->pFESpace()->map ( ), Unique ) );
 		pressure_km1->subset ( solution, M_fluid->pFESpace()->map ( ), M_fluid->uFESpace()->map().mapSize(), 0 );
 
 		// Evaluate the residual coming from the fluid block
@@ -1512,8 +1521,6 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 		// Adding contribution from the fluid
 		residual += *fluid_residual;
-
-		residual.spy("Residuale");
 	}
 
 	applyBCresidual ( residual );

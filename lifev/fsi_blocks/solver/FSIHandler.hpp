@@ -412,6 +412,10 @@ private:
     boost::shared_ptr<ExporterHDF5<mesh_Type > > M_importerFluid;     // Import just from solution in hdf5 format! I do not know
     boost::shared_ptr<ExporterHDF5<mesh_Type > > M_importerStructure; // if the import with other filters works.
 
+	// To handle the post-processing
+	int M_saveEvery;
+	int M_counterSaveEvery;
+
 };
 
 } // end namespace LifeV
