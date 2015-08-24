@@ -419,9 +419,16 @@ void FSIHandler::initializeTimeAdvance ( )
         std::string iterationString;
         iterationString = initialLoaded;
         
-        
-        for (UInt iterInit = 0; iterInit < M_orderBDF; iterInit++ )
+        // The structure equation has a second derivative, so for it we need to load not only
+        // a number of vectors equals to M_orderBDF, but one more. For fluid and ALE just
+        // a number of M_orderBDF vectors need to be loaded. Note that we do have a
+        // time advance object for the ALE (although its equation has not time derivative)
+        // because we need to compute the ALE velocity.
+        for (UInt iterInit = 0; iterInit < (M_orderBDF+1); iterInit++ )
         {
+            // For fluid and ALE read just M_orderBDF vectors from previous time steps
+            if ( iterInit < M_orderBDF )
+            {
             vectorPtr_Type velocityRestart;
             velocityRestart.reset ( new vector_Type (M_fluid->uFESpace()->map(),  Unique ) );
             velocityRestart->zero();
@@ -493,12 +500,42 @@ void FSIHandler::initializeTimeAdvance ( )
             initialStateVelocity.push_back(*velocityRestart);
             df0.push_back (aleRestart);
             uv0.push_back (structureRestart);
+            
+            }
+            else
+            {
+                // For the structure we need to read one more vector from previous time steps 
+                vectorPtr_Type structureRestart;
+                structureRestart.reset ( new vector_Type (M_displacementFESpace->map(),  Unique ) );
+                structureRestart->zero();
+                
+                LifeV::ExporterData<mesh_Type> structureReader(LifeV::ExporterData<mesh_Type>::VectorField,
+                                                               std::string ("s - displacement." + iterationString),
+                                                               M_displacementFESpace,
+                                                               structureRestart,
+                                                               UInt (0),
+                                                               LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+                
+                M_importerStructure->readVariable (structureReader);
+                
+                int iterations = std::atoi (iterationString.c_str() );
+                Real iterationsReal = iterations;
+                
+                iterations--;
+                
+                std::ostringstream iter;
+                iter.fill ( '0' );
+                iter << std::setw (5) << ( iterations );
+                iterationString = iter.str();
+                
+                uv0.push_back (structureRestart);
+            }
         }
         
-        // For BDF 1 it does not change anything, for BDF2 it is necessary
+        // For BDF 1 it does not change anything, for BDF2 it is necessary. We do the std::reverse
+        // just to the fluid stencil because the ones of the structure and ALE are ordered in the
+        // other way round.
         std::reverse(initialStateVelocity.begin(),initialStateVelocity.end());
-        std::reverse(df0.begin(),df0.end()); // verify here
-        std::reverse(uv0.begin(),uv0.end()); // verify here
     }
     
     // Fluid
@@ -975,11 +1012,13 @@ FSIHandler::solveFSIproblem ( )
     if ( M_restart )
     {
         M_solution.reset ( new VectorEpetra ( *M_monolithicMap ) );
-        M_fluidVelocity->subset(*M_solution, M_fluid->uFESpace()->map(), 0, 0);
-        M_fluidPressure->subset(*M_solution, M_fluid->pFESpace()->map(), 0, M_fluid->uFESpace()->map().mapSize());
-        M_structureDisplacement->subset(*M_solution, M_displacementFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize());
-        M_fluidDisplacement->subset(*M_solution, M_aleFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
-                                    M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize() );
+        M_solution->zero();
+        
+        M_solution->subset(*M_fluidVelocity, M_fluid->uFESpace()->map(), 0, 0);
+        M_solution->subset(*M_fluidPressure, M_fluid->pFESpace()->map(), 0, M_fluid->uFESpace()->map().mapSize());
+        M_solution->subset(*M_structureDisplacement, M_displacementFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize());
+        M_solution->subset(*M_fluidDisplacement, M_aleFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
+                           M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize() );
     }
     
 	// Apply boundary conditions for the ale problem (the matrix will not change during the simulation)
