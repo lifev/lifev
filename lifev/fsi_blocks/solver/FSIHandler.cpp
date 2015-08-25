@@ -419,7 +419,7 @@ void FSIHandler::initializeTimeAdvance ( )
         std::string iterationString;
         iterationString = initialLoaded;
         
-        // The structure equation has a second derivative, so for it we need to load not only
+        // The structure equation has a second derivative in time, so for it we need to load not only
         // a number of vectors equals to M_orderBDF, but one more. For fluid and ALE just
         // a number of M_orderBDF vectors need to be loaded. Note that we do have a
         // time advance object for the ALE (although its equation has not time derivative)
@@ -558,16 +558,9 @@ void FSIHandler::initializeTimeAdvance ( )
 	}
     
     // Post-Processing of the initial solution
-    if ( !M_restart )
-    {
-        M_exporterFluid->postProcess(M_t_zero);
-        M_exporterStructure->postProcess(M_t_zero);
-    }
-    else
-    {
-        M_exporterFluid->postProcess(M_t_zero);
-        M_exporterStructure->postProcess(M_t_zero);
-    }
+	M_exporterFluid->postProcess(M_t_zero);
+	M_exporterStructure->postProcess(M_t_zero);
+
 }
 
 void FSIHandler::buildInterfaceMaps ()
@@ -1126,11 +1119,44 @@ FSIHandler::solveFSIproblem ( )
 		M_structureTimeAdvance->shiftRight(*M_structureDisplacement);
 		M_aleTimeAdvance->shiftRight(*M_fluidDisplacement);
 
-		if ( time_step_count == M_counterSaveEvery )
+		// This part below handles the exporter of the solution.
+		// In particular, given a number of timesteps at which
+		// we ask to export the solution (from datafile), here
+		// the code takes care of exporting the solution also at
+		// the previous timesteps such that, if later a restart
+		// of the simulation is performed, it works correctly.
+		if ( M_orderBDF == 1 )
 		{
-			M_exporterFluid->postProcess(M_time);
-			M_exporterStructure->postProcess(M_time);
-			M_counterSaveEvery += M_saveEvery;
+			if ( time_step_count == (M_counterSaveEvery-1) )
+			{
+				M_exporterFluid->postProcess(M_time);
+				M_exporterStructure->postProcess(M_time);
+			}
+			else if ( time_step_count == M_counterSaveEvery )
+			{
+				M_exporterFluid->postProcess(M_time);
+				M_exporterStructure->postProcess(M_time);
+				M_counterSaveEvery += M_saveEvery;
+			}
+		}
+		else if ( M_orderBDF == 2 )
+		{
+			if ( time_step_count == (M_counterSaveEvery-2) )
+			{
+				M_exporterFluid->postProcess(M_time);
+				M_exporterStructure->postProcess(M_time);
+			}
+			else if ( time_step_count == (M_counterSaveEvery-1) )
+			{
+				M_exporterFluid->postProcess(M_time);
+				M_exporterStructure->postProcess(M_time);
+			}
+			else if ( time_step_count == M_counterSaveEvery )
+			{
+				M_exporterFluid->postProcess(M_time);
+				M_exporterStructure->postProcess(M_time);
+				M_counterSaveEvery += M_saveEvery;
+			}
 		}
 	}
 
