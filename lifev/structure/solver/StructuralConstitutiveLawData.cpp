@@ -89,7 +89,8 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData() :
     M_thinLayerDensity				   ( ),
     M_thinLayerLameI				   ( ),
     M_thinLayerLameII				   ( ),
-    M_interfaceFlag					   ( )
+    M_interfaceFlag					   ( ),
+    M_LameThickByFunctors			   ( false )
 {
 }
 
@@ -131,8 +132,8 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData ( const StructuralC
     M_thinLayerDensity				   ( structuralConstitutiveLawData.M_thinLayerDensity ),
     M_thinLayerLameI				   ( structuralConstitutiveLawData.M_thinLayerLameI ),
     M_thinLayerLameII				   ( structuralConstitutiveLawData.M_thinLayerLameII ),
-    M_interfaceFlag                    ( structuralConstitutiveLawData.M_interfaceFlag)
-
+    M_interfaceFlag                    ( structuralConstitutiveLawData.M_interfaceFlag),
+    M_LameThickByFunctors              ( structuralConstitutiveLawData.M_LameThickByFunctors)
 {
 }
 
@@ -182,6 +183,7 @@ StructuralConstitutiveLawData::operator= ( const StructuralConstitutiveLawData& 
         M_thinLayerLameI				   = structuralConstitutiveLawData.M_thinLayerLameI;
         M_thinLayerLameII				   = structuralConstitutiveLawData.M_thinLayerLameII;
         M_interfaceFlag					   = structuralConstitutiveLawData.M_interfaceFlag;
+        M_LameThickByFunctors			   = structuralConstitutiveLawData.M_LameThickByFunctors;
     }
 
     return *this;
@@ -355,6 +357,8 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
     M_relativeTolerance = dataFile ( ( section + "/newton/reltol" ).data(), 1.e-07 );
     M_errorTolerance = dataFile ( ( section + "/newton/etamax" ).data(), 1.e-03 );
     M_NonLinearLineSearch = static_cast<Int> ( dataFile ( ( section + "/newton/NonLinearLineSearch" ).data(), 0 ) );
+
+    M_LameThickByFunctors = dataFile ( ( section + "/physics/LameThickByFunctor" ).data(), false );
 
     // thin layer parameters
     M_thinLayer = dataFile ( ( section + "/physics/use_thin" ).data(), false );

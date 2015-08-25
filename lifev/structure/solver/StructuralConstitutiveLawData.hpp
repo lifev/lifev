@@ -533,6 +533,16 @@ public:
     	return M_interfaceFlag;
     }
 
+    //! Get if the Lame for thick layer are given by functor
+    /*!
+     * @return true if Lame for thick layer are given by functor
+     */
+
+    const bool lameThickByFunctors() const
+    {
+    	return M_LameThickByFunctors;
+    }
+
     //@}
 
 private:
@@ -594,6 +604,7 @@ private:
     Real 				   M_thinLayerLameII;
     UInt 				   M_interfaceFlag;
 
+    bool 				   M_LameThickByFunctors;
 };
 
 } // end namespace LifeV

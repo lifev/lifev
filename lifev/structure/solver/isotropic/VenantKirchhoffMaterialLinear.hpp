@@ -40,6 +40,14 @@
 
 #include <lifev/structure/solver/isotropic/StructuralIsotropicConstitutiveLaw.hpp>
 
+// Start include for atheroma problem //
+
+#include <lifev/fsi_blocks/examples/fsi_atheroma_only_thick_varying_young/LameIEvaluationFunctorThick.hpp>
+#include <lifev/fsi_blocks/examples/fsi_atheroma_only_thick_varying_young/LameIIEvaluationFunctorThick.hpp>
+
+// End include for atheroma problem //
+
+
 
 namespace LifeV
 {
@@ -339,19 +347,41 @@ void VenantKirchhoffMaterialLinear<MeshType>::computeLinearStiff (dataPtr_Type& 
     //In the case of Linear Material it is the Stiffness Matrix.
     //In the case of NonLinear Materials it must be added of the non linear part.
 
-    integrate ( elements ( this->M_dispETFESpace->mesh() ),
-                this->M_dispFESpace->qr(),
-                this->M_dispETFESpace,
-                this->M_dispETFESpace,
-                parameter ( (* (this->M_vectorsParameters) ) [0]) * div ( phi_i ) * div ( phi_j )
-              ) >> M_linearStiff;
+    if ( this->M_dataMaterial->lameThickByFunctors() )
+    {
+    	boost::shared_ptr<LameIEvaluationFunctorThick>  LameIEvaluation ( new LameIEvaluationFunctorThick  );
+    	boost::shared_ptr<LameIIEvaluationFunctorThick> LameIIEvaluation( new LameIIEvaluationFunctorThick );
 
-    integrate ( elements ( this->M_dispETFESpace->mesh() ),
-                this->M_dispFESpace->qr(),
-                this->M_dispETFESpace,
-                this->M_dispETFESpace,
-                value ( 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [1]) * dot ( sym (grad (phi_j) ) , grad (phi_i) )
-              ) >> M_linearStiff;
+		integrate ( elements ( this->M_dispETFESpace->mesh() ),
+					this->M_dispFESpace->qr(),
+					this->M_dispETFESpace,
+					this->M_dispETFESpace,
+					eval(LameIEvaluation, X) * div ( phi_i ) * div ( phi_j )
+				  ) >> M_linearStiff;
+
+		integrate ( elements ( this->M_dispETFESpace->mesh() ),
+					this->M_dispFESpace->qr(),
+					this->M_dispETFESpace,
+					this->M_dispETFESpace,
+					value ( 2.0 ) * eval(LameIIEvaluation, X) * dot ( sym (grad (phi_j) ) , grad (phi_i) )
+				  ) >> M_linearStiff;
+    }
+    else
+    {
+		integrate ( elements ( this->M_dispETFESpace->mesh() ),
+					this->M_dispFESpace->qr(),
+					this->M_dispETFESpace,
+					this->M_dispETFESpace,
+					parameter ( (* (this->M_vectorsParameters) ) [0]) * div ( phi_i ) * div ( phi_j )
+				  ) >> M_linearStiff;
+
+		integrate ( elements ( this->M_dispETFESpace->mesh() ),
+					this->M_dispFESpace->qr(),
+					this->M_dispETFESpace,
+					this->M_dispETFESpace,
+					value ( 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [1]) * dot ( sym (grad (phi_j) ) , grad (phi_i) )
+				  ) >> M_linearStiff;
+    }
 
     this->M_linearStiff->globalAssemble();
 
