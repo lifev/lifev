@@ -8,4 +8,6 @@ ADD_SUBDIRECTORIES(
     fsi_interface_mass
     fsi_atheroma_only_thick
     fsi_atheroma_double_layer
+    fsi_atheroma_only_thick_varying_young
+    fsi_atheroma_double_layer_varying_young
 )
