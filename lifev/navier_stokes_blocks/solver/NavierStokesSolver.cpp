@@ -65,11 +65,14 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh, const int& id_domain)
 		}
 		else if ( id_domain == 1 )
 		{
-			uOrder = M_dataFile("fluid/master_space_discretization/vel_order","P1");
+			uOrder = M_dataFile("fluid/slave_space_discretization/vel_order","P1");
 			pOrder = M_dataFile("fluid/slave_space_discretization/pres_order","P1");
 			M_stiffStrain = M_dataFile("fluid/slave_space_discretization/stiff_strain", true);
 		}
 	}
+
+	M_uOrder = uOrder;
+	M_pOrder = pOrder;
 
 	M_useGraph = M_dataFile("fluid/use_graph", true);
 
@@ -140,6 +143,77 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh, const int& id_domain)
     M_displayer.leaderPrintMax ( " Number of DOFs for the velocity = ", M_velocityFESpace->dof().numTotalDof()*3 ) ;
     M_displayer.leaderPrintMax ( " Number of DOFs for the pressure = ", M_pressureFESpace->dof().numTotalDof() ) ;
     
+}
+
+void NavierStokesSolver::solveLaplacian( const UInt& flag, bcPtr_Type& bc_laplacian, vectorPtr_Type& laplacianSolution)
+{
+    // Update BCs for the laplacian problem
+    bc_laplacian->bcUpdate ( *M_pressureFESpace->mesh(), M_pressureFESpace->feBd(), M_pressureFESpace->dof() );
+
+    vectorPtr_Type Phi_h;
+    Phi_h.reset ( new vector_Type ( M_pressureFESpace->map() ) );
+    Phi_h->zero();
+
+    vectorPtr_Type rhs_laplacian_repeated( new vector_Type (M_pressureFESpace->map(), Repeated ) );
+    rhs_laplacian_repeated->zero();
+
+    boost::shared_ptr< MatrixEpetra<Real> > Laplacian;
+    Laplacian.reset ( new MatrixEpetra<Real> ( M_pressureFESpace->map() ) );
+    Laplacian->zero();
+
+    {
+    	using namespace ExpressionAssembly;
+
+    	integrate(
+    			elements(M_fespacePETA->mesh()),
+    			M_pressureFESpace->qr(),
+    			M_fespacePETA,
+    			M_fespacePETA,
+    			dot( grad(phi_i) , grad(phi_j) )
+    	) >> Laplacian;
+    }
+
+    {
+    	using namespace ExpressionAssembly;
+
+    	integrate(
+    			elements(M_fespacePETA->mesh()),
+    			M_pressureFESpace->qr(),
+    			M_fespacePETA,
+    			value(1.0)*phi_i
+    	) >> rhs_laplacian_repeated;
+    }
+
+
+    rhs_laplacian_repeated->globalAssemble();
+
+    vectorPtr_Type rhs_laplacian( new vector_Type (*rhs_laplacian_repeated, Unique ) );
+
+    bcManage ( *Laplacian, *rhs_laplacian, *M_pressureFESpace->mesh(), M_pressureFESpace->dof(), *bc_laplacian, M_pressureFESpace->feBd(), 1.0, 0.0 );
+    Laplacian->globalAssemble();
+
+    Teuchos::RCP< Teuchos::ParameterList > belosList = Teuchos::rcp ( new Teuchos::ParameterList );
+    belosList = Teuchos::getParametersFromXmlFile ( "SolverParamListLaplacian.xml" );
+
+    // Preconditioner
+    prec_Type* precRawPtr;
+    basePrecPtr_Type precPtr;
+    precRawPtr = new prec_Type;
+    precRawPtr->setDataFromGetPot ( M_dataFile, "prec" );
+    precPtr.reset ( precRawPtr );
+
+    // Linear Solver
+    LinearSolver solver;
+    solver.setCommunicator ( M_comm );
+    solver.setParameters ( *belosList );
+    solver.setPreconditioner ( precPtr );
+
+    // Solve system
+    solver.setOperator ( Laplacian );
+    solver.setRightHandSide ( rhs_laplacian );
+    solver.solve ( Phi_h );
+
+    *laplacianSolution = *Phi_h;
 }
 
 void NavierStokesSolver::setSolversOptions(const Teuchos::ParameterList& solversOptions)
@@ -1506,5 +1580,53 @@ void NavierStokesSolver::integrateForces ( const vectorPtr_Type & velocity, cons
 	*M_forces *= -1;
 }
 
+void NavierStokesSolver::preprocessBoundary(const Real& nx, const Real& ny, const Real& nz, BCHandler& bc, Real& Q_hat, const vectorPtr_Type& Phi_h, const UInt flag,
+					    					vectorPtr_Type& Phi_h_flag, vectorPtr_Type& V_hat_x, vectorPtr_Type& V_hat_y, vectorPtr_Type& V_hat_z)
+{
+	Phi_h_flag.reset ( new vector_Type ( M_pressureFESpace->map() ) );
+	Phi_h_flag->zero();
+
+	bcManageRhs ( *Phi_h_flag, *M_pressureFESpace->mesh(), M_pressureFESpace->dof(),  bc, M_pressureFESpace->feBd(), 1., 0.);
+
+	*Phi_h_flag *= *Phi_h;
+
+	Q_hat = 0.0;
+
+	// Computing the flowrate associated to Phi_h_inflow
+
+	vectorPtr_Type Phi_h_flag_rep;
+	Phi_h_flag_rep.reset ( new vector_Type ( *Phi_h_flag, Repeated ) );
+
+	vectorPtr_Type Q_hat_vec;
+	Q_hat_vec.reset ( new vector_Type ( M_pressureFESpace->map() ) );
+	Q_hat_vec->zero();
+
+	vectorPtr_Type ones_vec;
+	ones_vec.reset ( new vector_Type ( M_pressureFESpace->map() ) );
+	ones_vec->zero();
+	*ones_vec += 1.0;
+
+	{
+		using namespace ExpressionAssembly;
+		QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria6pt) );
+		integrate (
+				boundary (M_fespacePETA->mesh(), flag),
+				myBDQR,
+				M_fespacePETA,
+				value(M_fespacePETA, *Phi_h_flag_rep)*phi_i
+		)
+		>> Q_hat_vec;
+	}
+
+	Q_hat = Q_hat_vec->dot(*ones_vec);
+
+	V_hat_x.reset ( new vector_Type ( *Phi_h_flag ) );
+	V_hat_y.reset ( new vector_Type ( *Phi_h_flag ) );
+	V_hat_z.reset ( new vector_Type ( *Phi_h_flag ) );
+
+	*V_hat_x *= nx;
+	*V_hat_y *= ny;
+	*V_hat_z *= nz;
+}
 
 }

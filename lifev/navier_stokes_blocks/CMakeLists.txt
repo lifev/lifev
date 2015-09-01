@@ -36,6 +36,8 @@ TRIBITS_ADD_LIBRARY(
 
 TRIBITS_ADD_TEST_DIRECTORIES(testsuite)
 
+TRIBITS_ADD_EXAMPLE_DIRECTORIES(examples)
+
 #
 # Do standard postprocessing
 #

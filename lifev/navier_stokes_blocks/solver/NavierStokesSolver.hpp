@@ -76,6 +76,13 @@
 #include <lifev/navier_stokes_blocks/solver/StabilizationVMSLES_semi_implicit.hpp>
 #include <lifev/navier_stokes_blocks/solver/StabilizationSUPGALE.hpp>
 
+#include <Teuchos_ParameterList.hpp>
+#include <Teuchos_XMLParameterListHelpers.hpp>
+#include <Teuchos_RCP.hpp>
+#include <lifev/core/algorithm/LinearSolver.hpp>
+#include <lifev/core/algorithm/Preconditioner.hpp>
+#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+
 namespace LifeV
 {
 
@@ -114,6 +121,12 @@ public:
 	typedef boost::shared_ptr<parameterList_Type> parameterListPtr_Type;
 
     typedef boost::shared_ptr<Epetra_Operator> invOpPtr_Type;
+
+    typedef LifeV::Preconditioner                  basePrec_Type;
+    typedef boost::shared_ptr<basePrec_Type>       basePrecPtr_Type;
+    typedef LifeV::PreconditionerIfpack            prec_Type;
+    typedef boost::shared_ptr<prec_Type>           precPtr_Type;
+    typedef Teuchos::RCP< Teuchos::ParameterList > parameterListRCP_Type;
 
 	// Constructor
 	NavierStokesSolver(const dataFile_Type dataFile, const commPtr_Type& communicator);
@@ -369,6 +382,13 @@ public:
 
     void integrateForces ( const vectorPtr_Type & velocity, const vectorPtr_Type & pressure);
 
+    // Additional method used for pre-processing on non-circular boundaries
+
+    void preprocessBoundary(const Real& nx, const Real& ny, const Real& nz, BCHandler& bc, Real& Q_hat, const vectorPtr_Type& Phi_h, const UInt flag,
+    					    vectorPtr_Type& Phi_h_flag, vectorPtr_Type& V_hat_x, vectorPtr_Type& V_hat_y, vectorPtr_Type& V_hat_z);
+
+    void solveLaplacian( const UInt& flag, bcPtr_Type& bc_laplacian, vectorPtr_Type& laplacianSolution );
+
 private:
 
 	// build the graphs
@@ -386,6 +406,10 @@ private:
 
 	// getpot object
 	dataFile_Type M_dataFile;
+
+	// Order FE spaces
+	std::string M_uOrder;
+	std::string M_pOrder;
 
 	// FE spaces
 	boost::shared_ptr<FESpace<mesh_Type, map_Type> > M_velocityFESpace;
