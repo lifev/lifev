@@ -152,6 +152,8 @@ public:
 	// Solve the Navier-Stokes equations, provided the BC
 	void iterate_nonlinear( bcPtr_Type & bc, const Real& time );
 
+	void iterate_nonlinear( bcPtr_Type & bc, const Real& time, const vectorPtr_Type& velocities );
+
 	void evalResidual(vector_Type& residual, const vector_Type& solution, const UInt iter_newton);
 
 	void solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol );
@@ -238,6 +240,12 @@ public:
 	const boost::shared_ptr<FESpace<mesh_Type, map_Type> >& pFESpace() const
 	{
 		return M_pressureFESpace;
+	}
+
+	// Get the velocity FE space
+	const boost::shared_ptr<FESpace<mesh_Type, map_Type> >& uFESpace_scalar() const
+	{
+		return M_velocityFESpaceScalar;
 	}
 
     void updateVelocity(vectorPtr_Type& velocity)
@@ -419,6 +427,7 @@ private:
 	// ET FE Spaces
 	boost::shared_ptr<ETFESpace_velocity > M_fespaceUETA;
 	boost::shared_ptr<ETFESpace_pressure > M_fespacePETA;
+	boost::shared_ptr<ETFESpace_pressure > M_fespaceUETA_scalar;
 
 	// stiff-strain check
 	bool M_stiffStrain;
