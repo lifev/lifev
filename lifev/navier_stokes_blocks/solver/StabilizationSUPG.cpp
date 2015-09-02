@@ -17,7 +17,8 @@ namespace LifeV
 // Constructor
 //=============================================================================
 
-StabilizationSUPG::StabilizationSUPG()
+StabilizationSUPG::StabilizationSUPG():
+		M_label("SUPG")
 {
 }
 

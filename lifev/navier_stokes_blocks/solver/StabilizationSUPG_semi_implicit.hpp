@@ -210,6 +210,8 @@ public:
     	return M_block_11;
     }
 
+    std::string label () { return M_label; }
+
     //@}
 
 private:
@@ -254,6 +256,8 @@ private:
     matrixPtr_Type M_block_11;
 
     bool M_useGraph;
+
+    std::string M_label;
 
     //@}
 }; // class StabilizationSUPG_semi_implicit

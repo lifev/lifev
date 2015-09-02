@@ -17,7 +17,8 @@ namespace LifeV
 // Constructor
 //=============================================================================
 
-StabilizationSUPGALE::StabilizationSUPGALE()
+StabilizationSUPGALE::StabilizationSUPGALE():
+		M_label("SUPG-ALE")
 {
 }
 

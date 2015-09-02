@@ -17,7 +17,8 @@ namespace LifeV
 // Constructor
 //=============================================================================
 
-StabilizationSUPG_semi_implicit::StabilizationSUPG_semi_implicit()
+StabilizationSUPG_semi_implicit::StabilizationSUPG_semi_implicit():
+		M_label("SUPG_semi_implicit")
 {
 }
 

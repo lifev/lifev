@@ -127,6 +127,8 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh, const int& id_domain)
     if ( M_useStabilization )
     {
     	M_stabilization.reset ( StabilizationFactory::instance().createObject ( M_dataFile("fluid/stabilization/type","none") ) );
+    	if (M_comm->MyPID() == 0)
+    		std::cout << "\nUsing the " << M_stabilization->label() << " stabilization\n\n";
     	M_stabilization->setVelocitySpace(M_velocityFESpace);
     	M_stabilization->setPressureSpace(M_pressureFESpace);
     	M_stabilization->setDensity(M_density);

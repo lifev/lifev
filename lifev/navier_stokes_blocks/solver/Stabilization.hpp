@@ -227,6 +227,8 @@ public:
 
     virtual matrixPtr_Type const& block_11() const = 0;
 
+    virtual std::string label () = 0;
+
 private:
 
 };

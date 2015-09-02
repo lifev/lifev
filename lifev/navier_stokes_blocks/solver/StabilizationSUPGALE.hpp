@@ -212,6 +212,8 @@ public:
 
     void setUseGraph (const bool& useGraph) { M_useGraph = useGraph; }
     
+    std::string label () { return M_label; }
+
     //@}
 
 private:
@@ -256,6 +258,8 @@ private:
     matrixPtr_Type M_block_11;
     
     bool M_useGraph;
+
+    std::string M_label;
 
     //@}
 }; // class StabilizationSUPGALE
