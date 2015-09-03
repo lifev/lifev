@@ -147,6 +147,9 @@ public:
 	// Solve the current timestep, provided the BC
 	void iterate( bcPtr_Type & bc, const Real& time );
 
+	// Solve the current timestep, provided the BC and a vector of velocities (used only for for aorta)
+	void iterate( bcPtr_Type & bc, const Real& time, const vectorPtr_Type& velocities );
+
 	// Solve the steady Navier-Stokes equations, provided the BC
 	void iterate_steady( bcPtr_Type & bc );
 
@@ -174,6 +177,8 @@ public:
     void setExtrapolatedPressure( const vectorPtr_Type& pressure_extrapolated ) { M_pressure_extrapolated = pressure_extrapolated; }
 
     VectorSmall<2> computeForces( BCHandler& bcHandlerDrag, BCHandler& bcHandlerLift);
+
+    void solveTimeStep();
 
   void computeForcesNonLinear(vectorPtr_Type& force, const vectorPtr_Type& solution);
 
@@ -260,6 +265,8 @@ public:
     }
 
     void applyBoundaryConditions ( bcPtr_Type & bc, const Real& time );
+
+    void applyBoundaryConditions ( bcPtr_Type & bc, const Real& time, const vectorPtr_Type& velocities );
 
     matrixPtr_Type const& getF() const
     {

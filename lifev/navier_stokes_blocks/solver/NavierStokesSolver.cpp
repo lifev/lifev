@@ -680,11 +680,32 @@ void NavierStokesSolver::applyBoundaryConditions ( bcPtr_Type & bc, const Real& 
     bcManageMatrix( *M_block01, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 0.0, 0.0);
 }
 
+void NavierStokesSolver::applyBoundaryConditions ( bcPtr_Type & bc, const Real& time, const vectorPtr_Type& velocities )
+{
+	/* Used only for example aorta semi implicit */
+
+	updateBCHandler(bc);
+	bcManage ( *M_block00, *M_rhs, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 1.0, time );
+    bcManageMatrix( *M_block01, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 0.0, 0.0);
+
+    *M_rhs += *velocities;
+}
+
+void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time, const vectorPtr_Type& velocities )
+{
+	applyBoundaryConditions ( bc, time, velocities);
+	solveTimeStep();
+}
+
 void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
 {
 	applyBoundaryConditions ( bc, time );
+	solveTimeStep();
+}
 
-    //(1) Set up the OseenOperator
+void NavierStokesSolver::solveTimeStep( )
+{
+	//(1) Set up the OseenOperator
     M_displayer.leaderPrint( "\tNS operator - set up the block operator...");
     LifeChrono chrono;
     chrono.start();

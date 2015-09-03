@@ -3,4 +3,5 @@ INCLUDE(AddSubdirectories)
 
 ADD_SUBDIRECTORIES(
 	example_aorta_fully_implicit
+	example_aorta_semi_implicit
 )
