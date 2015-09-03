@@ -27,7 +27,7 @@ filename   = result_aorta_semi_implicit
 
     options_preconditioner = solversOptionsFast
     preconditionerType     = SIMPLE # SIMPLE or PCD
-    save_every             = 1
+    save_every             = 5
     use_graph              = false
     
     [./physics]
@@ -35,7 +35,7 @@ filename   = result_aorta_semi_implicit
     viscosity       = 0.035  # viscosity
 
     [../time_discretization]
-    initialtime     = 0.05
+    initialtime     = 0.0
     endtime         = 5.0
     timestep        = 0.01
 
@@ -43,7 +43,7 @@ filename   = result_aorta_semi_implicit
 
     [../space_discretization]
     mesh_dir        = ./
-    mesh_file       = Aorta_fluid_1M_NE.mesh
+    mesh_file       = Aorta_fluid_30K_NE.mesh
     mesh_type       = .mesh
 
     vel_order       = P1

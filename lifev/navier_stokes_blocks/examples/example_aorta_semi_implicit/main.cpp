@@ -102,6 +102,9 @@ main ( int argc, char** argv )
     bool useStabilization = dataFile("fluid/stabilization/use", false);
     std::string stabilizationType = dataFile("fluid/stabilization/type", "none");
         
+    int saveEvery = dataFile ( "fluid/save_every", 1 );
+    int counterSaveEvery = saveEvery;
+
     // Time handler objects to deal with time advancing and extrapolation
     TimeAndExtrapolationHandler timeVelocity;
     Real dt       = dataFile("fluid/time_discretization/timestep",0.0);
@@ -413,9 +416,12 @@ main ( int argc, char** argv )
 
     Real i_HeartBeat = 0.0;
 
+    int time_step_count = 0;
 
     for ( ; time <= tFinal + dt / 2.; time += dt)
     {
+    	time_step_count += 1;
+
     	// ---------------------------------
     	// Evaluation of the inflow velocity
     	// ---------------------------------
@@ -552,7 +558,40 @@ main ( int argc, char** argv )
     	if (verbose)
     		std::cout << "\nTimestep solved in " << iterChrono.diff() << " s\n";
         
-        exporter->postProcess ( time );
+    	// This part below handles the exporter of the solution.
+    	// In particular, given a number of timesteps at which
+    	// we ask to export the solution (from datafile), here
+    	// the code takes care of exporting the solution also at
+    	// the previous timesteps such that, if later a restart
+    	// of the simulation is performed, it works correctly.
+    	if ( orderBDF == 1 )
+    	{
+    		if ( time_step_count == (counterSaveEvery-1) )
+    		{
+    			exporter->postProcess ( time );
+    		}
+    		else if ( time_step_count == counterSaveEvery )
+    		{
+    			exporter->postProcess ( time );
+    			counterSaveEvery += saveEvery;
+    		}
+    	}
+    	else if ( orderBDF == 2 )
+    	{
+    		if ( time_step_count == (counterSaveEvery-2) )
+    		{
+    			exporter->postProcess ( time );
+    		}
+    		else if ( time_step_count == (counterSaveEvery-1) )
+    		{
+    			exporter->postProcess ( time );
+    		}
+    		else if ( time_step_count == counterSaveEvery )
+    		{
+    			exporter->postProcess ( time );
+    			counterSaveEvery += saveEvery;
+    		}
+    	}
         
         timeVelocity.shift(*velocity);
         
