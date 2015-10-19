@@ -370,7 +370,8 @@ private:
 	std::ofstream M_outputTimeStep;
 	std::ofstream M_outputResiduals;
 	std::ofstream M_outputSteps;
-
+    std::ofstream M_outputLinearIterations;
+    
 	// Extrapolation of the initial guess for Newton
 	bool M_extrapolateInitialGuess;
 	UInt M_orderExtrapolationInitialGuess;

@@ -53,6 +53,8 @@ public:
     //! Returns the result of a Epetra_Operator inverse applied to an vector_Type X in Y.
     virtual int ApplyInverse(const vector_Type& X, vector_Type& Y) const;
 
+    int NumIter() const {return M_numIterations;}
+    
     //! Returns the infinity norm of the global matrix.
     double NormInf() const {return M_oper->NormInf();}
 
@@ -101,6 +103,9 @@ protected:
     boost::shared_ptr<Epetra_Operator> M_operBoost;
     //! Whenever to use the transpose
     bool M_useTranspose;
+    
+    //! Number of iterations performed by the solver
+    mutable int M_numIterations;
 };
 
 typedef FactorySingleton<Factory<InvertibleOperator, std::string> > InvertibleOperatorFactory;

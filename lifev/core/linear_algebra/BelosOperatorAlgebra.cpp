@@ -37,7 +37,6 @@ int BelosOperatorAlgebra::doApplyInverse(const vector_Type& X, vector_Type& Y) c
 {
 
     Teuchos::RCP<vector_Type> Xcopy(new vector_Type(X) );
-    Y.PutScalar(0.0);
     bool set = M_linProblem->setProblem(Teuchos::rcp(&Y, false), Xcopy);
     if (set == false)
     {
@@ -49,6 +48,8 @@ int BelosOperatorAlgebra::doApplyInverse(const vector_Type& X, vector_Type& Y) c
     
     Belos::ReturnType ret = M_solverManager->solve();
 
+    M_numIterations = M_solverManager->getNumIters();
+    
     if(ret == Belos::Converged)
         return 0;
     else

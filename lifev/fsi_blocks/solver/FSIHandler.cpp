@@ -219,8 +219,11 @@ void FSIHandler::setup ( )
 
 	M_nonLinearLineSearch = M_datafile ( "newton/NonLinearLineSearch", 0);
 	if (M_comm->MyPID() == 0)
+    {
 		M_out_res.open ("residualsNewton");
-
+        M_outputLinearIterations.open("linearIterations");
+    }
+    
     M_useShapeDerivatives = M_datafile ( "newton/useShapeDerivatives", false);
     M_subiterateFluidDirichlet = M_datafile ( "fluid/subiterateFluidDirichlet", false);
 
@@ -1061,7 +1064,12 @@ FSIHandler::solveFSIproblem ( )
 
 	for ( ; M_time <= M_t_end + M_dt / 2.; M_time += M_dt)
 	{
-		time_step_count += 1;
+        if ( M_comm->MyPID()==0 )
+        {
+            M_outputLinearIterations << std::endl;
+        }
+        
+        time_step_count += 1;
 
 		M_displayer.leaderPrint ( "\n-----------------------------------\n" ) ;
 		M_displayer.leaderPrintMax ( "FSI - solving now for time ", M_time ) ;
@@ -1703,7 +1711,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 void
 FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol )
 {
-	increment.zero();
+	//increment.zero();
 
 	if ( M_nonconforming )
 	{
@@ -1804,6 +1812,11 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 	//-------------------------//
 
 	M_invOper->ApplyInverse(residual.epetraVector() , increment.epetraVector());
+    
+    if ( M_comm->MyPID()==0 )
+    {
+        M_outputLinearIterations << " " << M_invOper->NumIter();
+    }
 
 	M_displayer.leaderPrint (" FSI-  End of solve Jac ...                      ");
 
