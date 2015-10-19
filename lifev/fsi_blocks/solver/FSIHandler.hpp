@@ -371,6 +371,7 @@ private:
 	std::ofstream M_outputResiduals;
 	std::ofstream M_outputSteps;
     std::ofstream M_outputLinearIterations;
+    std::ofstream M_outputPreconditionerComputation;
     
 	// Extrapolation of the initial guess for Newton
 	bool M_extrapolateInitialGuess;

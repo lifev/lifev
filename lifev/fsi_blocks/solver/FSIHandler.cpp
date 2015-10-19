@@ -222,6 +222,7 @@ void FSIHandler::setup ( )
     {
 		M_out_res.open ("residualsNewton");
         M_outputLinearIterations.open("linearIterations");
+        M_outputPreconditionerComputation.open("preconditionerComputation");
     }
     
     M_useShapeDerivatives = M_datafile ( "newton/useShapeDerivatives", false);
@@ -1067,6 +1068,7 @@ FSIHandler::solveFSIproblem ( )
         if ( M_comm->MyPID()==0 )
         {
             M_outputLinearIterations << std::endl;
+            M_outputPreconditionerComputation << std::endl;
         }
         
         time_step_count += 1;
@@ -1107,7 +1109,8 @@ FSIHandler::solveFSIproblem ( )
 		// Writing the norms into a file
 		if ( M_comm->MyPID()==0 )
 		{
-			M_outputTimeStep << "Time = " << M_time << " solved in " << iterChrono.diff() << " seconds" << std::endl;
+			// M_outputTimeStep << "Time = " << M_time << " solved in " << iterChrono.diff() << " seconds" << std::endl;
+			M_outputTimeStep << M_time << ", " << iterChrono.diff() << std::endl;
 		}
 
 		iterChrono.reset();
@@ -1800,6 +1803,11 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
     M_prec->updateApproximatedFluidOperator();
 	smallThingsChrono.stop();
 	M_displayer.leaderPrintMax ( "done in ", smallThingsChrono.diff() ) ;
+
+	if ( M_comm->MyPID()==0 )
+	{
+		M_outputPreconditionerComputation << " " << smallThingsChrono.diff();
+	}
 
 	//------------------------------------------------------//
 	// Third: set the preconditioner of the jacobian system //
