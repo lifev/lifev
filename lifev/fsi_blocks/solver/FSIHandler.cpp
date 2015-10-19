@@ -221,8 +221,9 @@ void FSIHandler::setup ( )
 	if (M_comm->MyPID() == 0)
     {
 		M_out_res.open ("residualsNewton");
-        M_outputLinearIterations.open("linearIterations");
-        M_outputPreconditionerComputation.open("preconditionerComputation");
+        M_outputLinearIterations.open("linearIterations.dat");
+        M_outputPreconditionerComputation.open("preconditionerComputation.dat");
+        M_outputTimeLinearSolver.open ("solutionLinearSystem.dat");
     }
     
     M_useShapeDerivatives = M_datafile ( "newton/useShapeDerivatives", false);
@@ -249,7 +250,7 @@ void FSIHandler::setup ( )
 	if(M_comm->MyPID()==0)
 	{
 		M_outputTimeStep << std::scientific;
-		M_outputTimeStep.open ("TimeStep.txt" );
+		M_outputTimeStep.open ("TimeStep.dat" );
 
 		if (M_printResiduals)
 			M_outputResiduals.open ("Residuals.txt" );
@@ -1069,6 +1070,7 @@ FSIHandler::solveFSIproblem ( )
         {
             M_outputLinearIterations << std::endl;
             M_outputPreconditionerComputation << std::endl;
+            M_outputTimeLinearSolver << std::endl;
         }
         
         time_step_count += 1;
@@ -1824,6 +1826,7 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
     if ( M_comm->MyPID()==0 )
     {
         M_outputLinearIterations << " " << M_invOper->NumIter();
+        M_outputTimeLinearSolver << " " << M_invOper->TimeSolver();
     }
 
 	M_displayer.leaderPrint (" FSI-  End of solve Jac ...                      ");

@@ -46,7 +46,13 @@ int BelosOperatorAlgebra::doApplyInverse(const vector_Type& X, vector_Type& Y) c
 
     M_solverManager->setProblem ( M_linProblem );
     
+    LifeChrono chrono;
+    chrono.start();
+
     Belos::ReturnType ret = M_solverManager->solve();
+
+    chrono.stop();
+    M_solutionTime = chrono.diff();
 
     M_numIterations = M_solverManager->getNumIters();
     

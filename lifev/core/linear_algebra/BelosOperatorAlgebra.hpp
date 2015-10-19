@@ -23,6 +23,7 @@
 #include <Teuchos_ParameterList.hpp>
 
 #include <lifev/core/linear_algebra/InvertibleOperator.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
 
 namespace LifeV
 {

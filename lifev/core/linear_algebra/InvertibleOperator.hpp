@@ -55,6 +55,8 @@ public:
 
     int NumIter() const {return M_numIterations;}
     
+    double TimeSolver() const {return M_solutionTime;}
+
     //! Returns the infinity norm of the global matrix.
     double NormInf() const {return M_oper->NormInf();}
 
@@ -106,6 +108,9 @@ protected:
     
     //! Number of iterations performed by the solver
     mutable int M_numIterations;
+
+    //! Time spent to solve the linear system
+    mutable double M_solutionTime;
 };
 
 typedef FactorySingleton<Factory<InvertibleOperator, std::string> > InvertibleOperatorFactory;
