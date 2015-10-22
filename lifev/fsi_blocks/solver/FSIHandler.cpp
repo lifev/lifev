@@ -372,10 +372,11 @@ void FSIHandler::initializeTimeAdvance ( )
     std::vector<vector_Type> initialStateVelocity;
     
     // Initialize and create objects for the ALE time advance
-    M_aleTimeAdvance.reset ( TimeAdvanceFactory::instance().createObject ( timeAdvanceMethod ) );
-    M_aleTimeAdvance->setup (M_dataStructure->dataTimeAdvance()->orderBDF() , 1);
-    M_aleTimeAdvance->setTimeStep ( M_dt );
-    std::vector<vectorPtr_Type> df0;
+    M_aleTimeAdvance.reset( new TimeAndExtrapolationHandler ( ) );
+    M_aleTimeAdvance->setMaximumExtrapolationOrder(M_orderBDF);
+    M_aleTimeAdvance->setTimeStep(M_dt);
+    vector_Type disp_mesh_initial ( M_aleFESpace->map() );
+    std::vector<vector_Type> initialStateALE;
     
     // Structure
     M_structureTimeAdvance.reset ( TimeAdvanceFactory::instance().createObject ( timeAdvanceMethod ) );
@@ -392,12 +393,9 @@ void FSIHandler::initializeTimeAdvance ( )
             initialStateVelocity.push_back(velocityInitial);
     
         // ALE
-        vectorPtr_Type fluidDisp (new VectorEpetra (M_aleFESpace->map(), Unique) );
-        fluidDisp->zero();
-        for ( UInt previousPass = 0; previousPass < M_aleTimeAdvance->size() ; previousPass++)
-        {
-            df0.push_back (fluidDisp);
-        }
+        disp_mesh_initial.zero() ;
+        for ( UInt i = 0; i < M_orderBDF; ++i )
+            initialStateALE.push_back(disp_mesh_initial);
         
         // Structure
         vectorPtr_Type disp (new VectorEpetra (M_displacementFESpace->map(), Unique) );
@@ -503,7 +501,7 @@ void FSIHandler::initializeTimeAdvance ( )
             iterationString = iter.str();
             
             initialStateVelocity.push_back(*velocityRestart);
-            df0.push_back (aleRestart);
+            initialStateALE.push_back(*aleRestart);
             uv0.push_back (structureRestart);
             
             }
@@ -538,17 +536,17 @@ void FSIHandler::initializeTimeAdvance ( )
         }
         
         // For BDF 1 it does not change anything, for BDF2 it is necessary. We do the std::reverse
-        // just to the fluid stencil because the ones of the structure and ALE are ordered in the
+        // just to the fluid and ALE stencil because the one of the structure is ordered in the
         // other way round.
         std::reverse(initialStateVelocity.begin(),initialStateVelocity.end());
+        std::reverse(initialStateALE.begin(),initialStateALE.end());
     }
     
     // Fluid
 	M_fluidTimeAdvance->initialize(initialStateVelocity);
 
     // ALE
-    M_aleTimeAdvance->setInitialCondition (df0);
-    M_aleTimeAdvance->updateRHSContribution ( M_dt );
+    M_aleTimeAdvance->initialize(initialStateALE);
     
     // Structure
     M_structureTimeAdvance->setInitialCondition (uv0);
@@ -1130,7 +1128,7 @@ FSIHandler::solveFSIproblem ( )
 		// Updating all the time-advance objects
 		M_fluidTimeAdvance->shift(*M_fluidVelocity);
 		M_structureTimeAdvance->shiftRight(*M_structureDisplacement);
-		M_aleTimeAdvance->shiftRight(*M_fluidDisplacement);
+		M_aleTimeAdvance->shift(*M_fluidDisplacement);
 
 		// This part below handles the exporter of the solution.
 		// In particular, given a number of timesteps at which
@@ -1330,18 +1328,18 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		moveMesh ( *mmRep );
 	}
 
-	if ( iter_newton ==  0 )
-	{
-		M_aleTimeAdvance->updateRHSFirstDerivative ( M_dt );
-	}
+	// Approximating now the fluid mesh velocity
+    vectorPtr_Type meshVelocity ( new vector_Type (M_aleFESpace->map() ) );
+    meshVelocity->zero();
+    vector_Type meshVelocity_bdf ( M_aleFESpace->map() ); // velocity from previous timesteps
+    meshVelocity_bdf.zero();
+    M_aleTimeAdvance->rhsContribution( meshVelocity_bdf );
+    *meshVelocity = M_aleTimeAdvance->alpha()*(*meshDisplacement)/(M_dt) - meshVelocity_bdf;
 
-	// Important: assume that the fluid velocity and the ale have the same map
-	vector_Type meshVelocity ( M_aleTimeAdvance->firstDerivative ( *meshDisplacement ) );
-
-	M_beta_star.reset ( new VectorEpetra ( M_fluid->uFESpace()->map ( ) ) );
-	M_beta_star->subset ( solution, 0);
-	vector_Type u_k ( *M_beta_star ); // Needed to update the Jacobian of the fluid
-	*M_beta_star -= meshVelocity;	  // This is (u-w), fluid velocity minus fluid mesh velocity
+    // Computing the convective velocity
+	M_beta.reset ( new VectorEpetra ( M_fluid->uFESpace()->map ( ) ) );
+	M_beta->subset ( solution, 0); // this line says M_beta equal to fluid velocity
+	*M_beta -= *meshVelocity;	   // This is (u_k-w_k), fluid velocity minus fluid mesh velocity
 
 	//-------------------------------------------------------------------//
 	// Second: re-assemble the fluid blocks since we have moved the mesh //
@@ -1349,21 +1347,15 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 	M_fluid->buildSystem();
 
-	/*
-	M_fluid->updateSystem ( M_beta_star, M_rhs_velocity );
-
-	M_fluid->applyBoundaryConditions ( M_fluidBC, M_time );
-	M_rhsFluid.reset(new VectorEpetra ( M_fluid->uFESpace()->map() ) );
-	M_rhsFluid = M_fluid->getRhs();
-	*/
-
 	// Get the fluid velocity at the previous Newton iteration
 	vectorPtr_Type velocity_km1( new vector_Type ( M_fluid->uFESpace()->map ( ) ) );
+    velocity_km1->zero();
 	velocity_km1->subset ( solution, 0);
 
 	// Get the fluid pressure at the previous Newton iteration
 	vectorPtr_Type pressure_km1( new vector_Type ( M_fluid->pFESpace()->map ( ) ) );
-	pressure_km1->subset ( solution, M_fluid->pFESpace()->map ( ), M_fluid->uFESpace()->map().mapSize(), 0 );
+    pressure_km1->zero();
+    pressure_km1->subset ( solution, M_fluid->pFESpace()->map ( ), M_fluid->uFESpace()->map().mapSize(), 0 );
 
 	if ( M_nonconforming )
 	{
@@ -1387,7 +1379,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		fluid_pressure_residual->zero();
 
 		// Evaluate the residual coming from the fluid
-		M_fluid->evaluateResidual( M_beta_star, velocity_km1, pressure_km1, M_rhs_velocity, velocity_residual, fluid_pressure_residual);
+		M_fluid->evaluateResidual( M_beta, velocity_km1, pressure_km1, M_rhs_velocity, velocity_residual, fluid_pressure_residual);
 
 		vectorPtr_Type lambda_km1_omegaF ( new vector_Type ( M_fluid->uFESpace()->map() ) );
 		M_FluidToStructureInterpolant->expandGammaToOmega_Known(lambda_km1, lambda_km1_omegaF);
@@ -1561,16 +1553,8 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		vectorPtr_Type fluid_residual( new vector_Type ( residual.map(), Unique ) );
 		fluid_residual->zero();
 
-		// Get the fluid velocity at the previous Newton iteration
-		vectorPtr_Type velocity_km1( new vector_Type ( M_fluid->uFESpace()->map ( ), Unique ) );
-		velocity_km1->subset ( solution, 0);
-
-		// Get the fluid pressure at the previous Newton iteration
-		vectorPtr_Type pressure_km1( new vector_Type ( M_fluid->pFESpace()->map ( ), Unique ) );
-		pressure_km1->subset ( solution, M_fluid->pFESpace()->map ( ), M_fluid->uFESpace()->map().mapSize(), 0 );
-
 		// Evaluate the residual coming from the fluid block
-		M_fluid->evaluateResidual( M_beta_star, velocity_km1, pressure_km1, M_rhs_velocity, fluid_residual);
+		M_fluid->evaluateResidual( M_beta, velocity_km1, pressure_km1, M_rhs_velocity, fluid_residual);
 
 		//--------------------------------------//
 		// Third: initialize the apply operator //
@@ -1649,10 +1633,10 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	//---------------------------------------------//
 
 	M_displayer.leaderPrint ( "[FSI] - Update Jacobian terms: \n" ) ;
-	M_fluid->updateConvectiveTerm(M_beta_star);
-	M_fluid->updateJacobian(u_k);
+	M_fluid->updateConvectiveTerm(M_beta);
+	M_fluid->updateJacobian(*velocity_km1);
 	if ( M_fluid->useStabilization() )
-		M_fluid->updateStabilization(*M_beta_star, *velocity_km1, *pressure_km1, *M_rhs_velocity);
+		M_fluid->updateStabilization(*M_beta, *velocity_km1, *pressure_km1, *M_rhs_velocity);
 
 	M_fluid->applyBoundaryConditionsJacobian ( M_fluidBC );
 
@@ -1671,9 +1655,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		vector_Type uk (M_fluid->uFESpace()->map() + M_fluid->pFESpace()->map() );
 		//vector_Type pk (M_fluid->pFESpace()->map() );
 
-		vector_Type meshVelRep (  M_aleFESpace->map(), Repeated ) ;
-
-		meshVelRep = M_aleTimeAdvance->firstDerivative();
+		vector_Type meshVelRep (  *meshVelocity, Repeated ) ;
 
 		//When this class is used, the convective term is used implictly
 		un.subset ( solution, 0 );
@@ -1708,7 +1690,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 	if ( std::strcmp(M_prec->preconditionerTypeFluid(),"aPCDOperator")==0 )
 	{
-		M_fluid->updatePCD(M_beta_star);
+		M_fluid->updatePCD(M_beta);
 		M_prec->setPCDBlocks(M_fluid->Fp(),M_fluid->Mp(),M_fluid->Mu());
 	}
 }
@@ -1716,7 +1698,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 void
 FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol )
 {
-	//increment.zero();
+	increment.zero();
 
 	if ( M_nonconforming )
 	{
@@ -1884,29 +1866,11 @@ FSIHandler::moveMesh ( const VectorEpetra& displacement )
 void
 FSIHandler::updateSystem ( )
 {
-	//M_structureTimeAdvance->updateRHSContribution ( M_dt );
-
-	// Fluid update - initialize vectors - TODO to be done only once at the beginning
-	//M_u_star.reset ( new VectorEpetra ( M_fluid->uFESpace()->map ( ) ) );
-	//M_w_star.reset ( new VectorEpetra ( M_aleFESpace->map ( ) ) );
-	//M_beta_star.reset ( new VectorEpetra ( M_fluid->uFESpace()->map ( ) ) );
 	M_rhs_velocity.reset ( new VectorEpetra ( M_fluid->uFESpace()->map ( ) ) );
-
-	//M_u_star->zero();
-	//M_w_star->zero();
-	//M_beta_star->zero();
 	M_rhs_velocity->zero();
 
-	// Compute extrapolation of the velocity for the fluid and rhs contribution due to the time derivative
-	//M_fluidTimeAdvance->extrapolate (M_orderBDF, *M_u_star);
+	// Compute rhs contribution due to the time derivative
 	M_fluidTimeAdvance->rhsContribution (*M_rhs_velocity);
-
-	// Extrapolate the mesh velocity
-	//M_aleTimeAdvance->extrapolationFirstDerivative ( *M_w_star );
-
-	// compute beta* = u*-w*
-	//*M_beta_star += *M_u_star;
-	//*M_beta_star -= *M_w_star;
 
 	// Get the right hand side of the structural part and apply the BC on it TODO now it also applies bc on the matrix, remove!!
 	getRhsStructure ( );

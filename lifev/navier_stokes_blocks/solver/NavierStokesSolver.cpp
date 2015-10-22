@@ -426,25 +426,25 @@ void NavierStokesSolver::buildSystem()
     }
     else
     {
-        M_Mu.reset (new matrix_Type ( M_velocityFESpace->map() ) );
+        M_Mu.reset (new matrix_Type ( M_velocityFESpace->map() ) ); // mass velocity
         M_Mu->zero();
         
-        M_Btranspose.reset (new matrix_Type ( M_velocityFESpace->map() ) );
+        M_Btranspose.reset (new matrix_Type ( M_velocityFESpace->map() ) ); // grad term
         M_Btranspose->zero();
         
-        M_B.reset (new matrix_Type ( M_pressureFESpace->map() ) );
+        M_B.reset (new matrix_Type ( M_pressureFESpace->map() ) ); // div term
         M_B->zero();
         
-        M_A.reset (new matrix_Type ( M_velocityFESpace->map() ) );
+        M_A.reset (new matrix_Type ( M_velocityFESpace->map() ) ); // stiffness
         M_A->zero();
         
-        M_C.reset (new matrix_Type ( M_velocityFESpace->map() ) );
+        M_C.reset (new matrix_Type ( M_velocityFESpace->map() ) ); // convective
         M_C->zero();
         
-        M_F.reset (new matrix_Type ( M_velocityFESpace->map() ) );
+        M_F.reset (new matrix_Type ( M_velocityFESpace->map() ) ); // linearization convective
         M_F->zero();
         
-        M_Jacobian.reset (new matrix_Type ( M_velocityFESpace->map() ) );
+        M_Jacobian.reset (new matrix_Type ( M_velocityFESpace->map() ) ); // jacobian
         M_Jacobian->zero();
     }
 
@@ -487,7 +487,7 @@ void NavierStokesSolver::buildSystem()
 					   M_velocityFESpace->qr(),
 					   M_fespaceUETA,
 					   M_fespaceUETA,
-					   value( 0.5 * M_viscosity ) * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) )
+					   value( M_viscosity ) * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) )
 			) >> M_A;
 		}
 		else
@@ -1027,7 +1027,6 @@ void NavierStokesSolver::evaluateResidual( const vectorPtr_Type& convective_velo
 					   	   	   	   	   	   vectorPtr_Type& residual)
 {
 	// This methos is used in FSI to assemble the fluid residual component
-
 	residual->zero();
 
 	// Residual vector for the velocity and pressure components
@@ -1052,7 +1051,7 @@ void NavierStokesSolver::evaluateResidual( const vectorPtr_Type& convective_velo
 					M_fespaceUETA,
 					M_density * value ( M_alpha / M_timeStep ) * dot ( value ( M_fespaceUETA, *u_km1_repeated ), phi_i ) -
 					M_density * dot ( value ( M_fespaceUETA, *rhs_velocity_repeated ), phi_i ) +
-					value ( 0.5 ) * M_viscosity * dot ( grad ( phi_i )  + transpose ( grad ( phi_i ) ), grad ( M_fespaceUETA, *u_km1_repeated ) + transpose ( grad ( M_fespaceUETA, *u_km1_repeated ) ) ) +
+					M_viscosity * dot ( grad ( phi_i )  + transpose ( grad ( phi_i ) ), grad ( M_fespaceUETA, *u_km1_repeated ) + transpose ( grad ( M_fespaceUETA, *u_km1_repeated ) ) ) +
 					M_density * dot ( value ( M_fespaceUETA, *convective_velocity_repeated ) * grad ( M_fespaceUETA, *u_km1_repeated ), phi_i ) +
 					value ( -1.0 ) * value ( M_fespacePETA, *p_km1_repeated ) * div ( phi_i )
 			) >> res_velocity;

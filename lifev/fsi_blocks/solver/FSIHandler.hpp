@@ -289,7 +289,7 @@ private:
 
     // time advance for the structure
     timeAdvancePtr_Type M_structureTimeAdvance;
-    timeAdvancePtr_Type M_aleTimeAdvance;
+    boost::shared_ptr<TimeAndExtrapolationHandler> M_aleTimeAdvance;
     boost::shared_ptr<TimeAndExtrapolationHandler> M_fluidTimeAdvance;
 
     // boundary conditions
@@ -339,7 +339,7 @@ private:
 
 	vectorPtr_Type M_u_star;
 	vectorPtr_Type M_w_star;
-	vectorPtr_Type M_beta_star;
+	vectorPtr_Type M_beta;
 	vectorPtr_Type M_rhs_velocity;
 
 	matrixPtr_Type M_matrixStructure;
