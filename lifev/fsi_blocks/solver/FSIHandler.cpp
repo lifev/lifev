@@ -1321,7 +1321,9 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 				  M_lagrangeMap->mapSize() );
 
 	vectorPtr_Type meshDisplacement ( new vector_Type (M_aleFESpace->map() ) );
+	meshDisplacement->zero();
 	meshDisplacement->subset (solution, offset);
+
 	vectorPtr_Type mmRep ( new vector_Type (*meshDisplacement, Repeated ) );
 	if ( M_moveMesh )
 	{
@@ -1338,6 +1340,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
     // Computing the convective velocity
 	M_beta.reset ( new VectorEpetra ( M_fluid->uFESpace()->map ( ) ) );
+	M_beta->zero();
 	M_beta->subset ( solution, 0); // this line says M_beta equal to fluid velocity
 	*M_beta -= *meshVelocity;	   // This is (u_k-w_k), fluid velocity minus fluid mesh velocity
 
