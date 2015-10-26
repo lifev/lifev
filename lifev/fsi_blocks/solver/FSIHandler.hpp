@@ -237,7 +237,7 @@ private:
 
     void applyBCsolution(vectorPtr_Type& M_solution);
 
-    void applyBCresidual(VectorEpetra& residual);
+    void applyBCresidual(VectorEpetra& r_u, VectorEpetra& r_ds, VectorEpetra& r_df);
 
     void setSolversOptions(const Teuchos::ParameterList& solversOptions);
 
@@ -343,6 +343,7 @@ private:
 	vectorPtr_Type M_rhs_velocity;
 
 	matrixPtr_Type M_matrixStructure;
+	matrixPtr_Type M_matrixStructure_noBc;
 
 	// Operator to apply Jacobian of the FSI
 	boost::shared_ptr<LifeV::Operators::FSIApplyOperator> M_applyOperatorJacobian;

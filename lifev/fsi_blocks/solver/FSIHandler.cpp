@@ -864,6 +864,11 @@ FSIHandler::getMatrixStructure ( )
 	*M_matrixStructure += *M_structure->massMatrix();
 	*M_matrixStructure += * (M_structure->material()->jacobian() );
 
+	M_matrixStructure_noBc.reset (new matrix_Type ( M_displacementFESpace->map(), 1 ) );
+	*M_matrixStructure_noBc += *M_structure->massMatrix();
+	*M_matrixStructure_noBc += * (M_structure->material()->jacobian() );
+	M_matrixStructure_noBc->globalAssemble();
+
 	if ( !M_structureBC->bcUpdateDone() )
 		M_structureBC->bcUpdate ( *M_displacementFESpace->mesh(), M_displacementFESpace->feBd(), M_displacementFESpace->dof() );
 
@@ -1226,23 +1231,33 @@ FSIHandler::applyBCsolution(vectorPtr_Type& M_solution)
 }
 
 void
-FSIHandler::applyBCresidual(VectorEpetra& residual)
+FSIHandler::applyBCresidual(VectorEpetra& r_u, VectorEpetra& r_ds, VectorEpetra& r_df)
 {
 	//! Extract each component of the input vector
-	VectorEpetra velocity(M_fluid->uFESpace()->map(), Unique);
-	velocity.subset(residual, M_fluid->uFESpace()->map(), 0, 0);
-	velocity *= -1;
+	VectorEpetra ru_copy(r_u, Unique);
+	ru_copy *= -1;
 
 	//! Apply BC on each component
 	if ( !M_fluidBC_residual->bcUpdateDone() )
 		M_fluidBC_residual->bcUpdate ( *M_fluid->uFESpace()->mesh(), M_fluid->uFESpace()->feBd(), M_fluid->uFESpace()->dof() );
 
-	bcManageRhs ( velocity, *M_fluid->uFESpace()->mesh(), M_fluid->uFESpace()->dof(), *M_fluidBC_residual, M_fluid->uFESpace()->feBd(), 0.0, M_time );
+	bcManageRhs ( ru_copy, *M_fluid->uFESpace()->mesh(), M_fluid->uFESpace()->dof(), *M_fluidBC_residual, M_fluid->uFESpace()->feBd(), 1.0, M_time );
 
-	velocity *= -1;
+	ru_copy *= -1;
 
-	//! Push local contributions into the global one
-	residual.subset(velocity, M_fluid->uFESpace()->map(), 0, 0);
+	r_u.zero();
+	r_u = ru_copy;
+
+	if ( !M_structureBC->bcUpdateDone() )
+		M_structureBC->bcUpdate ( *M_displacementFESpace->mesh(), M_displacementFESpace->feBd(), M_displacementFESpace->dof() );
+
+	bcManageRhs ( r_ds, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC, M_displacementFESpace->feBd(), 1.0, 0.0 );
+
+	if ( !M_aleBC->bcUpdateDone() )
+		M_aleBC->bcUpdate ( *M_aleFESpace->mesh(), M_aleFESpace->feBd(), M_aleFESpace->dof() );
+
+	bcManageRhs ( r_df, *M_aleFESpace->mesh(), M_aleFESpace->dof(), *M_aleBC, M_aleFESpace->feBd(), 1.0, 0.0 );
+
 }
 
 void
@@ -1309,59 +1324,77 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 {
 	residual.zero();
 
-	M_NewtonIter = iter_newton;
+	// Create empty vectors to store each component of the FSI residual
 
-	//---------------------------------------------------------//
-	// First: extract the fluid displacement and move the mesh //
-	//---------------------------------------------------------//
+	vectorPtr_Type res_u ( new vector_Type ( M_fluid->uFESpace()->map(), Unique ) );
+	vectorPtr_Type res_p ( new vector_Type ( M_fluid->pFESpace()->map(), Unique ) );
+	vectorPtr_Type res_ds ( new vector_Type ( M_displacementFESpace->map(), Unique ) );
+	vectorPtr_Type res_lambda ( new vector_Type ( *M_lagrangeMap, Unique ) );
+	vectorPtr_Type res_df ( new vector_Type (M_aleFESpace->map(), Unique ) );
 
-	UInt offset ( M_fluid->uFESpace()->map().mapSize() +
-				  M_fluid->pFESpace()->map().mapSize() +
-				  M_displacementFESpace->map().mapSize() +
-				  M_lagrangeMap->mapSize() );
+	res_u->zero();
+	res_p->zero();
+	res_ds->zero();
+	res_lambda->zero();
+	res_df->zero();
 
-	vectorPtr_Type meshDisplacement ( new vector_Type (M_aleFESpace->map() ) );
-	meshDisplacement->zero();
-	meshDisplacement->subset (solution, offset);
+	// Create empty vectors to store each component of the FSI solution from previous newton step
 
-	vectorPtr_Type mmRep ( new vector_Type (*meshDisplacement, Repeated ) );
-	if ( M_moveMesh )
-	{
-		moveMesh ( *mmRep );
-	}
+	vectorPtr_Type u_k ( new vector_Type ( M_fluid->uFESpace()->map() ) );
+	vectorPtr_Type p_k ( new vector_Type ( M_fluid->pFESpace()->map() ) );
+	vectorPtr_Type ds_k ( new vector_Type ( M_displacementFESpace->map() ) );
+	vectorPtr_Type lambda_k ( new vector_Type ( *M_lagrangeMap ) );
+	vectorPtr_Type df_k ( new vector_Type ( M_aleFESpace->map() ) );
 
-	// Approximating now the fluid mesh velocity
+	u_k->zero();
+	p_k->zero();
+	ds_k->zero();
+	lambda_k->zero();
+	df_k->zero();
+
+	// Copy in the vectors u_k, p_k, ds_k, lambda_k and df_k each component of the solution at the previous newton step k
+
+	u_k->subset (solution,  M_fluid->uFESpace()->map(), 0, 0);
+	p_k->subset (solution,  M_fluid->pFESpace()->map(), M_fluid->uFESpace()->map().mapSize(), 0);
+	ds_k->subset (solution,  M_displacementFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize(), 0);
+	lambda_k->subset(solution,  *M_lagrangeMap, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize(), 0);
+	df_k->subset(solution,  M_aleFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize(), 0);
+
+	//---------------//
+	// Move the mesh //
+	//---------------//
+
+	vectorPtr_Type mmRep ( new vector_Type (*df_k, Repeated ) );
+	moveMesh ( *mmRep );
+
+	//---------------------------------//
+	// Compute the fluid mesh velocity //
+	//---------------------------------//
+
     vectorPtr_Type meshVelocity ( new vector_Type (M_aleFESpace->map() ) );
     meshVelocity->zero();
     vector_Type meshVelocity_bdf ( M_aleFESpace->map() ); // velocity from previous timesteps
     meshVelocity_bdf.zero();
     M_aleTimeAdvance->rhsContribution( meshVelocity_bdf );
-    *meshVelocity = M_aleTimeAdvance->alpha()*(*meshDisplacement)/(M_dt) - meshVelocity_bdf;
+    *meshVelocity = ( M_aleTimeAdvance->alpha()*(*df_k)/(M_dt) - meshVelocity_bdf );
 
-    // Computing the convective velocity
+    //---------------------------------//
+    // Compute the convective velocity //
+    //---------------------------------//
+
 	M_beta.reset ( new VectorEpetra ( M_fluid->uFESpace()->map ( ) ) );
 	M_beta->zero();
-	M_beta->subset ( solution, 0); // this line says M_beta equal to fluid velocity
-	*M_beta -= *meshVelocity;	   // This is (u_k-w_k), fluid velocity minus fluid mesh velocity
+	*M_beta = ( *u_k - *meshVelocity );
 
-	//-------------------------------------------------------------------//
-	// Second: re-assemble the fluid blocks since we have moved the mesh //
-	//-------------------------------------------------------------------//
+	//--------------------------------------------------------------------//
+	// Re-assemble the fluid constant blocks since we have moved the mesh //
+	//--------------------------------------------------------------------//
 
 	M_fluid->buildSystem();
 
-	// Get the fluid velocity at the previous Newton iteration
-	vectorPtr_Type velocity_km1( new vector_Type ( M_fluid->uFESpace()->map ( ) ) );
-    velocity_km1->zero();
-	velocity_km1->subset ( solution, 0);
-
-	// Get the fluid pressure at the previous Newton iteration
-	vectorPtr_Type pressure_km1( new vector_Type ( M_fluid->pFESpace()->map ( ) ) );
-    pressure_km1->zero();
-    pressure_km1->subset ( solution, M_fluid->pFESpace()->map ( ), M_fluid->uFESpace()->map().mapSize(), 0 );
-
 	if ( M_nonconforming )
 	{
+		/*
 		vectorPtr_Type lambda_km1 ( new vector_Type ( *M_lagrangeMap ) );
 		lambda_km1->zero();
 		UInt offset_lagrange = M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize();
@@ -1549,20 +1582,43 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		residual.subset(*residual_structure_displacement, M_displacementFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() );
 		residual.subset(*velocity_km1_gamma, *M_lagrangeMap, 0, offset_lagrange );
 		residual.subset(*res_ALE, M_aleFESpace->map(), 0, offset );
+		*/
 	}
 	else
 	{
-		// Initialize vector for the fluid residual with map of the full residual
-		vectorPtr_Type fluid_residual( new vector_Type ( residual.map(), Unique ) );
-		fluid_residual->zero();
+		//------------------------//
+		// Residual for the fluid //
+		//------------------------//
 
-		// Evaluate the residual coming from the fluid block
-		M_fluid->evaluateResidual( M_beta, velocity_km1, pressure_km1, M_rhs_velocity, fluid_residual);
+		// Evaluate the residual coming from the fluid ( without coupling for the moment )
+		M_fluid->evaluateResidual( M_beta, u_k, p_k, M_rhs_velocity, res_u, res_p);
+
+		// Adding the coupling contribution
+		*res_u += ( *(M_coupling->lambdaToFluidMomentum()) * (*lambda_k) );
+
+		//------------------------//
+		// Residual for the solid //
+		//------------------------//
+
+		*res_ds = ( (*M_matrixStructure_noBc) * (*ds_k) +  *(M_coupling->lambdaToStructureMomentum()) * (*lambda_k) - (*M_rhsStructure)  );
+
+		//---------------------------------------//
+		// Residual for the lagrange multipliers //
+		//---------------------------------------//
+
+		*res_lambda = ( *(M_coupling->fluidVelocityToLambda()) * (*u_k) + *(M_coupling->structureDisplacementToLambda()) * (*ds_k) - ( *M_rhsCouplingVelocities )  );
+
+		//----------------------//
+		// Residual for the ALE //
+		//----------------------//
+
+		*res_df = ( *(M_coupling->structureDisplacementToFluidDisplacement()) * (*ds_k) + *(M_ale->matrix_noBC()) * (*df_k) );
 
 		//--------------------------------------//
 		// Third: initialize the apply operator //
 		//--------------------------------------//
 
+		/*
 		initializeApplyOperatorResidual ( );
 
 		//------------------------------------------------//
@@ -1586,33 +1642,27 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 		// Adding contribution from the fluid
 		residual += *fluid_residual;
+		*/
 	}
 
-	applyBCresidual ( residual );
+	applyBCresidual ( *res_u, *res_ds, *res_df );
+
+	residual.subset(*res_u, M_fluid->uFESpace()->map(), 0, 0 );
+	residual.subset(*res_p, M_fluid->pFESpace()->map(), 0, M_fluid->uFESpace()->map().mapSize() );
+	residual.subset(*res_ds, M_displacementFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() );
+	residual.subset(*res_lambda, *M_lagrangeMap, 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize() );
+	residual.subset(*res_df, M_aleFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize() );
+
 
 	if (M_printResiduals)
 	{
-		// Defining vectors for the single components of the residual
-		vectorPtr_Type r_fluid_vel ( new vector_Type (M_fluid->uFESpace()->map() ) );
-		vectorPtr_Type r_fluid_press ( new vector_Type (M_fluid->pFESpace()->map() ) );
-		vectorPtr_Type r_structure_displ ( new vector_Type (M_displacementFESpace->map() ) );
-		vectorPtr_Type r_coupling ( new vector_Type (*M_lagrangeMap ) );
-		vectorPtr_Type r_fluid_displ ( new vector_Type (M_aleFESpace->map() ) );
-
-		// Getting each single contribution
-		r_fluid_vel->subset(residual);
-		r_fluid_press->subset(residual, M_fluid->uFESpace()->dof().numTotalDof() * 3);
-		r_structure_displ->subset(residual, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() );
-		r_coupling->subset(residual, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize() );
-		r_fluid_displ->subset(residual, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize() );
-
 		// Computing the norms
 		Real norm_full_residual = residual.normInf();
-		Real norm_u_residual = r_fluid_vel->normInf();
-		Real norm_p_residual = r_fluid_press->normInf();
-		Real norm_ds_residual = r_structure_displ->normInf();
-		Real norm_lambda_residual = r_coupling->normInf();
-		Real norm_df_residual = r_fluid_displ->normInf();
+		Real norm_u_residual = res_u->normInf();
+		Real norm_p_residual = res_p->normInf();
+		Real norm_ds_residual = res_ds->normInf();
+		Real norm_lambda_residual = res_lambda->normInf();
+		Real norm_df_residual = res_df->normInf();
 
 		// Writing the norms into a file
 		if ( M_comm->MyPID()==0 && iter_newton == 0)
@@ -1631,15 +1681,16 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		}
 	}
 
+
 	//---------------------------------------------//
 	// Post-step: update the Jacobian of the fluid //
 	//---------------------------------------------//
 
 	M_displayer.leaderPrint ( "[FSI] - Update Jacobian terms: \n" ) ;
 	M_fluid->updateConvectiveTerm(M_beta);
-	M_fluid->updateJacobian(*velocity_km1);
+	M_fluid->updateJacobian(*u_k);
 	if ( M_fluid->useStabilization() )
-		M_fluid->updateStabilization(*M_beta, *velocity_km1, *pressure_km1, *M_rhs_velocity);
+		M_fluid->updateStabilization(*M_beta, *u_k, *p_k, *M_rhs_velocity);
 
 	M_fluid->applyBoundaryConditionsJacobian ( M_fluidBC );
 
@@ -1678,8 +1729,8 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 										meshVelRep, // or veloFluidMesh
 										*M_fluid->uFESpace(),
 										*M_fluid->pFESpace(),
-										true /*This flag tells the method to consider the velocity of the domain implicitly*/,
-										true /*This flag tells the method to consider the convective term implicitly */,
+										true, //This flag tells the method to consider the velocity of the domain implicitly,
+										true, //This flag tells the method to consider the convective term implicitly ,
 										*M_fluidBC);
 	}
 
@@ -1689,13 +1740,6 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 	if ( !M_nonconforming )
 		initializeApplyOperatorJacobian();
-
-
-	if ( std::strcmp(M_prec->preconditionerTypeFluid(),"aPCDOperator")==0 )
-	{
-		M_fluid->updatePCD(M_beta);
-		M_prec->setPCDBlocks(M_fluid->Fp(),M_fluid->Mp(),M_fluid->Mu());
-	}
 }
 
 void
