@@ -145,6 +145,12 @@ public:
     	return M_matrHE;
     }
 
+    matrixPtr_Type const& matrix_noBC() const
+    {
+    	M_matrHE_noBC->globalAssemble();
+    	return M_matrHE_noBC;
+    }
+
     void updateShapeDerivatives(Real&                          alpha,
                                 const Real&                    density,
                                 const Real&                    viscosity,
@@ -231,6 +237,7 @@ private:
 
     //! The matrix holding the values
     matrixPtr_Type                 M_matrHE;
+    matrixPtr_Type                 M_matrHE_noBC;
 
     //! The matrix holding the shape derivatives
     matrixPtr_Type                 M_matrShapeDerVel;

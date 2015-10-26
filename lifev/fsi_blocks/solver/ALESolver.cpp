@@ -132,6 +132,11 @@ void ALESolver::computeMatrix( )
 
     M_matrHE->globalAssemble();
 
+    M_matrHE_noBC.reset ( new matrix_Type (M_localMap ) );
+    M_matrHE_noBC->zero();
+    *M_matrHE_noBC += *M_matrHE;
+    M_matrHE_noBC->globalAssemble();
+
     chrono.stop();
     M_displayer.leaderPrintMax ("done in " , chrono.diff() );
 
