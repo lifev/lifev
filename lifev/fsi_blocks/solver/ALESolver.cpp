@@ -104,7 +104,7 @@ void ALESolver::applyBoundaryConditions (BCHandler& BCh)
     	BCh.bcUpdate ( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
     }
 
-    bcManageMatrix ( *M_matrHE, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.0, 0. );
+    bcManageMatrix ( *M_matrHE_BC, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.0, 0. );
 }
 
 void ALESolver::computeMatrix( )
@@ -132,10 +132,9 @@ void ALESolver::computeMatrix( )
 
     M_matrHE->globalAssemble();
 
-    M_matrHE_noBC.reset ( new matrix_Type (M_localMap ) );
-    M_matrHE_noBC->zero();
-    *M_matrHE_noBC += *M_matrHE;
-    M_matrHE_noBC->globalAssemble();
+    M_matrHE_BC.reset ( new matrix_Type (M_localMap ) );
+    M_matrHE_BC->zero();
+    *M_matrHE_BC += *M_matrHE;
 
     chrono.stop();
     M_displayer.leaderPrintMax ("done in " , chrono.diff() );

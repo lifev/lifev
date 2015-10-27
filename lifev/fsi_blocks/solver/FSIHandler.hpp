@@ -53,22 +53,15 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 // solvers
 #include <lifev/navier_stokes_blocks/solver/NavierStokesSolver.hpp>
-#include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
-#include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
-#include <lifev/structure/solver/StructuralOperator.hpp>
-#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialLinear.hpp>
+#include <lifev/fsi_blocks/solver/LinearElasticity.hpp>
 
 #include <lifev/fsi_blocks/solver/ALESolver.hpp>
 
 // Expression template FE space
 #include <lifev/eta/fem/ETFESpace.hpp>
 
-// time advance for the structure
-#include <lifev/core/fem/TimeAdvance.hpp>
-#include <lifev/core/fem/TimeAdvanceNewmark.hpp>
-#include <lifev/core/fem/TimeAdvanceBDF.hpp>
-
 #include <lifev/core/fem/TimeAndExtrapolationHandler.hpp>
+#include <lifev/core/fem/Newmark.hpp>
 
 #include <lifev/core/fem/DOFInterface3Dto3D.hpp>
 
@@ -133,12 +126,11 @@ public:
     typedef ETFESpace< mesh_Type, map_Type, 3, 3 > solidETFESpace_Type;
     typedef boost::shared_ptr<solidETFESpace_Type> solidETFESpacePtr_Type;
 
-    typedef boost::shared_ptr<TimeAdvance<vector_Type> > timeAdvancePtr_Type;
-
     typedef BCHandler bc_Type;
     typedef boost::shared_ptr<BCHandler> bcPtr_Type;
 
-	typedef boost::shared_ptr<VectorEpetra> vectorPtr_Type;
+    typedef VectorEpetra vector_Type;
+	typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
 
 	typedef MatrixEpetra<Real> matrix_Type;
 	typedef boost::shared_ptr<matrix_Type> matrixPtr_Type;
@@ -175,6 +167,9 @@ public:
 
     void setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& fluidBC_residual, const bcPtr_Type& structureBC, const bcPtr_Type& aleBC);
 
+    void setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& fluidBC_residual, const bcPtr_Type& structureBC, const bcPtr_Type& aleBC,
+    							 const bcPtr_Type& aleBC_residual);
+
     void setFluidInterfaceBoundaryConditions ( const bcPtr_Type& interfaceFluidBC ) { M_interfaceFluidBC = interfaceFluidBC; };
 
     // update all the bc handlers
@@ -206,7 +201,7 @@ private:
 
     void buildMonolithicMap ( );
 
-    void createStructureFESpaces ( );
+    void setupStructure ( );
 
     void createAleFESpace();
 
@@ -231,7 +226,7 @@ private:
 
     void getMatrixStructure ( );
 
-    void getRhsStructure ( );
+    void get_structure_coupling_velocities ( );
 
     void applyBCstructure ( );
 
@@ -283,12 +278,11 @@ private:
 
     // navier-stokes solver
     boost::shared_ptr<NavierStokesSolver> M_fluid;
-    boost::shared_ptr<StructuralOperator<mesh_Type> > M_structure;
-    boost::shared_ptr<StructuralConstitutiveLawData> M_dataStructure;
+    boost::shared_ptr<LinearElasticity> M_structure;
     boost::shared_ptr<ALESolver> M_ale;
 
     // time advance for the structure
-    timeAdvancePtr_Type M_structureTimeAdvance;
+    boost::shared_ptr<Newmark> M_structureTimeAdvance;
     boost::shared_ptr<TimeAndExtrapolationHandler> M_aleTimeAdvance;
     boost::shared_ptr<TimeAndExtrapolationHandler> M_fluidTimeAdvance;
 
@@ -298,6 +292,7 @@ private:
     bcPtr_Type M_structureBC;
     bcPtr_Type M_aleBC;
     bcPtr_Type M_interfaceFluidBC;
+    bcPtr_Type M_aleBC_residual;
 
 	//! Displayer to print in parallel (only PID 0 will print)
 	Displayer M_displayer;
@@ -337,8 +332,6 @@ private:
 	vectorPtr_Type M_rhsCouplingVelocities;
 	vectorPtr_Type M_solution;
 
-	vectorPtr_Type M_u_star;
-	vectorPtr_Type M_w_star;
 	vectorPtr_Type M_beta;
 	vectorPtr_Type M_rhs_velocity;
 
@@ -419,6 +412,8 @@ private:
 	// To handle the post-processing
 	int M_saveEvery;
 	int M_counterSaveEvery;
+
+	vectorPtr_Type M_rhsStructureVelocity;
 
 };
 

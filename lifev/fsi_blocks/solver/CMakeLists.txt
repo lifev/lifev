@@ -5,6 +5,7 @@ SET(solver_HEADERS
   solver/FSIApplyOperator.hpp
   solver/FSIApplyOperatorNonConforming.hpp
   solver/DirichletNeumannPreconditioner.hpp
+  solver/LinearElasticity.hpp
 CACHE INTERNAL "")
 
 SET(solver_SOURCES
@@ -14,6 +15,7 @@ SET(solver_SOURCES
   solver/FSIApplyOperator.cpp	
   solver/FSIApplyOperatorNonConforming.cpp	
   solver/DirichletNeumannPreconditioner.cpp
+  solver/LinearElasticity.cpp
 CACHE INTERNAL "")
 
 

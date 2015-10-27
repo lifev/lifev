@@ -42,6 +42,7 @@ SET(fem_HEADERS
   fem/TimeAdvanceNewmark.hpp
   fem/TimeData.hpp
   fem/TimeAndExtrapolationHandler.hpp
+  fem/Newmark.hpp
 CACHE INTERNAL "")
 
 SET(fem_SOURCES
@@ -74,6 +75,7 @@ SET(fem_SOURCES
   fem/TimeAdvanceData.cpp
   fem/TimeData.cpp
   fem/TimeAndExtrapolationHandler.cpp
+  fem/Newmark.cpp
 CACHE INTERNAL "")
 
 

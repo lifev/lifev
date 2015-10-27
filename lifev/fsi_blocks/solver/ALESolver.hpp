@@ -141,14 +141,12 @@ public:
 
     matrixPtr_Type const& matrix() const
     {
-    	M_matrHE->globalAssemble();
-    	return M_matrHE;
+    	return M_matrHE_BC;
     }
 
     matrixPtr_Type const& matrix_noBC() const
     {
-    	M_matrHE_noBC->globalAssemble();
-    	return M_matrHE_noBC;
+    	return M_matrHE;
     }
 
     void updateShapeDerivatives(Real&                          alpha,
@@ -237,7 +235,7 @@ private:
 
     //! The matrix holding the values
     matrixPtr_Type                 M_matrHE;
-    matrixPtr_Type                 M_matrHE_noBC;
+    matrixPtr_Type                 M_matrHE_BC;
 
     //! The matrix holding the shape derivatives
     matrixPtr_Type                 M_matrShapeDerVel;

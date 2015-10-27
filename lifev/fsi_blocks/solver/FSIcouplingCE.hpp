@@ -89,7 +89,7 @@ public:
 
     void buildBlocks ( std::map<ID, ID> const& locDofMap, const bool& lambda_num_structure );
 
-    void setUp ( const Real& timeStep, const Real& interfaceDofs, const Real& coefficientFirstDerivative,
+    void setUp ( const Real& timeStep, const Real& interfaceDofs, const Real& beta, const Real& gamma,
     			 const mapPtr_Type& interfaceMap, const FESpacePtr_Type& fluidVelocityFESpace,
     			 const FESpacePtr_Type& structureDisplacementFESpace, const vectorPtr_Type& numerationInterface);
 
@@ -140,7 +140,8 @@ private:
 
     Real M_interface;
     Real M_timeStep;
-    Real M_coefficientFirstDerivative;
+    Real M_beta;
+    Real M_gamma;
 };
 
 } // end namespace LifeV

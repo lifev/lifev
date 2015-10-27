@@ -174,12 +174,11 @@ void FSIHandler::setup ( )
     // Temporary fix for Shape derivatives
     M_fluid->pFESpace()->setQuadRule(M_fluid->uFESpace()->qr());
 
-	// Structure data
-	M_dataStructure.reset ( new StructuralConstitutiveLawData ( ) );
-	M_dataStructure->setup ( M_datafile );
+	// Structure
+	M_structure.reset ( new LinearElasticity ( M_comm ) );
 
-	// This beacuse the structural solver requires that the FESpaces are given from outside
-	createStructureFESpaces();
+	// setup of the structural class
+	setupStructure();
 
 	// This beacuse the ale solver requires that the FESpace is given from outside
 	createAleFESpace();
@@ -199,15 +198,12 @@ void FSIHandler::setup ( )
 	M_fluid->setTimeStep(M_dt);
 	M_fluid->buildSystem();
 
-	// Structure
-	M_structure.reset (new StructuralOperator<mesh_Type> ( ) );
-	M_structure->setup ( M_dataStructure, M_displacementFESpace, M_displacementETFESpace, M_structureBC, M_comm);
-	double timeAdvanceCoefficient = M_structureTimeAdvance->coefficientSecondDerivative ( 0 ) / ( M_dt * M_dt );
-	M_structure->buildSystem (timeAdvanceCoefficient);
-
 	// Ale
 	M_ale.reset( new ALESolver ( *M_aleFESpace, M_comm ) );
 	M_ale->setUp( M_datafile );
+
+	// Structure
+	M_structure->assemble_matrices(M_dt, M_structureTimeAdvance->get_beta(), M_structureBC);
 
 	// Data needed by the Newton algorithm
 	M_relativeTolerance = M_datafile ( "newton/reltol", 1.e-4);
@@ -314,17 +310,26 @@ FSIHandler::instantiateExporter( boost::shared_ptr< Exporter<mesh_Type > >& expo
 	}
 }
 
-void FSIHandler::createStructureFESpaces ( )
+void FSIHandler::setupStructure ( )
 {
 	const std::string dOrder = M_datafile ( "solid/space_discretization/order", "P2");
-	M_displacementFESpace.reset ( new FESpace_Type (M_structureLocalMesh, dOrder, 3, M_comm) );
-	M_displacementETFESpace.reset ( new solidETFESpace_Type (M_structureLocalMesh, & (M_displacementFESpace->refFE() ), & (M_displacementFESpace->fe().geoMap() ), M_comm) );
+
+	Real density = M_datafile("solid/physics/density",0.0);
+	Real young = M_datafile("solid/model/young",0.0);
+	Real poisson = M_datafile("solid/model/poisson",0.0);
+
+	M_structure->setCoefficients(density, young, poisson);
+	M_structure->setup(M_structureLocalMesh, dOrder);
+
+	M_displacementFESpace = M_structure->fespace();
+	M_displacementETFESpace = M_structure->et_fespace();
 	M_displacementFESpaceScalar.reset ( new FESpace_Type (M_structureLocalMesh, dOrder, 1, M_comm) );
 
 	if ( !M_usePartitionedMeshes )
 		M_displacementFESpaceSerial.reset ( new FESpace_Type (M_structureMesh, dOrder, 3, M_comm) );
 
 	M_displayer.leaderPrintMax ( " Number of DOFs for the structure = ", M_displacementFESpace->dof().numTotalDof()*3 ) ;
+
 }
 
 void FSIHandler::createAleFESpace()
@@ -342,6 +347,16 @@ void FSIHandler::setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_
 	M_aleBC       		= aleBC;
 }
 
+void FSIHandler::setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& fluidBC_residual, const bcPtr_Type& structureBC, const bcPtr_Type& aleBC,
+		const bcPtr_Type& aleBC_residual )
+{
+	M_fluidBC 	  		= fluidBC;
+	M_fluidBC_residual 	= fluidBC_residual;
+	M_structureBC 		= structureBC;
+	M_aleBC       		= aleBC;
+	M_aleBC_residual    = aleBC_residual;
+}
+
 void FSIHandler::setBoundaryConditionsPCD ( const bcPtr_Type& pcdBC)
 {
 	M_pcdBC = pcdBC;
@@ -352,6 +367,7 @@ void FSIHandler::updateBoundaryConditions ( )
 	M_fluidBC->bcUpdate ( *M_fluid->uFESpace()->mesh(), M_fluid->uFESpace()->feBd(), M_fluid->uFESpace()->dof() );
 	M_structureBC->bcUpdate ( *M_displacementFESpace->mesh(), M_displacementFESpace->feBd(), M_displacementFESpace->dof() );
 	M_aleBC->bcUpdate ( *M_aleFESpace->mesh(), M_aleFESpace->feBd(), M_aleFESpace->dof() );
+	M_aleBC_residual->bcUpdate ( *M_aleFESpace->mesh(), M_aleFESpace->feBd(), M_aleFESpace->dof() );
 }
 
 void FSIHandler::initializeTimeAdvance ( )
@@ -362,7 +378,6 @@ void FSIHandler::initializeTimeAdvance ( )
 	M_t_zero   = M_datafile("fluid/time_discretization/initialtime",0.0);
 	M_t_end    = M_datafile("fluid/time_discretization/endtime",0.0);
 	M_orderBDF = M_datafile("fluid/time_discretization/BDF_order",2);
-    const std::string timeAdvanceMethod =  M_datafile ( "solid/time_discretization/method", "BDF");
     
 	// Initialize and create objects for the fluid time advance
 	M_fluidTimeAdvance->setBDForder(M_orderBDF);
@@ -374,17 +389,17 @@ void FSIHandler::initializeTimeAdvance ( )
     // Initialize and create objects for the ALE time advance
     M_aleTimeAdvance.reset( new TimeAndExtrapolationHandler ( ) );
     M_aleTimeAdvance->setMaximumExtrapolationOrder(M_orderBDF);
+    M_aleTimeAdvance->setBDForder(M_orderBDF);
     M_aleTimeAdvance->setTimeStep(M_dt);
     vector_Type disp_mesh_initial ( M_aleFESpace->map() );
     std::vector<vector_Type> initialStateALE;
     
-    // Structure
-    M_structureTimeAdvance.reset ( TimeAdvanceFactory::instance().createObject ( timeAdvanceMethod ) );
-    UInt OrderDev = 2;
-    M_structureTimeAdvance->setup (M_dataStructure->dataTimeAdvance()->orderBDF() , OrderDev);
-    M_structureTimeAdvance->setTimeStep ( M_dt );
-    std::vector<vectorPtr_Type> uv0;
-    
+    // Structure time advance
+    M_structureTimeAdvance.reset ( new Newmark );
+    M_structureTimeAdvance->set_beta(0.25);
+    M_structureTimeAdvance->set_gamma(0.5);
+    M_structureTimeAdvance->set_timestep(M_dt);
+
     if ( !M_restart )
     {
         // Fluid
@@ -397,17 +412,18 @@ void FSIHandler::initializeTimeAdvance ( )
         for ( UInt i = 0; i < M_orderBDF; ++i )
             initialStateALE.push_back(disp_mesh_initial);
         
-        // Structure
-        vectorPtr_Type disp (new VectorEpetra (M_displacementFESpace->map(), Unique) );
-        disp->zero();
-        for ( UInt previousPass = 0; previousPass < M_structureTimeAdvance->size() ; previousPass++)
-        {
-            uv0.push_back (disp);
-        }
+        vectorPtr_Type ds_initial ( new vector_Type ( M_displacementFESpace->map() ) );
+        vectorPtr_Type vs_initial ( new vector_Type ( M_displacementFESpace->map() ) );
+        vectorPtr_Type as_initial ( new vector_Type ( M_displacementFESpace->map() ) );
+        ds_initial->zero();
+        vs_initial->zero();
+        as_initial->zero();
+        M_structureTimeAdvance->initialize(ds_initial, vs_initial, as_initial);
         
     }
     else
     {
+    	/*
         std::string const importerType       =  M_datafile ( "importer/type", "hdf5");
         std::string const fileNameFluid      =  M_datafile ( "importer/fluid_filename", "SolutionRestarted");
         std::string const fileNameStructure  =  M_datafile ( "importer/structure_filename", "SolutionRestarted");
@@ -540,6 +556,7 @@ void FSIHandler::initializeTimeAdvance ( )
         // other way round.
         std::reverse(initialStateVelocity.begin(),initialStateVelocity.end());
         std::reverse(initialStateALE.begin(),initialStateALE.end());
+    	*/
     }
     
     // Fluid
@@ -547,19 +564,7 @@ void FSIHandler::initializeTimeAdvance ( )
 
     // ALE
     M_aleTimeAdvance->initialize(initialStateALE);
-    
-    // Structure
-    M_structureTimeAdvance->setInitialCondition (uv0);
-	M_structureTimeAdvance->updateRHSContribution ( M_dt );
 
-	if ( !M_restart && M_extrapolateInitialGuess )
-	{
-		M_extrapolationSolution.reset( new TimeAndExtrapolationHandler ( ) );
-		M_extrapolationSolution->setBDForder(M_orderExtrapolationInitialGuess);
-		M_extrapolationSolution->setMaximumExtrapolationOrder(M_orderExtrapolationInitialGuess);
-		M_extrapolationSolution->setTimeStep(M_dt);
-	}
-    
     // Post-Processing of the initial solution
 	M_exporterFluid->postProcess(M_t_zero);
 	M_exporterStructure->postProcess(M_t_zero);
@@ -569,7 +574,7 @@ void FSIHandler::initializeTimeAdvance ( )
 void FSIHandler::buildInterfaceMaps ()
 {
 	M_nonconforming = M_datafile("interface/nonconforming", false);
-	M_lambda_num_structure = M_datafile("interface/lambda_num_structure", true);
+	M_lambda_num_structure = M_datafile("interface/lambda_num_structure", false);
 	markerID_Type interface = M_datafile("interface/flag", 1);
 	Real tolerance = M_datafile("interface/tolerance", 1.0);
 	Int flag = M_datafile("interface/fluid_vertex_flag", 123);
@@ -819,12 +824,12 @@ FSIHandler::assembleCoupling ( )
 
 	if ( M_lambda_num_structure )
 	{
-		M_coupling->setUp ( M_dt, M_structureInterfaceMap->mapSize()/3.0 , M_structureTimeAdvance->coefficientFirstDerivative ( 0 ),
+		M_coupling->setUp ( M_dt, M_structureInterfaceMap->mapSize()/3.0 , M_structureTimeAdvance->get_beta(), M_structureTimeAdvance->get_gamma(),
 							M_lagrangeMap, M_fluid->uFESpace(), M_displacementFESpace, M_numerationInterface );
 	}
 	else
 	{
-		M_coupling->setUp ( M_dt, M_fluidInterfaceMap->mapSize()/3.0 , M_structureTimeAdvance->coefficientFirstDerivative ( 0 ),
+		M_coupling->setUp ( M_dt, M_fluidInterfaceMap->mapSize()/3.0 , M_structureTimeAdvance->get_beta(), M_structureTimeAdvance->get_gamma(),
 							M_lagrangeMap, M_fluid->uFESpace(), M_displacementFESpace, M_numerationInterface );
 	}
 
@@ -854,57 +859,27 @@ FSIHandler::buildMonolithicMap ( )
 void
 FSIHandler::getMatrixStructure ( )
 {
-	M_matrixStructure.reset (new matrix_Type ( M_displacementFESpace->map(), 1 ) );
+	M_matrixStructure.reset (new matrix_Type ( M_displacementFESpace->map() ) );
+
 	M_matrixStructure->zero();
 
-	vectorPtr_Type solidPortion ( new vector_Type ( M_displacementFESpace->map() ) );
-	solidPortion->zero();
-
-	M_structure->material()->updateJacobianMatrix ( *solidPortion, M_dataStructure, M_structure->mapMarkersVolumes(), M_structure->mapMarkersIndexes(), M_structure->displayerPtr() );
-	*M_matrixStructure += *M_structure->massMatrix();
-	*M_matrixStructure += * (M_structure->material()->jacobian() );
-
-	M_matrixStructure_noBc.reset (new matrix_Type ( M_displacementFESpace->map(), 1 ) );
-	*M_matrixStructure_noBc += *M_structure->massMatrix();
-	*M_matrixStructure_noBc += * (M_structure->material()->jacobian() );
-	M_matrixStructure_noBc->globalAssemble();
-
-	if ( !M_structureBC->bcUpdateDone() )
-		M_structureBC->bcUpdate ( *M_displacementFESpace->mesh(), M_displacementFESpace->feBd(), M_displacementFESpace->dof() );
-
-	bcManageMatrix ( *M_matrixStructure, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC, M_displacementFESpace->feBd(), 1.0, M_time );
+	*M_matrixStructure += *(M_structure->jacobian());
 
 	M_matrixStructure->globalAssemble();
 }
 
 void
-FSIHandler::getRhsStructure ( )
+FSIHandler::get_structure_coupling_velocities ( )
 {
-	Real timeAdvanceCoefficient = M_structureTimeAdvance->coefficientSecondDerivative ( 0 ) / ( M_dt * M_dt );
-	M_structureTimeAdvance->updateRHSContribution ( M_dt );
+	M_structureTimeAdvance->compute_csi( );
 
-	M_rhsStructure.reset ( new VectorEpetra ( M_displacementFESpace->map() ) );
-	*M_rhsStructure *= 0;
-	*M_rhsStructure += *M_structure->massMatrix() * M_structureTimeAdvance->rhsContributionSecondDerivative() / timeAdvanceCoefficient;
+	M_rhsStructureVelocity.reset ( new vector_Type ( M_displacementFESpace->map(), Unique ) );
 
-	if ( M_considerGravity )
-	{
-		vectorPtr_Type gravity_vector ( new vector_Type ( M_displacementFESpace->map(), Unique ) );
-		vectorPtr_Type gravity_component ( new vector_Type ( M_displacementFESpaceScalar->map(), Unique ) );
+	M_rhsStructureVelocity->zero();
 
-		gravity_component->zero();
-		*gravity_component += M_gravity;
-		gravity_vector->subset(*gravity_component, M_displacementFESpaceScalar->map(), 0, M_gravityDirection*M_displacementFESpaceScalar->dof().numTotalDof() );
-
-		// Archimede's force: (rho_f-rho_s)*g
-		*M_rhsStructure += *M_structure->massMatrix()*(1.0/(timeAdvanceCoefficient*M_structure->rho())) * M_fluid->density() * (*gravity_vector);
-		*M_rhsStructure -= *M_structure->massMatrix()*(1.0/timeAdvanceCoefficient)*(*gravity_vector);
-	}
-
-	if ( !M_structureBC->bcUpdateDone() )
-		M_structureBC->bcUpdate ( *M_displacementFESpace->mesh(), M_displacementFESpace->feBd(), M_displacementFESpace->dof() );
-
-	bcManageRhs ( *M_rhsStructure, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC, M_displacementFESpace->feBd(), 1.0, M_time );
+	*M_rhsStructureVelocity = ( ( M_dt * M_structureTimeAdvance->get_gamma() ) * (*M_structureTimeAdvance->get_csi() )   -
+								( M_dt * ( 1.0 - M_structureTimeAdvance->get_gamma() ) ) * ( *M_structureTimeAdvance->old_second_derivative() ) -
+								*M_structureTimeAdvance->old_first_derivative() );
 }
 
 void
@@ -912,9 +887,8 @@ FSIHandler::updateRhsCouplingVelocities ( )
 {
 	if ( M_lambda_num_structure )
 	{
-		vector_Type rhsStructureVelocity (M_structureTimeAdvance->rhsContributionFirstDerivative(), Unique, Add);
 		vector_Type lambda (*M_structureInterfaceMap, Unique);
-		structureToInterface ( lambda, rhsStructureVelocity);
+		structureToInterface ( lambda, *M_rhsStructureVelocity);
 		M_rhsCouplingVelocities.reset( new VectorEpetra ( *M_lagrangeMap ) );
 		M_rhsCouplingVelocities->zero();
 
@@ -929,16 +903,15 @@ FSIHandler::updateRhsCouplingVelocities ( )
 			{
 				if (M_structureInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second ) ) >= 0 )
 				{
-						(*M_rhsCouplingVelocities) [  (int) (*M_numerationInterface) [ITrow->second ] + dim * interface ] = -lambda ( ITrow->second + dim * totalDofs );
+						(*M_rhsCouplingVelocities) [  (int) (*M_numerationInterface) [ITrow->second ] + dim * interface ] = lambda ( ITrow->second + dim * totalDofs );
 				}
 			}
 		}
 	}
 	else
 	{
-		vector_Type rhsStructureVelocity (M_structureTimeAdvance->rhsContributionFirstDerivative(), Unique, Add);
 		vector_Type lambda (*M_structureInterfaceMap, Unique);
-		structureToInterface ( lambda, rhsStructureVelocity);
+		structureToInterface ( lambda, *M_rhsStructureVelocity);
 		M_rhsCouplingVelocities.reset( new VectorEpetra ( *M_lagrangeMap ) );
 		M_rhsCouplingVelocities->zero();
 
@@ -953,7 +926,7 @@ FSIHandler::updateRhsCouplingVelocities ( )
 			{
 				if (M_fluidInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->first ) ) >= 0 )
 				{
-					(*M_rhsCouplingVelocities) [  (int) (*M_numerationInterface) [ITrow->first ] + dim * interface ] = -lambda ( ITrow->second + dim * totalDofs );
+					(*M_rhsCouplingVelocities) [  (int) (*M_numerationInterface) [ITrow->first ] + dim * interface ] = lambda ( ITrow->second + dim * totalDofs );
 				}
 			}
 		}
@@ -963,16 +936,12 @@ FSIHandler::updateRhsCouplingVelocities ( )
 void
 FSIHandler::updateRhsCouplingVelocities_nonconforming ( )
 {
-	vectorPtr_Type rhsStructureVelocity ( new vector_Type ( M_structureTimeAdvance->rhsContributionFirstDerivative(), Unique, Add ) );
-
 	// Update known field for the interpolation
-	M_StructureToFluidInterpolant->updateRhs ( rhsStructureVelocity );
+	M_StructureToFluidInterpolant->updateRhs ( M_rhsStructureVelocity );
 	M_StructureToFluidInterpolant->interpolate();
 
 	// Get the vector on the fluid interface
 	M_StructureToFluidInterpolant->getSolutionOnGamma (M_rhsCouplingVelocities);
-
-	*M_rhsCouplingVelocities *= -1.0; // to do formally the same thing as in the conforming case
 }
 
 void
@@ -1014,14 +983,14 @@ FSIHandler::solveFSIproblem ( )
     {
         M_solution.reset ( new VectorEpetra ( *M_monolithicMap ) );
         M_solution->zero();
-        
+
         M_solution->subset(*M_fluidVelocity, M_fluid->uFESpace()->map(), 0, 0);
         M_solution->subset(*M_fluidPressure, M_fluid->pFESpace()->map(), 0, M_fluid->uFESpace()->map().mapSize());
         M_solution->subset(*M_structureDisplacement, M_displacementFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize());
         M_solution->subset(*M_fluidDisplacement, M_aleFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
                            M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize() );
     }
-    
+
 	// Apply boundary conditions for the ale problem (the matrix will not change during the simulation)
 	M_ale->applyBoundaryConditions ( *M_aleBC );
 
@@ -1075,7 +1044,7 @@ FSIHandler::solveFSIproblem ( )
             M_outputPreconditionerComputation << std::endl;
             M_outputTimeLinearSolver << std::endl;
         }
-        
+
         time_step_count += 1;
 
 		M_displayer.leaderPrint ( "\n-----------------------------------\n" ) ;
@@ -1132,7 +1101,7 @@ FSIHandler::solveFSIproblem ( )
 
 		// Updating all the time-advance objects
 		M_fluidTimeAdvance->shift(*M_fluidVelocity);
-		M_structureTimeAdvance->shiftRight(*M_structureDisplacement);
+		M_structureTimeAdvance->shift(M_structureDisplacement);
 		M_aleTimeAdvance->shift(*M_fluidDisplacement);
 
 		// This part below handles the exporter of the solution.
@@ -1183,14 +1152,14 @@ FSIHandler::solveFSIproblem ( )
 void
 FSIHandler::initializeExtrapolation( )
 {
-	// Initialize vector in the extrapolation object for the initial guess of Newton
-	vector_Type solutionInitial ( *M_monolithicMap );
-	std::vector<vector_Type> initialStateSolution;
-	solutionInitial *= 0 ;
-	for ( UInt i = 0; i < M_orderExtrapolationInitialGuess; ++i )
-		initialStateSolution.push_back(solutionInitial);
-
-	M_extrapolationSolution->initialize(initialStateSolution);
+//	// Initialize vector in the extrapolation object for the initial guess of Newton
+//	vector_Type solutionInitial ( *M_monolithicMap );
+//	std::vector<vector_Type> initialStateSolution;
+//	solutionInitial *= 0 ;
+//	for ( UInt i = 0; i < M_orderExtrapolationInitialGuess; ++i )
+//		initialStateSolution.push_back(solutionInitial);
+//
+//	M_extrapolationSolution->initialize(initialStateSolution);
 }
 
 void
@@ -1218,10 +1187,10 @@ FSIHandler::applyBCsolution(vectorPtr_Type& M_solution)
 
 	bcManageRhs ( displacement, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC, M_displacementFESpace->feBd(), 1.0, M_time );
 
-	if ( !M_aleBC->bcUpdateDone() )
-		M_aleBC->bcUpdate ( *M_aleFESpace->mesh(), M_aleFESpace->feBd(), M_aleFESpace->dof() );
+	if ( !M_aleBC_residual->bcUpdateDone() )
+		M_aleBC_residual->bcUpdate ( *M_aleFESpace->mesh(), M_aleFESpace->feBd(), M_aleFESpace->dof() );
 
-	bcManageRhs ( geometry, *M_aleFESpace->mesh(), M_aleFESpace->dof(), *M_aleBC, M_aleFESpace->feBd(), 1.0, M_time );
+	bcManageRhs ( geometry, *M_aleFESpace->mesh(), M_aleFESpace->dof(), *M_aleBC_residual, M_aleFESpace->feBd(), 1.0, M_time );
 
 	//! Push local contributions into the global one
 	M_solution->subset(velocity, M_fluid->uFESpace()->map(), 0, 0);
@@ -1251,72 +1220,72 @@ FSIHandler::applyBCresidual(VectorEpetra& r_u, VectorEpetra& r_ds, VectorEpetra&
 	if ( !M_structureBC->bcUpdateDone() )
 		M_structureBC->bcUpdate ( *M_displacementFESpace->mesh(), M_displacementFESpace->feBd(), M_displacementFESpace->dof() );
 
-	bcManageRhs ( r_ds, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC, M_displacementFESpace->feBd(), 1.0, 0.0 );
+	bcManageRhs ( r_ds, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC, M_displacementFESpace->feBd(), 1.0, M_time );
 
-	if ( !M_aleBC->bcUpdateDone() )
-		M_aleBC->bcUpdate ( *M_aleFESpace->mesh(), M_aleFESpace->feBd(), M_aleFESpace->dof() );
+	if ( !M_aleBC_residual->bcUpdateDone() )
+		M_aleBC_residual->bcUpdate ( *M_aleFESpace->mesh(), M_aleFESpace->feBd(), M_aleFESpace->dof() );
 
-	bcManageRhs ( r_df, *M_aleFESpace->mesh(), M_aleFESpace->dof(), *M_aleBC, M_aleFESpace->feBd(), 1.0, 0.0 );
+	bcManageRhs ( r_df, *M_aleFESpace->mesh(), M_aleFESpace->dof(), *M_aleBC_residual, M_aleFESpace->feBd(), 1.0, M_time );
 
 }
 
 void
 FSIHandler::assembleStructureInterfaceMass()
 {
-	// INITIALIZE MATRIX WITH THE MAP OF THE INTERFACE
-	matrixPtr_Type structure_interfaceMass( new matrix_Type ( M_displacementFESpace->map(), 50 ) );
-	structure_interfaceMass->zero();
-
-	// ASSEMBLE MASS MATRIX AT THE INTERFACE
-	QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
-	{
-		using namespace ExpressionAssembly;
-		integrate ( boundary (M_displacementETFESpace->mesh(), M_datafile("interface/flag", 1) ),
-					myBDQR,
-					M_displacementETFESpace,
-					M_displacementETFESpace,
-					//Boundary Mass
-					dot(phi_i,phi_j)
-		)
-		>> structure_interfaceMass;
-	}
-	structure_interfaceMass->globalAssemble();
-
-	mapPtr_Type M_mapStuctureGammaVectorial;
-	M_StructureToFluidInterpolant->getVectorialInterpolationMap(M_mapStuctureGammaVectorial);
-
-	// RESTRICT MATRIX TO INTERFACE DOFS ONLY
-	M_interface_mass_structure.reset(new matrix_Type ( *M_mapStuctureGammaVectorial, 50 ) );
-	structure_interfaceMass->restrict ( M_mapStuctureGammaVectorial, M_numerationInterfaceStructure,
-										M_structureDisplacement->size()/3, M_interface_mass_structure );
+//	// INITIALIZE MATRIX WITH THE MAP OF THE INTERFACE
+//	matrixPtr_Type structure_interfaceMass( new matrix_Type ( M_displacementFESpace->map(), 50 ) );
+//	structure_interfaceMass->zero();
+//
+//	// ASSEMBLE MASS MATRIX AT THE INTERFACE
+//	QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
+//	{
+//		using namespace ExpressionAssembly;
+//		integrate ( boundary (M_displacementETFESpace->mesh(), M_datafile("interface/flag", 1) ),
+//					myBDQR,
+//					M_displacementETFESpace,
+//					M_displacementETFESpace,
+//					//Boundary Mass
+//					dot(phi_i,phi_j)
+//		)
+//		>> structure_interfaceMass;
+//	}
+//	structure_interfaceMass->globalAssemble();
+//
+//	mapPtr_Type M_mapStuctureGammaVectorial;
+//	M_StructureToFluidInterpolant->getVectorialInterpolationMap(M_mapStuctureGammaVectorial);
+//
+//	// RESTRICT MATRIX TO INTERFACE DOFS ONLY
+//	M_interface_mass_structure.reset(new matrix_Type ( *M_mapStuctureGammaVectorial, 50 ) );
+//	structure_interfaceMass->restrict ( M_mapStuctureGammaVectorial, M_numerationInterfaceStructure,
+//										M_structureDisplacement->size()/3, M_interface_mass_structure );
 }
 
 void
 FSIHandler::applyInverseFluidMassOnGamma ( const vectorPtr_Type& weakLambda, vectorPtr_Type& strongLambda )
 {
-	Teuchos::RCP< Teuchos::ParameterList > belosList = Teuchos::rcp ( new Teuchos::ParameterList );
-	belosList = Teuchos::getParametersFromXmlFile ( "SolverParamList_rbf3d.xml" );
-
-	// Preconditioner
-	prec_Type* precRawPtr;
-	basePrecPtr_Type precPtr;
-	precRawPtr = new prec_Type;
-	precRawPtr->setDataFromGetPot ( M_datafile, "prec" );
-	precPtr.reset ( precRawPtr );
-
-	// Linear Solver
-	LinearSolver solverOne;
-	solverOne.setCommunicator ( M_comm );
-	solverOne.setParameters ( *belosList );
-	solverOne.setPreconditioner ( precPtr );
-
-	// Solution
-	strongLambda->zero();
-
-	// Solve system
-	solverOne.setOperator ( M_interface_mass_fluid );
-	solverOne.setRightHandSide ( weakLambda );
-	solverOne.solve ( strongLambda );
+//	Teuchos::RCP< Teuchos::ParameterList > belosList = Teuchos::rcp ( new Teuchos::ParameterList );
+//	belosList = Teuchos::getParametersFromXmlFile ( "SolverParamList_rbf3d.xml" );
+//
+//	// Preconditioner
+//	prec_Type* precRawPtr;
+//	basePrecPtr_Type precPtr;
+//	precRawPtr = new prec_Type;
+//	precRawPtr->setDataFromGetPot ( M_datafile, "prec" );
+//	precPtr.reset ( precRawPtr );
+//
+//	// Linear Solver
+//	LinearSolver solverOne;
+//	solverOne.setCommunicator ( M_comm );
+//	solverOne.setParameters ( *belosList );
+//	solverOne.setPreconditioner ( precPtr );
+//
+//	// Solution
+//	strongLambda->zero();
+//
+//	// Solve system
+//	solverOne.setOperator ( M_interface_mass_fluid );
+//	solverOne.setRightHandSide ( weakLambda );
+//	solverOne.solve ( strongLambda );
 }
 
 void
@@ -1600,19 +1569,25 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		// Residual for the solid //
 		//------------------------//
 
-		*res_ds = ( (*M_matrixStructure_noBc) * (*ds_k) +  *(M_coupling->lambdaToStructureMomentum()) * (*lambda_k) - (*M_rhsStructure)  );
+		*res_ds = ( ( ( 1.0/ ( M_dt * M_dt * M_structureTimeAdvance->get_beta() ) ) * ( (*M_structure->mass_matrix_no_bc() ) * (*ds_k) ) ) +
+					( (*M_structure->stiffness_matrix_no_bc() ) * (*ds_k) ) +
+				    ( (*M_coupling->lambdaToStructureMomentum() ) * (*lambda_k) ) -
+				    ( (*M_structure->mass_matrix_no_bc() ) * (*M_structureTimeAdvance->get_csi()) ) );
 
 		//---------------------------------------//
 		// Residual for the lagrange multipliers //
 		//---------------------------------------//
 
-		*res_lambda = ( *(M_coupling->fluidVelocityToLambda()) * (*u_k) + *(M_coupling->structureDisplacementToLambda()) * (*ds_k) - ( *M_rhsCouplingVelocities )  );
+		*res_lambda = ( ( (*M_coupling->fluidVelocityToLambda()) * (*u_k) ) +
+						( (*M_coupling->structureDisplacementToLambda()) * (*ds_k) ) +
+						(  *M_rhsCouplingVelocities )  );
 
 		//----------------------//
 		// Residual for the ALE //
 		//----------------------//
 
-		*res_df = ( *(M_coupling->structureDisplacementToFluidDisplacement()) * (*ds_k) + *(M_ale->matrix_noBC()) * (*df_k) );
+		*res_df = ( ( (*M_coupling->structureDisplacementToFluidDisplacement()) * (*ds_k) ) +
+					( (*M_ale->matrix()) * (*df_k) ) );
 
 		//--------------------------------------//
 		// Third: initialize the apply operator //
@@ -1749,6 +1724,7 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 
 	if ( M_nonconforming )
 	{
+		/*
 		M_applyOperatorJacobianNonConforming->setComm ( M_comm );
 		M_applyOperatorJacobianNonConforming->setTimeStep ( M_dt );
 		M_applyOperatorJacobianNonConforming->setDatafile ( M_datafile );
@@ -1785,6 +1761,7 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 		}
 
 		M_invOper->setOperator(M_applyOperatorJacobianNonConforming);
+	    */
 	}
 	else
 	{
@@ -1804,14 +1781,16 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 	{
 		M_prec->setShapeDerivativesBlocks(M_ale->shapeDerivativesVelocity(), M_ale->shapeDerivativesPressure());
 	}
-    
+
     if ( M_nonconforming)
     {
+    	/*
     	M_prec->setCoefficientFirstDerivative ( M_structureTimeAdvance->coefficientFirstDerivative ( 0 ) );
     	M_prec->setVelocityFESpace ( M_fluid->uFESpace() );
     	M_prec->setBCInterface ( M_interfaceFluidBC );
     	M_prec->setTimeStep ( M_dt );
     	M_prec->setMonolithicMap ( M_monolithicMap );
+    	*/
     }
     else
     {
@@ -1820,7 +1799,7 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
         M_prec->setDomainMap(M_applyOperatorJacobian->OperatorDomainBlockMapPtr());
         M_prec->setRangeMap(M_applyOperatorJacobian->OperatorRangeBlockMapPtr());
     }
-    
+
 	//--------------------------------------------------------------------------------//
 	// Second: update the operators associated to shur complements and fluid momentum //
 	//--------------------------------------------------------------------------------//
@@ -1829,7 +1808,7 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 	M_displayer.leaderPrint ( "\n Set preconditioner for the fluid momentum and the shur complements\n" ) ;
 	M_displayer.leaderPrint ( "\t Set and approximate fluid momentum in the preconditioner.. " ) ;
 	smallThingsChrono.start();
-	
+
     // To be changed
     M_prec->updateApproximatedFluidOperator();
 	smallThingsChrono.stop();
@@ -1851,7 +1830,7 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 	//-------------------------//
 
 	M_invOper->ApplyInverse(residual.epetraVector() , increment.epetraVector());
-    
+
     if ( M_comm->MyPID()==0 )
     {
         M_outputLinearIterations << " " << M_invOper->NumIter();
@@ -1919,8 +1898,8 @@ FSIHandler::updateSystem ( )
 	// Compute rhs contribution due to the time derivative
 	M_fluidTimeAdvance->rhsContribution (*M_rhs_velocity);
 
-	// Get the right hand side of the structural part and apply the BC on it TODO now it also applies bc on the matrix, remove!!
-	getRhsStructure ( );
+	// Get the vector needed for the coupling of the velocities
+	get_structure_coupling_velocities ( );
 
 	if ( M_nonconforming )
 		updateRhsCouplingVelocities_nonconforming ( );
@@ -1931,32 +1910,32 @@ FSIHandler::updateSystem ( )
 void
 FSIHandler::initializeApplyOperatorResidual ( )
 {
-	Operators::FSIApplyOperator::operatorPtrContainer_Type operDataResidual(5,5);
-
-	matrixPtr_Type block00 ( new matrix_Type( M_fluid->uFESpace()->map() ) );
-	block00->zero(); // put to zero since the fluid part of the residual is assembled directly
-	block00->globalAssemble(); 
-
-	matrixPtr_Type block10 ( new matrix_Type( M_fluid->pFESpace()->map() ) );
-	block10->zero(); // put to zero since the fluid part of the residual is assembled directly
-	block10->globalAssemble( M_fluid->uFESpace()->mapPtr(), M_fluid->pFESpace()->mapPtr() ); 
-
-	matrixPtr_Type block01 ( new matrix_Type( M_fluid->uFESpace()->map() ) );
-	block01->zero(); // put to zero since the fluid part of the residual is assembled directly
-	block01->globalAssemble( M_fluid->pFESpace()->mapPtr(), M_fluid->uFESpace()->mapPtr() ); 
-
-	operDataResidual(0,0) = block00->matrixPtr(); // empty block
-	operDataResidual(0,1) = block01->matrixPtr(); // empty block
-	operDataResidual(1,0) = block10->matrixPtr(); // empty block
-	operDataResidual(0,3) = M_coupling->lambdaToFluidMomentum()->matrixPtr();
-	operDataResidual(2,2) = M_matrixStructure->matrixPtr();
-	operDataResidual(2,3) = M_coupling->lambdaToStructureMomentum()->matrixPtr();
-	operDataResidual(3,0) = M_coupling->fluidVelocityToLambda()->matrixPtr();
-	operDataResidual(3,2) = M_coupling->structureDisplacementToLambda()->matrixPtr();
-	operDataResidual(4,2) = M_coupling->structureDisplacementToFluidDisplacement()->matrixPtr();
-	operDataResidual(4,4) = M_ale->matrix()->matrixPtr();
-
-	M_applyOperatorResidual->setUp(operDataResidual, M_comm);
+//	Operators::FSIApplyOperator::operatorPtrContainer_Type operDataResidual(5,5);
+//
+//	matrixPtr_Type block00 ( new matrix_Type( M_fluid->uFESpace()->map() ) );
+//	block00->zero(); // put to zero since the fluid part of the residual is assembled directly
+//	block00->globalAssemble();
+//
+//	matrixPtr_Type block10 ( new matrix_Type( M_fluid->pFESpace()->map() ) );
+//	block10->zero(); // put to zero since the fluid part of the residual is assembled directly
+//	block10->globalAssemble( M_fluid->uFESpace()->mapPtr(), M_fluid->pFESpace()->mapPtr() );
+//
+//	matrixPtr_Type block01 ( new matrix_Type( M_fluid->uFESpace()->map() ) );
+//	block01->zero(); // put to zero since the fluid part of the residual is assembled directly
+//	block01->globalAssemble( M_fluid->pFESpace()->mapPtr(), M_fluid->uFESpace()->mapPtr() );
+//
+//	operDataResidual(0,0) = block00->matrixPtr(); // empty block
+//	operDataResidual(0,1) = block01->matrixPtr(); // empty block
+//	operDataResidual(1,0) = block10->matrixPtr(); // empty block
+//	operDataResidual(0,3) = M_coupling->lambdaToFluidMomentum()->matrixPtr();
+//	operDataResidual(2,2) = M_matrixStructure->matrixPtr();
+//	operDataResidual(2,3) = M_coupling->lambdaToStructureMomentum()->matrixPtr();
+//	operDataResidual(3,0) = M_coupling->fluidVelocityToLambda()->matrixPtr();
+//	operDataResidual(3,2) = M_coupling->structureDisplacementToLambda()->matrixPtr();
+//	operDataResidual(4,2) = M_coupling->structureDisplacementToFluidDisplacement()->matrixPtr();
+//	operDataResidual(4,4) = M_ale->matrix()->matrixPtr();
+//
+//	M_applyOperatorResidual->setUp(operDataResidual, M_comm);
 
 }
 
