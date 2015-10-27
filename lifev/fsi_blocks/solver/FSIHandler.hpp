@@ -323,6 +323,8 @@ private:
 	vectorPtr_Type M_fluidPressure;
 	vectorPtr_Type M_fluidDisplacement;
 	vectorPtr_Type M_structureDisplacement;
+	vectorPtr_Type M_structureVelocity;
+	vectorPtr_Type M_structureAcceleration;
 
 	// Monolithic map
 	boost::shared_ptr<map_Type> M_monolithicMap;

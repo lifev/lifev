@@ -276,16 +276,22 @@ void FSIHandler::setupExporters( )
 	M_fluidPressure.reset ( new VectorEpetra ( M_fluid->pFESpace()->map(), M_exporterFluid->mapType() ) );
 	M_fluidDisplacement.reset ( new VectorEpetra ( M_aleFESpace->map(), M_exporterFluid->mapType() ) );
 	M_structureDisplacement.reset ( new VectorEpetra ( M_displacementFESpace->map(), M_exporterStructure->mapType() ) );
+	M_structureVelocity.reset ( new VectorEpetra ( M_displacementFESpace->map(), M_exporterStructure->mapType() ) );
+	M_structureAcceleration.reset ( new VectorEpetra ( M_displacementFESpace->map(), M_exporterStructure->mapType() ) );
 
     M_fluidVelocity->zero();
     M_fluidPressure->zero();
     M_fluidDisplacement->zero();
     M_structureDisplacement->zero();
+    M_structureVelocity->zero();
+    M_structureAcceleration->zero();
     
 	M_exporterFluid->addVariable ( ExporterData<mesh_Type>::VectorField, "f - velocity", M_fluid->uFESpace(), M_fluidVelocity, UInt (0) );
 	M_exporterFluid->addVariable ( ExporterData<mesh_Type>::ScalarField, "f - pressure", M_fluid->pFESpace(), M_fluidPressure, UInt (0) );
 	M_exporterFluid->addVariable ( ExporterData<mesh_Type>::VectorField, "f - displacement", M_aleFESpace, M_fluidDisplacement, UInt (0) );
 	M_exporterStructure->addVariable ( ExporterData<mesh_Type>::VectorField, "s - displacement", M_displacementFESpace, M_structureDisplacement, UInt (0) );
+	M_exporterStructure->addVariable ( ExporterData<mesh_Type>::VectorField, "s - velocity", M_displacementFESpace, M_structureVelocity, UInt (0) );
+	M_exporterStructure->addVariable ( ExporterData<mesh_Type>::VectorField, "s - acceleration", M_displacementFESpace, M_structureAcceleration, UInt (0) );
 }
 
 void
@@ -423,7 +429,6 @@ void FSIHandler::initializeTimeAdvance ( )
     }
     else
     {
-    	/*
         std::string const importerType       =  M_datafile ( "importer/type", "hdf5");
         std::string const fileNameFluid      =  M_datafile ( "importer/fluid_filename", "SolutionRestarted");
         std::string const fileNameStructure  =  M_datafile ( "importer/structure_filename", "SolutionRestarted");
@@ -438,16 +443,8 @@ void FSIHandler::initializeTimeAdvance ( )
         std::string iterationString;
         iterationString = initialLoaded;
         
-        // The structure equation has a second derivative in time, so for it we need to load not only
-        // a number of vectors equals to M_orderBDF, but one more. For fluid and ALE just
-        // a number of M_orderBDF vectors need to be loaded. Note that we do have a
-        // time advance object for the ALE (although its equation has not time derivative)
-        // because we need to compute the ALE velocity.
-        for (UInt iterInit = 0; iterInit < (M_orderBDF+1); iterInit++ )
+        for (UInt iterInit = 0; iterInit < M_orderBDF; iterInit++ )
         {
-            // For fluid and ALE read just M_orderBDF vectors from previous time steps
-            if ( iterInit < M_orderBDF )
-            {
             vectorPtr_Type velocityRestart;
             velocityRestart.reset ( new vector_Type (M_fluid->uFESpace()->map(),  Unique ) );
             velocityRestart->zero();
@@ -464,6 +461,14 @@ void FSIHandler::initializeTimeAdvance ( )
             structureRestart.reset ( new vector_Type (M_displacementFESpace->map(),  Unique ) );
             structureRestart->zero();
             
+            vectorPtr_Type structureVelocityRestart;
+            structureVelocityRestart.reset ( new vector_Type (M_displacementFESpace->map(),  Unique ) );
+            structureVelocityRestart->zero();
+
+            vectorPtr_Type structureAccelerationRestart;
+            structureAccelerationRestart.reset ( new vector_Type (M_displacementFESpace->map(),  Unique ) );
+            structureAccelerationRestart->zero();
+
             LifeV::ExporterData<mesh_Type> velocityReader (LifeV::ExporterData<mesh_Type>::VectorField,
                                                            std::string ("f - velocity." + iterationString),
                                                            M_fluid->uFESpace(),
@@ -492,11 +497,27 @@ void FSIHandler::initializeTimeAdvance ( )
                                                            UInt (0),
                                                            LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
             
+            LifeV::ExporterData<mesh_Type> structureVelocityReader(LifeV::ExporterData<mesh_Type>::VectorField,
+            											   	   	   std::string ("s - velocity." + iterationString),
+            											   	   	   M_displacementFESpace,
+            											   	   	   structureVelocityRestart,
+            											   	   	   UInt (0),
+            											   	   	   LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+
+            LifeV::ExporterData<mesh_Type> structureAccelerationReader(LifeV::ExporterData<mesh_Type>::VectorField,
+                        											   std::string ("s - acceleration." + iterationString),
+                        											   M_displacementFESpace,
+                        											   structureAccelerationRestart,
+                        											   UInt (0),
+                        											   LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+
             
             M_importerFluid->readVariable (velocityReader);
             M_importerFluid->readVariable (pressureReader);
             M_importerFluid->readVariable (aleReader);
             M_importerStructure->readVariable (structureReader);
+            M_importerStructure->readVariable (structureVelocityReader);
+            M_importerStructure->readVariable (structureAccelerationReader);
             
             int iterations = std::atoi (iterationString.c_str() );
             Real iterationsReal = iterations;
@@ -507,6 +528,8 @@ void FSIHandler::initializeTimeAdvance ( )
                 *M_fluidPressure = *pressureRestart;
                 *M_fluidDisplacement = *aleRestart;
                 *M_structureDisplacement = *structureRestart;
+                *M_structureVelocity = *structureVelocityRestart;
+                *M_structureAcceleration = *structureAccelerationRestart;
             }
             
             iterations--;
@@ -518,36 +541,10 @@ void FSIHandler::initializeTimeAdvance ( )
             
             initialStateVelocity.push_back(*velocityRestart);
             initialStateALE.push_back(*aleRestart);
-            uv0.push_back (structureRestart);
-            
-            }
-            else
+
+            if ( iterInit == 0 )
             {
-                // For the structure we need to read one more vector from previous time steps 
-                vectorPtr_Type structureRestart;
-                structureRestart.reset ( new vector_Type (M_displacementFESpace->map(),  Unique ) );
-                structureRestart->zero();
-                
-                LifeV::ExporterData<mesh_Type> structureReader(LifeV::ExporterData<mesh_Type>::VectorField,
-                                                               std::string ("s - displacement." + iterationString),
-                                                               M_displacementFESpace,
-                                                               structureRestart,
-                                                               UInt (0),
-                                                               LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
-                
-                M_importerStructure->readVariable (structureReader);
-                
-                int iterations = std::atoi (iterationString.c_str() );
-                Real iterationsReal = iterations;
-                
-                iterations--;
-                
-                std::ostringstream iter;
-                iter.fill ( '0' );
-                iter << std::setw (5) << ( iterations );
-                iterationString = iter.str();
-                
-                uv0.push_back (structureRestart);
+            	M_structureTimeAdvance->restart(M_structureDisplacement, M_structureVelocity, M_structureAcceleration);
             }
         }
         
@@ -556,7 +553,6 @@ void FSIHandler::initializeTimeAdvance ( )
         // other way round.
         std::reverse(initialStateVelocity.begin(),initialStateVelocity.end());
         std::reverse(initialStateALE.begin(),initialStateALE.end());
-    	*/
     }
     
     // Fluid
@@ -1103,6 +1099,11 @@ FSIHandler::solveFSIproblem ( )
 		M_fluidTimeAdvance->shift(*M_fluidVelocity);
 		M_structureTimeAdvance->shift(M_structureDisplacement);
 		M_aleTimeAdvance->shift(*M_fluidDisplacement);
+
+		*M_structureVelocity  = *M_structureTimeAdvance->old_first_derivative();
+
+		*M_structureAcceleration = *M_structureTimeAdvance->old_second_derivative();
+
 
 		// This part below handles the exporter of the solution.
 		// In particular, given a number of timesteps at which

@@ -85,4 +85,28 @@ Newmark::shift( const vectorPtr_Type& state )
 	*M_old_second_derivative = *M_current_second_derivative;
 }
 
+void
+Newmark::restart( const vectorPtr_Type& state, const vectorPtr_Type& first_derivative, const vectorPtr_Type& second_derivative )
+{
+	// Instantiate vectors
+
+	// Previous timestep - given
+	M_old_state.reset( new vector_Type ( *state, Unique ) );
+	M_old_first_derivative.reset( new vector_Type ( *first_derivative, Unique ) );
+	M_old_second_derivative.reset( new vector_Type ( *second_derivative, Unique ) );
+
+	// Current timestep - initialized to zero
+	M_current_state.reset( new vector_Type ( *state, Unique ) );
+	M_current_first_derivative.reset( new vector_Type ( *first_derivative, Unique ) );
+	M_current_second_derivative.reset( new vector_Type ( *second_derivative, Unique ) );
+
+	M_current_state->zero();
+	M_current_first_derivative->zero();
+	M_current_second_derivative->zero();
+
+	// Instantiate csi
+	M_csi.reset( new vector_Type ( *state, Unique ) );
+	M_csi->zero();
+}
+
 }

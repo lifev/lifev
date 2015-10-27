@@ -35,6 +35,8 @@ public:
 
     void shift( const vectorPtr_Type& state );
 
+    void restart( const vectorPtr_Type& state, const vectorPtr_Type& first_derivative, const vectorPtr_Type& second_derivative );
+
     // set the value of beta
     void set_beta( const Real beta ) { M_beta = beta; };
 

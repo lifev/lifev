@@ -113,6 +113,18 @@ bcPtr_Type BCh_ale ()
     return bc_ale;
 }
 
+bcPtr_Type BCh_ale_residual ()
+{
+    BCFunctionBase zero_function (fZero);
+
+    bcPtr_Type bc_ale_residual (new BCHandler );
+
+    bc_ale_residual->addBC ("Inflow",  INLET,     Essential, Full, zero_function, 3);
+    bc_ale_residual->addBC ("Outflow", OUTLET,    Essential, Full, zero_function, 3);
+
+    return bc_ale_residual;
+}
+
 bcPtr_Type BCh_PCD ()
 {
     BCFunctionBase zero_function (fZero);
