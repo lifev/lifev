@@ -1113,12 +1113,7 @@ FSIHandler::solveFSIproblem ( )
 		// of the simulation is performed, it works correctly.
 		if ( M_orderBDF == 1 )
 		{
-			if ( time_step_count == (M_counterSaveEvery-1) )
-			{
-				M_exporterFluid->postProcess(M_time);
-				M_exporterStructure->postProcess(M_time);
-			}
-			else if ( time_step_count == M_counterSaveEvery )
+			if ( time_step_count == M_counterSaveEvery )
 			{
 				M_exporterFluid->postProcess(M_time);
 				M_exporterStructure->postProcess(M_time);
@@ -1127,12 +1122,7 @@ FSIHandler::solveFSIproblem ( )
 		}
 		else if ( M_orderBDF == 2 )
 		{
-			if ( time_step_count == (M_counterSaveEvery-2) )
-			{
-				M_exporterFluid->postProcess(M_time);
-				M_exporterStructure->postProcess(M_time);
-			}
-			else if ( time_step_count == (M_counterSaveEvery-1) )
+			if ( time_step_count == (M_counterSaveEvery-1) )
 			{
 				M_exporterFluid->postProcess(M_time);
 				M_exporterStructure->postProcess(M_time);
