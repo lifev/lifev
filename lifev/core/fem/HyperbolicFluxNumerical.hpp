@@ -47,7 +47,7 @@ namespace
 
 using namespace LifeV;
 
-typedef boost::function < Vector ( const Real&, const Real&,
+typedef std::function < Vector ( const Real&, const Real&,
                                    const Real&, const Real&,
                                    const std::vector<Real>& ) >
 vectorFunction;
@@ -142,15 +142,15 @@ public:
     //! @name Public Types
     //@{
 
-    typedef boost::function < Vector ( const Real&, const Real&,
+    typedef std::function < Vector ( const Real&, const Real&,
                                        const Real&, const Real&,
                                        const std::vector<Real>& ) >
     vectorFunction_Type;
 
-    typedef boost::function< Real ( const Real& ) > scalarFunction_Type;
+    typedef std::function< Real ( const Real& ) > scalarFunction_Type;
 
     typedef typename SolverType::vector_type        vector_Type;
-    typedef boost::shared_ptr< vector_Type >        vectorPtr_Type;
+    typedef std::shared_ptr< vector_Type >        vectorPtr_Type;
 
     typedef GetPot                                  dataFile_Type;
     typedef KN< Real >                              normal_Type;
@@ -449,7 +449,7 @@ normInfinity ( const Real& leftState, const Real& rightState, const normal_Type&
     }
 
     // Bind the function which depends on all the parameter to obatin a scalar function, which depend just on the unknown
-    absFunctionDotNormalBound = boost::bind ( &absFunctionDotNormal, _1,
+    absFunctionDotNormalBound = std::bind ( &absFunctionDotNormal, std::placeholders::_1,
                                               M_firstDerivativePhysicalFlux,
                                               normal, t, x, y, z, -1, values );
 
@@ -464,7 +464,7 @@ normInfinity ( const Real& leftState, const Real& rightState, const normal_Type&
 
 // Create the fluxDotNormal function
 template < typename Mesh, typename SolverType >
-boost::function< Real ( const Real& ) >
+std::function< Real ( const Real& ) >
 AbstractNumericalFlux< Mesh, SolverType >::
 computeFunctionDotNormal ( const vectorFunction_Type& function, const normal_Type& normal, const UInt& iElem,
                            const Real& t, const Real& x, const Real& y, const Real& z, const Real& plusMinus ) const
@@ -487,7 +487,7 @@ computeFunctionDotNormal ( const vectorFunction_Type& function, const normal_Typ
     }
 
     // Bind the fluxDotNormal function with known quantities.
-    functionDotNormalBound = boost::bind ( &functionDotNormal, _1, function,
+    functionDotNormalBound = std::bind ( &functionDotNormal, std::placeholders::_1, function,
                                            normal, t, x, y, z, plusMinus, values );
 
     return functionDotNormalBound;

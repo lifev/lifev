@@ -146,9 +146,9 @@ public:
     typedef MapEpetra                             map_Type;
 
     typedef FESpace<mesh_type, map_Type> fespace_type;
-    typedef boost::shared_ptr<fespace_type>              fespace_ptrType;
+    typedef std::shared_ptr<fespace_type>              fespace_ptrType;
 
-    typedef boost::shared_ptr<matrix_type>               matrix_ptrType;
+    typedef std::shared_ptr<matrix_type>               matrix_ptrType;
 
     //@}
 
@@ -221,13 +221,13 @@ public:
 private:
 
     typedef MatrixElemental                              localMatrix_type;
-    typedef boost::scoped_ptr<localMatrix_type>          localMatrix_ptrType;
+    typedef std::unique_ptr<localMatrix_type>          localMatrix_ptrType;
 
     typedef CurrentFE                                    currentFE_type;
-    typedef boost::scoped_ptr<currentFE_type>            currentFE_ptrType;
+    typedef std::unique_ptr<currentFE_type>            currentFE_ptrType;
 
     typedef CurrentFEManifold                            currentBdFE_type;
-    typedef boost::scoped_ptr<currentBdFE_type>          currentBdFE_ptrType;
+    typedef std::unique_ptr<currentBdFE_type>          currentBdFE_ptrType;
 
 
     // Finite element space for the unknown

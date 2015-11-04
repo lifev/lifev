@@ -76,9 +76,9 @@ public:
     typedef VectorEpetra                     vector_type;
 
     typedef void                             prec_raw_type;
-    typedef boost::shared_ptr<prec_raw_type> prec_type;
-    typedef boost::shared_ptr<matrix_type>   matrix_ptrtype;
-    typedef boost::shared_ptr<VectorEpetra>  vector_ptrtype;
+    typedef std::shared_ptr<prec_raw_type> prec_type;
+    typedef std::shared_ptr<matrix_type>   matrix_ptrtype;
+    typedef std::shared_ptr<VectorEpetra>  vector_ptrtype;
 
     //@}
 

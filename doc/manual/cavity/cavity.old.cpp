@@ -49,7 +49,7 @@
 typedef LifeV::RegionMesh<LifeV::LinearTetra>       mesh_type;
 typedef LifeV::OseenSolver< mesh_type >                     fluid_type;
 typedef fluid_type::vector_type                       vector_type;
-typedef boost::shared_ptr<vector_type>                vector_ptrtype;   //Pointer
+typedef std::shared_ptr<vector_type>                vector_ptrtype;   //Pointer
 
 // +-----------------------------------------------+
 // | Data and functions for the boundary conditions|
@@ -91,7 +91,7 @@ int main (int argc, char** argv)
     MPI_Init (&argc, &argv);
 #endif
 
-    boost::shared_ptr<Epetra_Comm>   comm;
+    std::shared_ptr<Epetra_Comm>   comm;
 #ifdef EPETRA_MPI
     comm.reset ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
     int nproc;
@@ -154,7 +154,7 @@ int main (int argc, char** argv)
     {
         std::cout << "Mesh file: " << meshData.meshDir() << meshData.meshFile() << std::endl;
     }
-    boost::shared_ptr< LifeV::RegionMesh<LifeV::LinearTetra> > fullMeshPtr (new LifeV::RegionMesh<LifeV::LinearTetra>);
+    std::shared_ptr< LifeV::RegionMesh<LifeV::LinearTetra> > fullMeshPtr (new LifeV::RegionMesh<LifeV::LinearTetra>);
     LifeV::readMesh (*fullMeshPtr, meshData);
     // Split the mesh between processors
     LifeV::partitionMesh< LifeV::RegionMesh<LifeV::LinearTetra> >   meshPart (fullMeshPtr, comm);
@@ -249,7 +249,7 @@ int main (int argc, char** argv)
     {
         std::cout << std::endl << "[Creating the problem]" << std::endl;
     }
-    boost::shared_ptr<LifeV::OseenData> oseenData (new LifeV::OseenData() );
+    std::shared_ptr<LifeV::OseenData> oseenData (new LifeV::OseenData() );
     oseenData->setup ( dataFile );
 
     if (verbose)
@@ -320,7 +320,7 @@ int main (int argc, char** argv)
     // (A new one should be built for Navier-Stokes)
     fluid.resetPrec();
 
-    boost::shared_ptr< LifeV::Exporter<LifeV::RegionMesh<LifeV::LinearTetra> > > exporter;
+    std::shared_ptr< LifeV::Exporter<LifeV::RegionMesh<LifeV::LinearTetra> > > exporter;
 
     vector_ptrtype velAndPressure;
 

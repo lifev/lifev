@@ -47,7 +47,7 @@ struct ExporterPolicyNoExporter
 {
 
     typedef VectorEpetra                             vector_Type;
-    typedef boost::shared_ptr<VectorEpetra>          vectorPtr_Type;
+    typedef std::shared_ptr<VectorEpetra>          vectorPtr_Type;
 
     static void initExporter ( Teuchos::ParameterList& /*list*/,
                                vectorPtr_Type /*solution*/ ) {}

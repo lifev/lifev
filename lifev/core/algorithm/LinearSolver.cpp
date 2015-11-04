@@ -68,7 +68,7 @@ LinearSolver::LinearSolver() :
 
 }
 
-LinearSolver::LinearSolver ( const boost::shared_ptr<Epetra_Comm> commPtr ) :
+LinearSolver::LinearSolver ( const std::shared_ptr<Epetra_Comm> commPtr ) :
     M_operator             (),
     M_matrix               (),
     M_baseMatrixForPreconditioner(),
@@ -418,7 +418,7 @@ LinearSolver::setSolverType ( const SolverType& solverType )
 }
 
 void
-LinearSolver::setCommunicator ( const boost::shared_ptr<Epetra_Comm> commPtr )
+LinearSolver::setCommunicator ( const std::shared_ptr<Epetra_Comm> commPtr )
 {
     M_displayer->setCommunicator ( commPtr );
 }
@@ -561,7 +561,7 @@ LinearSolver::solver()
     return M_solverOperator;
 }
 
-boost::shared_ptr<Displayer>
+std::shared_ptr<Displayer>
 LinearSolver::displayer()
 {
     return M_displayer;

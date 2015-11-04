@@ -72,21 +72,21 @@ public:
     //@{
 
     typedef BCHandler                                                              bcHandler_Type;
-    typedef boost::shared_ptr< bcHandler_Type >                                    bcHandlerPtr_Type;
+    typedef std::shared_ptr< bcHandler_Type >                                    bcHandlerPtr_Type;
 
     typedef StructuralOperator< RegionMesh <LinearTetra> >                         physicalSolver_Type;
-    typedef boost::shared_ptr< physicalSolver_Type >                               physicalSolverPtr_Type;
+    typedef std::shared_ptr< physicalSolver_Type >                               physicalSolverPtr_Type;
 
     typedef BCInterfaceFactory< bcHandler_Type, physicalSolver_Type >              factory_Type;
     typedef BCInterfaceFunction< bcHandler_Type, physicalSolver_Type >             bcFunction_Type;
-    typedef boost::shared_ptr< bcFunction_Type >                                   bcFunctionPtr_Type;
+    typedef std::shared_ptr< bcFunction_Type >                                   bcFunctionPtr_Type;
     typedef std::vector< bcFunctionPtr_Type >                                      vectorFunction_Type;
 
     typedef BCInterfaceFunctionParserSolver< bcHandler_Type, physicalSolver_Type > functionParserSolver_Type;
-    typedef boost::shared_ptr< functionParserSolver_Type >                         functionParserSolverPtr_Type;
+    typedef std::shared_ptr< functionParserSolver_Type >                         functionParserSolverPtr_Type;
 
     typedef BCInterfaceData3D                                                      data_Type;
-    typedef boost::shared_ptr< data_Type >                                         dataPtr_Type;
+    typedef std::shared_ptr< data_Type >                                         dataPtr_Type;
 
     //@}
 

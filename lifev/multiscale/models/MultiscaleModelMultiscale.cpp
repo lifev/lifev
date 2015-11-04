@@ -132,7 +132,7 @@ MultiscaleModelMultiscale::setupData ( const std::string& fileName )
     couplings_Type coupling;
     algorithms_Type algorithm;
 
-    boost::array< Real, NDIM > geometryScale, geometryRotate, geometryTranslate;
+    std::array< Real, NDIM > geometryScale, geometryRotate, geometryTranslate;
 
     multiscaleIDContainer_Type modelsIDVector;
     multiscaleIDContainer_Type boundaryIDVector;

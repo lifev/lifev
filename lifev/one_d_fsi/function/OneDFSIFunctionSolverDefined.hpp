@@ -69,13 +69,13 @@ public:
     //@{
 
     typedef OneDFSIFunction                         bcFunction_Type;
-    typedef boost::shared_ptr<bcFunction_Type>      bcFunctionPtr_Type;
+    typedef std::shared_ptr<bcFunction_Type>      bcFunctionPtr_Type;
 
     typedef OneDFSIFlux                             flux_Type;
-    typedef boost::shared_ptr< flux_Type >          fluxPtr_Type;
+    typedef std::shared_ptr< flux_Type >          fluxPtr_Type;
 
     typedef OneDFSISource                           source_Type;
-    typedef boost::shared_ptr< source_Type >        sourcePtr_Type;
+    typedef std::shared_ptr< source_Type >        sourcePtr_Type;
 
     typedef OneDFSIData                             data_Type;
     typedef data_Type::mesh_Type                    mesh_Type;
@@ -84,13 +84,13 @@ public:
 
     typedef SolverAmesos                            linearSolver_Type;
     typedef linearSolver_Type::vector_type          vector_Type;
-    typedef boost::shared_ptr< vector_Type >        vectorPtr_Type;
-    typedef boost::array< vectorPtr_Type, 2 >       vectorPtrContainer_Type;
+    typedef std::shared_ptr< vector_Type >        vectorPtr_Type;
+    typedef std::array< vectorPtr_Type, 2 >       vectorPtrContainer_Type;
 
     typedef linearSolver_Type::matrix_type          matrix_Type;
 
     typedef std::map< std::string, vectorPtr_Type > solution_Type;
-    typedef boost::shared_ptr< solution_Type >      solutionPtr_Type;
+    typedef std::shared_ptr< solution_Type >      solutionPtr_Type;
 
     typedef OneDFSI::bcLine_Type                    bcLine_Type;
     typedef OneDFSI::bcSide_Type                    bcSide_Type;

@@ -46,7 +46,7 @@ namespace LifeV
 Parser::Parser() :
     M_strings       (),
     M_results       (),
-    M_calculator    (),
+    M_parser    	(),
     M_evaluate      ( true )
 {
 
@@ -54,13 +54,12 @@ Parser::Parser() :
     debugStream ( 5030 ) << "Parser::Parser" << "\n";
 #endif
 
-    M_calculator.setDefaultVariables();
 }
 
 Parser::Parser ( const std::string& string ) :
     M_strings       (),
     M_results       (),
-    M_calculator    (),
+    M_parser    	(),
     M_evaluate      ( true )
 {
 
@@ -68,14 +67,13 @@ Parser::Parser ( const std::string& string ) :
     debugStream ( 5030 ) << "Parser::Parser( string )" << "\n";
 #endif
 
-    M_calculator.setDefaultVariables();
     setString ( string );
 }
 
 Parser::Parser ( const Parser& parser ) :
     M_strings       ( parser.M_strings ),
     M_results       ( parser.M_results ),
-    M_calculator    ( parser.M_calculator ),
+	M_parser    	( parser.M_parser ),
     M_evaluate      ( parser.M_evaluate )
 {
 }
@@ -93,7 +91,6 @@ Parser::operator= ( const Parser& parser )
 
         M_strings    = parser.M_strings;
         M_results    = parser.M_results;
-        //M_calculator = parser.M_calculator; //NOT WORKING!!!
         M_evaluate   = parser.M_evaluate;
     }
 
@@ -115,17 +112,9 @@ Parser::evaluate ( const ID& id )
         {
             start = M_strings[i].begin();
             end   = M_strings[i].end();
-#ifdef HAVE_BOOST_SPIRIT_QI
-#ifdef ENABLE_SPIRIT_PARSER
-            qi::phrase_parse ( start, end, M_calculator, ascii::space, M_results );
-#else
-            std::cerr << "!!! ERROR: The Boost Spirit parser has been disabled !!!" << std::endl;
-            std::exit ( EXIT_FAILURE );
-#endif /* ENABLE_SPIRIT_PARSER */
-#else
-            std::cerr << "!!! ERROR: Boost version < 1.41 !!!" << std::endl;
-            std::exit ( EXIT_FAILURE );
-#endif
+
+            M_parser.SetExpr(M_strings[i]);
+			M_results[i] = M_parser.Eval();
         }
         M_evaluate = false;
     }
@@ -159,12 +148,11 @@ Parser::countSubstring ( const std::string& substring ) const
     return counter;
 }
 
-void
+/*void
 Parser::clearVariables()
 {
-    M_calculator.clearVariables();
     M_evaluate = true;
-}
+}*/
 
 // ===================================================
 // Set Methods
@@ -201,7 +189,8 @@ Parser::setVariable ( const std::string& name, const Real& value )
     debugStream ( 5030 ) << "Parser::setVariable       variables[" << name << "]: " << value << "\n";
 #endif
 
-    M_calculator.setVariable ( name, value);
+    double val = value;
+    M_parser.DefineVar(name, &val);
 
     M_evaluate = true;
 }
@@ -212,12 +201,22 @@ Parser::setVariable ( const std::string& name, const Real& value )
 const Real&
 Parser::variable ( const std::string& name )
 {
+	// Get the map with the variables
+	mu::varmap_type variables = M_parser.GetVar();
+	//cout << "Number: " << (int)variables.size() << "\n";
 
-#ifdef HAVE_LIFEV_DEBUG
-    debugStream ( 5030 ) << "Parser::variable          variables[" << name << "]: " << M_calculator.variable ( name ) << "\n";
-#endif
+	// Get the number of variables
+	mu::varmap_type::const_iterator item = variables.begin();
 
-    return M_calculator.variable ( name );
+	// Query the variables
+	for (; item!=variables.end(); ++item)
+	{
+	  if (item->first == name)
+	  {
+		  Real val = *(item->second);
+		  return val;
+	  }
+	}
 }
 
 } // Namespace LifeV

@@ -84,12 +84,12 @@ public:
     typedef Preconditioner                          super_Type;
 
     typedef Teko::Epetra::EpetraBlockPreconditioner preconditioner_Type;
-    typedef boost::shared_ptr<preconditioner_Type>  preconditionerPtr_Type;
+    typedef std::shared_ptr<preconditioner_Type>  preconditionerPtr_Type;
     typedef RegionMesh<LinearTetra>                 mesh_Type;
     typedef MapEpetra                               map_Type;
-    typedef boost::shared_ptr<FESpace<mesh_Type, map_Type> >  FESpacePtr_Type;
+    typedef std::shared_ptr<FESpace<mesh_Type, map_Type> >  FESpacePtr_Type;
     typedef MatrixEpetra<Real>                      matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>          matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type>          matrixPtr_Type;
 
     typedef Teuchos::ParameterList                  list_Type;
     //@}
@@ -100,9 +100,9 @@ public:
     //@{
     //! default constructor.
 #ifdef HAVE_MPI
-    PreconditionerLSC ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
+    PreconditionerLSC ( std::shared_ptr<Epetra_Comm> comm = std::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
 #else
-    PreconditionerLSC ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
+    PreconditionerLSC ( std::shared_ptr<Epetra_Comm> comm = std::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
 #endif
 
     //! constructor from matrix A.
@@ -161,7 +161,7 @@ protected:
     std::string M_precType;
     int         M_velocityBlockSize;
     int         M_pressureBlockSize;
-    boost::shared_ptr<Epetra_Comm> M_comm;
+    std::shared_ptr<Epetra_Comm> M_comm;
 
 };
 

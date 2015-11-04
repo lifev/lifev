@@ -107,7 +107,7 @@ struct FactoryDefaultError
   @sa factoryDefaultError, factoryClone, FactoryTypeInfo
 */
 template < class AbstractProduct, typename IdentifierType,
-         typename ProductCreator = boost::function<AbstractProduct*() >,
+         typename ProductCreator = std::function<AbstractProduct*() >,
          template<class> class FactoryErrorPolicy = FactoryDefaultError >
 class Factory : public FactoryErrorPolicy<AbstractProduct>
 {

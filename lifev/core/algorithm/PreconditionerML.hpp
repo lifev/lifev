@@ -67,7 +67,7 @@ public:
     typedef Preconditioner                       super;
 
     typedef ML_Epetra::MultiLevelPreconditioner  prec_raw_type;
-    typedef boost::shared_ptr<prec_raw_type>     prec_type;
+    typedef std::shared_ptr<prec_raw_type>     prec_type;
 
     typedef super::operator_raw_type             operator_raw_type;
     typedef super::operator_type                 operator_type;
@@ -79,9 +79,9 @@ public:
     //@{
     //! Empty constructor.
 #ifdef HAVE_MPI
-    PreconditionerML ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
+    PreconditionerML ( std::shared_ptr<Epetra_Comm> comm = std::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
 #else
-    PreconditionerML ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
+    PreconditionerML ( std::shared_ptr<Epetra_Comm> comm = std::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
 #endif
 
     //! destructor.
@@ -198,9 +198,9 @@ public:
       @param yCoord Shared pointer on a vector of the y coordinates of the vertices of the mesh
       @param zCoord Shared pointer on a vector of the z coordinates of the vertices of the mesh
      */
-    void setVerticesCoordinates (boost::shared_ptr<std::vector<Real> > xCoord,
-                                 boost::shared_ptr<std::vector<Real> > yCoord,
-                                 boost::shared_ptr<std::vector<Real> > zCoord);
+    void setVerticesCoordinates (std::shared_ptr<std::vector<Real> > xCoord,
+                                 std::shared_ptr<std::vector<Real> > yCoord,
+                                 std::shared_ptr<std::vector<Real> > zCoord);
 
     //@}
 
@@ -249,7 +249,7 @@ public:
 protected:
 
     list_Type  M_IfpackSubList;
-    boost::shared_ptr<Epetra_Comm> M_comm;
+    std::shared_ptr<Epetra_Comm> M_comm;
 
 private:
 
@@ -260,9 +260,9 @@ private:
     bool                    M_analyze;
 
     bool                    M_visualizationDataAvailable;
-    boost::shared_ptr<std::vector<Real> > M_xCoord;
-    boost::shared_ptr<std::vector<Real> > M_yCoord;
-    boost::shared_ptr<std::vector<Real> > M_zCoord;
+    std::shared_ptr<std::vector<Real> > M_xCoord;
+    std::shared_ptr<std::vector<Real> > M_yCoord;
+    std::shared_ptr<std::vector<Real> > M_zCoord;
 
 };
 

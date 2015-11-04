@@ -43,7 +43,7 @@ template < class vector_Type >
 class EmptyPhysicalSolver
 {
 public:
-    typedef boost::shared_ptr<vector_Type> solutionPtr_Type;
+    typedef std::shared_ptr<vector_Type> solutionPtr_Type;
 };
 
 

@@ -66,15 +66,15 @@ namespace
 {
 
 typedef RegionMesh<LinearTriangle>      mesh_Type;
-typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
+typedef std::shared_ptr<mesh_Type> meshPtr_Type;
 
 // interrogator that checks if the barycenter of the mesh entity satisfies the condition
 // given in the constructor wrt the given circle
 // (default: barycenter inside the circle)
 template < typename MeshEntityType,
-         typename ComparisonPolicyType = boost::function2 < bool,
+         typename ComparisonPolicyType = std::function < bool (
          Real const&,
-         Real const& > >
+         Real const& ) > >
 class CircleInterrogator
 {
 public:
@@ -118,7 +118,7 @@ class LevelSetInterrogator
 {
 public:
     typedef MeshEntityType                          meshEntity_Type;
-    typedef boost::function1<Real, Vector3D const&> distanceFunction_Type;
+    typedef std::function<Real (Vector3D const&) > distanceFunction_Type;
 
     explicit LevelSetInterrogator ( distanceFunction_Type const& distFun ) : M_distanceFunction ( distFun ) {}
 
@@ -180,10 +180,10 @@ int main ( int argc, char** argv )
     // communicator
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+    std::shared_ptr<Epetra_Comm> comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
     verbose = comm->MyPID() == 0;
 #else
-    boost::shared_ptr<Epetra_Comm> comm ( new Epetra_SerialComm );
+    std::shared_ptr<Epetra_Comm> comm ( new Epetra_SerialComm );
 #endif
 
     // number of elements for each direction in the mesh

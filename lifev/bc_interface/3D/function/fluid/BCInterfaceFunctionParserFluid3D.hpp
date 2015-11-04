@@ -64,11 +64,11 @@ BCInterfaceFunctionParser< BCHandler, OseenSolverShapeDerivative< RegionMesh< Li
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParser< BCHandler, OseenSolver< RegionMesh< LinearTetra > > >::setData ( const boost::shared_ptr< BCInterfaceData >& data );
+BCInterfaceFunctionParser< BCHandler, OseenSolver< RegionMesh< LinearTetra > > >::setData ( const std::shared_ptr< BCInterfaceData >& data );
 
 template< >
 void
-BCInterfaceFunctionParser< BCHandler, OseenSolverShapeDerivative< RegionMesh< LinearTetra > > >::setData ( const boost::shared_ptr< BCInterfaceData >& data );
+BCInterfaceFunctionParser< BCHandler, OseenSolverShapeDerivative< RegionMesh< LinearTetra > > >::setData ( const std::shared_ptr< BCInterfaceData >& data );
 
 } // Namespace LifeV
 

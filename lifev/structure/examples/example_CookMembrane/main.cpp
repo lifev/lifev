@@ -125,44 +125,44 @@ public:
 
     typedef RegionMesh<LifeV::LinearTetra >                       mesh_Type;
     typedef StructuralOperator<mesh_Type >::vector_Type             vector_Type;
-    typedef boost::shared_ptr<vector_Type>                        vectorPtr_Type;
-    typedef boost::shared_ptr< TimeAdvance< vector_Type > >       timeAdvance_type;
+    typedef std::shared_ptr<vector_Type>                        vectorPtr_Type;
+    typedef std::shared_ptr< TimeAdvance< vector_Type > >       timeAdvance_type;
 
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_type;
+    typedef std::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_type;
     //Exporters Typedefs
     typedef LifeV::Exporter<mesh_Type >                  filter_Type;
-    typedef boost::shared_ptr<filter_Type >                       filterPtr_Type;
+    typedef std::shared_ptr<filter_Type >                       filterPtr_Type;
 
     typedef LifeV::ExporterEmpty<mesh_Type >                      emptyExporter_Type;
-    typedef boost::shared_ptr<emptyExporter_Type>                 emptyExporterPtr_Type;
+    typedef std::shared_ptr<emptyExporter_Type>                 emptyExporterPtr_Type;
 
     typedef LifeV::ExporterEnsight<mesh_Type >                    ensightFilter_Type;
-    typedef boost::shared_ptr<ensightFilter_Type>                 ensightFilterPtr_Type;
+    typedef std::shared_ptr<ensightFilter_Type>                 ensightFilterPtr_Type;
 
     typedef LifeV::ExporterData<mesh_Type>                        exporterData_Type;
-    typedef boost::shared_ptr<exporterData_Type>                  exporterDataPtr_Type;
+    typedef std::shared_ptr<exporterData_Type>                  exporterDataPtr_Type;
 
     typedef LifeV::ExporterVTK<mesh_Type>                         exporterVTK_Type;
-    typedef boost::shared_ptr<exporterVTK_Type>                   exporterVTKPtr_Type;
+    typedef std::shared_ptr<exporterVTK_Type>                   exporterVTKPtr_Type;
 
 #ifdef HAVE_HDF5
     typedef LifeV::ExporterHDF5<mesh_Type >                       hdf5Filter_Type;
-    typedef boost::shared_ptr<hdf5Filter_Type>                    hdf5FilterPtr_Type;
+    typedef std::shared_ptr<hdf5Filter_Type>                    hdf5FilterPtr_Type;
 #endif
 
     typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >         solidFESpace_Type;
-    typedef boost::shared_ptr<solidFESpace_Type>                  solidFESpacePtr_Type;
+    typedef std::shared_ptr<solidFESpace_Type>                  solidFESpacePtr_Type;
 
 
     typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >      solidETFESpace_Type;
-    typedef boost::shared_ptr<solidETFESpace_Type>                 solidETFESpacePtr_Type;
+    typedef std::shared_ptr<solidETFESpace_Type>                 solidETFESpacePtr_Type;
 
     /** @name Constructors, destructor
      */
     //@{
     Structure ( int                                   argc,
                 char**                                argv,
-                boost::shared_ptr<Epetra_Comm>        structComm );
+                std::shared_ptr<Epetra_Comm>        structComm );
 
     ~Structure()
     {}
@@ -191,7 +191,7 @@ private:
 
 private:
     struct Private;
-    boost::shared_ptr<Private> parameters;
+    std::shared_ptr<Private> parameters;
     filterPtr_Type importerSolid;
     filterPtr_Type exporterSolid;
 
@@ -214,7 +214,7 @@ struct Structure::Private
 
     std::string data_file_name;
 
-    boost::shared_ptr<Epetra_Comm>     comm;
+    std::shared_ptr<Epetra_Comm>     comm;
 
     static Real bcZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
     {
@@ -278,7 +278,7 @@ struct Structure::Private
 
 Structure::Structure ( int                                   argc,
                        char**                                argv,
-                       boost::shared_ptr<Epetra_Comm>        structComm) :
+                       std::shared_ptr<Epetra_Comm>        structComm) :
     parameters ( new Private() ),
     dFESpace(),
     dETFESpace(),
@@ -329,18 +329,18 @@ Structure::run3d()
     bool verbose = (parameters->comm->MyPID() == 0);
 
     //! Number of boundary conditions for the velocity and mesh motion
-    boost::shared_ptr<BCHandler> BCh ( new BCHandler() );
+    std::shared_ptr<BCHandler> BCh ( new BCHandler() );
 
     //! dataElasticStructure
     GetPot dataFile ( parameters->data_file_name.c_str() );
 
-    boost::shared_ptr<StructuralConstitutiveLawData> dataStructure (new StructuralConstitutiveLawData( ) );
+    std::shared_ptr<StructuralConstitutiveLawData> dataStructure (new StructuralConstitutiveLawData( ) );
     dataStructure->setup (dataFile);
 
     MeshData             meshData;
     meshData.setup (dataFile, "solid/space_discretization");
 
-    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr (new RegionMesh<LinearTetra> ( ( parameters->comm ) ) );
+    std::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr (new RegionMesh<LinearTetra> ( ( parameters->comm ) ) );
     readMesh (*fullMeshPtr, meshData);
 
     //fullMeshPtr->showMe( );
@@ -581,9 +581,9 @@ Structure::run3d()
         std::cout << "ok." << std::endl;
     }
 
-    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterSolid;
+    std::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterSolid;
 
-    //boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterCheck;
+    //std::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterCheck;
 
     std::string const exporterType =  dataFile ( "exporter/type", "ensight");
     std::string const exportFileName = dataFile ( "exporter/nameFile", "structure");
@@ -740,13 +740,13 @@ main ( int argc, char** argv )
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_MpiComm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+    std::shared_ptr<Epetra_MpiComm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
     if ( Comm->MyPID() == 0 )
     {
         cout << "% using MPI" << endl;
     }
 #else
-    boost::shared_ptr<Epetra_SerialComm> Comm ( new Epetra_SerialComm() );
+    std::shared_ptr<Epetra_SerialComm> Comm ( new Epetra_SerialComm() );
     cout << "% using serial Version" << endl;
 #endif
 

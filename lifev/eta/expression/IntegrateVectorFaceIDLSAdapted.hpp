@@ -96,10 +96,10 @@ public:
     //@{
 
     //! Full data constructor
-    IntegrateVectorFaceIDLSAdapted (const boost::shared_ptr<MeshType>& mesh,
+    IntegrateVectorFaceIDLSAdapted (const std::shared_ptr<MeshType>& mesh,
                                     const UInt boundaryID,
                                     const BDQRAdapter_Type& quadratureBD,
-                                    const boost::shared_ptr<TestSpaceType> testSpace,
+                                    const std::shared_ptr<TestSpaceType> testSpace,
                                     const ExpressionType& expression);
 
     //! Copy constructor
@@ -124,7 +124,7 @@ public:
 
     //! Operator wrapping the addTo method (for shared_ptr)
     template <typename VectorType>
-    inline void operator>> (boost::shared_ptr<VectorType> vec)
+    inline void operator>> (std::shared_ptr<VectorType> vec)
     {
         addTo (vec);
     }
@@ -150,7 +150,7 @@ public:
     void addTo (VectorType& vec);
 
     template <typename VectorType>
-    inline void addTo (boost::shared_ptr<VectorType> vec)
+    inline void addTo (std::shared_ptr<VectorType> vec)
     {
         ASSERT (vec != 0, " Cannot assemble with an empty vector");
         addTo (*vec);
@@ -169,7 +169,7 @@ private:
     //@}
 
     // Pointer on the mesh
-    boost::shared_ptr<MeshType> M_mesh;
+    std::shared_ptr<MeshType> M_mesh;
 
     // Identifier for the boundary
     UInt M_boundaryId;
@@ -178,7 +178,7 @@ private:
     BDQRAdapter_Type M_qrAdapter;
 
     // Shared pointer on the Space
-    boost::shared_ptr<TestSpaceType> M_testSpace;
+    std::shared_ptr<TestSpaceType> M_testSpace;
 
     // Tree to compute the values for the assembly
     evaluation_Type M_evaluation;
@@ -205,10 +205,10 @@ template < typename MeshType,
          typename LSFESpaceType,
          typename LSVectorType >
 IntegrateVectorFaceIDLSAdapted < MeshType, TestSpaceType, ExpressionType, LSFESpaceType, LSVectorType>::
-IntegrateVectorFaceIDLSAdapted (const boost::shared_ptr<MeshType>& mesh,
+IntegrateVectorFaceIDLSAdapted (const std::shared_ptr<MeshType>& mesh,
                                 const UInt boundaryID,
                                 const BDQRAdapter_Type& quadratureBD,
-                                const boost::shared_ptr<TestSpaceType> testSpace,
+                                const std::shared_ptr<TestSpaceType> testSpace,
                                 const ExpressionType& expression)
     :   M_mesh (mesh),
         M_boundaryId (boundaryID),

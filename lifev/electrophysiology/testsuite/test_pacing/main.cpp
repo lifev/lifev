@@ -86,7 +86,7 @@ Int main ( Int argc, char** argv )
 
     //! Initializing Epetra communicator
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm>  Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm>  Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
     if ( Comm->MyPID() == 0 )
     {
         std::cout << "% using MPI" << std::endl;
@@ -114,17 +114,17 @@ Int main ( Int argc, char** argv )
 
     typedef RegionMesh<LinearTetra>                         mesh_Type;
 
-    typedef boost::function < Real (const Real& /*t*/,
+    typedef std::function < Real (const Real& /*t*/,
                                     const Real &   x,
                                     const Real &   y,
                                     const Real& /*z*/,
                                     const ID&   /*i*/ ) >   function_Type;
 
     typedef ElectroETAMonodomainSolver< mesh_Type, IonicAlievPanfilov > monodomainSolver_Type;
-    typedef boost::shared_ptr< monodomainSolver_Type >                 monodomainSolverPtr_Type;
+    typedef std::shared_ptr< monodomainSolver_Type >                 monodomainSolverPtr_Type;
 
     typedef VectorEpetra                                               vector_Type;
-    typedef boost::shared_ptr<vector_Type>                             vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type>                             vectorPtr_Type;
 
     //********************************************//
     // Import parameters from an xml list. Use    //
@@ -152,7 +152,7 @@ Int main ( Int argc, char** argv )
     {
         std::cout << "Building Constructor for Aliev Panfilov model ... ";
     }
-    boost::shared_ptr<IonicAlievPanfilov>  model ( new IonicAlievPanfilov() );
+    std::shared_ptr<IonicAlievPanfilov>  model ( new IonicAlievPanfilov() );
     if ( Comm->MyPID() == 0 )
     {
         std::cout << " Done!" << std::endl;

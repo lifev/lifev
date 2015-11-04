@@ -122,9 +122,9 @@ int main ( int argc, char** argv )
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
     const bool verbose (Comm->MyPID() == 0);
@@ -137,14 +137,14 @@ int main ( int argc, char** argv )
 
     const UInt Nelements (10);
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
+    std::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
 
     regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                     2.0,   2.0,   2.0,
                     -1.0,  -1.0,  -1.0);
 
     MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
-    boost::shared_ptr< mesh_Type > meshPtr (meshPart.meshPartition() );
+    std::shared_ptr< mesh_Type > meshPtr (meshPart.meshPartition() );
 
     fullMeshPtr.reset();
 
@@ -167,7 +167,7 @@ int main ( int argc, char** argv )
 
     std::string uOrder ("P1");
 
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace
+    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace
     ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 3, Comm) );
 
     if (verbose)
@@ -184,7 +184,7 @@ int main ( int argc, char** argv )
         std::cout << " -- Building ETFESpaces ... " << std::flush;
     }
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 3 > > ETuSpace
+    std::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 3 > > ETuSpace
     ( new ETFESpace< mesh_Type, MapEpetra, 3, 3 > (meshPtr, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), Comm) );
 
     if (verbose)

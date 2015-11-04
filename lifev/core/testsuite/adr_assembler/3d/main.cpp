@@ -127,11 +127,14 @@ typedef MatrixEpetra<Real> matrix_Type;
 typedef VectorEpetra vector_Type;
 typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
 typedef FESpace<mesh_Type, MapEpetra> feSpace_Type;
-typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
+
 typedef LifeV::Preconditioner basePrec_Type;
 typedef boost::shared_ptr<basePrec_Type> basePrecPtr_Type;
 typedef LifeV::PreconditionerIfpack prec_Type;
 typedef boost::shared_ptr<prec_Type> precPtr_Type;
+
+typedef std::shared_ptr<feSpace_Type> feSpacePtr_Type;
+
 
 int
 main ( int argc, char** argv )
@@ -139,9 +142,9 @@ main ( int argc, char** argv )
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
     const bool verbose (Comm->MyPID() == 0);
@@ -170,7 +173,7 @@ main ( int argc, char** argv )
     {
         std::cout << " -- Building the mesh ... " << std::flush;
     }
-    boost::shared_ptr< mesh_Type > fullMeshPtr ( new RegionMesh<LinearTetra> ( Comm ) );
+    std::shared_ptr< mesh_Type > fullMeshPtr ( new RegionMesh<LinearTetra> ( Comm ) );
     regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                     2.0,   2.0,   2.0,
                     -1.0,  -1.0,  -1.0);
@@ -183,7 +186,7 @@ main ( int argc, char** argv )
     {
         std::cout << " -- Partitioning the mesh ... " << std::flush;
     }
-    boost::shared_ptr< mesh_Type > meshPtr;
+    std::shared_ptr< mesh_Type > meshPtr;
     {
         MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
         meshPtr = meshPart.meshPartition();
@@ -211,8 +214,8 @@ main ( int argc, char** argv )
     }
     std::string uOrder ("P1");
     std::string bOrder ("P1");
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uFESpace ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 1, Comm) );
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > betaFESpace ( new FESpace< mesh_Type, MapEpetra > (meshPtr, bOrder, 3, Comm) );
+    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > uFESpace ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 1, Comm) );
+    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > betaFESpace ( new FESpace< mesh_Type, MapEpetra > (meshPtr, bOrder, 3, Comm) );
     if (verbose)
     {
         std::cout << " done ! " << std::endl;
@@ -248,7 +251,7 @@ main ( int argc, char** argv )
     {
         std::cout << " -- Defining the matrix ... " << std::flush;
     }
-    boost::shared_ptr<matrix_Type> systemMatrix (new matrix_Type ( uFESpace->map() ) );
+    std::shared_ptr<matrix_Type> systemMatrix (new matrix_Type ( uFESpace->map() ) );
     *systemMatrix *= 0.0;
     if (verbose)
     {
@@ -516,8 +519,13 @@ main ( int argc, char** argv )
     {
         std::cout << " -- Defining the exported quantities ... " << std::flush;
     }
+<<<<<<< HEAD
     boost::shared_ptr<vector_Type> solutionPtr (new vector_Type (*solution, Repeated) );
     boost::shared_ptr<vector_Type> solutionErrPtr (new vector_Type (solutionErr, Repeated) );
+=======
+    std::shared_ptr<vector_Type> solutionPtr (new vector_Type (solution, Repeated) );
+    std::shared_ptr<vector_Type> solutionErrPtr (new vector_Type (solutionErr, Repeated) );
+>>>>>>> 24ac07b... Versione c++11
     if (verbose)
     {
         std::cout << " done ! " << std::endl;

@@ -210,7 +210,7 @@ LIFECORE
 ============================
 Parser                                 -                                       CMCS1     DONE
 ParserDefinitions                      -                                       CMCS1     DONE
-ParserSpiritGrammar                    -                                       CMCS1     DONE
+ParserSpiritGrammar                          -                                 CMCS1     DONE
 
 LIFEALG
 ============================

@@ -270,7 +270,7 @@ public:
     void createInterfaceMap ( const MapEpetra& interfaceMap,
                               const std::map<ID, ID>& locDofMap,
                               const UInt subdomainMaxId,
-                              const boost::shared_ptr<Epetra_Comm> epetraWorldComm );
+                              const std::shared_ptr<Epetra_Comm> epetraWorldComm );
 
 
     //! applies the b.c. to every block
@@ -398,7 +398,7 @@ private:
 
     //! @name Private Members
     //@{
-    boost::scoped_ptr<std::vector<Int> >        M_couplingFlags;
+    std::unique_ptr<std::vector<Int> >        M_couplingFlags;
     vectorPtr_Type                              M_numerationInterface;
     //@}
 };

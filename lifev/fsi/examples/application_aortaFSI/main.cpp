@@ -114,7 +114,7 @@ class Problem
 {
 public:
 
-    typedef boost::shared_ptr<LifeV::FSISolver> FSISolverPtr_Type;
+    typedef std::shared_ptr<LifeV::FSISolver> FSISolverPtr_Type;
 
     typedef LifeV::FSIOperator::data_Type                          data_Type;
     typedef LifeV::FSIOperator::dataPtr_Type                       dataPtr_Type;
@@ -122,13 +122,13 @@ public:
     typedef LifeV::FSIOperator::vector_Type        vector_Type;
     typedef LifeV::FSIOperator::vectorPtr_Type     vectorPtr_Type;
 
-    typedef boost::shared_ptr< LifeV::Exporter<LifeV::RegionMesh<LifeV::LinearTetra> > > filterPtr_Type;
+    typedef std::shared_ptr< LifeV::Exporter<LifeV::RegionMesh<LifeV::LinearTetra> > > filterPtr_Type;
 
     typedef LifeV::ExporterEnsight<LifeV::FSIOperator::mesh_Type>  ensightFilter_Type;
-    typedef boost::shared_ptr<ensightFilter_Type>                 ensightFilterPtr_Type;
+    typedef std::shared_ptr<ensightFilter_Type>                 ensightFilterPtr_Type;
 #ifdef HAVE_HDF5
     typedef LifeV::ExporterHDF5<LifeV::FSIOperator::mesh_Type>  hdf5Filter_Type;
-    typedef boost::shared_ptr<hdf5Filter_Type>                  hdf5FilterPtr_Type;
+    typedef std::shared_ptr<hdf5Filter_Type>                  hdf5FilterPtr_Type;
 #endif
     typedef LifeV::FactorySingleton<LifeV::Factory<LifeV::FSIOperator,  std::string> > FSIFactory_Type;
     typedef LifeV::RegionMesh<LifeV::LinearTetra> mesh_Type;
@@ -436,11 +436,11 @@ struct FSIChecker
 
     void operator() ()
     {
-        boost::shared_ptr<Problem> fsip;
+        std::shared_ptr<Problem> fsip;
 
         try
         {
-            fsip = boost::shared_ptr<Problem> ( new Problem ( data_file ) );
+            fsip = std::shared_ptr<Problem> ( new Problem ( data_file ) );
 
             fsip->run();
         }

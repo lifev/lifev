@@ -80,7 +80,7 @@ public:
 
     typedef VectorEpetra vector_Type;
     typedef vector_Type const* vectorConstPtr_Type;
-    typedef boost::shared_ptr<BCVectorBase> BCVectorBasePtr_Type;
+    typedef std::shared_ptr<BCVectorBase> BCVectorBasePtr_Type;
 
     //@}
 
@@ -483,7 +483,7 @@ public:
 
 
     typedef BCVectorBase bcVectorBase_Type;
-    typedef boost::shared_ptr<DOFInterface> dofInterfacePtr_Type;
+    typedef std::shared_ptr<DOFInterface> dofInterfacePtr_Type;
     typedef BCVectorBase::vector_Type vector_Type;
     typedef BCVectorBase::vectorConstPtr_Type vectorConstPtr_Type;
 

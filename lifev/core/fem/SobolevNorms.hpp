@@ -80,7 +80,7 @@ elementaryL2NormSquare ( const VectorType& u, const CurrentFE& fe, const DOF& do
 
 //! returns the square of the L2 norm of fct on the current element
 inline Real
-elementaryFctL2NormSquare ( boost::function<Real ( Real, Real, Real ) > fct,
+elementaryFctL2NormSquare ( std::function<Real ( Real, Real, Real ) > fct,
                             const CurrentFE& fe )
 {
     Real sum (0.0);
@@ -102,7 +102,7 @@ elementaryFctL2NormSquare ( boost::function<Real ( Real, Real, Real ) > fct,
 
 //! for time dependent+vectorial.
 inline Real
-elementaryFctL2NormSquare ( boost::function<Real ( Real, Real, Real, Real, UInt ) > fct,
+elementaryFctL2NormSquare ( std::function<Real ( Real, Real, Real, Real, UInt ) > fct,
                             const CurrentFE& fe, const Real t, const UInt nbComp )
 {
     Real sum (0.0);
@@ -226,7 +226,7 @@ Real elementaryFctH1NormSquare ( const FunctionType& fct, const CurrentFE& fe, c
 //! returns the square of the L2 norm of (u-fct) on the current element
 template <typename VectorType>
 Real elementaryDifferenceL2NormSquare ( VectorType& u,
-                                        boost::function<Real ( Real, Real, Real ) > fct,
+                                        std::function<Real ( Real, Real, Real ) > fct,
                                         const CurrentFE& fe,
                                         const DOF& dof )
 {
@@ -259,7 +259,7 @@ Real elementaryDifferenceL2NormSquare ( VectorType& u,
 //! for time dependent+vectorial
 template <typename VectorType>
 Real elementaryDifferenceL2NormSquare ( VectorType& u,
-                                        boost::function<Real ( Real, Real, Real, Real, UInt ) > fct,
+                                        std::function<Real ( Real, Real, Real, Real, UInt ) > fct,
                                         const CurrentFE& fe,
                                         const DOF& dof, const Real t, const UInt nbComp )
 {
@@ -401,7 +401,7 @@ Real elementaryDifferenceH1NormSquare ( const VectorType& u, const UsrFct& fct, 
 //! for time dependent+vectorial
 template <typename VectorType>
 Real elementaryDifferenceIntegral ( VectorType& u,
-                                    boost::function<Real ( Real, Real, Real, Real, UInt ) > fct,
+                                    std::function<Real ( Real, Real, Real, Real, UInt ) > fct,
                                     const CurrentFE& fe,
                                     const DOF& dof, const Real t, const UInt nbComp = 1)
 {
@@ -461,7 +461,7 @@ Real elementaryIntegral ( VectorType& u,
 
 //! returns the integral of fct on the current element
 inline Real
-elementaryFctIntegral ( boost::function < Real ( Real, Real, Real,
+elementaryFctIntegral ( std::function < Real ( Real, Real, Real,
                                                  Real, UInt ) > fct,
                         const CurrentFE& fe, const Real t, const UInt nbComp = 1)
 {

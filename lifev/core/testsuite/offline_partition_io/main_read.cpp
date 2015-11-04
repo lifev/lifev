@@ -74,7 +74,7 @@ main ( int argc, char** argv )
 #ifdef HAVE_MPI
 
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_MpiComm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_MpiComm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 
     const bool verbose (comm->MyPID() == 0);
 
@@ -101,7 +101,7 @@ main ( int argc, char** argv )
     partsFile += partitionerType;
     partsFile += ".h5";
 
-    boost::shared_ptr<mesh_Type> mesh;
+    std::shared_ptr<mesh_Type> mesh;
     {
         PartitionIO<RegionMesh<LinearTetra> > partitionIO (partsFile, comm);
         partitionIO.read (mesh);
@@ -115,9 +115,9 @@ main ( int argc, char** argv )
     }
     std::string uOrder ("P1");
     std::string bOrder ("P1");
-    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> >
+    std::shared_ptr<FESpace<mesh_Type, MapEpetra> >
     uFESpace (new FESpace<mesh_Type, MapEpetra> (mesh, uOrder, 1, comm) );
-    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> >
+    std::shared_ptr<FESpace<mesh_Type, MapEpetra> >
     betaFESpace (new FESpace<mesh_Type, MapEpetra> (mesh, bOrder, 3, comm) );
     if (verbose)
     {
@@ -152,7 +152,7 @@ main ( int argc, char** argv )
     {
         std::cout << " -- Defining the matrix ... " << std::flush;
     }
-    boost::shared_ptr<matrix_Type>
+    std::shared_ptr<matrix_Type>
     systemMatrix (new matrix_Type (uFESpace->map() ) );
     *systemMatrix *= 0.0;
     if (verbose)

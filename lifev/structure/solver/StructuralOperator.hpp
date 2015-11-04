@@ -99,9 +99,9 @@ namespace LifeV
 using namespace ExpressionAssembly;
 
 template < typename MeshEntityType,
-         typename ComparisonPolicyType = boost::function2 < bool,
+         typename ComparisonPolicyType = std::function < bool (
          const UInt,
-         const UInt > >
+         const UInt ) > >
 class MarkerSelector
 {
 public:
@@ -171,22 +171,22 @@ public:
     //!@name Type definitions
     //@{
     typedef Real ( *function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
-    typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID& ) > source_Type;
+    typedef std::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > source_Type;
 
     typedef StructuralConstitutiveLaw<Mesh>               material_Type;
-    typedef boost::shared_ptr<material_Type>              materialPtr_Type;
+    typedef std::shared_ptr<material_Type>              materialPtr_Type;
 
     typedef BCHandler                                     bcHandlerRaw_Type;
-    typedef boost::shared_ptr<bcHandlerRaw_Type>          bcHandler_Type;
+    typedef std::shared_ptr<bcHandlerRaw_Type>          bcHandler_Type;
 
     typedef LinearSolver                                  solver_Type;
 
     typedef typename solver_Type::matrix_Type             matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>                matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type>                matrixPtr_Type;
     typedef typename solver_Type::vector_Type             vector_Type;
-    typedef boost::shared_ptr<vector_Type>                vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type>                vectorPtr_Type;
     typedef vector_Type                                   solution_Type;
-    typedef boost::shared_ptr<solution_Type>              solutionPtr_Type;
+    typedef std::shared_ptr<solution_Type>              solutionPtr_Type;
 
     typedef StructuralConstitutiveLawData                 data_Type;
 
@@ -196,46 +196,48 @@ public:
 
     typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
     typedef std::map< UInt, vectorIndexes_Type>           mapMarkerIndexes_Type;
-    typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
-    typedef boost::shared_ptr<mapMarkerIndexes_Type>      mapMarkerIndexesPtr_Type;
+    typedef std::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
+    typedef std::shared_ptr<mapMarkerIndexes_Type>      mapMarkerIndexesPtr_Type;
     typedef mapMarkerVolumes_Type::const_iterator         mapIterator_Type;
 
     typedef typename mesh_Type::element_Type              meshEntity_Type;
 
-    typedef typename boost::function2<bool, const UInt, const UInt> comparisonPolicy_Type;
+    typedef typename std::function<bool (const UInt, const UInt) > comparisonPolicy_Type;
 
     typedef MarkerSelector<meshEntity_Type, comparisonPolicy_Type> markerSelector_Type;
-    typedef boost::scoped_ptr<markerSelector_Type>          markerSelectorPtr_Type;
+    typedef std::unique_ptr<markerSelector_Type>          markerSelectorPtr_Type;
 
     typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >  ETFESpace_Type;
-    typedef boost::shared_ptr<ETFESpace_Type>                      ETFESpacePtr_Type;
+    typedef std::shared_ptr<ETFESpace_Type>                      ETFESpacePtr_Type;
 
     typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >          FESpace_Type;
-    typedef boost::shared_ptr<FESpace_Type>                        FESpacePtr_Type;
+    typedef std::shared_ptr<FESpace_Type>                        FESpacePtr_Type;
 
     //Preconditioners typedef
     typedef LifeV::Preconditioner                   basePrec_Type;
-    typedef boost::shared_ptr<basePrec_Type>        basePrecPtr_Type;
+    typedef std::shared_ptr<basePrec_Type>        basePrecPtr_Type;
     typedef LifeV::PreconditionerIfpack             precIfpack_Type;
-    typedef boost::shared_ptr<precIfpack_Type>      precIfpackPtr_Type;
+    typedef std::shared_ptr<precIfpack_Type>      precIfpackPtr_Type;
     typedef LifeV::PreconditionerML                 precML_Type;
-    typedef boost::shared_ptr<precML_Type>          precMLPtr_Type;
+    typedef std::shared_ptr<precML_Type>          precMLPtr_Type;
 
     // Time advance
     typedef TimeAdvance< vector_Type >                                  timeAdvance_Type;
-    typedef boost::shared_ptr< timeAdvance_Type >                       timeAdvancePtr_Type;
+    typedef std::shared_ptr< timeAdvance_Type >                       timeAdvancePtr_Type;
 
     typedef Epetra_SerialDenseMatrix                     matrixSerialDense_Type;
-    typedef boost::shared_ptr<matrixSerialDense_Type>    matrixSerialDensePtr_Type;
+    typedef std::shared_ptr<matrixSerialDense_Type>    matrixSerialDensePtr_Type;
     typedef std::vector<LifeV::Real>                     vectorInvariants_Type;
-    typedef boost::shared_ptr<vectorInvariants_Type>     vectorInvariantsPtr_Type;
+
+    typedef std::shared_ptr<vectorInvariants_Type>     vectorInvariantsPtr_Type;
 
 
     // Source term
-    typedef boost::function<VectorSmall<3> ( Real const&, const Real&, const Real&, const Real& ) > volumeForce_Type;
-    typedef boost::shared_ptr<volumeForce_Type>                                                     volumeForcePtr_Type;
+    typedef std::function<VectorSmall<3> ( Real const&, const Real&, const Real&, const Real& ) > volumeForce_Type;
+    typedef std::shared_ptr<volumeForce_Type>                                                     volumeForcePtr_Type;
     typedef sourceVectorialFunctor                                       sourceFunctor_Type;
-    typedef boost::shared_ptr<sourceFunctor_Type> sourceFunctorPtr_Type;
+    typedef std::shared_ptr<sourceFunctor_Type> sourceFunctorPtr_Type;
+
     //@}
 
     //! @name Constructor & Destructor
@@ -257,11 +259,11 @@ public:
       \param BCh boundary conditions for the displacement
       \param comm the Epetra Comunicator
     */
-    void setup ( boost::shared_ptr<data_Type>  data,
+    void setup ( std::shared_ptr<data_Type>  data,
                  const FESpacePtr_Type&        dFESpace,
                  const ETFESpacePtr_Type&      dETFESpace,
                  bcHandler_Type&       BCh,
-                 boost::shared_ptr<Epetra_Comm>&     comm
+                 std::shared_ptr<Epetra_Comm>&     comm
                );
 
     /*!
@@ -269,10 +271,10 @@ public:
       \param refFE reference FE for the displacement
       \param comm the Epetra Comunicator
     */
-    void setup ( boost::shared_ptr<data_Type> data,
+    void setup ( std::shared_ptr<data_Type> data,
                  const FESpacePtr_Type&       dFESpace,
                  const ETFESpacePtr_Type&     dETFESpace,
-                 boost::shared_ptr<Epetra_Comm>&     comm
+                 std::shared_ptr<Epetra_Comm>&     comm
                );
 
     /*!
@@ -282,11 +284,11 @@ public:
       \param monolithicMap the MapEpetra
       \param offset the offset parameter
     */
-    void setup ( boost::shared_ptr<data_Type> data,
+    void setup ( std::shared_ptr<data_Type> data,
                  const FESpacePtr_Type&       dFESpace,
                  const ETFESpacePtr_Type&     dETFESpace,
-                 boost::shared_ptr<Epetra_Comm>&     comm,
-                 const boost::shared_ptr<const MapEpetra>&       monolithicMap,
+                 std::shared_ptr<Epetra_Comm>&     comm,
+                 const std::shared_ptr<const MapEpetra>&       monolithicMap,
                  UInt       offset = 0
                );
 
@@ -570,7 +572,7 @@ public:
         return *M_Displayer;
     }
 
-    boost::shared_ptr<const Displayer>   const& displayerPtr() const
+    std::shared_ptr<const Displayer>   const& displayerPtr() const
     {
         return M_Displayer;
     }
@@ -653,7 +655,7 @@ public:
     }
 
     //! Get the comunicator object
-    boost::shared_ptr<Epetra_Comm> const& comunicator() const
+    std::shared_ptr<Epetra_Comm> const& comunicator() const
     {
         return M_Displayer->comm();
     }
@@ -714,7 +716,7 @@ public:
     }
 
     //! Get the data container
-    const boost::shared_ptr<data_Type>& data() const
+    const std::shared_ptr<data_Type>& data() const
     {
         return M_data;
     }
@@ -770,22 +772,23 @@ protected:
 
     //!Protected Members
 
-    boost::shared_ptr<data_Type>         M_data;
+
+    std::shared_ptr<data_Type>         M_data;
 
     FESpacePtr_Type                      M_dispFESpace;
 
     ETFESpacePtr_Type                    M_dispETFESpace;
 
-    boost::shared_ptr<const Displayer>   M_Displayer;
+    std::shared_ptr<const Displayer>   M_Displayer;
 
     Int                                  M_me;
 
     //! data for solving tangent problem with aztec + preconditioner
-    boost::shared_ptr<solver_Type>       M_linearSolver;
+    std::shared_ptr<solver_Type>       M_linearSolver;
     basePrecPtr_Type                     M_preconditioner;
 
     //! Elementary matrices and vectors
-    boost::shared_ptr<MatrixElemental>   M_elmatM;
+    std::shared_ptr<MatrixElemental>   M_elmatM;
 
     //! linearized velocity
     vectorPtr_Type                       M_disp;
@@ -801,10 +804,10 @@ protected:
 
     vectorPtr_Type                       M_bodyForceVector;
     //! right  hand  side
-    //boost::shared_ptr<vector_Type>       M_f;
+    //std::shared_ptr<vector_Type>       M_f;
 
     //! residual
-    boost::shared_ptr<vector_Type>       M_residual_d;
+    std::shared_ptr<vector_Type>       M_residual_d;
 
     //! files for lists of iterations and residuals per timestep
     std::ofstream                        M_out_iter;
@@ -814,7 +817,7 @@ protected:
     bcHandler_Type                       M_BCh;
 
     //! Map Epetra
-    boost::shared_ptr<const MapEpetra>   M_localMap;
+    std::shared_ptr<const MapEpetra>   M_localMap;
 
     //! Matrix M: mass
     matrixPtr_Type                       M_massMatrix;
@@ -900,11 +903,11 @@ StructuralOperator<Mesh>::StructuralOperator( ) :
 
 template <typename Mesh>
 void
-StructuralOperator<Mesh>::setup (boost::shared_ptr<data_Type>          data,
+StructuralOperator<Mesh>::setup (std::shared_ptr<data_Type>          data,
                                  const FESpacePtr_Type& dFESpace,
                                  const ETFESpacePtr_Type& dETFESpace,
                                  bcHandler_Type&                    BCh,
-                                 boost::shared_ptr<Epetra_Comm>&   comm)
+                                 std::shared_ptr<Epetra_Comm>&   comm)
 {
     setup (data, dFESpace, dETFESpace, comm);
     M_BCh = BCh;
@@ -912,10 +915,10 @@ StructuralOperator<Mesh>::setup (boost::shared_ptr<data_Type>          data,
 
 template <typename Mesh>
 void
-StructuralOperator<Mesh>::setup (boost::shared_ptr<data_Type>        data,
+StructuralOperator<Mesh>::setup (std::shared_ptr<data_Type>        data,
                                  const FESpacePtr_Type& dFESpace,
                                  const ETFESpacePtr_Type& dETFESpace,
-                                 boost::shared_ptr<Epetra_Comm>&     comm)
+                                 std::shared_ptr<Epetra_Comm>&     comm)
 {
     setup ( data, dFESpace, dETFESpace, comm, dFESpace->mapPtr(), (UInt) 0 );
 
@@ -932,11 +935,11 @@ StructuralOperator<Mesh>::setup (boost::shared_ptr<data_Type>        data,
 
 template <typename Mesh>
 void
-StructuralOperator<Mesh>::setup (boost::shared_ptr<data_Type>        data,
+StructuralOperator<Mesh>::setup (std::shared_ptr<data_Type>        data,
                                  const FESpacePtr_Type& dFESpace,
                                  const ETFESpacePtr_Type& dETFESpace,
-                                 boost::shared_ptr<Epetra_Comm>&     comm,
-                                 const boost::shared_ptr<const MapEpetra>&  monolithicMap,
+                                 std::shared_ptr<Epetra_Comm>&     comm,
+                                 const std::shared_ptr<const MapEpetra>&  monolithicMap,
                                  UInt                                offset)
 {
     M_data                            = data;

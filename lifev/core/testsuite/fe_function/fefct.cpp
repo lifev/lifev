@@ -64,7 +64,7 @@ struct fefct::Private
     std::string    data_file_name;
     std::string    discretization_section;
 
-    boost::shared_ptr<Epetra_Comm>   comm;
+    std::shared_ptr<Epetra_Comm>   comm;
 
 };
 

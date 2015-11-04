@@ -188,7 +188,7 @@ BCInterfaceFunctionParserSolver< OneDFSIBCHandler, OneDFSISolver >::updatePhysic
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< OneDFSIBCHandler, OneDFSISolver >::createAccessList ( const boost::shared_ptr< BCInterfaceData >& data )
+BCInterfaceFunctionParserSolver< OneDFSIBCHandler, OneDFSISolver >::createAccessList ( const std::shared_ptr< BCInterfaceData >& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

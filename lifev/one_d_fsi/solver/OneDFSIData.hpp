@@ -64,7 +64,7 @@ namespace LifeV
  *
  *  <b>Physical Parameters</b>
  *
- *  Main parameters: \f$A^0, \alpha, \beta_0, \beta_1, \gamma, K_r, \rho\f$.
+ *  Main parameters: \f$A^0, \alpha, \beta_0, \betA_1, \gamma, K_r, \rho\f$.
  *
  *  Euler equations:
  *
@@ -80,14 +80,14 @@ namespace LifeV
  *  with
  *
  *  \f[
- *  P-P_\mathrm{ext} = \psi(A,A^0,\beta_0, \beta_1, \gamma) =
+ *  P-P_\mathrm{ext} = \psi(A,A^0,\beta_0, \betA_1, \gamma) =
  *  \underbrace{\sqrt{\frac{\pi}{A^0}}\frac{h E}{1-\nu^2}}_{\beta_0} \left(\left(\frac{A}{A^0}\right)^{\beta_1}-1\right) +
  *  \underbrace{\frac{T \tan\phi}{4 \sqrt{\pi}}\frac{h E}{1-\nu^2}}_{\displaystyle\gamma} \frac{1}{A\sqrt{A}} \frac{\partial A}{\partial t},
  *  \f]
  *
  *  <b>Linear Parameters</b>
  *
- *  Parameters: \f$F_{11}, F_{12}, F_{21}, F_{22}, \lambda_1, \lambda_2\f$
+ *  Parameters: \f$F_{11}, F_{12}, F_{21}, F_{22}, \lambdA_1, \lambda_2\f$
  *
  *  Equations:
  *
@@ -99,7 +99,7 @@ namespace LifeV
  *  \f]
  *
  *
- *  The flux matrix \f$\mathbf F = [F_{11}, F_{12}; F_{21}, F_{22}]\f$ has the eigenvalues \f$\lambda_1, \lambda_2\f$.
+ *  The flux matrix \f$\mathbf F = [F_{11}, F_{12}; F_{21}, F_{22}]\f$ has the eigenvalues \f$\lambdA_1, \lambda_2\f$.
  */
 class OneDFSIData
 {
@@ -109,14 +109,14 @@ public:
     //@{
 
     typedef TimeData                                                  time_Type;
-    typedef boost::shared_ptr< time_Type >                            timePtr_Type;
+    typedef std::shared_ptr< time_Type >                            timePtr_Type;
 
     typedef RegionMesh< LinearLine >                                  mesh_Type;
-    typedef boost::shared_ptr< mesh_Type >                            meshPtr_Type;
+    typedef std::shared_ptr< mesh_Type >                            meshPtr_Type;
 
     // ScalVec SHOULD BE REPLACED EVERYWHERE BY EPETRAVECTOR FOR PARALLEL COMPUTATION
     typedef ublas::vector< Real >                                     scalarVector_Type;
-    typedef boost::array< Real, 2 >                                   container2D_Type;
+    typedef std::array< Real, 2 >                                   container2D_Type;
 
     enum OneD_distributionLaw
     {
@@ -164,7 +164,7 @@ public:
     //! Update all the physical coefficients
     /*!
      * This method can be called after any update in the physical coefficient.
-     * It recomputes the main coefficients \f$\alpha, \beta_0, \beta_1, \gamma, K_r\f$
+     * It recomputes the main coefficients \f$\alpha, \beta_0, \betA_1, \gamma, K_r\f$
      */
     void updateCoefficients();
 

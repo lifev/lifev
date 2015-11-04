@@ -240,7 +240,7 @@ void
 MultiscaleModelWindkessel0D::imposeBoundaryFlowRate ( const multiscaleID_Type& boundaryID, const function_Type& function )
 {
     ZeroDimensionalFunction base;
-    base.setFunction ( boost::bind ( function, _1, _1, _1, _1, _1 ) );
+    base.setFunction ( std::bind ( function, std::placeholders::_1, std::placeholders::_1, std::placeholders::_1, std::placeholders::_1, std::placeholders::_1 ) );
 
     M_bc->handler()->setBC ( boundaryFlag ( boundaryID ), Current, base );
 }
@@ -249,7 +249,7 @@ void
 MultiscaleModelWindkessel0D::imposeBoundaryMeanNormalStress ( const multiscaleID_Type& boundaryID, const function_Type& function )
 {
     ZeroDimensionalFunction base;
-    base.setFunction ( boost::bind ( function, _1, _1, _1, _1, _1 ) );
+    base.setFunction ( std::bind ( function, std::placeholders::_1, std::placeholders::_1, std::placeholders::_1, std::placeholders::_1, std::placeholders::_1 ) );
 
     M_bc->handler()->setBC ( boundaryFlag ( boundaryID ), Voltage, base );
 }

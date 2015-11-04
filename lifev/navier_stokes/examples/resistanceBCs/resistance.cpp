@@ -121,7 +121,7 @@ struct ResistanceTest::Private
         nu (1),
         H (1), D (1)
     {}
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_Type;
+    typedef std::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_Type;
 
     double Re;
 
@@ -135,7 +135,7 @@ struct ResistanceTest::Private
 
     std::string initial_sol;
 
-    boost::shared_ptr<Epetra_Comm>   comm;
+    std::shared_ptr<Epetra_Comm>   comm;
 
     // Static boost functions to impose boundary conditions
     // Inlet BCs (for this test Poiseuille)
@@ -303,9 +303,9 @@ ResistanceTest::run()
 {
     typedef RegionMesh<LinearTetra>               mesh_Type;
     typedef FESpace< mesh_Type, MapEpetra >       feSpace_Type;
-    typedef boost::shared_ptr<feSpace_Type>       feSpacePtr_Type;
+    typedef std::shared_ptr<feSpace_Type>       feSpacePtr_Type;
     typedef OseenSolver< mesh_Type >::vector_Type vector_Type;
-    typedef boost::shared_ptr<vector_Type>        vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type>        vectorPtr_Type;
     // Reading from data file
     //
     GetPot dataFile ( parameters->data_file_name );
@@ -317,16 +317,16 @@ ResistanceTest::run()
     // Lagrange multiplier for flux BCs
     int numLM = 0;
 
-    boost::shared_ptr<OseenData> oseenData (new OseenData() );
+    std::shared_ptr<OseenData> oseenData (new OseenData() );
     oseenData->setup ( dataFile );
 
     MeshData meshData;
     meshData.setup (dataFile, "fluid/space_discretization");
 
-    boost::shared_ptr<mesh_Type> fullMeshPtr ( new mesh_Type ( parameters->comm ) );
+    std::shared_ptr<mesh_Type> fullMeshPtr ( new mesh_Type ( parameters->comm ) );
     readMesh (*fullMeshPtr, meshData);
 
-    boost::shared_ptr<mesh_Type> meshPtr;
+    std::shared_ptr<mesh_Type> meshPtr;
     {
         MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, parameters->comm);
         meshPtr = meshPart.meshPartition();

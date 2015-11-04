@@ -72,7 +72,7 @@ class MatrixBlockMonolithicEpetra : public MatrixEpetra<DataType>
 public:
 
     typedef MatrixBlockMonolithicEpetraView<DataType> block_type;
-    typedef boost::shared_ptr<block_type> block_ptrType;
+    typedef std::shared_ptr<block_type> block_ptrType;
 
     /** @name Constructors, destructor
      */

@@ -78,15 +78,15 @@ public:
                                  const Real& y,
                                  const Real& z,
                                  const ID& id );
-    typedef boost::function < Real ( Real const&, Real const&, Real const&,
+    typedef std::function < Real ( Real const&, Real const&, Real const&,
                                      Real const&, ID const& ) > source_Type;
 
     typedef Mesh mesh_Type;
     typedef BCHandler                               bcHandlerRaw_Type;
-    typedef boost::shared_ptr<bcHandlerRaw_Type>    bcHandler_Type;
+    typedef std::shared_ptr<bcHandlerRaw_Type>    bcHandler_Type;
 
     typedef typename SolverType::matrix_type        matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>          matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type>          matrixPtr_Type;
     typedef typename SolverType::vector_type        vector_Type;
 
     typedef typename SolverType::prec_raw_type      preconditionerRaw_Type;
@@ -111,7 +111,7 @@ public:
     HeartMonodomainSolver ( const data_type& dataType,
                             FESpace<Mesh, MapEpetra>& uFESpace,
                             BCHandler& bcHandler,
-                            boost::shared_ptr<Epetra_Comm>& comm);
+                            std::shared_ptr<Epetra_Comm>& comm);
 
     //! Destructor
     virtual ~HeartMonodomainSolver() {}
@@ -222,7 +222,7 @@ protected:
 
     //! MPI communicator
     //Epetra_Comm*                   M_comm;
-    const boost::shared_ptr<Epetra_Comm> M_comm;
+    const std::shared_ptr<Epetra_Comm> M_comm;
     Int                            M_me;
 
     //! Monodomain BC
@@ -301,7 +301,7 @@ HeartMonodomainSolver<Mesh, SolverType>::
 HeartMonodomainSolver ( const data_type&          dataType,
                         FESpace<Mesh, MapEpetra>& uFESpace,
                         BCHandler&                BCh_u,
-                        boost::shared_ptr<Epetra_Comm>&              comm ) :
+                        std::shared_ptr<Epetra_Comm>&              comm ) :
     M_data                   ( dataType ),
     M_uFESpace               ( uFESpace ),
     M_comm                   ( comm ),

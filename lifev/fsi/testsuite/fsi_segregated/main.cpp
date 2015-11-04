@@ -332,7 +332,7 @@ class Problem
 {
 public:
 
-    typedef boost::shared_ptr<FSISolver>                    fsi_solver_ptr;
+    typedef std::shared_ptr<FSISolver>                    fsi_solver_ptr;
     typedef FSIOperator::data_Type                          data_Type;
     typedef FSIOperator::dataPtr_Type                       dataPtr_Type;
 
@@ -341,10 +341,10 @@ public:
     typedef FSIOperator::mesh_Type                          mesh_Type;
 
     typedef Exporter<FSIOperator::mesh_Type>                filter_type;
-    typedef boost::shared_ptr<filter_type>                  filter_ptrtype;
+    typedef std::shared_ptr<filter_type>                  filter_ptrtype;
 
     typedef FESpace<FSIOperator::mesh_Type, MapEpetra>      feSpace_Type;
-    typedef boost::shared_ptr<feSpace_Type>                 feSpacePtr_Type;
+    typedef std::shared_ptr<feSpace_Type>                 feSpacePtr_Type;
 
     /*!
       This routine sets up the problem:
@@ -424,7 +424,6 @@ public:
 #endif
                 M_exporterFluid.reset ( new ExporterEnsight<mesh_Type > ( dataFile, exporterName + "Fluid" ) );
 
-
             M_exporterFluid->setMeshProcId (M_fsi->FSIOper()->uFESpace().mesh(), M_fsi->FSIOper()->uFESpace().map().comm().MyPID() );
 
             M_velAndPressure.reset ( new vector_Type ( M_fsi->FSIOper()->fluid().getMap(),      M_exporterFluid->mapType() ) );
@@ -439,7 +438,6 @@ public:
 
             M_exporterFluid->addVariable ( ExporterData<mesh_Type>::VectorField, "f-displacement",
                                            M_fsi->FSIOper()->mmFESpacePtr(), M_fluidDisp, UInt (0) );
-
         }
         if ( M_fsi->isSolid() )
         {
@@ -462,6 +460,8 @@ public:
                                            M_fsi->FSIOper()->dFESpacePtr(), M_solidVel, UInt (0) );
 
         }
+
+        std::cout << "XXX10" << std::endl;
 
         bool restart = dataFile ("problem/restart", false);
         M_Tstart = 0.;
@@ -492,10 +492,12 @@ public:
         {
             M_fsi->initialize();
         }
+        std::cout << "XXX11" << std::endl;
         M_data->dataFluid()->dataTime()->setInitialTime ( M_Tstart ); //+ M_data->dataFluid()->dataTime()->timeStep()
         M_data->dataFluid()->dataTime()->setTime ( M_Tstart  );
         //std::cout << "in problem" << std::endl;
         //M_fsi->FSIOper()->fluid().postProcess();
+        std::cout << "XXX12" << std::endl;
     }
 
     fsi_solver_ptr fsiSolver()
@@ -513,6 +515,7 @@ public:
     */
     void run()
     {
+        std::cout << "XXX15" << std::endl;
         std::ofstream ofile;
 
         bool const isFluidLeader ( M_fsi->FSIOper()->isFluid() && M_fsi->FSIOper()->isLeader() );
@@ -525,6 +528,7 @@ public:
 
         Real flux;
         int _i = 1;
+        std::cout << "XXX16" << std::endl;
 
         for ( ; M_data->dataFluid()->dataTime()->canAdvance(); M_data->dataFluid()->dataTime()->updateTime(), ++_i )
         {
@@ -532,10 +536,13 @@ public:
 
             if ( M_absorbingBC && M_fsi->isFluid() )
             {
+                std::cout << "XXX17" << std::endl;
 
                 BCFunctionBase outFlow;
                 outFlow.setFunction (bc_adaptor (*M_fsi->FSIOper() ) );
+                std::cout << "XXX18" << std::endl;
                 M_fsi->FSIOper()->BCh_fluid()->modifyBC (3, outFlow);
+                std::cout << "XXX19" << std::endl;
 
                 /*
                   BCFunctionBase outFlowFace;
@@ -551,6 +558,7 @@ public:
             }
 
             M_fsi->iterate();
+            std::cout << "XXX20" << std::endl;
 
             if ( M_fsi->isFluid() )
             {
@@ -693,12 +701,14 @@ struct FSIChecker
 
     void operator() ()
     {
-        boost::shared_ptr<Problem> FSIproblem;
+        std::shared_ptr<Problem> FSIproblem;
 
         try
         {
-            FSIproblem = boost::shared_ptr<Problem> ( new Problem ( M_dataFileName, M_method ) );
+            FSIproblem = std::shared_ptr<Problem> ( new Problem ( M_dataFileName, M_method ) );
+            std::cout << "XXX13" << std::endl;
             FSIproblem->run();
+            std::cout << "XXX14" << std::endl;
         }
         catch ( const std::exception& _ex )
         {
@@ -766,7 +776,9 @@ int main ( int argc, char** argv )
     */
 
     FSIChecker FSIProblem ( dataFileName );
+    std::cout << "XXX2" << std::endl;
     FSIProblem();
+    std::cout << "XXX3" << std::endl;
 
     std::cout << "Total sum up " << chrono.diffCumul() << " s." << std::endl;
 

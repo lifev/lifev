@@ -84,7 +84,7 @@ namespace LifeV
 
     <b>Template requirements</b>
 
-    <i> MeshType </i> Same as for boost::shared_ptr
+    <i> MeshType </i> Same as for std::shared_ptr
     <i> MapType </i> empty constructor; copy constructor; constructor using the reference FE, the mesh and a communicator;
     concatenation operator +=
 
@@ -104,7 +104,7 @@ public:
     typedef MapType map_Type;
 
     //! Typedef for a pointer on the mesh
-    typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
+    typedef std::shared_ptr<mesh_Type> meshPtr_Type;
 
     //! Typedef for a pointer on the communicator
     typedef typename map_Type::commPtr_Type commPtr_Type;

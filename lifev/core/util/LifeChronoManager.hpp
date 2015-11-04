@@ -58,7 +58,7 @@ class LifeChronoManager
 public:
     typedef TimerType timer_Type;
     typedef std::map<std::string const, timer_Type*> timerList_Type;
-    typedef boost::shared_ptr<Epetra_Comm const> commPtr_Type;
+    typedef std::shared_ptr<Epetra_Comm const> commPtr_Type;
 
     /*!
      * @brief Constructor

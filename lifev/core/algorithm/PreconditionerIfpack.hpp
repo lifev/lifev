@@ -76,7 +76,7 @@ public:
     typedef Preconditioner             super;
 
     typedef Ifpack_Preconditioner            prec_raw_type;
-    typedef boost::shared_ptr<prec_raw_type> prec_type;
+    typedef std::shared_ptr<prec_raw_type> prec_type;
 
     typedef super::operator_raw_type         operator_raw_type;
     typedef super::operator_type             operator_type;
@@ -89,9 +89,9 @@ public:
 
     //! Empty constructor
 #ifdef HAVE_MPI
-    PreconditionerIfpack ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
+    PreconditionerIfpack ( std::shared_ptr<Epetra_Comm> comm = std::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
 #else
-    PreconditionerIfpack ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
+    PreconditionerIfpack ( std::shared_ptr<Epetra_Comm> comm = std::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
 #endif
 
     //! Destructor
@@ -209,7 +209,7 @@ public:
 protected:
 
     prec_type M_preconditioner;
-    boost::shared_ptr<Epetra_Comm> M_comm;
+    std::shared_ptr<Epetra_Comm> M_comm;
 
 private:
 

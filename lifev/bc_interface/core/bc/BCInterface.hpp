@@ -104,7 +104,7 @@ namespace LifeV
  *      or you can set it from outside
  *
  *      <CODE>
- *      boost::shared_ptr< bcHandler_Type > bcHandler( new bcHandler_Type() ); <BR>
+ *      std::shared_ptr< bcHandler_Type > bcHandler( new bcHandler_Type() ); <BR>
  *      bcInterface.setHandler( bcHandler );
  *      </CODE>
  *
@@ -163,10 +163,10 @@ public:
     //@{
 
     typedef BcHandler                                                 bcHandler_Type;
-    typedef boost::shared_ptr< bcHandler_Type >                       bcHandlerPtr_Type;
+    typedef std::shared_ptr< bcHandler_Type >                       bcHandlerPtr_Type;
 
     typedef PhysicalSolverType                                        physicalSolver_Type;
-    typedef boost::shared_ptr< physicalSolver_Type >                  physicalSolverPtr_Type;
+    typedef std::shared_ptr< physicalSolver_Type >                  physicalSolverPtr_Type;
 
     typedef BCInterfaceFactory< bcHandler_Type, physicalSolver_Type > factory_Type;
 
@@ -180,7 +180,7 @@ public:
     typedef std::vector< bcFunctionSolverDefinedPtr_Type >            vectorFunctionSolverDefined_Type;
 
     typedef BCInterfaceData                                           data_Type;
-    typedef boost::shared_ptr< data_Type >                            dataPtr_Type;
+    typedef std::shared_ptr< data_Type >                            dataPtr_Type;
 
     //@}
 
@@ -344,7 +344,7 @@ BCInterface< BcHandler, PhysicalSolverType >::updatePhysicalSolverVariables()
 
     for ( UInt i ( 0 ); i < M_vectorFunction.size(); ++i )
     {
-        bcFunctionParserSolverPtr_Type castedFunctionSolver = boost::dynamic_pointer_cast< bcFunctionParserSolver_Type > ( M_vectorFunction[i] );
+        bcFunctionParserSolverPtr_Type castedFunctionSolver = std::dynamic_pointer_cast< bcFunctionParserSolver_Type > ( M_vectorFunction[i] );
 
         if ( castedFunctionSolver != 0 )
         {
@@ -368,7 +368,7 @@ BCInterface< BcHandler, PhysicalSolverType >::setPhysicalSolver ( const physical
     //for ( typename vectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
     for ( UInt i ( 0 ); i < M_vectorFunction.size(); ++i )
     {
-        bcFunctionParserSolverPtr_Type castedFunctionSolver = boost::dynamic_pointer_cast< bcFunctionParserSolver_Type > ( M_vectorFunction[i] );
+        bcFunctionParserSolverPtr_Type castedFunctionSolver = std::dynamic_pointer_cast< bcFunctionParserSolver_Type > ( M_vectorFunction[i] );
 
         if ( castedFunctionSolver != 0 )
         {

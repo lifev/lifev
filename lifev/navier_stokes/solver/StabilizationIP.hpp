@@ -94,11 +94,11 @@ public:
 
     //! @name Public Types
     //@{
-    typedef boost::shared_ptr<MeshType> mesh_type; //deprecated
+    typedef std::shared_ptr<MeshType> mesh_type; //deprecated
     typedef MeshType  mesh_Type;
     typedef DofType   dof_Type;
-    typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
-    typedef boost::shared_ptr<dof_Type>  dofPtr_Type;
+    typedef std::shared_ptr<mesh_Type> meshPtr_Type;
+    typedef std::shared_ptr<dof_Type>  dofPtr_Type;
     //@}
 
     //! @name Constructor and Destructor
@@ -202,9 +202,9 @@ private:
     //! reference to the DofType data structure
     dofPtr_Type   M_dof;
     //! current Fe on side 1 of the current facet
-    boost::shared_ptr<CurrentFE>    M_feOnSide1;
+    std::shared_ptr<CurrentFE>    M_feOnSide1;
     //! current Fe on side 2 of the current facet
-    boost::shared_ptr<CurrentFE>    M_feOnSide2;
+    std::shared_ptr<CurrentFE>    M_feOnSide2;
     //! current boundary FE
     CurrentFEManifold*  M_feBd;
     //! Stabilization parameter @f$\gamma_\beta@f$ for @f$\int_{facet} [\beta \cdot \nabla \mathbf{u}] [\beta \cdot \nabla \mathbf{v}]@f$

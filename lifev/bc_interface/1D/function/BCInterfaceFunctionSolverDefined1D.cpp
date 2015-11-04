@@ -63,29 +63,29 @@ BCInterfaceFunctionSolverDefined< OneDFSIBCHandler, OneDFSISolver >::assignFunct
     {
         case Riemann:
 
-            base.setFunction ( boost::bind ( &OneDFSIFunctionSolverDefinedRiemann::operator(),
-                                             dynamic_cast<OneDFSIFunctionSolverDefinedRiemann*> ( & ( *M_function ) ), _1, _2 ) );
+            base.setFunction ( std::bind ( &OneDFSIFunctionSolverDefinedRiemann::operator(),
+                                             dynamic_cast<OneDFSIFunctionSolverDefinedRiemann*> ( & ( *M_function ) ), std::placeholders::_1, std::placeholders::_2 ) );
 
             break;
 
         case Compatibility:
 
-            base.setFunction ( boost::bind ( &OneDFSIFunctionSolverDefinedCompatibility::operator(),
-                                             dynamic_cast<OneDFSIFunctionSolverDefinedCompatibility*> ( & ( *M_function ) ), _1, _2 ) );
+            base.setFunction ( std::bind ( &OneDFSIFunctionSolverDefinedCompatibility::operator(),
+                                             dynamic_cast<OneDFSIFunctionSolverDefinedCompatibility*> ( & ( *M_function ) ), std::placeholders::_1, std::placeholders::_2 ) );
 
             break;
 
         case Absorbing:
 
-            base.setFunction ( boost::bind ( &OneDFSIFunctionSolverDefinedAbsorbing::operator(),
-                                             dynamic_cast<OneDFSIFunctionSolverDefinedAbsorbing*> ( & ( *M_function ) ), _1, _2 ) );
+            base.setFunction ( std::bind ( &OneDFSIFunctionSolverDefinedAbsorbing::operator(),
+                                             dynamic_cast<OneDFSIFunctionSolverDefinedAbsorbing*> ( & ( *M_function ) ), std::placeholders::_1, std::placeholders::_2 ) );
 
             break;
 
         case Resistance:
 
-            base.setFunction ( boost::bind ( &OneDFSIFunctionSolverDefinedResistance::operator(),
-                                             dynamic_cast<OneDFSIFunctionSolverDefinedResistance*> ( & ( *M_function ) ), _1, _2 ) );
+            base.setFunction ( std::bind ( &OneDFSIFunctionSolverDefinedResistance::operator(),
+                                             dynamic_cast<OneDFSIFunctionSolverDefinedResistance*> ( & ( *M_function ) ), std::placeholders::_1, std::placeholders::_2 ) );
 
             break;
     }

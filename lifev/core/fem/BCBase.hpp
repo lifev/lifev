@@ -632,19 +632,19 @@ private:
 
     bcComponentsVec_Type                       M_components;        //! the list of components involved in this BC
 
-    boost::shared_ptr<BCFunctionBase>     M_bcFunction;   //!< Pointer to a user defined BC function
+    std::shared_ptr<BCFunctionBase>     M_bcFunction;   //!< Pointer to a user defined BC function
 
-    boost::shared_ptr<BCFunctionUDepBase> M_bcFunctionFEVectorDependent; //!< Pointer to a user defined BC function (depending on a generic FE vector)
+    std::shared_ptr<BCFunctionUDepBase> M_bcFunctionFEVectorDependent; //!< Pointer to a user defined BC function (depending on a generic FE vector)
 
-    boost::shared_ptr<BCVectorBase >      M_bcVector;       //!< Pointer to a user given BC vector
+    std::shared_ptr<BCVectorBase >      M_bcVector;       //!< Pointer to a user given BC vector
 
     bool                                  M_isStored_BcVector; //! True if a FE BCVector has been provided
 
     bool                                  M_isStored_BcFunctionVectorDependent; //!< True if the BCBase is based on a BCFunctionUDepBase function, False otherwise
 
-    std::set<boost::shared_ptr<BCIdentifierBase>, BCIdentifierComparison> M_idSet; //!< set of pointers to identifiers allowing the user to get hold the DOF to which the BC applies
+    std::set<std::shared_ptr<BCIdentifierBase>, BCIdentifierComparison> M_idSet; //!< set of pointers to identifiers allowing the user to get hold the DOF to which the BC applies
 
-    std::vector<boost::shared_ptr<BCIdentifierBase> > M_idVector; //!< container for id's when the list is finalized
+    std::vector<std::shared_ptr<BCIdentifierBase> > M_idVector; //!< container for id's when the list is finalized
 
     int M_offset; //!< boundary condition offset
 

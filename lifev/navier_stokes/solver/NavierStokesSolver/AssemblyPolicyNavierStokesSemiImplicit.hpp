@@ -74,20 +74,20 @@ namespace LifeV
 template< class mesh_Type >
 struct AssemblyPolicyNavierStokesSemiImplicit: public AssemblyPolicyStokes< mesh_Type >
 {
-    typedef boost::shared_ptr< NavierStokesProblem<mesh_Type> > NSProblemPtr_Type;
+    typedef std::shared_ptr< NavierStokesProblem<mesh_Type> > NSProblemPtr_Type;
     typedef MatrixEpetra<Real>                       matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>           matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type>           matrixPtr_Type;
     typedef VectorEpetra                             vector_Type;
-    typedef boost::shared_ptr<VectorEpetra>          vectorPtr_Type;
+    typedef std::shared_ptr<VectorEpetra>          vectorPtr_Type;
     typedef MeshPartitioner< mesh_Type >             meshPartitioner_Type;
     typedef MapEpetra                                map_Type;
-    typedef boost::shared_ptr<map_Type>              mapPtr_Type;
+    typedef std::shared_ptr<map_Type>              mapPtr_Type;
     typedef FESpace< mesh_Type, map_Type >           fespace_Type;
-    typedef boost::shared_ptr< fespace_Type >        fespacePtr_Type;
+    typedef std::shared_ptr< fespace_Type >        fespacePtr_Type;
     typedef TimeAdvanceBDF<vector_Type>              bdf_Type;
-    typedef boost::shared_ptr< bdf_Type >            bdfPtr_Type;
+    typedef std::shared_ptr< bdf_Type >            bdfPtr_Type;
     typedef Preconditioner                           preconditioner_Type;
-    typedef boost::shared_ptr<preconditioner_Type>   preconditionerPtr_Type;
+    typedef std::shared_ptr<preconditioner_Type>   preconditionerPtr_Type;
 
     enum { BDFOrder = 1 };
 

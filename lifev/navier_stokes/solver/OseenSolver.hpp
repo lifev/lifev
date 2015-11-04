@@ -95,30 +95,30 @@ public:
 
     typedef MeshType                                    mesh_Type;
     typedef SolverType                                  linearSolver_Type;
-    typedef boost::shared_ptr<linearSolver_Type>        linearSolverPtr_Type;
+    typedef std::shared_ptr<linearSolver_Type>        linearSolverPtr_Type;
     typedef OseenData                                   data_Type;
-    typedef boost::shared_ptr< data_Type >              dataPtr_Type;
+    typedef std::shared_ptr< data_Type >              dataPtr_Type;
 
-    typedef boost::function < Real ( const Real& t, const Real& x, const Real& y,
+    typedef std::function < Real ( const Real& t, const Real& x, const Real& y,
                                      const Real& z, const ID& i ) > function_Type;
 
-    typedef boost::function < Real ( const Real& t, const Real& x, const Real& y,
+    typedef std::function < Real ( const Real& t, const Real& x, const Real& y,
                                      const Real& z, const ID& i ) > source_Type;
 
     typedef BCHandler                                   bcHandler_Type;
-    typedef boost::shared_ptr<bcHandler_Type>           bcHandlerPtr_Type;
+    typedef std::shared_ptr<bcHandler_Type>           bcHandlerPtr_Type;
 
 #ifdef HAVE_NS_PREC
     typedef MatrixEpetraStructured<Real>                matrix_Type;
 #else
     typedef typename linearSolver_Type::matrix_type     matrix_Type;
 #endif
-    typedef boost::shared_ptr<matrix_Type>              matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type>              matrixPtr_Type;
     typedef typename linearSolver_Type::vector_type     vector_Type;
-    typedef boost::shared_ptr<vector_Type>              vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type>              vectorPtr_Type;
 
     typedef vector_Type                                 solution_Type;
-    typedef boost::shared_ptr<solution_Type>            solutionPtr_Type;
+    typedef std::shared_ptr<solution_Type>            solutionPtr_Type;
 
     typedef typename linearSolver_Type::prec_raw_type   preconditioner_Type;
     typedef typename linearSolver_Type::prec_type       preconditionerPtr_Type;
@@ -140,10 +140,10 @@ public:
         @param lagrangeMultiplier Lagrange multiplier
      */
 
-    OseenSolver ( boost::shared_ptr<data_Type>    dataType,
+    OseenSolver ( std::shared_ptr<data_Type>    dataType,
                   FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
                   FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
-                  boost::shared_ptr<Epetra_Comm>& communicator,
+                  std::shared_ptr<Epetra_Comm>& communicator,
                   const Int                       lagrangeMultiplier = 0 );
 
     //! Constructor
@@ -155,10 +155,10 @@ public:
         @param monolithicMap MapEpetra class
         @param offset
      */
-    OseenSolver ( boost::shared_ptr<data_Type>    dataType,
+    OseenSolver ( std::shared_ptr<data_Type>    dataType,
                   FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
                   FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
-                  boost::shared_ptr<Epetra_Comm>& communicator,
+                  std::shared_ptr<Epetra_Comm>& communicator,
                   const MapEpetra                 monolithicMap,
                   const UInt                      offset = 0 );
 
@@ -170,11 +170,11 @@ public:
         @param lagrangeMultipliers (lagrange multipliers for the flux problem with rufaec flag)
         @param communicator MPI communicator
      */
-    OseenSolver ( boost::shared_ptr<data_Type>    dataType,
+    OseenSolver ( std::shared_ptr<data_Type>    dataType,
                   FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
                   FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
                   const std::vector<Int>&         lagrangeMultipliers,
-                  boost::shared_ptr<Epetra_Comm>& communicator );
+                  std::shared_ptr<Epetra_Comm>& communicator );
 
     //! virtual destructor
     virtual ~OseenSolver();
@@ -659,7 +659,7 @@ public:
     /*!
         @return Epetra communicator
      */
-    const boost::shared_ptr<Epetra_Comm>& comm() const
+    const std::shared_ptr<Epetra_Comm>& comm() const
     {
         return M_Displayer.comm();
     }
@@ -846,7 +846,7 @@ protected:
     bool                           M_steady;
 
     //! Postprocessing class
-    boost::shared_ptr<PostProcessingBoundary<mesh_Type> > M_postProcessing;
+    std::shared_ptr<PostProcessingBoundary<mesh_Type> > M_postProcessing;
 
     //! Stabilization
     bool                           M_stabilization;
@@ -884,7 +884,7 @@ protected:
     matrixPtr_Type                         M_blockPreconditioner;
     VectorElemental                        M_wLoc;
     VectorElemental                        M_uLoc;
-    boost::shared_ptr<vector_Type> M_un;
+    std::shared_ptr<vector_Type> M_un;
 
 }; // class OseenSolver
 
@@ -896,10 +896,10 @@ protected:
 
 template<typename MeshType, typename SolverType>
 OseenSolver<MeshType, SolverType>::
-OseenSolver ( boost::shared_ptr<data_Type>    dataType,
+OseenSolver ( std::shared_ptr<data_Type>    dataType,
               FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
               FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
-              boost::shared_ptr<Epetra_Comm>& communicator,
+              std::shared_ptr<Epetra_Comm>& communicator,
               const Int                       lagrangeMultiplier ) :
     M_oseenData       ( dataType ),
     M_velocityFESpace        ( velocityFESpace ),
@@ -961,10 +961,10 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
 
 template<typename MeshType, typename SolverType>
 OseenSolver<MeshType, SolverType>::
-OseenSolver ( boost::shared_ptr<data_Type>    dataType,
+OseenSolver ( std::shared_ptr<data_Type>    dataType,
               FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
               FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
-              boost::shared_ptr<Epetra_Comm>& communicator,
+              std::shared_ptr<Epetra_Comm>& communicator,
               MapEpetra                       monolithicMap,
               UInt                            /*offset*/ ) :
     M_oseenData              ( dataType ),
@@ -1018,11 +1018,11 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
 
 template<typename MeshType, typename SolverType>
 OseenSolver<MeshType, SolverType>::
-OseenSolver ( boost::shared_ptr<data_Type>    dataType,
+OseenSolver ( std::shared_ptr<data_Type>    dataType,
               FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
               FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
               const std::vector<Int>&         lagrangeMultipliers,
-              boost::shared_ptr<Epetra_Comm>& communicator ) :
+              std::shared_ptr<Epetra_Comm>& communicator ) :
     M_oseenData       ( dataType ),
     M_velocityFESpace        ( velocityFESpace ),
     M_pressureFESpace        ( pressureFESpace ),
@@ -1700,7 +1700,7 @@ OseenSolver<MeshType, SolverType>::iterate ( bcHandler_Type& bcHandler )
     // solving the system
     M_linearSolver->setMatrix ( *matrixFull );
 
-    boost::shared_ptr<MatrixEpetra<Real> > staticCast = boost::static_pointer_cast<MatrixEpetra<Real> > (matrixFull);
+    std::shared_ptr<MatrixEpetra<Real> > staticCast = std::static_pointer_cast<MatrixEpetra<Real> > (matrixFull);
 
     Int numIter = M_linearSolver->solveSystem ( rightHandSideFull, *M_solution, staticCast );
 

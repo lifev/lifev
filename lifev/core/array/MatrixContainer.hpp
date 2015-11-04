@@ -33,8 +33,8 @@ public:
 
     typedef KEYTYPE KeyType;
 
-    typedef boost::shared_ptr<MatrixEpetra<double> > MatrixType_ptr;
-    typedef boost::shared_ptr<Epetra_CrsMatrix> MatrixRawType_ptr;
+    typedef std::shared_ptr<MatrixEpetra<double> > MatrixType_ptr;
+    typedef std::shared_ptr<Epetra_CrsMatrix> MatrixRawType_ptr;
     typedef typename std::map<KeyType, MatrixType_ptr > Container;
     typedef typename Container::iterator Iterator;
     typedef typename Container::const_iterator CIterator;
@@ -62,7 +62,7 @@ private:
     //! map containing the matrices
     Container M_container;
     //! list for additional parameters
-    boost::shared_ptr<Teuchos::ParameterList> M_pList;
+    std::shared_ptr<Teuchos::ParameterList> M_pList;
 };
 
 template<typename KEYTYPE>
@@ -74,7 +74,7 @@ void MatrixContainer<KEYTYPE>::set (const KeyType& _name, const MatrixType_ptr& 
 }
 
 template<typename KEYTYPE>
-boost::shared_ptr<MatrixEpetra<double> > MatrixContainer<KEYTYPE>::getMatrix (const KeyType& _name) const
+std::shared_ptr<MatrixEpetra<double> > MatrixContainer<KEYTYPE>::getMatrix (const KeyType& _name) const
 {
     CIterator it (M_container.find (_name) );
     ASSERT_POS (it != M_container.end(), "Matrix not found");
@@ -82,7 +82,7 @@ boost::shared_ptr<MatrixEpetra<double> > MatrixContainer<KEYTYPE>::getMatrix (co
 }
 
 template<typename KEYTYPE>
-boost::shared_ptr<Epetra_CrsMatrix> MatrixContainer<KEYTYPE>::get (const KeyType& _name) const
+std::shared_ptr<Epetra_CrsMatrix> MatrixContainer<KEYTYPE>::get (const KeyType& _name) const
 {
     CIterator it (M_container.find (_name) );
     ASSERT_POS (it != M_container.end(), "Matrix not found");

@@ -98,9 +98,9 @@ int main (int argc, char** argv)
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
     std::cout << "MPI Initialization" << std::endl;
-    boost::shared_ptr<Epetra_Comm> comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+    std::shared_ptr<Epetra_Comm> comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
-    boost::shared_ptr<Epetra_Comm> comm ( new Epetra_SerialComm );
+    std::shared_ptr<Epetra_Comm> comm ( new Epetra_SerialComm );
 #endif
 
     GetPot datafile ( "data_baremesh" );

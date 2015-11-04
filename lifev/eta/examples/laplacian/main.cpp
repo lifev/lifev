@@ -120,9 +120,9 @@ int main ( int argc, char** argv )
     // MPI initialization
 #ifdef HAVE_MPI
     MPI_Init ( &argc, &argv );
-    boost::shared_ptr< Epetra_Comm > Comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+    std::shared_ptr< Epetra_Comm > Comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
-    boost::shared_ptr< Epetra_Comm > Comm ( new Epetra_SerialComm );
+    std::shared_ptr< Epetra_Comm > Comm ( new Epetra_SerialComm );
 #endif
 
     // Initializing chronometers
@@ -154,7 +154,7 @@ int main ( int argc, char** argv )
 
     typedef RegionMesh< LinearTetra >                                       mesh_Type;
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr ( new mesh_Type ( Comm ) );
+    std::shared_ptr< mesh_Type > fullMeshPtr ( new mesh_Type ( Comm ) );
 
 
     // Building structured mesh (in this case a cube)
@@ -167,7 +167,7 @@ int main ( int argc, char** argv )
     // Partitioning mesh, possibly with overlap
     const UInt overlap ( dataFile( "mesh/overlap", 0 ) );
 
-    boost::shared_ptr< mesh_Type > localMeshPtr;
+    std::shared_ptr< mesh_Type > localMeshPtr;
 
     MeshPartitioner< mesh_Type > meshPart;
 
@@ -199,10 +199,10 @@ int main ( int argc, char** argv )
     // +-----------------------------------------------+
 
     typedef FESpace< mesh_Type, MapEpetra >                                 uSpaceStd_Type;
-    typedef boost::shared_ptr< uSpaceStd_Type >                             uSpaceStdPtr_Type;
+    typedef std::shared_ptr< uSpaceStd_Type >                             uSpaceStdPtr_Type;
 
     typedef ETFESpace< mesh_Type, MapEpetra, 3, 1 >                         uSpaceETA_Type;
-    typedef boost::shared_ptr< uSpaceETA_Type >                             uSpaceETAPtr_Type;
+    typedef std::shared_ptr< uSpaceETA_Type >                             uSpaceETAPtr_Type;
 
     typedef FESpace<mesh_Type, MapEpetra>::function_Type                    function_Type;
 
@@ -223,12 +223,12 @@ int main ( int argc, char** argv )
     }
 
     typedef Epetra_FECrsGraph                                               graph_Type;
-    typedef boost::shared_ptr<Epetra_FECrsGraph>                            graphPtr_Type;
+    typedef std::shared_ptr<Epetra_FECrsGraph>                            graphPtr_Type;
 
     typedef MatrixEpetra< Real >                                            matrix_Type;
-    typedef boost::shared_ptr< MatrixEpetra< Real > >                       matrixPtr_Type;
+    typedef std::shared_ptr< MatrixEpetra< Real > >                       matrixPtr_Type;
     typedef VectorEpetra                                                    vector_Type;
-    typedef boost::shared_ptr<VectorEpetra>                                 vectorPtr_Type;
+    typedef std::shared_ptr<VectorEpetra>                                 vectorPtr_Type;
 
     // Declaring the problem's graph and matrix
     graphPtr_Type systemGraph;
@@ -346,7 +346,8 @@ int main ( int argc, char** argv )
     rhsLap->zero();
     solutionLap->zero();
 
-    boost::shared_ptr<laplacianFunctor< Real > >  laplacianSourceFunctor ( new laplacianFunctor< Real >( sourceFunction ) );
+
+    std::shared_ptr<laplacianFunctor< Real > >  laplacianSourceFunctor ( new laplacianFunctor< Real >( sourceFunction ) );
 
     {
         using namespace ExpressionAssembly;
@@ -418,9 +419,9 @@ int main ( int argc, char** argv )
     typedef LinearSolver::SolverType                                        solver_Type;
 
     typedef LifeV::Preconditioner                                           basePrec_Type;
-    typedef boost::shared_ptr<basePrec_Type>                                basePrecPtr_Type;
+    typedef std::shared_ptr<basePrec_Type>                                basePrecPtr_Type;
     typedef PreconditionerIfpack                                            prec_Type;
-    typedef boost::shared_ptr<prec_Type>                                    precPtr_Type;
+    typedef std::shared_ptr<prec_Type>                                    precPtr_Type;
 
 
     if (verbose)
@@ -492,8 +493,8 @@ int main ( int argc, char** argv )
     Real H1SeminormLap = 0.0;
     Real TotH1SeminormLap = 0.0;
 
-    boost::shared_ptr<laplacianFunctor< Real > >  laplacianExactFunctor ( new laplacianFunctor< Real >( uExactFunction ) );
-    boost::shared_ptr<laplacianFunctor< VectorSmall<3> > >  laplacianExactGradientFunctor ( new laplacianFunctor< VectorSmall<3> >( uGradExactFunction ) );
+    std::shared_ptr<laplacianFunctor< Real > >  laplacianExactFunctor ( new laplacianFunctor< Real >( uExactFunction ) );
+    std::shared_ptr<laplacianFunctor< VectorSmall<3> > >  laplacianExactGradientFunctor ( new laplacianFunctor< VectorSmall<3> >( uGradExactFunction ) );
 
     {
         using namespace ExpressionAssembly;

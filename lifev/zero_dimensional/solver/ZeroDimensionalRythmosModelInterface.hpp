@@ -138,9 +138,9 @@ protected:
     Int                                             M_numProc; // Total number of processes
 
     Epetra_CrsGraph*                                M_graph;
-    boost::shared_ptr<Epetra_CrsGraph>              M_graphSharedPtr;
+    std::shared_ptr<Epetra_CrsGraph>              M_graphSharedPtr;
     Epetra_Comm*                                    M_comm;
-    boost::shared_ptr<Epetra_Comm>                  M_commSharedPtr;
+    std::shared_ptr<Epetra_Comm>                  M_commSharedPtr;
     Epetra_Map*                                     M_standardMap;
     Epetra_Vector*                                  M_initialSolutionY;
     Epetra_Vector*                                  M_initialSolutionYp;
@@ -151,12 +151,12 @@ protected:
     vectorPtr_Type                                  M_C;
     vectorEpetraPtr_Type                            M_Y0;
     vectorEpetraPtr_Type                            M_Yp0;
-    boost::shared_ptr<MapEpetra>                    M_mapEpetraPtr;
+    std::shared_ptr<MapEpetra>                    M_mapEpetraPtr;
     vectorEpetraPtr_Type                            M_fA;//dummy variable
     vectorEpetraPtr_Type                            M_fB;//dummy variable
 };
 
-typedef boost::shared_ptr< RythmosModelInterface >  rythmosModelInterfacePtr_Type;
+typedef std::shared_ptr< RythmosModelInterface >  rythmosModelInterfacePtr_Type;
 typedef Teuchos::RCP< RythmosModelInterface >       rythmosModelInterfacePtrRCP_Type;
 } // LifeV namespace
 

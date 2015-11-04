@@ -57,9 +57,9 @@ using namespace LifeV;
 typedef RegionMesh<LinearTetra>         mesh_Type;
 typedef OseenSolver< mesh_Type >        fluid_Type;
 typedef fluid_Type::vector_Type         vector_Type;
-typedef boost::shared_ptr<vector_Type>  vectorPtr_Type;   //Pointer
+typedef std::shared_ptr<vector_Type>  vectorPtr_Type;   //Pointer
 typedef FESpace< mesh_Type, MapEpetra > feSpace_Type;
-typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;   //Pointer
+typedef std::shared_ptr<feSpace_Type> feSpacePtr_Type;   //Pointer
 
 
 // +-----------------------------------------------+
@@ -103,7 +103,7 @@ int main (int argc, char** argv)
     MPI_Init (&argc, &argv);
 #endif
 
-    boost::shared_ptr<Epetra_Comm>   comm;
+    std::shared_ptr<Epetra_Comm>   comm;
 #ifdef EPETRA_MPI
     comm.reset ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
     int nproc;
@@ -166,7 +166,7 @@ int main (int argc, char** argv)
     {
         std::cout << "Mesh file: " << meshData.meshDir() << meshData.meshFile() << std::endl;
     }
-    boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
+    std::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
     readMesh (*fullMeshPtr, meshData);
     // Split the mesh between processors
     MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, comm);
@@ -258,7 +258,7 @@ int main (int argc, char** argv)
     {
         std::cout << std::endl << "[Creating the problem]" << std::endl;
     }
-    boost::shared_ptr< OseenData > oseenData (new OseenData);
+    std::shared_ptr< OseenData > oseenData (new OseenData);
     oseenData->setup ( dataFile );
 
 
@@ -328,7 +328,7 @@ int main (int argc, char** argv)
     // (A new one should be built for Navier-Stokes)
     fluid.resetPreconditioner();
 
-    boost::shared_ptr< ExporterHDF5<mesh_Type> > exporter;
+    std::shared_ptr< ExporterHDF5<mesh_Type> > exporter;
 
     std::string const exporterType =  dataFile ( "exporter/type", "ensight");
 

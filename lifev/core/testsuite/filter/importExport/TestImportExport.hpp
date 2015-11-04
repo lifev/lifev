@@ -68,10 +68,10 @@ public:
   typedef LifeV::RegionMesh<LifeV::LinearTetra>         mesh_Type;
   typedef LifeV::RossEthierSteinmanUnsteadyDec          problem_Type;
   typedef LifeV::FESpace< mesh_Type, LifeV::MapEpetra > feSpace_Type;
-  typedef boost::shared_ptr<feSpace_Type>               feSpacePtr_Type;
-  typedef boost::shared_ptr<Epetra_Comm>                commPtr_Type;
+  typedef std::shared_ptr<feSpace_Type>               feSpacePtr_Type;
+  typedef std::shared_ptr<Epetra_Comm>                commPtr_Type;
   typedef LifeV::Exporter<mesh_Type >::vectorPtr_Type   vectorPtr_Type;
-  typedef boost::function < LifeV::Real ( LifeV::Real const&,
+  typedef std::function < LifeV::Real ( LifeV::Real const&,
 					  LifeV::Real const&,
 					  LifeV::Real const&,
 					  LifeV::Real const&,
@@ -83,23 +83,23 @@ public:
     bool run ( GetPot& commandLine, const std::string& testString = "import" );
 
     template<typename ImporterType>
-    bool importLoop ( const boost::shared_ptr< ImporterType >& importerPtr );
+    bool importLoop ( const std::shared_ptr< ImporterType >& importerPtr );
 
     template<typename ExporterType>
-    bool exportLoop ( const boost::shared_ptr< ExporterType >& exporterPtr );
+    bool exportLoop ( const std::shared_ptr< ExporterType >& exporterPtr );
 
 private:
     void loadData ( GetPot& commandLine );
     void buildMesh();
     void buildFESpaces();
     template<typename ExporterType>
-    void buildExporter ( boost::shared_ptr< ExporterType >& exporterPtr,
+    void buildExporter ( std::shared_ptr< ExporterType >& exporterPtr,
                          const std::string& prefix ) const;
 
     commPtr_Type                                             M_commPtr;
     LifeV::Displayer                                         M_displayer;
     GetPot                                                   M_dataFile;
-    boost::shared_ptr< mesh_Type >                           M_meshPtr;
+    std::shared_ptr< mesh_Type >                           M_meshPtr;
     LifeV::TimeData                                          M_timeData;
 
     feSpacePtr_Type                                          M_vectorFESpacePtr;
@@ -186,7 +186,7 @@ TestImportExport::buildMesh()
     // +-----------------------------------------------+
     M_displayer.leaderPrint ( "[Building the mesh]\n" );
     chrono.start();
-    boost::shared_ptr< mesh_Type > fullMeshPtr ( new mesh_Type ( M_commPtr ) );
+    std::shared_ptr< mesh_Type > fullMeshPtr ( new mesh_Type ( M_commPtr ) );
 
     if ( M_dataFile ("space_discretization/mesh_from_file", false) )
     {
@@ -260,7 +260,7 @@ TestImportExport::buildFESpaces()
 
 template<typename ExporterType>
 void
-TestImportExport::buildExporter ( boost::shared_ptr< ExporterType >& exporterPtr,
+TestImportExport::buildExporter ( std::shared_ptr< ExporterType >& exporterPtr,
                                   const std::string& prefix ) const
 {
     using namespace LifeV;
@@ -295,8 +295,8 @@ TestImportExport::run ( GetPot& commandLine, const std::string& testString )
     buildMesh();
     buildFESpaces();
 
-    boost::shared_ptr< ExporterType > exporterPtr;
-    boost::shared_ptr< ImporterType > importerPtr;
+    std::shared_ptr< ExporterType > exporterPtr;
+    std::shared_ptr< ImporterType > importerPtr;
 
     buildExporter ( importerPtr, M_dataFile ("importer/prefix", "testImporter" ) );
     buildExporter ( exporterPtr, M_dataFile ("exporter/prefix", "testExporter" ) );
@@ -340,7 +340,7 @@ TestImportExport::run ( GetPot& commandLine, const std::string& testString )
 
 template<typename ExporterType>
 bool
-TestImportExport::exportLoop ( const boost::shared_ptr< ExporterType >& exporterPtr )
+TestImportExport::exportLoop ( const std::shared_ptr< ExporterType >& exporterPtr )
 {
     using namespace LifeV;
 
@@ -398,7 +398,7 @@ TestImportExport::exportLoop ( const boost::shared_ptr< ExporterType >& exporter
 
 template<typename ImporterType>
 bool
-TestImportExport::importLoop ( const boost::shared_ptr< ImporterType >& importerPtr )
+TestImportExport::importLoop ( const std::shared_ptr< ImporterType >& importerPtr )
 {
     using namespace LifeV;
 

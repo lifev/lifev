@@ -51,7 +51,7 @@ namespace LifeV
  * We want to check if the solutions are correct between versions.
  * we want to produce a small number of scalars and check they are always the same.
  *
- * Given: u_0, u_1, ...
+ * Given: u_0, ustd::placeholders::_1, ...
  *
  * mean: u = mean u_j
  *

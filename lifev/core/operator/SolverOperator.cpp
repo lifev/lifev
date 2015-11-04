@@ -44,7 +44,7 @@ namespace LifeV
 namespace Operators
 {
 
-SolverOperator::SolverOperator ( boost::shared_ptr<Epetra_Comm> comm ) :
+SolverOperator::SolverOperator ( std::shared_ptr<Epetra_Comm> comm ) :
     M_name ( "SolverOperator" ),
     M_useTranspose ( false ),
     M_lossOfAccuracy ( undefined ),

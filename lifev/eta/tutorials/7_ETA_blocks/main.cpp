@@ -115,9 +115,9 @@ int main ( int argc, char** argv )
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
     const bool verbose (Comm->MyPID() == 0);
@@ -130,13 +130,13 @@ int main ( int argc, char** argv )
 
     const UInt Nelements (10);
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type ( Comm ) );
+    std::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type ( Comm ) );
 
     regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                     2.0,   2.0,   2.0,
                     -1.0,  -1.0,  -1.0);
 
-    boost::shared_ptr< mesh_Type > meshPtr;
+    std::shared_ptr< mesh_Type > meshPtr;
     {
         MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
         meshPtr = meshPart.meshPartition();
@@ -164,13 +164,13 @@ int main ( int argc, char** argv )
     }
 
     std::string uOrder ("P2");
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace
+    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace
     ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 1, Comm) );
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 3 > > ETuSpace
+    std::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 3 > > ETuSpace
     ( new ETFESpace< mesh_Type, MapEpetra, 3, 3 > (meshPtr, &feTetraP2, & (uSpace->fe().geoMap() ), Comm) );
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > ETpSpace
+    std::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > ETpSpace
     ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPtr, &feTetraP1, & (uSpace->fe().geoMap() ), Comm) );
 
     if (verbose)
@@ -199,7 +199,7 @@ int main ( int argc, char** argv )
         std::cout << " -- Assembly of the Stokes matrix ... " << std::flush;
     }
 
-    boost::shared_ptr<blockMatrix_Type> ETsystemMatrix (new blockMatrix_Type ( ETuSpace->map() | ETpSpace->map() ) );
+    std::shared_ptr<blockMatrix_Type> ETsystemMatrix (new blockMatrix_Type ( ETuSpace->map() | ETpSpace->map() ) );
     *ETsystemMatrix *= 0.0;
 
 

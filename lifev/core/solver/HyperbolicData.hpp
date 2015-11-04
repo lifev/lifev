@@ -69,13 +69,13 @@ public:
     //@{
 
     typedef GetPot                          Data_Type;
-    typedef boost::shared_ptr< Data_Type >  DataPtr_Type;
+    typedef std::shared_ptr< Data_Type >  DataPtr_Type;
 
     typedef TimeData                        Time_Type;
-    typedef boost::shared_ptr< Time_Type >  TimePtr_Type;
+    typedef std::shared_ptr< Time_Type >  TimePtr_Type;
 
     typedef MeshData                        Mesh_Type;
-    typedef boost::shared_ptr< Mesh_Type >  MeshPtr_Type;
+    typedef std::shared_ptr< Mesh_Type >  MeshPtr_Type;
 
     //@}
 

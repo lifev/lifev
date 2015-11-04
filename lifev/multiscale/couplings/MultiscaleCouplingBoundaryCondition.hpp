@@ -209,7 +209,7 @@ template< class ModelType >
 inline void
 MultiscaleCouplingBoundaryCondition::applyBoundaryConditions0D ( const UInt& i )
 {
-    boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType > ( M_models[i] );
+    std::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType > ( M_models[i] );
     multiscaleID_Type flag ( model->boundaryFlag ( M_boundaryIDs[i] ) );
 
     for ( UInt j ( 0 ); j < M_listSize; ++j )
@@ -228,7 +228,7 @@ template< class ModelType >
 inline void
 MultiscaleCouplingBoundaryCondition::applyBoundaryConditions1D ( const UInt& i )
 {
-    boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType > ( M_models[i] );
+    std::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType > ( M_models[i] );
     multiscaleID_Type flag ( model->boundaryFlag ( M_boundaryIDs[i] ) );
 
     for ( UInt j ( 0 ); j < M_listSize; ++j )
@@ -247,7 +247,7 @@ template< class ModelType >
 inline void
 MultiscaleCouplingBoundaryCondition::applyBoundaryConditions3D ( const UInt& i )
 {
-    boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType > ( M_models[i] );
+    std::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType > ( M_models[i] );
     multiscaleID_Type flag ( model->boundaryFlag ( M_boundaryIDs[i] ) );
 
     for ( UInt j ( 0 ); j < M_listSize; ++j )

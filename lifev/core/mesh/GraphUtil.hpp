@@ -56,15 +56,15 @@ namespace GraphUtil
 {
 
 // Public typedefs
-typedef boost::shared_ptr<Epetra_Comm>          commPtr_Type;
+typedef std::shared_ptr<Epetra_Comm>          commPtr_Type;
 typedef std::vector <LifeV::Int>                idList_Type;
-typedef boost::shared_ptr<idList_Type>          idListPtr_Type;
+typedef std::shared_ptr<idList_Type>          idListPtr_Type;
 typedef std::vector <idListPtr_Type>            idTable_Type;
-typedef boost::shared_ptr<idTable_Type>         idTablePtr_Type;
+typedef std::shared_ptr<idTable_Type>         idTablePtr_Type;
 typedef std::set<Int>                           idSet_Type;
-typedef boost::shared_ptr<idSet_Type>           idSetPtr_Type;
+typedef std::shared_ptr<idSet_Type>           idSetPtr_Type;
 typedef std::vector<idSetPtr_Type>              idSetGroup_Type;
-typedef boost::shared_ptr<idSetGroup_Type>      idSetGroupPtr_Type;
+typedef std::shared_ptr<idSetGroup_Type>      idSetGroupPtr_Type;
 typedef boost::bimap<LifeV::UInt, LifeV::UInt>  biMap_Type;
 typedef biMap_Type::value_type                  biMapValue_Type;
 
@@ -201,8 +201,8 @@ void partitionGraphParMETIS (const idListPtr_Type& vertexList,
     // imbalance tolerance for each vertex weight
     std::vector<float> ubvec (ncon, 1.05);
 
-    boost::shared_ptr<Epetra_MpiComm> mpiComm
-        = boost::dynamic_pointer_cast <Epetra_MpiComm> (comm);
+    std::shared_ptr<Epetra_MpiComm> mpiComm
+        = std::dynamic_pointer_cast <Epetra_MpiComm> (comm);
     MPI_Comm MPIcomm = mpiComm->Comm();
 
     Int* adjwgtPtr (0);

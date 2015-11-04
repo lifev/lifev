@@ -78,12 +78,12 @@ public:
     //@{
     // Make the template's type available to the outside
     typedef MeshType mesh_Type;
-    typedef boost::shared_ptr<MeshType> meshPtr_Type;
+    typedef std::shared_ptr<MeshType> meshPtr_Type;
     typedef std::vector<Int> idList_Type;
     typedef std::vector<idList_Type> graph_Type;
-    typedef boost::shared_ptr<graph_Type> graphPtr_Type;
+    typedef std::shared_ptr<graph_Type> graphPtr_Type;
     typedef std::vector<meshPtr_Type> partMesh_Type;
-    typedef boost::shared_ptr<partMesh_Type> partMeshPtr_Type;
+    typedef std::shared_ptr<partMesh_Type> partMeshPtr_Type;
     //@}
     //! \name Constructors & Destructors
     //@{
@@ -104,7 +104,7 @@ public:
       \param interfaceMapRep - Epetra_Map*
     */
     MeshPartitioner ( meshPtr_Type& mesh,
-                      boost::shared_ptr<Epetra_Comm>& comm,
+                      std::shared_ptr<Epetra_Comm>& comm,
                       Epetra_Map* interfaceMap = 0,
                       Epetra_Map* interfaceMapRep = 0 );
 
@@ -128,7 +128,7 @@ public:
       @note This method is meant to be used with the empty constructor.
     */
     void doPartition ( meshPtr_Type& mesh,
-                       boost::shared_ptr<Epetra_Comm>& comm,
+                       std::shared_ptr<Epetra_Comm>& comm,
                        Epetra_Map* interfaceMap = 0,
                        Epetra_Map* interfaceMapRep = 0 );
 
@@ -141,7 +141,7 @@ public:
       \param numPartitions - UInt - the number of partitions desired, in the offline case
       \param _comm - Epetra_Comm& - reference of the Epetra communicator used
     */
-    void setup (UInt numPartitions, boost::shared_ptr<Epetra_Comm> comm);
+    void setup (UInt numPartitions, std::shared_ptr<Epetra_Comm> comm);
 
     //! Call update() method after loading the graph, to rebuild all data structures
     /*!
@@ -234,7 +234,7 @@ public:
         return M_elementDomains;
     }
     //! Return a pointer to the communicator M_comm
-    const boost::shared_ptr<Epetra_Comm>& comm()   const
+    const std::shared_ptr<Epetra_Comm>& comm()   const
     {
         return M_comm;
     }
@@ -362,7 +362,7 @@ private:
     std::vector<Int>                     M_vertexDistribution;
     std::vector<Int>                     M_adjacencyGraphKeys;
     std::vector<Int>                     M_adjacencyGraphValues;
-    boost::shared_ptr<Epetra_Comm>       M_comm;
+    std::shared_ptr<Epetra_Comm>         M_comm;
     Int                                  M_me;
 
     std::vector<std::vector<Int> >       M_localNodes;
@@ -384,8 +384,8 @@ private:
     UInt                                 M_elementFacets;
     UInt                                 M_elementRidges;
     UInt                                 M_facetVertices;
-    boost::shared_ptr<std::vector<Int> > M_repeatedFacet;
-    boost::shared_ptr<std::vector<Int> > M_isOnProc;
+    std::shared_ptr<std::vector<Int> > M_repeatedFacet;
+    std::shared_ptr<std::vector<Int> > M_isOnProc;
     std::vector<Int>                     M_graphVertexLocations;
     graphPtr_Type                        M_elementDomains;
     bool                                 M_serialMode; // how to tell if running serial partition mode
@@ -421,7 +421,7 @@ MeshPartitioner()
 
 template < typename MeshType >
 MeshPartitioner < MeshType >::
-MeshPartitioner ( meshPtr_Type& mesh, boost::shared_ptr<Epetra_Comm>& comm,
+MeshPartitioner ( meshPtr_Type& mesh, std::shared_ptr<Epetra_Comm>& comm,
                   Epetra_Map* interfaceMap, Epetra_Map* interfaceMapRep)
 {
     init ();
@@ -462,7 +462,7 @@ init ()
 template < typename MeshType >
 void
 MeshPartitioner < MeshType >::
-doPartition ( meshPtr_Type& mesh, boost::shared_ptr<Epetra_Comm>& comm,
+doPartition ( meshPtr_Type& mesh, std::shared_ptr<Epetra_Comm>& comm,
               Epetra_Map* interfaceMap, Epetra_Map* interfaceMapRep )
 {
     M_comm = comm;
@@ -486,7 +486,7 @@ doPartition ( meshPtr_Type& mesh, boost::shared_ptr<Epetra_Comm>& comm,
 // =================================
 
 template<typename MeshType>
-void MeshPartitioner<MeshType>::setup (UInt numPartitions, boost::shared_ptr<Epetra_Comm> comm)
+void MeshPartitioner<MeshType>::setup (UInt numPartitions, std::shared_ptr<Epetra_Comm> comm)
 {
     M_serialMode = true;
     M_comm = comm;
@@ -655,7 +655,7 @@ template<typename MeshType>
 void MeshPartitioner<MeshType>::findRepeatedFacesFSI()
 {
     std::vector<Int>                    myRepeatedFacet; // used for the solid partitioning
-    boost::shared_ptr<std::vector<Int> > myIsOnProc;     // used for the solid partitioning
+    std::shared_ptr<std::vector<Int> > myIsOnProc;     // used for the solid partitioning
 
     myIsOnProc.reset (new std::vector<Int> (M_originalMesh->numElements() ) );
 
@@ -719,7 +719,7 @@ void MeshPartitioner<MeshType>::findRepeatedFacesFSI()
     M_isOnProc.reset (new std::vector<Int> (*myIsOnProc) );
 
     // Lot of communication here!!
-    boost::shared_ptr<Epetra_MpiComm> mpiComm = boost::dynamic_pointer_cast <Epetra_MpiComm> ( M_comm );
+    std::shared_ptr<Epetra_MpiComm> mpiComm = std::dynamic_pointer_cast <Epetra_MpiComm> ( M_comm );
     MPI_Allreduce ( &myRepeatedFacet[0], & (*M_repeatedFacet) [0], myRepeatedFacet.size(),
                     MPI_INT, MPI_SUM, mpiComm->Comm() );
     MPI_Allreduce ( & (*myIsOnProc) [0], & (*M_isOnProc) [0], myIsOnProc->size(),
@@ -823,7 +823,7 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph (UInt numParts)
     // imbalance tolerance for each vertex weight
     std::vector<float> ubvec (ncon, 1.05);
 
-    boost::shared_ptr<Epetra_MpiComm> mpiComm = boost::dynamic_pointer_cast <Epetra_MpiComm> (M_comm);
+    std::shared_ptr<Epetra_MpiComm> mpiComm = std::dynamic_pointer_cast <Epetra_MpiComm> (M_comm);
     MPI_Comm MPIcomm = mpiComm->Comm();
 
     Int nprocs;
@@ -878,7 +878,7 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph (UInt numParts)
 template<typename MeshType>
 void MeshPartitioner<MeshType>::matchFluidPartitionsFSI()
 {
-    boost::shared_ptr<Epetra_MpiComm> mpiComm = boost::dynamic_pointer_cast <Epetra_MpiComm> (M_comm);
+    std::shared_ptr<Epetra_MpiComm> mpiComm = std::dynamic_pointer_cast <Epetra_MpiComm> (M_comm);
     MPI_Comm MPIcomm = mpiComm->Comm();
     Int numProcesses;
     MPI_Comm_size (MPIcomm, &numProcesses);
@@ -987,7 +987,7 @@ void MeshPartitioner<MeshType>::matchFluidPartitionsFSI()
 template<typename MeshType>
 void MeshPartitioner<MeshType>::redistributeElements()
 {
-    boost::shared_ptr<Epetra_MpiComm> mpiComm = boost::dynamic_pointer_cast <Epetra_MpiComm> (M_comm);
+    std::shared_ptr<Epetra_MpiComm> mpiComm = std::dynamic_pointer_cast <Epetra_MpiComm> (M_comm);
     MPI_Comm MPIcomm = mpiComm->Comm();
     Int numProcesses;
     MPI_Comm_size (MPIcomm, &numProcesses);

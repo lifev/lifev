@@ -76,7 +76,7 @@ public:
     //! @name Public typedefs
     //@{
     typedef boost::numeric::ublas::vector<Real> Vector;
-    typedef boost::function<bool ( const std::vector<Real>&, const std::vector<Real>&, const Real& ) > fct;
+    typedef std::function<bool ( const std::vector<Real>&, const std::vector<Real>&, const Real& ) > fct;
     //@}
 
     //! @name Constructor & Destructor
@@ -251,7 +251,7 @@ private:
 
     //! Auxiliary DOF object of the mesh which provides the local to global table
     //! when interpolation is used
-    boost::shared_ptr<DOF> M_dof;
+    std::shared_ptr<DOF> M_dof;
 
     //! STL list which holds the connections between facets at the interface
     std::list< std::pair<ID, ID> > M_facetToFacetConnectionList;

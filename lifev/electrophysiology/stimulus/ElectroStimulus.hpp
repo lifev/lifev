@@ -52,7 +52,7 @@ public:
     //! @name Type definitions
     //@{
     typedef VectorEpetra                    vector_Type;
-    typedef boost::shared_ptr<VectorEpetra> vectorPtr_Type;
+    typedef std::shared_ptr<VectorEpetra> vectorPtr_Type;
     typedef Teuchos::ParameterList          list_Type;
 
     //@}

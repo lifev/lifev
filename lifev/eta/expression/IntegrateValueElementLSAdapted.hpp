@@ -82,7 +82,7 @@ public:
     //! @name Constructor & Destructor
     //@{
 
-    IntegrateValueElementLSAdapted ( const boost::shared_ptr<MeshType>& mesh,
+    IntegrateValueElementLSAdapted ( const std::shared_ptr<MeshType>& mesh,
                                      const QRAdapter_Type& QRAdapter,
                                      const ExpressionType& expression);
 
@@ -123,7 +123,7 @@ private:
     //@}
 
     // Mesh
-    boost::shared_ptr<MeshType> M_mesh;
+    std::shared_ptr<MeshType> M_mesh;
 
     // Quadrature Adapter
     QRAdapter_Type M_QRAdapter;
@@ -140,7 +140,7 @@ private:
 
 template< typename MeshType, typename ExpressionType, typename LSFESpaceType, typename VectorType>
 IntegrateValueElementLSAdapted<MeshType, ExpressionType, LSFESpaceType, VectorType>::
-IntegrateValueElementLSAdapted ( const boost::shared_ptr<MeshType>& mesh,
+IntegrateValueElementLSAdapted ( const std::shared_ptr<MeshType>& mesh,
                                  const QRAdapter_Type& QRAdapter,
                                  const ExpressionType& expression)
     :

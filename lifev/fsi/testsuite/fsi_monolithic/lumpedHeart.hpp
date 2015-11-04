@@ -106,7 +106,7 @@ private:
     //@}
 
     Real                                      M_time;
-    //boost::shared_ptr< bc_type >              M_BC;
+    //std::shared_ptr< bc_type >              M_BC;
     TimeAdvanceBDF<Real>                      M_ODEscheme;
     Real                                      M_dt;
     Real                                      M_T_max  ;

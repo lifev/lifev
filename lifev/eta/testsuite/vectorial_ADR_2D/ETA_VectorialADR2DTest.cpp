@@ -109,13 +109,13 @@ ETA_VectorialADR2DTest::run()
 
     const UInt Nelements (10);
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
+    std::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
 
     regularMesh2D ( *fullMeshPtr, 0, Nelements, Nelements, false,
                     2.0,   2.0,
                     -0.0,  -0.0);
 
-    boost::shared_ptr< mesh_Type > meshPtr;
+    std::shared_ptr< mesh_Type > meshPtr;
     {
         MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, M_comm);
         meshPtr = meshPart.meshPartition();
@@ -146,10 +146,10 @@ ETA_VectorialADR2DTest::run()
     std::string uOrder ("P1");
     std::string bOrder ("P1");
 
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace
+    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace
     ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 2, M_comm) );
 
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > betaSpace
+    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > betaSpace
     ( new FESpace< mesh_Type, MapEpetra > (meshPtr, bOrder, 2, M_comm) );
 
     if (verbose)
@@ -166,10 +166,10 @@ ETA_VectorialADR2DTest::run()
         std::cout << " -- Building ETFESpaces ... " << std::flush;
     }
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 2 > > ETuSpace
+    std::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 2 > > ETuSpace
     ( new ETFESpace< mesh_Type, MapEpetra, 2, 2 > (meshPtr, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), M_comm) );
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 2 > > ETbetaSpace
+    std::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 2 > > ETbetaSpace
     ( new ETFESpace< mesh_Type, MapEpetra, 2, 2 > (meshPtr, & (betaSpace->refFE() ), & (betaSpace->fe().geoMap() ), M_comm) );
 
     if (verbose)
@@ -212,10 +212,10 @@ ETA_VectorialADR2DTest::run()
         std::cout << " -- Defining the matrices ... " << std::flush;
     }
 
-    boost::shared_ptr<matrix_Type> systemMatrix (new matrix_Type ( uSpace->map() ) );
+    std::shared_ptr<matrix_Type> systemMatrix (new matrix_Type ( uSpace->map() ) );
     *systemMatrix *= 0.0;
 
-    boost::shared_ptr<matrix_Type> ETsystemMatrix (new matrix_Type ( ETuSpace->map() ) );
+    std::shared_ptr<matrix_Type> ETsystemMatrix (new matrix_Type ( ETuSpace->map() ) );
     *ETsystemMatrix *= 0.0;
 
     if (verbose)
@@ -343,7 +343,7 @@ ETA_VectorialADR2DTest::run()
         std::cout << " -- Computing the error ... " << std::flush;
     }
 
-    boost::shared_ptr<matrix_Type> checkMatrix (new matrix_Type ( ETuSpace->map() ) );
+    std::shared_ptr<matrix_Type> checkMatrix (new matrix_Type ( ETuSpace->map() ) );
     *checkMatrix *= 0.0;
 
     *checkMatrix += *systemMatrix;

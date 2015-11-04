@@ -96,11 +96,11 @@ struct test_bdf::Private
     {
     }
 
-    typedef boost::function < Real (Real const&, Real const&, Real const&,
+    typedef std::function < Real (Real const&, Real const&, Real const&,
                                     Real const&, ID const&) > fct_type;
 
     std::string data_file_name;
-    boost::shared_ptr<Epetra_Comm> comm;
+    std::shared_ptr<Epetra_Comm> comm;
     Real errorNorm;
 
 };
@@ -165,9 +165,9 @@ void test_bdf::run()
     //Mesh stuff
     Members->comm->Barrier();
     MeshData meshData (dataFile, ("bdf/" + discretization_section).c_str() );
-    boost::shared_ptr<regionMesh> fullMeshPtr ( new regionMesh ( Members->comm ) );
+    std::shared_ptr<regionMesh> fullMeshPtr ( new regionMesh ( Members->comm ) );
     readMesh (*fullMeshPtr, meshData);
-    boost::shared_ptr<regionMesh> meshPtr;
+    std::shared_ptr<regionMesh> meshPtr;
     {
         MeshPartitioner<regionMesh> meshPart ( fullMeshPtr, Members->comm );
         meshPtr = meshPart.meshPartition();
@@ -175,7 +175,7 @@ void test_bdf::run()
 
     //=============================================================================
     //finite element space of the solution
-    boost::shared_ptr<FESpace<regionMesh, MapEpetra> > feSpacePtr (
+    std::shared_ptr<FESpace<regionMesh, MapEpetra> > feSpacePtr (
         new FESpace<regionMesh, MapEpetra> (
             meshPtr, dataFile ( ("bdf/" + discretization_section + "/order").c_str(), "P2"), 1, Members->comm) );
 
@@ -190,7 +190,7 @@ void test_bdf::run()
     //Fe Matrices and vectors
     MatrixElemental elmat (feSpacePtr->fe().nbFEDof(), 1, 1); //local matrix
     MatrixEpetra<double> matM (feSpacePtr->map() ); //mass matrix
-    boost::shared_ptr<MatrixEpetra<double> > matA_ptr (
+    std::shared_ptr<MatrixEpetra<double> > matA_ptr (
         new MatrixEpetra<double> (feSpacePtr->map() ) ); //stiff matrix
     boost::shared_ptr<VectorEpetra> u ( new VectorEpetra (feSpacePtr->map(), Unique) ); // solution vector
     boost::shared_ptr<VectorEpetra> f ( new VectorEpetra (feSpacePtr->map(), Unique) ); // forcing term vector
@@ -235,7 +235,7 @@ void test_bdf::run()
 
     //===================================================
     // post processing setup
-    boost::shared_ptr<Exporter<regionMesh> > exporter;
+    std::shared_ptr<Exporter<regionMesh> > exporter;
     std::string const exporterType =  dataFile ( "exporter/type", "hdf5");
 
 #ifdef HAVE_HDF5
@@ -259,7 +259,7 @@ void test_bdf::run()
     exporter->setPostDir ( "./" );
     exporter->setMeshProcId ( meshPtr, Members->comm->MyPID() );
 
-    boost::shared_ptr<VectorEpetra> u_display_ptr (new VectorEpetra (
+    std::shared_ptr<VectorEpetra> u_display_ptr (new VectorEpetra (
                                                        feSpacePtr->map(), exporter->mapType() ) );
     exporter->addVariable (ExporterData<regionMesh >::ScalarField, "u", feSpacePtr,
                            u_display_ptr, UInt (0) );

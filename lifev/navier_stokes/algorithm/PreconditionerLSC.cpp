@@ -39,7 +39,7 @@
 namespace LifeV
 {
 
-PreconditionerLSC::PreconditionerLSC ( boost::shared_ptr<Epetra_Comm> comm ) :
+PreconditionerLSC::PreconditionerLSC ( std::shared_ptr<Epetra_Comm> comm ) :
     PreconditionerTeko  (),
     M_precType          ( "" ),
     M_velocityBlockSize ( -1 ),

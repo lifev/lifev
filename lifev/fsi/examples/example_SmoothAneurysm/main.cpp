@@ -114,7 +114,7 @@ class Problem
 {
 public:
 
-    typedef boost::shared_ptr<LifeV::FSISolver> fsi_solver_ptr;
+    typedef std::shared_ptr<LifeV::FSISolver> fsi_solver_ptr;
 
     typedef LifeV::FSIOperator::data_Type                          data_Type;
     typedef LifeV::FSIOperator::dataPtr_Type                       dataPtr_Type;
@@ -122,13 +122,13 @@ public:
     typedef LifeV::FSIOperator::vector_Type        vector_Type;
     typedef LifeV::FSIOperator::vectorPtr_Type     vectorPtr_Type;
 
-    typedef boost::shared_ptr< LifeV::Exporter<LifeV::RegionMesh<LifeV::LinearTetra> > > filterPtr_Type;
+    typedef std::shared_ptr< LifeV::Exporter<LifeV::RegionMesh<LifeV::LinearTetra> > > filterPtr_Type;
 
     typedef LifeV::ExporterEnsight<LifeV::FSIOperator::mesh_Type>  ensightFilter_Type;
-    typedef boost::shared_ptr<ensightFilter_Type>                 ensightFilterPtr_Type;
+    typedef std::shared_ptr<ensightFilter_Type>                 ensightFilterPtr_Type;
 #ifdef HAVE_HDF5
     typedef LifeV::ExporterHDF5<LifeV::FSIOperator::mesh_Type>  hdf5Filter_Type;
-    typedef boost::shared_ptr<hdf5Filter_Type>                  hdf5FilterPtr_Type;
+    typedef std::shared_ptr<hdf5Filter_Type>                  hdf5FilterPtr_Type;
 #endif
     typedef LifeV::FactorySingleton<LifeV::Factory<LifeV::FSIOperator,  std::string> > FSIFactory_Type;
 
@@ -156,7 +156,7 @@ public:
       -# initialize and setup the FSIsolver
     */
 
-    Problem ( GetPot const& data_file, boost::shared_ptr<Epetra_Comm> comm) :
+    Problem ( GetPot const& data_file, std::shared_ptr<Epetra_Comm> comm) :
         M_Tstart (0.),
         M_tolSave (1),
         M_saveEvery (1),
@@ -538,24 +538,24 @@ private:
 
     vectorPtr_Type M_WS;
 
-    boost::shared_ptr<Epetra_Comm>  M_comm;
+    std::shared_ptr<Epetra_Comm>  M_comm;
 };
 
 struct FSIChecker
 {
     FSIChecker ( GetPot const& _data_file,
-                 boost::shared_ptr<Epetra_Comm> comm ) :
+                 std::shared_ptr<Epetra_Comm> comm ) :
         data_file ( _data_file ),
         communicator ( comm )
     {}
 
     void operator() ()
     {
-        boost::shared_ptr<Problem> fsip;
+        std::shared_ptr<Problem> fsip;
 
         try
         {
-            fsip = boost::shared_ptr<Problem> ( new Problem ( data_file, communicator ) );
+            fsip = std::shared_ptr<Problem> ( new Problem ( data_file, communicator ) );
 
             fsip->run();
         }
@@ -568,7 +568,7 @@ struct FSIChecker
     }
 
     GetPot                data_file;
-    boost::shared_ptr<Epetra_Comm> communicator;
+    std::shared_ptr<Epetra_Comm> communicator;
     LifeV::Vector         disp;
 };
 
@@ -589,13 +589,13 @@ int main (int argc, char** argv)
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_MpiComm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+    std::shared_ptr<Epetra_MpiComm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
     if ( Comm->MyPID() == 0 )
     {
         cout << "% using MPI" << endl;
     }
 #else
-    boost::shared_ptr<Epetra_SerialComm> Comm ( new Epetra_SerialComm() );
+    std::shared_ptr<Epetra_SerialComm> Comm ( new Epetra_SerialComm() );
     std::cout << "% using serial Version" << std::endl;
 #endif
 

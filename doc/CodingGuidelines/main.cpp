@@ -73,7 +73,7 @@ int
 main ( int argc, char** argv )
 {
     //MPI communicator initialization
-    boost::shared_ptr<Epetra_Comm> comm;
+    std::shared_ptr<Epetra_Comm> comm;
 
 #ifdef HAVE_MPI
     std::cout << "MPI Initialization" << std::endl;

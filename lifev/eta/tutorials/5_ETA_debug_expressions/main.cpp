@@ -89,9 +89,9 @@ int main ( int argc, char** argv )
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
     const bool verbose (Comm->MyPID() == 0);
@@ -111,13 +111,13 @@ int main ( int argc, char** argv )
 
     const UInt Nelements (10);
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type ( Comm ) );
+    std::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type ( Comm ) );
 
     regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                     2.0,   2.0,   2.0,
                     -1.0,  -1.0,  -1.0);
 
-    boost::shared_ptr< mesh_Type > meshPtr;
+    std::shared_ptr< mesh_Type > meshPtr;
     {
         MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
         meshPtr = meshPart.meshPartition();
@@ -141,7 +141,7 @@ int main ( int argc, char** argv )
         std::cout << " -- Building the scalar ETFESpace ... " << std::flush;
     }
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > scalarSpace
+    std::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > scalarSpace
     ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPtr, &feTetraP1, Comm) );
 
     if (verbose)
@@ -163,7 +163,7 @@ int main ( int argc, char** argv )
         std::cout << " -- Defining the matrix ... " << std::flush;
     }
 
-    boost::shared_ptr<matrix_Type> scalarMatrix (new matrix_Type ( scalarSpace->map() ) );
+    std::shared_ptr<matrix_Type> scalarMatrix (new matrix_Type ( scalarSpace->map() ) );
 
     *scalarMatrix *= 0.0;
 

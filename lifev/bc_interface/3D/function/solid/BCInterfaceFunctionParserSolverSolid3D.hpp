@@ -59,7 +59,7 @@ BCInterfaceFunctionParserSolver< BCHandler, StructuralOperator<RegionMesh <Linea
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< BCHandler, StructuralOperator<RegionMesh <LinearTetra> > >::createAccessList ( const boost::shared_ptr< BCInterfaceData >& data );
+BCInterfaceFunctionParserSolver< BCHandler, StructuralOperator<RegionMesh <LinearTetra> > >::createAccessList ( const std::shared_ptr< BCInterfaceData >& data );
 
 } // Namespace LifeV
 

@@ -83,13 +83,13 @@ public:
     typedef Preconditioner                          super_Type;
 
     typedef Epetra_Operator                         operator_Type;
-    typedef boost::shared_ptr<Epetra_Operator>      operatorPtr_Type;
+    typedef std::shared_ptr<Epetra_Operator>      operatorPtr_Type;
 
     typedef Teko::Epetra::EpetraBlockPreconditioner preconditioner_Type;
-    typedef boost::shared_ptr<preconditioner_Type>  preconditionerPtr_Type;
+    typedef std::shared_ptr<preconditioner_Type>  preconditionerPtr_Type;
 
     typedef MatrixEpetra<Real>                      matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>          matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type>          matrixPtr_Type;
     //@}
 
 
@@ -97,10 +97,10 @@ public:
      */
     //@{
     //! default constructor.
-    PreconditionerTeko ( const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
+    PreconditionerTeko ( const std::shared_ptr<Epetra_Comm>& comm = std::shared_ptr<Epetra_Comm>() );
 
     /** Copy constructor*/
-    PreconditionerTeko ( PreconditionerTeko& P, const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
+    PreconditionerTeko ( PreconditionerTeko& P, const std::shared_ptr<Epetra_Comm>& comm = std::shared_ptr<Epetra_Comm>() );
 
     //! default virtual destructor
     virtual ~PreconditionerTeko();

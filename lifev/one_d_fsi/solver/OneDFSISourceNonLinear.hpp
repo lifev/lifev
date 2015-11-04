@@ -98,7 +98,7 @@ namespace LifeV
  *  The assumed wall-law is
  *
  *  \f[
- *  P-P_\mathrm{ext} = \psi(A,A^0,\beta_0, \beta_1, \gamma) =
+ *  P-P_\mathrm{ext} = \psi(A,A^0,\beta_0, \betA_1, \gamma) =
  *  \underbrace{\sqrt{\frac{\pi}{A^0}}\frac{h E}{1-\nu^2}}_{\beta_0} \left(\left(\frac{A}{A^0}\right)^{\beta_1}-1\right) +
  *  \underbrace{\frac{T \tan\phi}{4 \sqrt{\pi}}\frac{h E}{1-\nu^2}}_{\displaystyle\gamma} \frac{1}{A\sqrt{A}} \frac{\partial A}{\partial t}.
  *  \f]

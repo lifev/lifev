@@ -69,16 +69,16 @@ public:
     //@{
 
     typedef Epetra_Operator                        prec_raw_type;
-    typedef boost::shared_ptr<prec_raw_type>       prec_type;
+    typedef std::shared_ptr<prec_raw_type>       prec_type;
 
     typedef LinearSolver                           solver_Type;
-    typedef boost::shared_ptr<solver_Type>         solverPtr_Type;
+    typedef std::shared_ptr<solver_Type>         solverPtr_Type;
 
     typedef MatrixEpetra<Real>                     operator_raw_type;
-    typedef boost::shared_ptr<operator_raw_type>   operator_type;
+    typedef std::shared_ptr<operator_raw_type>   operator_type;
 
     typedef Preconditioner                         preconditioner_Type;
-    typedef boost::shared_ptr<preconditioner_Type> preconditionerPtr_Type;
+    typedef std::shared_ptr<preconditioner_Type> preconditionerPtr_Type;
 
     typedef Displayer::comm_Type                   comm_Type;
     typedef Displayer::commPtr_Type                commPtr_Type;
@@ -96,9 +96,9 @@ public:
      * @param comm The communicator.
      */
 #ifdef HAVE_MPI
-    PreconditionerLinearSolver ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
+    PreconditionerLinearSolver ( std::shared_ptr<Epetra_Comm> comm = std::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
 #else
-    PreconditionerLinearSolver ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
+    PreconditionerLinearSolver ( std::shared_ptr<Epetra_Comm> comm = std::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
 #endif
 
     //! Destructor

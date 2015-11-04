@@ -70,7 +70,7 @@ int MonolithicBlockComposedDN::solveSystem ( const vector_Type& rhs, vector_Type
             }
         }
     }
-    return linearSolver->solveSystem (rhs, step, boost::static_pointer_cast<Preconditioner> (M_blockPrecs) );
+    return linearSolver->solveSystem (rhs, step, std::static_pointer_cast<Preconditioner> (M_blockPrecs) );
 }
 
 

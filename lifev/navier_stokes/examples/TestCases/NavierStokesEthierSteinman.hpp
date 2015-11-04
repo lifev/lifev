@@ -127,7 +127,7 @@ public:
     /*!
         @param bcHandler shared pointer on a BCHandler object
      */
-    void setBoundaryConditions ( boost::shared_ptr<BCHandler> bcHandler ) const;
+    void setBoundaryConditions ( std::shared_ptr<BCHandler> bcHandler ) const;
 
     //! Set the viscosity of the fluid
     /*!
@@ -147,13 +147,13 @@ public:
     //@{
 
     //! Getter for the problem mesh
-    void mesh ( boost::shared_ptr< esMesh_Type >& meshPart ) const;
+    void mesh ( std::shared_ptr< esMesh_Type >& meshPart ) const;
 
     //! Getter for the boundary conditions in the provided BCHandler
     /*!
         @param bcHandler shared pointer on a BCHandler object
      */
-    void boundaryConditions ( boost::shared_ptr<BCHandler> bcHandler ) const;
+    void boundaryConditions ( std::shared_ptr<BCHandler> bcHandler ) const;
 
     //! Returns the name of the problem
     std::string name() const;

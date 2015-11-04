@@ -75,7 +75,7 @@ struct DimSelector
 {
     typedef nullShape elem_Type;
     typedef RegionMesh<elem_Type> mesh_Type;
-    typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
+    typedef std::shared_ptr<mesh_Type> meshPtr_Type;
 
     static meshPtr_Type generateRegularMesh ( GetPot const& dataFile );
 };
@@ -85,7 +85,7 @@ struct DimSelector<2>
 {
     typedef LinearTriangle elem_Type;
     typedef RegionMesh<elem_Type> mesh_Type;
-    typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
+    typedef std::shared_ptr<mesh_Type> meshPtr_Type;
 
     static meshPtr_Type generateRegularMesh ( GetPot const& dataFile )
     {
@@ -103,7 +103,7 @@ struct DimSelector<3>
 {
     typedef LinearTetra elem_Type;
     typedef RegionMesh<elem_Type> mesh_Type;
-    typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
+    typedef std::shared_ptr<mesh_Type> meshPtr_Type;
 
     static meshPtr_Type generateRegularMesh ( GetPot const& dataFile )
     {
@@ -121,13 +121,13 @@ struct TestRepeatedMesh
 {
     typedef typename DimSelector<Dim>::elem_Type elem_Type;
     typedef RegionMesh<elem_Type> mesh_Type;
-    typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
-    typedef boost::shared_ptr<Epetra_Comm> commPtr_Type;
+    typedef std::shared_ptr<mesh_Type> meshPtr_Type;
+    typedef std::shared_ptr<Epetra_Comm> commPtr_Type;
     typedef MatrixEpetra<Real> matrix_Type;
-    typedef boost::shared_ptr<matrix_Type> matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type> matrixPtr_Type;
     typedef VectorEpetra vector_Type;
     typedef FESpace<mesh_Type, MapEpetra> feSpace_Type;
-    typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
+    typedef std::shared_ptr<feSpace_Type> feSpacePtr_Type;
 
     TestRepeatedMesh() {}
 
@@ -137,7 +137,7 @@ struct TestRepeatedMesh
 
 private:
     commPtr_Type M_comm;
-    boost::scoped_ptr<LifeChronoManager<> > M_chronoMgr;
+    std::unique_ptr<LifeChronoManager<> > M_chronoMgr;
 };
 
 template <uint Dim>
@@ -166,7 +166,7 @@ int TestRepeatedMesh<Dim>::run()
 #ifdef HAVE_LIFEV_DEBUG
     std::ofstream debugOut (
         ( "repeated_mesh." +
-          ( M_comm->NumProc() > 1 ? boost::lexical_cast<std::string> ( M_comm->MyPID() ) : "s" ) +
+          ( M_comm->NumProc() > 1 ? std::to_string<std::string> ( M_comm->MyPID() ) : "s" ) +
           ".out" ).c_str() );
 #else
     std::ofstream debugOut ( "/dev/null" );

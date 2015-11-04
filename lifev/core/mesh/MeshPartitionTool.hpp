@@ -104,11 +104,11 @@ public:
     typedef MeshType                             mesh_Type;
     typedef GraphCutterBase<mesh_Type>           graphCutter_Type;
     typedef MeshPartBuilder<mesh_Type>           meshPartBuilder_Type;
-    typedef boost::shared_ptr<mesh_Type>         meshPtr_Type;
+    typedef std::shared_ptr<mesh_Type>         meshPtr_Type;
     typedef std::vector<meshPtr_Type>            partMesh_Type;
-    typedef boost::shared_ptr<partMesh_Type>     partMeshPtr_Type;
+    typedef std::shared_ptr<partMesh_Type>     partMeshPtr_Type;
     typedef std::vector<idTablePtr_Type>         vertexPartitionTable_Type;
-    typedef boost::shared_ptr<vertexPartitionTable_Type>
+    typedef std::shared_ptr<vertexPartitionTable_Type>
     vertexPartitionTablePtr_Type;
     //@}
 
@@ -129,7 +129,7 @@ public:
      * \param parameters - Teuchos parameter list
     */
     MeshPartitionTool (const meshPtr_Type& mesh,
-                       const boost::shared_ptr<Epetra_Comm>& comm,
+                       const std::shared_ptr<Epetra_Comm>& comm,
                        const Teuchos::ParameterList parameters
                        = Teuchos::ParameterList() );
 
@@ -203,15 +203,15 @@ private:
 
     //! Private Data Members
     //@{
-    boost::shared_ptr<Epetra_Comm>             M_comm;
+    std::shared_ptr<Epetra_Comm>             M_comm;
     Int                                        M_myPID;
     Teuchos::ParameterList                     M_parameters;
     meshPtr_Type                               M_originalMesh;
     meshPtr_Type                               M_meshPart;
     partMeshPtr_Type                           M_allMeshParts;
     std::string                                M_graphLib;
-    boost::shared_ptr<graphCutter_Type>        M_graphCutter;
-    boost::shared_ptr<meshPartBuilder_Type>    M_meshPartBuilder;
+    std::shared_ptr<graphCutter_Type>        M_graphCutter;
+    std::shared_ptr<meshPartBuilder_Type>    M_meshPartBuilder;
     bool                                       M_success;
     bool                                       M_secondStage;
     Int                                        M_secondStageNumParts;
@@ -234,7 +234,7 @@ private:
 template < typename MeshType>
 MeshPartitionTool < MeshType >::MeshPartitionTool (
     const meshPtr_Type& mesh,
-    const boost::shared_ptr<Epetra_Comm>& comm,
+    const std::shared_ptr<Epetra_Comm>& comm,
     const Teuchos::ParameterList parameters) :
     M_comm (comm),
     M_myPID (M_comm->MyPID() ),
@@ -303,10 +303,10 @@ void MeshPartitionTool < MeshType >::run()
         }
         // MPI comm object for second stage is always MPI_COMM_SELF
 #ifdef EPETRA_MPI
-        boost::shared_ptr<Epetra_Comm>
+        std::shared_ptr<Epetra_Comm>
         secondStageComm (new Epetra_MpiComm (MPI_COMM_SELF) );
 #else
-        boost::shared_ptr<Epetra_Comm>
+        std::shared_ptr<Epetra_Comm>
         secondStageComm (new Epetra_SerialComm);
 #endif
 

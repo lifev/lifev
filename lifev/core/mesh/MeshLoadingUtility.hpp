@@ -73,12 +73,12 @@ namespace MeshUtility
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
  */
 template <typename RegionMeshType>
-void printMeshInfos ( boost::shared_ptr<RegionMeshType > mesh )
+void printMeshInfos ( std::shared_ptr<RegionMeshType > mesh )
 {
 #ifdef HAVE_MPI
-    boost::shared_ptr<Epetra_Comm> Comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+    std::shared_ptr<Epetra_Comm> Comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm ( new Epetra_SerialComm );
+    std::shared_ptr<Epetra_Comm> Comm ( new Epetra_SerialComm );
 #endif
     Displayer displayer ( Comm );
     MeshUtility::MeshStatistics::meshSize meshSize = MeshUtility::MeshStatistics::computeSize ( *mesh );
@@ -123,22 +123,22 @@ getMeshData ( const std::string& meshName,
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
  */
 template< typename RegionMeshType>
-void loadMesh (  boost::shared_ptr< RegionMeshType >& meshLocal,
-                 boost::shared_ptr< RegionMeshType >& meshFull,
+void loadMesh (  std::shared_ptr< RegionMeshType >& meshLocal,
+                 std::shared_ptr< RegionMeshType >& meshFull,
                  const std::string& meshName,
                  const std::string& resourcesPath,
                  const std::string& meshOrder )
 {
 #ifdef HAVE_MPI
-    boost::shared_ptr<Epetra_Comm> Comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+    std::shared_ptr<Epetra_Comm> Comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm ( new Epetra_SerialComm );
+    std::shared_ptr<Epetra_Comm> Comm ( new Epetra_SerialComm );
 #endif
     Displayer displayer ( Comm );
 
     LifeChrono meshReadChrono;
     meshReadChrono.start();
-    boost::shared_ptr<RegionMeshType > fullMesh ( new RegionMeshType );
+    std::shared_ptr<RegionMeshType > fullMesh ( new RegionMeshType );
     readMesh (*fullMesh, getMeshData (meshName, resourcesPath, meshOrder ) );
     MeshUtility::printMeshInfos ( fullMesh );
     meshReadChrono.stop();
@@ -170,14 +170,14 @@ void loadMesh (  boost::shared_ptr< RegionMeshType >& meshLocal,
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
  */
 template< typename RegionMeshType>
-void loadPartitionedMesh ( boost::shared_ptr< RegionMeshType >& meshLocal,
+void loadPartitionedMesh ( std::shared_ptr< RegionMeshType >& meshLocal,
                            const std::string& meshName,
                            const std::string& resourcesPath )
 {
 #ifdef HAVE_MPI
-    boost::shared_ptr<Epetra_MpiComm> Comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+    std::shared_ptr<Epetra_MpiComm> Comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm ( new Epetra_SerialComm );
+    std::shared_ptr<Epetra_Comm> Comm ( new Epetra_SerialComm );
 #endif
     Displayer displayer ( Comm );
 
@@ -206,8 +206,8 @@ void loadPartitionedMesh ( boost::shared_ptr< RegionMeshType >& meshLocal,
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
  */
 template< typename RegionMeshType>
-void loadMesh ( boost::shared_ptr< RegionMeshType >& meshLocal,
-                boost::shared_ptr< RegionMeshType >& meshFull ,
+void loadMesh ( std::shared_ptr< RegionMeshType >& meshLocal,
+                std::shared_ptr< RegionMeshType >& meshFull ,
                 const std::string& meshName,
                 const std::string& resourcesPath = "./",
                 bool isPartitioned = false,
@@ -236,13 +236,13 @@ void loadMesh ( boost::shared_ptr< RegionMeshType >& meshLocal,
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
  */
 template< typename RegionMeshType>
-void loadMesh ( boost::shared_ptr< RegionMeshType >& meshLocal,
+void loadMesh ( std::shared_ptr< RegionMeshType >& meshLocal,
                 const std::string& meshName,
                 const std::string& resourcesPath = "./",
                 bool isPartitioned = false,
                 const std::string& meshOrder = "P1" )
 {
-    boost::shared_ptr< RegionMeshType > tmpMeshFull;
+    std::shared_ptr< RegionMeshType > tmpMeshFull;
     loadMesh ( meshLocal, tmpMeshFull, meshName, resourcesPath, isPartitioned, meshOrder );
 }
 
@@ -259,8 +259,8 @@ void loadMesh ( boost::shared_ptr< RegionMeshType >& meshLocal,
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
  */
 template< typename RegionMeshType >
-void loadStructuredMesh ( boost::shared_ptr< RegionMeshType >& mesh,
-                          boost::shared_ptr< RegionMeshType >& meshFull,
+void loadStructuredMesh ( std::shared_ptr< RegionMeshType >& mesh,
+                          std::shared_ptr< RegionMeshType >& meshFull,
                           markerID_Type regionFlag,
                           const std::vector<UInt>& m,
                           bool verbose = false,
@@ -268,15 +268,15 @@ void loadStructuredMesh ( boost::shared_ptr< RegionMeshType >& mesh,
                           const std::vector<Real>& t = std::vector<Real> (3, 0) )
 {
 #ifdef HAVE_MPI
-    boost::shared_ptr<Epetra_Comm> Comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+    std::shared_ptr<Epetra_Comm> Comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm ( new Epetra_SerialComm );
+    std::shared_ptr<Epetra_Comm> Comm ( new Epetra_SerialComm );
 #endif
     Displayer displayer ( Comm );
 
     LifeChrono meshBuildChrono;
     meshBuildChrono.start();
-    boost::shared_ptr< RegionMeshType > fullMesh ( new RegionMeshType ( Comm ) );
+    std::shared_ptr< RegionMeshType > fullMesh ( new RegionMeshType ( Comm ) );
     if ( m.size() == 1)
     {
         //TODO structured mesh in 1D
@@ -327,14 +327,14 @@ void loadStructuredMesh ( boost::shared_ptr< RegionMeshType >& mesh,
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
  */
 template< typename RegionMeshType>
-void loadStructuredMesh ( boost::shared_ptr< RegionMeshType >& mesh,
+void loadStructuredMesh ( std::shared_ptr< RegionMeshType >& mesh,
                           markerID_Type regionFlag,
                           const std::vector<UInt> m,
                           bool verbose = false,
                           const std::vector<Real>& l = std::vector<Real> (3, 1),
                           const std::vector<Real>& t = std::vector<Real> (3, 0) )
 {
-    boost::shared_ptr< RegionMeshType > tmpMeshFull;
+    std::shared_ptr< RegionMeshType > tmpMeshFull;
     loadStructuredMesh ( mesh, tmpMeshFull, regionFlag, m, verbose, l, t );
 }
 

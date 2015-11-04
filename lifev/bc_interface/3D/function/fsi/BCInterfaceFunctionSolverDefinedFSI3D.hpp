@@ -95,21 +95,21 @@ public:
     //@{
 
     typedef BCHandler                                                              bcHandler_Type;
-    typedef boost::shared_ptr< bcHandler_Type >                                    bcHandlerPtr_Type;
+    typedef std::shared_ptr< bcHandler_Type >                                    bcHandlerPtr_Type;
 
     typedef FSIOperator                                                            physicalSolver_Type;
-    typedef boost::shared_ptr< physicalSolver_Type >                               physicalSolverPtr_Type;
+    typedef std::shared_ptr< physicalSolver_Type >                               physicalSolverPtr_Type;
 
     typedef BCInterfaceFactory< bcHandler_Type, physicalSolver_Type >              factory_Type;
     typedef BCInterfaceFunction< bcHandler_Type, physicalSolver_Type >             bcFunction_Type;
-    typedef boost::shared_ptr< bcFunction_Type >                                   bcFunctionPtr_Type;
+    typedef std::shared_ptr< bcFunction_Type >                                   bcFunctionPtr_Type;
     typedef std::vector< bcFunctionPtr_Type >                                      vectorFunction_Type;
 
     typedef BCInterfaceFunctionParserSolver< bcHandler_Type, physicalSolver_Type > functionParserSolver_Type;
-    typedef boost::shared_ptr< functionParserSolver_Type >                         functionParserSolverPtr_Type;
+    typedef std::shared_ptr< functionParserSolver_Type >                         functionParserSolverPtr_Type;
 
     typedef BCInterfaceData3D                                                      data_Type;
-    typedef boost::shared_ptr< data_Type >                                         dataPtr_Type;
+    typedef std::shared_ptr< data_Type >                                         dataPtr_Type;
 
     //@}
 
@@ -321,7 +321,7 @@ BCInterfaceFunctionSolverDefined< BCHandler, FSIOperator >::assignFunction ( BCB
 template< class MethodType >
 inline void BCInterfaceFunctionSolverDefined< BCHandler, FSIOperator >::checkFunction ( BCVectorInterface& base )
 {
-    boost::shared_ptr< MethodType > operMethod = boost::dynamic_pointer_cast< MethodType > ( M_physicalSolver );
+    std::shared_ptr< MethodType > operMethod = std::dynamic_pointer_cast< MethodType > ( M_physicalSolver );
 
     switch ( M_FSIFunction )
     {
@@ -490,7 +490,7 @@ inline void BCInterfaceFunctionSolverDefined< BCHandler, FSIOperator >::checkFun
 template< class MethodType >
 inline void BCInterfaceFunctionSolverDefined< BCHandler, FSIOperator >::checkFunction ( BCVector& base )
 {
-    boost::shared_ptr< MethodType > operMethod = boost::dynamic_pointer_cast< MethodType > ( M_physicalSolver );
+    std::shared_ptr< MethodType > operMethod = std::dynamic_pointer_cast< MethodType > ( M_physicalSolver );
 
     switch ( M_FSIFunction )
     {
@@ -518,7 +518,7 @@ inline void BCInterfaceFunctionSolverDefined< BCHandler, FSIOperator >::checkFun
             // Set the physical solver in the Robin functions for alpha and beta
             for ( UInt i ( 0 ); i < M_vectorFunctionRobin.size(); ++i )
             {
-                functionParserSolverPtr_Type castedFunctionSolver = boost::dynamic_pointer_cast< functionParserSolver_Type > ( M_vectorFunctionRobin[i] );
+                functionParserSolverPtr_Type castedFunctionSolver = std::dynamic_pointer_cast< functionParserSolver_Type > ( M_vectorFunctionRobin[i] );
 
                 if ( castedFunctionSolver != 0 )
                 {
@@ -539,7 +539,7 @@ inline void BCInterfaceFunctionSolverDefined< BCHandler, FSIOperator >::checkFun
 template< class MethodType >
 inline void BCInterfaceFunctionSolverDefined< BCHandler, FSIOperator >::checkFunction ( BCFunctionBase& /*base*/ )
 {
-    boost::shared_ptr< MethodType > operMethod = boost::dynamic_pointer_cast< MethodType > ( M_physicalSolver );
+    std::shared_ptr< MethodType > operMethod = std::dynamic_pointer_cast< MethodType > ( M_physicalSolver );
 
     switch ( M_FSIFunction )
     {

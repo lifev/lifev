@@ -68,14 +68,14 @@ struct ExporterPolicyHDF5
 {
 
     typedef VectorEpetra                             vector_Type;
-    typedef boost::shared_ptr<VectorEpetra>          vectorPtr_Type;
-    typedef boost::shared_ptr<mesh_Type>             meshPtr_Type;
+    typedef std::shared_ptr<VectorEpetra>          vectorPtr_Type;
+    typedef std::shared_ptr<mesh_Type>             meshPtr_Type;
     typedef MapEpetra                                map_Type;
-    typedef boost::shared_ptr<map_Type>              mapPtr_Type;
+    typedef std::shared_ptr<map_Type>              mapPtr_Type;
     typedef FESpace< mesh_Type, map_Type >           fespace_Type;
-    typedef boost::shared_ptr< fespace_Type >        fespacePtr_Type;
+    typedef std::shared_ptr< fespace_Type >        fespacePtr_Type;
     typedef ExporterHDF5<mesh_Type>                  exporter_Type;
-    typedef boost::shared_ptr< exporter_Type >       exporterPtr_Type;
+    typedef std::shared_ptr< exporter_Type >       exporterPtr_Type;
 
     void initExporter ( Teuchos::ParameterList& list,
                         vectorPtr_Type solution );

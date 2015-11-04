@@ -223,22 +223,22 @@ static bool regML = (PRECFactory::instance().registerProduct ( "ML", &createML )
 typedef RegionMesh<LinearTetra> mesh_Type;
 typedef MatrixEpetra<Real> matrix_Type;
 typedef VectorEpetra vector_Type;
-typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
-typedef boost::shared_ptr<matrix_Type> matrixPtr_Type;
+typedef std::shared_ptr<vector_Type> vectorPtr_Type;
+typedef std::shared_ptr<matrix_Type> matrixPtr_Type;
 
 typedef LifeV::Preconditioner             basePrec_Type;
-typedef boost::shared_ptr<basePrec_Type>  basePrecPtr_Type;
+typedef std::shared_ptr<basePrec_Type>  basePrecPtr_Type;
 typedef LifeV::PreconditionerIfpack       prec_Type;
-typedef boost::shared_ptr<prec_Type>      precPtr_Type;
+typedef std::shared_ptr<prec_Type>      precPtr_Type;
 
 int main ( int argc, char** argv )
 {
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
     // a flag to see who's the leader for output purposes
@@ -252,12 +252,12 @@ int main ( int argc, char** argv )
     // Load the mesh
     MeshData dataMesh;
     dataMesh.setup (dataFile, "mesh");
-    boost::shared_ptr < mesh_Type > fullMeshPtr (new mesh_Type);
+    std::shared_ptr < mesh_Type > fullMeshPtr (new mesh_Type);
     readMesh (*fullMeshPtr, dataMesh);
 
     // Partition the mesh
     MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
-    boost::shared_ptr < mesh_Type > localMeshPtr (new mesh_Type);
+    std::shared_ptr < mesh_Type > localMeshPtr (new mesh_Type);
     localMeshPtr = meshPart.meshPartition();
 
     // Free the global mesh
@@ -270,7 +270,8 @@ int main ( int argc, char** argv )
 
     std::string uOrder ("P1");
 
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uFESpace ( new FESpace< mesh_Type, MapEpetra > (localMeshPtr, uOrder, 1, Comm) );
+    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > uFESpace ( new FESpace< mesh_Type, MapEpetra > (meshPart, uOrder, 1, Comm) );
+
     if (verbose)
     {
         std::cout << std::endl << " ### Dof Summary ###: " <<  std::endl;
@@ -285,7 +286,7 @@ int main ( int argc, char** argv )
         std::cout << " Building EA FESpaces  " << std::endl;
     }
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > ETuFESpace ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (localMeshPtr, & (uFESpace->refFE() ), Comm) );
+    std::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > ETuFESpace ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (localMeshPtr, & (uFESpace->refFE() ), Comm) );
 
     vectorPtr_Type uSolution ( new vector_Type ( ETuFESpace->map() , Unique) );
 
@@ -327,8 +328,8 @@ int main ( int argc, char** argv )
     ExporterHDF5<mesh_Type> exporter ( dataFile, meshPart.meshPartition(), exporterFileName, Comm->MyPID() );
     exporter.setMultimesh (false);
 
-    boost::shared_ptr<vector_Type> uExported ( new vector_Type (ETuFESpace->map(), exporter.mapType() ) );
-    boost::shared_ptr<vector_Type> errorExported ( new vector_Type (ETuFESpace->map(), exporter.mapType() ) );
+    std::shared_ptr<vector_Type> uExported ( new vector_Type (ETuFESpace->map(), exporter.mapType() ) );
+    std::shared_ptr<vector_Type> errorExported ( new vector_Type (ETuFESpace->map(), exporter.mapType() ) );
 
     exporter.addVariable ( ExporterData<mesh_Type>::ScalarField, "u", uFESpace, uExported, UInt (0) );
     exporter.addVariable ( ExporterData<mesh_Type>::ScalarField, "err", uFESpace, errorExported, UInt (0) );
@@ -389,8 +390,8 @@ int main ( int argc, char** argv )
 
     ChronoItem.start();
 
-    boost::shared_ptr<LaplacianExactFunctor> laplacianFctRhs ( new LaplacianExactFunctor );
-    boost::shared_ptr<GRobinRhsFunctor> gRobinFctRhs ( new GRobinRhsFunctor );
+    std::shared_ptr<LaplacianExactFunctor> laplacianFctRhs ( new LaplacianExactFunctor );
+    std::shared_ptr<GRobinRhsFunctor> gRobinFctRhs ( new GRobinRhsFunctor );
 
     vector_Type uRhs ( ETuFESpace->map() , Repeated );
     uRhs *= 0.0;
@@ -487,8 +488,8 @@ int main ( int argc, char** argv )
     vector_Type errorH1BoundaryVector ( ETuFESpace->map(), Repeated );
     vector_Type errorH1BoundaryVectorUnique ( ETuFESpace->map() );
 
-    boost::shared_ptr<uExactFunctor> uExactFct ( new uExactFunctor );
-    boost::shared_ptr<gradExactFunctor> gradExactFct ( new gradExactFunctor );
+    std::shared_ptr<uExactFunctor> uExactFct ( new uExactFunctor );
+    std::shared_ptr<gradExactFunctor> gradExactFct ( new gradExactFunctor );
 
     {
         using namespace ExpressionAssembly;

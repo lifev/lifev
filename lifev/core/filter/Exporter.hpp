@@ -76,9 +76,9 @@ public:
 
     typedef MeshType                          mesh_Type;
     typedef VectorEpetra                      vector_Type;
-    typedef boost::shared_ptr<vector_Type>    vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type>    vectorPtr_Type;
     typedef FESpace< mesh_Type, MapEpetra >   feSpace_Type;
-    typedef boost::shared_ptr<feSpace_Type>   feSpacePtr_Type;
+    typedef std::shared_ptr<feSpace_Type>   feSpacePtr_Type;
 
     //! FieldTypeEnum of data stored.
     enum FieldTypeEnum
@@ -270,9 +270,9 @@ public:
     //! @name Public typedefs
     //@{
     typedef MeshType                                    mesh_Type;
-    typedef boost::shared_ptr<MeshType>                 meshPtr_Type;
+    typedef std::shared_ptr<MeshType>                 meshPtr_Type;
     typedef Epetra_Comm                                 comm_Type;
-    typedef boost::shared_ptr<comm_Type>                commPtr_Type;
+    typedef std::shared_ptr<comm_Type>                commPtr_Type;
     typedef ExporterData<mesh_Type>                     exporterData_Type;
     typedef typename exporterData_Type::vector_Type     vector_Type;
     typedef typename exporterData_Type::vectorPtr_Type  vectorPtr_Type;
@@ -358,10 +358,10 @@ public:
     virtual void exportPID ( meshPtr_Type& mesh, commPtr_Type& comm, const bool binaryFormat = false );
 
     //! Export the region marker ID as P0 variable
-    void exportRegionMarkerID ( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm  );
+    void exportRegionMarkerID ( std::shared_ptr<MeshType> mesh, std::shared_ptr<Epetra_Comm> comm  );
 
     //! Export entity flags
-    virtual void exportFlags ( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm, flag_Type const& flag = EntityFlags::ALL );
+    virtual void exportFlags ( std::shared_ptr<MeshType> mesh, std::shared_ptr<Epetra_Comm> comm, flag_Type const& flag = EntityFlags::ALL );
 
     //@}
 
@@ -653,7 +653,7 @@ void Exporter<MeshType>::readVariable (exporterData_Type& dvar)
 }
 
 template <typename MeshType>
-void Exporter<MeshType>::exportFlags ( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm, flag_Type const& compareFlag )
+void Exporter<MeshType>::exportFlags ( std::shared_ptr<MeshType> mesh, std::shared_ptr<Epetra_Comm> comm, flag_Type const& compareFlag )
 {
     // @todo this is only for point flags, extension to other entity flags is trivial
 
@@ -757,7 +757,7 @@ void Exporter<MeshType>::exportPID ( meshPtr_Type& mesh, commPtr_Type& comm, boo
 
 // Export the region marker ID as P0 variable
 template <typename MeshType>
-void Exporter<MeshType>::exportRegionMarkerID ( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm )
+void Exporter<MeshType>::exportRegionMarkerID ( std::shared_ptr<MeshType> mesh, std::shared_ptr<Epetra_Comm> comm )
 {
     // TODO: use FESpace M_spacemap for generality
     const ReferenceFE* refFEPtr;

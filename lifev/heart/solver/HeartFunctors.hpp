@@ -61,8 +61,8 @@ public:
     //! @name Public Types
     //@{
 
-    typedef boost::function<Real ( Real const& x, Real const& y, Real const& z, Real const&, ID const& id , Real const&) > region_Type;
-    typedef boost::function<Real ( Real const& x, Real const& y, Real const& z, Real const&, ID const& id) > region1_Type;
+    typedef std::function<Real ( Real const& x, Real const& y, Real const& z, Real const&, ID const& id , Real const&) > region_Type;
+    typedef std::function<Real ( Real const& x, Real const& y, Real const& z, Real const&, ID const& id) > region1_Type;
 
     //@}
 
@@ -143,7 +143,7 @@ public:
 
     GetPot M_dataFile;
 
-    boost::shared_ptr<Epetra_Comm>   M_comm;
+    std::shared_ptr<Epetra_Comm>   M_comm;
 
     Int  M_stimulusSource;
     Real M_stimulusPeriod1;

@@ -69,7 +69,7 @@ public:
     //@{
 
     typedef OneDFSIFunctionSolverDefined                       bcFunctionSolverDefined_Type;
-    typedef boost::shared_ptr< bcFunctionSolverDefined_Type >  bcFunctionSolverDefinedPtr_Type;
+    typedef std::shared_ptr< bcFunctionSolverDefined_Type >  bcFunctionSolverDefinedPtr_Type;
 
     typedef bcFunctionSolverDefined_Type::bcFunction_Type      bcFunction_Type;
     typedef bcFunctionSolverDefined_Type::bcFunctionPtr_Type   bcFunctionPtr_Type;

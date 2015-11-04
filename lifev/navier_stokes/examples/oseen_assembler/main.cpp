@@ -84,9 +84,9 @@ enum ConvectionType {Explicit, SemiImplicit, KIO91};
 typedef RegionMesh<LinearTetra> mesh_Type;
 typedef MatrixEpetra<Real> matrix_Type;
 typedef VectorEpetra vector_Type;
-typedef boost::shared_ptr<VectorEpetra> vectorPtr_Type;
+typedef std::shared_ptr<VectorEpetra> vectorPtr_Type;
 typedef FESpace< mesh_Type, MapEpetra > fespace_Type;
-typedef boost::shared_ptr< fespace_Type > fespacePtr_Type;
+typedef std::shared_ptr< fespace_Type > fespacePtr_Type;
 typedef LifeV::RossEthierSteinmanUnsteadyDec problem_Type;
 }
 
@@ -144,11 +144,11 @@ main ( int argc, char** argv )
     // +-----------------------------------------------+
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
     int nproc;
     MPI_Comm_size (MPI_COMM_WORLD, &nproc);
 #else
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
     const bool verbose (Comm->MyPID() == 0);
@@ -240,7 +240,7 @@ main ( int argc, char** argv )
         std::cout << std::endl << "[Loading the mesh]" << std::endl;
     }
 
-    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr ( new RegionMesh<LinearTetra> ( Comm ) );
+    std::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr ( new RegionMesh<LinearTetra> ( Comm ) );
 
     // Building the mesh from the source
     if (meshSource == RegularMesh)
@@ -282,7 +282,7 @@ main ( int argc, char** argv )
     {
         std::cout << "Partitioning the mesh ... " << std::endl;
     }
-    boost::shared_ptr<RegionMesh<LinearTetra> > meshPtr;
+    std::shared_ptr<RegionMesh<LinearTetra> > meshPtr;
     {
         MeshPartitioner< RegionMesh<LinearTetra> >   meshPart (fullMeshPtr, Comm);
         meshPtr = meshPart.meshPartition();
@@ -397,11 +397,11 @@ main ( int argc, char** argv )
     {
         std::cout << "Defining the matrices... " << std::flush;
     }
-    boost::shared_ptr<matrix_Type> systemMatrix (new matrix_Type ( solutionMap ) );
+    std::shared_ptr<matrix_Type> systemMatrix (new matrix_Type ( solutionMap ) );
     *systemMatrix *= 0.0;
-    boost::shared_ptr<matrix_Type> baseMatrix (new matrix_Type ( solutionMap ) );
+    std::shared_ptr<matrix_Type> baseMatrix (new matrix_Type ( solutionMap ) );
     *baseMatrix *= 0.0;
-    boost::shared_ptr<matrix_Type> massMatrix (new matrix_Type ( solutionMap ) );
+    std::shared_ptr<matrix_Type> massMatrix (new matrix_Type ( solutionMap ) );
     *massMatrix *= 0.0;
     if (verbose)
     {

@@ -104,7 +104,7 @@ public:
 
 private:
     struct Private;
-    boost::shared_ptr<Private> Members;
+    std::shared_ptr<Private> Members;
 };
 
 #endif /* __test_bdf_H */

@@ -94,7 +94,7 @@ public:
     typedef ETFESpace<MeshType, MapType, SpaceDim, FieldDim> fespace_Type;
 
     //! Type for the pointer on the finite element space
-    typedef boost::shared_ptr<fespace_Type> fespacePtr_Type;
+    typedef std::shared_ptr<fespace_Type> fespacePtr_Type;
 
     //! Data vector type
     typedef VectorEpetra vector_Type;
@@ -189,7 +189,7 @@ private:
 template<typename MeshType, typename MapType, UInt SpaceDim, UInt FieldDim>
 inline ExpressionInterpolateValue<MeshType, MapType, SpaceDim, FieldDim>
 value (
-    boost::shared_ptr< ETFESpace<MeshType, MapType, SpaceDim, FieldDim> > fespace,
+    std::shared_ptr< ETFESpace<MeshType, MapType, SpaceDim, FieldDim> > fespace,
     const VectorEpetra& vector
 )
 {

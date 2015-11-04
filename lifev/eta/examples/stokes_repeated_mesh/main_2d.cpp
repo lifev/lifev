@@ -85,21 +85,21 @@ Real fRhs ( const Real& /* t */, const Real& /* x */, const Real& /* y */, const
 
 
 typedef RegionMesh<LinearTriangle> mesh_Type;
-typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
+typedef std::shared_ptr<mesh_Type> meshPtr_Type;
 
-typedef boost::shared_ptr<Epetra_Comm> commPtr_Type;
+typedef std::shared_ptr<Epetra_Comm> commPtr_Type;
 
 typedef MatrixEpetraStructured<Real> matrix_Type;
-typedef boost::shared_ptr<matrix_Type> matrixPtr_Type;
+typedef std::shared_ptr<matrix_Type> matrixPtr_Type;
 typedef VectorEpetra vectorStd_Type;
 typedef VectorEpetraStructured vector_Type;
 
 typedef FESpace<mesh_Type, MapEpetra> uSpaceStd_Type;
-typedef boost::shared_ptr<uSpaceStd_Type> uSpaceStdPtr_Type;
+typedef std::shared_ptr<uSpaceStd_Type> uSpaceStdPtr_Type;
 typedef ETFESpace< mesh_Type, MapEpetra, 2, 2 > uSpace_Type;
-typedef boost::shared_ptr<uSpace_Type> uSpacePtr_Type;
+typedef std::shared_ptr<uSpace_Type> uSpacePtr_Type;
 typedef ETFESpace< mesh_Type, MapEpetra, 2, 1 > pSpace_Type;
-typedef boost::shared_ptr<pSpace_Type> pSpacePtr_Type;
+typedef std::shared_ptr<pSpace_Type> pSpacePtr_Type;
 
 int main ( int argc, char** argv )
 {
@@ -131,7 +131,7 @@ int main ( int argc, char** argv )
 #ifdef HAVE_LIFEV_DEBUG
         std::ofstream debugOut (
             ( "rm." +
-              ( comm->NumProc() > 1 ? boost::lexical_cast<std::string> ( comm->MyPID() ) : "s" ) +
+              ( comm->NumProc() > 1 ? std::to_string ( comm->MyPID() ) : "s" ) +
               ".out" ).c_str() );
 #else
         std::ofstream debugOut ( "/dev/null" );

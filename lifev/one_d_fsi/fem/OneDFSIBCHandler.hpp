@@ -68,7 +68,7 @@ public:
     //@{
 
     typedef OneDFSIBC                           bc_Type;
-    typedef boost::shared_ptr< bc_Type >        bcPtr_Type;
+    typedef std::shared_ptr< bc_Type >        bcPtr_Type;
 
     typedef bc_Type::bcFunction_Type            bcFunction_Type;
     typedef bc_Type::bcFunctionPtr_Type         bcFunctionPtr_Type;

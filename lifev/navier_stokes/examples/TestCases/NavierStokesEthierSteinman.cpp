@@ -138,7 +138,7 @@ NavierStokesEthierSteinman::setDensity ( const Real& density )
 }
 
 void
-NavierStokesEthierSteinman::mesh ( boost::shared_ptr< RegionMesh<LinearTetra> >& mesh ) const
+NavierStokesEthierSteinman::mesh ( std::shared_ptr< RegionMesh<LinearTetra> >& mesh ) const
 {
     if ( M_refinement == 0 )
     {
@@ -153,7 +153,7 @@ NavierStokesEthierSteinman::mesh ( boost::shared_ptr< RegionMesh<LinearTetra> >&
 }
 
 void
-NavierStokesEthierSteinman::boundaryConditions ( boost::shared_ptr<BCHandler> bcHandler ) const
+NavierStokesEthierSteinman::boundaryConditions ( std::shared_ptr<BCHandler> bcHandler ) const
 {
     BCFunctionBase uDirichlet ( RossEthierSteinmanUnsteadyDec::uexact );
     BCFunctionBase uNeumann  ( RossEthierSteinmanUnsteadyDec::fNeumann );

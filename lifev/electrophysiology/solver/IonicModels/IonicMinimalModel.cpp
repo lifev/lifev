@@ -332,7 +332,7 @@ void IonicMinimalModel::computePotentialRhsSVI ( const std::vector<vectorPtr_Typ
                                                  FESpace<mesh_Type, MapEpetra>&  uFESpace)
 {
     typedef ETFESpace<mesh_Type, MapEpetra, 3, 1> ETFESpace_Type;
-    typedef boost::shared_ptr<ETFESpace_Type> ETFESpacePtr_Type;
+    typedef std::shared_ptr<ETFESpace_Type> ETFESpacePtr_Type;
 
     * (rhs[0]) *= 0.0;
 
@@ -347,9 +347,9 @@ void IonicMinimalModel::computePotentialRhsSVI ( const std::vector<vectorPtr_Typ
     {
         using namespace ExpressionAssembly;
 
-        boost::shared_ptr<MMTanhFunctor> tanh (new MMTanhFunctor);
-        boost::shared_ptr<MMHFunctor> H (new MMHFunctor);
-        boost::shared_ptr<MMSV> sv (new MMSV);
+        std::shared_ptr<MMTanhFunctor> tanh (new MMTanhFunctor);
+        std::shared_ptr<MMHFunctor> H (new MMHFunctor);
+        std::shared_ptr<MMSV> sv (new MMSV);
 
         BOOST_AUTO_TPL (U, value (spaceScalar, * (v[0] ) ) );
         BOOST_AUTO_TPL (V, value (spaceScalar, * (v[1] ) ) );

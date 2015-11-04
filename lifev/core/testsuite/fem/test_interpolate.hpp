@@ -62,17 +62,17 @@ Real bilinearFunction (const Real& /*t*/, const Real& x, const Real& y, const Re
 //! Compute the errors between these FE vectors and the analytical solution, and compare them with the ones provided in the array errorArray.
 //! return true if all the errors are equal to the errors in errorArray, within a tolerance eps. return false otherwise.
 template<typename MeshType, typename MapType, typename Fct>
-bool check_interpolate ( std::vector< boost::shared_ptr < FESpace<MeshType, MapType> > >& originalFeSpaceVecPtr,
-                         std::vector< boost::shared_ptr < FESpace<MeshType, MapType> > >& finalFeSpaceVecPtr,
+bool check_interpolate ( std::vector< std::shared_ptr < FESpace<MeshType, MapType> > >& originalFeSpaceVecPtr,
+                         std::vector< std::shared_ptr < FESpace<MeshType, MapType> > >& finalFeSpaceVecPtr,
                          const MapEpetraType& outputMapType,  Fct& function,
                          const Real errorArray [], const std::string stringArray [], Real eps, Real time, UInt verbose)
 {
-    std::vector< boost::shared_ptr <VectorEpetra> > interpVecPtr (originalFeSpaceVecPtr.size() );
+    std::vector< std::shared_ptr <VectorEpetra> > interpVecPtr (originalFeSpaceVecPtr.size() );
     bool check (true);
 
     for (UInt i = 0; i < originalFeSpaceVecPtr.size(); i++)
     {
-        boost::shared_ptr <VectorEpetra> tmp (new VectorEpetra (originalFeSpaceVecPtr[i]->map(), outputMapType) );
+        std::shared_ptr <VectorEpetra> tmp (new VectorEpetra (originalFeSpaceVecPtr[i]->map(), outputMapType) );
         originalFeSpaceVecPtr[i]->interpolate ( static_cast<typename FESpace<MeshType, MapType>::function_Type> ( function ), *tmp, time);
         interpVecPtr[i] = tmp;
     }

@@ -66,15 +66,15 @@ template< class mesh_Type, class TimeIterationPolicy >
 struct InitPolicySolver : public virtual TimeIterationPolicy
 {
     typedef VectorEpetra                             vector_Type;
-    typedef boost::shared_ptr<VectorEpetra>          vectorPtr_Type;
+    typedef std::shared_ptr<VectorEpetra>          vectorPtr_Type;
     typedef MeshPartitioner< mesh_Type >             meshPartitioner_Type;
     typedef MapEpetra                                map_Type;
-    typedef boost::shared_ptr<map_Type>              mapPtr_Type;
+    typedef std::shared_ptr<map_Type>              mapPtr_Type;
     typedef TimeAdvanceBDF<vector_Type>              bdf_Type;
-    typedef boost::shared_ptr< bdf_Type >            bdfPtr_Type;
+    typedef std::shared_ptr< bdf_Type >            bdfPtr_Type;
     typedef BCHandler                                bcContainer_Type;
-    typedef boost::shared_ptr<bcContainer_Type>      bcContainerPtr_Type;
-    typedef boost::shared_ptr< NavierStokesProblem<mesh_Type> > NSProblemPtr_Type;
+    typedef std::shared_ptr<bcContainer_Type>      bcContainerPtr_Type;
+    typedef std::shared_ptr< NavierStokesProblem<mesh_Type> > NSProblemPtr_Type;
 
     InitPolicySolver() {}
     virtual ~InitPolicySolver() {}

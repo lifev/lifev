@@ -86,7 +86,7 @@ extern const RefHybridFE fePipo;
   @li In defQuadRuleFE.cc: you define a list of CurrentFEManifold with a command like:
   \code
   #define NB_BDFE_PIPO
-static const CurrentFEManifold BdFE_PIPO_1( feTriaP0, geoLinearTria, quadRuleTria4pt, refcoor_PIPO_1, 0 );
+static const CurrentFEManifold BdFE_PIPO_1( feTriaP0, geoLinearTria, quadRuleTria4pt, refcoor_PIPOstd::placeholders::_1, 0 );
 ...
   \endcode
 
@@ -95,7 +95,7 @@ static const CurrentFEManifold BdFE_PIPO_1( feTriaP0, geoLinearTria, quadRuleTri
   \code
 static const CurrentFEManifold HybPIPOList[ NB_BDFE_PIPO ] =
 {
-     BdFE_PIPO_1, BdFE_PIPO_2,
+     BdFE_PIPOstd::placeholders::_1, BdFE_PIPOstd::placeholders::_2,
      ...
 };
   \endcode

@@ -76,7 +76,7 @@ public:
     //@{
     void postProcess (const Real& /*time*/) {}
     void exportPID ( meshPtr_Type /*meshPart*/, commPtr_Type /*comm*/, const bool /*binaryFormat*/ = false ) {}
-    void exportRegionMarkerID ( boost::shared_ptr<MeshType> /*mesh*/, boost::shared_ptr<Epetra_Comm> /*comm*/  ) {}
+    void exportRegionMarkerID ( std::shared_ptr<MeshType> /*mesh*/, std::shared_ptr<Epetra_Comm> /*comm*/  ) {}
     UInt importFromTime ( const Real& /*time*/ )
     {
         assert (false);

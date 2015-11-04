@@ -98,7 +98,7 @@ public:
     //@{
 
     typedef FSIOperator                                                FSIOper_Type;
-    typedef boost::shared_ptr<FSIOper_Type>                            FSIOperPtr_Type;
+    typedef std::shared_ptr<FSIOper_Type>                            FSIOperPtr_Type;
 
     typedef FSIOperator::mesh_Type                                     mesh_Type;
 
@@ -253,13 +253,13 @@ private:
 
     dataPtr_Type                                M_data;
 
-    boost::shared_ptr<MapEpetra>                M_fluidInterfaceMap;
-    boost::shared_ptr<MapEpetra>                M_solidInterfaceMap;
+    std::shared_ptr<MapEpetra>                M_fluidInterfaceMap;
+    std::shared_ptr<MapEpetra>                M_solidInterfaceMap;
 
-    boost::shared_ptr<Epetra_MpiComm>            M_epetraComm;
-    boost::shared_ptr<Epetra_MpiComm>            M_epetraWorldComm;
-    boost::shared_ptr<MPI_Comm>                    M_localComm;
-    boost::shared_ptr<MPI_Comm>                    M_interComm;
+    std::shared_ptr<Epetra_MpiComm>            M_epetraComm;
+    std::shared_ptr<Epetra_MpiComm>            M_epetraWorldComm;
+    std::shared_ptr<MPI_Comm>                    M_localComm;
+    std::shared_ptr<MPI_Comm>                    M_interComm;
 
     std::ofstream                                M_out_iter;
     std::ofstream                                M_out_res;

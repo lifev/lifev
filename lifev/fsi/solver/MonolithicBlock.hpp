@@ -76,18 +76,18 @@ public:
     //! @name Public Types
     //@{
     typedef VectorEpetra                                               vector_Type;
-    typedef boost::shared_ptr< vector_Type >                           vectorPtr_Type;
+    typedef std::shared_ptr< vector_Type >                           vectorPtr_Type;
     typedef MatrixEpetra< Real >                                       matrix_Type;
-    typedef boost::shared_ptr< matrix_Type >                           matrixPtr_Type;
-    typedef boost::shared_ptr< Epetra_Operator >                       epetraOperatorPtr_Type;
-    typedef boost::shared_ptr< Preconditioner >                        epetra_preconditioner_ptrtype;
+    typedef std::shared_ptr< matrix_Type >                           matrixPtr_Type;
+    typedef std::shared_ptr< Epetra_Operator >                       epetraOperatorPtr_Type;
+    typedef std::shared_ptr< Preconditioner >                        epetra_preconditioner_ptrtype;
     typedef matrix_Type::matrix_type/*matrix_Type*/                    epetraMatrix_Type;
     typedef SolverAztecOO                                              solver_Type;
-    typedef boost::shared_ptr< SolverAztecOO >                         solverPtr_Type;
+    typedef std::shared_ptr< SolverAztecOO >                         solverPtr_Type;
     typedef FESpace<RegionMesh<LinearTetra>, MapEpetra>                fespace_Type;
-    typedef boost::shared_ptr< fespace_Type >                          fespacePtr_Type;
-    typedef boost::shared_ptr< MapEpetra >                             mapPtr_Type;
-    typedef boost::shared_ptr< BCHandler >                             bchandlerPtr_Type;
+    typedef std::shared_ptr< fespace_Type >                          fespacePtr_Type;
+    typedef std::shared_ptr< MapEpetra >                             mapPtr_Type;
+    typedef std::shared_ptr< BCHandler >                             bchandlerPtr_Type;
     //@}
 
 
@@ -322,7 +322,7 @@ public:
     //!sets the communicator
     /*!
      */
-    virtual void setComm (boost::shared_ptr<Epetra_Comm> comm )
+    virtual void setComm (std::shared_ptr<Epetra_Comm> comm )
     {
         M_comm = comm;
     }
@@ -486,16 +486,16 @@ protected:
      */
     virtual void blockAssembling (const UInt /*k*/) {}
 
-    //!swaps two boost::shared_ptr. The tamplate argument of the shared_ptr is templated
+    //!swaps two std::shared_ptr. The tamplate argument of the shared_ptr is templated
     /*!
       \param operFrom shared_ptr to be swapped
       \param operTo shared_ptr to be swapped
      */
     template <typename Operator>
     void
-    swap (boost::shared_ptr<Operator>& operFrom, boost::shared_ptr<Operator>& OperTo);
+    swap (std::shared_ptr<Operator>& operFrom, std::shared_ptr<Operator>& OperTo);
 
-    //!swaps two boost::shared_ptr. The tamplate argument of the shared_ptr is templated
+    //!swaps two std::shared_ptr. The tamplate argument of the shared_ptr is templated
     /*!
       \param operFrom shared_ptr to be swapped
       \param operTo shared_ptr to be swapped
@@ -513,10 +513,10 @@ protected:
     std::vector<fespacePtr_Type>                                 M_FESpace;
     std::vector<UInt>                                            M_offset;
     vectorPtr_Type                                               M_numerationInterface;
-    boost::shared_ptr<Epetra_Comm>                               M_comm;
+    std::shared_ptr<Epetra_Comm>                               M_comm;
     //Int                                                          M_superCouplingFlag;
     //@}
-    //boost::shared_ptr<OperatorPtr>                M_blockPrec;
+    //std::shared_ptr<OperatorPtr>                M_blockPrec;
 private:
 
     //! @name Private Methods
@@ -536,9 +536,9 @@ typedef FactorySingleton<Factory<MonolithicBlock,  std::string> >     BlockPrecF
 
 template <typename Operator>
 void
-MonolithicBlock::swap (boost::shared_ptr<Operator>& operFrom, boost::shared_ptr<Operator>& operTo)
+MonolithicBlock::swap (std::shared_ptr<Operator>& operFrom, std::shared_ptr<Operator>& operTo)
 {
-    boost::shared_ptr<Operator> tmp = operFrom;
+    std::shared_ptr<Operator> tmp = operFrom;
     operFrom = operTo;
     operTo = tmp;
 }

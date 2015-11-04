@@ -220,9 +220,11 @@ BCHandler::modifyBC ( std::string const& name, BCFunctionUDepBase const& bcUDepF
 void
 BCHandler::modifyBC ( bcFlag_Type const& aFlag, BCFunctionBase const& bcFunction )
 {
+    std::cout << "XXX21" << std::endl;
     BCBase* bcBasePtr = findBC ( aFlag );
 
     bcBasePtr->setBCFunction ( bcFunction );
+    std::cout << "XXX22" << std::endl;
 }
 
 void
@@ -440,11 +442,13 @@ BCHandler::hasOnlyEssential() const
 BCBase*
 BCHandler::findBC ( bcName_Type const& name )
 {
+	std::string Pippo = "Pippo";
     BCBase* bcBasePtr = 0;
     std::for_each ( M_bcList.begin(),
                     M_bcList.end(),
-                    boost::lambda::if_then ( boost::lambda::bind ( &BCBase::name, boost::lambda::_1 ) == name,
-                                             boost::lambda::var ( bcBasePtr ) = &boost::lambda::_1 ) );
+					[&name, &bcBasePtr] (LifeV::BCBase i) { if ((std::bind ( &BCBase::name, i ))() == name)
+						bcBasePtr = &i; }
+    				);
 
     //! handle invalid name case: ie we didnot find the name in the M_bcList
     if ( !bcBasePtr )
@@ -454,8 +458,9 @@ BCHandler::findBC ( bcName_Type const& name )
              << "The list of available BCs is:\n";
         std::for_each ( M_bcList.begin(),
                         M_bcList.end(),
-                        std::cout << boost::lambda::bind ( &BCBase::name, boost::lambda::_1 )
-                        << boost::lambda::constant ( "\n" ) );
+						[] (BCBase i) { std::cout << (std::bind (
+								&BCBase::name, i ))() << '\n'; }
+    					);
         throw std::invalid_argument ( __ex.str() );
     }
     return bcBasePtr;
@@ -465,11 +470,13 @@ BCBase*
 BCHandler::findBC ( bcFlag_Type const& aFlag)
 {
     BCBase* bcBasePtr = 0;
+    std::cout << "XXX23" << std::endl;
     std::for_each ( M_bcList.begin(),
                     M_bcList.end(),
-                    boost::lambda::if_then ( boost::lambda::bind ( &BCBase::flag, boost::lambda::_1 ) == aFlag,
-                                             boost::lambda::var ( bcBasePtr ) = &boost::lambda::_1 ) );
-
+					[&aFlag, &bcBasePtr] (LifeV::BCBase i) { if ((std::bind ( &BCBase::flag, i ))() == aFlag)
+											bcBasePtr = &i; }
+    				);
+    std::cout << "XXX24" << std::endl;
     return bcBasePtr;
 }
 

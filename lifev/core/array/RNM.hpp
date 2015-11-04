@@ -94,7 +94,7 @@ inline void Check_Kn ( const char* str, const char* file, int line )
 //   est le sous tableau  3,3  n'est pas numeroter consecutivement
 //
 //    Donc la fonction  IsVector1() nous dit si un tableau
-//    ý un 2 ou 3 indices est ou non consecutif en memoire
+//    ï¿½ un 2 ou 3 indices est ou non consecutif en memoire
 //
 //  ----------------------------------
 //   version du 21 novembre 2000 FH
@@ -928,7 +928,7 @@ public:
 
     ~KN()
     {
-        // should use boost::shared_ptr
+        // should use std::shared_ptr
         delete [] this->v;
     }
 

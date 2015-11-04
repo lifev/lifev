@@ -44,7 +44,7 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-HeartMonodomainData::HeartMonodomainData (   boost::shared_ptr<HeartFunctors> heart ) :
+HeartMonodomainData::HeartMonodomainData (   std::shared_ptr<HeartFunctors> heart ) :
     MeshData                        ( heart-> M_dataFile, "electric/space_discretization" ),
     TimeData                        ( heart-> M_dataFile, "electric/time_discretization" ),
     M_reducedConductivityBox        ( heart-> reducedConductivityBox() ),

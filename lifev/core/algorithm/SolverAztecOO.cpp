@@ -62,7 +62,7 @@ SolverAztecOO::SolverAztecOO() :
     }
 }
 
-SolverAztecOO::SolverAztecOO ( const boost::shared_ptr<Epetra_Comm>& comm ) :
+SolverAztecOO::SolverAztecOO ( const std::shared_ptr<Epetra_Comm>& comm ) :
     M_preconditioner       (),
     M_solver               (),
     M_TrilinosParameterList(),
@@ -299,7 +299,7 @@ SolverAztecOO::showMe ( std::ostream& output ) const
 // Set Methods
 // ===================================================
 void
-SolverAztecOO::setCommunicator ( const boost::shared_ptr<Epetra_Comm>& comm )
+SolverAztecOO::setCommunicator ( const std::shared_ptr<Epetra_Comm>& comm )
 {
     M_displayer->setCommunicator ( comm );
 }
@@ -404,7 +404,7 @@ SolverAztecOO::setReusePreconditioner ( const bool reusePreconditioner )
     M_reusePreconditioner = reusePreconditioner;
 }
 
-boost::shared_ptr<Displayer>
+std::shared_ptr<Displayer>
 SolverAztecOO::displayer()
 {
     return M_displayer;

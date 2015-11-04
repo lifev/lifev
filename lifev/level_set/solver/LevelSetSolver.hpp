@@ -116,7 +116,7 @@ namespace LifeV
   The best usage consists in, first of all, build a LevelSetData stucture
 
   \code
-  boost::shared_ptr<DataLevelSet> data_level_set(new DataLevelSet);
+  std::shared_ptr<DataLevelSet> data_level_set(new DataLevelSet);
   data_level_set->setup(...);
   \endcode
 
@@ -172,18 +172,18 @@ public:
     typedef MapEpetra map_Type;
 
     typedef FESpace<mesh_type, map_Type> fespace_type;
-    typedef boost::shared_ptr<fespace_type>              fespace_ptrType;
+    typedef std::shared_ptr<fespace_type>              fespace_ptrType;
 
     typedef typename solver_type::vector_type vector_type;
 
     typedef typename solver_type::matrix_type matrix_type;
-    typedef boost::shared_ptr<matrix_type> matrix_ptrType;
+    typedef std::shared_ptr<matrix_type> matrix_ptrType;
 
     typedef DataLevelSet data_type;
-    typedef boost::shared_ptr<data_type> data_ptrType;
+    typedef std::shared_ptr<data_type> data_ptrType;
 
     typedef TimeAdvanceBDF<vector_type> bdf_type;
-    typedef boost::shared_ptr<bdf_type> bdf_ptrType;
+    typedef std::shared_ptr<bdf_type> bdf_ptrType;
 
     //@}
 

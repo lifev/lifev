@@ -437,7 +437,7 @@ MultiscaleModelFSI3D::imposeBoundaryFlowRate ( const multiscaleID_Type& boundary
 
             M_boundaryFlowRateFunctions.push_back ( boundaryFlowRateFunction );
 
-            base.setFunction ( boost::bind ( &FSI3DBoundaryFlowRateFunction::function, M_boundaryFlowRateFunctions.back(), _1, _2, _3, _4, _5 ) );
+            base.setFunction ( std::bind ( &FSI3DBoundaryFlowRateFunction::function, M_boundaryFlowRateFunctions.back(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 ) );
             M_fluidBC->handler()->addBC ( "CouplingFlowRate_Model_" + number2string ( M_ID ) + "_BoundaryID_" + number2string ( boundaryID ), boundaryFlag ( boundaryID ), EssentialVertices, Full, base, 3 );
 
             break;
@@ -454,7 +454,7 @@ MultiscaleModelFSI3D::imposeBoundaryFlowRate ( const multiscaleID_Type& boundary
 
             M_boundaryFlowRateFunctions.push_back ( boundaryFlowRateFunction );
 
-            base.setFunction ( boost::bind ( &FSI3DBoundaryFlowRateFunction::function, M_boundaryFlowRateFunctions.back(), _1, _2, _3, _4, _5 ) );
+            base.setFunction ( std::bind ( &FSI3DBoundaryFlowRateFunction::function, M_boundaryFlowRateFunctions.back(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 ) );
             M_fluidBC->handler()->addBC ( "CouplingFlowRate_Model_" + number2string ( M_ID ) + "_BoundaryID_" + number2string ( boundaryID ), boundaryFlag ( boundaryID ), Flux, Full, base, 3 );
 
             break;
@@ -486,7 +486,7 @@ MultiscaleModelFSI3D::imposeBoundaryMeanNormalStress ( const multiscaleID_Type& 
 
     M_boundaryStressFunctions.push_back ( boundaryStressFunction );
 
-    base.setFunction ( boost::bind ( &FSI3DBoundaryStressFunction::function, M_boundaryStressFunctions.back(), _1, _2, _3, _4, _5 ) );
+    base.setFunction ( std::bind ( &FSI3DBoundaryStressFunction::function, M_boundaryStressFunctions.back(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 ) );
 #endif
     M_fluidBC->handler()->addBC ( "BoundaryStress_Model_" + number2string ( M_ID ) + "_BoundaryID_" + number2string ( boundaryID ), boundaryFlag ( boundaryID ), Natural, Normal, base );
 }
@@ -503,7 +503,7 @@ MultiscaleModelFSI3D::imposeBoundaryArea ( const multiscaleID_Type& boundaryID, 
     M_boundaryAreaFunctions.push_back ( boundaryAreaFunction );
 
     BCFunctionBase base;
-    base.setFunction ( boost::bind ( &FSI3DBoundaryAreaFunction::function, M_boundaryAreaFunctions.back(), _1, _2, _3, _4, _5 ) );
+    base.setFunction ( std::bind ( &FSI3DBoundaryAreaFunction::function, M_boundaryAreaFunctions.back(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 ) );
     M_solidBC->handler()->addBC ( "BoundaryArea_Model_" + number2string ( M_ID ) + "_BoundaryID_" + number2string ( boundaryID ), M_boundaryFlagsArea[boundaryID], EssentialEdges, Full, base, 3 );
 #endif
 }
@@ -965,7 +965,7 @@ MultiscaleModelFSI3D::setupLinearModel()
 
     // Set all the BCFunctions to zero
     BCFunctionBase bcBaseDeltaZero;
-    bcBaseDeltaZero.setFunction ( boost::bind ( &MultiscaleModelFSI3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
+    bcBaseDeltaZero.setFunction ( std::bind ( &MultiscaleModelFSI3D::bcFunctionDeltaZero, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 ) );
 
     for ( bc_Type::bcBaseIterator_Type i = M_linearFluidBC->begin() ; i != M_linearFluidBC->end() ; ++i )
     {
@@ -1041,13 +1041,13 @@ MultiscaleModelFSI3D::imposePerturbation()
                 for ( boundaryAreaFunctionsContainerIterator_Type j = M_boundaryAreaFunctions.begin(); j < M_boundaryAreaFunctions.end(); ++j )
                     if ( ( *j )->fluidFlag() == boundaryFlag ( boundaryID ) )
                     {
-                        bcBaseDeltaOne.setFunction ( boost::bind ( &FSI3DBoundaryAreaFunction::functionLinear, *j, _1, _2, _3, _4, _5 ) );
+                        bcBaseDeltaOne.setFunction ( std::bind ( &FSI3DBoundaryAreaFunction::functionLinear, *j, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 ) );
                         M_linearSolidBC->findBCWithFlag ( M_boundaryFlagsArea[boundaryID] ).setBCFunction ( bcBaseDeltaOne );
                     }
             }
             else
             {
-                bcBaseDeltaOne.setFunction ( boost::bind ( &MultiscaleModelFSI3D::bcFunctionDeltaOne, this, _1, _2, _3, _4, _5 ) );
+                bcBaseDeltaOne.setFunction ( std::bind ( &MultiscaleModelFSI3D::bcFunctionDeltaOne, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 ) );
                 M_linearFluidBC->findBCWithFlag ( boundaryFlag ( boundaryID ) ).setBCFunction ( bcBaseDeltaOne );
             }
 
@@ -1067,7 +1067,7 @@ MultiscaleModelFSI3D::resetPerturbation()
         if ( ( *i )->isPerturbed() )
         {
             BCFunctionBase bcBaseDeltaZero;
-            bcBaseDeltaZero.setFunction ( boost::bind ( &MultiscaleModelFSI3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
+            bcBaseDeltaZero.setFunction ( std::bind ( &MultiscaleModelFSI3D::bcFunctionDeltaZero, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 ) );
 
             multiscaleID_Type boundaryID ( ( *i )->boundaryID ( ( *i )->modelGlobalToLocalID ( M_ID ) ) );
             if ( M_boundaryFlagsAreaPerturbed[boundaryID] == true )

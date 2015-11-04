@@ -142,14 +142,14 @@ public:
     //! @name Public Types
     //@{
     typedef MeshType mesh_Type;
-    typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
+    typedef std::shared_ptr<mesh_Type> meshPtr_Type;
     typedef std::vector<meshPtr_Type> meshParts_Type;
-    typedef boost::shared_ptr<meshParts_Type> meshPartsPtr_Type;
+    typedef std::shared_ptr<meshParts_Type> meshPartsPtr_Type;
     // TODO: enable the following two typedefs if I decide to also
     // write the graph to the HDF5 container
     // typedef std::vector<std::vector<Int> > table_Type;
-    // typedef boost::shared_ptr<table_Type> tablePtr_Type;
-    typedef boost::shared_ptr<Epetra_MpiComm> commPtr_Type;
+    // typedef std::shared_ptr<table_Type> tablePtr_Type;
+    typedef std::shared_ptr<Epetra_MpiComm> commPtr_Type;
     //@}
 
     //! \name Constructors & Destructors

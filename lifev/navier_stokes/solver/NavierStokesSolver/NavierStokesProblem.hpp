@@ -116,13 +116,13 @@ public:
     //@{
 
     //! Getter for the problem mesh
-    virtual void mesh ( boost::shared_ptr< mesh_Type >& mesh ) const = 0;
+    virtual void mesh ( std::shared_ptr< mesh_Type >& mesh ) const = 0;
 
     //! Getter for the boundary conditions in the provided BCHandler
     /*!
         @param bcHandler shared pointer on a BCHandler object
      */
-    virtual void boundaryConditions ( boost::shared_ptr<BCHandler> bcHandler ) const = 0;
+    virtual void boundaryConditions ( std::shared_ptr<BCHandler> bcHandler ) const = 0;
 
     //! Returns the name of the problem
     virtual std::string name() const = 0;

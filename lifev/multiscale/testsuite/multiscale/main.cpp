@@ -86,7 +86,7 @@ Int
 main ( Int argc, char** argv )
 {
     //Setup main communicator
-    boost::shared_ptr< Epetra_Comm > comm;
+    std::shared_ptr< Epetra_Comm > comm;
 
     //Setup MPI variables
     Int numberOfProcesses (1);

@@ -45,7 +45,7 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-PreconditionerML::PreconditionerML ( boost::shared_ptr<Epetra_Comm> comm ) :
+PreconditionerML::PreconditionerML ( std::shared_ptr<Epetra_Comm> comm ) :
     super(),
     M_comm ( comm ),
     M_operator(),
@@ -558,9 +558,9 @@ PreconditionerML::setDataFromGetPot ( const GetPot&      dataFile,
 }
 
 void
-PreconditionerML::setVerticesCoordinates (boost::shared_ptr<std::vector<Real> > xCoord,
-                                          boost::shared_ptr<std::vector<Real> > yCoord,
-                                          boost::shared_ptr<std::vector<Real> > zCoord)
+PreconditionerML::setVerticesCoordinates (std::shared_ptr<std::vector<Real> > xCoord,
+                                          std::shared_ptr<std::vector<Real> > yCoord,
+                                          std::shared_ptr<std::vector<Real> > zCoord)
 {
     M_xCoord = xCoord;
     M_yCoord = yCoord;

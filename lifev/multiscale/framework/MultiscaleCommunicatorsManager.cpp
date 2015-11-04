@@ -74,7 +74,7 @@ MultiscaleCommunicatorsManager::splitCommunicator()
     // Preliminaries
     Int myPID = M_comm->MyPID();
     Int numberOfProcesses = M_comm->NumProc();
-    MPI_Comm comm = ( boost::dynamic_pointer_cast< Epetra_MpiComm > ( M_comm ) )->Comm();
+    MPI_Comm comm = ( std::dynamic_pointer_cast< Epetra_MpiComm > ( M_comm ) )->Comm();
 
     // Group initialization
     MPI_Group commGroup;

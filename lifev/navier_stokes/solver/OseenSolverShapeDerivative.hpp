@@ -104,10 +104,10 @@ public:
         @param communicator MPI communicator
         @param lagrangeMultiplier Lagrange multiplier
      */
-    OseenSolverShapeDerivative ( boost::shared_ptr<data_Type>    dataType,
+    OseenSolverShapeDerivative ( std::shared_ptr<data_Type>    dataType,
                                  FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
                                  FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
-                                 boost::shared_ptr<Epetra_Comm>& communicator,
+                                 std::shared_ptr<Epetra_Comm>& communicator,
                                  const Int                       lagrangeMultiplier = 0);
 
     //! Constructor
@@ -119,10 +119,10 @@ public:
         @param monolithicMap MapEpetra class
         @param offset
      */
-    OseenSolverShapeDerivative ( boost::shared_ptr<data_Type>    dataType,
+    OseenSolverShapeDerivative ( std::shared_ptr<data_Type>    dataType,
                                  FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
                                  FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
-                                 boost::shared_ptr<Epetra_Comm>& communicator,
+                                 std::shared_ptr<Epetra_Comm>& communicator,
                                  const MapEpetra                 monolithicMap,
                                  const UInt                      offset = 0 );
 
@@ -136,11 +136,11 @@ public:
         @param monolithicMap MapEpetra class
         @param offset
      */
-    OseenSolverShapeDerivative ( boost::shared_ptr<data_Type>    dataType,
+    OseenSolverShapeDerivative ( std::shared_ptr<data_Type>    dataType,
                                  FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
                                  FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
                                  FESpace<mesh_Type, MapEpetra>&  mmFESpace,
-                                 boost::shared_ptr<Epetra_Comm>& communicator,
+                                 std::shared_ptr<Epetra_Comm>& communicator,
                                  const MapEpetra                 monolithicMap,
                                  const UInt                      offset = 0 );
 
@@ -377,9 +377,9 @@ private:
 
     VectorElemental                   M_elementVectorVelocity; // Elementary right hand side for the linearized velocity
     VectorElemental                   M_elementVectorPressure; // Elementary right hand side for the linearized pressure
-    //    boost::shared_ptr<MatrixElemental>                   M_elementMatrixVelocity;
-    //    boost::shared_ptr<MatrixElemental>                   M_elementMatrixConvective;
-    //    boost::shared_ptr<MatrixElemental>                   M_elementMatrixPressure;    // Elementary displacement for right hand side
+    //    std::shared_ptr<MatrixElemental>                   M_elementMatrixVelocity;
+    //    std::shared_ptr<MatrixElemental>                   M_elementMatrixConvective;
+    //    std::shared_ptr<MatrixElemental>                   M_elementMatrixPressure;    // Elementary displacement for right hand side
     VectorElemental                   M_elementMeshVelocity;    // Elementary mesh velocity
     VectorElemental                   M_elementVelocity;   // Elementary velocity
     VectorElemental                   M_elementPressure;   // Elementary pressure
@@ -399,10 +399,10 @@ private:
 
 template<typename MeshType, typename SolverType>
 OseenSolverShapeDerivative<MeshType, SolverType>::
-OseenSolverShapeDerivative ( boost::shared_ptr<data_Type>    dataType,
+OseenSolverShapeDerivative ( std::shared_ptr<data_Type>    dataType,
                              FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
                              FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
-                             boost::shared_ptr<Epetra_Comm>& communicator,
+                             std::shared_ptr<Epetra_Comm>& communicator,
                              const Int                       lagrangeMultiplier) :
     oseenSolver_Type ( dataType,
                        velocityFESpace,
@@ -431,10 +431,10 @@ OseenSolverShapeDerivative ( boost::shared_ptr<data_Type>    dataType,
 
 template<typename MeshType, typename SolverType>
 OseenSolverShapeDerivative<MeshType, SolverType>::
-OseenSolverShapeDerivative ( boost::shared_ptr<data_Type>    dataType,
+OseenSolverShapeDerivative ( std::shared_ptr<data_Type>    dataType,
                              FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
                              FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
-                             boost::shared_ptr<Epetra_Comm>& communicator,
+                             std::shared_ptr<Epetra_Comm>& communicator,
                              const MapEpetra                 monolithicMap,
                              const UInt                      offset ) :
     oseenSolver_Type ( dataType,
@@ -465,11 +465,11 @@ OseenSolverShapeDerivative ( boost::shared_ptr<data_Type>    dataType,
 
 template<typename MeshType, typename SolverType>
 OseenSolverShapeDerivative<MeshType, SolverType>::
-OseenSolverShapeDerivative ( boost::shared_ptr<data_Type>    dataType,
+OseenSolverShapeDerivative ( std::shared_ptr<data_Type>    dataType,
                              FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
                              FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
                              FESpace<mesh_Type, MapEpetra>&  mmFESpace,
-                             boost::shared_ptr<Epetra_Comm>& communicator,
+                             std::shared_ptr<Epetra_Comm>& communicator,
                              const MapEpetra                 monolithicMap,
                              const UInt                      offset) :
     oseenSolver_Type  (dataType,
@@ -678,7 +678,7 @@ void OseenSolverShapeDerivative<MeshType, SolverType>::solveLinearSystem ( bcHan
     matrixFull->globalAssemble();
     this->M_linearSolver->setMatrix ( *matrixFull );
     this->M_linearSolver->setReusePreconditioner ( M_reuseLinearPreconditioner );
-    boost::shared_ptr<MatrixEpetra<Real> > staticCast = boost::static_pointer_cast<MatrixEpetra<Real> > (matrixFull);
+    std::shared_ptr<MatrixEpetra<Real> > staticCast = std::static_pointer_cast<MatrixEpetra<Real> > (matrixFull);
     this->M_linearSolver->solveSystem ( rightHandSideFull, M_linearSolution, staticCast );
 
     *this->M_residual  = M_linearRightHandSideNoBC;
@@ -947,19 +947,19 @@ updateShapeDerivatives ( matrix_Type&                   matrix,
             mmFESpace.fe().updateFirstDerivQuadPt ( mmFESpace.mesh()->volumeList ( i ) );
 
             // initialization of elementary vectors
-            boost::shared_ptr<MatrixElemental> elementMatrixPressure ( new MatrixElemental ( this->M_pressureFESpace.fe().nbFEDof(),
+            std::shared_ptr<MatrixElemental> elementMatrixPressure ( new MatrixElemental ( this->M_pressureFESpace.fe().nbFEDof(),
                                                                        1,
                                                                        0,
                                                                        mmFESpace.fe().nbFEDof(),
                                                                        0,
                                                                        nDimensions ) );
-            boost::shared_ptr<MatrixElemental> elementMatrixVelocity ( new MatrixElemental ( this->M_velocityFESpace.fe().nbFEDof(),
+            std::shared_ptr<MatrixElemental> elementMatrixVelocity ( new MatrixElemental ( this->M_velocityFESpace.fe().nbFEDof(),
                                                                        nDimensions,
                                                                        0,
                                                                        this->M_velocityFESpace.fe().nbFEDof(),
                                                                        0,
                                                                        nDimensions ) );
-            boost::shared_ptr<MatrixElemental> elementMatrixConvective;
+            std::shared_ptr<MatrixElemental> elementMatrixConvective;
 
             if ( convectiveTermDerivative )
             {

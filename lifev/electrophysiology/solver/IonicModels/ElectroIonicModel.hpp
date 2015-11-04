@@ -102,21 +102,21 @@ public:
 
     typedef VectorEpetra                            vector_Type;
 
-    typedef boost::shared_ptr<VectorEpetra>         vectorPtr_Type;
+    typedef std::shared_ptr<VectorEpetra>         vectorPtr_Type;
 
-    typedef boost::shared_ptr<VectorElemental>      elvecPtr_Type;
+    typedef std::shared_ptr<VectorElemental>      elvecPtr_Type;
 
     typedef RegionMesh<LinearTetra>                 mesh_Type;
 
     typedef MatrixEpetra<Real>                      matrix_Type;
 
-    typedef boost::shared_ptr<matrix_Type>          matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type>          matrixPtr_Type;
 
     typedef FESpace<mesh_Type, MapEpetra>           feSpace_Type;
 
-    typedef boost::shared_ptr<feSpace_Type>         feSpacePtr_Type;
+    typedef std::shared_ptr<feSpace_Type>         feSpacePtr_Type;
 
-    typedef boost::function < Real (const Real& t,
+    typedef std::function < Real (const Real& t,
                                     const Real& x,
                                     const Real& y,
                                     const Real& z,
@@ -300,7 +300,7 @@ public:
     {
 
         // boost::ref() is needed here because otherwise a copy of the base object is reinstantiated
-        function_Type f = boost::bind (&ElectroStimulus::appliedCurrent, boost::ref (stimulus), _1, _2, _3, _4, _5 );
+        function_Type f = std::bind (&ElectroStimulus::appliedCurrent, boost::ref (stimulus), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
 
         feSpacePtr -> interpolate (
             static_cast<FESpace<RegionMesh<LinearTetra>, MapEpetra>::function_Type> (f),

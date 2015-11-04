@@ -154,40 +154,40 @@ public:
     //@{
 
     typedef OneDFSIPhysics                          physics_Type;
-    typedef boost::shared_ptr< physics_Type >       physicsPtr_Type;
+    typedef std::shared_ptr< physics_Type >       physicsPtr_Type;
 
     typedef OneDFSIFlux                             flux_Type;
-    typedef boost::shared_ptr< flux_Type >          fluxPtr_Type;
+    typedef std::shared_ptr< flux_Type >          fluxPtr_Type;
 
     typedef OneDFSISource                           source_Type;
-    typedef boost::shared_ptr< source_Type >        sourcePtr_Type;
+    typedef std::shared_ptr< source_Type >        sourcePtr_Type;
 
     typedef OneDFSIData                             data_Type;
     typedef data_Type::mesh_Type                    mesh_Type;
 
     typedef data_Type::container2D_Type             container2D_Type;
     typedef data_Type::scalarVector_Type            scalarVector_Type;
-    typedef boost::array< scalarVector_Type, 4 >    scalarVectorContainer_Type;
+    typedef std::array< scalarVector_Type, 4 >    scalarVectorContainer_Type;
 
     typedef FESpace< mesh_Type, MapEpetra >         feSpace_Type;
-    typedef boost::shared_ptr< feSpace_Type >       feSpacePtr_Type;
+    typedef std::shared_ptr< feSpace_Type >       feSpacePtr_Type;
 
     typedef Epetra_Comm                             comm_Type;
-    typedef boost::shared_ptr< comm_Type >          commPtr_Type;
+    typedef std::shared_ptr< comm_Type >          commPtr_Type;
 
     typedef SolverAmesos                            linearSolver_Type;
-    typedef boost::shared_ptr< linearSolver_Type >  linearSolverPtr_Type;
+    typedef std::shared_ptr< linearSolver_Type >  linearSolverPtr_Type;
 
     typedef linearSolver_Type::vector_type          vector_Type;
-    typedef boost::shared_ptr< vector_Type >        vectorPtr_Type;
-    typedef boost::array< vectorPtr_Type, 2 >       vectorPtrContainer_Type;
+    typedef std::shared_ptr< vector_Type >        vectorPtr_Type;
+    typedef std::array< vectorPtr_Type, 2 >       vectorPtrContainer_Type;
 
     typedef linearSolver_Type::matrix_type          matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>          matrixPtr_Type;
-    typedef boost::array<matrixPtr_Type, 4 >        matrixPtrContainer_Type;
+    typedef std::shared_ptr<matrix_Type>          matrixPtr_Type;
+    typedef std::array<matrixPtr_Type, 4 >        matrixPtrContainer_Type;
 
     typedef std::map< std::string, vectorPtr_Type > solution_Type;
-    typedef boost::shared_ptr< solution_Type >      solutionPtr_Type;
+    typedef std::shared_ptr< solution_Type >      solutionPtr_Type;
     typedef solution_Type::const_iterator           solutionConstIterator_Type;
 
     typedef OneDFSI::bcLine_Type                    bcLine_Type;
@@ -576,10 +576,10 @@ private:
     commPtr_Type                       M_commPtr;
     Displayer                          M_displayer;
 
-    boost::shared_ptr< MatrixElemental > M_elementalMassMatrixPtr;       //!< element mass matrix
-    boost::shared_ptr< MatrixElemental > M_elementalStiffnessMatrixPtr;  //!< element stiffness matrix
-    boost::shared_ptr< MatrixElemental > M_elementalGradientMatrixPtr;   //!< element gradient matrix
-    boost::shared_ptr< MatrixElemental > M_elementalDivergenceMatrixPtr; //!< element divergence matrix
+    std::shared_ptr< MatrixElemental > M_elementalMassMatrixPtr;       //!< element mass matrix
+    std::shared_ptr< MatrixElemental > M_elementalStiffnessMatrixPtr;  //!< element stiffness matrix
+    std::shared_ptr< MatrixElemental > M_elementalGradientMatrixPtr;   //!< element gradient matrix
+    std::shared_ptr< MatrixElemental > M_elementalDivergenceMatrixPtr; //!< element divergence matrix
 
     //! Right hand sides of the linear system i: "mass * M_Ui = M_rhsi"
     vectorPtrContainer_Type            M_rhs;

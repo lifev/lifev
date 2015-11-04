@@ -51,8 +51,8 @@ namespace LifeV
 // ===================================================
 
 MapEpetra::MapEpetra () :
-    M_exporter (new boost::shared_ptr<Epetra_Export>()),
-    M_importer (new boost::shared_ptr<Epetra_Import>())
+    M_exporter (new std::shared_ptr<Epetra_Export>()),
+    M_importer (new std::shared_ptr<Epetra_Import>())
 {
     // Nothing to be done here
 }
@@ -72,8 +72,8 @@ MapEpetra::MapEpetra ( Int  numGlobalElements,
 }
 
 MapEpetra::MapEpetra ( mapData_Type const& mapData, commPtr_Type const& commPtr ) :
-    M_exporter (new boost::shared_ptr<Epetra_Export>()),
-    M_importer (new boost::shared_ptr<Epetra_Import>()),
+    M_exporter (new std::shared_ptr<Epetra_Export>()),
+    M_importer (new std::shared_ptr<Epetra_Import>()),
     M_commPtr  ( commPtr )
 {
     ASSERT (M_commPtr.get()!=0, "Error! The communicator pointer is not valid.\n");
@@ -93,8 +93,8 @@ MapEpetra::MapEpetra ( mapData_Type const& mapData, commPtr_Type const& commPtr 
 MapEpetra::MapEpetra ( const Int numGlobalElements,
                        const Int /*notUsed*/,
                        const commPtr_Type& commPtr ) :
-    M_exporter (new boost::shared_ptr<Epetra_Export>()),
-    M_importer (new boost::shared_ptr<Epetra_Import>()),
+    M_exporter (new std::shared_ptr<Epetra_Export>()),
+    M_importer (new std::shared_ptr<Epetra_Import>()),
     M_commPtr  ( commPtr )
 {
     ASSERT (M_commPtr.get()!=0, "Error! The communicator pointer is not valid.\n");
@@ -112,8 +112,8 @@ MapEpetra::MapEpetra ( const Int numGlobalElements,
 
 MapEpetra::MapEpetra ( const Int           size,
                        const commPtr_Type& commPtr ) :
-    M_exporter (new boost::shared_ptr<Epetra_Export>()),
-    M_importer (new boost::shared_ptr<Epetra_Import>()),
+    M_exporter (new std::shared_ptr<Epetra_Export>()),
+    M_importer (new std::shared_ptr<Epetra_Import>()),
     M_commPtr  ( commPtr )
 {
     ASSERT (M_commPtr.get()!=0, "Error! The communicator pointer is not valid.\n");
@@ -249,8 +249,8 @@ MapEpetra& MapEpetra::operator+= ( const MapEpetra& epetraMap )
 
     M_uniqueMapEpetra.reset ( new Epetra_Map ( -1, map.size(), map.data(), 0, *M_commPtr ) );
 
-    M_exporter.reset (new boost::shared_ptr<Epetra_Export>());
-    M_importer.reset (new boost::shared_ptr<Epetra_Import>());
+    M_exporter.reset (new std::shared_ptr<Epetra_Export>());
+    M_importer.reset (new std::shared_ptr<Epetra_Import>());
 
     return *this;
 }
@@ -269,9 +269,9 @@ MapEpetra& MapEpetra::operator += ( Int const size )
 // Methods
 // ===================================================
 
-boost::shared_ptr<MapEpetra> MapEpetra::createRootMap (Int const root) const
+std::shared_ptr<MapEpetra> MapEpetra::createRootMap (Int const root) const
 {
-    boost::shared_ptr<MapEpetra> rootMap ( new MapEpetra ( Epetra_Util::Create_Root_Map ( *getUniqueMap(), root ) ) );
+    std::shared_ptr<MapEpetra> rootMap ( new MapEpetra ( Epetra_Util::Create_Root_Map ( *getUniqueMap(), root ) ) );
     return rootMap;
 }
 
@@ -455,8 +455,8 @@ void MapEpetra::uniqueMap()
 {
     M_uniqueMapEpetra.reset ( new Epetra_Map ( Epetra_Util::Create_OneToOne_Map ( *getRepeatedMap(), false ) ) );
 
-    M_exporter.reset (new boost::shared_ptr<Epetra_Export>());
-    M_importer.reset (new boost::shared_ptr<Epetra_Import>());
+    M_exporter.reset (new std::shared_ptr<Epetra_Export>());
+    M_importer.reset (new std::shared_ptr<Epetra_Import>());
 }
 
 void MapEpetra::createImportExport()

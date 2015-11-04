@@ -117,7 +117,7 @@ public:
     typedef typename bcInterface_Type::vectorFunctionSolverDefined_Type vectorFunctionSolverDefined_Type;
 
     typedef BCInterfaceData0D                                           data_Type;
-    typedef boost::shared_ptr< data_Type >                              dataPtr_Type;
+    typedef std::shared_ptr< data_Type >                              dataPtr_Type;
 
     //@}
 

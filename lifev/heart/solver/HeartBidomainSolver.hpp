@@ -75,16 +75,16 @@ public:
 
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&,
                                  const Real&, const ID& );
-    typedef boost::function < Real ( const Real&, const Real&, const Real&,
+    typedef std::function < Real ( const Real&, const Real&, const Real&,
                                      const Real&, const ID& ) > source_Type;
 
     typedef Mesh mesh_Type;
 
     typedef BCHandler                             bchandlerRaw_Type;
-    //    typedef boost::shared_ptr<bchandlerRaw_Type> bchandlerRaw_Type;
+    //    typedef std::shared_ptr<bchandlerRaw_Type> bchandlerRaw_Type;
 
     typedef typename SolverType::matrix_type      matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>        matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type>        matrixPtr_Type;
     typedef typename SolverType::vector_type      vector_Type;
 
     typedef typename SolverType::prec_raw_type    precRaw_Type;
@@ -108,7 +108,7 @@ public:
                           FESpace<Mesh, MapEpetra>& pFESpace,
                           FESpace<Mesh, MapEpetra>& uFESpace,
                           BCHandler&                bcHandler,
-                          boost::shared_ptr<Epetra_Comm>& comm );
+                          std::shared_ptr<Epetra_Comm>& comm );
 
     //! Destructor
     virtual ~HeartBidomainSolver();
@@ -244,7 +244,7 @@ protected:
     FESpace<Mesh, MapEpetra>&      M_uFESpace;
 
     //! MPI communicator
-    const boost::shared_ptr<Epetra_Comm> M_comm;
+    const std::shared_ptr<Epetra_Comm> M_comm;
     Int                            M_me;
 
     //! Bidomain BC
@@ -333,7 +333,7 @@ HeartBidomainSolver ( const data_type&          dataType,
                       FESpace<Mesh, MapEpetra>& pFESpace,
                       FESpace<Mesh, MapEpetra>& uFESpace,
                       BCHandler&                BCh_u,
-                      boost::shared_ptr<Epetra_Comm>&  comm ) :
+                      std::shared_ptr<Epetra_Comm>&  comm ) :
     M_data                   ( dataType ),
     M_pFESpace               ( pFESpace ),
     M_uFESpace               ( uFESpace ),

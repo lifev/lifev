@@ -86,7 +86,7 @@ namespace
 
 typedef RegionMesh<LinearTetra>           mesh_Type;
 typedef Preconditioner                    basePrec_Type;
-typedef boost::shared_ptr<basePrec_Type>  basePrecPtr_Type;
+typedef std::shared_ptr<basePrec_Type>  basePrecPtr_Type;
 
 typedef TimeIterationPolicyLinear< mesh_Type, AssemblyPolicyStokes< mesh_Type > > Stokes;
 typedef TimeIterationPolicyLinear< mesh_Type, AssemblyPolicyGeneralizedStokes< mesh_Type > > GStokes;
@@ -109,10 +109,10 @@ typedef NavierStokesSolver< mesh_Type, InitStokes, SemiImplicit, HDF5Exporter > 
 void setPreconditioner ( basePrecPtr_Type& precPtr,
                          const std::string& preconditionerName,
                          const std::string& precSection,
-                         boost::shared_ptr<NavierStokesProblem<mesh_Type> > nsProblem,
+                         std::shared_ptr<NavierStokesProblem<mesh_Type> > nsProblem,
                          const nsSolver_Type& nsSolver,
                          const GetPot& dataFile,
-                         boost::shared_ptr<Epetra_Comm> Comm,
+                         std::shared_ptr<Epetra_Comm> Comm,
                          const bool useMinusDiv )
 {
     if ( preconditionerName == "FromFile" )
@@ -184,9 +184,9 @@ main ( int argc, char** argv )
 #ifdef HAVE_MPI
     MPI_Init ( &argc, &argv );
     {
-        boost::shared_ptr<Epetra_Comm> Comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+        std::shared_ptr<Epetra_Comm> Comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm ( new Epetra_SerialComm );
+    std::shared_ptr<Epetra_Comm> Comm ( new Epetra_SerialComm );
 #endif
 
         Displayer displayer ( Comm );
@@ -242,7 +242,7 @@ main ( int argc, char** argv )
         meshPath.append ("/");
 
         // Here we create a Navier-Stokes problem object
-        boost::shared_ptr< NavierStokesProblem< mesh_Type > > nsProblem;
+        std::shared_ptr< NavierStokesProblem< mesh_Type > > nsProblem;
         if ( benchmark == "Cavity" )
         {
             nsProblem.reset ( new NavierStokesCavity );

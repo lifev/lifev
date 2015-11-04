@@ -258,19 +258,19 @@ FSIMonolithic::computeMaxSingularValue( )
 
     M_preconditionedSymmetrizedMatrix.reset (new ComposedOperator<Epetra_Operator> (M_epetraComm) );
 
-    boost::shared_ptr<operatorPtr_Type>  ComposedPrecPtr (M_linearSolver->preconditioner()->preconditioner() );
+    std::shared_ptr<operatorPtr_Type>  ComposedPrecPtr (M_linearSolver->preconditioner()->preconditioner() );
 
     //M_monolithicMatrix->getMatrixPtr()->OptimizeStorage();
-    boost::shared_ptr<Epetra_FECrsMatrix> matrCrsPtr (new Epetra_FECrsMatrix (*M_monolithicMatrix->matrix()->matrixPtr() ) );
-    M_preconditionedSymmetrizedMatrix->push_back (boost::static_pointer_cast<operatorPtr_Type> (/*ComposedPrecPtr*/matrCrsPtr) );
+    std::shared_ptr<Epetra_FECrsMatrix> matrCrsPtr (new Epetra_FECrsMatrix (*M_monolithicMatrix->matrix()->matrixPtr() ) );
+    M_preconditionedSymmetrizedMatrix->push_back (std::static_pointer_cast<operatorPtr_Type> (/*ComposedPrecPtr*/matrCrsPtr) );
     M_preconditionedSymmetrizedMatrix->push_back ( (ComposedPrecPtr/*matrCrsPtr*/), true);
     M_preconditionedSymmetrizedMatrix->push_back ( (ComposedPrecPtr/*matrCrsPtr*/), true, true);
-    M_preconditionedSymmetrizedMatrix->push_back (boost::static_pointer_cast<operatorPtr_Type> (/*ComposedPrecPtr*/matrCrsPtr), false, true);
+    M_preconditionedSymmetrizedMatrix->push_back (std::static_pointer_cast<operatorPtr_Type> (/*ComposedPrecPtr*/matrCrsPtr), false, true);
 
     std::vector<LifeV::Real> real;
     std::vector<LifeV::Real> imaginary;
 
-    boost::shared_ptr<EigenSolver> eig;
+    std::shared_ptr<EigenSolver> eig;
 
     UInt nev = M_dataFile ("eigensolver/nevec", 10); //number of eigenvectors
     if (nev)
@@ -463,7 +463,7 @@ updateSolidSystem ( vectorPtr_Type& rhsFluidCoupling )
     solidPortionRHSSecondDerivative->subset (M_solidTimeAdvance->rhsContributionSecondDerivative(), M_offset );
 
     // Create a matrix of the size of the structure
-    boost::shared_ptr<MatrixEpetra<Real> >  solidMassMatrix (new MatrixEpetra<Real> ( M_solid->map(), 1 ) );
+    std::shared_ptr<MatrixEpetra<Real> >  solidMassMatrix (new MatrixEpetra<Real> ( M_solid->map(), 1 ) );
     *solidMassMatrix *= 0.0;
     *solidMassMatrix += *M_solid->massMatrix();
     solidMassMatrix->globalAssemble();
@@ -647,13 +647,13 @@ void FSIMonolithic::setupBlockPrec( )
 
 #ifdef HAVE_NS_PREC
     /* This shall be enabled once the branch about NS_PREC is going to be merged to master*/
-    boost::shared_ptr<MonolithicBlockComposed> blockPrecPointer ( boost::dynamic_pointer_cast<MonolithicBlockComposed> M_precPtr);
+    std::shared_ptr<MonolithicBlockComposed> blockPrecPointer ( std::dynamic_pointer_cast<MonolithicBlockComposed> M_precPtr);
 
     if (blockPrecPointer.get() != 0)
     {
         UInt fluidPosition = blockPrecPointer->whereIsBlock (MonolithicBlockComposed::fluid);
         ASSERT (blockPrecPointer->blockPrecs().size() < fluidPosition, "The preconditioner corresponding to the fluid block is probably not PCD. Check in the data file");
-        boost::shared_ptr<PreconditionerPCD> prec_PCD ( boost::dynamic_pointer_cast<PreconditionerPCD> blockPrecPointer->blockPrecs() [fluidPosition] );
+        std::shared_ptr<PreconditionerPCD> prec_PCD ( std::dynamic_pointer_cast<PreconditionerPCD> blockPrecPointer->blockPrecs() [fluidPosition] );
 
 
         if (prec_PCD.get() != 0)
@@ -719,7 +719,7 @@ FSIMonolithic::assembleSolidBlock ( UInt iter, const vector_Type& solution )
     M_solid->material()->updateJacobianMatrix ( *solidPortion, dataSolid(), M_solid->mapMarkersVolumes(), M_solid->mapMarkersIndexes(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
 
     //Need to inglobe it into a boost::shared to avoid memeory leak
-    boost::shared_ptr<MatrixEpetra<Real> >  solidMatrix (new MatrixEpetra<Real> ( M_solid->map(), 1 ) );
+    std::shared_ptr<MatrixEpetra<Real> >  solidMatrix (new MatrixEpetra<Real> ( M_solid->map(), 1 ) );
     *solidMatrix *= 0.0;
 
     *solidMatrix += *M_solid->massMatrix();
@@ -841,7 +841,7 @@ FSIMonolithic::vectorPtr_Type FSIMonolithic::computeStress()
     solverMass.setDataFromGetPot ( M_dataFile, "solid/solver" );
     solverMass.setupPreconditioner (M_dataFile, "solid/prec"); //to avoid if we have already a prec.
 
-    boost::shared_ptr<PreconditionerIfpack> P (new PreconditionerIfpack() );
+    std::shared_ptr<PreconditionerIfpack> P (new PreconditionerIfpack() );
 
     vectorPtr_Type sol (new vector_Type (M_monolithicMatrix->interfaceMap() ) );
     solverMass.setMatrix (*M_boundaryMass);
@@ -849,7 +849,7 @@ FSIMonolithic::vectorPtr_Type FSIMonolithic::computeStress()
     solverMass.solveSystem ( lambda, *sol, M_boundaryMass);
 
     EpetraExt::MultiVector_Reindex reindexMV (*M_interfaceMap->map (Unique) );
-    boost::shared_ptr<MapEpetra> newMap (new MapEpetra ( *M_interfaceMap ) );
+    std::shared_ptr<MapEpetra> newMap (new MapEpetra ( *M_interfaceMap ) );
     M_stress.reset (new vector_Type (reindexMV (lambda.epetraVector() ), newMap, Unique) );
     return M_stress;
 }

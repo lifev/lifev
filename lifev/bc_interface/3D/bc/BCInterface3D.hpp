@@ -146,18 +146,18 @@ public:
     typedef typename bcInterface_Type::vectorFunctionSolverDefined_Type vectorFunctionSolverDefined_Type;
 
     typedef BCInterfaceData3D                                           data_Type;
-    typedef boost::shared_ptr< data_Type >                              dataPtr_Type;
+    typedef std::shared_ptr< data_Type >                              dataPtr_Type;
 
     typedef BCFunctionRobin                                             bcFunctionRobin_Type;
-    typedef boost::shared_ptr< bcFunctionRobin_Type >                   bcFunctionRobinPtr_Type;
+    typedef std::shared_ptr< bcFunctionRobin_Type >                   bcFunctionRobinPtr_Type;
     typedef std::vector< bcFunctionRobinPtr_Type >                      vectorFunctionRobin_Type;
 
     typedef BCFunctionDirectional                                       bcFunctionDirectional_Type;
-    typedef boost::shared_ptr< bcFunctionDirectional_Type >             bcFunctionDirectionalPtr_Type;
+    typedef std::shared_ptr< bcFunctionDirectional_Type >             bcFunctionDirectionalPtr_Type;
     typedef std::vector< bcFunctionDirectionalPtr_Type >                vectorFunctionDirectional_Type;
 
     typedef BCDataInterpolator                                          bcFunctionDataInterpolator_Type;
-    typedef boost::shared_ptr< bcFunctionDataInterpolator_Type >        bcFunctionDataInterpolatorPtr_Type;
+    typedef std::shared_ptr< bcFunctionDataInterpolator_Type >        bcFunctionDataInterpolatorPtr_Type;
     typedef std::vector< bcFunctionDataInterpolatorPtr_Type >           vectorDataInterpolator_Type;
 
     //@}

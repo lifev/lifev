@@ -62,7 +62,7 @@ public:
     //! @name Type definitions
     //@{
     typedef ElectroIonicModel super;
-    typedef boost::shared_ptr<VectorEpetra> vectorPtr_Type;
+    typedef std::shared_ptr<VectorEpetra> vectorPtr_Type;
     typedef RegionMesh<LinearTetra> mesh_Type;
     //@}
 

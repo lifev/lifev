@@ -75,7 +75,7 @@ public:
     //! @name Public Types
     //@{
 
-    typedef boost::shared_ptr<FESpaceType> FESpaceType_Ptr;
+    typedef std::shared_ptr<FESpaceType> FESpaceType_Ptr;
 
     typedef QRAdapterBase< LevelSetQRAdapter<FESpaceType, VectorType> > base_Type;
 
@@ -176,13 +176,13 @@ private:
     bool M_isAdaptedElement;
 
     // Adapted Quadrature Rule
-    boost::shared_ptr<QuadratureRule> M_adaptedQR;
+    std::shared_ptr<QuadratureRule> M_adaptedQR;
 
 };
 
 template<typename FESpaceType, typename VectorType>
 LevelSetQRAdapter<FESpaceType, VectorType>
-adapt (boost::shared_ptr<FESpaceType> fespace, const VectorType& vector, const QuadratureRule& qr)
+adapt (std::shared_ptr<FESpaceType> fespace, const VectorType& vector, const QuadratureRule& qr)
 {
     return LevelSetQRAdapter<FESpaceType, VectorType> (fespace, vector, qr);
 }

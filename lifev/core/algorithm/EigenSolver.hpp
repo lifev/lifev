@@ -97,13 +97,13 @@ public:
     typedef Anasazi::BasicEigenproblem<data_Type, vector_Type, solver_Type>                     eigenpb_Type;
     typedef Teuchos::RCP<Anasazi::BasicEigenproblem<data_Type, vector_Type, solver_Type> >      eigenpbPtr_Type;
     typedef Anasazi::BlockKrylovSchurSolMgr <data_Type, vector_Type, solver_Type>                 eigensolver_Type;
-    typedef boost::shared_ptr<eigensolver_Type>                                  eigensolverPtr_Type;
+    typedef std::shared_ptr<eigensolver_Type>                                  eigensolverPtr_Type;
 
     //@}
     //!@name Constructor and Destructor
     //@{
 
-    EigenSolver (boost::shared_ptr<solver_Type> const matrix, Epetra_BlockMap const& block_map, long unsigned int numvec);
+    EigenSolver (std::shared_ptr<solver_Type> const matrix, Epetra_BlockMap const& block_map, long unsigned int numvec);
 
     virtual ~EigenSolver()
     {}

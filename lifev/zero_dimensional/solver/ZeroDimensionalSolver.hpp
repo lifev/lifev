@@ -100,7 +100,7 @@ public:
 
     //! Constructor
     explicit ZeroDimensionalSolver ( Int numCircuitElements,
-                                     boost::shared_ptr< Epetra_Comm> comm,
+                                     std::shared_ptr< Epetra_Comm> comm,
                                      zeroDimensionalCircuitDataPtr_Type circuitData );
     //! Destructor
     virtual ~ZeroDimensionalSolver() {}
@@ -117,7 +117,7 @@ private:
     rythmosModelInterfacePtr_Type                 M_modelInterface;
     rythmosSolverInterfacePtrRCP_Type             M_solverInterfaceRCP;
     rythmosModelInterfacePtrRCP_Type              M_modelInterfaceRCP;
-    boost::shared_ptr< Epetra_Comm>               M_comm;
+    std::shared_ptr< Epetra_Comm>               M_comm;
     Teuchos::RCP< Epetra_Comm>                    M_commRCP;
     Teuchos::RCP<Rythmos::StepperBase<Real> >     M_stepperPtr;
     Teuchos::RCP<Teuchos::FancyOStream>           M_out;
@@ -139,7 +139,7 @@ public:
 
     //! Constructor
     explicit ZeroDimensionalSolver (Int /*numCircuitElements*/,
-                                    boost::shared_ptr<Epetra_Comm> /*comm*/,
+                                    std::shared_ptr<Epetra_Comm> /*comm*/,
                                     zeroDimensionalCircuitDataPtr_Type /*circuitData*/) {}
     //! Destructor
     virtual ~ZeroDimensionalSolver() {}

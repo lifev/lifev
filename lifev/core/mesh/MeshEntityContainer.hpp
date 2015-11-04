@@ -69,7 +69,7 @@ namespace Comparers
  *  We rely on the fact that std::less<ID>(ID a, ID b) is defined (otherwise the user must supply it).
  */
 template < typename MeshEntity,
-         typename Policy = boost::function2<bool, ID, ID> >
+         typename Policy = std::function<bool ( ID, ID )> >
 class CompareAccordingToLocalId
 {
 public:
@@ -93,7 +93,7 @@ private:
  *  It compares according to the Marker of a MeshEntity and it relies on std comparison operators
  *  It defaults to std::less<markerID_Type>. We rely on the fact that less<ID>(ID a, ID b) (otherwise the user must supply it).
  */
-template <typename MeshEntity, typename Policy = boost::function2< bool, markerID_Type, markerID_Type> >
+template <typename MeshEntity, typename Policy = std::function< bool (markerID_Type, markerID_Type)> >
 class CompareAccordingToMarker
 {
 public:
@@ -151,7 +151,7 @@ namespace Predicates
  @author Luca Formaggia
  */
 template < typename MeshEntity,
-         typename ComparisonPolicy = boost::function2<bool, flag_Type, flag_Type> >
+         typename ComparisonPolicy = std::function<bool (flag_Type, flag_Type)> >
 class EntityFlagInterrogator
 {
 public:
@@ -192,7 +192,7 @@ private:
  @author Luca Formaggia
  */
 template < typename MeshEntity,
-         typename ComparisonPolicy = boost::function2< bool, markerID_Type, markerID_Type> >
+         typename ComparisonPolicy = std::function< bool (markerID_Type, markerID_Type)> >
 class EntityMarkerIDInterrogator
 {
 public:

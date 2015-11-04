@@ -77,10 +77,10 @@ public :
     typedef FactorySingleton< Factory< OneDFSIPhysics, OneDFSI::physicsType_Type > > factoryPhysics_Type;
 
     typedef OneDFSIData                           data_Type;
-    typedef boost::shared_ptr< data_Type >        dataPtr_Type;
+    typedef std::shared_ptr< data_Type >        dataPtr_Type;
 
     typedef VectorEpetra                          vector_Type;
-    typedef boost::shared_ptr< vector_Type >      vectorPtr_Type;
+    typedef std::shared_ptr< vector_Type >      vectorPtr_Type;
 
     //@}
 

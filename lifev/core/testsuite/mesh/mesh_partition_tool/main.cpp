@@ -62,7 +62,7 @@ typedef RegionMesh<LinearTetra> mesh_Type;
 typedef MatrixEpetra<Real> matrix_Type;
 typedef VectorEpetra vector_Type;
 typedef FESpace<mesh_Type, MapEpetra> feSpace_Type;
-typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
+typedef std::shared_ptr<feSpace_Type> feSpacePtr_Type;
 typedef MeshPartitionTool<mesh_Type> meshCutter_Type;
 
 int main ( int argc, char** argv )
@@ -70,9 +70,9 @@ int main ( int argc, char** argv )
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
     const bool verbose (Comm->MyPID() == 0);
@@ -94,8 +94,8 @@ int main ( int argc, char** argv )
     {
         std::cout << " -- Building the mesh ... " << std::flush;
     }
-    boost::shared_ptr< mesh_Type > fullMeshPtr (new RegionMesh<LinearTetra>);
-    boost::shared_ptr< mesh_Type > meshPart;
+    std::shared_ptr< mesh_Type > fullMeshPtr (new RegionMesh<LinearTetra>);
+    std::shared_ptr< mesh_Type > meshPart;
     regularMesh3D ( *fullMeshPtr, 1, numElements, numElements, numElements, false,
                     2.0,   2.0,   2.0,
                     -1.0,  -1.0,  -1.0);
@@ -145,7 +145,7 @@ int main ( int argc, char** argv )
     }
     std::string uOrder ("P1");
     std::string bOrder ("P1");
-    boost::shared_ptr < FESpace < mesh_Type,
+    std::shared_ptr < FESpace < mesh_Type,
           MapEpetra > >
           uFESpace (new FESpace < mesh_Type,
                     MapEpetra > (meshPart,
@@ -153,7 +153,7 @@ int main ( int argc, char** argv )
                                  1,
                                  Comm) );
 
-    boost::shared_ptr < FESpace < mesh_Type,
+    std::shared_ptr < FESpace < mesh_Type,
           MapEpetra > >
           betaFESpace (new FESpace < mesh_Type,
                        MapEpetra > (meshPart,
@@ -194,7 +194,7 @@ int main ( int argc, char** argv )
     {
         std::cout << " -- Defining the matrix ... " << std::flush;
     }
-    boost::shared_ptr<matrix_Type>
+    std::shared_ptr<matrix_Type>
     systemMatrix (new matrix_Type (uFESpace->map() ) );
     *systemMatrix *= 0.0;
     if (verbose)

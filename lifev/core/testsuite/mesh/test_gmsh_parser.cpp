@@ -42,13 +42,13 @@
 #include <cstdlib>
 #include <iostream>
 
-typedef boost::shared_ptr<Epetra_Comm> comm_t;
+typedef std::shared_ptr<Epetra_Comm> comm_t;
 
 template <int dim>
 struct partitioner
 {
     template<typename M>
-    static void dopartition (boost::shared_ptr<M>& mesh_p, comm_t comm)
+    static void dopartition (std::shared_ptr<M>& mesh_p, comm_t comm)
     {
         mesh_p->updateElementFacets (true, true);
         mesh_p->updateElementRidges (true, true);
@@ -61,7 +61,7 @@ template <>
 struct partitioner<2>
 {
     template<typename M>
-    static void dopartition (boost::shared_ptr<M>&, comm_t)
+    static void dopartition (std::shared_ptr<M>&, comm_t)
     {
         // TODO: not working yet, problem with boundary ridges (aka points).
         /*
@@ -76,7 +76,7 @@ template <>
 struct partitioner<1>
 {
     template<typename M>
-    static void dopartition (boost::shared_ptr<M>&, comm_t)
+    static void dopartition (std::shared_ptr<M>&, comm_t)
     {}
 };
 
@@ -97,7 +97,7 @@ struct tester
         }
 
         // Convert the mesh
-        boost::shared_ptr<mesh_t> mesh (new mesh_t (comm) );
+        std::shared_ptr<mesh_t> mesh (new mesh_t (comm) );
         LifeV::convertBareMesh (baremesh, *mesh, true);
 
         // Partitioning (if possible)
@@ -115,9 +115,9 @@ int main (int argc, char* argv[])
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    boost::shared_ptr<Epetra_Comm> comm (new Epetra_SerialComm);
+    std::shared_ptr<Epetra_Comm> comm (new Epetra_SerialComm);
 #endif
 
     bool ilead = (comm->MyPID() == 0);

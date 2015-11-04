@@ -124,7 +124,7 @@ public:
     typedef typename bcInterface_Type::vectorFunctionSolverDefined_Type vectorFunctionSolverDefined_Type;
 
     typedef BCInterfaceData1D                                           data_Type;
-    typedef boost::shared_ptr< data_Type >                              dataPtr_Type;
+    typedef std::shared_ptr< data_Type >                              dataPtr_Type;
 
     typedef typename bcHandler_Type::solutionPtr_Type                   solutionPtr_Type;
     typedef typename bcHandler_Type::fluxPtr_Type                       fluxPtr_Type;
@@ -234,7 +234,7 @@ private:
     //@{
 
     template< class BCInterfaceBaseType >
-    void createFunction ( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector );
+    void createFunction ( std::vector< std::shared_ptr< BCInterfaceBaseType > >& baseVector );
 
     template< class BCBaseType >
     void addBcToHandler ( BCBaseType& base );
@@ -314,7 +314,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::setSolution ( const solutionPtr_
     //for ( typename vectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
     for ( UInt i ( 0 ); i < this->M_vectorFunction.size(); ++i )
     {
-        bcFunctionParserSolverPtr_Type castedFunctionSolver = boost::dynamic_pointer_cast< bcFunctionParserSolver_Type > ( this->M_vectorFunction[i] );
+        bcFunctionParserSolverPtr_Type castedFunctionSolver = std::dynamic_pointer_cast< bcFunctionParserSolver_Type > ( this->M_vectorFunction[i] );
 
         if ( castedFunctionSolver != 0 )
         {
@@ -335,9 +335,9 @@ BCInterface1D< BcHandler, PhysicalSolverType >::setSolution ( const solutionPtr_
 // ===================================================
 template< class BcHandler, class PhysicalSolverType > template< class BCInterfaceBaseType >
 inline void
-BCInterface1D< BcHandler, PhysicalSolverType >::createFunction ( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector )
+BCInterface1D< BcHandler, PhysicalSolverType >::createFunction ( std::vector< std::shared_ptr< BCInterfaceBaseType > >& baseVector )
 {
-    boost::shared_ptr< BCInterfaceBaseType > function ( new BCInterfaceBaseType() );
+    std::shared_ptr< BCInterfaceBaseType > function ( new BCInterfaceBaseType() );
     function->setData ( M_data );
     baseVector.push_back ( function );
 }

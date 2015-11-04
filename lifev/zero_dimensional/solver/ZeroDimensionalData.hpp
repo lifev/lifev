@@ -70,10 +70,10 @@ public:
 
     typedef struct SolverData                                         solverData_Type;
     typedef TimeData                                                  time_Type;
-    typedef boost::shared_ptr < time_Type >                           timePtr_Type;
+    typedef std::shared_ptr < time_Type >                           timePtr_Type;
 
     // TODO: this is a temporary typedef, to be removed in the future
-    typedef boost::shared_ptr < Real >                                solutionPtr_Type;
+    typedef std::shared_ptr < Real >                                solutionPtr_Type;
 
     //! Constructor
     explicit ZeroDimensionalData();

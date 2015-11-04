@@ -345,7 +345,7 @@ private:
     //! pointer on the divergence of the basis functions
     const function_Type* M_divPhi;
 
-    //! reference coordinates. Order: xi_1,eta_1,zeta_1,xi_2,eta_2,zeta_2,...
+    //! reference coordinates. Order: xistd::placeholders::_1,etA_1,zetA_1,xistd::placeholders::_2,etA_2,zetA_2,...
     const Real* M_refCoor;
 
 

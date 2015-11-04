@@ -31,7 +31,7 @@ namespace LifeV
 // ===================================================
 // Constructurs and Destructor
 // ===================================================
-PreconditionerComposed::PreconditionerComposed ( boost::shared_ptr<Epetra_Comm> comm) :
+PreconditionerComposed::PreconditionerComposed ( std::shared_ptr<Epetra_Comm> comm) :
     super_Type (comm ),
     M_operVector (0),
     M_prec (new prec_Type (comm) )
@@ -41,9 +41,9 @@ PreconditionerComposed::PreconditionerComposed ( boost::shared_ptr<Epetra_Comm> 
 
 /*
 PreconditionerComposed::PreconditionerComposed(PreconditionerComposed& P):
-    super_Type(P, boost::dynamic_pointer_cast<ComposedOperator<Ifpack_Preconditioner> >(P.preconditionerPtr())->commPtr()),
+    super_Type(P, std::dynamic_pointer_cast<ComposedOperator<Ifpack_Preconditioner> >(P.preconditionerPtr())->commPtr()),
     M_operVector(P.operVector()),
-    M_prec(new prec_Type(*boost::dynamic_pointer_cast<prec_Type>(P.preconditionerPtr())))
+    M_prec(new prec_Type(*std::dynamic_pointer_cast<prec_Type>(P.preconditionerPtr())))
     //M_precType(P.preconditionerType())
 {
     //    *M_prec=*P.preconditioner();
@@ -185,7 +185,7 @@ PreconditionerComposed::resetPreconditioner()
 // ===================================================
 Int
 PreconditionerComposed::createPrec (operator_type& oper,
-                                    boost::shared_ptr<Preconditioner>& prec )
+                                    std::shared_ptr<Preconditioner>& prec )
 {
     return prec->buildPreconditioner ( oper );
 }

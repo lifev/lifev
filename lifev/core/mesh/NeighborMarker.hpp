@@ -42,12 +42,13 @@
 
 #include <lifev/core/mesh/Marker.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
+#include <unordered_set>
 
 // LifeV namespace
 namespace LifeV
 {
 
-typedef boost::unordered_set<ID> neighbors_Type;
+typedef std::unordered_set<ID> neighbors_Type;
 typedef std::vector<neighbors_Type> neighborList_Type;
 
 

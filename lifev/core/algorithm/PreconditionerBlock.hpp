@@ -61,10 +61,10 @@ public:
      */
     //@{
     //! default constructor.
-    PreconditionerBlock ( const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
+    PreconditionerBlock ( const std::shared_ptr<Epetra_Comm>& comm = std::shared_ptr<Epetra_Comm>() );
 
     /** Copy constructor*/
-    PreconditionerBlock ( PreconditionerBlock& P, const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
+    PreconditionerBlock ( PreconditionerBlock& P, const std::shared_ptr<Epetra_Comm>& comm = std::shared_ptr<Epetra_Comm>() );
 
     //! default virtual destructor
     virtual ~PreconditionerBlock();

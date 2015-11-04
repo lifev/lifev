@@ -181,7 +181,7 @@ private:
 
         typedef FSIExactJacobian::vector_Type  vector_Type;
         typedef Epetra_Map                  map_Type;
-        typedef boost::shared_ptr<map_Type> mapPtr_Type;
+        typedef std::shared_ptr<map_Type> mapPtr_Type;
 
         // OBSOLETE typedef
         //         typedef exactJacobian::vector_Type  vector_Type;
@@ -256,7 +256,7 @@ private:
         mapPtr_Type                     M_operatorDomainMap;
         mapPtr_Type                     M_operatorRangeMap;
 
-        boost::shared_ptr<Epetra_Comm>  M_comm;
+        std::shared_ptr<Epetra_Comm>  M_comm;
 
     }; // end of class Epetra_ExactJacobian
 

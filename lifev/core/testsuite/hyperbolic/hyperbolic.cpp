@@ -218,12 +218,12 @@ struct hyperbolic::Private
     Private() {}
 
     // Policy for scalar functions
-    typedef boost::function < Real ( const Real&, const Real&,
+    typedef std::function < Real ( const Real&, const Real&,
                                      const Real&, const Real&, const ID& ) >
     fct_type;
 
     // Policy for the flux function
-    typedef boost::function < Vector ( const Real&, const Real&,
+    typedef std::function < Vector ( const Real&, const Real&,
                                        const Real&, const Real&,
                                        const std::vector<Real>& ) >
     vectorFct_type;
@@ -231,70 +231,70 @@ struct hyperbolic::Private
     std::string    data_file_name;
     std::string    discretization_section;
 
-    boost::shared_ptr<Epetra_Comm>   comm;
+    std::shared_ptr<Epetra_Comm>   comm;
 
     // Function Types
 
     fct_type getUOne()
     {
         fct_type f;
-        f = boost::bind ( &dataProblem::UOne, _1, _2, _3, _4, _5 );
+        f = std::bind ( &dataProblem::UOne, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
         return f;
     }
 
     fct_type getUZero()
     {
         fct_type f;
-        f = boost::bind ( &dataProblem::UZero, _1, _2, _3, _4, _5 );
+        f = std::bind ( &dataProblem::UZero, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
         return f;
     }
 
     fct_type getAnalyticalSolution()
     {
         fct_type f;
-        f = boost::bind ( &dataProblem::analyticalSolution, _1, _2, _3, _4, _5 );
+        f = std::bind ( &dataProblem::analyticalSolution, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
         return f;
     }
 
     vectorFct_type getPhysicalFlux()
     {
         vectorFct_type f;
-        f = boost::bind ( &dataProblem::physicalFlux, _1, _2, _3, _4, _5 );
+        f = std::bind ( &dataProblem::physicalFlux, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
         return f;
     }
 
     vectorFct_type getFirstDerivativePhysicalFlux()
     {
         vectorFct_type f;
-        f = boost::bind ( &dataProblem::firstDerivativePhysicalFlux, _1, _2, _3, _4, _5 );
+        f = std::bind ( &dataProblem::firstDerivativePhysicalFlux, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
         return f;
     }
 
     fct_type getSource ( )
     {
         fct_type f;
-        f = boost::bind ( &dataProblem::source_in, _1, _2, _3, _4, _5 );
+        f = std::bind ( &dataProblem::source_in, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
         return f;
     }
 
     fct_type getInitialCondition ( )
     {
         fct_type f;
-        f = boost::bind ( &dataProblem::initialCondition, _1, _2, _3, _4, _5 );
+        f = std::bind ( &dataProblem::initialCondition, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
         return f;
     }
 
     fct_type getMass ( )
     {
         fct_type f;
-        f = boost::bind ( & dataProblem::initialCondition, _1, _2, _3, _4, _5 );
+        f = std::bind ( & dataProblem::initialCondition, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
         return f;
     }
 
     fct_type getDual ( )
     {
         fct_type f;
-        f = boost::bind ( & dataProblem::dual, _1, _2, _3, _4, _5 );
+        f = std::bind ( & dataProblem::dual, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
         return f;
     }
 
@@ -335,9 +335,9 @@ hyperbolic::run()
     typedef SolverAztecOO                               solver_type;
     typedef HyperbolicSolver< RegionMesh, solver_type > hyper;
     typedef hyper::vector_Type                          vector_type;
-    typedef boost::shared_ptr<vector_type>              vector_ptrtype;
+    typedef std::shared_ptr<vector_type>              vector_ptrtype;
     typedef FESpace< RegionMesh, MapEpetra >            feSpace_Type;
-    typedef boost::shared_ptr< feSpace_Type >           feSpacePtr_Type;
+    typedef std::shared_ptr< feSpace_Type >           feSpacePtr_Type;
 
     LifeChrono chronoTotal;
     LifeChrono chronoReadAndPartitionMesh;
@@ -382,13 +382,13 @@ hyperbolic::run()
     meshData.setup ( dataFile,  Members->discretization_section + "/space_discretization");
 
     // Create the mesh
-    boost::shared_ptr<RegionMesh> fullMeshPtr ( new RegionMesh ( Members->comm ) );
+    std::shared_ptr<RegionMesh> fullMeshPtr ( new RegionMesh ( Members->comm ) );
 
     // Set up the mesh
     readMesh ( *fullMeshPtr, meshData );
 
     // Partition the mesh using ParMetis
-    boost::shared_ptr<RegionMesh> meshPtr;
+    std::shared_ptr<RegionMesh> meshPtr;
     {
         MeshPartitioner< RegionMesh >  meshPart ( fullMeshPtr, Members->comm );
         meshPtr = meshPart.meshPartition();
@@ -531,7 +531,7 @@ hyperbolic::run()
     hyperbolicSolver.setBoundaryCondition ( bcHyperbolic );
 
     // Set the exporter for the solution
-    boost::shared_ptr< Exporter< RegionMesh > > exporter;
+    std::shared_ptr< Exporter< RegionMesh > > exporter;
 
     // Shared pointer used in the exporter for the solution
     vector_ptrtype exporterSolution;

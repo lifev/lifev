@@ -85,7 +85,7 @@ OneDFSIBCHandler::OneDFSIBCHandler ( const OneDFSIBCHandler& bcHandler ) :
     // NOTE: The copy constructor is not working correctly. All the members of the class are true copy, but
     // the BCFunctions inside M_boundary are still pointing to the original M_defaultFunction, instead
     // of to the copy (which remain unused!). This is because the link between M_boundary and M_defaultFunction
-    // is provided by boost::bind and, for now, we have no solution for this.
+    // is provided by std::bind and, for now, we have no solution for this.
     std::cerr << "!!! WARNING: COPY CONSTRUCTOR DOES NOT CREATE A TRUE COPY !!!" << std::endl;
     std::exit ( EXIT_FAILURE );
 }
@@ -140,8 +140,8 @@ OneDFSIBCHandler::setDefaultBC()
 
         //bcFunctionPtr_Type bcFunction( new bcFunction_Type() );
         bcFunction_Type bcFunction;
-        bcFunction.setFunction ( boost::bind ( &OneDFSIFunctionSolverDefinedRiemann::operator(),
-                                               dynamic_cast<OneDFSIFunctionSolverDefinedRiemann*> ( & ( *M_defaultFunctions.back() ) ), _1, _2 ) );
+        bcFunction.setFunction ( std::bind ( &OneDFSIFunctionSolverDefinedRiemann::operator(),
+                                               dynamic_cast<OneDFSIFunctionSolverDefinedRiemann*> ( & ( *M_defaultFunctions.back() ) ), std::placeholders::_1, std::placeholders::_2 ) );
 
 #ifdef HAVE_LIFEV_DEBUG
         debugStream ( 6311 ) << "[OneDFSIModel_BCHandler::setDefaultBC] left-first-W1 Invoking setBC.\n";
@@ -157,8 +157,8 @@ OneDFSIBCHandler::setDefaultBC()
 
         //bcFunctionPtr_Type bcFunction ( new bcFunction_Type() );
         bcFunction_Type bcFunction;
-        bcFunction.setFunction ( boost::bind ( &OneDFSIFunctionSolverDefinedCompatibility::operator(),
-                                               dynamic_cast<OneDFSIFunctionSolverDefinedCompatibility*> ( & ( *M_defaultFunctions.back() ) ), _1, _2 ) );
+        bcFunction.setFunction ( std::bind ( &OneDFSIFunctionSolverDefinedCompatibility::operator(),
+                                               dynamic_cast<OneDFSIFunctionSolverDefinedCompatibility*> ( & ( *M_defaultFunctions.back() ) ), std::placeholders::_1, std::placeholders::_2 ) );
 
 #ifdef HAVE_LIFEV_DEBUG
         debugStream ( 6311 ) << "[OneDFSIModel_BCHandler::setDefaultBC] left-second-W2 Invoking setBC.\n";
@@ -174,8 +174,8 @@ OneDFSIBCHandler::setDefaultBC()
 
         //bcFunctionPtr_Type bcFunction ( new bcFunction_Type() );
         bcFunction_Type bcFunction;
-        bcFunction.setFunction ( boost::bind ( &OneDFSIFunctionSolverDefinedRiemann::operator(),
-                                               dynamic_cast<OneDFSIFunctionSolverDefinedRiemann*> ( & ( *M_defaultFunctions.back() ) ), _1, _2 ) );
+        bcFunction.setFunction ( std::bind ( &OneDFSIFunctionSolverDefinedRiemann::operator(),
+                                               dynamic_cast<OneDFSIFunctionSolverDefinedRiemann*> ( & ( *M_defaultFunctions.back() ) ), std::placeholders::_1, std::placeholders::_2 ) );
 
 #ifdef HAVE_LIFEV_DEBUG
         debugStream ( 6311 ) << "[OneDFSIModel_BCHandler::setDefaultBC] right-first-W2 Invoking setBC.\n";
@@ -191,8 +191,8 @@ OneDFSIBCHandler::setDefaultBC()
 
         //bcFunctionPtr_Type bcFunction ( new bcFunction_Type() );
         bcFunction_Type bcFunction;
-        bcFunction.setFunction ( boost::bind ( &OneDFSIFunctionSolverDefinedCompatibility::operator(),
-                                               dynamic_cast<OneDFSIFunctionSolverDefinedCompatibility*> ( & ( *M_defaultFunctions.back() ) ), _1, _2 ) );
+        bcFunction.setFunction ( std::bind ( &OneDFSIFunctionSolverDefinedCompatibility::operator(),
+                                               dynamic_cast<OneDFSIFunctionSolverDefinedCompatibility*> ( & ( *M_defaultFunctions.back() ) ), std::placeholders::_1, std::placeholders::_2 ) );
 
 #ifdef HAVE_LIFEV_DEBUG
         debugStream ( 6311 ) << "[OneDFSIModel_BCHandler::setDefaultBC] right-second-W1 Invoking setBC.\n";

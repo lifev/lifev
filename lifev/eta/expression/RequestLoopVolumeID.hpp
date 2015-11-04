@@ -59,8 +59,8 @@ public:
     //@{
     typedef typename MeshType::element_Type element_Type;
 
-    typedef boost::shared_ptr<std::vector<element_Type*> > vectorVolumesPtr_Type;
-    typedef boost::shared_ptr<std::vector<UInt> > vectorIndexesPtr_Type;
+    typedef std::shared_ptr<std::vector<element_Type*> > vectorVolumesPtr_Type;
+    typedef std::shared_ptr<std::vector<UInt> > vectorIndexesPtr_Type;
     //@}
 
 
@@ -134,7 +134,7 @@ private:
  */
 template<typename MeshType>
 RequestLoopVolumeID<MeshType>
-integrationOverSelectedVolumes (boost::shared_ptr<std::vector<typename MeshType::element_Type*> >& volumeListExtracted, boost::shared_ptr<std::vector<UInt> >& indexListExtracted )
+integrationOverSelectedVolumes (std::shared_ptr<std::vector<typename MeshType::element_Type*> >& volumeListExtracted, std::shared_ptr<std::vector<UInt> >& indexListExtracted )
 {
     return RequestLoopVolumeID<MeshType> ( volumeListExtracted, indexListExtracted );
 }

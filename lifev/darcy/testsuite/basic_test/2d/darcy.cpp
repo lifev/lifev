@@ -36,6 +36,10 @@
 #include "darcy.hpp"
 #include "user_fun.hpp"
 
+//#if __cplusplus < 201103L
+//#error "ERRORE C++"
+//#endif
+
 // ===================================================
 //! Namespaces & define
 // ===================================================
@@ -64,7 +68,7 @@ struct darcy_nonlinear::Private
     Private() {}
 
     // Policy for scalar functions
-    typedef boost::function < Real ( const Real&, const Real&,
+    typedef std::function < Real ( const Real&, const Real&,
                                      const Real&, const Real&, const ID& ) >
     fct_type;
 
@@ -72,28 +76,28 @@ struct darcy_nonlinear::Private
     std::string xml_file_name;
     std::string discretization_section;
 
-    boost::shared_ptr<Epetra_Comm>   comm;
+    std::shared_ptr<Epetra_Comm>   comm;
 
     // Function Types
 
     fct_type getUOne ( )
     {
         fct_type f;
-        f = boost::bind ( &UOne, _1, _2, _3, _4, _5 );
+        f = std::bind ( &UOne, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
         return f;
     }
 
     fct_type getAnalyticalSolution ( )
     {
         fct_type f;
-        f = boost::bind ( &dataProblem::analyticalSolution, _1, _2, _3, _4, _5 );
+        f = std::bind ( &dataProblem::analyticalSolution, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
         return f;
     }
 
     fct_type getAnalyticalFlux ( )
     {
         fct_type f;
-        f = boost::bind ( &dataProblem::analyticalFlux, _1, _2, _3, _4, _5 );
+        f = std::bind ( &dataProblem::analyticalFlux, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
         return f;
     }
 
@@ -141,7 +145,7 @@ darcy_nonlinear::run()
     LifeChrono chronoError;
 
     // Displayer to print on screen
-    boost::shared_ptr < Displayer > displayer ( new Displayer ( Members->comm ) );
+    std::shared_ptr < Displayer > displayer ( new Displayer ( Members->comm ) );
 
     // Start chronoTotal for measure the total time for the computation
     chronoTotal.start();
@@ -380,7 +384,7 @@ darcy_nonlinear::run()
     darcySolver.setBoundaryConditions ( bcDarcy );
 
     // Set the exporter for the solution
-    boost::shared_ptr< Exporter< regionMesh_Type > > exporter;
+    std::shared_ptr< Exporter< regionMesh_Type > > exporter;
 
     // Shared pointer used in the exporter for the primal solution
     vectorPtr_Type primalExporter;

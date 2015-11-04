@@ -81,8 +81,8 @@ public:
     //! @name Public Types
     //@{
 
-    typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID& ) > function_Type;
-    typedef boost::shared_ptr<BCFunctionBase> BCFunctionBasePtr_Type;
+    typedef std::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID& ) > function_Type;
+    typedef std::shared_ptr<BCFunctionBase> BCFunctionBasePtr_Type;
 
     //@}
 
@@ -384,8 +384,8 @@ public:
     //! @name Public Types
     //@{
 
-    typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID&, const Real& ) > function_Type;
-    typedef boost::shared_ptr<BCFunctionUDepBase> BCFunctionUDepBasePtr_Type;
+    typedef std::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID&, const Real& ) > function_Type;
+    typedef std::shared_ptr<BCFunctionUDepBase> BCFunctionUDepBasePtr_Type;
 
     //@}
 

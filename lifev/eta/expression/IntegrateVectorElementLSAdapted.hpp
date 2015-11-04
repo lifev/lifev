@@ -95,9 +95,9 @@ public:
     //@{
 
     //! Full data constructor
-    IntegrateVectorElementLSAdapted (const boost::shared_ptr<MeshType>& mesh,
+    IntegrateVectorElementLSAdapted (const std::shared_ptr<MeshType>& mesh,
                                      const QRAdapter_Type& QRAdapter,
-                                     const boost::shared_ptr<TestSpaceType>& testSpace,
+                                     const std::shared_ptr<TestSpaceType>& testSpace,
                                      const ExpressionType& expression);
 
     //! Copy constructor
@@ -121,7 +121,7 @@ public:
     }
 
     template <typename VectorType>
-    inline void operator>> (boost::shared_ptr<VectorType> vector)
+    inline void operator>> (std::shared_ptr<VectorType> vector)
     {
         addTo (*vector);
     }
@@ -146,7 +146,7 @@ public:
     void addTo (VectorType& vec);
 
     template <typename VectorType>
-    void addTo (boost::shared_ptr<VectorType> vec)
+    void addTo (std::shared_ptr<VectorType> vec)
     {
         addTo (*vec);
     }
@@ -164,13 +164,13 @@ private:
     //@}
 
     // Pointer on the mesh
-    boost::shared_ptr<MeshType> M_mesh;
+    std::shared_ptr<MeshType> M_mesh;
 
     // Quadrature adapter
     QRAdapter_Type M_QRAdapter;
 
     // Shared pointer on the Space
-    boost::shared_ptr<TestSpaceType> M_testSpace;
+    std::shared_ptr<TestSpaceType> M_testSpace;
 
     // Tree to compute the values for the assembly
     evaluation_Type M_evaluation;
@@ -202,9 +202,9 @@ template < typename MeshType,
          typename LSFESpaceType,
          typename LSVectorType >
 IntegrateVectorElementLSAdapted < MeshType, TestSpaceType, ExpressionType, LSFESpaceType, LSVectorType>::
-IntegrateVectorElementLSAdapted (const boost::shared_ptr<MeshType>& mesh,
+IntegrateVectorElementLSAdapted (const std::shared_ptr<MeshType>& mesh,
                                  const QRAdapter_Type& QRAdapter,
-                                 const boost::shared_ptr<TestSpaceType>& testSpace,
+                                 const std::shared_ptr<TestSpaceType>& testSpace,
                                  const ExpressionType& expression)
     :   M_mesh (mesh),
         M_QRAdapter (QRAdapter),

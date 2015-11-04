@@ -86,7 +86,7 @@ private:
     Teuchos::RCP<Epetra_Comm>            M_comm;
 };
 
-typedef boost::shared_ptr< RythmosSolverInterface > rythmosSolverInterfacePtr_Type;
+typedef std::shared_ptr< RythmosSolverInterface > rythmosSolverInterfacePtr_Type;
 typedef Teuchos::RCP< RythmosSolverInterface > rythmosSolverInterfacePtrRCP_Type;
 
 } // LifeV namespace

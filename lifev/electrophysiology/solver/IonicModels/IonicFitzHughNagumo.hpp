@@ -66,7 +66,7 @@ namespace LifeV
 typedef ElectroIonicModel super;
 typedef MatrixEpetra<Real> matrix_Type;
 typedef VectorEpetra vector_Type;
-typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
+typedef std::shared_ptr<vector_Type> vectorPtr_Type;
 typedef RegionMesh<LinearTetra> mesh_Type;
 //@}
 

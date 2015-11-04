@@ -83,7 +83,7 @@ class PostProcessingBoundary
     typedef typename MeshType::elementShape_Type             elementGeometricShape_Type;
     typedef typename elementGeometricShape_Type::GeoBShape   facetGeometricShape_Type;
     typedef MeshType                                         mesh_Type;
-    typedef boost::shared_ptr<MeshType>                      meshPtr_Type;
+    typedef std::shared_ptr<MeshType>                      meshPtr_Type;
     typedef CurrentFEManifold*                               currentBdFEPtr_Type;
     typedef DOF*                                             dofPtr_Type;
     //@}
@@ -376,7 +376,7 @@ private:
     // pointer to the mesh
     meshPtr_Type                                 M_meshPtr;
     // pointer to the processor mapping
-    boost::shared_ptr<MapEpetra>                 M_epetraMapPtr;
+    std::shared_ptr<MapEpetra>                 M_epetraMapPtr;
 
     const Int                                    M_geoDimension;
 

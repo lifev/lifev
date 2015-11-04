@@ -294,7 +294,7 @@ public:
     typedef TimeAdvanceBDF < vector_Type > timeAdvance_Type;
 
     //! Shared pointer to a time advance scheme.
-    typedef boost::shared_ptr < timeAdvance_Type > timeAdvancePtr_Type;
+    typedef std::shared_ptr < timeAdvance_Type > timeAdvancePtr_Type;
 
     //@}
 

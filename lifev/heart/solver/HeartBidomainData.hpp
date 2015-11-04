@@ -66,7 +66,7 @@ public:
         Description of the purpose of the enumerator list.
     */
 
-    typedef boost::function < Real ( Real const& x,
+    typedef std::function < Real ( Real const& x,
                                      Real const& y,
                                      Real const& z,
                                      Real const& t,
@@ -83,7 +83,7 @@ public:
     //! Constructors
     HeartBidomainData();
 
-    HeartBidomainData ( boost::shared_ptr<HeartFunctors> heart);
+    HeartBidomainData ( std::shared_ptr<HeartFunctors> heart);
 
     HeartBidomainData ( const HeartBidomainData& dataBidomain );
 

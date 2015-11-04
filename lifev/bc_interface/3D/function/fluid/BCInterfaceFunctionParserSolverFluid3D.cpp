@@ -206,7 +206,7 @@ BCInterfaceFunctionParserSolver< BCHandler, OseenSolverShapeDerivative< RegionMe
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< BCHandler, OseenSolver< RegionMesh< LinearTetra > > >::createAccessList ( const boost::shared_ptr< BCInterfaceData >& data )
+BCInterfaceFunctionParserSolver< BCHandler, OseenSolver< RegionMesh< LinearTetra > > >::createAccessList ( const std::shared_ptr< BCInterfaceData >& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -226,7 +226,7 @@ BCInterfaceFunctionParserSolver< BCHandler, OseenSolver< RegionMesh< LinearTetra
 
 template< >
 void
-BCInterfaceFunctionParserSolver< BCHandler, OseenSolverShapeDerivative< RegionMesh< LinearTetra > > >::createAccessList ( const boost::shared_ptr< BCInterfaceData >& data )
+BCInterfaceFunctionParserSolver< BCHandler, OseenSolverShapeDerivative< RegionMesh< LinearTetra > > >::createAccessList ( const std::shared_ptr< BCInterfaceData >& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

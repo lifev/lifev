@@ -118,7 +118,7 @@ inline Real string2number ( const std::string& s )
     return n;
 
     // Temporary disabled
-    //return boost::lexical_cast< Real >( s );
+    //return std::to_string( s );
 }
 
 // @author Cristiano Malossi
@@ -126,7 +126,7 @@ inline Real string2number ( const std::string& s )
 template <typename NumberType>
 inline std::string number2string ( const NumberType& n )
 {
-    return boost::lexical_cast< std::string > ( n );
+    return std::to_string ( n );
 }
 
 // @author Cristiano Malossi

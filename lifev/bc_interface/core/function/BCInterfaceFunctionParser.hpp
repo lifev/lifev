@@ -107,7 +107,7 @@ public:
     typedef typename function_Type::boundaryFunctionTimeTimeStep_Type              boundaryFunctionTimeTimeStep_Type;
     typedef typename function_Type::boundaryFunctionTimeSpaceID_Type               boundaryFunctionTimeSpaceID_Type;
     typedef Parser                                                                 parser_Type;
-    typedef boost::shared_ptr< parser_Type >                                       parserPtr_Type;
+    typedef std::shared_ptr< parser_Type >                                         parserPtr_Type;
 
     typedef typename function_Type::data_Type                                      data_Type;
     typedef typename function_Type::dataPtr_Type                                   dataPtr_Type;
@@ -399,14 +399,14 @@ template< typename BcHandlerType, typename PhysicalSolverType >
 typename BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::boundaryFunctionTime_Type
 BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionSelectorTime()
 {
-    return boost::bind ( &BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionTime, this, _1 );
+    return std::bind ( &BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionTime, this, std::placeholders::_1 );
 }
 
 template< typename BcHandlerType, typename PhysicalSolverType >
 typename BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::boundaryFunctionTimeTimeStep_Type
 BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionSelectorTimeTimeStep()
 {
-    return boost::bind ( &BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionTimeTimeStep, this, _1, _2 );
+    return std::bind ( &BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionTimeTimeStep, this, std::placeholders::_1, std::placeholders::_2 );
 }
 
 template< typename BcHandlerType, typename PhysicalSolverType >
@@ -415,11 +415,11 @@ BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionSelector
 {
     if ( M_parser->countSubstring ( "," ) )
     {
-        return boost::bind ( &BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionTimeSpaceID, this, _1, _2, _3, _4, _5 );
+        return std::bind ( &BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionTimeSpaceID, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
     }
     else
     {
-        return boost::bind ( &BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionTimeSpace, this, _1, _2, _3, _4, _5 );
+        return std::bind ( &BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionTimeSpace, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
     }
 }
 

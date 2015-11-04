@@ -81,7 +81,7 @@ class DOFGatherer
 public:
     //! Public typedefs
     typedef FESpace<MeshType, MapEpetra>       feSpace_Type;
-    typedef boost::shared_ptr<feSpace_Type>    feSpacePtr_Type;
+    typedef std::shared_ptr<feSpace_Type>    feSpacePtr_Type;
 
     //! Constructors and destructor
     //@{
@@ -174,7 +174,7 @@ private:
 
     // Private data
     const idTablePtr_Type M_elementIds;
-    const boost::shared_ptr<FESpace<MeshType, MapEpetra> > M_feSpace;
+    const std::shared_ptr<FESpace<MeshType, MapEpetra> > M_feSpace;
     idSetGroupPtr_Type M_dofGIDTable;
 };
 

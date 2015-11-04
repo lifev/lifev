@@ -76,13 +76,13 @@ int main (int argc, char* argv[])
 {
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+    std::shared_ptr<Epetra_Comm> comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
-    boost::shared_ptr<Epetra_Comm> comm ( new Epetra_SerialComm );
+    std::shared_ptr<Epetra_Comm> comm ( new Epetra_SerialComm );
 #endif
 
     typedef RegionMesh<LinearTriangle> mesh_Type;
-    typedef boost::shared_ptr< mesh_Type > meshPtr_Type;
+    typedef std::shared_ptr< mesh_Type > meshPtr_Type;
 
     // Create the mesh.
     meshPtr_Type mesh ( new mesh_Type ( comm ) );

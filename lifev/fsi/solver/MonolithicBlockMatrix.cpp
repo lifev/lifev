@@ -146,7 +146,7 @@ void MonolithicBlockMatrix::applyPreconditioner ( const matrixPtr_Type prec, mat
 }
 
 
-void MonolithicBlockMatrix::createInterfaceMap ( const MapEpetra& interfaceMap , const std::map<ID, ID>& locDofMap, const UInt subdomainMaxId,  const boost::shared_ptr<Epetra_Comm> epetraWorldComm )
+void MonolithicBlockMatrix::createInterfaceMap ( const MapEpetra& interfaceMap , const std::map<ID, ID>& locDofMap, const UInt subdomainMaxId,  const std::shared_ptr<Epetra_Comm> epetraWorldComm )
 {
     //std::map<ID, ID> const& locDofMap = M_dofStructureToHarmonicExtension->locDofMap();
     std::map<ID, ID>::const_iterator ITrow;

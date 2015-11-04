@@ -4728,7 +4728,7 @@ void shape_terms (
     int /*iblock*/,
     bool wImplicit,
     Real alpha,
-    boost::shared_ptr<MatrixElemental> elmat_convect
+    std::shared_ptr<MatrixElemental> elmat_convect
 )
 {
     // I div d - (grad d)^T
@@ -5018,7 +5018,7 @@ void shape_terms (
 
             // the block iccor of the elementary vector
             MatrixElemental::matrix_view mat = elmat.block ( icoor, kcoor );
-            boost::shared_ptr<MatrixElemental::matrix_view> mat_convect;
+            std::shared_ptr<MatrixElemental::matrix_view> mat_convect;
 
             if (elmat_convect.get() )
             {

@@ -94,9 +94,9 @@ public:
     //! @name Public Types
     //@{
     typedef Teuchos::ParameterList                          pList_Type;
-    typedef boost::shared_ptr<Epetra_Comm>                  commPtr_Type;
+    typedef std::shared_ptr<Epetra_Comm>                  commPtr_Type;
     typedef MeshType                                        mesh_Type;
-    typedef boost::shared_ptr<mesh_Type>                    meshPtr_Type;
+    typedef std::shared_ptr<mesh_Type>                    meshPtr_Type;
 
     typedef std::map<Int, idListPtr_Type >                table_Type;
     //@}
@@ -708,8 +708,8 @@ void GraphCutterZoltan<MeshType>::partitionGraph()
     int argc = 1;
     char* argv;
     float ver;
-    boost::shared_ptr<Epetra_MpiComm> mpiComm
-        = boost::dynamic_pointer_cast<Epetra_MpiComm> (M_comm);
+    std::shared_ptr<Epetra_MpiComm> mpiComm
+        = std::dynamic_pointer_cast<Epetra_MpiComm> (M_comm);
 
     Zoltan_Initialize (argc, &argv, &ver);
     M_zoltanStruct = Zoltan_Create (mpiComm->Comm() );
@@ -718,11 +718,11 @@ void GraphCutterZoltan<MeshType>::partitionGraph()
     int hier_debug_level = M_parameters.get<int> ("hier_debug_level");
     Zoltan_Set_Param (M_zoltanStruct,
                       "DEBUG_LEVEL",
-                      boost::lexical_cast<std::string> (debug_level).c_str() );
+                      std::to_string (debug_level).c_str() );
 
     Zoltan_Set_Param (M_zoltanStruct,
                       "HIER_DEBUG_LEVEL",
-                      boost::lexical_cast<std::string> (hier_debug_level).c_str() );
+                      std::to_string (hier_debug_level).c_str() );
 
     Zoltan_Set_Param (M_zoltanStruct, "LB_METHOD",
                       M_parameters.get<std::string> ("lb_method").c_str() );
@@ -744,10 +744,10 @@ void GraphCutterZoltan<MeshType>::partitionGraph()
     Zoltan_Set_Param (M_zoltanStruct, "TOPOLOGY",
                       M_parameters.get<std::string> ("topology").c_str() );
     Zoltan_Set_Param (M_zoltanStruct, "NUM_GLOBAL_PARTS",
-                      (boost::lexical_cast<std::string>
+                      (std::to_string
                        (M_numParts) ).c_str() );
     Zoltan_Set_Param (M_zoltanStruct, "NUM_LOCAL_PARTS",
-                      (boost::lexical_cast<std::string>
+                      (std::to_string
                        (M_numPartsPerProcessor) ).c_str() );
 
     Zoltan_Set_Num_Obj_Fn (M_zoltanStruct,

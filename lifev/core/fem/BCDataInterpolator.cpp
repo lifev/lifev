@@ -73,7 +73,7 @@ BCDataInterpolator::BCDataInterpolator(  ) :
     M_flagInterpolated ( false ),
     M_verbose ( false )
 {
-    M_userDefinedFunction = boost::bind ( &BCDataInterpolator::interpolatedDataFunction, this, _1, _2, _3, _4, _5 );
+    M_userDefinedFunction = std::bind ( &BCDataInterpolator::interpolatedDataFunction, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
 }
 
 BCDataInterpolator::~BCDataInterpolator()

@@ -70,14 +70,14 @@ public:
     //@{
 
     typedef ZeroDimensionalData                                             data_Type;
-    typedef boost::shared_ptr< data_Type >                                  dataPtr_Type;
+    typedef std::shared_ptr< data_Type >                                  dataPtr_Type;
     typedef ZeroDimensionalSolver                                           solver_Type;
-    typedef boost::shared_ptr< solver_Type >                                solverPtr_Type;
+    typedef std::shared_ptr< solver_Type >                                solverPtr_Type;
 
     typedef ZeroDimensionalBCHandler                                        bc_Type;
-    typedef boost::shared_ptr< bc_Type >                                    bcPtr_Type;
+    typedef std::shared_ptr< bc_Type >                                    bcPtr_Type;
     typedef BCInterface0D< bc_Type, data_Type >                             bcInterface_Type;
-    typedef boost::shared_ptr< bcInterface_Type >                           bcInterfacePtr_Type;
+    typedef std::shared_ptr< bcInterface_Type >                           bcInterfacePtr_Type;
 
     //@}
 

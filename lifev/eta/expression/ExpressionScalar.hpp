@@ -134,7 +134,7 @@ public:
     //@{
 
     typedef ExpressionBase<ExpressionExtractScalar<VectorType> > base_Type;
-    typedef boost::shared_ptr<VectorType>                        containerPtr_Type;
+    typedef std::shared_ptr<VectorType>                        containerPtr_Type;
 
     //@}
 

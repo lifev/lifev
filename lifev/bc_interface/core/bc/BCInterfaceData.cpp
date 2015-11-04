@@ -123,7 +123,15 @@ BCInterfaceData::showMe ( std::ostream& output ) const
 void BCInterfaceData::setBaseString ( const std::string& baseString )
 {
     M_baseString = baseString;
-    boost::replace_all ( M_baseString, " ", "" );
+	std::string search = " ";
+	std::string replace = "";
+
+    for( size_t pos = 0; ; pos += replace.length() ) {
+        pos = M_baseString.find( search, pos );
+        if( pos == std::string::npos ) break;
+        M_baseString.erase( pos, search.length() );
+        M_baseString.insert( pos, replace );
+    }
 }
 
 // ===================================================

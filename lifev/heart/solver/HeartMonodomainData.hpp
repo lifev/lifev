@@ -61,7 +61,7 @@ public:
     //@{
 
 
-    typedef boost::function < Real ( Real const& x,
+    typedef std::function < Real ( Real const& x,
                                      Real const& y,
                                      Real const& z,
                                      Real const& t,
@@ -78,7 +78,7 @@ public:
     //! Constructors
     HeartMonodomainData();
 
-    HeartMonodomainData ( boost::shared_ptr<HeartFunctors> heart);
+    HeartMonodomainData ( std::shared_ptr<HeartFunctors> heart);
 
     HeartMonodomainData ( const HeartMonodomainData& dataMonodomain );
 

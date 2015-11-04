@@ -50,7 +50,7 @@ void minmax_check::inspect (
 
     for ( ; cur != end; ++cur, ++m_errors )
     {
-        std::string linenbr = boost::lexical_cast<string> (
+        std::string linenbr = std::to_string (
                                   std::count ( contents.begin(), (*cur) [0].first, '\n' ) + 1);
 
         error ( library_name, full_path, "violation of Boost min/max guidelines on line " + linenbr );

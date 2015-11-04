@@ -54,7 +54,7 @@ class AztecooOperator : public SolverOperator
 {
 public:
     typedef AztecOO SolverType;
-    typedef boost::shared_ptr<SolverType> SolverType_ptr;
+    typedef std::shared_ptr<SolverType> SolverType_ptr;
 
     AztecooOperator();
 

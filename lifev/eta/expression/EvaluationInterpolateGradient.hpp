@@ -86,7 +86,7 @@ public:
     typedef ETFESpace<MeshType, MapType, SpaceDim, FieldDim> fespace_Type;
 
     //! Type of the pointer on the FESpace
-    typedef boost::shared_ptr<fespace_Type> fespacePtr_Type;
+    typedef std::shared_ptr<fespace_Type> fespacePtr_Type;
 
     //! Type of the vector to be used
     typedef VectorEpetra vector_Type;
@@ -335,7 +335,7 @@ public:
     typedef ETFESpace<MeshType, MapType, SpaceDim, 1> fespace_Type;
 
     //! Type of the pointer on the FESpace
-    typedef boost::shared_ptr<fespace_Type> fespacePtr_Type;
+    typedef std::shared_ptr<fespace_Type> fespacePtr_Type;
 
     //! Type of the vector to be used
     typedef VectorEpetra vector_Type;
@@ -583,7 +583,7 @@ public:
     typedef ETFESpace<MeshType, MapType, 3, 3> fespace_Type;
 
     //! Type of the pointer on the FESpace
-    typedef boost::shared_ptr<fespace_Type> fespacePtr_Type;
+    typedef std::shared_ptr<fespace_Type> fespacePtr_Type;
 
     //! Type of the vector to be used
     typedef VectorEpetra vector_Type;

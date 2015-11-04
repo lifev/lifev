@@ -112,13 +112,13 @@ ETA_Blocks2DTest::run()
 
     const UInt Nelements (10);
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
+    std::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
 
     regularMesh2D ( *fullMeshPtr, 0, Nelements, Nelements, false,
                     2.0,   2.0,
                     -0.0,  -0.0);
 
-    boost::shared_ptr< mesh_Type > meshPtr;
+    std::shared_ptr< mesh_Type > meshPtr;
     {
         MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, M_comm);
         meshPtr = meshPart.meshPartition();
@@ -145,13 +145,13 @@ ETA_Blocks2DTest::run()
     }
 
     std::string uOrder ("P2");
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace
+    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace
     ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 1, M_comm) );
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 2 > > ETuSpace
+    std::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 2 > > ETuSpace
     ( new ETFESpace< mesh_Type, MapEpetra, 2, 2 > (meshPtr, &feTriaP2, & (uSpace->fe().geoMap() ), M_comm) );
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 1 > > ETpSpace
+    std::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 1 > > ETpSpace
     ( new ETFESpace< mesh_Type, MapEpetra, 2, 1 > (meshPtr, &feTriaP1, & (uSpace->fe().geoMap() ), M_comm) );
 
     if (verbose)
@@ -179,7 +179,7 @@ ETA_Blocks2DTest::run()
         std::cout << " -- Assembly of the Stokes matrix ... " << std::flush;
     }
 
-    boost::shared_ptr<blockMatrix_Type> ETsystemMatrix (new blockMatrix_Type ( ETuSpace->map() | ETpSpace->map() ) );
+    std::shared_ptr<blockMatrix_Type> ETsystemMatrix (new blockMatrix_Type ( ETuSpace->map() | ETpSpace->map() ) );
     *ETsystemMatrix *= 0.0;
 
     // ---------------------------------------------------------------

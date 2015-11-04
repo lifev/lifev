@@ -45,7 +45,7 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-PreconditionerLinearSolver::PreconditionerLinearSolver ( boost::shared_ptr<Epetra_Comm> comm ) :
+PreconditionerLinearSolver::PreconditionerLinearSolver ( std::shared_ptr<Epetra_Comm> comm ) :
     Preconditioner          ( comm ),
     M_printSubiterationCount ( false ),
     M_precName              ( "" ),

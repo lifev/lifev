@@ -84,17 +84,17 @@ public:
     typedef typename base::exporterData_Type exporterData_Type;
 
     typedef EpetraExt::HDF5 hdf5_Type;
-    typedef boost::shared_ptr<hdf5_Type> hdf5Ptr_Type;
+    typedef std::shared_ptr<hdf5_Type> hdf5Ptr_Type;
     typedef std::vector<std::vector<Int> > graph_Type;
-    typedef boost::shared_ptr<graph_Type> graphPtr_Type;
-    typedef boost::shared_ptr<std::vector<meshPtr_Type> > serialMeshPtr_Type;
+    typedef std::shared_ptr<graph_Type> graphPtr_Type;
+    typedef std::shared_ptr<std::vector<meshPtr_Type> > serialMeshPtr_Type;
 
     typedef DOFInterface3Dto3D interface_Type;
-    typedef boost::shared_ptr<interface_Type> interfacePtr_Type;
+    typedef std::shared_ptr<interface_Type> interfacePtr_Type;
     typedef std::vector<interfacePtr_Type> interfaceVector_Type;
     // The vector contains pointers to each fluid partition's interface with
     // the solid.
-    typedef boost::shared_ptr<interfaceVector_Type> interfaceVectorPtr_Type;
+    typedef std::shared_ptr<interfaceVector_Type> interfaceVectorPtr_Type;
 
 
     //! @name Constructor & Destructor
@@ -141,7 +141,7 @@ public:
       (as returned by partitionMesh::graph() )
       \param comm - Epetra_Comm* - raw pointer to the Epetra communicator to be used
     */
-    void addPartitionGraph (const graphPtr_Type& graph, boost::shared_ptr<Epetra_Comm>& comm)
+    void addPartitionGraph (const graphPtr_Type& graph, std::shared_ptr<Epetra_Comm>& comm)
     {
         M_graph = graph;
         M_comm = comm;
@@ -154,7 +154,7 @@ public:
       pointers to the mesh partitions (as returned by partitionMesh::meshAllPartitions() )
       \param comm - Epetra_Comm* - raw pointer to the Epetra communicator to be used
     */
-    void addMeshPartitionAll (const serialMeshPtr_Type& meshPointer, boost::shared_ptr<Epetra_Comm>& comm)
+    void addMeshPartitionAll (const serialMeshPtr_Type& meshPointer, std::shared_ptr<Epetra_Comm>& comm)
     {
         M_serialMesh = meshPointer;
         M_parallelMesh.reset();
@@ -171,7 +171,7 @@ public:
       partitionMesh::mesh() )
       \param comm - Epetra_Comm* - raw pointer to the Epetra communicator to be used
     */
-    void addMyMeshPartition ( const meshPtr_Type& /*meshPointer*/, boost::shared_ptr<Epetra_Comm>& /*comm*/ )
+    void addMyMeshPartition ( const meshPtr_Type& /*meshPointer*/, std::shared_ptr<Epetra_Comm>& /*comm*/ )
     {
         /*M_parallelMesh = meshPointer; M_serialMesh.reset(); M_comm = comm;*/
     }
@@ -185,7 +185,7 @@ public:
                           const std::string& type,
                           const Int& firstInterfaceFlag,
                           const Int& secondInterfaceFlag,
-                          const boost::shared_ptr<Epetra_Comm>& comm);
+                          const std::shared_ptr<Epetra_Comm>& comm);
 
     //! Get the number of stored DOF interfaces
     Int queryStoredInterfaceNumber();
@@ -200,12 +200,12 @@ public:
     meshPtr_Type  getMeshPartition();
 
     //! Return a pointer to the k-th interface stored inside the file
-    boost::shared_ptr< std::map<UInt, UInt> > getStoredInterface (Int k) ;
+    std::shared_ptr< std::map<UInt, UInt> > getStoredInterface (Int k) ;
 
     // When reading back partitions and interfaces, the comm member must be set explicitly.
     // This is intended for use with getMeshPartition and getStoredInterface
     //! Set the M_comm data member.
-    void setComm ( const boost::shared_ptr<Epetra_Comm>& comm )
+    void setComm ( const std::shared_ptr<Epetra_Comm>& comm )
     {
         M_comm = comm;
     }
@@ -232,7 +232,7 @@ private:
     std::vector<std::string>               M_interfaceTypes;
     std::vector<Int>                       M_firstInterfaceFlags;
     std::vector<Int>                       M_secondInterfaceFlags;
-    boost::shared_ptr<Epetra_Comm>         M_comm;
+    std::shared_ptr<Epetra_Comm>         M_comm;
 
 };
 
@@ -263,7 +263,7 @@ void ExporterHDF5Mesh3D<MeshType>::addDOFInterface (const interfaceVectorPtr_Typ
                                                     const std::string& type,
                                                     const Int& firstInterfaceFlag,
                                                     const Int& secondInterfaceFlag,
-                                                    const boost::shared_ptr<Epetra_Comm>& comm)
+                                                    const std::shared_ptr<Epetra_Comm>& comm)
 {
     M_DOFInterfaces.push_back (interfaces);
     M_interfaceTypes.push_back (type);
@@ -707,7 +707,7 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
 }
 
 template <typename MeshType>
-boost::shared_ptr< std::map<UInt, UInt> > ExporterHDF5Mesh3D<MeshType>::getStoredInterface (int k)
+std::shared_ptr< std::map<UInt, UInt> > ExporterHDF5Mesh3D<MeshType>::getStoredInterface (int k)
 {
     if (this->M_HDF5.get() == 0)
     {
@@ -723,7 +723,7 @@ boost::shared_ptr< std::map<UInt, UInt> > ExporterHDF5Mesh3D<MeshType>::getStore
     std::stringstream idx;
     idx << k << "." << myRank;
 
-    boost::shared_ptr<std::map<UInt, UInt> > interface (new std::map<UInt, UInt>);
+    std::shared_ptr<std::map<UInt, UInt> > interface (new std::map<UInt, UInt>);
 
     Int size;
     this->M_HDF5->Read ("Interfaces", "Size." + idx.str(), size);

@@ -58,7 +58,7 @@ BCInterfaceFunctionParser< BCHandler, EmptyPhysicalSolver< VectorEpetra > >::ass
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParser< BCHandler, EmptyPhysicalSolver< VectorEpetra > >::setData ( const boost::shared_ptr< BCInterfaceData >& data );
+BCInterfaceFunctionParser< BCHandler, EmptyPhysicalSolver< VectorEpetra > >::setData ( const std::shared_ptr< BCInterfaceData >& data );
 
 
 

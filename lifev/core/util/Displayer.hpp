@@ -67,7 +67,7 @@ public:
     //@{
 
     typedef Epetra_Comm                              comm_Type;
-    typedef boost::shared_ptr< comm_Type >           commPtr_Type;
+    typedef std::shared_ptr< comm_Type >           commPtr_Type;
 
     //@}
 

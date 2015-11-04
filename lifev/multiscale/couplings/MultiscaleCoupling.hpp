@@ -70,7 +70,7 @@ public:
     //@{
 
     typedef MultiscaleCouplingFunction                           couplingFunction_Type;
-    typedef boost::shared_ptr < couplingFunction_Type >          couplingFunctionPtr_Type;
+    typedef std::shared_ptr < couplingFunction_Type >          couplingFunctionPtr_Type;
     typedef std::vector< couplingFunction_Type >                 couplingFunctionsContainer_Type;
 
     typedef std::vector< multiscaleVectorPtr_Type >              couplingVariablesContainer_Type;

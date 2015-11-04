@@ -137,9 +137,9 @@ private:
 
     QuadratureRule M_stdQR;
 
-    boost::shared_ptr<QuadratureRule> M_adaptedQR;
+    std::shared_ptr<QuadratureRule> M_adaptedQR;
 
-    boost::shared_ptr<MeshType> M_mesh;
+    std::shared_ptr<MeshType> M_mesh;
 
     bool M_isAdaptedElement;
 
@@ -223,7 +223,7 @@ public:
     // quadrature rule and the number of Monte-Carlo points.
     // ---------------------------------------------------------------
 
-    MCQuadrature (boost::shared_ptr<MeshType> mesh, const QuadratureRule& stdQR, const UInt& nbPoints)
+    MCQuadrature (std::shared_ptr<MeshType> mesh, const QuadratureRule& stdQR, const UInt& nbPoints)
         : base_Type(),
           M_stdQR (stdQR),
           M_adaptedQR (new QuadratureRule (stdQR) ),
@@ -344,9 +344,9 @@ int main ( int argc, char** argv )
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
     const bool verbose (Comm->MyPID() == 0);
@@ -359,7 +359,7 @@ int main ( int argc, char** argv )
 
     const UInt Nelements (10);
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
+    std::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
 
     regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                     2.0,   2.0,   2.0,
@@ -391,7 +391,7 @@ int main ( int argc, char** argv )
     {
         using namespace ExpressionAssembly;
 
-        boost::shared_ptr<fFunctor> fFct (new fFunctor);
+        std::shared_ptr<fFunctor> fFct (new fFunctor);
 
         integrate (  elements (meshPart.meshPartition() ),
                      quadRuleTetra1pt,
@@ -432,7 +432,7 @@ int main ( int argc, char** argv )
     {
         using namespace ExpressionAssembly;
 
-        boost::shared_ptr<fFunctor> fFct (new fFunctor);
+        std::shared_ptr<fFunctor> fFct (new fFunctor);
 
         MCQuadrature<mesh_Type> myQuad (meshPart.meshPartition(), quadRuleTetra1pt, 1e4);
 

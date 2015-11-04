@@ -187,7 +187,7 @@ css_style()
 
 namespace
 {
-typedef boost::shared_ptr< boost::inspect::inspector > inspector_ptr;
+typedef std::shared_ptr< boost::inspect::inspector > inspector_ptr;
 
 struct inspector_element
 {

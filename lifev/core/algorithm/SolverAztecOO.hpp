@@ -90,10 +90,10 @@ public:
     typedef VectorEpetra                       vector_type;
 
     typedef Preconditioner                     prec_raw_type;
-    typedef boost::shared_ptr<prec_raw_type>   prec_type;
-    typedef boost::shared_ptr<Epetra_Operator> comp_prec_type;
-    typedef boost::shared_ptr<matrix_type>     matrix_ptrtype;
-    typedef boost::shared_ptr<VectorEpetra>    vector_ptrtype;
+    typedef std::shared_ptr<prec_raw_type>   prec_type;
+    typedef std::shared_ptr<Epetra_Operator> comp_prec_type;
+    typedef std::shared_ptr<matrix_type>     matrix_ptrtype;
+    typedef std::shared_ptr<VectorEpetra>    vector_ptrtype;
 
     //@}
 
@@ -107,7 +107,7 @@ public:
     /*!
       @param comm Communicator
      */
-    LIFEV_DEPRECATED ( SolverAztecOO ( const boost::shared_ptr<Epetra_Comm>& comm ) );
+    LIFEV_DEPRECATED ( SolverAztecOO ( const std::shared_ptr<Epetra_Comm>& comm ) );
 
     //@}
 
@@ -197,7 +197,7 @@ public:
     /*!
       @param comm Communicator for the displayer
      */
-    void setCommunicator ( const boost::shared_ptr<Epetra_Comm>& comm );
+    void setCommunicator ( const std::shared_ptr<Epetra_Comm>& comm );
 
     //! Method to set matrix from MatrixEpetra
     /*!
@@ -255,7 +255,7 @@ public:
     void setReusePreconditioner ( const bool reusePreconditioner );
 
     //! Return the displayer
-    boost::shared_ptr<Displayer> displayer();
+    std::shared_ptr<Displayer> displayer();
 
     //@}
 
@@ -293,7 +293,7 @@ private:
     AztecOO                      M_solver;
 
     Teuchos::ParameterList       M_TrilinosParameterList;
-    boost::shared_ptr<Displayer> M_displayer;
+    std::shared_ptr<Displayer> M_displayer;
 
     Real                         M_tolerance;
     Int                          M_maxIter;

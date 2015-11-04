@@ -61,10 +61,10 @@ public:
     //@{
 
     typedef OseenData                               dataFluid_Type;
-    typedef boost::shared_ptr< dataFluid_Type >     dataFluidPtr_Type;
+    typedef std::shared_ptr< dataFluid_Type >     dataFluidPtr_Type;
 
     typedef StructuralConstitutiveLawData           dataSolid_Type;
-    typedef boost::shared_ptr< dataSolid_Type >     dataSolidPtr_Type;
+    typedef std::shared_ptr< dataSolid_Type >     dataSolidPtr_Type;
 
     typedef dataFluid_Type::time_Type               time_Type;
     typedef dataFluid_Type::timePtr_Type            timePtr_Type;
@@ -280,7 +280,7 @@ public:
     /*!
      * @return range of omega for Aitken iterations
      */
-    const boost::array< Real, 2 >& OmegaRange() const
+    const std::array< Real, 2 >& OmegaRange() const
     {
         return M_rangeOmega;
     }
@@ -376,15 +376,15 @@ private:
 
     // Problem - FixedPoint / EJ
     Real                          M_defaultOmega;
-    boost::array< Real, 2 >       M_rangeOmega;
+    std::array< Real, 2 >       M_rangeOmega;
     Int                           M_updateEvery;
 
     // Interface
     Int                           M_fluidInterfaceFlag;
     Int                           M_structureInterfaceFlag;
 
-    boost::scoped_ptr<Int const>  M_fluidInterfaceVertexFlag;
-    boost::scoped_ptr<Int const>  M_structureInterfaceVertexFlag;
+    std::unique_ptr<Int const>  M_fluidInterfaceVertexFlag;
+    std::unique_ptr<Int const>  M_structureInterfaceVertexFlag;
 
     Real                          M_interfaceTolerance;
 

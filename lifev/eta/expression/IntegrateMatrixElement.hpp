@@ -100,10 +100,10 @@ public:
     //@{
 
     //! Full data constructor
-    IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
+    IntegrateMatrixElement (const std::shared_ptr<MeshType>& mesh,
                             const QRAdapterType& qrAdapter,
-                            const boost::shared_ptr<TestSpaceType>& testSpace,
-                            const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+                            const std::shared_ptr<TestSpaceType>& testSpace,
+                            const std::shared_ptr<SolutionSpaceType>& solutionSpace,
                             const ExpressionType& expression,
                             const UInt offsetUp = 0,
                             const UInt offsetLeft = 0,
@@ -113,10 +113,10 @@ public:
                             const bool subDomain = false );
 
     //! Full data constructor
-    IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
+    IntegrateMatrixElement (const std::shared_ptr<MeshType>& mesh,
                             const QRAdapterType& qrAdapter,
-                            const boost::shared_ptr<TestSpaceType>& testSpace,
-                            const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+                            const std::shared_ptr<TestSpaceType>& testSpace,
+                            const std::shared_ptr<SolutionSpaceType>& solutionSpace,
                             const ExpressionType& expression,
                             const OpenMPParameters& ompParams,
                             const UInt offsetUp = 0,
@@ -161,7 +161,7 @@ public:
 
     //! Operator wrapping the addTo method (for shared_ptr)
     template <typename MatrixType>
-    inline void operator>> (boost::shared_ptr<MatrixType> mat)
+    inline void operator>> (std::shared_ptr<MatrixType> mat)
     {
         if (mat->filled() )
         {
@@ -226,7 +226,7 @@ public:
       Specialized for the case where the matrix is passed as a shared_ptr
      */
     template <typename MatrixType>
-    inline void addTo (boost::shared_ptr<MatrixType> mat)
+    inline void addTo (std::shared_ptr<MatrixType> mat)
     {
         ASSERT (mat != 0, " Cannot assemble with an empty matrix");
         addTo (*mat);
@@ -252,7 +252,7 @@ public:
       Specialized for the case where the matrix is passed as a shared_ptr
      */
     template <typename MatrixType>
-    inline void addToClosed (boost::shared_ptr<MatrixType> mat)
+    inline void addToClosed (std::shared_ptr<MatrixType> mat)
     {
         ASSERT (mat != 0, " Cannot assemble with an empty matrix");
         addToClosed (*mat);
@@ -286,14 +286,14 @@ private:
     //@}
 
     // Pointer on the mesh
-    boost::shared_ptr<MeshType> M_mesh;
+    std::shared_ptr<MeshType> M_mesh;
 
     // Quadrature to be used
     QRAdapterType M_qrAdapter;
 
     // Shared pointer on the Spaces
-    boost::shared_ptr<TestSpaceType> M_testSpace;
-    boost::shared_ptr<SolutionSpaceType> M_solutionSpace;
+    std::shared_ptr<TestSpaceType> M_testSpace;
+    std::shared_ptr<SolutionSpaceType> M_solutionSpace;
 
     // Tree to compute the values for the assembly
     evaluation_Type M_evaluation;
@@ -332,10 +332,10 @@ private:
 
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
 IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>::
-IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
+IntegrateMatrixElement (const std::shared_ptr<MeshType>& mesh,
                         const QRAdapterType& qrAdapter,
-                        const boost::shared_ptr<TestSpaceType>& testSpace,
-                        const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+                        const std::shared_ptr<TestSpaceType>& testSpace,
+                        const std::shared_ptr<SolutionSpaceType>& solutionSpace,
                         const ExpressionType& expression,
                         const UInt offsetUp,
                         const UInt offsetLeft,
@@ -397,10 +397,10 @@ IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
 
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
 IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>::
-IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
+IntegrateMatrixElement (const std::shared_ptr<MeshType>& mesh,
                         const QRAdapterType& qrAdapter,
-                        const boost::shared_ptr<TestSpaceType>& testSpace,
-                        const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+                        const std::shared_ptr<TestSpaceType>& testSpace,
+                        const std::shared_ptr<SolutionSpaceType>& solutionSpace,
                         const ExpressionType& expression,
                         const OpenMPParameters& ompParams,
                         const UInt offsetUp,
@@ -702,8 +702,8 @@ addToClosed (MatrixType& mat)
 
 
         // Update the currentFEs
-        boost::scoped_ptr<ETCurrentFE<MeshType::S_geoDimensions, 1> > globalCFE_std;
-        boost::scoped_ptr<ETCurrentFE<MeshType::S_geoDimensions, 1> > globalCFE_adapted;
+        std::unique_ptr<ETCurrentFE<MeshType::S_geoDimensions, 1> > globalCFE_std;
+        std::unique_ptr<ETCurrentFE<MeshType::S_geoDimensions, 1> > globalCFE_adapted;
 
         switch (MeshType::geoShape_Type::BasRefSha::S_shape)
         {

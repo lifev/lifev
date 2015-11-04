@@ -75,17 +75,17 @@ namespace ElectrophysiologyUtility
  * @param fileName    Name of the HDF5 file to read from
  * @param localMesh   Pointer to the mesh
  */
-template<typename Mesh> inline void importFibers (  boost::shared_ptr<VectorEpetra> fiberVector, const std::string& fileName, boost::shared_ptr< Mesh > localMesh, const std::string& filePath = "./" )
+template<typename Mesh> inline void importFibers (  std::shared_ptr<VectorEpetra> fiberVector, const std::string& fileName, std::shared_ptr< Mesh > localMesh, const std::string& filePath = "./" )
 {
     typedef Mesh                                                                          mesh_Type;
     typedef ExporterData<mesh_Type>                                                       exporterData_Type;
-    typedef boost::shared_ptr< LifeV::Exporter<LifeV::RegionMesh<LifeV::LinearTetra> > >  filterPtr_Type;
+    typedef std::shared_ptr< LifeV::Exporter<LifeV::RegionMesh<LifeV::LinearTetra> > >  filterPtr_Type;
     typedef LifeV::ExporterHDF5< RegionMesh<LinearTetra> >                                hdf5Filter_Type;
-    typedef boost::shared_ptr<hdf5Filter_Type>                                            hdf5FilterPtr_Type;
+    typedef std::shared_ptr<hdf5Filter_Type>                                            hdf5FilterPtr_Type;
 
 
-    boost::shared_ptr<Epetra_Comm> comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > fiberSpace ( new FESpace< mesh_Type, MapEpetra > ( localMesh, "P1", 3, comm ) );
+    std::shared_ptr<Epetra_Comm> comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > fiberSpace ( new FESpace< mesh_Type, MapEpetra > ( localMesh, "P1", 3, comm ) );
 
     exporterData_Type impData (exporterData_Type::VectorField, "fibers.00000", fiberSpace,
                                fiberVector, UInt (0), exporterData_Type::UnsteadyRegime);
@@ -106,17 +106,17 @@ template<typename Mesh> inline void importFibers (  boost::shared_ptr<VectorEpet
  * @param fieldName   Name of the scalar field in the HDF5 file
  * @param localMesh   Pointer to the mesh
  */
-template<typename Mesh> inline void importScalarField (  boost::shared_ptr<VectorEpetra> vector, const std::string& fileName, const std::string& fieldName, boost::shared_ptr< Mesh > localMesh  )
+template<typename Mesh> inline void importScalarField (  std::shared_ptr<VectorEpetra> vector, const std::string& fileName, const std::string& fieldName, std::shared_ptr< Mesh > localMesh  )
 {
     typedef Mesh                                                                         mesh_Type;
     typedef ExporterData<mesh_Type>                                                      exporterData_Type;
-    typedef boost::shared_ptr< LifeV::Exporter<LifeV::RegionMesh<LifeV::LinearTetra> > > filterPtr_Type;
+    typedef std::shared_ptr< LifeV::Exporter<LifeV::RegionMesh<LifeV::LinearTetra> > > filterPtr_Type;
     typedef LifeV::ExporterHDF5< RegionMesh<LinearTetra> >                               hdf5Filter_Type;
-    typedef boost::shared_ptr<hdf5Filter_Type>                                           hdf5FilterPtr_Type;
+    typedef std::shared_ptr<hdf5Filter_Type>                                           hdf5FilterPtr_Type;
 
 
-    boost::shared_ptr<Epetra_Comm>  comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > feSpace ( new FESpace< mesh_Type, MapEpetra > ( localMesh, "P1", 1, comm ) );
+    std::shared_ptr<Epetra_Comm>  comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > feSpace ( new FESpace< mesh_Type, MapEpetra > ( localMesh, "P1", 1, comm ) );
 
     exporterData_Type impData (exporterData_Type::ScalarField, fieldName + ".00000", feSpace,
                                vector, UInt (0), exporterData_Type::UnsteadyRegime);
@@ -136,17 +136,17 @@ template<typename Mesh> inline void importScalarField (  boost::shared_ptr<Vecto
  * @param fieldName   Name of the vector field in the HDF5 file
  * @param localMesh   Pointer to the mesh
  */
-template<typename Mesh> inline void importVectorField (  boost::shared_ptr<VectorEpetra> vector, const std::string& fileName, const std::string& fieldName, boost::shared_ptr< Mesh > localMesh  , const std::string& postDir = "./")
+template<typename Mesh> inline void importVectorField (  std::shared_ptr<VectorEpetra> vector, const std::string& fileName, const std::string& fieldName, std::shared_ptr< Mesh > localMesh  , const std::string& postDir = "./")
 {
     typedef Mesh                                                                         mesh_Type;
     typedef ExporterData<mesh_Type>                                                      exporterData_Type;
-    typedef boost::shared_ptr< LifeV::Exporter<LifeV::RegionMesh<LifeV::LinearTetra> > > filterPtr_Type;
+    typedef std::shared_ptr< LifeV::Exporter<LifeV::RegionMesh<LifeV::LinearTetra> > > filterPtr_Type;
     typedef LifeV::ExporterHDF5< RegionMesh<LinearTetra> >                               hdf5Filter_Type;
-    typedef boost::shared_ptr<hdf5Filter_Type>                                           hdf5FilterPtr_Type;
+    typedef std::shared_ptr<hdf5Filter_Type>                                           hdf5FilterPtr_Type;
 
 
-    boost::shared_ptr<Epetra_Comm>  comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > feSpace ( new FESpace< mesh_Type, MapEpetra > ( localMesh, "P1", 3, comm ) );
+    std::shared_ptr<Epetra_Comm>  comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > feSpace ( new FESpace< mesh_Type, MapEpetra > ( localMesh, "P1", 3, comm ) );
 
     exporterData_Type impData (exporterData_Type::VectorField, fieldName + ".00000", feSpace,
                                vector, UInt (0), exporterData_Type::UnsteadyRegime);
@@ -173,10 +173,10 @@ template<typename Mesh> inline void importVectorField (  boost::shared_ptr<Vecto
  *                            fy in each row for all the mesh
  *                            fz in each row for all the mesh
  */
-inline void importFibersFromTextFile ( boost::shared_ptr<VectorEpetra> fiberVector, std::string fileName, std::string filePath, int format = 0 )
+inline void importFibersFromTextFile ( std::shared_ptr<VectorEpetra> fiberVector, std::string fileName, std::string filePath, int format = 0 )
 {
     typedef VectorEpetra                                    vector_Type;
-    typedef boost::shared_ptr<vector_Type>                  vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type>                  vectorPtr_Type;
 
     std::ifstream fibers ( (filePath + fileName).c_str() );
 
@@ -314,7 +314,7 @@ inline void setupFibers ( VectorEpetra& fiberVector, Real fx, Real fy, Real fz)
  * @param value       value to set on that boundary
  * @param flag        flag of the boundary
  */
-inline void setValueOnBoundary ( VectorEpetra& vec, boost::shared_ptr<  RegionMesh<LinearTetra> > fullMesh, Real value, UInt flag)
+inline void setValueOnBoundary ( VectorEpetra& vec, std::shared_ptr<  RegionMesh<LinearTetra> > fullMesh, Real value, UInt flag)
 {
 
     for ( Int j (0); j < vec.epetraVector().MyLength() ; ++j )
@@ -337,7 +337,7 @@ inline void setValueOnBoundary ( VectorEpetra& vec, boost::shared_ptr<  RegionMe
  * @param value       value to set on that boundary
  * @param flags        flags of the boundary
  */
-inline void setValueOnBoundary ( VectorEpetra& vec, boost::shared_ptr<  RegionMesh<LinearTetra> > fullMesh, Real value, std::vector<UInt> flags)
+inline void setValueOnBoundary ( VectorEpetra& vec, std::shared_ptr<  RegionMesh<LinearTetra> > fullMesh, Real value, std::vector<UInt> flags)
 {
     for ( int j (0); j < vec.epetraVector().MyLength() ; ++j )
     {
@@ -386,7 +386,7 @@ inline void rescaleVector ( VectorEpetra& vector, Real scaleFactor = 1.0 )
  * @param flag        flag of the boundary
  * @param scaleFactor Additional scaling factor (defaults to 1)
  */
-inline void rescaleVectorOnBoundary ( VectorEpetra& vector, boost::shared_ptr<  RegionMesh<LinearTetra> > fullMesh, UInt flag, Real scaleFactor = 1.0 )
+inline void rescaleVectorOnBoundary ( VectorEpetra& vector, std::shared_ptr<  RegionMesh<LinearTetra> > fullMesh, UInt flag, Real scaleFactor = 1.0 )
 {
     for ( Int j (0); j < vector.epetraVector().MyLength() ; ++j )
     {
@@ -474,22 +474,22 @@ inline void addNoiseToFibers ( VectorEpetra& fiberVector, Real magnitude = 0.01,
 
 
 
-typedef boost::function < Real (const Real&  t,
+typedef std::function < Real (const Real&  t,
                                 const Real&  x,
                                 const Real&  y,
                                 const Real&  z,
                                 const ID&    i ) >   function_Type;
-template<typename Mesh> inline void setFibersFromFunction (  boost::shared_ptr<VectorEpetra> vector, boost::shared_ptr< Mesh > localMesh, function_Type f)
+template<typename Mesh> inline void setFibersFromFunction (  std::shared_ptr<VectorEpetra> vector, std::shared_ptr< Mesh > localMesh, function_Type f)
 {
     typedef Mesh                                                                         mesh_Type;
     typedef ExporterData<mesh_Type>                                                      exporterData_Type;
-    typedef boost::shared_ptr< LifeV::Exporter<LifeV::RegionMesh<LifeV::LinearTetra> > > filterPtr_Type;
+    typedef std::shared_ptr< LifeV::Exporter<LifeV::RegionMesh<LifeV::LinearTetra> > > filterPtr_Type;
     typedef LifeV::ExporterHDF5< RegionMesh<LinearTetra> >                               hdf5Filter_Type;
-    typedef boost::shared_ptr<hdf5Filter_Type>                                           hdf5FilterPtr_Type;
+    typedef std::shared_ptr<hdf5Filter_Type>                                           hdf5FilterPtr_Type;
 
 
-    boost::shared_ptr<Epetra_Comm>  comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > feSpace ( new FESpace< mesh_Type, MapEpetra > ( localMesh, "P1", 3, comm ) );
+    std::shared_ptr<Epetra_Comm>  comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > feSpace ( new FESpace< mesh_Type, MapEpetra > ( localMesh, "P1", 3, comm ) );
 
     feSpace->interpolate (
         static_cast<FESpace<RegionMesh<LinearTetra>, MapEpetra>::function_Type> (f),

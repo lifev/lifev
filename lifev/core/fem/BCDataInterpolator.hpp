@@ -108,8 +108,8 @@ public:
     typedef Epetra_SerialDenseSolver        solver_Type;
     typedef Epetra_SerialDenseMatrix        matrix_Type;
     typedef Epetra_SerialDenseVector        vector_Type;
-    typedef boost::shared_ptr<matrix_Type>  matrixPtr_Type;
-    typedef boost::shared_ptr<vector_Type>  vectorPtr_Type;
+    typedef std::shared_ptr<matrix_Type>  matrixPtr_Type;
+    typedef std::shared_ptr<vector_Type>  vectorPtr_Type;
 
 
     /*! @enum BCInterpolation_Type

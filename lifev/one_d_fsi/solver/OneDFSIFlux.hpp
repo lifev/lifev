@@ -71,7 +71,7 @@ public:
     typedef FactorySingleton< Factory< OneDFSIFlux, OneDFSI::fluxTerm_Type > > factoryFlux_Type;
 
     typedef OneDFSIPhysics                              physics_Type;
-    typedef boost::shared_ptr< physics_Type >           physicsPtr_Type;
+    typedef std::shared_ptr< physics_Type >           physicsPtr_Type;
 
     typedef OneDFSIData::container2D_Type               container2D_Type;
 

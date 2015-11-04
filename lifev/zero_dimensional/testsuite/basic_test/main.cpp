@@ -71,7 +71,7 @@ Int
 main ( Int argc, char** argv )
 {
     //Setup main communicator
-    boost::shared_ptr< Epetra_Comm > comm;
+    std::shared_ptr< Epetra_Comm > comm;
 
     //Setup MPI variables
     Int numberOfProcesses (1);
@@ -134,10 +134,10 @@ main ( Int argc, char** argv )
     zeroDimensionalBC.createHandler();
     zeroDimensionalBC.fillHandler ( circuitDataFile, "Files" );
 
-    boost::shared_ptr< ZeroDimensionalData > zeroDimensionalData ( new ZeroDimensionalData );
+    std::shared_ptr< ZeroDimensionalData > zeroDimensionalData ( new ZeroDimensionalData );
     zeroDimensionalData->setup ( dataFile, zeroDimensionalBC.handler() );
 
-    boost::shared_ptr< ZeroDimensionalSolver > zeroDimensionalSolver ( new ZeroDimensionalSolver ( zeroDimensionalData->unknownCounter(), comm, zeroDimensionalData->circuitData() ) );
+    std::shared_ptr< ZeroDimensionalSolver > zeroDimensionalSolver ( new ZeroDimensionalSolver ( zeroDimensionalData->unknownCounter(), comm, zeroDimensionalData->circuitData() ) );
     zeroDimensionalSolver->setup ( zeroDimensionalData->solverData() );
 
     zeroDimensionalData->showMe();

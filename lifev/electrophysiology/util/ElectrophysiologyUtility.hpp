@@ -51,7 +51,7 @@
 #include <time.h>       /* time */
 #include <math.h>       /* floor */
 #include <lifev/core/mesh/NeighborMarker.hpp>
-
+#include <unordered_set>
 
 namespace LifeV
 {
@@ -61,7 +61,7 @@ namespace LifeV
 namespace ElectrophysiologyUtility
 {
 
-typedef boost::unordered_set<ID> neighbors_Type;
+typedef std::unordered_set<ID> neighbors_Type;
 typedef std::vector<neighbors_Type> neighborList_Type;
 
 //! HeartUtility - A string parser grammar based on \c boost::spirit::qi
@@ -84,7 +84,7 @@ typedef std::vector<neighbors_Type> neighborList_Type;
  * @param fullMesh   Pointer to the mesh.
  * @param Comm   EpetraMpi comunicator.
  */
-template<typename Mesh> inline void appliedCurrentClosestPointWithinRadius (std::vector<Real>& point, Real Radius, boost::shared_ptr<VectorEpetra> appliedCurrentVector, Real valueAppliedCurrent,  boost::shared_ptr< Mesh > fullMesh, boost::shared_ptr<Epetra_Comm> Comm )
+template<typename Mesh> inline void appliedCurrentClosestPointWithinRadius (std::vector<Real>& point, Real Radius, std::shared_ptr<VectorEpetra> appliedCurrentVector, Real valueAppliedCurrent,  std::shared_ptr< Mesh > fullMesh, std::shared_ptr<Epetra_Comm> Comm )
 {
     Int n = appliedCurrentVector -> epetraVector().MyLength();
 
@@ -127,7 +127,7 @@ template<typename Mesh> inline void appliedCurrentClosestPointWithinRadius (std:
  * @param valueAppliedCurrent    Value of the current to apply at the specified point.
  * @param fullMesh   Pointer to the mesh.
  */
-template<typename Mesh> inline void appliedCurrentPointsWithinRadius (std::vector<Real>& point, Real Radius, boost::shared_ptr<VectorEpetra> appliedCurrentVector, Real valueAppliedCurrent,  boost::shared_ptr< Mesh > fullMesh )
+template<typename Mesh> inline void appliedCurrentPointsWithinRadius (std::vector<Real>& point, Real Radius, std::shared_ptr<VectorEpetra> appliedCurrentVector, Real valueAppliedCurrent,  std::shared_ptr< Mesh > fullMesh )
 {
     Int n = appliedCurrentVector -> epetraVector().MyLength();
 
@@ -164,7 +164,7 @@ template<typename Mesh> inline void appliedCurrentPointsWithinRadius (std::vecto
  * @param Comm   EpetraMpi comunicator.
  * @return The ids of the closest point
  */
-template<typename Mesh> inline UInt findClosestPoint (std::vector<Real>& point, boost::shared_ptr<VectorEpetra> vec,  boost::shared_ptr< Mesh > fullMesh, boost::shared_ptr<Epetra_Comm> Comm )
+template<typename Mesh> inline UInt findClosestPoint (std::vector<Real>& point, std::shared_ptr<VectorEpetra> vec,  std::shared_ptr< Mesh > fullMesh, std::shared_ptr<Epetra_Comm> Comm )
 {
     Int n = vec -> epetraVector().MyLength();
     Real Radius = 100000.0;
@@ -209,7 +209,7 @@ template<typename Mesh> inline UInt findClosestPoint (std::vector<Real>& point, 
  * @param vec    Vector epetra used to recover Global id.
  * @param fullMesh   Pointer to the mesh.
  */
-template<typename Mesh> inline void allIdsPointsWithGivenFlag (std::vector<ID>& containerIds, UInt flag, boost::shared_ptr<VectorEpetra> vec,  boost::shared_ptr< Mesh > fullMesh )
+template<typename Mesh> inline void allIdsPointsWithGivenFlag (std::vector<ID>& containerIds, UInt flag, std::shared_ptr<VectorEpetra> vec,  std::shared_ptr< Mesh > fullMesh )
 {
     for ( Int j (0); j < vec->epetraVector().MyLength() ; ++j )
     {
@@ -280,7 +280,7 @@ template<typename Type> inline void randomNPointsInSet (std::vector<Type>& conta
  * @param N number of values we want to select
  * @param fullMesh mesh used to determine the neighborhood
  */
-template<typename Mesh> inline void randomNPointsInSetAndNeighborhood (std::vector<ID>& container, std::vector<ID>& selectedValue, std::vector<Real>& activationTime, Real deltaT, UInt N,  Mesh& fullMesh, boost::shared_ptr<Epetra_Comm> Comm)
+template<typename Mesh> inline void randomNPointsInSetAndNeighborhood (std::vector<ID>& container, std::vector<ID>& selectedValue, std::vector<Real>& activationTime, Real deltaT, UInt N,  Mesh& fullMesh, std::shared_ptr<Epetra_Comm> Comm)
 {
     /* initialize random seed: */
     Teuchos::ScalarTraits<Real>::seedrandom (time (NULL) );
@@ -307,7 +307,7 @@ template<typename Mesh> inline void randomNPointsInSetAndNeighborhood (std::vect
  * @param appliedCurrentVector vector containg the current
  * @param valueAppliedCurrent value of the current we want to apply
  */
-template<typename Type> inline void applyCurrentGivenSetOfPoints (std::vector<Type>& container, boost::shared_ptr<VectorEpetra> appliedCurrentVector, Real valueAppliedCurrent )
+template<typename Type> inline void applyCurrentGivenSetOfPoints (std::vector<Type>& container, std::shared_ptr<VectorEpetra> appliedCurrentVector, Real valueAppliedCurrent )
 {
     for (int i (0); i < container.size(); i++)
     {
@@ -329,7 +329,7 @@ template<typename Type> inline void applyCurrentGivenSetOfPoints (std::vector<Ty
  * @param shiftVector vector containig the index that refers to the value of applied current in each PMJ
  * @param currentTime current time
  */
-template<typename Type> inline void applyCurrentGivenSetOfPoints (std::vector<Type>& container, std::vector<Real> activationTime, boost::shared_ptr<VectorEpetra> appliedCurrentVector, std::vector<Real>& valueAppliedCurrent, std::vector<UInt>& shiftVector, Real currentTime )
+template<typename Type> inline void applyCurrentGivenSetOfPoints (std::vector<Type>& container, std::vector<Real> activationTime, std::shared_ptr<VectorEpetra> appliedCurrentVector, std::vector<Real>& valueAppliedCurrent, std::vector<UInt>& shiftVector, Real currentTime )
 {
     for (int i (0); i < container.size(); i++)
     {

@@ -51,7 +51,7 @@ using namespace std;
 
 int main ( int argc, char* argv[] )
 {
-    boost::shared_ptr<Epetra_Comm> Comm;
+    std::shared_ptr<Epetra_Comm> Comm;
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
     Comm.reset (new Epetra_MpiComm (MPI_COMM_WORLD) );
@@ -64,9 +64,9 @@ int main ( int argc, char* argv[] )
 
     typedef LinearTriangle                     geoElement_Type;
     typedef RegionMesh < geoElement_Type >     mesh_Type;
-    typedef boost::shared_ptr < mesh_Type >    meshPtr_Type;
+    typedef std::shared_ptr < mesh_Type >    meshPtr_Type;
     typedef VectorEpetra                       vector_Type;
-    typedef boost::shared_ptr<vector_Type>     vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type>     vectorPtr_Type;
 
     MeshData meshData;
     meshData.setup (dataFile, "space_discretization");
@@ -84,7 +84,7 @@ int main ( int argc, char* argv[] )
     localMeshPtr = meshPart.meshPartition();
 
     // Creating and setting up a GhostHandler object
-    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > FESpaceP1 (new FESpace<mesh_Type, MapEpetra> (localMeshPtr, "P1", 1, Comm) );
+    std::shared_ptr<FESpace<mesh_Type, MapEpetra> > FESpaceP1 (new FESpace<mesh_Type, MapEpetra> (localMeshPtr, "P1", 1, Comm) );
     GhostHandler<mesh_Type> ghostObj ( fullMeshPtr, localMeshPtr, FESpaceP1->mapPtr(), Comm );
     ghostObj.setUpNeighbors();
 

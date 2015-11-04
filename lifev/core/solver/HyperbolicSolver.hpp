@@ -127,23 +127,23 @@ public:
     //! @name Public Types
     //@{
 
-    typedef boost::function < Real ( const Real&, const Real&, const Real&,
+    typedef std::function < Real ( const Real&, const Real&, const Real&,
                                      const Real&, const UInt& ) >
     Function_Type;
 
     typedef HyperbolicData< Mesh >                   data_Type;
 
     typedef BCHandler                                bchandler_Type;
-    typedef boost::shared_ptr< bchandler_Type >      bchandlerPtr_Type;
+    typedef std::shared_ptr< bchandler_Type >      bchandlerPtr_Type;
 
     typedef typename SolverType::vector_type         vector_Type;
-    typedef boost::shared_ptr< vector_Type >         vectorPtr_Type;
+    typedef std::shared_ptr< vector_Type >         vectorPtr_Type;
 
     typedef Epetra_Comm                              comm_Type;
-    typedef boost::shared_ptr< comm_Type >           commPtr_Type;
+    typedef std::shared_ptr< comm_Type >           commPtr_Type;
 
     typedef AbstractNumericalFlux<Mesh, SolverType>  flux_Type;
-    typedef boost::shared_ptr< flux_Type >           fluxPtr_Type;
+    typedef std::shared_ptr< flux_Type >           fluxPtr_Type;
 
     typedef Real                                     ghostData_Type;
     typedef std::vector< ghostData_Type >            ghostDataContainer_Type;

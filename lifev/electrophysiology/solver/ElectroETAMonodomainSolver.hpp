@@ -102,12 +102,12 @@ public:
     //! Mesh
     typedef Mesh                                                        mesh_Type;
 
-    typedef boost::shared_ptr<mesh_Type>                                meshPtr_Type;
+    typedef std::shared_ptr<mesh_Type>                                meshPtr_Type;
 
     //! Distributed vector // For parallel usage
     typedef VectorEpetra                                                vector_Type;
 
-    typedef boost::shared_ptr<VectorEpetra>                             vectorPtr_Type;
+    typedef std::shared_ptr<VectorEpetra>                             vectorPtr_Type;
 
     typedef vector_Type                                                 solution_Type;
 
@@ -118,39 +118,39 @@ public:
     //! Distributed Matrix // For parallel usage
     typedef MatrixEpetra<Real>                                          matrix_Type;
 
-    typedef boost::shared_ptr<matrix_Type>                              matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type>                              matrixPtr_Type;
 
     //! Communicator to exchange informations among processes
     typedef Epetra_Comm                                                 comm_Type;
 
-    typedef boost::shared_ptr<comm_Type>                                commPtr_Type;
+    typedef std::shared_ptr<comm_Type>                                commPtr_Type;
 
     //! Expression template  scalar finite element space
     //! To be used in the expression assembly namespace
     typedef ETFESpace<mesh_Type, MapEpetra, 3, 1>                       ETFESpace_Type;
 
-    typedef boost::shared_ptr<ETFESpace<mesh_Type, MapEpetra, 3, 1> >   ETFESpacePtr_Type;
+    typedef std::shared_ptr<ETFESpace<mesh_Type, MapEpetra, 3, 1> >   ETFESpacePtr_Type;
 
     //! Expression template vectorial finite element space
     //! To be used in the expression assembly namespace
     typedef ETFESpace<mesh_Type, MapEpetra, 3, 3>                       ETFESpaceVectorial_Type;
 
-    typedef boost::shared_ptr<ETFESpaceVectorial_Type>                  ETFESpaceVectorialPtr_Type;
+    typedef std::shared_ptr<ETFESpaceVectorial_Type>                  ETFESpaceVectorialPtr_Type;
 
     //! Finite element space
     typedef FESpace<mesh_Type, MapEpetra>                               feSpace_Type;
 
-    typedef boost::shared_ptr<feSpace_Type>                             feSpacePtr_Type;
+    typedef std::shared_ptr<feSpace_Type>                             feSpacePtr_Type;
 
     //! Linear Solver
     typedef LinearSolver                                                linearSolver_Type;
 
-    typedef boost::shared_ptr<LinearSolver>                             linearSolverPtr_Type;
+    typedef std::shared_ptr<LinearSolver>                             linearSolverPtr_Type;
 
     //! Exporter to save the solution
     typedef Exporter<mesh_Type>                                         IOFile_Type;
 
-    typedef boost::shared_ptr<IOFile_Type>                              IOFilePtr_Type;
+    typedef std::shared_ptr<IOFile_Type>                              IOFilePtr_Type;
 
     //! Exporter data
     typedef ExporterData<mesh_Type>                                     IOData_Type;
@@ -164,12 +164,12 @@ public:
     //! Preconditioner
     typedef LifeV::Preconditioner                                       basePrec_Type;
 
-    typedef boost::shared_ptr<basePrec_Type>                            basePrecPtr_Type;
+    typedef std::shared_ptr<basePrec_Type>                            basePrecPtr_Type;
 
     //! MultiLevel Preconditioner
     typedef LifeV::PreconditionerML                                     prec_Type;
 
-    typedef boost::shared_ptr<prec_Type>                                precPtr_Type;
+    typedef std::shared_ptr<prec_Type>                                precPtr_Type;
 
     //! Ionic model
     typedef IonicModel                                                  ionicModel_Type;
@@ -177,13 +177,13 @@ public:
     //! Base class of the ionic model
     typedef ElectroIonicModel                                           superIonicModel;
 
-    typedef boost::shared_ptr<superIonicModel>                          ionicModelPtr_Type;
+    typedef std::shared_ptr<superIonicModel>                          ionicModelPtr_Type;
 
     //! xml list to read parameters
     typedef Teuchos::ParameterList                                      list_Type;
 
     //! boost function
-    typedef boost::function < Real (const Real& t,
+    typedef std::function < Real (const Real& t,
                                     const Real& x,
                                     const Real& y,
                                     const Real& z,
@@ -205,8 +205,8 @@ public:
     //! Constructor
     /*!
      * @param GetPot datafile (for preconditioner)
-     * @param boost::shared_ptr<IonicModel>  chosen ionic model pointer
-     * @param boost::shared_ptr<Mesh> Pointer to the partitioned mesh
+     * @param std::shared_ptr<IonicModel>  chosen ionic model pointer
+     * @param std::shared_ptr<Mesh> Pointer to the partitioned mesh
      */
     ElectroETAMonodomainSolver (GetPot& dataFile, ionicModelPtr_Type model,
                                 meshPtr_Type meshPtr);
@@ -226,8 +226,8 @@ public:
      * @param string file name of the mesh
      * @param string path to the mesh
      * @param GetPot datafile (for preconditioner)
-     * @param boost::shared_ptr<IonicModel> chosen ionic model pointer
-     * @param boost::shared_ptr<Epetra_Comm> Epetra communicator
+     * @param std::shared_ptr<IonicModel> chosen ionic model pointer
+     * @param std::shared_ptr<Epetra_Comm> Epetra communicator
      */
     ElectroETAMonodomainSolver (std::string meshName, std::string meshPath,
                                 GetPot& dataFile, ionicModelPtr_Type model, commPtr_Type comm);
@@ -1535,7 +1535,7 @@ template<typename Mesh, typename IonicModel>
 void ElectroETAMonodomainSolver<Mesh, IonicModel>::setupFibers()
 {
 
-    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > Space3D (
+    std::shared_ptr<FESpace<mesh_Type, MapEpetra> > Space3D (
         new FESpace<mesh_Type, MapEpetra> (M_localMeshPtr, M_elementsOrder,
                                            3, M_commPtr) );
 
@@ -1555,7 +1555,7 @@ template<typename Mesh, typename IonicModel>
 void ElectroETAMonodomainSolver<Mesh, IonicModel>::setupFibers (
     VectorSmall<3> fibers)
 {
-    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > Space3D (
+    std::shared_ptr<FESpace<mesh_Type, MapEpetra> > Space3D (
         new FESpace<mesh_Type, MapEpetra> (M_localMeshPtr, M_elementsOrder,
                                            3, M_commPtr) );
 
@@ -1568,7 +1568,7 @@ template<typename Mesh, typename IonicModel>
 void ElectroETAMonodomainSolver<Mesh, IonicModel>::exportFiberDirection (
     std::string postDir)
 {
-    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > Space3D (
+    std::shared_ptr<FESpace<mesh_Type, MapEpetra> > Space3D (
         new FESpace<mesh_Type, MapEpetra> (M_localMeshPtr, M_elementsOrder,
                                            3, M_commPtr) );
 
@@ -1586,7 +1586,7 @@ template<typename Mesh, typename IonicModel>
 void ElectroETAMonodomainSolver<Mesh, IonicModel>::exportFiberDirection (
     IOFile_Type& exporter)
 {
-    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > Space3D (
+    std::shared_ptr<FESpace<mesh_Type, MapEpetra> > Space3D (
         new FESpace<mesh_Type, MapEpetra> (M_localMeshPtr, M_elementsOrder,
                                            3, M_commPtr) );
 
@@ -1834,7 +1834,7 @@ void ElectroETAMonodomainSolver<Mesh, IonicModel>::setupExporter (
     std::string variableName;
     for (int i = 0; i < M_ionicModelPtr->Size(); i++)
     {
-        variableName = "Variable" + boost::lexical_cast<std::string> (i);
+        variableName = "Variable" + std::to_string<std::string> (i);
         exporter.addVariable (ExporterData<mesh_Type>::ScalarField, variableName,
                               M_feSpacePtr, M_globalSolution.at (i), UInt (0) );
     }

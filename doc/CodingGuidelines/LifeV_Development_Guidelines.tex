@@ -60,8 +60,8 @@ This is a short list of rules for the nomenclature of files, classes and methods
 typedef Epetra_FEVector                       vector_Type;
 typedef const Epetra_FEVector                 vectorConst_Type;
 
-typedef boost::shared_ptr< vector_Type >      vectorPtr_Type;
-typedef boost::shared_ptr< vector_constType > vectorConstPtr_Type;
+typedef std::shared_ptr< vector_Type >      vectorPtr_Type;
+typedef std::shared_ptr< vector_constType > vectorConstPtr_Type;
 
 typedef std::map<Int,Real>::iterator          mapIterator_Type;
 typedef std::map<Int,Real>::const_iterator    mapConstIterator_Type;

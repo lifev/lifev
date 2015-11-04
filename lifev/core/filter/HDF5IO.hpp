@@ -79,7 +79,7 @@ class HDF5IO
 public:
     //! @name Public Types
     //@{
-    typedef boost::shared_ptr<Epetra_MpiComm> commPtr_Type;
+    typedef std::shared_ptr<Epetra_MpiComm> commPtr_Type;
     //@}
 
     //! @name Constructors and Destructor

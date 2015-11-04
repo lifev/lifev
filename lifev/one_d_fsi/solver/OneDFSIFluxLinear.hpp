@@ -81,7 +81,7 @@ namespace LifeV
  *  The assumed wall-law is
  *
  *  \f[
- *  P-P_\mathrm{ext} = \psi(A,A^0,\beta_0, \beta_1, \gamma) = \dots
+ *  P-P_\mathrm{ext} = \psi(A,A^0,\beta_0, \betA_1, \gamma) = \dots
  *  \f]
  *
  *  This class implements all the interfaces required for the computation of \f$\mathbf F\f$ and its derivatives.
@@ -124,7 +124,7 @@ public:
     /*!
      *  \f[
      *  \begin{array}{rcl}
-     *  \mathbf F(\mathbf U)_1 & = & F_{11} U_1 + F_{12} U_2,\\
+     *  \mathbf F(\mathbf U)_1 & = & F_{11} U_1 + F_{12} Ustd::placeholders::_2,\\
      *  \mathbf F(\mathbf U)_2 & = & F_{21} U_1 + F_{22} U_2
      *  \end{array}
      *  \f]]

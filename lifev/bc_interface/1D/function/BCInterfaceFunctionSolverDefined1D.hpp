@@ -75,7 +75,7 @@ public:
 
     typedef OneDFSIBCHandler                                                       bcHandler_Type;
     typedef OneDFSISolver                                                          physicalSolver_Type;
-    typedef boost::shared_ptr< physicalSolver_Type >                               physicalSolverPtr_Type;
+    typedef std::shared_ptr< physicalSolver_Type >                               physicalSolverPtr_Type;
 
     typedef bcHandler_Type::bc_Type                                                bc_Type;
     typedef bc_Type::bcFunctionSolverDefinedPtr_Type                               bcFunctionSolverDefinedPtr_Type;
@@ -83,7 +83,7 @@ public:
     typedef bc_Type::vectorPtrContainer_Type                                       vectorPtrContainer_Type;
 
     typedef BCInterfaceData1D                                                      data_Type;
-    typedef boost::shared_ptr< data_Type >                                         dataPtr_Type;
+    typedef std::shared_ptr< data_Type >                                         dataPtr_Type;
 
     typedef bc_Type::fluxPtr_Type                                                  fluxPtr_Type;
     typedef bc_Type::sourcePtr_Type                                                sourcePtr_Type;

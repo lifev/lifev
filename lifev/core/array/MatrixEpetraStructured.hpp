@@ -74,7 +74,7 @@ class MatrixEpetraStructured : public MatrixEpetra<DataType>
 public:
 
     typedef MatrixEpetraStructuredView<DataType> block_type;
-    typedef boost::shared_ptr<block_type> block_ptrType;
+    typedef std::shared_ptr<block_type> block_ptrType;
 
     /** @name Constructors, destructor
      */
@@ -185,9 +185,9 @@ public:
     //@{
 
     //! Returns a pointer to a new matrix which contains the transpose of the current matrix
-    boost::shared_ptr<MatrixEpetraStructured<DataType> > transpose()
+    std::shared_ptr<MatrixEpetraStructured<DataType> > transpose()
     {
-        return boost::static_pointer_cast<MatrixEpetraStructured<DataType> > ( this->MatrixEpetra<DataType>::transpose() );
+        return std::static_pointer_cast<MatrixEpetraStructured<DataType> > ( this->MatrixEpetra<DataType>::transpose() );
     }
 
     //@}

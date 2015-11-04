@@ -210,7 +210,7 @@ void getVolumeFromFaces ( RegionMesh const& mesh,
     vols[ 1 ] = 0.0;
     vols[ 2 ] = 0.0;
     typedef typename RegionMesh::facetShape_Type GeoBShape;
-    typedef boost::shared_ptr<CurrentFEManifold> current_fe_type;
+    typedef std::shared_ptr<CurrentFEManifold> current_fe_type;
 
     current_fe_type bdfe;
 
@@ -252,7 +252,7 @@ template <typename RegionMesh>
 Real testClosedDomain ( RegionMesh const& mesh,
                         std::ostream& err = std::cerr )
 {
-    typedef boost::shared_ptr<CurrentFEManifold> current_fe_type;
+    typedef std::shared_ptr<CurrentFEManifold> current_fe_type;
     current_fe_type bdfe;
 
     MeshUtility::GetOnes ones;
@@ -427,7 +427,7 @@ bool checkMesh3D ( RegionMesh& mesh,
 
     // test now orientation
 
-    boost::shared_ptr<std::vector<bool> > elSign ( new std::vector<bool> );
+    std::shared_ptr<std::vector<bool> > elSign ( new std::vector<bool> );
 
     Real meshMeasure = checkVolumes ( mesh, *elSign, sw );
     UInt positive;
@@ -491,7 +491,7 @@ bool checkMesh3D ( RegionMesh& mesh,
     //                                    BOUNDARY FACES
     //-----------------------------------------------------
 
-    boost::shared_ptr<MeshUtility::temporaryFaceContainer_Type> bfaces (
+    std::shared_ptr<MeshUtility::temporaryFaceContainer_Type> bfaces (
         new MeshUtility::temporaryFaceContainer_Type );
     UInt numInternalFaces, numFaces;
 
@@ -683,7 +683,7 @@ bool checkMesh3D ( RegionMesh& mesh,
     //                                    BOUNDARY EDGES
     //-----------------------------------------------------
 
-    boost::shared_ptr<MeshUtility::temporaryEdgeContainer_Type> bedges (
+    std::shared_ptr<MeshUtility::temporaryEdgeContainer_Type> bedges (
         new MeshUtility::temporaryEdgeContainer_Type );
 
     UInt bEdgesFound = MeshUtility::findBoundaryEdges ( mesh, *bedges );

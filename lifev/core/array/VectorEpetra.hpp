@@ -67,7 +67,7 @@ public:
     //@{
 
     typedef Epetra_FEVector                  vector_type;
-    typedef boost::shared_ptr< vector_type > vectorPtr_Type;
+    typedef std::shared_ptr< vector_type > vectorPtr_Type;
     typedef Real                             data_type;
     typedef Epetra_CombineMode               combineMode_Type;
 
@@ -99,7 +99,7 @@ public:
       @param mapPtr Pointer to the map which has to be used to split the vector between the processors
       @param mapType Specify wether the map is Unique or Repeated
      */
-    explicit VectorEpetra ( const boost::shared_ptr< MapEpetra >& mapPtr,
+    explicit VectorEpetra ( const std::shared_ptr< MapEpetra >& mapPtr,
                             const MapEpetraType& mapType = Unique,
                             const combineMode_Type combineMode = Add );
 
@@ -134,7 +134,7 @@ public:
       @param mapType Specify wether the map is Unique or Repeated
      */
     VectorEpetra ( const Epetra_MultiVector& vector,
-                   const boost::shared_ptr< MapEpetra > map,
+                   const std::shared_ptr< MapEpetra > map,
                    const MapEpetraType& mapType,
                    const combineMode_Type combineMode = Add );
 
@@ -664,7 +664,7 @@ public:
      */
     void showMe ( std::ostream& output = std::cout ) const;
 
-    void apply (const boost::function1<Real, Real>& f);
+    void apply (const std::function<Real (Real)>& f);
 
     //@}
 
@@ -744,7 +744,7 @@ public:
     }
 
     //! Return a shared pointer on the MapEpetra
-    const boost::shared_ptr< MapEpetra > mapPtr() const
+    const std::shared_ptr< MapEpetra > mapPtr() const
     {
         return M_epetraMap;
     }
@@ -812,7 +812,7 @@ private:
 
     //@}
 
-    boost::shared_ptr< MapEpetra > M_epetraMap;
+    std::shared_ptr< MapEpetra > M_epetraMap;
     MapEpetraType                  M_mapType;
     vectorPtr_Type                 M_epetraVector;
     combineMode_Type               M_combineMode;

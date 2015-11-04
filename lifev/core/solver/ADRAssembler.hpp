@@ -88,8 +88,8 @@ namespace LifeV
   field \f$\beta\f$ is defined
 
   \code
-  boost::shared_ptr<FESpace< mesh_type, MapEpetra > > uFESpace( new FESpace< mesh_type, MapEpetra >( ... ));
-  boost::shared_ptr<FESpace< mesh_type, MapEpetra > > betaFESpace( new FESpace< mesh_type, MapEpetra >( ... ));
+  std::shared_ptr<FESpace< mesh_type, MapEpetra > > uFESpace( new FESpace< mesh_type, MapEpetra >( ... ));
+  std::shared_ptr<FESpace< mesh_type, MapEpetra > > betaFESpace( new FESpace< mesh_type, MapEpetra >( ... ));
 
   myAssembler.setup(uFESpace,betaFESpace);
   \endcode
@@ -108,7 +108,7 @@ namespace LifeV
   Now that everything has been set up, one can assemble the terms:
 
   \code
-  boost::shared_ptr<matrix_type> systemMatrix(new matrix_type( uFESpace->map() ));
+  std::shared_ptr<matrix_type> systemMatrix(new matrix_type( uFESpace->map() ));
   *systemMatrix*=0.0;
 
   myAssembler.addDiffusion(systemMatrix,4.0);
@@ -173,14 +173,14 @@ public:
     typedef MapEpetra                                    map_Type;
 
     typedef FESpace<mesh_type, map_Type> fespace_type;
-    typedef boost::shared_ptr<fespace_type>              fespace_ptrType;
+    typedef std::shared_ptr<fespace_type>              fespace_ptrType;
 
-    typedef boost::shared_ptr<matrix_type>               matrix_ptrType;
+    typedef std::shared_ptr<matrix_type>               matrix_ptrType;
 
     typedef LifeChrono                                       chrono_type;
 
     // Use the portable syntax of the boost function
-    typedef boost::function5<Real, const Real&, const Real&, const Real&, const Real&, const ID&> function_type;
+    typedef std::function<Real (const Real&, const Real&, const Real&, const Real&, const ID&) > function_type;
 
     //@}
 
@@ -401,14 +401,14 @@ public:
 private:
 
 
-    typedef CurrentFE                                    currentFE_type;
-    typedef boost::scoped_ptr<currentFE_type>            currentFE_ptrType;
+    typedef CurrentFE                                  currentFE_type;
+    typedef std::unique_ptr<currentFE_type>            currentFE_ptrType;
 
-    typedef MatrixElemental                                      localMatrix_type;
-    typedef boost::scoped_ptr<localMatrix_type>          localMatrix_ptrType;
+    typedef MatrixElemental                            localMatrix_type;
+    typedef std::unique_ptr<localMatrix_type>          localMatrix_ptrType;
 
-    typedef VectorElemental                                      localVector_type;
-    typedef boost::scoped_ptr<localVector_type>          localVector_ptrType;
+    typedef VectorElemental                            localVector_type;
+    typedef std::unique_ptr<localVector_type>          localVector_ptrType;
 
     //! @name Private Methods
     //@{

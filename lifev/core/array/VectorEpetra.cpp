@@ -70,7 +70,7 @@ VectorEpetra::VectorEpetra ( const MapEpetra& map,
     M_epetraVector.reset( new vector_type ( *M_epetraMap->map (M_mapType) ) );
 }
 
-VectorEpetra::VectorEpetra ( const boost::shared_ptr<MapEpetra>& map,
+VectorEpetra::VectorEpetra ( const std::shared_ptr<MapEpetra>& map,
                              const MapEpetraType& mapType,
                              const combineMode_Type combineMode ) :
     M_epetraMap   ( map ),
@@ -133,7 +133,7 @@ VectorEpetra::VectorEpetra ( const VectorEpetra& vector, const MapEpetraType& ma
 }
 
 VectorEpetra::VectorEpetra ( const Epetra_MultiVector&          vector,
-                             const boost::shared_ptr<MapEpetra> map,
+                             const std::shared_ptr<MapEpetra> map,
                              const MapEpetraType&               mapType,
                              const combineMode_Type             combineMode ) :
     M_epetraMap   ( map ),
@@ -1014,7 +1014,7 @@ void VectorEpetra::showMe ( std::ostream& output ) const
     }
 }
 
-void VectorEpetra::apply (const boost::function1<Real, Real>& f)
+void VectorEpetra::apply (const std::function<Real (Real)>& f)
 {
     Int i, j;
     for ( i = 0; i < M_epetraVector->NumVectors(); ++i )

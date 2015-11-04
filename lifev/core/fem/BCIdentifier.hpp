@@ -148,7 +148,7 @@ public:
         @return Boolean which is true if the ID of the first BCIdentifier is smaller
                 than the ID of the second BCIdentifier
      */
-    bool operator() ( boost::shared_ptr<BCIdentifierBase> const& i1, boost::shared_ptr<BCIdentifierBase> const& i2 ) const
+    bool operator() ( std::shared_ptr<BCIdentifierBase> const& i1, std::shared_ptr<BCIdentifierBase> const& i2 ) const
     {
         return ( i1.get()->id() < i2.get()->id() );
     }

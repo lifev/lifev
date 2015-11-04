@@ -46,27 +46,27 @@ using namespace LifeV;
 
 typedef LinearTetra geoElement_Type;
 typedef RegionMesh < geoElement_Type > regionMesh_Type;
-typedef boost::shared_ptr < regionMesh_Type > regionMeshPtr_Type;
+typedef std::shared_ptr < regionMesh_Type > regionMeshPtr_Type;
 
 typedef MapEpetra map_Type;
 
 typedef Exporter < regionMesh_Type > exporter_Type;
-typedef boost::shared_ptr < exporter_Type > exporterPtr_Type;
+typedef std::shared_ptr < exporter_Type > exporterPtr_Type;
 
 typedef FESpace < regionMesh_Type, map_Type > FESpace_Type;
-typedef boost::shared_ptr < FESpace_Type > FESpacePtr_Type;
+typedef std::shared_ptr < FESpace_Type > FESpacePtr_Type;
 
 typedef FEVectorField < regionMesh_Type, map_Type > FEVectorField_Type;
-typedef boost::shared_ptr < FEVectorField_Type > FEVectorFieldPtr_Type;
+typedef std::shared_ptr < FEVectorField_Type > FEVectorFieldPtr_Type;
 
 typedef FEScalarField < regionMesh_Type, map_Type > FEScalarField_Type;
-typedef boost::shared_ptr < FEScalarField_Type > FEScalarFieldPtr_Type;
+typedef std::shared_ptr < FEScalarField_Type > FEScalarFieldPtr_Type;
 
 typedef FEFunction < regionMesh_Type, map_Type, Vector > FEVectorFct_Type;
-typedef boost::shared_ptr < FEVectorFct_Type > FEVectorFctPtr_Type;
+typedef std::shared_ptr < FEVectorFct_Type > FEVectorFctPtr_Type;
 
 typedef FEFunction < regionMesh_Type, map_Type, Real > FEScalarFct_Type;
-typedef boost::shared_ptr < FEScalarFct_Type > FEScalarFctPtr_Type;
+typedef std::shared_ptr < FEScalarFct_Type > FEScalarFctPtr_Type;
 
 // ===================================================
 //!                       Data

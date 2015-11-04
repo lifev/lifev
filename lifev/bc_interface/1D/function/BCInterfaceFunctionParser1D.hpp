@@ -59,7 +59,7 @@ BCInterfaceFunctionParser< OneDFSIBCHandler, OneDFSISolver >::assignFunction ( b
 // ===================================================
 template<  >
 void
-BCInterfaceFunctionParser< OneDFSIBCHandler, OneDFSISolver >::setData ( const boost::shared_ptr< BCInterfaceData >& data );
+BCInterfaceFunctionParser< OneDFSIBCHandler, OneDFSISolver >::setData ( const std::shared_ptr< BCInterfaceData >& data );
 
 } // Namespace LifeV
 

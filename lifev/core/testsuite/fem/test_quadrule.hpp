@@ -66,7 +66,7 @@ typedef container_Type::const_iterator constIterator_Type;
 template<typename Mesh>
 bool quad_check_doe (const ReferenceFE& refFE, const GeometricMap& geoMap, const container_Type& allQuad, std::string output_file)
 {
-    boost::shared_ptr<Epetra_Comm> dummyComm ( new Epetra_SerialComm );
+    std::shared_ptr<Epetra_Comm> dummyComm ( new Epetra_SerialComm );
     Mesh aMesh ( dummyComm );
     UInt nEl (1);
     regularMesh3D ( aMesh, 1, nEl, nEl, nEl);
@@ -130,7 +130,7 @@ bool quad_check_doe (const ReferenceFE& refFE, const GeometricMap& geoMap, const
 template<typename Mesh>
 bool quad_check_cr ( const ReferenceFE& refFE, const GeometricMap& geoMap, const container_Type& allQuad, std::string output_name)
 {
-    boost::shared_ptr<Epetra_Comm> dummyComm ( new Epetra_SerialComm );
+    std::shared_ptr<Epetra_Comm> dummyComm ( new Epetra_SerialComm );
     SetofFun fct;
     int fun (fct.nfun() );
 

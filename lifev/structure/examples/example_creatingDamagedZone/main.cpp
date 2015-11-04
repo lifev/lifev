@@ -95,9 +95,9 @@ int returnValue = EXIT_FAILURE;
 
 //Class to investigate the mesh
 template < typename MeshEntityType,
-         typename ComparisonPolicyType = boost::function2 < bool,
+         typename ComparisonPolicyType = std::function < bool (
          Real const&,
-         Real const& > >
+         Real const&) > >
 class SphereInterrogator
 {
 public:
@@ -141,9 +141,9 @@ private:
 //This class is to count how many volumes are in the sphere. This is for debug purposes
 //It cannot be used the same functor as SphereInspector since they perform different operation
 template < typename MeshEntityType,
-         typename ComparisonPolicyType = boost::function2 < bool,
+         typename ComparisonPolicyType = std::function < bool (
          Real const&,
-         Real const& > >
+         Real const&) > >
 class SphereCounter
 {
 public:
@@ -212,7 +212,7 @@ public:
     //@{
     Structure ( int                                   argc,
                 char**                                argv,
-                boost::shared_ptr<Epetra_Comm>        structComm );
+                std::shared_ptr<Epetra_Comm>        structComm );
 
     ~Structure()
     {}
@@ -241,7 +241,7 @@ private:
 
 private:
     struct Private;
-    boost::shared_ptr<Private> parameters;
+    std::shared_ptr<Private> parameters;
 
 };
 
@@ -256,7 +256,7 @@ struct Structure::Private
 
     std::string data_file_name;
 
-    boost::shared_ptr<Epetra_Comm>     comm;
+    std::shared_ptr<Epetra_Comm>     comm;
 
 };
 
@@ -264,7 +264,7 @@ struct Structure::Private
 
 Structure::Structure ( int                                   argc,
                        char**                                argv,
-                       boost::shared_ptr<Epetra_Comm>        structComm) :
+                       std::shared_ptr<Epetra_Comm>        structComm) :
     parameters ( new Private() )
 {
     GetPot command_line (argc, argv);
@@ -327,8 +327,12 @@ Structure::run3d()
     MeshData             meshData;
     meshData.setup (dataFile, "solid/space_discretization");
 
+<<<<<<< HEAD
     boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr (new RegionMesh<LinearTetra> ( ( parameters->comm ) ) );
     boost::shared_ptr<RegionMesh<LinearTetra> > localMeshPtr (new RegionMesh<LinearTetra> ( ( parameters->comm ) ) );
+=======
+    std::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr (new RegionMesh<LinearTetra> ( ( parameters->comm ) ) );
+>>>>>>> 24ac07b... Versione c++11
     readMesh (*fullMeshPtr, meshData);
 
     //fullMeshPtr->showMe( );
@@ -444,13 +448,13 @@ main ( int argc, char** argv )
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_MpiComm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+    std::shared_ptr<Epetra_MpiComm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
     if ( Comm->MyPID() == 0 )
     {
         cout << "% using MPI" << endl;
     }
 #else
-    boost::shared_ptr<Epetra_SerialComm> Comm ( new Epetra_SerialComm() );
+    std::shared_ptr<Epetra_SerialComm> Comm ( new Epetra_SerialComm() );
     cout << "% using serial Version" << endl;
 #endif
 

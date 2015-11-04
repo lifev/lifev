@@ -43,10 +43,10 @@ const int SLIPWALL = 20;
 
 using namespace LifeV;
 
-typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_type;
+typedef std::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_type;
 
 typedef OseenSolver< RegionMesh<LinearTetra> >::vector_type  vector_type;
-typedef boost::shared_ptr<vector_type>                   vector_ptrtype;
+typedef std::shared_ptr<vector_type>                   vector_ptrtype;
 
 Real zero_scalar ( const Real& /* t */,
                    const Real& /* x */,
@@ -142,7 +142,7 @@ main ( int argc, char** argv )
     std::vector<ID> zComp (1);
     zComp[0] = 3;
 
-    BCFunctionBase uIn  ( boost::bind (&uLid, _1, _2, _3, _4, _5) );
+    BCFunctionBase uIn  ( boost::bind (&uLid, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5) );
     BCFunctionBase uZero ( zero_scalar );
 
     // boundary conditions definition.

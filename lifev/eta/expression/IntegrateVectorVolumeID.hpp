@@ -87,8 +87,8 @@ public:
     typedef typename MeshType::element_Type element_Type;
 
 
-    typedef boost::shared_ptr<std::vector<element_Type*> > vectorVolumesPtr_Type;
-    typedef boost::shared_ptr<std::vector<UInt> > vectorIndexesPtr_Type;
+    typedef std::shared_ptr<std::vector<element_Type*> > vectorVolumesPtr_Type;
+    typedef std::shared_ptr<std::vector<UInt> > vectorIndexesPtr_Type;
 
     //@}
 
@@ -100,7 +100,7 @@ public:
     IntegrateVectorVolumeID (const vectorVolumesPtr_Type volumeList,
                              const vectorIndexesPtr_Type indexList,
                              const QRAdapterType& qrAdapter,
-                             const boost::shared_ptr<TestSpaceType>& testSpace,
+                             const std::shared_ptr<TestSpaceType>& testSpace,
                              const ExpressionType& expression);
 
     //! Copy constructor
@@ -124,7 +124,7 @@ public:
 
     //! Operator wrapping the addTo method (for shared_ptr)
     template <typename Vector>
-    inline void operator>> (boost::shared_ptr<Vector> vector)
+    inline void operator>> (std::shared_ptr<Vector> vector)
     {
         addTo (*vector);
     }
@@ -169,7 +169,7 @@ private:
     QRAdapterType M_qrAdapter;
 
     // Shared pointer on the Space
-    boost::shared_ptr<TestSpaceType> M_testSpace;
+    std::shared_ptr<TestSpaceType> M_testSpace;
 
     // Tree to compute the values for the assembly
     evaluation_Type M_evaluation;
@@ -197,7 +197,7 @@ IntegrateVectorVolumeID < MeshType, TestSpaceType, ExpressionType, QRAdapterType
 IntegrateVectorVolumeID (const vectorVolumesPtr_Type volumeList,
                          const vectorIndexesPtr_Type indexList,
                          const QRAdapterType& qrAdapter,
-                         const boost::shared_ptr<TestSpaceType>& testSpace,
+                         const std::shared_ptr<TestSpaceType>& testSpace,
                          const ExpressionType& expression)
     :   M_volumeList ( volumeList ),
         M_indexList ( indexList ),

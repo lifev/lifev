@@ -44,7 +44,7 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-PreconditionerIfpack::PreconditionerIfpack ( boost::shared_ptr<Epetra_Comm> comm ) :
+PreconditionerIfpack::PreconditionerIfpack ( std::shared_ptr<Epetra_Comm> comm ) :
     super (),
     M_preconditioner(),
     M_comm ( comm ),

@@ -121,18 +121,18 @@ using namespace LifeV;
 // ---------------------------------------------------------------
 
 typedef RegionMesh<LinearTetra>                             mesh_Type;
-typedef boost::shared_ptr< mesh_Type >                      meshPtr_Type;
+typedef std::shared_ptr< mesh_Type >                      meshPtr_Type;
 
 typedef MatrixEpetra<Real>                                  matrix_Type;
-typedef boost::shared_ptr< matrix_Type >                    matrixPtr_Type;
+typedef std::shared_ptr< matrix_Type >                    matrixPtr_Type;
 
 typedef VectorEpetra                                        vector_Type;
-typedef boost::shared_ptr< vector_Type >                    vectorPtr_Type;
+typedef std::shared_ptr< vector_Type >                    vectorPtr_Type;
 
 
 
 typedef FESpace< mesh_Type, MapEpetra >                     fespace_Type;
-typedef boost::shared_ptr<fespace_Type >                    fespacePtr_Type;
+typedef std::shared_ptr<fespace_Type >                    fespacePtr_Type;
 
 
 // ---------------------------------------------------------------
@@ -148,7 +148,7 @@ typedef boost::shared_ptr<fespace_Type >                    fespacePtr_Type;
 // that exports the requested vecotr fields.
 // ---------------------------------------------------------------
 void createListFromGetPot (Teuchos::ParameterList& solverList, const GetPot& dataFile);
-void exportVectorField (boost::shared_ptr<Epetra_Comm> comm,
+void exportVectorField (std::shared_ptr<Epetra_Comm> comm,
                         meshPtr_Type mesh,
                         fespacePtr_Type fespace,
                         vectorPtr_Type vector,
@@ -177,18 +177,18 @@ int main ( int argc, char** argv )
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
     typedef BCHandler                                           bc_Type;
-    typedef boost::shared_ptr< bc_Type >                        bcPtr_Type;
+    typedef std::shared_ptr< bc_Type >                        bcPtr_Type;
 
     typedef EmptyPhysicalSolver<VectorEpetra>               physicalSolver_Type;
     typedef BCInterface3D< bc_Type, physicalSolver_Type >       bcInterface_Type;
 
-    typedef boost::shared_ptr< bcInterface_Type >                  bcInterfacePtr_Type;
+    typedef std::shared_ptr< bcInterface_Type >                  bcInterfacePtr_Type;
     typedef MeshUtility::MeshTransformer<mesh_Type>                meshTransformer_Type;
 
     //*************************************************************//
@@ -257,7 +257,7 @@ int main ( int argc, char** argv )
     //   the solution.
     //*************************************************************//
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > uSpace
+    std::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > uSpace
     ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPart, &feTetraP1, Comm) );
 
     fespacePtr_Type uFESpace ( new FESpace< mesh_Type, MapEpetra > (meshPart, "P1", 1, Comm) );
@@ -269,7 +269,7 @@ int main ( int argc, char** argv )
     // For more details, look at the ETA tutorial.
     //*************************************************************//
 
-    boost::shared_ptr<matrix_Type> systemMatrix (new matrix_Type ( uSpace->map() ) );
+    std::shared_ptr<matrix_Type> systemMatrix (new matrix_Type ( uSpace->map() ) );
 
     *systemMatrix *= 0.0;
     {
@@ -320,9 +320,9 @@ int main ( int argc, char** argv )
     //**********************************************************//
 
     typedef LifeV::Preconditioner             basePrec_Type;
-    typedef boost::shared_ptr<basePrec_Type>  basePrecPtr_Type;
+    typedef std::shared_ptr<basePrec_Type>  basePrecPtr_Type;
     typedef LifeV::PreconditionerIfpack           prec_Type;
-    typedef boost::shared_ptr<prec_Type>      precPtr_Type;
+    typedef std::shared_ptr<prec_Type>      precPtr_Type;
 
     prec_Type* precRawPtr;
     basePrecPtr_Type precPtr;
@@ -699,7 +699,7 @@ void createListFromGetPot (Teuchos::ParameterList& solverList, const GetPot& dat
 }
 
 //Export vector to file using HDF5 exporter
-void exportVectorField (boost::shared_ptr<Epetra_Comm> comm,
+void exportVectorField (std::shared_ptr<Epetra_Comm> comm,
                         meshPtr_Type mesh,
                         fespacePtr_Type fespace,
                         vectorPtr_Type vector,

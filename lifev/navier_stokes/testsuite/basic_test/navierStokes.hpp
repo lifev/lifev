@@ -103,10 +103,10 @@ public:
     typedef MeshType                                      mesh_Type;
     typedef Problem                                       problem_Type;
     typedef LifeV::FESpace< mesh_Type, LifeV::MapEpetra > feSpace_Type;
-    typedef boost::shared_ptr<feSpace_Type>               feSpacePtr_Type;
+    typedef std::shared_ptr<feSpace_Type>               feSpacePtr_Type;
     typedef LifeV::OseenSolver< mesh_Type >               fluid_Type;
     typedef typename fluid_Type::vector_Type              vector_Type;
-    typedef boost::shared_ptr<vector_Type>                vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type>                vectorPtr_Type;
     typedef typename fluid_Type::matrix_Type              matrix_Type;
 
     /** @name Constructors, destructor
@@ -206,7 +206,7 @@ private:
 
 
     struct Private;
-    boost::shared_ptr<Private> M_data;
+    std::shared_ptr<Private> M_data;
 
     std::vector<LifeV::UInt>   M_meshDiscretization;
     std::vector<std::string>   M_uFELabels;
@@ -293,7 +293,7 @@ struct NavierStokes<MeshType, Problem>::Private
         steady (0)
     {}
 
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_Type;
+    typedef std::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_Type;
 
     double         Re;
 
@@ -303,7 +303,7 @@ struct NavierStokes<MeshType, Problem>::Private
     //const double rho; /* < density is constant (in kg/m^3) */
 
     bool                             steady;
-    boost::shared_ptr<Epetra_Comm>   comm;
+    std::shared_ptr<Epetra_Comm>   comm;
 };
 
 template<typename MeshType, typename Problem>
@@ -637,7 +637,7 @@ NavierStokes<MeshType, Problem>::run()
                 std::cout << "[Loading the mesh]" << std::endl;
             }
 
-            boost::shared_ptr<mesh_Type > fullMeshPtr ( new mesh_Type ( M_data->comm ) );
+            std::shared_ptr<mesh_Type > fullMeshPtr ( new mesh_Type ( M_data->comm ) );
 
             Int geoDimensions = mesh_Type::S_geoDimensions;
             // Building the mesh from the source
@@ -676,7 +676,7 @@ NavierStokes<MeshType, Problem>::run()
             {
                 std::cout << "Partitioning the mesh ... " << std::flush;
             }
-            boost::shared_ptr<mesh_Type > localMeshPtr;
+            std::shared_ptr<mesh_Type > localMeshPtr;
             {
                 MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, M_data->comm);
                 localMeshPtr = meshPart.meshPartition();
@@ -770,7 +770,7 @@ NavierStokes<MeshType, Problem>::run()
             {
                 std::cout << std::endl << "[Creating the problem]" << std::endl;
             }
-            boost::shared_ptr<OseenData> oseenData (new OseenData() );
+            std::shared_ptr<OseenData> oseenData (new OseenData() );
             oseenData->setup ( dataFile );
 
             if (verbose)
@@ -896,7 +896,7 @@ NavierStokes<MeshType, Problem>::run()
 
             fluid.resetPreconditioner();
 
-            boost::shared_ptr< Exporter<mesh_Type > > exporter;
+            std::shared_ptr< Exporter<mesh_Type > > exporter;
 
             vectorPtr_Type velAndPressure;
             // only for export -->

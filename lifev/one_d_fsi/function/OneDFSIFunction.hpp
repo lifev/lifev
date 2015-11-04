@@ -65,7 +65,7 @@ public:
 
     /*! @typedef function_Type */
     //! Type definition for the 1D boundary function
-    typedef boost::function<Real ( const Real&, const Real&  ) > function_Type;
+    typedef std::function<Real ( const Real&, const Real&  ) > function_Type;
 
     //@}
 

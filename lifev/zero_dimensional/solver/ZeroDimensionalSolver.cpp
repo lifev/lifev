@@ -43,7 +43,7 @@ namespace LifeV
 #if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
 
 ZeroDimensionalSolver::ZeroDimensionalSolver ( Int numCircuitElements,
-                                               boost::shared_ptr< Epetra_Comm > comm,
+                                               std::shared_ptr< Epetra_Comm > comm,
                                                zeroDimensionalCircuitDataPtr_Type circuitData )
 {
     M_comm.swap ( comm );

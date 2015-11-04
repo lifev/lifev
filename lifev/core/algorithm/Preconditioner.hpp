@@ -69,10 +69,10 @@ public:
     //@{
 
     typedef Epetra_Operator                      prec_raw_type;
-    typedef boost::shared_ptr<prec_raw_type>     prec_type;
+    typedef std::shared_ptr<prec_raw_type>     prec_type;
 
     typedef MatrixEpetra<Real>                   operator_raw_type;
-    typedef boost::shared_ptr<operator_raw_type> operator_type;
+    typedef std::shared_ptr<operator_raw_type> operator_type;
 
     typedef Displayer::comm_Type                 comm_Type;
     typedef Displayer::commPtr_Type              commPtr_Type;

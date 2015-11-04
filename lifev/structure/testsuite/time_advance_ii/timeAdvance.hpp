@@ -66,7 +66,7 @@ public:
 
     problem ( int argc,
               char** argv,
-              boost::shared_ptr<Epetra_Comm>        structComm);
+              std::shared_ptr<Epetra_Comm>        structComm);
 
     ~problem()
     {}
@@ -84,7 +84,7 @@ public:
 
 private:
     struct Private;
-    boost::shared_ptr<Private> members;
+    std::shared_ptr<Private> members;
 };
 
 #endif /* __timeAdvance_H */

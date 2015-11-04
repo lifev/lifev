@@ -78,26 +78,26 @@ class NavierStokesSolver : private InitPolicy, public virtual TimeIterationPolic
 
 public:
 
-    typedef boost::shared_ptr< NavierStokesProblem<Mesh> > NSProblemPtr_Type;
+    typedef std::shared_ptr< NavierStokesProblem<Mesh> > NSProblemPtr_Type;
     typedef MatrixEpetra<Real>                       matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>           matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type>           matrixPtr_Type;
     typedef VectorEpetra                             vector_Type;
-    typedef boost::shared_ptr<VectorEpetra>          vectorPtr_Type;
+    typedef std::shared_ptr<VectorEpetra>          vectorPtr_Type;
     typedef MapEpetra                                map_Type;
-    typedef boost::shared_ptr<map_Type>              mapPtr_Type;
-    typedef boost::shared_ptr<Mesh>                  meshPtr_Type;
+    typedef std::shared_ptr<map_Type>              mapPtr_Type;
+    typedef std::shared_ptr<Mesh>                  meshPtr_Type;
     typedef FESpace< Mesh, map_Type >                fespace_Type;
-    typedef boost::shared_ptr< fespace_Type >        fespacePtr_Type;
+    typedef std::shared_ptr< fespace_Type >        fespacePtr_Type;
     typedef BCHandler                                bcContainer_Type;
-    typedef boost::shared_ptr<bcContainer_Type>      bcContainerPtr_Type;
+    typedef std::shared_ptr<bcContainer_Type>      bcContainerPtr_Type;
     //typedef LifeV::Preconditioner                  basePrec_Type;
-    //typedef boost::shared_ptr<basePrec_Type>       basePrecPtr_Type;
+    //typedef std::shared_ptr<basePrec_Type>       basePrecPtr_Type;
     typedef Epetra_Comm                              comm_Type;
-    typedef boost::shared_ptr<comm_Type>             commPtr_Type;
+    typedef std::shared_ptr<comm_Type>             commPtr_Type;
     typedef OseenAssembler< Mesh, matrix_Type, vector_Type > assembler_Type;
-    typedef boost::shared_ptr< assembler_Type >      assemblerPtr_Type;
+    typedef std::shared_ptr< assembler_Type >      assemblerPtr_Type;
     typedef TimeAdvanceBDF<vector_Type>              bdf_Type;
-    typedef boost::shared_ptr< bdf_Type >            bdfPtr_Type;
+    typedef std::shared_ptr< bdf_Type >            bdfPtr_Type;
 
     //! @name  Constructors, destructor
     //@{

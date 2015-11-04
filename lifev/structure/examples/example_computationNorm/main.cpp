@@ -105,33 +105,33 @@ public:
 
     typedef RegionMesh<LifeV::LinearTetra >                       mesh_Type;
     typedef VectorEpetra                                          vector_Type;
-    typedef boost::shared_ptr<vector_Type>                        vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type>                        vectorPtr_Type;
 
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_type;
+    typedef std::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_type;
     //Exporters Typedefs
     typedef LifeV::Exporter<mesh_Type >                           filter_Type;
-    typedef boost::shared_ptr<filter_Type >                       filterPtr_Type;
+    typedef std::shared_ptr<filter_Type >                       filterPtr_Type;
 
     typedef LifeV::ExporterEmpty<mesh_Type >                      emptyExporter_Type;
-    typedef boost::shared_ptr<emptyExporter_Type>                 emptyExporterPtr_Type;
+    typedef std::shared_ptr<emptyExporter_Type>                 emptyExporterPtr_Type;
 
     typedef LifeV::ExporterEnsight<mesh_Type >                    ensightFilter_Type;
-    typedef boost::shared_ptr<ensightFilter_Type>                 ensightFilterPtr_Type;
+    typedef std::shared_ptr<ensightFilter_Type>                 ensightFilterPtr_Type;
 
 #ifdef HAVE_HDF5
     typedef LifeV::ExporterHDF5<mesh_Type >                       hdf5Filter_Type;
-    typedef boost::shared_ptr<hdf5Filter_Type>                    hdf5FilterPtr_Type;
+    typedef std::shared_ptr<hdf5Filter_Type>                    hdf5FilterPtr_Type;
 #endif
 
     typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >         solidFESpace_Type;
-    typedef boost::shared_ptr<solidFESpace_Type>                  solidFESpacePtr_Type;
+    typedef std::shared_ptr<solidFESpace_Type>                  solidFESpacePtr_Type;
 
     /** @name Constructors, destructor
      */
     //@{
     Structure ( int                                   argc,
                 char**                                argv,
-                boost::shared_ptr<Epetra_Comm>        structComm );
+                std::shared_ptr<Epetra_Comm>        structComm );
 
     ~Structure()
     {}
@@ -160,7 +160,7 @@ private:
 
 private:
     struct Private;
-    boost::shared_ptr<Private> parameters;
+    std::shared_ptr<Private> parameters;
     filterPtr_Type importerSolid;
 
 };
@@ -176,7 +176,7 @@ struct Structure::Private
 
     std::string data_file_name;
 
-    boost::shared_ptr<Epetra_Comm>     comm;
+    std::shared_ptr<Epetra_Comm>     comm;
 
     static Real uexact (const Real& /*t*/, const Real&  X, const Real& Y, const Real& /*Z*/, const ID& i)
     {
@@ -227,7 +227,7 @@ struct Structure::Private
 
 Structure::Structure ( int                                   argc,
                        char**                                argv,
-                       boost::shared_ptr<Epetra_Comm>        structComm) :
+                       std::shared_ptr<Epetra_Comm>        structComm) :
     parameters ( new Private() )
 {
     GetPot command_line (argc, argv);
@@ -275,7 +275,7 @@ Structure::run3d()
     bool verbose = (parameters->comm->MyPID() == 0);
 
     //! Number of boundary conditions for the velocity and mesh motion
-    boost::shared_ptr<BCHandler> BCh ( new BCHandler() );
+    std::shared_ptr<BCHandler> BCh ( new BCHandler() );
 
     //! dataElasticStructure
     GetPot dataFile ( parameters->data_file_name.c_str() );
@@ -284,14 +284,14 @@ Structure::run3d()
     const std::string partitioningMesh = dataFile ( "partitioningOffline/loadMesh", "no");
 
     //Creation of pointers
-    boost::shared_ptr<MeshPartitioner<mesh_Type> > meshPart;
-    boost::shared_ptr<mesh_Type> pointerToMesh;
+    std::shared_ptr<MeshPartitioner<mesh_Type> > meshPart;
+    std::shared_ptr<mesh_Type> pointerToMesh;
 
 #ifdef LIFEV_HAS_HDF5
     if ( ! (partitioningMesh.compare ("no") ) )
 #endif
     {
-        boost::shared_ptr<mesh_Type > fullMeshPtr (new mesh_Type ( ( parameters->comm ) ) );
+        std::shared_ptr<mesh_Type > fullMeshPtr (new mesh_Type ( ( parameters->comm ) ) );
         //Creating a new mesh from scratch
         MeshData             meshData;
         meshData.setup (dataFile, "solid/space_discretization");
@@ -307,8 +307,8 @@ Structure::run3d()
         //Creating a mesh object from a partitioned mesh
         const std::string partsFileName (dataFile ("partitioningOffline/hdf5_file_name", "NO_DEFAULT_VALUE.h5") );
 
-        boost::shared_ptr<Epetra_MpiComm> mpiComm =
-            boost::dynamic_pointer_cast<Epetra_MpiComm> (parameters->comm);
+        std::shared_ptr<Epetra_MpiComm> mpiComm =
+            std::dynamic_pointer_cast<Epetra_MpiComm> (parameters->comm);
         PartitionIO<mesh_Type> partitionIO (partsFileName, mpiComm);
 
         partitionIO.read (pointerToMesh);
@@ -440,13 +440,13 @@ main ( int argc, char** argv )
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_MpiComm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+    std::shared_ptr<Epetra_MpiComm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
     if ( Comm->MyPID() == 0 )
     {
         std::cout << "% using MPI" << std::endl;
     }
 #else
-    boost::shared_ptr<Epetra_SerialComm> Comm ( new Epetra_SerialComm() );
+    std::shared_ptr<Epetra_SerialComm> Comm ( new Epetra_SerialComm() );
     cout << "% using serial Version" << endl;
 #endif
 

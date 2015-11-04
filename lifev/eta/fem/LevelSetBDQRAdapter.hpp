@@ -58,7 +58,7 @@ public:
     //! @name Public Types
     //@{
 
-    typedef boost::shared_ptr<FESpaceType> FESpaceType_Ptr;
+    typedef std::shared_ptr<FESpaceType> FESpaceType_Ptr;
 
     //@}
 
@@ -132,13 +132,13 @@ private:
 
     bool M_isAdaptedElement;
 
-    boost::shared_ptr<QuadratureBoundary> M_adaptedQrBd;
+    std::shared_ptr<QuadratureBoundary> M_adaptedQrBd;
 
 };
 
 template<typename FESpaceType, typename VectorType>
 LevelSetBDQRAdapter<FESpaceType, VectorType>
-adapt (boost::shared_ptr<FESpaceType> fespace, const VectorType& vector, const QuadratureBoundary& qrbd)
+adapt (std::shared_ptr<FESpaceType> fespace, const VectorType& vector, const QuadratureBoundary& qrbd)
 {
     return LevelSetBDQRAdapter<FESpaceType, VectorType> (fespace, vector, qrbd);
 }

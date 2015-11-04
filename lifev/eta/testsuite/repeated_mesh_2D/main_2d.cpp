@@ -87,16 +87,16 @@ Real fRhs ( const Real& /* t */, const Real& /* x */, const Real& /* y */, const
 typedef RegionMesh<LinearTriangle> mesh_Type;
 
 typedef MatrixEpetraStructured<Real> matrix_Type;
-typedef boost::shared_ptr<matrix_Type> matrixPtr_Type;
+typedef std::shared_ptr<matrix_Type> matrixPtr_Type;
 typedef VectorEpetra vectorStd_Type;
 typedef VectorEpetraStructured vector_Type;
 
 typedef FESpace<mesh_Type, MapEpetra> uSpaceStd_Type;
-typedef boost::shared_ptr<uSpaceStd_Type> uSpaceStdPtr_Type;
+typedef std::shared_ptr<uSpaceStd_Type> uSpaceStdPtr_Type;
 typedef ETFESpace< mesh_Type, MapEpetra, 2, 2 > uSpace_Type;
-typedef boost::shared_ptr<uSpace_Type> uSpacePtr_Type;
+typedef std::shared_ptr<uSpace_Type> uSpacePtr_Type;
 typedef ETFESpace< mesh_Type, MapEpetra, 2, 1 > pSpace_Type;
-typedef boost::shared_ptr<pSpace_Type> pSpacePtr_Type;
+typedef std::shared_ptr<pSpace_Type> pSpacePtr_Type;
 
 int main ( int argc, char** argv )
 {
@@ -110,9 +110,9 @@ int main ( int argc, char** argv )
     {
 
 #ifdef HAVE_MPI
-        boost::shared_ptr<Epetra_Comm> comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+        std::shared_ptr<Epetra_Comm> comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
-        boost::shared_ptr<Epetra_Comm> comm ( new Epetra_SerialComm );
+        std::shared_ptr<Epetra_Comm> comm ( new Epetra_SerialComm );
 #endif
 
         GetPot dataFile ( "data_2d" );
@@ -122,7 +122,7 @@ int main ( int argc, char** argv )
 #ifdef HAVE_LIFEV_DEBUG
         std::ofstream debugOut (
             ( "rm." +
-              ( comm->NumProc() > 1 ? boost::lexical_cast<std::string> ( comm->MyPID() ) : "s" ) +
+              ( comm->NumProc() > 1 ? std::to_string ( comm->MyPID() ) : "s" ) +
               ".out" ).c_str() );
 #else
         std::ofstream debugOut ( "/dev/null" );
@@ -134,7 +134,7 @@ int main ( int argc, char** argv )
         {
             std::cout << " -- Reading the mesh ... " << std::flush;
         }
-        boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type() );
+        std::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type() );
         if ( dataFile ( "mesh/mesh_type", "structured" ) == "structured" )
         {
             regularMesh2D ( *fullMeshPtr, 0,
@@ -164,7 +164,7 @@ int main ( int argc, char** argv )
 
         LifeChrono partTime;
         partTime.start();
-        boost::shared_ptr< mesh_Type > localMesh;
+        std::shared_ptr< mesh_Type > localMesh;
         {
             MeshPartitioner< mesh_Type >   meshPart;
             meshPart.doPartition ( fullMeshPtr, comm );
@@ -185,7 +185,7 @@ int main ( int argc, char** argv )
 
         LifeChrono partTimeR;
         partTimeR.start();
-        boost::shared_ptr< mesh_Type > localMeshR;
+        std::shared_ptr< mesh_Type > localMeshR;
         {
             MeshPartitioner< mesh_Type >   meshPartR;
             meshPartR.setPartitionOverlap ( 1 );

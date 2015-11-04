@@ -57,7 +57,7 @@ struct tester
 {
     typedef typename LifeV::BareMesh<S>    baremesh_t;
     typedef typename LifeV::RegionMesh<S>  mesh_t;
-    typedef boost::shared_ptr<Epetra_Comm> comm_t;
+    typedef std::shared_ptr<Epetra_Comm> comm_t;
     typedef LifeV::GeometricMap            geomap_t;
     typedef LifeV::ReferenceFE             reffem_t;
 
@@ -79,7 +79,7 @@ struct tester
         }
 
         // Convert the mesh
-        boost::shared_ptr<mesh_t> mesh (new mesh_t (comm) );
+        std::shared_ptr<mesh_t> mesh (new mesh_t (comm) );
         LifeV::convertBareMesh (baremesh, *mesh, ilead);
 
         // The current finite element
@@ -111,9 +111,9 @@ int main (int argc, char* argv[])
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    boost::shared_ptr<Epetra_Comm> comm (new Epetra_SerialComm);
+    std::shared_ptr<Epetra_Comm> comm (new Epetra_SerialComm);
 #endif
 
     // Parse command-line

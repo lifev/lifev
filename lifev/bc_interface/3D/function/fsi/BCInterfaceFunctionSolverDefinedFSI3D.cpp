@@ -100,7 +100,7 @@ BCInterfaceFunctionSolverDefined< BCHandler, FSIOperator >::updatePhysicalSolver
             // Update the physical solver variables
             for ( UInt i ( 0 ); i < M_vectorFunctionRobin.size(); ++i )
             {
-                functionParserSolverPtr_Type castedFunctionSolver = boost::dynamic_pointer_cast< functionParserSolver_Type > ( M_vectorFunctionRobin[i] );
+                functionParserSolverPtr_Type castedFunctionSolver = std::dynamic_pointer_cast< functionParserSolver_Type > ( M_vectorFunctionRobin[i] );
 
                 if ( castedFunctionSolver != 0 )
                 {
@@ -143,7 +143,7 @@ BCInterfaceFunctionSolverDefined< BCHandler, FSIOperator >::updatePhysicalSolver
             if ( M_physicalSolver->data().method().compare ("monolithicGE") == 0 || M_physicalSolver->data().method().compare ("monolithicGI") == 0 )
             {
                 M_robinRHS->subset ( M_physicalSolver->solidTimeAdvance()->rhsContributionFirstDerivative(),
-                                     boost::dynamic_pointer_cast< FSIMonolithic > ( M_physicalSolver )->offset() );
+                                     std::dynamic_pointer_cast< FSIMonolithic > ( M_physicalSolver )->offset() );
             }
             else
             {

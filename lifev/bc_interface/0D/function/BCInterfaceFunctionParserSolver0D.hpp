@@ -59,7 +59,7 @@ BCInterfaceFunctionParserSolver< ZeroDimensionalBCHandler, ZeroDimensionalData >
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< ZeroDimensionalBCHandler, ZeroDimensionalData >::createAccessList ( const boost::shared_ptr< BCInterfaceData >& data );
+BCInterfaceFunctionParserSolver< ZeroDimensionalBCHandler, ZeroDimensionalData >::createAccessList ( const std::shared_ptr< BCInterfaceData >& data );
 
 } // Namespace LifeV
 

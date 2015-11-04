@@ -57,7 +57,7 @@ public:
 
     /*! @typedef function_Type */
     //! Type definition for the 0D boundary function
-    typedef boost::function<Real ( const Real& ) > function_Type;
+    typedef std::function<Real ( const Real& ) > function_Type;
 
     //@}
 

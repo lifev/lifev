@@ -149,7 +149,7 @@ public:
     typedef typename feVectorContainerPtr_Type::iterator   feVectorContainerPtrIterate_Type;
 
     //container of shared pointer;
-    typedef std::vector<boost::shared_ptr<feVector_Type> > feVectorSharedPtrContainer_Type;
+    typedef std::vector<std::shared_ptr<feVector_Type> > feVectorSharedPtrContainer_Type;
     //@}
 
     //! @name Constructor & Destructor

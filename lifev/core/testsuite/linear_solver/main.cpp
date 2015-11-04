@@ -69,18 +69,18 @@ using namespace LifeV;
 namespace
 {
 typedef RegionMesh<LinearTetra>           mesh_Type;
-typedef boost::shared_ptr<mesh_Type>      meshPtr_Type;
+typedef std::shared_ptr<mesh_Type>      meshPtr_Type;
 typedef MatrixEpetra<Real>                matrix_Type;
 typedef VectorEpetra                      vector_Type;
-typedef boost::shared_ptr<VectorEpetra>   vectorPtr_Type;
+typedef std::shared_ptr<VectorEpetra>   vectorPtr_Type;
 typedef FESpace< mesh_Type, MapEpetra >   fespace_Type;
-typedef boost::shared_ptr< fespace_Type > fespacePtr_Type;
+typedef std::shared_ptr< fespace_Type > fespacePtr_Type;
 
 typedef LifeV::Preconditioner             basePrec_Type;
-typedef boost::shared_ptr<basePrec_Type>  basePrecPtr_Type;
+typedef std::shared_ptr<basePrec_Type>  basePrecPtr_Type;
 typedef LifeV::PreconditionerIfpack       prec_Type;
-typedef boost::shared_ptr<prec_Type>      precPtr_Type;
-typedef boost::function < Real ( Real const&,
+typedef std::shared_ptr<prec_Type>      precPtr_Type;
+typedef std::function < Real ( Real const&,
                                  Real const&,
                                  Real const&,
                                  Real const&,
@@ -163,9 +163,9 @@ main ( int argc, char** argv )
     {
 
 #ifdef HAVE_MPI
-        boost::shared_ptr<Epetra_Comm> Comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+        std::shared_ptr<Epetra_Comm> Comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
-        boost::shared_ptr<Epetra_Comm> Comm ( new Epetra_SerialComm );
+        std::shared_ptr<Epetra_Comm> Comm ( new Epetra_SerialComm );
 #endif
 
         const bool verbose ( Comm->MyPID() == 0 );
@@ -333,7 +333,7 @@ main ( int argc, char** argv )
         {
             std::cout << "Defining the matrices... " << std::flush;
         }
-        boost::shared_ptr<matrix_Type> systemMatrix ( new matrix_Type ( uFESpace->map() ) );
+        std::shared_ptr<matrix_Type> systemMatrix ( new matrix_Type ( uFESpace->map() ) );
         if ( verbose )
         {
             std::cout << "done" << std::endl;
@@ -422,7 +422,7 @@ main ( int argc, char** argv )
             std::cout << "Creation of vectors... " << std::flush;
         }
 
-        boost::shared_ptr<vector_Type> rhs;
+        std::shared_ptr<vector_Type> rhs;
         rhs.reset ( new vector_Type ( uFESpace->map(), Repeated ) );
 
         vector_Type fInterpolated ( uFESpace->map(), Repeated );
@@ -442,7 +442,7 @@ main ( int argc, char** argv )
             std::cout << "Applying BC... " << std::flush;
         }
         systemMatrix->globalAssemble();
-        boost::shared_ptr<vector_Type> rhsBC;
+        std::shared_ptr<vector_Type> rhsBC;
         rhsBC.reset ( new vector_Type ( *rhs, Unique ) );
         bcManage ( *systemMatrix, *rhsBC, *uFESpace->mesh(), uFESpace->dof(), bcHandler, uFESpace->feBd(), 1.0, 0.0 );
         if ( verbose )
@@ -454,7 +454,7 @@ main ( int argc, char** argv )
         {
             std::cout << std::endl << "Solving the system with SolverAztec00... " << std::endl;
         }
-        boost::shared_ptr<vector_Type> solution;
+        std::shared_ptr<vector_Type> solution;
         solution.reset ( new vector_Type ( uFESpace->map(), Unique ) );
         linearSolver1.setMatrix ( *systemMatrix );
         linearSolver1.solveSystem ( *rhsBC, *solution, systemMatrix );
@@ -463,7 +463,7 @@ main ( int argc, char** argv )
         {
             std::cout << std::endl << "Solving the system with LinearSolver (Belos)... " << std::endl;
         }
-        boost::shared_ptr<vector_Type> solution2;
+        std::shared_ptr<vector_Type> solution2;
         solution2.reset ( new vector_Type ( uFESpace->map(), Unique ) );
         linearSolver2.setOperator ( systemMatrix );
         linearSolver2.setRightHandSide ( rhsBC );
@@ -473,7 +473,7 @@ main ( int argc, char** argv )
         {
             std::cout << std::endl << "Solving the system with LinearSolver (AztecOO)... " << std::endl;
         }
-        boost::shared_ptr<vector_Type> solution3;
+        std::shared_ptr<vector_Type> solution3;
         solution3.reset ( new vector_Type ( uFESpace->map(), Unique ) );
         linearSolver3.setOperator ( systemMatrix );
         linearSolver3.setRightHandSide ( rhsBC );

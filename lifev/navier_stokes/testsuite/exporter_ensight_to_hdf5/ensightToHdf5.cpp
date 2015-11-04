@@ -65,7 +65,7 @@ typedef RegionMesh<LinearTetra>                  mesh_Type;
 typedef OseenSolver< mesh_Type >::vector_Type    vector_Type;
 typedef OseenSolver< mesh_Type >::vectorPtr_Type vectorPtr_Type;
 typedef FESpace< mesh_Type, MapEpetra >          feSpace_Type;
-typedef boost::shared_ptr< feSpace_Type >        feSpacePtr_Type;
+typedef std::shared_ptr< feSpace_Type >        feSpacePtr_Type;
 
 
 void
@@ -81,7 +81,7 @@ struct EnsightToHdf5::Private
 
     std::string    data_file_name;
 
-    boost::shared_ptr<Epetra_Comm>   comm;
+    std::shared_ptr<Epetra_Comm>   comm;
 };
 
 EnsightToHdf5::EnsightToHdf5 ( int argc,
@@ -121,20 +121,20 @@ EnsightToHdf5::run()
     bool verbose = (d->comm->MyPID() == 0);
 
     // Fluid solver
-    boost::shared_ptr<OseenData> oseenData (new OseenData() );
+    std::shared_ptr<OseenData> oseenData (new OseenData() );
     oseenData->setup ( dataFile );
 
     MeshData meshData;
     meshData.setup (dataFile, "fluid/space_discretization");
 
-    boost::shared_ptr<mesh_Type > fullMeshPtr (new mesh_Type ( d->comm ) );
+    std::shared_ptr<mesh_Type > fullMeshPtr (new mesh_Type ( d->comm ) );
     readMesh (*fullMeshPtr, meshData);
 
     // writeMesh("test.mesh", *fullMeshPtr);
     // Scale, Rotate, Translate (if necessary)
-    boost::array< Real, NDIM >    geometryScale;
-    boost::array< Real, NDIM >    geometryRotate;
-    boost::array< Real, NDIM >    geometryTranslate;
+    std::array< Real, NDIM >    geometryScale;
+    std::array< Real, NDIM >    geometryRotate;
+    std::array< Real, NDIM >    geometryTranslate;
 
     geometryScale[0] = dataFile ( "fluid/space_discretization/transform", 1., 0);
     geometryScale[1] = dataFile ( "fluid/space_discretization/transform", 1., 1);
@@ -151,7 +151,7 @@ EnsightToHdf5::run()
     MeshUtility::MeshTransformer<mesh_Type, mesh_Type::markerCommon_Type > _transformMesh (*fullMeshPtr);
     _transformMesh.transformMesh ( geometryScale, geometryRotate, geometryTranslate );
 
-    boost::shared_ptr<mesh_Type > meshPtr;
+    std::shared_ptr<mesh_Type > meshPtr;
     {
         MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, d->comm);
         meshPtr = meshPart.meshPartition();
@@ -241,8 +241,8 @@ EnsightToHdf5::run()
     Real t0     = oseenData->dataTime()->initialTime();
     Real tFinal = oseenData->dataTime()->endTime();
 
-    boost::shared_ptr< Exporter<mesh_Type > > exporter;
-    boost::shared_ptr< Exporter<mesh_Type > > importer;
+    std::shared_ptr< Exporter<mesh_Type > > exporter;
+    std::shared_ptr< Exporter<mesh_Type > > importer;
 
     std::string const exporterType =  dataFile ( "exporter/type", "hdf5");
     std::string const exporterName =  dataFile ( "exporter/filename", "ethiersteinman");

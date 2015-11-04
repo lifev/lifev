@@ -148,7 +148,7 @@ public:
     // Method defined in class to allow compiler optimization
     // as this class is used repeatedly during the assembly
     template <typename MatrixType>
-    void pushToGlobal (boost::shared_ptr<MatrixType> mat)
+    void pushToGlobal (std::shared_ptr<MatrixType> mat)
     {
         mat->addToCoefficients ( M_nbRow, M_nbColumn,
                                  rowIndices(), columnIndices(),
@@ -167,7 +167,7 @@ public:
     // Method defined in class to allow compiler optimization
     // as this class is used repeatedly during the assembly
     template <typename MatrixType>
-    void pushToClosedGlobal (boost::shared_ptr<MatrixType> mat)
+    void pushToClosedGlobal (std::shared_ptr<MatrixType> mat)
     {
         mat->sumIntoCoefficients ( M_nbRow, M_nbColumn,
                                    rowIndices(), columnIndices(),

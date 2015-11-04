@@ -67,7 +67,7 @@ main ( Int argc, char** argv )
     // ===================================================
 
     //Setup main communicator
-    boost::shared_ptr<Epetra_Comm>    comm;
+    std::shared_ptr<Epetra_Comm>    comm;
 
     Int    nprocs;
     Int rank;
@@ -98,7 +98,7 @@ main ( Int argc, char** argv )
 
     //BASE VECTORS
     typedef VectorEpetra                        Vector;
-    typedef boost::shared_ptr<Vector>           Vector_ptr;
+    typedef std::shared_ptr<Vector>           Vector_ptr;
 
     Int MyGlobalIElementsA[3], MyGlobalIElementsB[2];
     MyGlobalIElementsA[0] = 0;
@@ -166,7 +166,7 @@ main ( Int argc, char** argv )
     // ===================================================
 
     typedef boost::numeric::ublas::vector<Real> VectorBOOST;
-    typedef boost::shared_ptr<VectorBOOST>      VectorBOOST_ptr;
+    typedef std::shared_ptr<VectorBOOST>      VectorBOOST_ptr;
 
     // BASE Vectors
     VectorBOOST_ptr A1_BOOST, B1_BOOST, A2_BOOST, B2_BOOST;

@@ -25,9 +25,9 @@ int main (int argc, char** argv)
 #endif
 
 #ifdef EPETRA_MPI
-    boost::shared_ptr<Epetra_Comm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    boost::shared_ptr<Epetra_Comm> comm (new Epetra_SerialComm() );
+    std::shared_ptr<Epetra_Comm> comm (new Epetra_SerialComm() );
 #endif
 
     std::string dataFileName;
@@ -47,7 +47,7 @@ int main (int argc, char** argv)
 
     {
         //Create the mesh data and read and partitioned the mesh
-        boost::shared_ptr< RegionMesh <LinearTetra> > meshPtr ( new RegionMesh <LinearTetra> ( comm ) );
+        std::shared_ptr< RegionMesh <LinearTetra> > meshPtr ( new RegionMesh <LinearTetra> ( comm ) );
         MeshUtility::loadMesh ( meshPtr, meshName, meshPath, isPartitioned, meshOrder );
         if ( comm -> MyPID() == 0 )
         {
@@ -61,8 +61,8 @@ int main (int argc, char** argv)
         {
             std::cout << "\n\nReading and partitioning the cube mesh saving the global mesh: ... \n";
         }
-        boost::shared_ptr< RegionMesh <LinearTetra> > meshFullPtr ( new RegionMesh <LinearTetra> ( comm ) );
-        boost::shared_ptr< RegionMesh <LinearTetra> > meshLocalPtr ( new RegionMesh <LinearTetra> ( comm ) );
+        std::shared_ptr< RegionMesh <LinearTetra> > meshFullPtr ( new RegionMesh <LinearTetra> ( comm ) );
+        std::shared_ptr< RegionMesh <LinearTetra> > meshLocalPtr ( new RegionMesh <LinearTetra> ( comm ) );
         MeshUtility::loadMesh ( meshLocalPtr, meshFullPtr, meshName, meshPath, isPartitioned, "P1" );
         if ( comm -> MyPID() == 0 )
         {
@@ -76,7 +76,7 @@ int main (int argc, char** argv)
         {
             std::cout << "\n\nCreating a structured mesh without saving the full mesh: ... \n";
         }
-        boost::shared_ptr< RegionMesh <LinearTetra> > meshStructPtr ( new RegionMesh <LinearTetra> ( comm ) );
+        std::shared_ptr< RegionMesh <LinearTetra> > meshStructPtr ( new RegionMesh <LinearTetra> ( comm ) );
         std::vector<Real> l (3, 1.0);
         std::vector<Real> t (3, 0.0);
         MeshUtility::loadStructuredMesh  ( meshStructPtr,

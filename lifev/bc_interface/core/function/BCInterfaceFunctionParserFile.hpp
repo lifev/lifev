@@ -281,7 +281,16 @@ BCInterfaceFunctionParserFile< BcHandlerType, PhysicalSolverType >::setData ( co
     }
     else
     {
-        boost::replace_all ( stringsVector[1], "]", "" );
+    	std::string search = "]";
+    	std::string replace = "";
+
+        for( size_t pos = 0; ; pos += replace.length() ) {
+            pos = stringsVector[1].find( search, pos );
+            if( pos == std::string::npos ) break;
+            stringsVector[1].erase( pos, search.length() );
+            stringsVector[1].insert( pos, replace );
+        }
+
         data->setBaseString ( dataFile ( ( "function" + stringsVector[1] ).c_str(), "Undefined" ) );
     }
 
@@ -293,7 +302,6 @@ BCInterfaceFunctionParserFile< BcHandlerType, PhysicalSolverType >::setData ( co
 #endif
 
 }
-
 
 // ===================================================
 // Private Methods

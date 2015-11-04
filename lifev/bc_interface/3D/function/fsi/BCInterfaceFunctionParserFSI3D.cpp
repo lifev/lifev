@@ -55,7 +55,7 @@ BCInterfaceFunctionParser< BCHandler, FSIOperator >::assignFunction ( bcBase_Typ
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParser< BCHandler, FSIOperator >::setData ( const boost::shared_ptr< BCInterfaceData >& data )
+BCInterfaceFunctionParser< BCHandler, FSIOperator >::setData ( const std::shared_ptr< BCInterfaceData >& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -64,7 +64,7 @@ BCInterfaceFunctionParser< BCHandler, FSIOperator >::setData ( const boost::shar
 
     setupParser ( data );
 
-    boost::shared_ptr< BCInterfaceData3D > castedData = boost::dynamic_pointer_cast< BCInterfaceData3D > ( data );
+    std::shared_ptr< BCInterfaceData3D > castedData = std::dynamic_pointer_cast< BCInterfaceData3D > ( data );
 
     if ( castedData != 0 )
     {

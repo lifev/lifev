@@ -80,7 +80,7 @@ public:
     //@{
 
     typedef TimeData                                     time_Type;
-    typedef boost::shared_ptr< time_Type >               timePtr_Type;
+    typedef std::shared_ptr< time_Type >               timePtr_Type;
 
     //@}
 

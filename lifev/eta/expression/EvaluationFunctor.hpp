@@ -207,7 +207,7 @@ private:
     //@}
 
     // Internal storage
-    boost::shared_ptr<FunctorType> M_functor;
+    std::shared_ptr<FunctorType> M_functor;
     ArgumentEvaluationType M_evaluation;
 };
 
@@ -395,7 +395,7 @@ private:
     //@}
 
     // Internal storage
-    boost::shared_ptr<FunctorType> M_functor;
+    std::shared_ptr<FunctorType> M_functor;
     Argument1EvaluationType M_evaluation1;
     Argument2EvaluationType M_evaluation2;
 };

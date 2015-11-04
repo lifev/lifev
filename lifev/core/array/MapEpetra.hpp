@@ -77,7 +77,7 @@ public:
     //@{
 
     typedef Epetra_Map                                            map_Type;
-    typedef boost::shared_ptr<map_Type>                           mapPtr_Type;
+    typedef std::shared_ptr<map_Type>                           mapPtr_Type;
 
     typedef MapEpetraData                                         mapData_Type;
 
@@ -86,12 +86,12 @@ public:
        map initialized without importer/exporter (i.e. with a shared_ptr
        pointing to 0) would not "gain" the importer/exporter created by another
        map.*/
-    typedef boost::shared_ptr< boost::shared_ptr<Epetra_Export> > exporterPtr_Type;
-    typedef boost::shared_ptr< boost::shared_ptr<Epetra_Import> > importerPtr_Type;
+    typedef std::shared_ptr< std::shared_ptr<Epetra_Export> > exporterPtr_Type;
+    typedef std::shared_ptr< std::shared_ptr<Epetra_Import> > importerPtr_Type;
 
 
     typedef Epetra_Comm                                           comm_Type;
-    typedef boost::shared_ptr<comm_Type>                          commPtr_Type;
+    typedef std::shared_ptr<comm_Type>                          commPtr_Type;
 
     //@}
 
@@ -218,7 +218,7 @@ public:
     /*!
       @param root processor on which to export all the points
      */
-    boost::shared_ptr<MapEpetra> createRootMap ( Int const root ) const;
+    std::shared_ptr<MapEpetra> createRootMap ( Int const root ) const;
 
     //! This method return true if both the unique map and the repeated map are identical
     bool mapsAreSimilar ( MapEpetra const& epetraMap ) const;

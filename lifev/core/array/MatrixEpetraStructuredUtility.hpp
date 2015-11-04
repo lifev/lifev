@@ -141,8 +141,8 @@ void copyBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
   @param destBlock Destination block where the data will be stored
 */
 template< typename DataType>
-void copyBlock ( boost::shared_ptr< MatrixEpetraStructuredView<DataType> > srcBlock,
-                 boost::shared_ptr< MatrixEpetraStructuredView<DataType> > destBlock )
+void copyBlock ( std::shared_ptr< MatrixEpetraStructuredView<DataType> > srcBlock,
+                 std::shared_ptr< MatrixEpetraStructuredView<DataType> > destBlock )
 {
     copyBlock ( *srcBlock, *destBlock );
 }
@@ -164,7 +164,7 @@ void createZeroBlock ( MatrixEpetraStructuredView<DataType>& /*destBlock*/ )
   @param destBlock Block where the data will be stored
 */
 template< typename DataType >
-void createZeroBlock ( boost::shared_ptr< MatrixEpetraStructuredView<DataType> > destBlock )
+void createZeroBlock ( std::shared_ptr< MatrixEpetraStructuredView<DataType> > destBlock )
 {
     createZeroBlock ( *destBlock );
 }
@@ -215,7 +215,7 @@ void createScalarBlock ( const MatrixEpetraStructuredView<DataType>& destBlock, 
   @param diagonalValue Value to be inserted in the diagonal
 */
 template< typename DataType >
-void createScalarBlock ( boost::shared_ptr< MatrixEpetraStructuredView<DataType> > destBlock, const DataType& diagonalValue )
+void createScalarBlock ( std::shared_ptr< MatrixEpetraStructuredView<DataType> > destBlock, const DataType& diagonalValue )
 {
     createScalarBlock ( *destBlock, diagonalValue );
 }
@@ -235,7 +235,7 @@ void createIdentityBlock ( const MatrixEpetraStructuredView<DataType>& destBlock
   @param destBlock Block where the data will be stored
 */
 template< typename DataType >
-void createIdentityBlock ( boost::shared_ptr< MatrixEpetraStructuredView<DataType> > destBlock )
+void createIdentityBlock ( std::shared_ptr< MatrixEpetraStructuredView<DataType> > destBlock )
 {
     createIdentityBlock ( *destBlock );
 }
@@ -321,8 +321,8 @@ void createDiagBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
   @param destBlock Destination block where the data will be stored
 */
 template< typename DataType >
-void createDiagBlock ( boost::shared_ptr< MatrixEpetraStructuredView<DataType> > srcBlock,
-                       boost::shared_ptr< MatrixEpetraStructuredView<DataType> > destBlock )
+void createDiagBlock ( std::shared_ptr< MatrixEpetraStructuredView<DataType> > srcBlock,
+                       std::shared_ptr< MatrixEpetraStructuredView<DataType> > destBlock )
 {
     createDiagBlock ( *srcBlock, *destBlock );
 }
@@ -412,8 +412,8 @@ void createInvDiagBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
   @param destBlock Destination block where the data will be stored
 */
 template< typename DataType >
-void createInvDiagBlock ( boost::shared_ptr< MatrixEpetraStructuredView<DataType> > srcBlock,
-                          boost::shared_ptr< MatrixEpetraStructuredView<DataType> > destBlock )
+void createInvDiagBlock ( std::shared_ptr< MatrixEpetraStructuredView<DataType> > srcBlock,
+                          std::shared_ptr< MatrixEpetraStructuredView<DataType> > destBlock )
 {
     createInvDiagBlock ( *srcBlock, *destBlock );
 }
@@ -502,8 +502,8 @@ void createInvSquaredDiagBlock ( const MatrixEpetraStructuredView<DataType>& src
   @param destBlock Destination block where the data will be stored
 */
 template< typename DataType >
-void createInvSquaredDiagBlock ( boost::shared_ptr< MatrixEpetraStructuredView<DataType> > srcBlock,
-                                 boost::shared_ptr< MatrixEpetraStructuredView<DataType> > destBlock )
+void createInvSquaredDiagBlock ( std::shared_ptr< MatrixEpetraStructuredView<DataType> > srcBlock,
+                                 std::shared_ptr< MatrixEpetraStructuredView<DataType> > destBlock )
 {
     createInvSquaredDiagBlock ( *srcBlock, *destBlock );
 }
@@ -595,8 +595,8 @@ void createUpperTriangularBlock ( const MatrixEpetraStructuredView<DataType>& sr
   @param destBlock Destination block where the data will be stored
 */
 template< typename DataType >
-void createUpperTriangularBlock ( boost::shared_ptr< MatrixEpetraStructuredView<DataType> > srcBlock,
-                                  boost::shared_ptr< MatrixEpetraStructuredView<DataType> > destBlock )
+void createUpperTriangularBlock ( std::shared_ptr< MatrixEpetraStructuredView<DataType> > srcBlock,
+                                  std::shared_ptr< MatrixEpetraStructuredView<DataType> > destBlock )
 {
     createUpperTriangularBlock ( *srcBlock, *destBlock );
 }
@@ -688,8 +688,8 @@ void createLowerTriangularBlock ( const MatrixEpetraStructuredView<DataType>& sr
   @param destBlock Destination block where the data will be stored
 */
 template< typename DataType >
-void createLowerTriangularBlock ( boost::shared_ptr< MatrixEpetraStructuredView<DataType> > srcBlock,
-                                  boost::shared_ptr< MatrixEpetraStructuredView<DataType> > destBlock )
+void createLowerTriangularBlock ( std::shared_ptr< MatrixEpetraStructuredView<DataType> > srcBlock,
+                                  std::shared_ptr< MatrixEpetraStructuredView<DataType> > destBlock )
 {
     createLowerTriangularBlock ( *srcBlock, *destBlock );
 }
@@ -775,8 +775,8 @@ void createLumpedBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
   @param destBlock Destination block where the data will be stored
 */
 template< typename DataType >
-void createLumpedBlock ( boost::shared_ptr< MatrixEpetraStructuredView<DataType> > srcBlock,
-                         boost::shared_ptr< MatrixEpetraStructuredView<DataType> > destBlock )
+void createLumpedBlock ( std::shared_ptr< MatrixEpetraStructuredView<DataType> > srcBlock,
+                         std::shared_ptr< MatrixEpetraStructuredView<DataType> > destBlock )
 {
     createLumpedBlock ( *srcBlock, *destBlock );
 }
@@ -866,8 +866,8 @@ void createInvLumpedBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock
   @param destBlock Destination block where the data will be stored
 */
 template< typename DataType >
-void createInvLumpedBlock ( boost::shared_ptr< MatrixEpetraStructuredView<DataType> > srcBlock,
-                            boost::shared_ptr< MatrixEpetraStructuredView<DataType> > destBlock )
+void createInvLumpedBlock ( std::shared_ptr< MatrixEpetraStructuredView<DataType> > srcBlock,
+                            std::shared_ptr< MatrixEpetraStructuredView<DataType> > destBlock )
 {
     createInvLumpedBlock ( *srcBlock, *destBlock );
 }
@@ -882,7 +882,7 @@ void createInvLumpedBlock ( boost::shared_ptr< MatrixEpetraStructuredView<DataTy
 */
 template< typename DataType>
 void createMatrixFromBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
-                             boost::shared_ptr<MatrixEpetraStructured<DataType> >& destMatrix,
+                             std::shared_ptr<MatrixEpetraStructured<DataType> >& destMatrix,
                              const MapEpetra& rowMap,
                              bool closeMatrix = true )
 {
@@ -912,8 +912,8 @@ void createMatrixFromBlock ( const MatrixEpetraStructuredView<DataType>& srcBloc
   @warning This method is only intended to be used with square blocks!
 */
 template< typename DataType>
-void createMatrixFromBlock ( boost::shared_ptr< MatrixEpetraStructuredView<DataType> > srcBlock,
-                             boost::shared_ptr<MatrixEpetraStructured<DataType> >& destMatrix,
+void createMatrixFromBlock ( std::shared_ptr< MatrixEpetraStructuredView<DataType> > srcBlock,
+                             std::shared_ptr<MatrixEpetraStructured<DataType> >& destMatrix,
                              const MapEpetra& rowMap,
                              bool closeMatrix = true )
 {
@@ -931,9 +931,9 @@ void createMatrixFromBlock ( boost::shared_ptr< MatrixEpetraStructuredView<DataT
 */
 template< typename DataType>
 void createMatrixFromBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
-                             boost::shared_ptr<MatrixEpetraStructured<DataType> >& destMatrix,
-                             boost::shared_ptr<MapEpetra> domainMap,
-                             boost::shared_ptr<MapEpetra> rangeMap,
+                             std::shared_ptr<MatrixEpetraStructured<DataType> >& destMatrix,
+                             std::shared_ptr<MapEpetra> domainMap,
+                             std::shared_ptr<MapEpetra> rangeMap,
                              bool closeMatrix = true )
 {
 
@@ -968,10 +968,10 @@ void createMatrixFromBlock ( const MatrixEpetraStructuredView<DataType>& srcBloc
   @warning This method is only intended to be used with square blocks!
 */
 template< typename DataType>
-void createMatrixFromBlock ( boost::shared_ptr< MatrixEpetraStructuredView<DataType> > srcBlock,
-                             boost::shared_ptr<MatrixEpetraStructured<DataType> >& destMatrix,
-                             boost::shared_ptr<MapEpetra> domainMap,
-                             boost::shared_ptr<MapEpetra> rangeMap,
+void createMatrixFromBlock ( std::shared_ptr< MatrixEpetraStructuredView<DataType> > srcBlock,
+                             std::shared_ptr<MatrixEpetraStructured<DataType> >& destMatrix,
+                             std::shared_ptr<MapEpetra> domainMap,
+                             std::shared_ptr<MapEpetra> rangeMap,
                              bool closeMatrix = true )
 {
     createMatrixFromBlock ( *srcBlock, destMatrix, domainMap, rangeMap, closeMatrix );
@@ -985,8 +985,8 @@ void createMatrixFromBlock ( boost::shared_ptr< MatrixEpetraStructuredView<DataT
   @param columnIndex Column position of the block in the matrix
 */
 template <typename DataType>
-boost::shared_ptr< MatrixEpetraStructuredView<DataType> >
-createBlockView ( boost::shared_ptr<MatrixEpetra<DataType> > matrixPtr,
+std::shared_ptr< MatrixEpetraStructuredView<DataType> >
+createBlockView ( std::shared_ptr<MatrixEpetra<DataType> > matrixPtr,
                   const MatrixBlockStructure& blockStructure,
                   const UInt& rowIndex,
                   const UInt& columnIndex )
@@ -994,7 +994,7 @@ createBlockView ( boost::shared_ptr<MatrixEpetra<DataType> > matrixPtr,
     ASSERT ( matrixPtr->matrixPtr()->NumGlobalCols() == blockStructure.numRows(), " Incompatible block structure (global size does not match) " );
     ASSERT ( matrixPtr->matrixPtr()->NumGlobalRows() == blockStructure.numColumns(), " Incompatible block structure (global size does not match) " );
 
-    boost::shared_ptr< MatrixEpetraStructuredView<DataType> > matrixBlockView ( new MatrixEpetraStructuredView<DataType> );
+    std::shared_ptr< MatrixEpetraStructuredView<DataType> > matrixBlockView ( new MatrixEpetraStructuredView<DataType> );
 
     matrixBlockView->setup ( blockStructure.rowBlockFirstIndex ( rowIndex ),
                              blockStructure.columnBlockFirstIndex ( columnIndex ),
@@ -1016,7 +1016,7 @@ createBlockView ( boost::shared_ptr<MatrixEpetra<DataType> > matrixPtr,
 */
 template <typename DataType>
 void
-fillBlockView ( boost::shared_ptr<MatrixEpetra<DataType> > matrixPtr,
+fillBlockView ( std::shared_ptr<MatrixEpetra<DataType> > matrixPtr,
                 const MatrixBlockStructure& blockStructure,
                 const UInt& rowIndex,
                 const UInt& columnIndex,
@@ -1042,11 +1042,11 @@ fillBlockView ( boost::shared_ptr<MatrixEpetra<DataType> > matrixPtr,
 */
 template <typename DataType>
 void
-fillBlockView ( boost::shared_ptr<MatrixEpetra<DataType> > matrixPtr,
+fillBlockView ( std::shared_ptr<MatrixEpetra<DataType> > matrixPtr,
                 const MatrixBlockStructure& blockStructure,
                 const UInt& rowIndex,
                 const UInt& columnIndex,
-                boost::shared_ptr< MatrixEpetraStructuredView<DataType> >& blockView )
+                std::shared_ptr< MatrixEpetraStructuredView<DataType> >& blockView )
 {
     if ( blockView.get() == 0 )
     {

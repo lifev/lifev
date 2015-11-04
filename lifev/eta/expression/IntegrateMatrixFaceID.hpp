@@ -88,11 +88,11 @@ public:
     //@{
 
     //! Full data constructor
-    IntegrateMatrixFaceID (const boost::shared_ptr<MeshType>& mesh,
+    IntegrateMatrixFaceID (const std::shared_ptr<MeshType>& mesh,
                            const UInt boundaryID,
                            const QuadratureBoundary& quadratureBD,
-                           const boost::shared_ptr<TestSpaceType> testSpace,
-                           const boost::shared_ptr<SolutionSpaceType> solutionSpace,
+                           const std::shared_ptr<TestSpaceType> testSpace,
+                           const std::shared_ptr<SolutionSpaceType> solutionSpace,
                            const ExpressionType& expression);
 
     //! Copy constructor
@@ -116,7 +116,7 @@ public:
 
     //! Operator wrapping the addTo method (for shared_ptr)
     template <typename MatrixType>
-    inline void operator>> (boost::shared_ptr<MatrixType> mat)
+    inline void operator>> (std::shared_ptr<MatrixType> mat)
     {
         addTo (mat);
     }
@@ -142,7 +142,7 @@ public:
     void addTo (MatrixType& mat);
 
     template <typename MatrixType>
-    inline void addTo (boost::shared_ptr<MatrixType> mat)
+    inline void addTo (std::shared_ptr<MatrixType> mat)
     {
         ASSERT (mat != 0, " Cannot assemble with an empty matrix");
         addTo (*mat);
@@ -161,7 +161,7 @@ private:
     //@}
 
     // Pointer on the mesh
-    boost::shared_ptr<MeshType> M_mesh;
+    std::shared_ptr<MeshType> M_mesh;
 
     // Identifier for the boundary
     UInt M_boundaryId;
@@ -170,8 +170,8 @@ private:
     QuadratureBoundary M_quadratureBoundary;
 
     // Shared pointer on the Space
-    boost::shared_ptr<TestSpaceType> M_testSpace;
-    boost::shared_ptr<SolutionSpaceType> M_solutionSpace;
+    std::shared_ptr<TestSpaceType> M_testSpace;
+    std::shared_ptr<SolutionSpaceType> M_solutionSpace;
 
     // Tree to compute the values for the assembly
     evaluation_Type M_evaluation;
@@ -195,11 +195,11 @@ private:
 
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
 IntegrateMatrixFaceID < MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>::
-IntegrateMatrixFaceID (const boost::shared_ptr<MeshType>& mesh,
+IntegrateMatrixFaceID (const std::shared_ptr<MeshType>& mesh,
                        const UInt boundaryID,
                        const QuadratureBoundary& quadratureBD,
-                       const boost::shared_ptr<TestSpaceType> testSpace,
-                       const boost::shared_ptr<SolutionSpaceType> solutionSpace,
+                       const std::shared_ptr<TestSpaceType> testSpace,
+                       const std::shared_ptr<SolutionSpaceType> solutionSpace,
                        const ExpressionType& expression)
     :   M_mesh (mesh),
         M_boundaryId (boundaryID),

@@ -76,7 +76,7 @@ public:
     typedef ETFESpace<MeshType, MapType, SpaceDim, 1> fespace_Type;
 
     //! Pointer on the FESpace
-    typedef boost::shared_ptr<fespace_Type> fespacePtr_Type;
+    typedef std::shared_ptr<fespace_Type> fespacePtr_Type;
 
     //! Vector of the values
     typedef VectorEpetra vector_Type;

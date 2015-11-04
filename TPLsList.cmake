@@ -85,6 +85,7 @@ SET( LifeV_TPLS_FINDMODS_CLASSIFICATIONS
   HDF5            "cmake/TPLs/"    PS
   QHull           "cmake/TPLs/"    SS
   Trilinos        "cmake/TPLs/"    PS
+  muparser        "cmake/TPLs/"    PS
   )
 
 # NOTES:

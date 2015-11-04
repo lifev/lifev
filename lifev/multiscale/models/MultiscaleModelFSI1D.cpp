@@ -366,7 +366,7 @@ void
 MultiscaleModelFSI1D::imposeBoundaryFlowRate ( const multiscaleID_Type& boundaryID, const function_Type& function )
 {
     OneDFSIFunction base;
-    base.setFunction ( boost::bind ( function, _1, _1, _1, _1, _1 ) );
+    base.setFunction ( std::bind ( function, std::placeholders::_1, std::placeholders::_1, std::placeholders::_1, std::placeholders::_1, std::placeholders::_1 ) );
 
     M_bc->handler()->setBC ( flagConverter ( boundaryID ), OneDFSI::first, OneDFSI::Q, base );
 }
@@ -375,7 +375,7 @@ void
 MultiscaleModelFSI1D::imposeBoundaryMeanNormalStress ( const multiscaleID_Type& boundaryID, const function_Type& function )
 {
     OneDFSIFunction base;
-    base.setFunction ( boost::bind ( function, _1, _1, _1, _1, _1 ) );
+    base.setFunction ( std::bind ( function, std::placeholders::_1, std::placeholders::_1, std::placeholders::_1, std::placeholders::_1, std::placeholders::_1 ) );
 
     M_bc->handler()->setBC ( flagConverter ( boundaryID ), OneDFSI::first, OneDFSI::S, base );
 }
@@ -592,7 +592,7 @@ MultiscaleModelFSI1D::setupFESpace()
 #endif
 
     //Transform mesh
-    boost::array< Real, NDIM > NullTransformation;
+    std::array< Real, NDIM > NullTransformation;
     NullTransformation[0] = 0.;
     NullTransformation[1] = 0.;
     NullTransformation[2] = 0.;
@@ -726,7 +726,7 @@ MultiscaleModelFSI1D::setupLinearModel()
 #endif
 
     // Define bcFunction for linear problem
-    M_bcBaseDelta.setFunction ( boost::bind ( &MultiscaleModelFSI1D::bcFunctionDelta, this, _1 ) );
+    M_bcBaseDelta.setFunction ( std::bind ( &MultiscaleModelFSI1D::bcFunctionDelta, this, std::placeholders::_1 ) );
 
     // The linear BCHandler is a copy of the original BCHandler with the LinearSolution instead of the true solution
     //M_LinearBC.reset( new bc_Type( *M_bc->handler() ) ); // COPY CONSTRUCTOR NOT WORKING

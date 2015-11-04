@@ -80,8 +80,8 @@ namespace AssemblyElemental
 //! @name Public typedefs
 //@{
 //! Use the portable syntax of the boost function
-typedef boost::function5 < const Real,  const Real&, const Real&,
-        const Real&, const Real&, const ID&  > function_Type;
+typedef std::function < const Real (const Real&, const Real&,
+        const Real&, const Real&, const ID&)  > function_Type;
 //@}
 
 //! Elementary mass for constant mass coefficient
@@ -846,7 +846,7 @@ void shape_terms (
     int iblock = 0,
     bool wImplicit = false,
     Real alpha = 0.,
-    boost::shared_ptr<MatrixElemental> elmat_convect = boost::shared_ptr<MatrixElemental>()
+    std::shared_ptr<MatrixElemental> elmat_convect = std::shared_ptr<MatrixElemental>()
 );
 
 //

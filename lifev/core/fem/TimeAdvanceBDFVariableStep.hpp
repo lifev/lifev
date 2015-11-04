@@ -102,7 +102,7 @@ public:
     //@{
     typedef ScalarVector                         container_Type;
     typedef FEVectorType                         feVector_Type;
-    typedef boost::shared_ptr< feVector_Type >   feVectorPtr_Type;
+    typedef std::shared_ptr< feVector_Type >   feVectorPtr_Type;
     typedef std::vector< feVectorPtr_Type >      feVectorPtrContainer_Type;
     //@}
 

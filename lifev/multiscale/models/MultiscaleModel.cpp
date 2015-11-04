@@ -148,9 +148,9 @@ MultiscaleModel::showMe()
 // Set Methods
 // ===================================================
 void
-MultiscaleModel::setGeometry ( const boost::array< Real, NDIM >& scale,
-                               const boost::array< Real, NDIM >& rotate,
-                               const boost::array< Real, NDIM >& translate )
+MultiscaleModel::setGeometry ( const std::array< Real, NDIM >& scale,
+                               const std::array< Real, NDIM >& rotate,
+                               const std::array< Real, NDIM >& translate )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

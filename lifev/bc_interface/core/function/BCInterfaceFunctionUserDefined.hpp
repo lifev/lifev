@@ -277,7 +277,7 @@ BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::functionSel
     {
         case Sin:
 
-            return boost::bind ( &BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::functionSin, this, _1, _1, _1, _1, _1 );
+            return std::bind ( &BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::functionSin, this, std::placeholders::_1, std::placeholders::_1, std::placeholders::_1, std::placeholders::_1, std::placeholders::_1 );
 
         default:
 
@@ -295,7 +295,7 @@ BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::functionSel
     {
         case Sin:
 
-            return boost::bind ( &BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::functionSin, this, _1, _2, _1, _1, _1 );
+            return std::bind ( &BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::functionSin, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_1, std::placeholders::_1, std::placeholders::_1 );
 
         default:
 
@@ -313,7 +313,7 @@ BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::functionSel
     {
         case Sin:
 
-            return boost::bind ( &BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::functionSin, this, _1, _2, _3, _4, _5 );
+            return std::bind ( &BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::functionSin, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
 
         default:
 

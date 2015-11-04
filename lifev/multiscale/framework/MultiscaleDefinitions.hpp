@@ -152,24 +152,24 @@ typedef multiscaleIDContainer_Type::const_iterator                              
 typedef Displayer::commPtr_Type                                                  multiscaleCommPtr_Type;
 
 typedef VectorEpetra                                                             multiscaleVector_Type;
-typedef boost::shared_ptr< multiscaleVector_Type >                               multiscaleVectorPtr_Type;
+typedef std::shared_ptr< multiscaleVector_Type >                               multiscaleVectorPtr_Type;
 
 typedef MatrixEpetra< Real >                                                     multiscaleMatrix_Type;
-typedef boost::shared_ptr< multiscaleMatrix_Type >                               multiscaleMatrixPtr_Type;
+typedef std::shared_ptr< multiscaleMatrix_Type >                               multiscaleMatrixPtr_Type;
 
 typedef LinearSolver::parameterList_Type                                         multiscaleParameterList_Type;
 typedef LinearSolver::parameterListPtr_Type                                      multiscaleParameterListPtr_Type;
 
 typedef MultiscaleAlgorithm                                                      multiscaleAlgorithm_Type;
-typedef boost::shared_ptr< multiscaleAlgorithm_Type >                            multiscaleAlgorithmPtr_Type;
+typedef std::shared_ptr< multiscaleAlgorithm_Type >                            multiscaleAlgorithmPtr_Type;
 typedef FactorySingleton< Factory< multiscaleAlgorithm_Type, algorithms_Type > > multiscaleAlgorithmFactory_Type;
 
 typedef MultiscaleModel                                                          multiscaleModel_Type;
-typedef boost::shared_ptr< multiscaleModel_Type >                                multiscaleModelPtr_Type;
+typedef std::shared_ptr< multiscaleModel_Type >                                multiscaleModelPtr_Type;
 typedef FactorySingleton< Factory< multiscaleModel_Type, models_Type > >         multiscaleModelFactory_Type;
 
 typedef MultiscaleCoupling                                                       multiscaleCoupling_Type;
-typedef boost::shared_ptr< multiscaleCoupling_Type >                             multiscaleCouplingPtr_Type;
+typedef std::shared_ptr< multiscaleCoupling_Type >                             multiscaleCouplingPtr_Type;
 typedef FactorySingleton< Factory< multiscaleCoupling_Type, couplings_Type > >   multiscaleCouplingFactory_Type;
 
 typedef std::vector< multiscaleModelPtr_Type >                                   multiscaleModelsContainer_Type;
@@ -181,7 +181,7 @@ typedef multiscaleCouplingsContainer_Type::iterator                             
 typedef multiscaleCouplingsContainer_Type::const_iterator                        multiscaleCouplingsContainerConstIterator_Type;
 
 typedef MultiscaleGlobalData                                                     multiscaleData_Type;
-typedef boost::shared_ptr< multiscaleData_Type >                                 multiscaleDataPtr_Type;
+typedef std::shared_ptr< multiscaleData_Type >                                 multiscaleDataPtr_Type;
 
 // ===================================================
 // Multiscale Utility Methods
@@ -227,10 +227,10 @@ multiscaleMapsDefinition()
  * @return pointer to the derived object
  */
 template < typename DerivedType, typename BasePtrType >
-inline boost::shared_ptr< DerivedType >
+inline std::shared_ptr< DerivedType >
 multiscaleDynamicCast ( BasePtrType& base )
 {
-    return boost::dynamic_pointer_cast< DerivedType > ( base );
+    return std::dynamic_pointer_cast< DerivedType > ( base );
 }
 
 //! Display and error message

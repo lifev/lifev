@@ -92,16 +92,16 @@ public:
     //@{
 
     typedef OneDFSIPhysics                                         physics_Type;
-    typedef boost::shared_ptr< physics_Type >                      physicsPtr_Type;
+    typedef std::shared_ptr< physics_Type >                      physicsPtr_Type;
 
     typedef OneDFSIFlux                                            flux_Type;
-    typedef boost::shared_ptr< flux_Type >                         fluxPtr_Type;
+    typedef std::shared_ptr< flux_Type >                         fluxPtr_Type;
 
     typedef OneDFSISource                                          source_Type;
-    typedef boost::shared_ptr< source_Type >                       sourcePtr_Type;
+    typedef std::shared_ptr< source_Type >                       sourcePtr_Type;
 
     typedef OneDFSISolver                                          solver_Type;
-    typedef boost::shared_ptr< solver_Type >                       solverPtr_Type;
+    typedef std::shared_ptr< solver_Type >                       solverPtr_Type;
 
     typedef solver_Type::data_Type                                 data_Type;
     typedef solver_Type::mesh_Type                                 mesh_Type;
@@ -116,9 +116,9 @@ public:
     typedef solver_Type::feSpacePtr_Type                           feSpacePtr_Type;
 
     typedef OneDFSIBCHandler                                       bc_Type;
-    typedef boost::shared_ptr< bc_Type >                           bcPtr_Type;
+    typedef std::shared_ptr< bc_Type >                           bcPtr_Type;
     typedef BCInterface1D< bc_Type, solver_Type >                  bcInterface_Type;
-    typedef boost::shared_ptr< bcInterface_Type >                  bcInterfacePtr_Type;
+    typedef std::shared_ptr< bcInterface_Type >                  bcInterfacePtr_Type;
 
     typedef OneDFSIFunction                                        bcFunction_Type;
 
@@ -534,10 +534,10 @@ private:
     //@}
 
 #ifdef HAVE_HDF5
-    boost::shared_ptr< IOFile_Type >       M_exporter;
-    boost::shared_ptr< IOFile_Type >       M_importer;
+    std::shared_ptr< IOFile_Type >       M_exporter;
+    std::shared_ptr< IOFile_Type >       M_importer;
 
-    boost::shared_ptr< mesh_Type >         M_exporterMesh;
+    std::shared_ptr< mesh_Type >         M_exporterMesh;
     solutionPtr_Type                       M_exporterSolution;
 #endif
 
@@ -559,7 +559,7 @@ private:
 #endif
 
     // 1D problem
-    boost::shared_ptr< data_Type >         M_data;
+    std::shared_ptr< data_Type >         M_data;
     bcInterfacePtr_Type                    M_bc;
     physicsPtr_Type                        M_physics;
     fluxPtr_Type                           M_flux;
@@ -567,11 +567,11 @@ private:
     solverPtr_Type                         M_solver;
 
     // Linear solver
-    boost::shared_ptr< linearSolver_Type > M_linearSolver;
-    boost::shared_ptr< linearSolver_Type > M_linearViscoelasticSolver;
+    std::shared_ptr< linearSolver_Type > M_linearSolver;
+    std::shared_ptr< linearSolver_Type > M_linearViscoelasticSolver;
 
     // FE spaces
-    boost::shared_ptr< feSpace_Type >      M_feSpace;
+    std::shared_ptr< feSpace_Type >      M_feSpace;
 
     solutionPtr_Type                       M_solution_tn;    // Solution at time t_n
     solutionPtr_Type                       M_solution;       // Solution at time t_n+1

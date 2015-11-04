@@ -98,7 +98,7 @@ MultiscaleCouplingMeanTotalNormalStressArea::setupCoupling()
                 if ( M_models[i]->type() == FSI3D )
                 {
                     M_localCouplingFunctions.push_back ( MultiscaleCouplingFunction ( this, 3 ) );
-                    multiscaleDynamicCast< MultiscaleInterface > ( M_models[i] )->imposeBoundaryArea ( M_boundaryIDs[i], boost::bind ( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ) );
+                    multiscaleDynamicCast< MultiscaleInterface > ( M_models[i] )->imposeBoundaryArea ( M_boundaryIDs[i], std::bind ( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 ) );
 
                     break;
                 }

@@ -82,9 +82,9 @@ public:
     //@{
 
     typedef Epetra_FECrsMatrix             matrix_type;
-    typedef boost::shared_ptr<matrix_type> matrix_ptrtype;
+    typedef std::shared_ptr<matrix_type> matrix_ptrtype;
     typedef VectorEpetra                   vector_type;
-    typedef boost::shared_ptr<vector_type> vectorPtr_Type;
+    typedef std::shared_ptr<vector_type> vectorPtr_Type;
 
     //@}
 
@@ -264,7 +264,7 @@ public:
     void add ( const DataType scalar, const MatrixEpetra& matrix );
 
     //! Returns a pointer to a new matrix which contains the transpose of the current matrix
-    boost::shared_ptr<MatrixEpetra<DataType> > transpose( );
+    std::shared_ptr<MatrixEpetra<DataType> > transpose( );
 
     //! Set entries (rVec(i),rVec(i)) to coefficient and the rest of the row entries to zero
     /*!
@@ -367,8 +367,8 @@ public:
      @param domainMap The domain map
      @param rangeMap The range map
      */
-    Int globalAssemble ( const boost::shared_ptr<const MapEpetra>& domainMap,
-                         const boost::shared_ptr<const MapEpetra>& rangeMap );
+    Int globalAssemble ( const std::shared_ptr<const MapEpetra>& domainMap,
+                         const std::shared_ptr<const MapEpetra>& rangeMap );
 
     //! Fill complete of a square matrix with default domain and range map
     Int fillComplete();
@@ -554,7 +554,7 @@ public:
     }
 
     //! Return the shared_pointer of the Epetra_Map
-    boost::shared_ptr<MapEpetra> mapPtr()
+    std::shared_ptr<MapEpetra> mapPtr()
     {
         return M_map;
     }
@@ -623,7 +623,7 @@ private:
 
 
     // Shared pointer on the row MapEpetra used in the assembling
-    boost::shared_ptr< MapEpetra > M_map;
+    std::shared_ptr< MapEpetra > M_map;
 
     // Shared pointer on the domain MapEpetra.
     /*
@@ -632,7 +632,7 @@ private:
       NOTE: Epetra assume the domain map to be 1-1 and onto (Unique)
       M_domainMap is a NULL pointer until MatrixEpetra<DataType> is called.
      */
-    boost::shared_ptr< const MapEpetra > M_domainMap;
+    std::shared_ptr< const MapEpetra > M_domainMap;
 
     //! Shared pointer on the range MapEpetra.
     /*
@@ -641,7 +641,7 @@ private:
       NOTE: Epetra assume the domain map to be 1-1 and onto (Unique)
       M_rangeMap is a NULL pointer until MatrixEpetra<DataType> is called.
      */
-    boost::shared_ptr< const MapEpetra > M_rangeMap;
+    std::shared_ptr< const MapEpetra > M_rangeMap;
 
     // Pointer on a Epetra_FECrsMatrix
     matrix_ptrtype  M_epetraCrs;
@@ -884,7 +884,7 @@ Int MatrixEpetra<DataType>::multiply ( bool transposeCurrent,
                                                       *result.matrixPtr(), false );
     if (callFillCompleteOnResult)
     {
-        boost::shared_ptr<const MapEpetra> domainMap, rangeMap;
+        std::shared_ptr<const MapEpetra> domainMap, rangeMap;
         if (transposeCurrent)
         {
             rangeMap = M_domainMap;
@@ -965,15 +965,15 @@ void MatrixEpetra<DataType>::add ( const DataType scalar, const MatrixEpetra& ma
 }
 
 template <typename DataType>
-boost::shared_ptr<MatrixEpetra<DataType> > MatrixEpetra<DataType>::transpose( )
+std::shared_ptr<MatrixEpetra<DataType> > MatrixEpetra<DataType>::transpose( )
 {
     ASSERT_PRE (M_epetraCrs->Filled(), "The transpose can be formed only if the matrix is already filled!");
-    boost::shared_ptr<Epetra_FECrsMatrix> transposedFE;
+    std::shared_ptr<Epetra_FECrsMatrix> transposedFE;
     transposedFE.reset (new Epetra_FECrsMatrix (Copy, M_epetraCrs->OperatorDomainMap(), M_epetraCrs->OperatorRangeMap(), 0, false) );
     EpetraExt::RowMatrix_Transpose transposer;
     *dynamic_cast<Epetra_CrsMatrix*> (& (*transposedFE) ) = dynamic_cast<Epetra_CrsMatrix&> (transposer (*M_epetraCrs) );
     transposedFE->FillComplete();
-    boost::shared_ptr<MatrixEpetra<DataType> > transposedMatrix (new MatrixEpetra<DataType> (*M_domainMap) );
+    std::shared_ptr<MatrixEpetra<DataType> > transposedMatrix (new MatrixEpetra<DataType> (*M_domainMap) );
     transposedMatrix->globalAssemble (M_rangeMap, M_domainMap);
     transposedMatrix->matrixPtr() = transposedFE;
 
@@ -1449,8 +1449,8 @@ Int MatrixEpetra<DataType>::fillComplete()
 }
 
 template <typename DataType>
-Int MatrixEpetra<DataType>::globalAssemble ( const boost::shared_ptr<const MapEpetra>& domainMap,
-                                             const boost::shared_ptr<const MapEpetra>& rangeMap )
+Int MatrixEpetra<DataType>::globalAssemble ( const std::shared_ptr<const MapEpetra>& domainMap,
+                                             const std::shared_ptr<const MapEpetra>& rangeMap )
 {
 
     if ( !M_epetraCrs->Filled() && domainMap->mapsAreSimilar ( *rangeMap) )

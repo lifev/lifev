@@ -172,13 +172,13 @@ public:
     /*! copies the shared_ptr to the communicator in the member M_comm and builds the empty ComposedPreconditioneronditioner
     M_blockPrecs
     */
-    void setComm ( boost::shared_ptr<Epetra_Comm> comm )
+    void setComm ( std::shared_ptr<Epetra_Comm> comm )
     {
         M_comm = comm;
         M_blockPrecs.reset ( new PreconditionerComposed (M_comm) );
     }
 
-    const std::vector<boost::shared_ptr<Preconditioner> >& blockPrecs() const
+    const std::vector<std::shared_ptr<Preconditioner> >& blockPrecs() const
     {
         return M_blockPrecs->composedPreconditionerPtr()->Operator();
     }
@@ -298,7 +298,7 @@ protected:
     /*!
       Pointer to an PreconditionerComposed object containing the preconditioners for each block
     */
-    boost::shared_ptr<PreconditionerComposed>        M_blockPrecs;
+    std::shared_ptr<PreconditionerComposed>        M_blockPrecs;
     //@}
 
 private:

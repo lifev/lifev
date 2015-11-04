@@ -62,9 +62,9 @@ public:
     enum SolverOperatorStatusType          { undefined, yes, no };
 
 #ifdef HAVE_MPI
-    SolverOperator ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
+    SolverOperator ( std::shared_ptr<Epetra_Comm> comm = std::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
 #else
-    SolverOperator ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
+    SolverOperator ( std::shared_ptr<Epetra_Comm> comm = std::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
 #endif
     virtual ~SolverOperator();
 
@@ -228,7 +228,7 @@ protected:
     bool M_printSubiterationCount;
 
     //! Communicator
-    boost::shared_ptr<Epetra_Comm> M_comm;
+    std::shared_ptr<Epetra_Comm> M_comm;
 
 };
 

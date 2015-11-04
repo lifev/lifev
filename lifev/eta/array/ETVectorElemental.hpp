@@ -153,7 +153,7 @@ public:
     This is a partial specialization of the other assembly procedure of this class.
     */
     template <typename VectorType>
-    void globalAssembly (boost::shared_ptr<VectorType> vec)
+    void globalAssembly (std::shared_ptr<VectorType> vec)
     {
         for (UInt iRow (0); iRow < M_nbRow; ++iRow)
         {

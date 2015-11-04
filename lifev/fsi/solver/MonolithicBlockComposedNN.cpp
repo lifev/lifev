@@ -130,7 +130,7 @@ int MonolithicBlockComposedNN::solveSystem ( const vector_Type& rhs, vector_Type
         M_blockPrecs->replace (M_secondCompPrec, (UInt) 1, false, false);
     }
 
-    return linearSolver->solveSystem (rhs, step, boost::static_pointer_cast<Epetra_Operator> (M_blockPrecs) );
+    return linearSolver->solveSystem (rhs, step, std::static_pointer_cast<Epetra_Operator> (M_blockPrecs) );
 }
 
 

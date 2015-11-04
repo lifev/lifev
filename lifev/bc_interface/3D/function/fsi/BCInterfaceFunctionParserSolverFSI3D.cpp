@@ -189,7 +189,7 @@ BCInterfaceFunctionParserSolver< BCHandler, FSIOperator >::updatePhysicalSolverV
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< BCHandler, FSIOperator >::createAccessList ( const boost::shared_ptr< BCInterfaceData >& data )
+BCInterfaceFunctionParserSolver< BCHandler, FSIOperator >::createAccessList ( const std::shared_ptr< BCInterfaceData >& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

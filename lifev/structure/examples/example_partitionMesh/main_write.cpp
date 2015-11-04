@@ -86,7 +86,7 @@ int main (int argc, char** argv)
     typedef RegionMesh<LinearTetra> mesh_Type;
 
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 
     if (comm->NumProc() != 1)
     {
@@ -113,7 +113,7 @@ int main (int argc, char** argv)
     meshData.setup (dataFile, "solid/space_discretization");
 
     //Creation of the object whole mesh
-    boost::shared_ptr<mesh_Type> fullMeshPtr (new mesh_Type ( comm ) );
+    std::shared_ptr<mesh_Type> fullMeshPtr (new mesh_Type ( comm ) );
     readMesh (*fullMeshPtr, meshData);
 
     fullMeshPtr->showMe();
@@ -133,8 +133,8 @@ int main (int argc, char** argv)
 
     // Write mesh parts to HDF5 container
 
-    boost::shared_ptr<Epetra_MpiComm> mpiComm =
-        boost::dynamic_pointer_cast<Epetra_MpiComm> (comm);
+    std::shared_ptr<Epetra_MpiComm> mpiComm =
+        std::dynamic_pointer_cast<Epetra_MpiComm> (comm);
     PartitionIO<mesh_Type> partitionIO (stringFileName, mpiComm);
 
     partitionIO.write (meshPart.meshPartitions() );

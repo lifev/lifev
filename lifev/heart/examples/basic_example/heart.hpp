@@ -78,8 +78,8 @@ public:
     typedef HeartBidomainSolver< RegionMesh<LinearTetra> >::vector_Type     vector_Type;
     typedef HeartBidomainSolver<RegionMesh<LinearTetra> >::matrix_Type      matrix_Type;
 #endif
-    typedef boost::shared_ptr<vector_Type>                  vectorPtr_Type;
-    typedef boost::shared_ptr<matrix_Type>                  matrixPtr_Type;
+    typedef std::shared_ptr<vector_Type>                  vectorPtr_Type;
+    typedef std::shared_ptr<matrix_Type>                  matrixPtr_Type;
     //@}
 
     /** @name Constructors, destructor
@@ -104,12 +104,12 @@ public:
 #ifdef MONODOMAIN
     void computeRhs ( vector_Type& rhs,
                       HeartMonodomainSolver< RegionMesh<LinearTetra> >& electricModel,
-                      boost::shared_ptr< HeartIonicSolver< RegionMesh<LinearTetra> > > ionicModel,
+                      std::shared_ptr< HeartIonicSolver< RegionMesh<LinearTetra> > > ionicModel,
                       HeartMonodomainData& dataMonodomain );
 #else
     void computeRhs ( vector_Type& rhs,
                       HeartBidomainSolver< RegionMesh<LinearTetra> >& electricModel,
-                      boost::shared_ptr< HeartIonicSolver< RegionMesh<LinearTetra> > > ionicModel,
+                      std::shared_ptr< HeartIonicSolver< RegionMesh<LinearTetra> > > ionicModel,
                       HeartBidomainData& dataBidomain );
 #endif
     //@}
@@ -118,7 +118,7 @@ public:
 private:
     UInt ion_model;
     UInt nbeq;
-    boost::shared_ptr<HeartFunctors> M_heart_fct;
+    std::shared_ptr<HeartFunctors> M_heart_fct;
 };
 }
 #endif /* __HEART_H */

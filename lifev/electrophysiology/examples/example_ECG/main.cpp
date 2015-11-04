@@ -199,7 +199,7 @@ Int main ( Int argc, char** argv )
     //! Initializing Epetra communicator
     MPI_Init (&argc, &argv);
     {
-        boost::shared_ptr<Epetra_Comm>  Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
+        std::shared_ptr<Epetra_Comm>  Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
         if ( Comm->MyPID() == 0 )
         {
             std::cout << "% using MPI" << std::endl;
@@ -212,11 +212,11 @@ Int main ( Int argc, char** argv )
         //  chronoinitialsettings.start();
 
         typedef RegionMesh<LinearTetra>            mesh_Type;
-        typedef boost::shared_ptr<mesh_Type>       meshPtr_Type;
-        typedef boost::shared_ptr<VectorEpetra>    vectorPtr_Type;
+        typedef std::shared_ptr<mesh_Type>       meshPtr_Type;
+        typedef std::shared_ptr<VectorEpetra>    vectorPtr_Type;
         typedef FESpace< mesh_Type, MapEpetra >    feSpace_Type;
-        typedef boost::shared_ptr<feSpace_Type>    feSpacePtr_Type;
-        typedef boost::function < Real (const Real& /*t*/,
+        typedef std::shared_ptr<feSpace_Type>    feSpacePtr_Type;
+        typedef std::function < Real (const Real& /*t*/,
                                         const Real &   x,
                                         const Real &   y,
                                         const Real& /*z*/,
@@ -224,18 +224,18 @@ Int main ( Int argc, char** argv )
         typedef VectorEpetra                        vector_Type;
         typedef MatrixEpetra<Real>                  matrix_Type;
         typedef LifeV::Preconditioner               basePrec_Type;
-        typedef boost::shared_ptr<basePrec_Type>    basePrecPtr_Type;
+        typedef std::shared_ptr<basePrec_Type>    basePrecPtr_Type;
         typedef LifeV::PreconditionerML             prec_Type;
-        typedef boost::shared_ptr<prec_Type>        precPtr_Type;
+        typedef std::shared_ptr<prec_Type>        precPtr_Type;
         typedef ElectroETAMonodomainSolver< mesh_Type, IonicMinimalModel >        monodomainSolver_Type;
-        typedef boost::shared_ptr< monodomainSolver_Type >                        monodomainSolverPtr_Type;
+        typedef std::shared_ptr< monodomainSolver_Type >                        monodomainSolverPtr_Type;
 
-        typedef boost::shared_ptr< LifeV::Exporter<LifeV::RegionMesh<LifeV::LinearTetra> > >    filterPtr_Type;
+        typedef std::shared_ptr< LifeV::Exporter<LifeV::RegionMesh<LifeV::LinearTetra> > >    filterPtr_Type;
         typedef LifeV::ExporterHDF5< RegionMesh<LinearTetra> >                                  hdf5Filter_Type;
-        typedef boost::shared_ptr<hdf5Filter_Type>                                              hdf5FilterPtr_Type;
+        typedef std::shared_ptr<hdf5Filter_Type>                                              hdf5FilterPtr_Type;
         typedef ExporterData<mesh_Type>                           exporterData_Type;
         typedef Exporter< mesh_Type >                             IOFile_Type;
-        typedef boost::shared_ptr< IOFile_Type >                  IOFilePtr_Type;
+        typedef std::shared_ptr< IOFile_Type >                  IOFilePtr_Type;
         typedef ExporterHDF5< mesh_Type >                         hdf5IOFile_Type;
 
         //********************************************//
@@ -264,7 +264,7 @@ Int main ( Int argc, char** argv )
         {
             std::cout << "Building Constructor for Aliev Panfilov Model with parameters ... ";
         }
-        boost::shared_ptr<IonicMinimalModel>  model ( new IonicMinimalModel() );
+        std::shared_ptr<IonicMinimalModel>  model ( new IonicMinimalModel() );
         if ( Comm->MyPID() == 0 )
         {
             std::cout << " Done!" << std::endl;
@@ -554,10 +554,10 @@ Int main ( Int argc, char** argv )
         ADRAssembler<mesh_Type, matrix_Type, vector_Type> adrAssembler;
         adrAssembler.setup ( FESpacePtr, FESpacePtr );
         // define the matrices
-        boost::shared_ptr<matrix_Type> systemMatrixL ( new matrix_Type ( FESpacePtr->map() ) );
-        boost::shared_ptr<matrix_Type> systemMatrixM ( new matrix_Type ( FESpacePtr->map() ) );
-        boost::shared_ptr<vector_Type> rhs_Laplacian ( new vector_Type ( FESpacePtr->map() ) );
-        boost::shared_ptr<vector_Type> pseudoEcgVec_ptr ( new vector_Type ( FESpacePtr->map() ) );
+        std::shared_ptr<matrix_Type> systemMatrixL ( new matrix_Type ( FESpacePtr->map() ) );
+        std::shared_ptr<matrix_Type> systemMatrixM ( new matrix_Type ( FESpacePtr->map() ) );
+        std::shared_ptr<vector_Type> rhs_Laplacian ( new vector_Type ( FESpacePtr->map() ) );
+        std::shared_ptr<vector_Type> pseudoEcgVec_ptr ( new vector_Type ( FESpacePtr->map() ) );
 
         // fill the matrix
         adrAssembler.addDiffusion ( systemMatrixL, -1.0 );

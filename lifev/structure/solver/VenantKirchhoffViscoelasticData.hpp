@@ -63,10 +63,10 @@ public:
     //@{
 
     typedef TimeData                               time_Type;
-    typedef boost::shared_ptr<time_Type>           timePtr_Type;
+    typedef std::shared_ptr<time_Type>           timePtr_Type;
 
     typedef TimeAdvanceData                        timeAdvance_Type;
-    typedef boost::shared_ptr<timeAdvance_Type>    timeAdvancePtr_Type;
+    typedef std::shared_ptr<timeAdvance_Type>    timeAdvancePtr_Type;
 
     typedef std::map<UInt, Real>                   MaterialContainer_Type;
     typedef MaterialContainer_Type::const_iterator MaterialContainer_ConstIterator;

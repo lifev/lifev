@@ -54,7 +54,7 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-PreconditionerComposition::PreconditionerComposition ( boost::shared_ptr<Epetra_Comm> comm ) :
+PreconditionerComposition::PreconditionerComposition ( std::shared_ptr<Epetra_Comm> comm ) :
     super_Type ( comm ),
     M_comm ( comm ),
     M_prec ( new prec_Type ( comm ) )
@@ -139,7 +139,7 @@ PreconditionerComposition::OperatorDomainMap() const
 // Set Methods
 // ===================================================
 void
-PreconditionerComposition::setComm ( boost::shared_ptr<Epetra_Comm> comm )
+PreconditionerComposition::setComm ( std::shared_ptr<Epetra_Comm> comm )
 {
     M_comm = comm;
     M_prec->setComm ( comm );
@@ -187,7 +187,7 @@ PreconditionerComposition::pushBack ( matrixPtr_Type A,
                                       const bool useTranspose )
 {
     //std::cout << "[DEBUG] pushBack() matrix version" << std::endl;
-    M_prec->push_back ( boost::dynamic_pointer_cast<operator_Type> ( A->matrixPtr() ), useInverse, useTranspose );
+    M_prec->push_back ( std::dynamic_pointer_cast<operator_Type> ( A->matrixPtr() ), useInverse, useTranspose );
 
     return EXIT_SUCCESS;
 }

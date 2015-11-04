@@ -57,7 +57,7 @@ build_lifevlib() {
   ${cmake_bin}/cmake \
     -D CMAKE_INSTALL_PREFIX:PATH=${install_dir} \
     -D LifeV_ENABLE_Darcy:BOOL=ON \
-    -D LifeV_ENABLE_TESTS:BOOL=OFF \
+    -D LifeV_ENABLE_TESTS:BOOL=ON \
     -D LifeV_ENABLE_STRONG_CXX_COMPILE_WARNINGS:BOOL=OFF \
     -D LifeV_EXTRA_LINK_FLAGS:STRING="${lifev_flags}" \
     -D Trilinos_INCLUDE_DIRS:PATH=${trilinos_include} \

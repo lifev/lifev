@@ -54,7 +54,7 @@
 namespace LifeV
 {
 
-PreconditionerPCD::PreconditionerPCD ( boost::shared_ptr<Epetra_Comm> comm ) :
+PreconditionerPCD::PreconditionerPCD ( std::shared_ptr<Epetra_Comm> comm ) :
     PreconditionerComposition    ( comm ),
     M_velocityBlockSize          ( -1 ),
     M_pressureBlockSize          ( -1 ),
@@ -251,9 +251,9 @@ PreconditionerPCD::buildPreconditioner ( matrixPtr_type& oper )
      * \ 0 -S  /    = \ 0    I / \ 0  I  / \ 0 -S^-1 /
      */
 
-    boost::shared_ptr<matrix_Type> p3;
+    std::shared_ptr<matrix_Type> p3;
     superPtr_Type precForBlock3;
-    boost::shared_ptr<matrixBlock_Type> P3;
+    std::shared_ptr<matrixBlock_Type> P3;
     if ( M_fluidPrec == "LinearSolver" )
     {
         MatrixEpetraStructuredUtility::createMatrixFromBlock ( F, P3, velocityMap, true );
@@ -318,7 +318,7 @@ PreconditionerPCD::buildPreconditioner ( matrixPtr_type& oper )
             std::cout << "      >Divergence block... ";
         }
         timer.start();
-        boost::shared_ptr<matrixBlock_Type> P2e ( new matrixBlock_Type ( map ) );
+        std::shared_ptr<matrixBlock_Type> P2e ( new matrixBlock_Type ( map ) );
         P2e->setBlockStructure ( blockNumRows, blockNumColumns );
         P2e->blockView ( 0, 0, B11 );
         P2e->blockView ( 1, 0, B21 );
@@ -328,7 +328,7 @@ PreconditionerPCD::buildPreconditioner ( matrixPtr_type& oper )
         MatrixEpetraStructuredUtility::createIdentityBlock ( B11 );
         MatrixEpetraStructuredUtility::createIdentityBlock ( B22 );
         P2e->globalAssemble();
-        boost::shared_ptr<matrix_Type> p2e = P2e;
+        std::shared_ptr<matrix_Type> p2e = P2e;
         this->pushBack ( p2e, inversed, notTransposed );
         if ( verbose )
         {
@@ -365,7 +365,7 @@ PreconditionerPCD::buildPreconditioner ( matrixPtr_type& oper )
         std::cout << "      >Building Fp... ";
     }
     timer.start();
-    boost::shared_ptr<matrixBlock_Type> PFp;
+    std::shared_ptr<matrixBlock_Type> PFp;
     PFp.reset ( new matrixBlock_Type ( map ) );
     PFp->setBlockStructure ( blockNumRows, blockNumColumns );
     *PFp *= 0.0;
@@ -385,7 +385,7 @@ PreconditionerPCD::buildPreconditioner ( matrixPtr_type& oper )
     {
         M_adrPressureAssembler.addMass ( PFp, 1.0 / M_timestep, B22.firstRowIndex(), B22.firstColumnIndex() );
     }
-    boost::shared_ptr<matrix_Type> pFp = PFp;
+    std::shared_ptr<matrix_Type> pFp = PFp;
     FpOffset = B22.firstRowIndex();
     if ( verbose )
     {
@@ -397,7 +397,7 @@ PreconditionerPCD::buildPreconditioner ( matrixPtr_type& oper )
         std::cout << "      >Building Ap";
     }
     timer.start();
-    boost::shared_ptr<matrixBlock_Type> PAp;
+    std::shared_ptr<matrixBlock_Type> PAp;
     if ( M_pressureLaplacianPrec == "LinearSolver" )
     {
         PAp.reset ( new matrixBlock_Type ( pressureMap ) );
@@ -435,15 +435,15 @@ PreconditionerPCD::buildPreconditioner ( matrixPtr_type& oper )
         {
             std::cout << " (BBt version)... ";
         }
-        boost::shared_ptr<matrixBlock_Type> BMat ( new matrixBlock_Type ( map ) );
+        std::shared_ptr<matrixBlock_Type> BMat ( new matrixBlock_Type ( map ) );
         BMat->setBlockStructure ( blockNumRows, blockNumColumns );
         MatrixEpetraStructuredUtility::copyBlock ( B, * ( BMat->block ( 1, 0 ) ) );
         BMat->globalAssemble();
-        boost::shared_ptr<matrixBlock_Type> BtMat ( new matrixBlock_Type ( map ) );
+        std::shared_ptr<matrixBlock_Type> BtMat ( new matrixBlock_Type ( map ) );
         BtMat->setBlockStructure ( blockNumRows, blockNumColumns );
         MatrixEpetraStructuredUtility::copyBlock ( Bt, * ( BtMat->block ( 0, 1 ) ) );
         BtMat->globalAssemble();
-        boost::shared_ptr<matrixBlock_Type> BBtMat ( new matrixBlock_Type ( map ) );
+        std::shared_ptr<matrixBlock_Type> BBtMat ( new matrixBlock_Type ( map ) );
         BBtMat->setBlockStructure ( blockNumRows, blockNumColumns );
         BMat->multiply ( false,
                          *BtMat , false,
@@ -457,24 +457,24 @@ PreconditionerPCD::buildPreconditioner ( matrixPtr_type& oper )
             std::cout << " (BinvDBt version)... ";
         }
         // Create B
-        boost::shared_ptr<matrixBlock_Type> BMat ( new matrixBlock_Type ( map ) );
+        std::shared_ptr<matrixBlock_Type> BMat ( new matrixBlock_Type ( map ) );
         BMat->setBlockStructure ( blockNumRows, blockNumColumns );
         MatrixEpetraStructuredUtility::copyBlock ( B, * ( BMat->block ( 1, 0 ) ) );
         BMat->globalAssemble();
 
         // Create the inverse of the diagonal mass matrix D
-        boost::shared_ptr<matrixBlock_Type> tmpVelocityMass ( new matrixBlock_Type ( map ) );
+        std::shared_ptr<matrixBlock_Type> tmpVelocityMass ( new matrixBlock_Type ( map ) );
         tmpVelocityMass->setBlockStructure ( blockNumRows, blockNumColumns );
         M_adrVelocityAssembler.addMass ( tmpVelocityMass, 1.0 );
         tmpVelocityMass->globalAssemble();
-        boost::shared_ptr<matrixBlock_Type> invDMat ( new matrixBlock_Type ( map ) );
+        std::shared_ptr<matrixBlock_Type> invDMat ( new matrixBlock_Type ( map ) );
         invDMat->setBlockStructure ( blockNumRows, blockNumColumns );
         MatrixEpetraStructuredUtility::createInvDiagBlock ( * ( tmpVelocityMass->block ( 0, 0 ) ), * ( invDMat->block ( 0, 0 ) ) );
         invDMat->globalAssemble();
         tmpVelocityMass.reset(); // Free the memory
 
         // Compute BD^-1
-        boost::shared_ptr<matrixBlock_Type> BinvDMat ( new matrixBlock_Type ( map ) );
+        std::shared_ptr<matrixBlock_Type> BinvDMat ( new matrixBlock_Type ( map ) );
         BinvDMat->setBlockStructure ( blockNumRows, blockNumColumns );
         BMat->multiply ( false,
                          *invDMat , false,
@@ -483,11 +483,11 @@ PreconditionerPCD::buildPreconditioner ( matrixPtr_type& oper )
         BMat.reset();
 
         // Compute BD^-1Bt
-        boost::shared_ptr<matrixBlock_Type> BtMat ( new matrixBlock_Type ( map ) );
+        std::shared_ptr<matrixBlock_Type> BtMat ( new matrixBlock_Type ( map ) );
         BtMat->setBlockStructure ( blockNumRows, blockNumColumns );
         MatrixEpetraStructuredUtility::copyBlock ( Bt, * ( BtMat->block ( 0, 1 ) ) );
         BtMat->globalAssemble();
-        boost::shared_ptr<matrixBlock_Type> BBtMat ( new matrixBlock_Type ( map ) );
+        std::shared_ptr<matrixBlock_Type> BBtMat ( new matrixBlock_Type ( map ) );
         BBtMat->setBlockStructure ( blockNumRows, blockNumColumns );
         BinvDMat->multiply ( false,
                              *BtMat , false,
@@ -506,7 +506,7 @@ PreconditionerPCD::buildPreconditioner ( matrixPtr_type& oper )
         }
         M_adrPressureAssembler.addDiffusion ( PAp, M_divergenceCoeff, B22.firstRowIndex(), B22.firstColumnIndex() );
     }
-    boost::shared_ptr<matrix_Type> pAp = PAp;
+    std::shared_ptr<matrix_Type> pAp = PAp;
     if ( verbose )
     {
         std::cout << "done in " << timer.diff() << " s." << std::endl;
@@ -518,7 +518,7 @@ PreconditionerPCD::buildPreconditioner ( matrixPtr_type& oper )
         std::cout << "      >Building Mp";
     }
     timer.start();
-    boost::shared_ptr<matrixBlock_Type> PMp;
+    std::shared_ptr<matrixBlock_Type> PMp;
     if ( M_pressureMassPrec == "LinearSolver" && M_pressureMassOperator == "standard" )
     {
         PMp.reset ( new matrixBlock_Type ( pressureMap ) );
@@ -542,7 +542,7 @@ PreconditionerPCD::buildPreconditioner ( matrixPtr_type& oper )
         {
             std::cout << " (Lumped version)... ";
         }
-        boost::shared_ptr<matrixBlock_Type> tmpMass ( new matrixBlock_Type ( map ) );
+        std::shared_ptr<matrixBlock_Type> tmpMass ( new matrixBlock_Type ( map ) );
         M_adrPressureAssembler.addMass ( tmpMass, -1.0, B22.firstRowIndex(), B22.firstColumnIndex() );
         tmpMass->globalAssemble();
         tmpMass->setBlockStructure ( blockNumRows, blockNumColumns );
@@ -556,7 +556,7 @@ PreconditionerPCD::buildPreconditioner ( matrixPtr_type& oper )
         {
             std::cout << " (diagonal version)... ";
         }
-        boost::shared_ptr<matrixBlock_Type> tmpMass ( new matrixBlock_Type ( map ) );
+        std::shared_ptr<matrixBlock_Type> tmpMass ( new matrixBlock_Type ( map ) );
         M_adrPressureAssembler.addMass ( tmpMass, -1.0, B22.firstRowIndex(), B22.firstColumnIndex() );
         tmpMass->globalAssemble();
         tmpMass->setBlockStructure ( blockNumRows, blockNumColumns );
@@ -572,7 +572,7 @@ PreconditionerPCD::buildPreconditioner ( matrixPtr_type& oper )
         }
         M_adrPressureAssembler.addMass ( PMp, -1.0, B22.firstRowIndex(), B22.firstColumnIndex() );
     }
-    boost::shared_ptr<matrix_Type> pMp = PMp;
+    std::shared_ptr<matrix_Type> pMp = PMp;
     if ( verbose )
     {
         std::cout << "done in " << timer.diff() << " s." << std::endl;
@@ -645,7 +645,7 @@ PreconditionerPCD::buildPreconditioner ( matrixPtr_type& oper )
             std::cout << "      >Schur block (b)... ";
         }
         timer.start();
-        boost::shared_ptr<matrix_Type> p1b = PFp;
+        std::shared_ptr<matrix_Type> p1b = PFp;
         this->pushBack ( p1b, inversed, notTransposed );
         if ( verbose )
         {
@@ -699,7 +699,7 @@ PreconditionerPCD::buildPreconditioner ( matrixPtr_type& oper )
             std::cout << "      >Schur block (b)... ";
         }
         timer.start();
-        boost::shared_ptr<matrix_Type> p1b = PFp;
+        std::shared_ptr<matrix_Type> p1b = PFp;
         this->pushBack ( p1b, inversed, notTransposed );
         if ( verbose )
         {
@@ -744,7 +744,7 @@ PreconditionerPCD::buildPreconditioner ( matrixPtr_type& oper )
         std::cout << "      >Gradient block... ";
     }
     timer.start();
-    boost::shared_ptr<matrixBlock_Type> P2 ( new matrixBlock_Type ( map ) );
+    std::shared_ptr<matrixBlock_Type> P2 ( new matrixBlock_Type ( map ) );
     P2->setBlockStructure ( blockNumRows, blockNumColumns );
     P2->blockView ( 0, 0, B11 );
     P2->blockView ( 0, 1, B12 );
@@ -754,7 +754,7 @@ PreconditionerPCD::buildPreconditioner ( matrixPtr_type& oper )
     MatrixEpetraStructuredUtility::createIdentityBlock ( B11 );
     MatrixEpetraStructuredUtility::createIdentityBlock ( B22 );
     P2->globalAssemble();
-    boost::shared_ptr<matrix_Type> p2 = P2;
+    std::shared_ptr<matrix_Type> p2 = P2;
     this->pushBack ( p2, inversed, notTransposed );
     if ( verbose )
     {

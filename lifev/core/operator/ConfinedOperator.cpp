@@ -40,7 +40,7 @@ namespace LifeV
 namespace Operators
 {
 
-ConfinedOperator::ConfinedOperator ( boost::shared_ptr<Epetra_Comm> comm ) :
+ConfinedOperator::ConfinedOperator ( std::shared_ptr<Epetra_Comm> comm ) :
     M_oper(),
     M_blockStructure(),
     M_blockIndex ( 0 ),

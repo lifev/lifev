@@ -82,8 +82,8 @@ namespace BenchmarkUtility
 // ---------------------------------------------------------------
 
 typedef ElectroIonicModel                                        ionicModel_Type;
-typedef boost::shared_ptr<ionicModel_Type>                       ionicModelPtr_Type;
-typedef boost::function < Real (const Real& t,
+typedef std::shared_ptr<ionicModel_Type>                       ionicModelPtr_Type;
+typedef std::function < Real (const Real& t,
                                 const Real& x,
                                 const Real& y,
                                 const Real& z,

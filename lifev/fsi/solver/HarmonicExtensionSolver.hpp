@@ -76,7 +76,7 @@ public:
     //@{
 
     typedef SolverType                             solver_Type;
-    typedef boost::shared_ptr<solver_Type>         solverPtr_Type;
+    typedef std::shared_ptr<solver_Type>         solverPtr_Type;
 
     typedef typename solver_Type::matrix_type      matrix_Type;
     typedef typename solver_Type::matrix_ptrtype   matrixPtr_Type;
@@ -102,7 +102,7 @@ public:
     */
 
     HarmonicExtensionSolver ( FESpace<Mesh, MapEpetra>&       mmFESpace,
-                              boost::shared_ptr<Epetra_Comm>  comm);
+                              std::shared_ptr<Epetra_Comm>  comm);
 
     //! Constructors for an harmonics extensions with offset
     /*!
@@ -112,7 +112,7 @@ public:
       \param offset use this offset to fill the matrix (both: row and column offset)
     */
     HarmonicExtensionSolver ( FESpace<Mesh, MapEpetra>&      mmFESpace,
-                              boost::shared_ptr<Epetra_Comm> comm,
+                              std::shared_ptr<Epetra_Comm> comm,
                               MapEpetra&                     localMap,
                               UInt                           offset = 0
                             );
@@ -198,7 +198,7 @@ public:
         return M_FESpace;
     }
 
-    const boost::shared_ptr<Epetra_Comm>& comm() const
+    const std::shared_ptr<Epetra_Comm>& comm() const
     {
         return M_displayer.comm();
     }
@@ -246,7 +246,7 @@ private:
 template <typename Mesh, typename SolverType>
 HarmonicExtensionSolver<Mesh, SolverType>::
 HarmonicExtensionSolver ( FESpace<Mesh, MapEpetra>& mmFESpace,
-                          boost::shared_ptr<Epetra_Comm>    comm ) :
+                          std::shared_ptr<Epetra_Comm>    comm ) :
     M_FESpace               ( mmFESpace ),
     M_localMap              ( M_FESpace.map() ),
     M_matrHE                ( new matrix_Type (M_localMap ) ),
@@ -265,7 +265,7 @@ HarmonicExtensionSolver ( FESpace<Mesh, MapEpetra>& mmFESpace,
 template <typename Mesh, typename SolverType>
 HarmonicExtensionSolver<Mesh, SolverType>::
 HarmonicExtensionSolver ( FESpace<Mesh, MapEpetra>& mmFESpace,
-                          boost::shared_ptr<Epetra_Comm>              comm ,
+                          std::shared_ptr<Epetra_Comm>              comm ,
                           MapEpetra& localMap,
                           UInt offset) :
     M_FESpace               ( mmFESpace ),

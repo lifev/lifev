@@ -64,11 +64,11 @@ public:
     typedef typename bcHandler_Type::bcFunction_Type                                                 bcBase_Type;
 
     typedef BCInterfaceData                                                                          data_Type;
-    typedef boost::shared_ptr< data_Type >                                                           dataPtr_Type;
+    typedef std::shared_ptr< data_Type >                                                           dataPtr_Type;
 
-    typedef boost::function<Real ( const Real& ) >                                                   boundaryFunctionTime_Type;
-    typedef boost::function<Real ( const Real&, const Real& ) >                                      boundaryFunctionTimeTimeStep_Type;
-    typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID& ) > boundaryFunctionTimeSpaceID_Type;
+    typedef std::function<Real ( const Real& ) >                                                   boundaryFunctionTime_Type;
+    typedef std::function<Real ( const Real&, const Real& ) >                                      boundaryFunctionTimeTimeStep_Type;
+    typedef std::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID& ) > boundaryFunctionTimeSpaceID_Type;
 
     //@}
 

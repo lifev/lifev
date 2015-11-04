@@ -60,7 +60,7 @@ BCInterfaceFunctionParser< BCHandler, FSIOperator >::assignFunction ( bcBase_Typ
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParser< BCHandler, FSIOperator >::setData ( const boost::shared_ptr< BCInterfaceData >& data );
+BCInterfaceFunctionParser< BCHandler, FSIOperator >::setData ( const std::shared_ptr< BCInterfaceData >& data );
 
 } // Namespace LifeV
 

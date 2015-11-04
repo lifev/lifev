@@ -48,14 +48,14 @@ using namespace LifeV;
 
 template < class VectorType >
 UInt
-TestFunction ( boost::shared_ptr<VectorType> A1, boost::shared_ptr<VectorType> B1,
-               boost::shared_ptr<VectorType> A2, boost::shared_ptr<VectorType> B2,
-               boost::shared_ptr<VectorType> A3, boost::shared_ptr<VectorType> B3,
-               boost::shared_ptr<VectorType> A4, boost::shared_ptr<VectorType> B4 )
+TestFunction ( std::shared_ptr<VectorType> A1, std::shared_ptr<VectorType> B1,
+               std::shared_ptr<VectorType> A2, std::shared_ptr<VectorType> B2,
+               std::shared_ptr<VectorType> A3, std::shared_ptr<VectorType> B3,
+               std::shared_ptr<VectorType> A4, std::shared_ptr<VectorType> B4 )
 {
     //CONTAINER OF BASE VECTORS
     typedef VectorContainer< VectorType >                ContainerOfBaseVectors;
-    typedef boost::shared_ptr<ContainerOfBaseVectors>    ContainerOfBaseVectors_ptr;
+    typedef std::shared_ptr<ContainerOfBaseVectors>    ContainerOfBaseVectors_ptr;
 
     ContainerOfBaseVectors_ptr V1, V2, V3, V4;
     Real scalar = 1.0;

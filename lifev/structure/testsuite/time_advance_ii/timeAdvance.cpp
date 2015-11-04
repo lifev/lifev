@@ -117,16 +117,16 @@ struct problem::Private
         rho (1)
     {}
 
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_type;
+    typedef std::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_type;
     double rho;
     std::string    data_file_name;
 
-    boost::shared_ptr<Epetra_Comm>     comm;
+    std::shared_ptr<Epetra_Comm>     comm;
 
     fct_type getUZero()
     {
         fct_type f;
-        f = boost::bind (&UZero, _1, _2, _3, _4, _5);
+        f = std::bind (&UZero, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
         return f;
     }
 };
@@ -140,7 +140,7 @@ struct problem::Private
 // ===================================================
 problem::problem ( int          argc,
                    char**                argv,
-                   boost::shared_ptr<Epetra_Comm>        structComm) :
+                   std::shared_ptr<Epetra_Comm>        structComm) :
     members ( new Private() )
 {
     GetPot command_line (argc, argv);
@@ -169,11 +169,11 @@ problem::run()
 {
     typedef RegionMesh<LinearTetra>                                   mesh_Type;
     typedef VenantKirchhoffViscoelasticSolver< mesh_Type >::vector_type vector_type;
-    typedef boost::shared_ptr<vector_type>                              vector_ptrtype;
+    typedef std::shared_ptr<vector_type>                              vector_ptrtype;
 
-    typedef boost::shared_ptr< TimeAdvance< vector_type > >             TimeAdvance_type;
+    typedef std::shared_ptr< TimeAdvance< vector_type > >             TimeAdvance_type;
     typedef FESpace< mesh_Type, MapEpetra >                             FESpace_type;
-    typedef  boost::shared_ptr<FESpace_type>                            FESpace_ptrtype;
+    typedef  std::shared_ptr<FESpace_type>                            FESpace_ptrtype;
 
     bool verbose = (members->comm->MyPID() == 0);
 
@@ -182,16 +182,16 @@ problem::run()
     //
 
     GetPot dataFile ( members->data_file_name.c_str() );
-    boost::shared_ptr<VenantKirchhoffViscoelasticData> dataProblem (new VenantKirchhoffViscoelasticData( ) );
+    std::shared_ptr<VenantKirchhoffViscoelasticData> dataProblem (new VenantKirchhoffViscoelasticData( ) );
     dataProblem->setup (dataFile, "problem");
 
     MeshData             meshData;
     meshData.setup (dataFile, "problem/space_discretization");
 
-    boost::shared_ptr<mesh_Type > fullMeshPtr ( new mesh_Type ( members->comm ) );
+    std::shared_ptr<mesh_Type > fullMeshPtr ( new mesh_Type ( members->comm ) );
     readMesh (*fullMeshPtr, meshData);
 
-    boost::shared_ptr<mesh_Type > localMeshPtr;
+    std::shared_ptr<mesh_Type > localMeshPtr;
     {
         MeshPartitioner< mesh_Type > meshPart ( fullMeshPtr, members->comm );
         localMeshPtr = meshPart.meshPartition();
@@ -314,7 +314,7 @@ problem::run()
 
 
     // postProcess
-    boost::shared_ptr< Exporter<mesh_Type > > exporter;
+    std::shared_ptr< Exporter<mesh_Type > > exporter;
 
     std::string const exporterType =  dataFile ( "exporter/type", "ensight");
 

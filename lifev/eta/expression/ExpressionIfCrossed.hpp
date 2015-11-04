@@ -75,7 +75,7 @@ public:
     typedef ETFESpace<MeshType, MapType, SpaceDim, 1> fespace_Type;
 
     //! Type for the pointer on the finite element space
-    typedef boost::shared_ptr<fespace_Type> fespacePtr_Type;
+    typedef std::shared_ptr<fespace_Type> fespacePtr_Type;
 
     //! Data vector type
     typedef VectorEpetra vector_Type;
@@ -168,7 +168,7 @@ private:
 template<typename MeshType, typename MapType, UInt SpaceDim>
 inline ExpressionIfCrossed<MeshType, MapType, SpaceDim>
 ifCrossed (
-    boost::shared_ptr< ETFESpace<MeshType, MapType, SpaceDim, 1> > fespace,
+    std::shared_ptr< ETFESpace<MeshType, MapType, SpaceDim, 1> > fespace,
     const VectorEpetra& vector
 )
 {

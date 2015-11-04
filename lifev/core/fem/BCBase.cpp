@@ -543,7 +543,7 @@ const BCVectorBase* BCBase::pointerToBCVector() const
 void
 BCBase::addBCIdentifier ( BCIdentifierBase* identifierToAddPtr )
 {
-    M_idSet.insert ( boost::shared_ptr<BCIdentifierBase> ( identifierToAddPtr ) );
+    M_idSet.insert ( std::shared_ptr<BCIdentifierBase> ( identifierToAddPtr ) );
 }
 
 
@@ -575,7 +575,7 @@ BCBase::showMe ( bool verbose, std::ostream& out ) const
     {
         unsigned int count ( 0 ), lines ( 10 );
         out << "IDs in list";
-        for ( std::vector<boost::shared_ptr<BCIdentifierBase> >::const_iterator i = M_idVector.begin();
+        for ( std::vector<std::shared_ptr<BCIdentifierBase> >::const_iterator i = M_idVector.begin();
                 i != M_idVector.end(); ++i )
         {
             if ( count++ % lines == 0 )
@@ -678,7 +678,7 @@ Real BCBase::operator() ( const ID& iDof, const ID& iComponent ) const
 void
 BCBase::setBCVector ( const BCVectorBase& bcVector )
 {
-    M_bcVector = boost::shared_ptr<BCVectorBase > ( bcVector.clone() );
+    M_bcVector = std::shared_ptr<BCVectorBase > ( bcVector.clone() );
     M_isStored_BcVector = true;
     M_isStored_BcFunctionVectorDependent = false;
 }

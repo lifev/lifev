@@ -73,7 +73,7 @@ int main ( int argc, char* argv[] )
 
         typedef RegionMesh<LinearTriangle, neighborMarkerCommon_Type> mesh_Type;
         typedef FESpace< mesh_Type, MapEpetra > feSpace_Type;
-        typedef boost::shared_ptr< feSpace_Type > feSpacePtr_Type;
+        typedef std::shared_ptr< feSpace_Type > feSpacePtr_Type;
 
         LifeChrono chronoTotal;
         LifeChrono chronoMesh;
@@ -88,9 +88,9 @@ int main ( int argc, char* argv[] )
 
 #ifdef EPETRA_MPI
         std::cout << "Epetra Initialization" << std::endl;
-        boost::shared_ptr<Epetra_Comm> comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+        std::shared_ptr<Epetra_Comm> comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
-        boost::shared_ptr<Epetra_Comm> comm ( new Epetra_SerialComm() );
+        std::shared_ptr<Epetra_Comm> comm ( new Epetra_SerialComm() );
 #endif
 
         // Create the leader process, i.e. the process with MyPID equal to zero
@@ -98,7 +98,7 @@ int main ( int argc, char* argv[] )
 
 #ifdef HAVE_LIFEV_DEBUG
         // Create a stream that is different for each process
-        std::ofstream fileOut ( ( "gh." + boost::lexical_cast<std::string> ( comm->MyPID() ) + ".out" ).c_str() );
+        std::ofstream fileOut ( ( "gh." + std::to_string ( comm->MyPID() ) + ".out" ).c_str() );
 #else
         // discard file output in opt mode
         std::ofstream fileOut ( "/dev/null" );
@@ -119,13 +119,13 @@ int main ( int argc, char* argv[] )
         meshData.setup ( dataFile, "space_discretization" );
 
         // Create the mesh
-        boost::shared_ptr<mesh_Type> fullMeshPtr ( new mesh_Type ( comm ) );
+        std::shared_ptr<mesh_Type> fullMeshPtr ( new mesh_Type ( comm ) );
 
         // Set up the mesh
         readMesh ( *fullMeshPtr, meshData );
 
         // Partition the mesh using ParMetis
-        boost::shared_ptr<mesh_Type> meshPtr ( new mesh_Type ( comm ) );
+        std::shared_ptr<mesh_Type> meshPtr ( new mesh_Type ( comm ) );
         {
             MeshPartitioner< mesh_Type >  meshPart ( fullMeshPtr, comm );
             meshPtr = meshPart.meshPartition();
@@ -198,7 +198,7 @@ int main ( int argc, char* argv[] )
 
         ghostP1.clean();
 
-        boost::shared_ptr<VectorEpetra> vP1 ( new VectorEpetra ( mapP1Overlap, Unique ) );
+        std::shared_ptr<VectorEpetra> vP1 ( new VectorEpetra ( mapP1Overlap, Unique ) );
 
         // get all elements from the repeated map
         Int* pointer ( mapP1Overlap.map ( Repeated )->MyGlobalElements() );
@@ -273,7 +273,7 @@ int main ( int argc, char* argv[] )
 
         ghostP0.clean();
 
-        boost::shared_ptr<VectorEpetra> vP0 ( new VectorEpetra ( mapP0P0, Unique ) );
+        std::shared_ptr<VectorEpetra> vP0 ( new VectorEpetra ( mapP0P0, Unique ) );
 
         // get all elements from the repeated map
         pointer = mapP0P1.map ( Repeated )->MyGlobalElements();
@@ -303,7 +303,7 @@ int main ( int argc, char* argv[] )
             std::cout << "  C- Time for ghost " << chronoGhost.diff() << std::endl;
         }
 
-        boost::shared_ptr< Exporter< mesh_Type > > exporter;
+        std::shared_ptr< Exporter< mesh_Type > > exporter;
 
         // Type of the exporter
         std::string const exporterType =  dataFile ( "exporter/type", "ensight" );

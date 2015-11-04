@@ -88,7 +88,7 @@ Int main ( Int argc, char** argv )
 
     //! Initializing Epetra communicator
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm>  Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm>  Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
     if ( Comm->MyPID() == 0 )
     {
         std::cout << "% using MPI" << std::endl;
@@ -120,11 +120,11 @@ Int main ( Int argc, char** argv )
 
     typedef ElectroETAMonodomainSolver< mesh_Type, ionicModel_Type >    monodomainSolver_Type;
 
-    typedef boost::shared_ptr< monodomainSolver_Type >                  monodomainSolverPtr_Type;
+    typedef std::shared_ptr< monodomainSolver_Type >                  monodomainSolverPtr_Type;
 
     typedef VectorEpetra                                                vector_Type;
 
-    typedef boost::shared_ptr<vector_Type>                              vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type>                              vectorPtr_Type;
 
     //********************************************//
     // Import parameters from an xml list. Use    //
@@ -152,7 +152,7 @@ Int main ( Int argc, char** argv )
     {
         std::cout << "Building Constructor for Minimal Model with parameters ... ";
     }
-    boost::shared_ptr<ionicModel_Type>  model ( new ionicModel_Type() );
+    std::shared_ptr<ionicModel_Type>  model ( new ionicModel_Type() );
     if ( Comm->MyPID() == 0 )
     {
         std::cout << " Done!" << std::endl;

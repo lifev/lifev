@@ -88,7 +88,7 @@ public:
 
     typedef FSIMonolithic super_Type;
     typedef Preconditioner prec_Type;
-    typedef boost::shared_ptr< prec_Type > prec_type;
+    typedef std::shared_ptr< prec_Type > prec_type;
 
     //!@name Constructor and Destructor
     //@{
@@ -231,7 +231,7 @@ private:
     //!@name Private Members
     //@{
 
-    boost::shared_ptr<MapEpetra>         M_mapWithoutMesh;
+    std::shared_ptr<MapEpetra>         M_mapWithoutMesh;
     //This vector is used in the shapeDerivatives method since a
     //copy of the solution at the current iteration k is necessary
     vectorPtr_Type                       M_uk;

@@ -73,19 +73,19 @@ public:
 
     typedef Preconditioner                                             super_Type;
     typedef ComposedOperator<Preconditioner>                           prec_Type;
-    typedef boost::shared_ptr<prec_Type>                               precPtr_Type;
-    typedef boost::shared_ptr<Preconditioner>                          epetraPrecPtr_Type;
+    typedef std::shared_ptr<prec_Type>                               precPtr_Type;
+    typedef std::shared_ptr<Preconditioner>                          epetraPrecPtr_Type;
     typedef super_Type::operator_raw_type                              operator_Type;
-    typedef boost::shared_ptr<operator_Type>                           operatorPtr_Type;
+    typedef std::shared_ptr<operator_Type>                             operatorPtr_Type;
     typedef super_Type::list_Type                                      list_Type;
-    //typedef boost::shared_ptr<Preconditioner>                          epetraPrec_Type;
+    //typedef std::shared_ptr<Preconditioner>                          epetraPrec_Type;
 
 
     /** @name Constructors, destructor
      */
     //@{
     //! default constructor.
-    PreconditionerComposed ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>() );
+    PreconditionerComposed ( std::shared_ptr<Epetra_Comm> comm = std::shared_ptr<Epetra_Comm>() );
 
 private: //set it private to be sure that it's never called
     //!Copy Constructor
@@ -245,7 +245,7 @@ private:
     void myCreateParametersList (const GetPot& dataFile, const std::string& section, const std::string& subSection);
 
     Int createPrec (operatorPtr_Type& oper,
-                    boost::shared_ptr<Preconditioner>& prec);
+                    std::shared_ptr<Preconditioner>& prec);
     //@}
 
 

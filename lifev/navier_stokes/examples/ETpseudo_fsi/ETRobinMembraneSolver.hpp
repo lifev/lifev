@@ -93,11 +93,11 @@ public:
     typedef VectorEpetraStructured                          vector_block_type;
     typedef MatrixEpetra<Real>                                     matrix_type;
     typedef VectorEpetra                                           vector_type;
-    typedef boost::shared_ptr<matrix_type>                         matrixPtr_type;
-    typedef boost::shared_ptr<mesh_type>                           meshPtr_type;
-    typedef boost::shared_ptr<vector_type>                         vectorPtr_type;
+    typedef std::shared_ptr<matrix_type>                         matrixPtr_type;
+    typedef std::shared_ptr<mesh_type>                           meshPtr_type;
+    typedef std::shared_ptr<vector_type>                         vectorPtr_type;
 
-    typedef boost::shared_ptr< TimeAdvance< vector_type > >        timeAdvancePtr_type;
+    typedef std::shared_ptr< TimeAdvance< vector_type > >        timeAdvancePtr_type;
     typedef OseenAssembler< mesh_type , matrix_type, vector_type > assembler_type;
 
     //@}
@@ -131,15 +131,15 @@ public:
 private:
 
     struct Private;
-    boost::shared_ptr<Private>                                    M_d;
-    boost::shared_ptr<FESpace<mesh_type, MapEpetra> >             M_uFESpace;
-    boost::shared_ptr<FESpace<mesh_type, MapEpetra> >             M_uCompFESpace;
-    boost::shared_ptr<FESpace<mesh_type, MapEpetra> >             M_pFESpace;
-    boost::shared_ptr<FESpace<mesh_type, MapEpetra> >             M_mFESpace;
-    boost::shared_ptr<ETFESpace<mesh_type, MapEpetra , 3 , 3 > >  M_ETuFESpace;
-    boost::shared_ptr<ETFESpace<mesh_type, MapEpetra , 3 , 1 > >  M_ETpFESpace;
-    boost::shared_ptr<assembler_type>                             M_pseudoFSI;
-    boost::shared_ptr<MapEpetra>                                  M_interfaceMap;
+    std::shared_ptr<Private>                                    M_d;
+    std::shared_ptr<FESpace<mesh_type, MapEpetra> >             M_uFESpace;
+    std::shared_ptr<FESpace<mesh_type, MapEpetra> >             M_uCompFESpace;
+    std::shared_ptr<FESpace<mesh_type, MapEpetra> >             M_pFESpace;
+    std::shared_ptr<FESpace<mesh_type, MapEpetra> >             M_mFESpace;
+    std::shared_ptr<ETFESpace<mesh_type, MapEpetra , 3 , 3 > >  M_ETuFESpace;
+    std::shared_ptr<ETFESpace<mesh_type, MapEpetra , 3 , 1 > >  M_ETpFESpace;
+    std::shared_ptr<assembler_type>                             M_pseudoFSI;
+    std::shared_ptr<MapEpetra>                                  M_interfaceMap;
 
 };
 

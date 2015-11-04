@@ -71,8 +71,8 @@ public:
     //! @name Public Types
     //@{
     typedef MeshType mesh_Type;
-    typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
-    typedef boost::shared_ptr<Epetra_Comm>       commPtr_Type;
+    typedef std::shared_ptr<mesh_Type> meshPtr_Type;
+    typedef std::shared_ptr<Epetra_Comm>       commPtr_Type;
     typedef struct
     {
         idList_Type elements;

@@ -62,7 +62,7 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef boost::function< Real ( const Real&, const Real&, const Real&, const Real&, const ID& ) > function_Type;
+    typedef std::function< Real ( const Real&, const Real&, const Real&, const Real&, const ID& ) > function_Type;
 
     //@}
 

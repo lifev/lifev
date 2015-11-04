@@ -100,17 +100,17 @@ public:
 
     typedef LinearSolver                                                solver_Type;
     typedef Epetra_MultiVector                                          multiVector_Type;
-    typedef boost::shared_ptr<multiVector_Type>                         multiVectorPtr_Type;
+    typedef std::shared_ptr<multiVector_Type>                         	multiVectorPtr_Type;
     typedef Epetra_Operator                                             operator_Type;
-    typedef boost::shared_ptr<operator_Type>                            operatorPtr_Type;
+    typedef std::shared_ptr<operator_Type>                            	operatorPtr_Type;
     typedef Operators::SolverOperator                                   SolverOperator_Type;
-    typedef boost::shared_ptr< SolverOperator_Type >                    SolverOperatorPtr_Type;
+    typedef std::shared_ptr< SolverOperator_Type >                    	SolverOperatorPtr_Type;
     typedef MatrixEpetra<Real>                                          matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>                              matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type>                              	matrixPtr_Type;
     typedef VectorEpetra                                                vector_Type;
-    typedef boost::shared_ptr<VectorEpetra>                             vectorPtr_Type;
+    typedef std::shared_ptr<VectorEpetra>                             	vectorPtr_Type;
     typedef Preconditioner                                              preconditioner_Type;
-    typedef boost::shared_ptr<preconditioner_Type>                      preconditionerPtr_Type;
+    typedef std::shared_ptr<preconditioner_Type>                        preconditionerPtr_Type;
     typedef Teuchos::ParameterList                                      parameterList_Type;
     typedef Teuchos::RCP< parameterList_Type >                          parameterListPtr_Type;
 
@@ -128,7 +128,7 @@ public:
     /*!
       @param commPtr Communicator
      */
-    LinearSolver ( const boost::shared_ptr<Epetra_Comm> commPtr );
+    LinearSolver ( const std::shared_ptr<Epetra_Comm> commPtr );
 
     //! Destructor
     ~LinearSolver();
@@ -211,7 +211,7 @@ public:
     /*!
       @param commPtr Communicator for the displayer
      */
-    void setCommunicator ( const boost::shared_ptr<Epetra_Comm> commPtr );
+    void setCommunicator ( const std::shared_ptr<Epetra_Comm> commPtr );
 
     //! Method to set matrix from MatrixEpetra
     /*!
@@ -313,7 +313,7 @@ public:
     SolverOperatorPtr_Type solver();
 
     //! Return a shared pointer on the displayer
-    boost::shared_ptr<Displayer> displayer();
+    std::shared_ptr<Displayer> displayer();
 
     //! Returns the maximum of iterations tolerate to avoid recomputing the preconditioner
     Int maxItersForReuse() const;
@@ -357,7 +357,7 @@ private:
     SolverOperatorPtr_Type       M_solverOperator;
 
     Teuchos::ParameterList       M_parameterList;
-    boost::shared_ptr<Displayer> M_displayer;
+    std::shared_ptr<Displayer> M_displayer;
 
     // LifeV features
     Int                          M_maxItersForReuse;

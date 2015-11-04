@@ -88,7 +88,7 @@ public:
 
 private:
     struct Private;
-    boost::shared_ptr<Private> Members;
+    std::shared_ptr<Private> Members;
 };
 
 #endif /* __fefct_H */

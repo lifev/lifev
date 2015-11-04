@@ -85,7 +85,7 @@ public:
     //@{
 
     //! Full data constructor
-    IntegrateValueElement (const boost::shared_ptr<MeshType>& mesh,
+    IntegrateValueElement (const std::shared_ptr<MeshType>& mesh,
                            const QRAdapterType& qrAdapter,
                            const ExpressionType& expression);
 
@@ -138,7 +138,7 @@ private:
     //@}
 
     // Pointer on the mesh
-    boost::shared_ptr<MeshType> M_mesh;
+    std::shared_ptr<MeshType> M_mesh;
 
     // Quadrature to be used
     QRAdapterType M_qrAdapter;
@@ -165,7 +165,7 @@ private:
 
 template < typename MeshType, typename ExpressionType, typename QRAdapterType>
 IntegrateValueElement < MeshType, ExpressionType, QRAdapterType>::
-IntegrateValueElement (const boost::shared_ptr<MeshType>& mesh,
+IntegrateValueElement (const std::shared_ptr<MeshType>& mesh,
                        const QRAdapterType& qrAdapter,
                        const ExpressionType& expression)
     :   M_mesh (mesh),

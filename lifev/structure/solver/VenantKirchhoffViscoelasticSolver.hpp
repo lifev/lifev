@@ -92,17 +92,17 @@ public:
     //@{
 
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > source_type;
+    typedef std::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > source_type;
 
     typedef BCHandler                                                        bchandler_raw_type;
-    typedef boost::shared_ptr<bchandler_raw_type>  bchandler_type;
+    typedef std::shared_ptr<bchandler_raw_type>  bchandler_type;
 
     typedef SolverType                                               solver_type;
 
     typedef typename solver_type::matrix_type     matrix_type;
-    typedef boost::shared_ptr<matrix_type>         matrix_ptrtype;
+    typedef std::shared_ptr<matrix_type>         matrix_ptrtype;
     typedef typename solver_type::vector_type     vector_type;
-    typedef boost::shared_ptr<vector_type>          vector_ptrtype;
+    typedef std::shared_ptr<vector_type>          vector_ptrtype;
 
     typedef typename SolverType::prec_raw_type prec_raw_type;
     typedef typename SolverType::prec_type         prec_type;
@@ -131,9 +131,9 @@ public:
     @param feSpace finite element space
     @param comm communicator
     */
-    void setup ( boost::shared_ptr<data_type> data,
-                 const boost::shared_ptr< FESpace<Mesh, MapEpetra> >&   feSpace,
-                 boost::shared_ptr<Epetra_Comm>&     comm
+    void setup ( std::shared_ptr<data_type> data,
+                 const std::shared_ptr< FESpace<Mesh, MapEpetra> >&   feSpace,
+                 std::shared_ptr<Epetra_Comm>&     comm
                );
 
     //!  class setup
@@ -143,10 +143,10 @@ public:
     @param BCh boundary condition
     @param comm communicator
     */
-    void setup ( boost::shared_ptr<data_type> data,
-                 const boost::shared_ptr< FESpace<Mesh, MapEpetra> >&   feSpace,
+    void setup ( std::shared_ptr<data_type> data,
+                 const std::shared_ptr< FESpace<Mesh, MapEpetra> >&   feSpace,
                  bchandler_type&       BCh,
-                 boost::shared_ptr<Epetra_Comm>&     comm
+                 std::shared_ptr<Epetra_Comm>&     comm
                );
 
 
@@ -158,10 +158,10 @@ public:
     @param epetraMap  epetra vector
     @param offset
     */
-    virtual void setup ( boost::shared_ptr<data_type> data,
-                         const boost::shared_ptr< FESpace<Mesh, MapEpetra> >&   feSpace,
-                         boost::shared_ptr<Epetra_Comm>&     comm,
-                         const boost::shared_ptr<const MapEpetra>&      epetraMap,
+    virtual void setup ( std::shared_ptr<data_type> data,
+                         const std::shared_ptr< FESpace<Mesh, MapEpetra> >&   feSpace,
+                         std::shared_ptr<Epetra_Comm>&     comm,
+                         const std::shared_ptr<const MapEpetra>&      epetraMap,
                          UInt       offset = 0   );
 
 
@@ -377,7 +377,7 @@ public:
     /*!
     @returns the communicator
     */
-    boost::shared_ptr<Epetra_Comm> const& comm()   const
+    std::shared_ptr<Epetra_Comm> const& comm()   const
     {
         return M_displayer->comm();
     }
@@ -447,13 +447,13 @@ private:
 protected :
 
     //! data of problem
-    boost::shared_ptr<data_type>   M_data;
+    std::shared_ptr<data_type>   M_data;
 
     //! feSpace
-    boost::shared_ptr<FESpace<Mesh, MapEpetra> >      M_FESpace;
+    std::shared_ptr<FESpace<Mesh, MapEpetra> >      M_FESpace;
 
     //! displayer
-    boost::scoped_ptr<Displayer>   M_displayer;
+    std::unique_ptr<Displayer>   M_displayer;
 
     //! current rank
     Int                            M_me;
@@ -462,7 +462,7 @@ protected :
     bchandler_type   M_BCh;
 
     //! Epetra map need to define the VectorEpetra;
-    boost::shared_ptr<const MapEpetra>       M_localMap;
+    std::shared_ptr<const MapEpetra>       M_localMap;
 
     //! Matrix  mass
     matrix_ptrtype                          M_matrMass;
@@ -479,15 +479,15 @@ protected :
     //!@name Elementary matrices and vectors:
     //@{
     //! linear stiffness
-    boost::shared_ptr<MatrixElemental>                       M_elmatK;
+    std::shared_ptr<MatrixElemental>                       M_elmatK;
 
     //! mass
-    boost::shared_ptr<MatrixElemental>                       M_elmatM;
+    std::shared_ptr<MatrixElemental>                       M_elmatM;
     //!mass+ linear stiffness
-    boost::shared_ptr<MatrixElemental>                       M_elmatC;
+    std::shared_ptr<MatrixElemental>                       M_elmatC;
 
     //!damping
-    boost::shared_ptr<MatrixElemental>                       M_elmatD;
+    std::shared_ptr<MatrixElemental>                       M_elmatD;
     //@}
 
     //! unknowns vector
@@ -500,13 +500,13 @@ protected :
     vector_ptrtype                 M_rhsNoBC;
 
     //! residual
-    boost::shared_ptr<vector_type> M_residual;
+    std::shared_ptr<vector_type> M_residual;
 
     //! source term
     source_type                M_source;
 
     //! data for solving tangent problem with aztec
-    boost::shared_ptr<solver_type> M_linearSolver;
+    std::shared_ptr<solver_type> M_linearSolver;
 
     //! true if reuse the preconditonar
     bool                            M_reusePrec;
@@ -570,10 +570,10 @@ VenantKirchhoffViscoelasticSolver( ) :
 template <typename Mesh, typename SolverType>
 void
 VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setup (
-    boost::shared_ptr<data_type>        data,
-    const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& feSpace,
-    boost::shared_ptr<Epetra_Comm>&     comm,
-    const boost::shared_ptr<const MapEpetra>&  epetraMap,
+    std::shared_ptr<data_type>        data,
+    const std::shared_ptr< FESpace<Mesh, MapEpetra> >& feSpace,
+    std::shared_ptr<Epetra_Comm>&     comm,
+    const std::shared_ptr<const MapEpetra>&  epetraMap,
     UInt                                offset
 )
 {
@@ -598,9 +598,9 @@ VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setup (
 template <typename Mesh, typename SolverType>
 void
 VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setup (
-    boost::shared_ptr<data_type>        data,
-    const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& feSpace,
-    boost::shared_ptr<Epetra_Comm>&     comm
+    std::shared_ptr<data_type>        data,
+    const std::shared_ptr< FESpace<Mesh, MapEpetra> >& feSpace,
+    std::shared_ptr<Epetra_Comm>&     comm
 )
 {
     setup ( data, feSpace, comm, feSpace->mapPtr(), (UInt) 0 );
@@ -613,10 +613,10 @@ VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setup (
 template <typename Mesh, typename SolverType>
 void
 VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setup (
-    boost::shared_ptr<data_type>          data,
-    const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& feSpace,
+    std::shared_ptr<data_type>          data,
+    const std::shared_ptr< FESpace<Mesh, MapEpetra> >& feSpace,
     bchandler_type&                BCh,
-    boost::shared_ptr<Epetra_Comm>&              comm
+    std::shared_ptr<Epetra_Comm>&              comm
 )
 {
     setup (data, feSpace, comm);

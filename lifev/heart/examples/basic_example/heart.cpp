@@ -94,7 +94,7 @@ void
 Heart::run()
 {
     typedef FESpace< mesh_Type, MapEpetra > feSpace_Type;
-    typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
+    typedef std::shared_ptr<feSpace_Type> feSpacePtr_Type;
 
     LifeChrono chronoinitialsettings;
     LifeChrono chronototaliterations;
@@ -114,7 +114,7 @@ Heart::run()
 
     MeshData meshData;
     meshData.setup (M_heart_fct->M_dataFile, "electric/space_discretization");
-    boost::shared_ptr<mesh_Type > fullMeshPtr ( new mesh_Type ( M_heart_fct->M_comm ) );
+    std::shared_ptr<mesh_Type > fullMeshPtr ( new mesh_Type ( M_heart_fct->M_comm ) );
     readMesh (*fullMeshPtr, meshData);
     bool verbose = (M_heart_fct->M_comm->MyPID() == 0);
 
@@ -135,7 +135,7 @@ Heart::run()
 
 
     //! Construction of the partitioned mesh
-    boost::shared_ptr<mesh_Type> localMeshPtr;
+    std::shared_ptr<mesh_Type> localMeshPtr;
     {
         MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, M_heart_fct->M_comm);
         localMeshPtr = meshPart.meshPartition();
@@ -239,7 +239,7 @@ Heart::run()
     {
         std::cout << "Calling the ionic model constructor ... ";
     }
-    boost::shared_ptr< HeartIonicSolver< mesh_Type > > ionicModel;
+    std::shared_ptr< HeartIonicSolver< mesh_Type > > ionicModel;
     if (ion_model == 1)
     {
         if (verbose)
@@ -309,7 +309,7 @@ Heart::run()
     }
 
     //! Setting generic Exporter postprocessing
-    boost::shared_ptr< Exporter<mesh_Type > > exporter;
+    std::shared_ptr< Exporter<mesh_Type > > exporter;
     std::string const exporterType =  M_heart_fct->M_dataFile ( "exporter/type", "ensight");
 #ifdef HAVE_HDF5
     if (exporterType.compare ("hdf5") == 0)
@@ -425,7 +425,7 @@ Heart::run()
 #ifdef MONODOMAIN
 void Heart::computeRhs ( vector_Type& rhs,
                          HeartMonodomainSolver< mesh_Type >& electricModel,
-                         boost::shared_ptr< HeartIonicSolver< mesh_Type > > ionicModel,
+                         std::shared_ptr< HeartIonicSolver< mesh_Type > > ionicModel,
                          HeartMonodomainData& data )
 {
     bool verbose = (M_heart_fct->M_comm->MyPID() == 0);
@@ -499,7 +499,7 @@ void Heart::computeRhs ( vector_Type& rhs,
 #else
 void Heart::computeRhs ( vector_Type& rhs,
                          HeartBidomainSolver< mesh_Type >& electricModel,
-                         boost::shared_ptr< HeartIonicSolver< mesh_Type > > ionicModel,
+                         std::shared_ptr< HeartIonicSolver< mesh_Type > > ionicModel,
                          HeartBidomainData& data )
 {
     bool verbose = (M_heart_fct->M_comm->MyPID() == 0);

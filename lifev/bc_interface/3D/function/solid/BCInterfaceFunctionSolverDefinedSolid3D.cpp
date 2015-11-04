@@ -95,7 +95,7 @@ BCInterfaceFunctionSolverDefined< BCHandler, StructuralOperator<RegionMesh <Line
             // Update the physical solver variables
             for ( UInt i ( 0 ); i < M_vectorFunctionRobin.size(); ++i )
             {
-                functionParserSolverPtr_Type castedFunctionSolver = boost::dynamic_pointer_cast< functionParserSolver_Type > ( M_vectorFunctionRobin[i] );
+                functionParserSolverPtr_Type castedFunctionSolver = std::dynamic_pointer_cast< functionParserSolver_Type > ( M_vectorFunctionRobin[i] );
 
                 if ( castedFunctionSolver != 0 )
                 {
@@ -246,7 +246,7 @@ BCInterfaceFunctionSolverDefined< BCHandler, StructuralOperator<RegionMesh <Line
             // Set the physical solver in the Robin functions for alpha and beta
             for ( UInt i ( 0 ); i < M_vectorFunctionRobin.size(); ++i )
             {
-                functionParserSolverPtr_Type castedFunctionSolver = boost::dynamic_pointer_cast< functionParserSolver_Type > ( M_vectorFunctionRobin[i] );
+                functionParserSolverPtr_Type castedFunctionSolver = std::dynamic_pointer_cast< functionParserSolver_Type > ( M_vectorFunctionRobin[i] );
 
                 if ( castedFunctionSolver != 0 )
                 {

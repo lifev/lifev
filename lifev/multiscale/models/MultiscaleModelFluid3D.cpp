@@ -516,7 +516,7 @@ void
 MultiscaleModelFluid3D::setupMesh()
 {
     //Read fluid mesh from file
-    boost::shared_ptr< mesh_Type > fluidMesh ( new mesh_Type ( M_comm ) );
+    std::shared_ptr< mesh_Type > fluidMesh ( new mesh_Type ( M_comm ) );
     readMesh ( *fluidMesh, *M_meshData );
 
     //Transform mesh
@@ -637,7 +637,7 @@ MultiscaleModelFluid3D::setupLinearModel()
 
     // Set all the BCFunctions to zero
     BCFunctionBase bcBaseDeltaZero;
-    bcBaseDeltaZero.setFunction ( boost::bind ( &MultiscaleModelFluid3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
+    bcBaseDeltaZero.setFunction ( std::bind ( &MultiscaleModelFluid3D::bcFunctionDeltaZero, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 ) );
 
     for ( bc_Type::bcBaseIterator_Type i = M_linearBC->begin() ; i != M_linearBC->end() ; ++i )
     {
@@ -707,7 +707,7 @@ MultiscaleModelFluid3D::imposePerturbation()
         if ( ( *i )->isPerturbed() )
         {
             BCFunctionBase bcBaseDeltaOne;
-            bcBaseDeltaOne.setFunction ( boost::bind ( &MultiscaleModelFluid3D::bcFunctionDeltaOne, this, _1, _2, _3, _4, _5 ) );
+            bcBaseDeltaOne.setFunction ( std::bind ( &MultiscaleModelFluid3D::bcFunctionDeltaOne, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 ) );
 
             M_linearBC->findBCWithFlag ( boundaryFlag ( ( *i )->boundaryID ( ( *i )->modelGlobalToLocalID ( M_ID ) ) ) ).setBCFunction ( bcBaseDeltaOne );
 
@@ -727,7 +727,7 @@ MultiscaleModelFluid3D::resetPerturbation()
         if ( ( *i )->isPerturbed() )
         {
             BCFunctionBase bcBaseDeltaZero;
-            bcBaseDeltaZero.setFunction ( boost::bind ( &MultiscaleModelFluid3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
+            bcBaseDeltaZero.setFunction ( std::bind ( &MultiscaleModelFluid3D::bcFunctionDeltaZero, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 ) );
 
             M_linearBC->findBCWithFlag ( boundaryFlag ( ( *i )->boundaryID ( ( *i )->modelGlobalToLocalID ( M_ID ) ) ) ).setBCFunction ( bcBaseDeltaZero );
 

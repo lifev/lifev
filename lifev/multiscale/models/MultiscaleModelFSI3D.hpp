@@ -125,7 +125,7 @@ public:
     //@{
 
     typedef FSIMonolithic                                      FSIOperator_Type;
-    typedef boost::shared_ptr< FSIOperator_Type>               FSIOperatorPtr_Type;
+    typedef std::shared_ptr< FSIOperator_Type>                 FSIOperatorPtr_Type;
 
     typedef FSIOperator::data_Type                             data_Type;
     typedef FSIOperator::dataPtr_Type                          dataPtr_Type;
@@ -139,7 +139,7 @@ public:
     typedef FSIOperator::vectorPtr_Type                        vectorPtr_Type;
 
     typedef Exporter< mesh_Type >                              IOFile_Type;
-    typedef boost::shared_ptr< IOFile_Type >                   IOFilePtr_Type;
+    typedef std::shared_ptr< IOFile_Type >                   IOFilePtr_Type;
     typedef ExporterData< mesh_Type >                          IOData_Type;
 
     typedef ExporterEnsight< mesh_Type >                       ensightIOFile_Type;
@@ -148,13 +148,13 @@ public:
 #endif
 
     typedef BCHandler                                          bc_Type;
-    typedef boost::shared_ptr< bc_Type >                       bcPtr_Type;
+    typedef std::shared_ptr< bc_Type >                       bcPtr_Type;
     typedef BCInterface3D< bc_Type, FSIOperator >              bcInterface_Type;
-    typedef boost::shared_ptr< bcInterface_Type >              bcInterfacePtr_Type;
+    typedef std::shared_ptr< bcInterface_Type >                bcInterfacePtr_Type;
 
 #ifndef FSI_WITH_EXTERNALPRESSURE
     typedef FSI3DBoundaryStressFunction                        boundaryStressFunction_Type;
-    typedef boost::shared_ptr< boundaryStressFunction_Type >   boundaryStressFunctionPtr_Type;
+    typedef std::shared_ptr< boundaryStressFunction_Type >   boundaryStressFunctionPtr_Type;
     typedef std::vector< boundaryStressFunctionPtr_Type >      boundaryStressFunctionContainer_Type;
 #endif
 
@@ -174,21 +174,21 @@ public:
     typedef std::map< multiscaleID_Type, FSI3DBoundaryFlowRate_Type > boundaryFlowRateMap_Type;
 
     typedef FSI3DBoundaryFlowRateFunction                      boundaryFlowRateFunction_Type;
-    typedef boost::shared_ptr< boundaryFlowRateFunction_Type > boundaryFlowRateFunctionPtr_Type;
+    typedef std::shared_ptr< boundaryFlowRateFunction_Type > boundaryFlowRateFunctionPtr_Type;
     typedef std::vector< boundaryFlowRateFunctionPtr_Type >    boundaryFlowRateFunctionsContainer_Type;
     typedef boundaryFlowRateFunctionsContainer_Type::iterator  boundaryFlowRateFunctionsContainerIterator_Type;
 #endif
 
 #ifdef FSI_WITH_BOUNDARYAREA
     typedef FSI3DBoundaryAreaFunction                          boundaryAreaFunction_Type;
-    typedef boost::shared_ptr< boundaryAreaFunction_Type >     boundaryAreaFunctionPtr_Type;
+    typedef std::shared_ptr< boundaryAreaFunction_Type >     boundaryAreaFunctionPtr_Type;
     typedef std::vector< boundaryAreaFunctionPtr_Type >        boundaryAreaFunctionsContainer_Type;
     typedef boundaryAreaFunctionsContainer_Type::iterator      boundaryAreaFunctionsContainerIterator_Type;
 #endif
 
 #ifdef FSI_WITH_STRESSOUTPUT
     typedef WallTensionEstimator< mesh_Type >                  wallTensionEstimator_Type;
-    typedef boost::shared_ptr< wallTensionEstimator_Type >     wallTensionEstimatorPtr_Type;
+    typedef std::shared_ptr< wallTensionEstimator_Type >     wallTensionEstimatorPtr_Type;
 #endif
 
     //@}
@@ -841,7 +841,7 @@ public:
     /*!
      * @param normal outgoing normal of the fluid boundary
      */
-    void setNormal ( const boost::array< Real, 3 >& normal )
+    void setNormal ( const std::array< Real, 3 >& normal )
     {
         M_n = normal;
     }
@@ -928,7 +928,7 @@ private:
     function_Type                                  M_function;
     multiscaleID_Type                              M_fluidFlag;
     FSI3DBoundaryFlowRate_Type                     M_boundaryFlowRateType;
-    boost::array< Real, 3 >                        M_n;
+    std::array< Real, 3 >                        M_n;
     Real                                           M_area;
     bool                                           M_flowRateIsZero;
 };
@@ -1081,7 +1081,7 @@ public:
     /*!
      * @param geometricCenter the x-y-z coordinate of the geometric center of the fluid boundary
      */
-    void setGeometricCenter ( const boost::array< Real, 3 >& geometricCenter )
+    void setGeometricCenter ( const std::array< Real, 3 >& geometricCenter )
     {
         M_geometricCenter = geometricCenter;
     }
@@ -1090,7 +1090,7 @@ public:
     /*!
      * @param normal outgoing normal of the fluid boundary
      */
-    void setNormal ( const boost::array< Real, 3 >& normal )
+    void setNormal ( const std::array< Real, 3 >& normal )
     {
         M_n = normal;
         setupTangent();
@@ -1168,7 +1168,7 @@ private:
     Real displacement ( const Real& scaleFactor, const Real& x, const Real& y, const Real& z, const UInt& id )
     {
         // Compute the RHS
-        boost::array< Real, 3 > rhs;
+        std::array< Real, 3 > rhs;
         rhs[0] = 0;
         rhs[1] = scaleFactor * ( ( x - M_geometricCenter[0] ) * M_t1[0] + ( y - M_geometricCenter[1] ) * M_t1[1] + ( z - M_geometricCenter[2] ) * M_t1[2] );
         rhs[2] = scaleFactor * ( ( x - M_geometricCenter[0] ) * M_t2[0] + ( y - M_geometricCenter[1] ) * M_t2[1] + ( z - M_geometricCenter[2] ) * M_t2[2] );
@@ -1206,10 +1206,10 @@ private:
     const MultiscaleModelFSI3D*       M_FSI3D;             // A pointer to the model class
     multiscaleID_Type                 M_fluidFlag;         // Boundary flag
     Real                              M_referenceArea;     // Reference area
-    boost::array< Real, 3 >           M_geometricCenter;   // Geometric center
-    boost::array< Real, 3 >           M_n;                 // Normal direction
-    boost::array< Real, 3 >           M_t1;                // Tangential direction 1
-    boost::array< Real, 3 >           M_t2;                // Tangential direction 2
+    std::array< Real, 3 >           M_geometricCenter;   // Geometric center
+    std::array< Real, 3 >           M_n;                 // Normal direction
+    std::array< Real, 3 >           M_t1;                // Tangential direction 1
+    std::array< Real, 3 >           M_t2;                // Tangential direction 2
     function_Type                     M_function;          // Function scale factor
 };
 

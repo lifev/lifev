@@ -87,10 +87,10 @@ public:
     //@{
 
     //! Full data constructor
-    IntegrateVectorFaceID (const boost::shared_ptr<MeshType>& mesh,
+    IntegrateVectorFaceID (const std::shared_ptr<MeshType>& mesh,
                            const UInt boundaryID,
                            const QuadratureBoundary& quadratureBD,
-                           const boost::shared_ptr<TestSpaceType>& testSpace,
+                           const std::shared_ptr<TestSpaceType>& testSpace,
                            const ExpressionType& expression);
 
     //! Copy constructor
@@ -114,7 +114,7 @@ public:
 
     //! Operator wrapping the addTo method (for shared_ptr)
     template <typename VectorType>
-    inline void operator>> (boost::shared_ptr<VectorType> vector)
+    inline void operator>> (std::shared_ptr<VectorType> vector)
     {
         addTo (*vector);
     }
@@ -152,7 +152,7 @@ private:
     //@}
 
     // Pointer on the mesh
-    boost::shared_ptr<MeshType> M_mesh;
+    std::shared_ptr<MeshType> M_mesh;
 
     // Identifier for the boundary
     UInt M_boundaryId;
@@ -161,7 +161,7 @@ private:
     QuadratureBoundary M_quadratureBoundary;
 
     // Shared pointer on the Space
-    boost::shared_ptr<TestSpaceType> M_testSpace;
+    std::shared_ptr<TestSpaceType> M_testSpace;
 
     // Tree to compute the values for the assembly
     evaluation_Type M_evaluation;
@@ -183,10 +183,10 @@ private:
 
 template < typename MeshType, typename TestSpaceType, typename ExpressionType>
 IntegrateVectorFaceID < MeshType, TestSpaceType, ExpressionType>::
-IntegrateVectorFaceID (const boost::shared_ptr<MeshType>& mesh,
+IntegrateVectorFaceID (const std::shared_ptr<MeshType>& mesh,
                        const UInt boundaryID,
                        const QuadratureBoundary& quadratureBD,
-                       const boost::shared_ptr<TestSpaceType>& testSpace,
+                       const std::shared_ptr<TestSpaceType>& testSpace,
                        const ExpressionType& expression)
     :   M_mesh (mesh),
         M_boundaryId (boundaryID),

@@ -102,10 +102,10 @@ main ( int argc, char* argv[] )
         // needed to properly destroy all objects inside before mpi finalize
 
 #ifdef HAVE_MPI
-        boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+        std::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
         ASSERT ( Comm->NumProc() < 2, "The test does not run in parallel." );
 #else
-        boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
+        std::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
         typedef RegionMesh<LinearLine> mesh_Type;
@@ -113,11 +113,14 @@ main ( int argc, char* argv[] )
         typedef VectorEpetra vector_Type;
         typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
         typedef FESpace<mesh_Type, MapEpetra> feSpace_Type;
-        typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
+
         typedef LifeV::Preconditioner basePrec_Type;
         typedef boost::shared_ptr<basePrec_Type> basePrecPtr_Type;
         typedef LifeV::PreconditionerIfpack prec_Type;
         typedef boost::shared_ptr<prec_Type> precPtr_Type;
+
+        typedef std::shared_ptr<feSpace_Type> feSpacePtr_Type;
+
 
         const bool verbose (Comm->MyPID() == 0);
 
@@ -140,7 +143,7 @@ main ( int argc, char* argv[] )
             std::cout << " -- Reading the mesh ... " << std::flush;
         }
         // MeshData meshData(dataFile, "mesh");
-        boost::shared_ptr< mesh_Type > meshPtr ( new mesh_Type ( Comm ) );
+        std::shared_ptr< mesh_Type > meshPtr ( new mesh_Type ( Comm ) );
 
         // Set up the structured mesh
         regularMesh1D ( *meshPtr, 0,
@@ -195,7 +198,7 @@ main ( int argc, char* argv[] )
         {
             std::cout << " -- Defining the matrix ... " << std::flush;
         }
-        boost::shared_ptr<matrix_Type> systemMatrix (new matrix_Type ( uFESpace->map() ) );
+        std::shared_ptr<matrix_Type> systemMatrix (new matrix_Type ( uFESpace->map() ) );
         if (verbose)
         {
             std::cout << " done! " << std::endl;
@@ -404,8 +407,10 @@ main ( int argc, char* argv[] )
         {
             std::cout << " -- Defining the exported quantities ... " << std::flush;
         }
-        boost::shared_ptr<vector_Type> solutionPtr (new vector_Type (*solution, Repeated) );
-        boost::shared_ptr<vector_Type> solutionErrPtr (new vector_Type (solutionErr, Repeated) );
+
+        std::shared_ptr<vector_Type> solutionPtr (new vector_Type (*solution, Repeated) );
+        std::shared_ptr<vector_Type> solutionErrPtr (new vector_Type (solutionErr, Repeated) );
+
         if (verbose)
         {
             std::cout << " done ! " << std::endl;

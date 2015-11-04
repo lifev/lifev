@@ -55,7 +55,7 @@ BCInterfaceFunctionParser< BCHandler, EmptyPhysicalSolver< VectorEpetra > >::ass
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParser< BCHandler, EmptyPhysicalSolver< VectorEpetra > >::setData ( const boost::shared_ptr< BCInterfaceData >& data )
+BCInterfaceFunctionParser< BCHandler, EmptyPhysicalSolver< VectorEpetra > >::setData ( const std::shared_ptr< BCInterfaceData >& data )
 {
 #ifdef HAVE_LIFEV_DEBUG
     debugStream ( 5022 ) << "BCInterfaceFunction::setData" << "\n";
@@ -63,7 +63,7 @@ BCInterfaceFunctionParser< BCHandler, EmptyPhysicalSolver< VectorEpetra > >::set
 
     setupParser ( data );
 
-    boost::shared_ptr< BCInterfaceData3D > castedData = boost::dynamic_pointer_cast< BCInterfaceData3D > ( data );
+    std::shared_ptr< BCInterfaceData3D > castedData = std::dynamic_pointer_cast< BCInterfaceData3D > ( data );
 
     if ( castedData != 0 )
     {

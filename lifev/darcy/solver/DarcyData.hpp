@@ -73,7 +73,7 @@ public:
     typedef GetPot data_Type;
 
     //! Shared pointer for the data.
-    typedef boost::shared_ptr < data_Type > dataPtr_Type;
+    typedef std::shared_ptr < data_Type > dataPtr_Type;
 
     //! Teuchos parameter list.
     typedef Teuchos::ParameterList paramList_Type;
@@ -85,19 +85,19 @@ public:
     typedef TimeData timeData_Type;
 
     //! Shared pointer for the time data.
-    typedef boost::shared_ptr < timeData_Type > timeDataPtr_Type;
+    typedef std::shared_ptr < timeData_Type > timeDataPtr_Type;
 
     //! Typedef for the time advance data.
     typedef TimeAdvanceData timeAdvanceData_Type;
 
     //! Shared pointer for the time advance data.
-    typedef boost::shared_ptr < timeAdvanceData_Type > timeAdvanceDataPtr_Type;
+    typedef std::shared_ptr < timeAdvanceData_Type > timeAdvanceDataPtr_Type;
 
     //! Typedef for the mesh data.
     typedef MeshData meshData_Type;
 
     //! Shared pointer for the mesh data.
-    typedef boost::shared_ptr < meshData_Type > meshDataPtr_Type;
+    typedef std::shared_ptr < meshData_Type > meshDataPtr_Type;
 
     //! Self typedef.
     typedef DarcyData < mesh_Type > darcyData_Type;

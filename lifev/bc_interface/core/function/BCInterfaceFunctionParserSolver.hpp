@@ -92,7 +92,7 @@ public:
     typedef BcHandlerType                                                          bcHandler_Type;
     typedef PhysicalSolverType                                                     physicalSolver_Type;
 
-    typedef boost::shared_ptr< physicalSolver_Type >                               physicalSolverPtr_Type;
+    typedef std::shared_ptr< physicalSolver_Type >                               physicalSolverPtr_Type;
     typedef BCInterfaceFunction< bcHandler_Type, physicalSolver_Type >             function_Type;
     typedef BCInterfaceFunctionParser< bcHandler_Type, physicalSolver_Type >       functionParser_Type;
     typedef typename PhysicalSolverType::solutionPtr_Type                          solutionPtr_Type;

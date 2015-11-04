@@ -192,7 +192,7 @@ Real uInterpolated (const Real& time, const Real& /*x*/, const Real& /*y*/, cons
 // fct_type getUInterpolated()
 // {
 //     fct_type f;
-//     f = boost::bind(&Cylinder::Private::uInterpolated, this, _1, _2, _3, _4, _5);
+//     f = std::bind(&Cylinder::Private::uInterpolated, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
 //     return f;
 // }
 

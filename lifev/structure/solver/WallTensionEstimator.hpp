@@ -121,34 +121,34 @@ public:
 
     // FE space
     typedef FESpace < Mesh, MapEpetra >                   feSpace_Type;
-    typedef boost::shared_ptr < feSpace_Type >            feSpacePtr_Type;
+    typedef std::shared_ptr < feSpace_Type >            feSpacePtr_Type;
 
     typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 > feSpaceET_Type;
-    typedef boost::shared_ptr<feSpaceET_Type>                     feSpaceETPtr_Type;
+    typedef std::shared_ptr<feSpaceET_Type>                     feSpaceETPtr_Type;
 
     // Data classes
     typedef StructuralConstitutiveLawData                 data_Type;
-    typedef typename boost::shared_ptr<data_Type>         dataPtr_Type;
+    typedef typename std::shared_ptr<data_Type>         dataPtr_Type;
     typedef WallTensionEstimatorData                      analysisData_Type;
-    typedef typename boost::shared_ptr<analysisData_Type> analysisDataPtr_Type;
+    typedef typename std::shared_ptr<analysisData_Type> analysisDataPtr_Type;
 
     //Matrices 3x3 and std::vector for the invariants
     typedef Epetra_SerialDenseMatrix                      matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>                matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type>                matrixPtr_Type;
     typedef std::vector< Real >                           vector_Type;
-    typedef boost::shared_ptr<vector_Type>                vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type>                vectorPtr_Type;
 
     // These two are to handle the vector displacement read from hdf5
     typedef VectorEpetra                                  solutionVect_Type;
-    typedef boost::shared_ptr<VectorEpetra>               solutionVectPtr_Type;
+    typedef std::shared_ptr<VectorEpetra>               solutionVectPtr_Type;
 
     // Displayer and Exporter classes
-    typedef typename boost::shared_ptr<const Displayer>   displayerPtr_Type;
-    typedef typename boost::shared_ptr< Exporter<Mesh> >  exporterPtr_Type;
+    typedef typename std::shared_ptr<const Displayer>   displayerPtr_Type;
+    typedef typename std::shared_ptr< Exporter<Mesh> >  exporterPtr_Type;
 
     // Materials
     typedef StructuralConstitutiveLaw<Mesh>               material_Type;
-    typedef boost::shared_ptr<material_Type>              materialPtr_Type;
+    typedef std::shared_ptr<material_Type>              materialPtr_Type;
 
     //@}
 

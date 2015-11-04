@@ -112,7 +112,7 @@ public:
 
 
 private:
-    boost::shared_ptr<Epetra_Comm>   M_comm;
+    std::shared_ptr<Epetra_Comm>   M_comm;
     bool M_verbose;
 
 };

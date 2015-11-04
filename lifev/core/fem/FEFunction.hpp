@@ -92,9 +92,9 @@ public:
     typedef FEScalarField < mesh_Type, map_Type > FEScalarField_Type;
     typedef FEVectorField < mesh_Type, map_Type > FEVectorField_Type;
 
-    typedef typename boost::shared_ptr < FEField_Type > FEFieldPtr_Type;
-    typedef typename boost::shared_ptr < FEScalarField_Type > FEScalarFieldPtr_Type;
-    typedef typename boost::shared_ptr < FEVectorField_Type > FEVectorFieldPtr_Type;
+    typedef typename std::shared_ptr < FEField_Type > FEFieldPtr_Type;
+    typedef typename std::shared_ptr < FEScalarField_Type > FEScalarFieldPtr_Type;
+    typedef typename std::shared_ptr < FEVectorField_Type > FEVectorFieldPtr_Type;
 
     typedef typename std::vector < FEScalarFieldPtr_Type > FEScalarFieldPtrContainer_Type;
     typedef typename std::vector < FEVectorFieldPtr_Type > FEVectorFieldPtrContainer_Type;

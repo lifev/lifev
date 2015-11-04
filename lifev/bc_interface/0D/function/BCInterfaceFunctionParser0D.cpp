@@ -55,7 +55,7 @@ BCInterfaceFunctionParser< ZeroDimensionalBCHandler, ZeroDimensionalData >::assi
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParser< ZeroDimensionalBCHandler, ZeroDimensionalData >::setData ( const boost::shared_ptr< BCInterfaceData >& data )
+BCInterfaceFunctionParser< ZeroDimensionalBCHandler, ZeroDimensionalData >::setData ( const std::shared_ptr< BCInterfaceData >& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

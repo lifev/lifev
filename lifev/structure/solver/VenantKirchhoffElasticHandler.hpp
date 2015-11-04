@@ -66,9 +66,9 @@ public:
     //@{
 
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > source_Type;
+    typedef std::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > source_Type;
     typedef BCHandler                                bchandlerRaw_Type;
-    typedef boost::shared_ptr<bchandlerRaw_type>     bchandler_Type;
+    typedef std::shared_ptr<bchandlerRaw_type>     bchandler_Type;
 
     //@}
 

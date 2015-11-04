@@ -67,12 +67,12 @@ public:
     typedef typename mapMarkerVolumes_Type::const_iterator mapIterator_Type;
 
     typedef typename super::vectorVolumes_Type       vectorVolumes_Type;
-    typedef boost::shared_ptr<vectorVolumes_Type>    vectorVolumesPtr_Type;
+    typedef std::shared_ptr<vectorVolumes_Type>    vectorVolumesPtr_Type;
 
     typedef std::vector<UInt>                             vectorIndexes_Type;
-    typedef boost::shared_ptr<vectorIndexes_Type>    vectorIndexesPtr_Type;
+    typedef std::shared_ptr<vectorIndexes_Type>    vectorIndexesPtr_Type;
     typedef std::map< UInt, vectorIndexes_Type>           mapMarkerIndexes_Type;
-    typedef boost::shared_ptr<mapMarkerIndexes_Type>      mapMarkerIndexesPtr_Type;
+    typedef std::shared_ptr<mapMarkerIndexes_Type>      mapMarkerIndexesPtr_Type;
     typedef typename mapMarkerIndexes_Type::const_iterator mapIteratorIndex_Type;
 
     typedef typename super::FESpacePtr_Type          FESpacePtr_Type;
@@ -116,9 +116,8 @@ public:
     */
     void setup ( const FESpacePtr_Type& dFESpace,
                  const ETFESpacePtr_Type& dETFESpace,
-                 const boost::shared_ptr<const MapEpetra>&  monolithicMap,
+                 const std::shared_ptr<const MapEpetra>&  monolithicMap,
                  const UInt offset, const dataPtr_Type& dataMaterial);
-
 
     //! Compute the Stiffness matrix in StructuralSolver::buildSystem()
     /*!
@@ -301,7 +300,7 @@ template <typename MeshType>
 void
 VenantKirchhoffMaterialNonLinear<MeshType>::setup ( const FESpacePtr_Type&                       dFESpace,
                                                     const ETFESpacePtr_Type&                     dETFESpace,
-                                                    const boost::shared_ptr<const MapEpetra>&   monolithicMap,
+                                                    const std::shared_ptr<const MapEpetra>&   monolithicMap,
                                                     const UInt                                  offset,
                                                     const dataPtr_Type& dataMaterial)
 {

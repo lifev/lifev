@@ -62,10 +62,10 @@ public:
     //! @name Public Typedefs and Enumerators
     //@{
     typedef Epetra_Operator                        operator_Type;
-    typedef boost::shared_ptr<operator_Type>       operatorPtr_Type;
+    typedef std::shared_ptr<operator_Type>       operatorPtr_Type;
     typedef VectorBlockStructure                   blockStructure_Type;
     typedef Epetra_MultiVector                     vector_Type;
-    typedef boost::shared_ptr<vector_Type>         vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type>         vectorPtr_Type;
     typedef Epetra_Comm                            comm_Type;
     typedef Epetra_Map                             map_Type;
     //@}
@@ -73,9 +73,9 @@ public:
     //! null constructor and destructor
     //@{
 #ifdef HAVE_MPI
-    ConfinedOperator ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
+    ConfinedOperator ( std::shared_ptr<Epetra_Comm> comm = std::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
 #else
-    ConfinedOperator ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
+    ConfinedOperator ( std::shared_ptr<Epetra_Comm> comm = std::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
 #endif
     ~ConfinedOperator();
     //@}
@@ -138,8 +138,8 @@ protected:
     operatorPtr_Type               M_oper;
     blockStructure_Type            M_blockStructure;
     UInt                           M_blockIndex;
-    boost::shared_ptr<Epetra_Comm> M_comm;
-    boost::shared_ptr<map_Type>    M_map;
+    std::shared_ptr<Epetra_Comm> M_comm;
+    std::shared_ptr<map_Type>    M_map;
 
 };
 

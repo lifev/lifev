@@ -192,7 +192,7 @@ public:
 
     /** @} */ // End of group Geometric Element Container Types
 
-    typedef boost::shared_ptr<Epetra_Comm> commPtr_Type;
+    typedef std::shared_ptr<Epetra_Comm> commPtr_Type;
 
     /** @name Constructors & Destructor
      *  Default and Copy Constructor for the class.

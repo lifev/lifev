@@ -121,13 +121,13 @@ public:
     //@{
 
     //! Getter for the problem mesh
-    void mesh ( boost::shared_ptr< RegionMesh<LinearTetra> >& meshPart ) const;
+    void mesh ( std::shared_ptr< RegionMesh<LinearTetra> >& meshPart ) const;
 
     //! Getter for the boundary conditions in the provided BCHandler
     /*!
         @param bcHandler shared pointer on a BCHandler object
      */
-    void boundaryConditions ( boost::shared_ptr<BCHandler> bcHandler ) const;
+    void boundaryConditions ( std::shared_ptr<BCHandler> bcHandler ) const;
 
     //! Returns the name of the problem
     std::string name() const;

@@ -237,9 +237,9 @@ public:
      * @param rotate Vector (Rx,Ry,Rz) of angles for rotation (degree units)
      * @param translate Vector (Tx,Ty,Tz) of offset for position
      */
-    void setGeometry ( const boost::array< Real, NDIM >& scale,
-                       const boost::array< Real, NDIM >& rotate,
-                       const boost::array< Real, NDIM >& translate );
+    void setGeometry ( const std::array< Real, NDIM >& scale,
+                       const std::array< Real, NDIM >& rotate,
+                       const std::array< Real, NDIM >& translate );
 
     //! Set the epetra communicator for the model
     /*!
@@ -356,9 +356,9 @@ protected:
 
     multiscaleDataPtr_Type               M_globalData;         // GlobalDataContainer
 
-    boost::array< Real, NDIM >           M_geometryScale;      // Global geometrical scale
-    boost::array< Real, NDIM >           M_geometryRotate;     // Global geometrical rotation
-    boost::array< Real, NDIM >           M_geometryTranslate;  // Global geometrical translation
+    std::array< Real, NDIM >           M_geometryScale;      // Global geometrical scale
+    std::array< Real, NDIM >           M_geometryRotate;     // Global geometrical rotation
+    std::array< Real, NDIM >           M_geometryTranslate;  // Global geometrical translation
 
     multiscaleCommPtr_Type               M_comm;               // Communicator
 

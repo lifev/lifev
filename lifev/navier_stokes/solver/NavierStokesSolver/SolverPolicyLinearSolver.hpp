@@ -66,15 +66,15 @@ struct SolverPolicyLinearSolver
 {
 public:
     typedef MatrixEpetra<Real>                       matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>           matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type>           matrixPtr_Type;
     typedef VectorEpetra                             vector_Type;
-    typedef boost::shared_ptr<VectorEpetra>          vectorPtr_Type;
+    typedef std::shared_ptr<VectorEpetra>          vectorPtr_Type;
     typedef Epetra_Comm                              comm_Type;
-    typedef boost::shared_ptr<comm_Type>             commPtr_Type;
+    typedef std::shared_ptr<comm_Type>             commPtr_Type;
     typedef LinearSolver                             solver_Type;
-    typedef boost::shared_ptr< solver_Type >         solverPtr_Type;
+    typedef std::shared_ptr< solver_Type >         solverPtr_Type;
     typedef Preconditioner                           preconditioner_Type;
-    typedef boost::shared_ptr<preconditioner_Type>   preconditionerPtr_Type;
+    typedef std::shared_ptr<preconditioner_Type>   preconditionerPtr_Type;
 
     //! Method to set a preconditioner
     /*!

@@ -263,58 +263,58 @@ public:
     typedef DarcyData < mesh_Type > data_Type;
 
     //! Shared pointer for the data type.
-    typedef boost::shared_ptr < data_Type > dataPtr_Type;
+    typedef std::shared_ptr < data_Type > dataPtr_Type;
 
     //! Boundary condition handler.
     typedef BCHandler bcHandler_Type;
 
     //! Shared pointer to a boundary condition handler.
-    typedef boost::shared_ptr < bcHandler_Type > bcHandlerPtr_Type;
+    typedef std::shared_ptr < bcHandler_Type > bcHandlerPtr_Type;
 
     //! Shared pointer to a MPI communicator.
-    typedef boost::shared_ptr < Epetra_Comm > commPtr_Type;
+    typedef std::shared_ptr < Epetra_Comm > commPtr_Type;
 
     //! Map type.
     typedef MapEpetra map_Type;
 
     //! Shared pointer to a displayer.
-    typedef boost::shared_ptr < Displayer > displayerPtr_Type;
+    typedef std::shared_ptr < Displayer > displayerPtr_Type;
 
     //! Finite element space.
     typedef FESpace < mesh_Type, map_Type > fESpace_Type;
 
     //! Shared pointer to a finite element space.
-    typedef boost::shared_ptr < fESpace_Type > fESpacePtr_Type;
+    typedef std::shared_ptr < fESpace_Type > fESpacePtr_Type;
 
     //! Scalar field.
     typedef FEScalarField < mesh_Type, map_Type > scalarField_Type;
 
     //! Shared pointer to a scalar field.
-    typedef boost::shared_ptr < scalarField_Type > scalarFieldPtr_Type;
+    typedef std::shared_ptr < scalarField_Type > scalarFieldPtr_Type;
 
     //! Vector field.
     typedef FEVectorField < mesh_Type, map_Type > vectorField_Type;
 
     //! Shared pointer to a scalar field.
-    typedef boost::shared_ptr < vectorField_Type > vectorFieldPtr_Type;
+    typedef std::shared_ptr < vectorField_Type > vectorFieldPtr_Type;
 
     //! Scalar value function.
     typedef FEFunction < mesh_Type, map_Type, Real > scalarFct_Type;
 
     //! Shared pointer to a scalar value function.
-    typedef boost::shared_ptr < scalarFct_Type > scalarFctPtr_Type;
+    typedef std::shared_ptr < scalarFct_Type > scalarFctPtr_Type;
 
     //! Vector value function.
     typedef FEFunction < mesh_Type, map_Type, Vector > vectorFct_Type;
 
     //! Shared pointer to a vector value function.
-    typedef boost::shared_ptr < vectorFct_Type > vectorFctPtr_Type;
+    typedef std::shared_ptr < vectorFct_Type > vectorFctPtr_Type;
 
     //! Matrix value funcion.
     typedef FEFunction < mesh_Type, map_Type, Matrix > matrixFct_Type;
 
     //! Shared pointer to a matrix value function.
-    typedef boost::shared_ptr < matrixFct_Type > matrixFctPtr_Type;
+    typedef std::shared_ptr < matrixFct_Type > matrixFctPtr_Type;
 
     //! Sparse and distributed matrix.
     typedef typename solver_Type::matrix_Type matrix_Type;

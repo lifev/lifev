@@ -94,39 +94,40 @@ public:
     //@{
     typedef StructuralConstitutiveLawData          data_Type;
 
+
     typedef StructuralIsotropicConstitutiveLaw<MeshType>                 isotropicLaw_Type;
-    typedef boost::shared_ptr<isotropicLaw_Type>                         isotropicLawPtr_Type;
+    typedef std::shared_ptr<isotropicLaw_Type>                         isotropicLawPtr_Type;
 
     typedef StructuralAnisotropicConstitutiveLaw<MeshType>               anisotropicLaw_Type;
-    typedef boost::shared_ptr<anisotropicLaw_Type>                       anisotropicLawPtr_Type;
+    typedef std::shared_ptr<anisotropicLaw_Type>                       anisotropicLawPtr_Type;
 
     typedef MatrixEpetra<Real>                                           matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>                               matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type>                               matrixPtr_Type;
     typedef VectorEpetra                                                 vector_Type;
-    typedef boost::shared_ptr<vector_Type>                               vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type>                               vectorPtr_Type;
 
-    typedef typename boost::shared_ptr<data_Type>                        dataPtr_Type;
-    typedef typename boost::shared_ptr<const Displayer>                  displayerPtr_Type;
+    typedef typename std::shared_ptr<data_Type>                        dataPtr_Type;
+    typedef typename std::shared_ptr<const Displayer>                  displayerPtr_Type;
 
     typedef std::vector< typename MeshType::element_Type* >              vectorVolumes_Type;
 
-    typedef std::map< UInt, vectorVolumes_Type>                          mapMarkerVolumes_Type;
-    typedef boost::shared_ptr<mapMarkerVolumes_Type>                     mapMarkerVolumesPtr_Type;
+    typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
+    typedef std::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
 
-    typedef std::vector<UInt>                                            vectorIndexes_Type;
-    typedef std::map< UInt, vectorIndexes_Type>                          mapMarkerIndexes_Type;
-    typedef boost::shared_ptr<mapMarkerIndexes_Type>                     mapMarkerIndexesPtr_Type;
+    typedef std::vector<UInt>                             vectorIndexes_Type;
+    typedef std::map< UInt, vectorIndexes_Type>           mapMarkerIndexes_Type;
+    typedef std::shared_ptr<mapMarkerIndexes_Type>      mapMarkerIndexesPtr_Type;
 
 
-    typedef ETFESpace<MeshType, MapEpetra, 3, 3 >                        ETFESpace_Type;
-    typedef boost::shared_ptr<ETFESpace_Type>                            ETFESpacePtr_Type;
+    typedef ETFESpace<MeshType, MapEpetra, 3, 3 >         ETFESpace_Type;
+    typedef std::shared_ptr<ETFESpace_Type>             ETFESpacePtr_Type;
 
-    typedef FESpace< MeshType, MapEpetra >                               FESpace_Type;
-    typedef boost::shared_ptr<FESpace_Type>                              FESpacePtr_Type;
+    typedef FESpace< MeshType, MapEpetra >                FESpace_Type;
+    typedef std::shared_ptr<FESpace_Type>               FESpacePtr_Type;
 
     //Vector for vector parameters
-    typedef std::vector<std::vector<Real> >                              vectorsParameters_Type;
-    typedef boost::shared_ptr<vectorsParameters_Type>                    vectorsParametersPtr_Type;
+    typedef std::vector<std::vector<Real> >           vectorsParameters_Type;
+    typedef std::shared_ptr<vectorsParameters_Type> vectorsParametersPtr_Type;
     //@}
 
 
@@ -151,9 +152,10 @@ public:
       \param monolithicMap: the MapEpetra
       \param offset: the offset parameter used assembling the matrices
     */
+
     void setup ( const FESpacePtr_Type& dFESpace,
 		 const ETFESpacePtr_Type& ETFESpace,
-		 const boost::shared_ptr<const MapEpetra>&   monolithicMap,
+		 const std::shared_ptr<const MapEpetra>&   monolithicMap,
 		 const UInt offset, const dataPtr_Type& dataMaterial,
 		 const displayerPtr_Type& displayer  );
 
@@ -297,7 +299,7 @@ protected:
 
     ETFESpacePtr_Type                              M_dispETFESpace;
 
-    boost::shared_ptr<const MapEpetra>             M_localMap;
+    std::shared_ptr<const MapEpetra>             M_localMap;
 
     //! Matrix jacobian
     matrixPtr_Type                                 M_jacobian;

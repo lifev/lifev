@@ -81,7 +81,7 @@ const Real PI = 3.141592653589793;
 
 struct ETRobinMembraneSolver::Private
 {
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_type;
+    typedef std::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_type;
 
     std::string    data_file_name;
 
@@ -107,7 +107,7 @@ struct ETRobinMembraneSolver::Private
     Real numLM;
     bool useFlowRate;
 
-    boost::shared_ptr<Epetra_Comm>   comm;
+    std::shared_ptr<Epetra_Comm>   comm;
 
 };
 
@@ -187,7 +187,7 @@ ETRobinMembraneSolver::run()
     Real RING (dataFile ("fluid/problem/boundary_flags/ring_in", 20) );
     Real RING2 (dataFile ("fluid/problem/boundary_flags/ring_out", 30) );
 
-    boost::shared_ptr<OseenData> oseenData (new OseenData() );
+    std::shared_ptr<OseenData> oseenData (new OseenData() );
     oseenData->setup ( dataFile );
 
     MeshData meshData;
@@ -211,7 +211,7 @@ ETRobinMembraneSolver::run()
 
     //----------Creating Mesh and FESpaces-----------------------------------
 
-    boost::shared_ptr< mesh_type > fullMeshPtr (new mesh_type);
+    std::shared_ptr< mesh_type > fullMeshPtr (new mesh_type);
     readMesh (*fullMeshPtr, meshData);
 
     MeshPartitioner< mesh_type >   meshPart (fullMeshPtr, M_d->comm);
@@ -473,9 +473,9 @@ ETRobinMembraneSolver::run()
 
     //-------------------------------------------------------------------------------------
 
-    boost::shared_ptr<matrix_block_type> NSMatrixConstant (new matrix_block_type ( M_ETuFESpace->map() | M_ETpFESpace->map() | fluxMap ) );
+    std::shared_ptr<matrix_block_type> NSMatrixConstant (new matrix_block_type ( M_ETuFESpace->map() | M_ETpFESpace->map() | fluxMap ) );
     *NSMatrixConstant *= 0.0;
-    boost::shared_ptr<matrix_block_type> NSMatrixSteadyStokes (new matrix_block_type ( M_ETuFESpace->map() | M_ETpFESpace->map() | fluxMap ) );
+    std::shared_ptr<matrix_block_type> NSMatrixSteadyStokes (new matrix_block_type ( M_ETuFESpace->map() | M_ETpFESpace->map() | fluxMap ) );
     *NSMatrixSteadyStokes *= 0.0;
 
     //----------------------Temporal Loop----------------------------------
@@ -643,18 +643,18 @@ ETRobinMembraneSolver::run()
     //     {
 
     // #ifdef FLUX
-    //         boost::shared_ptr<matrix_block_type> NSMatrix (new matrix_block_type ( M_ETuFESpace->map() | M_ETpFESpace->map() | fluxMap ) );
+    //         std::shared_ptr<matrix_block_type> NSMatrix (new matrix_block_type ( M_ETuFESpace->map() | M_ETpFESpace->map() | fluxMap ) );
     //         *NSMatrix *= 0.0;
 
     // #else
 
-    //         boost::shared_ptr<matrix_block_type> NSMatrix (new matrix_block_type ( M_ETuFESpace->map() | M_ETpFESpace->map() ) );
+    //         std::shared_ptr<matrix_block_type> NSMatrix (new matrix_block_type ( M_ETuFESpace->map() | M_ETpFESpace->map() ) );
     //         *NSMatrix *= 0.0;
     // #endif
 
     //     vector_type NSRhsUnique ( fullMap, Unique );
 
-    //     boost::shared_ptr<matrix_type> stabMatrix (new matrix_type ( fullMap ));
+    //     std::shared_ptr<matrix_type> stabMatrix (new matrix_type ( fullMap ));
     //     M_ipStabilization.apply ( *stabMatrix, velocitySolution, false );
     //     stabMatrix->globalAssemble();
     //     *NSMatrix += *NSMatrixSteadyStokes;
@@ -667,7 +667,7 @@ ETRobinMembraneSolver::run()
     //        //            *M_uFESpace->mesh(), M_uFESpace->dof(),
     //        //            bcHFluid, M_uFESpace->feBd(), 1.0, currentTime);
 
-    //     boost::shared_ptr<matrix_type> NSMatrixDiri( new matrix_type( fullMap ) );
+    //     std::shared_ptr<matrix_type> NSMatrixDiri( new matrix_type( fullMap ) );
     //     *NSMatrixDiri += *NSMatrix;
     //     NSMatrixDiri->globalAssemble();
 
@@ -689,7 +689,7 @@ ETRobinMembraneSolver::run()
     //     dispRhsInit.subset( steadyResidual );
 
     //     vector_type dispSolutionInit( M_ETuFESpace->map(), Unique );
-    //         boost::shared_ptr<matrix_type> DispMatrixInit (new matrix_type ( M_ETuFESpace->map() ) );
+    //         std::shared_ptr<matrix_type> DispMatrixInit (new matrix_type ( M_ETuFESpace->map() ) );
     //         *DispMatrixInit *= 0.0;
     //      DispMatrixInit->insertOneDiagonal();
     //      DispMatrixInit->insertValueDiagonal( -1 , (*M_interfaceMap) );
@@ -801,7 +801,7 @@ ETRobinMembraneSolver::run()
         vector_type dtDisp (fluidMap, Repeated);
         dtDisp = ( alpha / dt ) * dispSolution - dispTimeAdvance.rhsContributionFirstDerivative();
 
-        boost::shared_ptr<matrix_block_type> NSMatrix (new matrix_block_type ( M_ETuFESpace->map() | M_ETpFESpace->map() | fluxMap ) );
+        std::shared_ptr<matrix_block_type> NSMatrix (new matrix_block_type ( M_ETuFESpace->map() | M_ETpFESpace->map() | fluxMap ) );
         *NSMatrix *= 0.0;
 
 #define DIVDIV_TEST value(NSdivdiv) * h_K * div(phi_i)
@@ -821,7 +821,7 @@ ETRobinMembraneSolver::run()
         ChronoItem.start();
 
         {
-            boost::shared_ptr<NormalizeFct> normalize (new NormalizeFct);
+            std::shared_ptr<NormalizeFct> normalize (new NormalizeFct);
             using namespace ::LifeV::ExpressionAssembly;
 
             integrate (
@@ -964,7 +964,7 @@ ETRobinMembraneSolver::run()
         if (M_d->stabilization == "ip")
         {
 
-            boost::shared_ptr<matrix_type> stabMatrix (new matrix_type ( fullMap ) );
+            std::shared_ptr<matrix_type> stabMatrix (new matrix_type ( fullMap ) );
             M_ipStabilization.apply ( *stabMatrix, velocityExtrapolated, false );
             stabMatrix->globalAssemble();
             *NSMatrix += *stabMatrix;
@@ -1004,7 +1004,7 @@ ETRobinMembraneSolver::run()
         NSRhs *= 0.0;
 
         {
-            boost::shared_ptr<NormalizeFct> normalize (new NormalizeFct);
+            std::shared_ptr<NormalizeFct> normalize (new NormalizeFct);
 
             using namespace ExpressionAssembly;
 
@@ -1162,7 +1162,7 @@ ETRobinMembraneSolver::run()
 
         bcHFluid.bcUpdate ( *meshPart.meshPartition(), M_uFESpace->feBd(), M_uFESpace->dof() );
 
-        boost::shared_ptr<matrix_type> NSMatrixNoBlock (new matrix_type ( fullMap ) );
+        std::shared_ptr<matrix_type> NSMatrixNoBlock (new matrix_type ( fullMap ) );
         *NSMatrixNoBlock += *NSMatrix;
         NSMatrixNoBlock->globalAssemble();
         bcManage (*NSMatrixNoBlock, NSRhsUnique,

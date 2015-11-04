@@ -98,6 +98,6 @@ public:
 
 private:
     struct Private;
-    boost::shared_ptr<Private> parameters;
+    std::shared_ptr<Private> parameters;
 };
 #endif /* __RESISTANCE_H */

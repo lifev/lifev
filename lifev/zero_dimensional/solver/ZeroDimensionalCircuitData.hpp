@@ -59,18 +59,18 @@ class ZeroDimensionalNodeS;
 //! A container class for all element obkects
 class ZeroDimensionalElementS;
 
-typedef boost::shared_ptr< ZeroDimensionalElementS >                    zeroDimensionalElementSPtr_Type;
-typedef boost::shared_ptr< ZeroDimensionalNodeS >                       zeroDimensionalNodeSPtr_Type;
+typedef std::shared_ptr< ZeroDimensionalElementS >                    zeroDimensionalElementSPtr_Type;
+typedef std::shared_ptr< ZeroDimensionalNodeS >                       zeroDimensionalNodeSPtr_Type;
 typedef std::vector<Int>                                                vecInt_Type;
 typedef vecInt_Type::iterator                                           iterVecInt_Type;
 typedef ZeroDimensionalBCHandler                                        bc_Type;
-typedef boost::shared_ptr< bc_Type >                                    bcPtr_Type;
+typedef std::shared_ptr< bc_Type >                                    bcPtr_Type;
 typedef MatrixEpetra<Real>                                              matrix_Type;
 typedef VectorEpetra                                                    vector_Type;
 typedef Epetra_Vector                                                   vectorEpetra_Type;
-typedef boost::shared_ptr< matrix_Type >                                matrixPtr_Type;
-typedef boost::shared_ptr< vector_Type >                                vectorPtr_Type;
-typedef boost::shared_ptr<vectorEpetra_Type >                           vectorEpetraPtr_Type;
+typedef std::shared_ptr< matrix_Type >                                matrixPtr_Type;
+typedef std::shared_ptr< vector_Type >                                vectorPtr_Type;
+typedef std::shared_ptr<vectorEpetra_Type >                           vectorEpetraPtr_Type;
 
 //! ZeroDimensionalElement - The base element class.
 /*!
@@ -189,9 +189,9 @@ protected:
 
 
 // TODO Move type definitions inside classes
-typedef boost::shared_ptr<ZeroDimensionalElement>                              zeroDimensionalElementPtr_Type;
+typedef std::shared_ptr<ZeroDimensionalElement>                              zeroDimensionalElementPtr_Type;
 typedef std::vector<zeroDimensionalElementPtr_Type>                            vecZeroDimensionalElementPtr_Type;
-typedef boost::shared_ptr<vecZeroDimensionalElementPtr_Type>                   ptrVecZeroDimensionalElementPtr_Type;
+typedef std::shared_ptr<vecZeroDimensionalElementPtr_Type>                   ptrVecZeroDimensionalElementPtr_Type;
 typedef vecZeroDimensionalElementPtr_Type::iterator                            iterZeroDimensionalElement_Type;
 
 //! ZeroDimensionalElementPassive - A class for passive elements.
@@ -726,12 +726,12 @@ public:
 
 
 // TODO Move type definitions inside classes
-typedef boost::shared_ptr<ZeroDimensionalElementPassiveResistor>        zeroDimensionalElementPassiveResistorPtr_Type;
-typedef boost::shared_ptr<ZeroDimensionalElementPassiveCapacitor>       zeroDimensionalElementPassiveCapacitorPtr_Type;
-typedef boost::shared_ptr<ZeroDimensionalElementPassiveInductor>        zeroDimensionalElementPassiveInductorPtr_Type;
-typedef boost::shared_ptr<ZeroDimensionalElementPassiveDiode>           zeroDimensionalElementPassiveDiodePtr_Type;
-typedef boost::shared_ptr<ZeroDimensionalElementCurrentSource>          zeroDimensionalElementCurrentSourcePtr_Type;
-typedef boost::shared_ptr<ZeroDimensionalElementVoltageSource>          zeroDimensionalElementVoltageSourcePtr_Type;
+typedef std::shared_ptr<ZeroDimensionalElementPassiveResistor>        zeroDimensionalElementPassiveResistorPtr_Type;
+typedef std::shared_ptr<ZeroDimensionalElementPassiveCapacitor>       zeroDimensionalElementPassiveCapacitorPtr_Type;
+typedef std::shared_ptr<ZeroDimensionalElementPassiveInductor>        zeroDimensionalElementPassiveInductorPtr_Type;
+typedef std::shared_ptr<ZeroDimensionalElementPassiveDiode>           zeroDimensionalElementPassiveDiodePtr_Type;
+typedef std::shared_ptr<ZeroDimensionalElementCurrentSource>          zeroDimensionalElementCurrentSourcePtr_Type;
+typedef std::shared_ptr<ZeroDimensionalElementVoltageSource>          zeroDimensionalElementVoltageSourcePtr_Type;
 
 
 typedef std::vector<zeroDimensionalElementPassiveResistorPtr_Type>      vecZeroDimensionalElementPassiveResistorPtr_Type;
@@ -742,12 +742,12 @@ typedef std::vector<zeroDimensionalElementCurrentSourcePtr_Type>        vecZeroD
 typedef std::vector<zeroDimensionalElementVoltageSourcePtr_Type>        vecZeroDimensionalElementVoltageSourcePtr_Type;
 
 
-typedef boost::shared_ptr<vecZeroDimensionalElementPassiveResistorPtr_Type>     ptrVecZeroDimensionalElementPassiveResistorPtr_Type;
-typedef boost::shared_ptr<vecZeroDimensionalElementPassiveCapacitorPtr_Type>    ptrVecZeroDimensionalElementPassiveCapacitorPtr_Type;
-typedef boost::shared_ptr<vecZeroDimensionalElementPassiveInductorPtr_Type>     ptrVecZeroDimensionalElementPassiveInductorPtr_Type;
-typedef boost::shared_ptr<vecZeroDimensionalElementPassiveDiodePtr_Type>        ptrVecZeroDimensionalElementPassiveDiodePtr_Type;
-typedef boost::shared_ptr<vecZeroDimensionalElementCurrentSourcePtr_Type>       ptrVecZeroDimensionalElementCurrentSourcePtr_Type;
-typedef boost::shared_ptr<vecZeroDimensionalElementVoltageSourcePtr_Type>       ptrVecZeroDimensionalElementVoltageSourcePtr_Type;
+typedef std::shared_ptr<vecZeroDimensionalElementPassiveResistorPtr_Type>     ptrVecZeroDimensionalElementPassiveResistorPtr_Type;
+typedef std::shared_ptr<vecZeroDimensionalElementPassiveCapacitorPtr_Type>    ptrVecZeroDimensionalElementPassiveCapacitorPtr_Type;
+typedef std::shared_ptr<vecZeroDimensionalElementPassiveInductorPtr_Type>     ptrVecZeroDimensionalElementPassiveInductorPtr_Type;
+typedef std::shared_ptr<vecZeroDimensionalElementPassiveDiodePtr_Type>        ptrVecZeroDimensionalElementPassiveDiodePtr_Type;
+typedef std::shared_ptr<vecZeroDimensionalElementCurrentSourcePtr_Type>       ptrVecZeroDimensionalElementCurrentSourcePtr_Type;
+typedef std::shared_ptr<vecZeroDimensionalElementVoltageSourcePtr_Type>       ptrVecZeroDimensionalElementVoltageSourcePtr_Type;
 
 typedef vecZeroDimensionalElementPassiveResistorPtr_Type::iterator              iterZeroDimensionalElementPassiveResistor_Type;
 typedef vecZeroDimensionalElementPassiveCapacitorPtr_Type::iterator             iterZeroDimensionalElementPassiveCapacitor_Type;
@@ -1020,23 +1020,23 @@ protected:
 
 
 // TODO Move type definitions inside classes
-typedef boost::shared_ptr<ZeroDimensionalNode>              zeroDimensionalNodePtr_Type;
+typedef std::shared_ptr<ZeroDimensionalNode>              zeroDimensionalNodePtr_Type;
 typedef std::vector<zeroDimensionalNodePtr_Type>            vecZeroDimensionalNodePtr_Type;
-typedef boost::shared_ptr< vecZeroDimensionalNodePtr_Type > ptrVecZeroDimensionalNodePtr_Type;
+typedef std::shared_ptr< vecZeroDimensionalNodePtr_Type > ptrVecZeroDimensionalNodePtr_Type;
 typedef vecZeroDimensionalNodePtr_Type::iterator            iterZeroDimensionalNode_Type;
 
-typedef boost::shared_ptr<ZeroDimensionalNodeUnknown>             zeroDimensionalNodeUnknownPtr_Type;
+typedef std::shared_ptr<ZeroDimensionalNodeUnknown>             zeroDimensionalNodeUnknownPtr_Type;
 typedef std::vector< zeroDimensionalNodeUnknownPtr_Type >         vecZeroDimensionalNodeUnknownPtr_Type;
-typedef boost::shared_ptr<vecZeroDimensionalNodeUnknownPtr_Type>  ptrVecZeroDimensionalNodeUnknownPtr_Type;
+typedef std::shared_ptr<vecZeroDimensionalNodeUnknownPtr_Type>  ptrVecZeroDimensionalNodeUnknownPtr_Type;
 typedef vecZeroDimensionalNodeUnknownPtr_Type::iterator           iterZeroDimensionalNodeUnknown_Type;
 
-typedef boost::shared_ptr<ZeroDimensionalNodeKnown>               zeroDimensionalNodeKnownPtr_Type;
+typedef std::shared_ptr<ZeroDimensionalNodeKnown>               zeroDimensionalNodeKnownPtr_Type;
 typedef std::vector< zeroDimensionalNodeKnownPtr_Type >           vecZeroDimensionalNodeKnownPtr_Type;
-typedef boost::shared_ptr< vecZeroDimensionalNodeKnownPtr_Type >  ptrVecZeroDimensionalNodeKnownPtr_Type;
+typedef std::shared_ptr< vecZeroDimensionalNodeKnownPtr_Type >  ptrVecZeroDimensionalNodeKnownPtr_Type;
 typedef vecZeroDimensionalNodeKnownPtr_Type::iterator             iterZeroDimensionalNodeKnown_Type;
 
 typedef std::map <Int, zeroDimensionalElementVoltageSourcePtr_Type>  mapVoltageSource_Type;
-typedef boost::shared_ptr < mapVoltageSource_Type>                   mapVoltageSourcePtr_Type;
+typedef std::shared_ptr < mapVoltageSource_Type>                   mapVoltageSourcePtr_Type;
 
 
 //! ZeroDimensionalElementS - Container of elements
@@ -1205,8 +1205,8 @@ protected:
 // TODO Move type definitions inside classes
 typedef std::map <Int, zeroDimensionalNodeUnknownPtr_Type>                          mapNodeUnknown_Type;
 typedef std::map <Int, zeroDimensionalNodeKnownPtr_Type>                            mapNodeKnown_Type;
-typedef boost::shared_ptr < mapNodeKnown_Type>                                      mapNodeKnownPtr_Type;
-typedef boost::shared_ptr < mapNodeUnknown_Type  >                                  mapNodeUnknownPtr_Type;
+typedef std::shared_ptr < mapNodeKnown_Type>                                      mapNodeKnownPtr_Type;
+typedef std::shared_ptr < mapNodeUnknown_Type  >                                  mapNodeUnknownPtr_Type;
 
 
 
@@ -1412,7 +1412,7 @@ protected:
 
 
 
-typedef boost::shared_ptr< ZeroDimensionalCircuitData > zeroDimensionalCircuitDataPtr_Type;
+typedef std::shared_ptr< ZeroDimensionalCircuitData > zeroDimensionalCircuitDataPtr_Type;
 
 //! OutPutFormat - Write to output
 /*!

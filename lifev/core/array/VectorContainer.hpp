@@ -80,7 +80,7 @@ namespace LifeV
  *  </ol>
  *
  */
-template< class VectorType, class ContainerType = std::vector< boost::shared_ptr< VectorType > > >
+template< class VectorType, class ContainerType = std::vector< std::shared_ptr< VectorType > > >
 class VectorContainer
 {
 public:
@@ -89,7 +89,7 @@ public:
     //@{
 
     typedef VectorType                               vector_Type;
-    typedef boost::shared_ptr < vector_Type >        vectorPtr_Type;
+    typedef std::shared_ptr < vector_Type >        vectorPtr_Type;
     typedef ContainerType                            container_Type;
     typedef typename container_Type::iterator        iterator_Type;
     typedef typename container_Type::const_iterator  constIterator_Type;

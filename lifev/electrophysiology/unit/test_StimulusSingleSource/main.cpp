@@ -77,7 +77,7 @@ Int main ( Int argc, char** argv )
 
     //! Initializing Epetra communicator
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm>  Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm>  Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
 
     //*********************************************//
     // creating output folder

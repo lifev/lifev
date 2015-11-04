@@ -90,19 +90,19 @@ struct impes::Private
     Private() {}
 
     // Policy for scalar functions
-    typedef boost::function < Real ( const Real&, const Real&,
+    typedef std::function < Real ( const Real&, const Real&,
                                      const Real&, const Real&, const ID& ) >
     fct_type;
 
     // Policy for vector function
-    typedef boost::function < Vector ( const Real&, const Real&,
+    typedef std::function < Vector ( const Real&, const Real&,
                                        const Real&, const Real&,
                                        const std::vector<Real>& ) >
     Vfct_type;
 
 
     // Policy for matrix function
-    typedef boost::function < Matrix ( const Real&, const Real&,
+    typedef std::function < Matrix ( const Real&, const Real&,
                                        const Real&, const Real&,
                                        const std::vector<Real>& ) >
     Mfct_type;
@@ -121,77 +121,77 @@ struct impes::Private
     // Section for the non-linear and transient Darcy solver
     std::string discretization_section_darcy_nonlin_trans;
 
-    boost::shared_ptr<Epetra_Comm>   comm;
+    std::shared_ptr<Epetra_Comm>   comm;
 
     // Function Types
 
     fct_type getUOne()
     {
         fct_type f;
-        f = boost::bind ( &dataProblem::UOne, _1, _2, _3, _4, _5 );
+        f = std::bind ( &dataProblem::UOne, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
         return f;
     }
 
     fct_type getUZero()
     {
         fct_type f;
-        f = boost::bind ( &dataProblem::UZero, _1, _2, _3, _4, _5 );
+        f = std::bind ( &dataProblem::UZero, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
         return f;
     }
 
     fct_type getPressureSource()
     {
         fct_type f;
-        f = boost::bind ( &dataProblem::pressureSource, _1, _2, _3, _4, _5 );
+        f = std::bind ( &dataProblem::pressureSource, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
         return f;
     }
 
     Mfct_type getPressurePermeability()
     {
         Mfct_type m;
-        m = boost::bind ( &dataProblem::pressurePermeability, _1, _2, _3, _4, _5 );
+        m = std::bind ( &dataProblem::pressurePermeability, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
         return m;
     }
 
     fct_type getSaturationInitialCondition()
     {
         fct_type f;
-        f = boost::bind ( &dataProblem::saturationInitialCondition, _1, _2, _3, _4, _5 );
+        f = std::bind ( &dataProblem::saturationInitialCondition, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
         return f;
     }
 
     Vfct_type getSaturationPhysicalFlux()
     {
         Vfct_type v;
-        v = boost::bind ( &dataProblem::saturationPhysicalFlux, _1, _2, _3, _4, _5 );
+        v = std::bind ( &dataProblem::saturationPhysicalFlux, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
         return v;
     }
 
     Vfct_type getSaturationFirstDerivativePhysicalFlux()
     {
         Vfct_type v;
-        v = boost::bind ( &dataProblem::saturationFirstDerivativePhysicalFlux, _1, _2, _3, _4, _5 );
+        v = std::bind ( &dataProblem::saturationFirstDerivativePhysicalFlux, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
         return v;
     }
 
     fct_type getSaturationSource()
     {
         fct_type f;
-        f = boost::bind ( &dataProblem::saturationSource, _1, _2, _3, _4, _5 );
+        f = std::bind ( &dataProblem::saturationSource, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
         return f;
     }
 
     Mfct_type getSaturationPermeability()
     {
         Mfct_type mnl;
-        mnl = boost::bind ( &dataProblem::saturationPermeability, _1, _2, _3, _4, _5 );
+        mnl = std::bind ( &dataProblem::saturationPermeability, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
         return mnl;
     }
 
     fct_type getSaturationMass()
     {
         fct_type f;
-        f = boost::bind ( &dataProblem::saturationMass, _1, _2, _3, _4, _5 );
+        f = std::bind ( &dataProblem::saturationMass, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5 );
         return f;
     }
 
@@ -239,9 +239,9 @@ impes::run()
     typedef DarcySolverTransientNonLinear< RegionMesh, solver_type > dstnl;
     typedef HyperbolicSolver< RegionMesh, solver_type >              hyper;
     typedef ds::vector_Type                                          vector_type;
-    typedef boost::shared_ptr<vector_type>                           vector_ptrtype;
+    typedef std::shared_ptr<vector_type>                           vector_ptrtype;
     typedef FESpace< RegionMesh, MapEpetra >                         feSpace_Type;
-    typedef boost::shared_ptr<feSpace_Type>                          feSpacePtr_Type;
+    typedef std::shared_ptr<feSpace_Type>                          feSpacePtr_Type;
 
     LifeChrono chronoTotal;
     LifeChrono chronoReadAndPartitionMesh;
@@ -297,13 +297,13 @@ impes::run()
     meshData.setup ( dataFile,  Members->discretization_section + "/space_discretization");
 
     // Create the mesh.
-    boost::shared_ptr<RegionMesh> fullMeshPtr ( new RegionMesh ( * ( Members->comm ) ) );
+    std::shared_ptr<RegionMesh> fullMeshPtr ( new RegionMesh ( * ( Members->comm ) ) );
 
     // Set up the mesh.
     readMesh ( *fullMeshPtr, meshData );
 
     // Partition the mesh using ParMetis.
-    boost::shared_ptr<RegionMesh> meshPtr;
+    std::shared_ptr<RegionMesh> meshPtr;
     {
         MeshPartitioner< RegionMesh >  meshPart ( fullMeshPtr, Members->comm );
         meshPtr = meshPart.meshPartition();
@@ -664,7 +664,7 @@ impes::run()
     saturationDarcySolver.setBC ( bcSaturation );
 
     // Set the exporter for the solution.
-    boost::shared_ptr< Exporter< RegionMesh > > exporter;
+    std::shared_ptr< Exporter< RegionMesh > > exporter;
 
     // Shared pointer used in the exporter for the pressure in the pressure equation.
     vector_ptrtype pressureExporter;

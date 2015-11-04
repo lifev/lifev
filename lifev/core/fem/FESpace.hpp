@@ -83,12 +83,12 @@ public:
     //! @name Public Types
     //@{
 
-    typedef boost::function < Real ( Real const&, Real const&, Real const&,
+    typedef std::function < Real ( Real const&, Real const&, Real const&,
                                      Real const&, ID const& ) > function_Type;
     typedef MeshType                                         mesh_Type;
-    typedef boost::shared_ptr<mesh_Type>                     meshPtr_Type;
+    typedef std::shared_ptr<mesh_Type>                     meshPtr_Type;
     typedef MapType                                          map_Type;
-    typedef boost::shared_ptr<map_Type>                      mapPtr_Type;
+    typedef std::shared_ptr<map_Type>                      mapPtr_Type;
     typedef typename map_Type::commPtr_Type                  commPtr_Type;
 
     //@}
@@ -431,7 +431,7 @@ public:
     {
         return *M_dof;
     }
-    const boost::shared_ptr<DOF>& dofPtr() const
+    const std::shared_ptr<DOF>& dofPtr() const
     {
         return M_dof;
     }
@@ -575,14 +575,14 @@ protected:
     UInt                                    M_fieldDim;
 
     //! A shared pointer to the DOF object
-    boost::shared_ptr<DOF>                  M_dof;
+    std::shared_ptr<DOF>                  M_dof;
 
     //! The number of total dofs
     UInt                                    M_dim;
 
     //! Current FE
-    boost::shared_ptr<CurrentFE>            M_fe;
-    boost::shared_ptr<CurrentFEManifold>    M_feBd;
+    std::shared_ptr<CurrentFE>            M_fe;
+    std::shared_ptr<CurrentFEManifold>    M_feBd;
 
     //! Map
     mapPtr_Type                             M_map;
@@ -1495,7 +1495,7 @@ feToFEInterpolate (const FESpace<mesh_Type, map_Type>& OriginalSpace,
     ASSERT (refFE().shape() == OriginalSpace.refFE().shape() , "Incompatible element shape for interpolation");
 
 
-    boost::shared_ptr<vector_type> InterpolatedVectorPtr;
+    std::shared_ptr<vector_type> InterpolatedVectorPtr;
 
     // If the spaces are the same, just return the original vector
     if (refFE().type() == OriginalSpace.refFE().type() )

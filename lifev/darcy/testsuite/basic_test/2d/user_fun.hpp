@@ -50,7 +50,7 @@ using namespace LifeV;
 
 typedef LinearTriangle geoElement_Type;
 typedef RegionMesh < geoElement_Type > regionMesh_Type;
-typedef boost::shared_ptr < regionMesh_Type > regionMeshPtr_Type;
+typedef std::shared_ptr < regionMesh_Type > regionMeshPtr_Type;
 
 typedef MeshPartitioner < regionMesh_Type > meshPartitioner_Type;
 

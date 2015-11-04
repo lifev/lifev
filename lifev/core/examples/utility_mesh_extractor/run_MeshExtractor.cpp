@@ -20,7 +20,7 @@
 
 #include "MeshExtractor.hpp"
 
-int run (GetPot& dataFile, bool /*verbose*/, boost::shared_ptr<Epetra_Comm>& comm)
+int run (GetPot& dataFile, bool /*verbose*/, std::shared_ptr<Epetra_Comm>& comm)
 {
     using namespace LifeV;
     typedef RegionMesh<LinearTetra> mesh_Type;
@@ -40,15 +40,15 @@ int run (GetPot& dataFile, bool /*verbose*/, boost::shared_ptr<Epetra_Comm>& com
     // Mesh Stuff                                                            //
     //=======================================================================//
     // Read the 3d mesh
-    boost::shared_ptr<mesh_Type> mesh;
-    boost::shared_ptr< MeshPartitioner<mesh_Type> > meshPart;
+    std::shared_ptr<mesh_Type> mesh;
+    std::shared_ptr< MeshPartitioner<mesh_Type> > meshPart;
     MeshData meshData (dataFile, mesh_section);
     mesh.reset ( new mesh_Type ( comm ) );
     readMesh (*mesh, meshData);
 
     //Extract the 2d mesh from the boundary with a given marker
-    boost::shared_ptr<mesh2d_Type> mesh2d;
-    boost::shared_ptr< MeshPartitioner<mesh2d_Type> > mesh2dPart;
+    std::shared_ptr<mesh2d_Type> mesh2d;
+    std::shared_ptr< MeshPartitioner<mesh2d_Type> > mesh2dPart;
     mesh2d.reset (extractBoundaryMesh (*mesh, *boundaryMarkerListToExtract.begin(), otherBoundaryMarkerList) );
     mesh2d->showMe (false, std::cout);
 
@@ -58,13 +58,13 @@ int run (GetPot& dataFile, bool /*verbose*/, boost::shared_ptr<Epetra_Comm>& com
     //========================================================================//
     // Create a dummy feSpace on the boundary mesh                            //
     //========================================================================//
-    boost::shared_ptr< FESpace<mesh2d_Type, MapEpetra> > feSpace;
+    std::shared_ptr< FESpace<mesh2d_Type, MapEpetra> > feSpace;
     feSpace.reset (new FESpace<mesh2d_Type, MapEpetra> (mesh2dPart->meshPartition(), "P1", 1, comm) );
 
     //========================================================================//
     // post processing setup                                                  //
     //========================================================================//
-    boost::shared_ptr<Exporter<mesh2d_Type> > exporter;
+    std::shared_ptr<Exporter<mesh2d_Type> > exporter;
     std::string const exporterType =  dataFile ( "exporter/type", "hdf5");
 
 #ifdef HAVE_HDF5
@@ -92,7 +92,7 @@ int run (GetPot& dataFile, bool /*verbose*/, boost::shared_ptr<Epetra_Comm>& com
     //====================================================================//
     // Show the extracted mesh, color element according to the PID        //
     //====================================================================//
-    boost::shared_ptr<VectorEpetra> u (new VectorEpetra (feSpace->map(), exporter->mapType() ) );
+    std::shared_ptr<VectorEpetra> u (new VectorEpetra (feSpace->map(), exporter->mapType() ) );
     exporter->addVariable (ExporterData<mesh2d_Type >::ScalarField, "u", feSpace, u, UInt (0) );
     *u = comm->MyPID();
     exporter->postProcess (0);

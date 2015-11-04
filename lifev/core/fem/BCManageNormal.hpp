@@ -62,9 +62,9 @@ public:
     typedef std::map<ID, ID> flagsMap_Type;
     typedef std::map<ID, Vector > versorsMap_Type;
     typedef MatrixType matrix_Type;
-    typedef boost::shared_ptr<matrix_Type> matrixPtr_Type;
-    typedef boost::shared_ptr<MapEpetra> epetraMapPtr_Type;
-    typedef boost::shared_ptr<VectorEpetra> epetraVectorPtr_type;
+    typedef std::shared_ptr<matrix_Type> matrixPtr_Type;
+    typedef std::shared_ptr<MapEpetra> epetraMapPtr_Type;
+    typedef std::shared_ptr<VectorEpetra> epetraVectorPtr_type;
 
     //@}
 

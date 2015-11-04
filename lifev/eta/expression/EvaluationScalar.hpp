@@ -194,7 +194,7 @@ public:
 
     //! Type returned by this class
     typedef Real return_Type;
-    typedef boost::shared_ptr<VectorType>                               containerPtr_Type;
+    typedef std::shared_ptr<VectorType>                               containerPtr_Type;
     //@}
 
 

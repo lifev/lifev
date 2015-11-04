@@ -130,7 +130,7 @@ Int main ( Int argc, char** argv )
 
     //! Initializing Epetra communicator
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm>  Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm>  Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
     if ( Comm->MyPID() == 0 )
     {
         std::cout << "% using MPI" << std::endl;
@@ -165,22 +165,22 @@ Int main ( Int argc, char** argv )
     typedef RegionMesh<LinearTetra>                                     mesh_Type;
 
     typedef VectorEpetra                                                vector_Type;
-    typedef boost::shared_ptr<vector_Type>                              vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type>                              vectorPtr_Type;
 
     typedef MatrixEpetra<Real>                                          matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>                              matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type>                              matrixPtr_Type;
 
-    typedef boost::function < Real (const Real& /*t*/,
+    typedef std::function < Real (const Real& /*t*/,
                                     const Real &   x,
                                     const Real &   y,
                                     const Real& /*z*/,
                                     const ID&   /*i*/ ) >               function_Type;
 
     typedef ElectroIonicModel                                           ionicModel_Type;
-    typedef boost::shared_ptr<ionicModel_Type>                          ionicModelPtr_Type;
+    typedef std::shared_ptr<ionicModel_Type>                          ionicModelPtr_Type;
 
     typedef ElectroETAMonodomainSolver< mesh_Type, ionicModel_Type >    monodomainSolver_Type;
-    typedef boost::shared_ptr< monodomainSolver_Type >                  monodomainSolverPtr_Type;
+    typedef std::shared_ptr< monodomainSolver_Type >                  monodomainSolverPtr_Type;
 
     // ---------------------------------------------------------------
     //  We set up a chronometer, to check how long it takes to setup

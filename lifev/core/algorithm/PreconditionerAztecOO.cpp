@@ -226,7 +226,7 @@ PreconditionerAztecOO::preconditionerPtr()
     debugStream ( 7100 ) << "PreconditionerAztecOO::getPrec() \n";
 #endif
 
-    boost::shared_ptr<Epetra_RowMatrix> prec;
+    std::shared_ptr<Epetra_RowMatrix> prec;
     if ( this->M_preconditionerCreated )
     {
         prec.reset (M_solver->solver().GetPrecMatrix() );

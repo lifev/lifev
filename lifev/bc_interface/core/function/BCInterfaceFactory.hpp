@@ -87,14 +87,14 @@ public:
     typedef PhysicalSolverType                                                                                   physicalSolver_Type;
 
     typedef BCInterfaceFunction< bcHandler_Type, physicalSolver_Type >                                           bcFunction_Type;
-    typedef boost::shared_ptr< bcFunction_Type >                                                                 bcFunctionPtr_Type;
+    typedef std::shared_ptr< bcFunction_Type >                                                                 bcFunctionPtr_Type;
     typedef FactorySingleton< Factory< bcFunction_Type , baseList_Type > >                                       factoryFunction_Type;
 
     typedef BCInterfaceFunctionParserSolver< bcHandler_Type, physicalSolver_Type >                               bcFunctionParserSolver_Type;
-    typedef boost::shared_ptr< bcFunctionParserSolver_Type >                                                     bcFunctionParserSolverPtr_Type;
+    typedef std::shared_ptr< bcFunctionParserSolver_Type >                                                     bcFunctionParserSolverPtr_Type;
 
     typedef BCInterfaceFunctionSolverDefined< bcHandler_Type, physicalSolver_Type >                              bcFunctionSolverDefined_Type;
-    typedef boost::shared_ptr< bcFunctionSolverDefined_Type >                                                    bcFunctionSolverDefinedPtr_Type;
+    typedef std::shared_ptr< bcFunctionSolverDefined_Type >                                                    bcFunctionSolverDefinedPtr_Type;
     typedef FactorySingleton< Factory< bcFunctionSolverDefined_Type, baseList_Type > >                           factoryFunctionSolverDefined_Type;
 
     //@}

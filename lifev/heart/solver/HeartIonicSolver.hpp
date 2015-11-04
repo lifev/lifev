@@ -78,7 +78,7 @@ public:
                                       const Real&,
                                       const ID& );
 
-    typedef boost::function < Real (const markerID_Type& ref,
+    typedef std::function < Real (const markerID_Type& ref,
                                     const Real& x,
                                     const Real& y,
                                     const Real& z,

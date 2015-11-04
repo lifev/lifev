@@ -78,7 +78,7 @@ public:
        problems.
      */
     typedef TimeData                              TimeData_type;
-    typedef boost::shared_ptr<TimeData_type>      TimeData_ptr_type;
+    typedef std::shared_ptr<TimeData_type>      TimeData_ptr_type;
 
     //@}
 

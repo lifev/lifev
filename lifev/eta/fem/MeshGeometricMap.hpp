@@ -120,7 +120,7 @@ inline const GeometricMap& geometricMapFromMesh()
     that corresponds with the mesh.
 */
 template <typename MeshType>
-inline const GeometricMap& geometricMapFromMesh (const boost::shared_ptr<MeshType>& /*mesh*/ )
+inline const GeometricMap& geometricMapFromMesh (const std::shared_ptr<MeshType>& /*mesh*/ )
 {
     return geometricMapFromElementShape<typename MeshType::elementShape_Type>();
 }

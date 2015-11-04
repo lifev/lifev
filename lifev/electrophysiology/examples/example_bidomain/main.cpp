@@ -146,7 +146,7 @@ Int main ( Int argc, char** argv )
 
     //! Initializing Epetra communicator
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm>  Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm>  Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
     if ( Comm->MyPID() == 0 )
     {
         std::cout << "% using MPI" << std::endl;
@@ -159,16 +159,16 @@ Int main ( Int argc, char** argv )
     //  chronoinitialsettings.start();
 
     typedef RegionMesh<LinearTetra>                         mesh_Type;
-    typedef boost::function < Real (const Real& /*t*/,
+    typedef std::function < Real (const Real& /*t*/,
                                     const Real &   x,
                                     const Real &   y,
                                     const Real& /*z*/,
                                     const ID&   /*i*/ ) >   function_Type;
 
     typedef ElectroETABidomainSolver< mesh_Type, IonicMinimalModel > bidomainSolver_Type;
-    typedef boost::shared_ptr< bidomainSolver_Type >                 bidomainSolverPtr_Type;
+    typedef std::shared_ptr< bidomainSolver_Type >                 bidomainSolverPtr_Type;
     typedef VectorEpetra                                               vector_Type;
-    typedef boost::shared_ptr<vector_Type>                             vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type>                             vectorPtr_Type;
 
     LifeChrono chronoinitialsettings;
 
@@ -203,7 +203,7 @@ Int main ( Int argc, char** argv )
     {
         std::cout << "Building Constructor for Minimal Model with parameters ... ";
     }
-    boost::shared_ptr<IonicMinimalModel>  model ( new IonicMinimalModel() );
+    std::shared_ptr<IonicMinimalModel>  model ( new IonicMinimalModel() );
     if ( Comm->MyPID() == 0 )
     {
         std::cout << " Done!" << std::endl;
@@ -286,7 +286,7 @@ Int main ( Int argc, char** argv )
         std::cout << "-- Reading bc ..";
     }
 
-    boost::shared_ptr<LifeV::BCHandler> bcs (new LifeV::BCHandler() );
+    std::shared_ptr<LifeV::BCHandler> bcs (new LifeV::BCHandler() );
 
     LifeV::BCFunctionBase zero (bcDirichletZero);
 
@@ -311,10 +311,10 @@ Int main ( Int argc, char** argv )
         std::cout << "\nImporting fibers:  " ;
     }
 
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > Space3D
+    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > Space3D
     ( new FESpace< mesh_Type, MapEpetra > ( splitting -> localMeshPtr(), "P1", 3, splitting -> commPtr() ) );
 
-    boost::shared_ptr<VectorEpetra> fiber ( new VectorEpetra ( Space3D -> map() ) );
+    std::shared_ptr<VectorEpetra> fiber ( new VectorEpetra ( Space3D -> map() ) );
     std::string nm = bidomainList.get ("fiber_file", "FiberDirection") ;
     ElectrophysiologyUtility::setupFibers ( *fiber, 0.0, 0.0, 1.0 );
     splitting -> setFiberPtr (fiber);

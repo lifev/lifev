@@ -289,14 +289,14 @@ protected:
       each coupling vector defines a new preconditioner type. It is created statically before the registration, then it
       is copied into this scoped_ptr.
      */
-    boost::scoped_ptr<std::vector<Int> >                        M_couplingFlags;
+    std::unique_ptr<std::vector<Int> >                        M_couplingFlags;
 
     //! vector of reordering for the different blocks.
     /*!the order in which the factors are allpied is specified by this
     vector. e.g. the fisrt block to be applied corresponds to the number M_blockReordering[0] in the vector
     M_blocks of blocks. This vector is assigned in the coupler method of each class.
     */
-    boost::scoped_ptr<std::vector<Int> >                      M_blockReordering;
+    std::unique_ptr<std::vector<Int> >                      M_blockReordering;
 
     //@}
 

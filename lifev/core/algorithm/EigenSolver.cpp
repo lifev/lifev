@@ -42,7 +42,7 @@
 
 namespace LifeV
 {
-EigenSolver::EigenSolver (boost::shared_ptr<solver_Type> const matrix, Epetra_BlockMap const& block_map, long unsigned int numvec) :
+EigenSolver::EigenSolver (std::shared_ptr<solver_Type> const matrix, Epetra_BlockMap const& block_map, long unsigned int numvec) :
     M_eigenVectors (new Epetra_MultiVector (block_map, numvec) ),
     MyProblem ( new Anasazi::BasicEigenproblem<data_Type, vector_Type, solver_Type> (Teuchos::rcp (matrix), M_eigenVectors) ),
     MyPL(),

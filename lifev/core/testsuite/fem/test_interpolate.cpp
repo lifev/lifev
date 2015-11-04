@@ -68,17 +68,17 @@ using namespace LifeV;
 int main (int argc, char** argv )
 {
     typedef FESpace < RegionMesh<LinearTetra>, MapEpetra > FESpaceTetra_Type;
-    typedef boost::shared_ptr < FESpaceTetra_Type > FESpaceTetraPtr_Type;
+    typedef std::shared_ptr < FESpaceTetra_Type > FESpaceTetraPtr_Type;
 
     typedef FESpace < RegionMesh<LinearHexa>, MapEpetra > FESpaceHexa_Type;
-    typedef boost::shared_ptr < FESpaceHexa_Type > FESpaceHexaPtr_Type;
+    typedef std::shared_ptr < FESpaceHexa_Type > FESpaceHexaPtr_Type;
 
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
     UInt verbose = (Comm->MyPID() == 0);
@@ -116,8 +116,8 @@ int main (int argc, char** argv )
 
     // Import/Generate an hexahedral and  a Tetrahedral mesh.
 
-    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshTetraPtr ( new RegionMesh<LinearTetra> ( Comm ) );
-    boost::shared_ptr<RegionMesh<LinearHexa> > fullMeshHexaPtr ( new RegionMesh<LinearHexa> ( Comm ) );
+    std::shared_ptr<RegionMesh<LinearTetra> > fullMeshTetraPtr ( new RegionMesh<LinearTetra> ( Comm ) );
+    std::shared_ptr<RegionMesh<LinearHexa> > fullMeshHexaPtr ( new RegionMesh<LinearHexa> ( Comm ) );
     UInt nEl (10);
     GetPot dataFile ("./data");
     MeshData meshData (dataFile, "interpolate/space_discretization");
@@ -126,7 +126,7 @@ int main (int argc, char** argv )
 
 
     // Partition the meshes using ParMetis
-    boost::shared_ptr<RegionMesh<LinearHexa> > localMeshHexaPtr;
+    std::shared_ptr<RegionMesh<LinearHexa> > localMeshHexaPtr;
     {
         // Create the partitioner
         MeshPartitioner< RegionMesh<LinearHexa> >  meshPartHexa;
@@ -137,7 +137,7 @@ int main (int argc, char** argv )
         // Get the local mesh
         localMeshHexaPtr = meshPartHexa.meshPartition();
     }
-    boost::shared_ptr<RegionMesh<LinearTetra> > localMeshTetraPtr;
+    std::shared_ptr<RegionMesh<LinearTetra> > localMeshTetraPtr;
     {
         // Create the partitioner
         MeshPartitioner< RegionMesh<LinearTetra> >  meshPartTetra;

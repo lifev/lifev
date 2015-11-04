@@ -59,7 +59,7 @@ BCInterfaceFunctionParser< BCHandler, StructuralOperator<RegionMesh <LinearTetra
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParser< BCHandler, StructuralOperator<RegionMesh <LinearTetra> > >::setData ( const boost::shared_ptr< BCInterfaceData >& data );
+BCInterfaceFunctionParser< BCHandler, StructuralOperator<RegionMesh <LinearTetra> > >::setData ( const std::shared_ptr< BCInterfaceData >& data );
 
 } // Namespace LifeV
 

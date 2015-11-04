@@ -66,7 +66,7 @@ public:
 
 private:
     struct Private;
-    boost::shared_ptr<Private> d;
+    std::shared_ptr<Private> d;
 };
 
 #endif /* __EnsightToHdf5_H */

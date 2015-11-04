@@ -161,7 +161,7 @@ std::string getDescription ( unsigned int area )
 {
     if ( DebugAreas->empty() )
     {
-        return std::string ( "Area " ) + boost::lexical_cast<std::string> (area);
+        return std::string ( "Area " ) + std::to_string (area);
     }
 
     std::map<unsigned int, std::string>::iterator entry_it = DebugAreas->find ( area );
@@ -172,7 +172,7 @@ std::string getDescription ( unsigned int area )
     }
     else
     {
-        return std::string ( "Area " ) + boost::lexical_cast<std::string> (area);
+        return std::string ( "Area " ) + std::to_string (area);
     }
 
 

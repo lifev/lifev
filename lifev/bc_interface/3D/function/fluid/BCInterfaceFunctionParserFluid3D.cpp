@@ -62,7 +62,7 @@ BCInterfaceFunctionParser< BCHandler, OseenSolverShapeDerivative< RegionMesh< Li
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParser< BCHandler, OseenSolver< RegionMesh< LinearTetra > > >::setData ( const boost::shared_ptr< BCInterfaceData >& data )
+BCInterfaceFunctionParser< BCHandler, OseenSolver< RegionMesh< LinearTetra > > >::setData ( const std::shared_ptr< BCInterfaceData >& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -71,7 +71,7 @@ BCInterfaceFunctionParser< BCHandler, OseenSolver< RegionMesh< LinearTetra > > >
 
     setupParser ( data );
 
-    boost::shared_ptr< BCInterfaceData3D > castedData = boost::dynamic_pointer_cast< BCInterfaceData3D > ( data );
+    std::shared_ptr< BCInterfaceData3D > castedData = std::dynamic_pointer_cast< BCInterfaceData3D > ( data );
 
     if ( castedData != 0 )
     {
@@ -117,7 +117,7 @@ BCInterfaceFunctionParser< BCHandler, OseenSolver< RegionMesh< LinearTetra > > >
 
 template< >
 void
-BCInterfaceFunctionParser< BCHandler, OseenSolverShapeDerivative< RegionMesh< LinearTetra > > >::setData ( const boost::shared_ptr< BCInterfaceData >& data )
+BCInterfaceFunctionParser< BCHandler, OseenSolverShapeDerivative< RegionMesh< LinearTetra > > >::setData ( const std::shared_ptr< BCInterfaceData >& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -126,7 +126,7 @@ BCInterfaceFunctionParser< BCHandler, OseenSolverShapeDerivative< RegionMesh< Li
 
     setupParser ( data );
 
-    boost::shared_ptr< BCInterfaceData3D > castedData = boost::dynamic_pointer_cast< BCInterfaceData3D > ( data );
+    std::shared_ptr< BCInterfaceData3D > castedData = std::dynamic_pointer_cast< BCInterfaceData3D > ( data );
 
     if ( castedData != 0 )
     {

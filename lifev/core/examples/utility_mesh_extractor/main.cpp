@@ -15,7 +15,7 @@
 
 using namespace LifeV;
 
-int run (GetPot& dataFile, bool verbose, boost::shared_ptr<Epetra_Comm>& comm);
+int run (GetPot& dataFile, bool verbose, std::shared_ptr<Epetra_Comm>& comm);
 
 // Do not edit
 int main (int argc, char** argv)
@@ -27,9 +27,9 @@ int main (int argc, char** argv)
 #endif
 
 #ifdef EPETRA_MPI
-    boost::shared_ptr<Epetra_Comm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    boost::shared_ptr<Epetra_Comm> comm (new Epetra_SerialComm() );
+    std::shared_ptr<Epetra_Comm> comm (new Epetra_SerialComm() );
 #endif
     bool verbose = comm->MyPID() == 0;
 

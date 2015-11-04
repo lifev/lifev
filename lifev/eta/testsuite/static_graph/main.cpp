@@ -72,9 +72,9 @@ int main ( int argc, char** argv )
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
     const bool verbose (Comm->MyPID() == 0);
@@ -96,7 +96,7 @@ int main ( int argc, char** argv )
         std::cout << " -- Building and partitioning the mesh ... " << std::flush;
     }
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
+    std::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
 
     regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                     2.0,   2.0,   2.0,
@@ -117,7 +117,7 @@ int main ( int argc, char** argv )
         std::cout << " -- Building ETFESpaces ... " << std::flush;
     }
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > uSpace
+    std::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > uSpace
     ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPart, &feTetraP1, Comm) );
 
     if (verbose)
@@ -129,8 +129,8 @@ int main ( int argc, char** argv )
         std::cout << " ---> Dofs: " << uSpace->dof().numTotalDof() << std::endl;
     }
 
-    boost::shared_ptr<matrix_Type> closedSystemMatrix;
-    boost::shared_ptr<matrix_Type> openSystemMatrix;
+    std::shared_ptr<matrix_Type> closedSystemMatrix;
+    std::shared_ptr<matrix_Type> openSystemMatrix;
 
     if (verbose)
     {
@@ -139,7 +139,7 @@ int main ( int argc, char** argv )
 
     LifeChrono feLoopTimer;
     feLoopTimer.start();
-    boost::shared_ptr<Epetra_FECrsGraph> matrixGraph;
+    std::shared_ptr<Epetra_FECrsGraph> matrixGraph;
     {
         using namespace ExpressionAssembly;
 

@@ -94,7 +94,7 @@ public:
     typedef VectorEpetraStructuredView block_type;
 
     //! Pointer on the view
-    typedef boost::shared_ptr<block_type> block_ptrType;
+    typedef std::shared_ptr<block_type> block_ptrType;
 
     //@}
 

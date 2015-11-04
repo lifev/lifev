@@ -66,14 +66,14 @@ public:
     //! @name Public Types
     //@{
     typedef Preconditioner                         super_Type;
-    typedef boost::shared_ptr<super_Type>          superPtr_Type;
+    typedef std::shared_ptr<super_Type>            superPtr_Type;
     typedef Epetra_Operator                        operator_Type;
-    typedef boost::shared_ptr<operator_Type>       operatorPtr_Type;
+    typedef std::shared_ptr<operator_Type>       operatorPtr_Type;
     typedef ComposedOperator<operator_Type>        prec_Type;
-    typedef boost::shared_ptr<prec_Type>           precPtr_Type;
+    typedef std::shared_ptr<prec_Type>           precPtr_Type;
 
     typedef MatrixEpetra<Real>                     matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>         matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type>           matrixPtr_Type;
 
     typedef Teuchos::ParameterList                 list_Type;
     //@}
@@ -84,12 +84,12 @@ public:
 
     //! Constructor
     /*!
-        @param comm Communicator (boost::shared_ptr<Epetra_Comm>() by default)
+        @param comm Communicator (std::shared_ptr<Epetra_Comm>() by default)
      */
 #ifdef HAVE_MPI
-    PreconditionerComposition ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
+    PreconditionerComposition ( std::shared_ptr<Epetra_Comm> comm = std::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
 #else
-    PreconditionerComposition ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
+    PreconditionerComposition ( std::shared_ptr<Epetra_Comm> comm = std::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
 #endif
 
 private:
@@ -167,7 +167,7 @@ public:
     /*!
         copies the shared_ptr to the communicator in the member M_comm and builds a new instance
     */
-    void setComm ( boost::shared_ptr<Epetra_Comm> comm );
+    void setComm ( std::shared_ptr<Epetra_Comm> comm );
 
     //@}
 
@@ -181,10 +181,10 @@ public:
     bool isPreconditionerSet() const;
 
     /** Get a standard pointer to the preconditioner. In most of the cases is more safe to use getPrecPtr(), which
-     returns a boost::shared_ptr*/
+     returns a std::shared_ptr*/
     operator_Type* preconditioner();
 
-    /** get a boost::shared_ptr to the preconditioner. The only requirement on the preconditioner is that
+    /** get a std::shared_ptr to the preconditioner. The only requirement on the preconditioner is that
      it must derive from the Epetra_Operator object*/
     operatorPtr_Type preconditionerPtr();
 
@@ -239,7 +239,7 @@ protected:
 
     //@}
 
-    boost::shared_ptr<Epetra_Comm> M_comm;
+    std::shared_ptr<Epetra_Comm> M_comm;
 
 private:
     precPtr_Type                   M_prec;

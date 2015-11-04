@@ -59,7 +59,7 @@ namespace GradientRecovery
 
  */
 template<typename FESpaceType, typename VectorType>
-VectorType ZZGradient (boost::shared_ptr<FESpaceType> fespace,
+VectorType ZZGradient (std::shared_ptr<FESpaceType> fespace,
                        const VectorType& inputData,
                        const UInt& dxi)
 {
@@ -174,7 +174,7 @@ VectorType ZZGradient (boost::shared_ptr<FESpaceType> fespace,
 
  */
 template<typename FESpaceType, typename VectorType>
-VectorType ZZLaplacian (boost::shared_ptr<FESpaceType> fespace,
+VectorType ZZLaplacian (std::shared_ptr<FESpaceType> fespace,
                         const VectorType& inputData)
 {
     // Need a repeated input

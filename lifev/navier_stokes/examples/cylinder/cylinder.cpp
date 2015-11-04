@@ -155,7 +155,7 @@ struct Cylinder::Private
         //H(20), D(1)
         //H(0.41), D(0.1)
     {}
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_Type;
+    typedef std::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_Type;
 
     double Re;
 
@@ -169,7 +169,7 @@ struct Cylinder::Private
 
     std::string initial_sol;
 
-    boost::shared_ptr<Epetra_Comm>   comm;
+    std::shared_ptr<Epetra_Comm>   comm;
     /**
      * get the characteristic velocity
      *
@@ -228,7 +228,7 @@ struct Cylinder::Private
     fct_Type getU_3d()
     {
         fct_Type f;
-        f = boost::bind (&Cylinder::Private::u3d, this, _1, _2, _3, _4, _5);
+        f = std::bind (&Cylinder::Private::u3d, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
         return f;
     }
 
@@ -270,7 +270,7 @@ struct Cylinder::Private
     fct_Type getU_2d()
     {
         fct_Type f;
-        f = boost::bind (&Cylinder::Private::u2d, this, _1, _2, _3, _4, _5);
+        f = std::bind (&Cylinder::Private::u2d, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
         return f;
     }
 
@@ -298,7 +298,7 @@ struct Cylinder::Private
     fct_Type getU_pois()
     {
         fct_Type f;
-        f = boost::bind (&Cylinder::Private::poiseuille, this, _1, _2, _3, _4, _5);
+        f = std::bind (&Cylinder::Private::poiseuille, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
         return f;
     }
 
@@ -318,7 +318,7 @@ struct Cylinder::Private
     fct_Type getU_one()
     {
         fct_Type f;
-        f = boost::bind (&Cylinder::Private::oneU, this, _1, _2, _3, _4, _5);
+        f = std::bind (&Cylinder::Private::oneU, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5);
         return f;
     }
 
@@ -372,9 +372,9 @@ Cylinder::run()
 
 {
     typedef FESpace< mesh_Type, MapEpetra >       feSpace_Type;
-    typedef boost::shared_ptr<feSpace_Type>       feSpacePtr_Type;
+    typedef std::shared_ptr<feSpace_Type>       feSpacePtr_Type;
     typedef OseenSolver< mesh_Type >::vector_Type vector_Type;
-    typedef boost::shared_ptr<vector_Type>        vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type>        vectorPtr_Type;
     // Reading from data file
     //
     GetPot dataFile ( d->data_file_name );
@@ -406,16 +406,16 @@ Cylinder::run()
 
     int numLM = 0;
 
-    boost::shared_ptr<OseenData> oseenData (new OseenData() );
+    std::shared_ptr<OseenData> oseenData (new OseenData() );
     oseenData->setup ( dataFile );
 
     MeshData meshData;
     meshData.setup (dataFile, "fluid/space_discretization");
 
-    boost::shared_ptr<mesh_Type> fullMeshPtr ( new mesh_Type ( d->comm ) );
+    std::shared_ptr<mesh_Type> fullMeshPtr ( new mesh_Type ( d->comm ) );
     readMesh (*fullMeshPtr, meshData);
 
-    boost::shared_ptr<mesh_Type> meshPtr;
+    std::shared_ptr<mesh_Type> meshPtr;
     {
         MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, d->comm);
         meshPtr = meshPart.meshPartition();

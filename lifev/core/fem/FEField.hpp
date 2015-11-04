@@ -85,10 +85,10 @@ public:
     typedef ReturnType return_Type;
 
     typedef FESpace < mesh_Type, map_Type > FESpace_Type;
-    typedef boost::shared_ptr < FESpace_Type > FESpacePtr_Type;
+    typedef std::shared_ptr < FESpace_Type > FESpacePtr_Type;
 
     typedef VectorEpetra vector_Type;
-    typedef boost::shared_ptr < vector_Type > vectorPtr_Type;
+    typedef std::shared_ptr < vector_Type > vectorPtr_Type;
 
     typedef Vector3D point_Type;
 

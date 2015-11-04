@@ -57,11 +57,11 @@ main ( int argc, char** argv )
 {
 #ifdef HAVE_MPI
     MPI_Init ( &argc, &argv );
-    boost::shared_ptr<Epetra_Comm> comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+    std::shared_ptr<Epetra_Comm> comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
     int nprocs;
     MPI_Comm_size ( MPI_COMM_WORLD, &nprocs );
 #else
-    boost::shared_ptr<Epetra_Comm> comm ( new Epetra_SerialComm );
+    std::shared_ptr<Epetra_Comm> comm ( new Epetra_SerialComm );
 #endif
 
     Displayer displayer ( comm );
@@ -107,7 +107,7 @@ main ( int argc, char** argv )
     int numEntries ( 10 );
     std::vector<UInt> blockNumRows   ( 2, numEntries / 2 );
     std::vector<UInt> blockNumColumns ( 2, numEntries / 2 );
-    boost::shared_ptr< MatrixEpetraStructured<double> > A;
+    std::shared_ptr< MatrixEpetraStructured<double> > A;
     A.reset ( new MatrixEpetraStructured<double> ( map, numEntries )  );
     A->setBlockStructure ( blockNumRows, blockNumColumns );
     for ( int i ( 0 ); i < problemSize / 2; ++i )
@@ -141,13 +141,13 @@ main ( int argc, char** argv )
     A->blockView ( 1, 1, A22 );
 
     // Creating a pointer for B
-    boost::shared_ptr< MatrixEpetraStructured<double> > B;
+    std::shared_ptr< MatrixEpetraStructured<double> > B;
 
     // Defining the view
     MatrixEpetraStructuredView<double> B11, B12, B21, B22;
 
     // Creating a pointer for the test matrix
-    boost::shared_ptr< MatrixEpetraStructured<double> > testMatrix;
+    std::shared_ptr< MatrixEpetraStructured<double> > testMatrix;
 
     // +-----------------------------------------------+
     // |        Core of the test                       |

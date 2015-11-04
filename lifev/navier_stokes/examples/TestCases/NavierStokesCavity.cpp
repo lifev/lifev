@@ -115,7 +115,7 @@ NavierStokesCavity::fZero ( const LifeV::Real& /* t */,
 }
 
 void
-NavierStokesCavity::mesh ( boost::shared_ptr< RegionMesh<LinearTetra> >& mesh ) const
+NavierStokesCavity::mesh ( std::shared_ptr< RegionMesh<LinearTetra> >& mesh ) const
 {
     if ( M_refinement == 0 )
     {
@@ -130,7 +130,7 @@ NavierStokesCavity::mesh ( boost::shared_ptr< RegionMesh<LinearTetra> >& mesh ) 
 }
 
 void
-NavierStokesCavity::boundaryConditions ( boost::shared_ptr<BCHandler> bcHandler ) const
+NavierStokesCavity::boundaryConditions ( std::shared_ptr<BCHandler> bcHandler ) const
 {
     LifeV::BCFunctionBase uZero (fZero);
     LifeV::BCFunctionBase uLid (lidBC);

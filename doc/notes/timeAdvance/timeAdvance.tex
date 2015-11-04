@@ -622,7 +622,7 @@ BDF_order       = 1  # 1, 2, 3, 4
 In the \verb"main" of the program we must choose the time advance scheme for
 example:
 \begin{verbatim}
-  typedef boost::shared_ptr< TimeAdvance< vector_type > >   TimeAdvance_type;
+  typedef std::shared_ptr< TimeAdvance< vector_type > >   TimeAdvance_type;
 
  std::string TimeAdvanceMethod =  dataFile(
                                  "problem/time_discretization/method",

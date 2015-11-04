@@ -67,12 +67,12 @@ int main (int argc, char** argv)
 #ifdef HAVE_MPI
 
     typedef RegionMesh<LinearTetra>           mesh_Type;
-    typedef boost::shared_ptr<mesh_Type>      meshPtr_Type;
+    typedef std::shared_ptr<mesh_Type>      meshPtr_Type;
     typedef std::vector<meshPtr_Type>         meshParts_Type;
-    typedef boost::shared_ptr<meshParts_Type> meshPartsPtr_Type;
+    typedef std::shared_ptr<meshParts_Type> meshPartsPtr_Type;
 
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 
     if (comm->NumProc() != 1)
     {
@@ -153,8 +153,8 @@ int main (int argc, char** argv)
 
     // Write mesh parts to HDF5 container
     {
-        boost::shared_ptr<Epetra_MpiComm> mpiComm =
-            boost::dynamic_pointer_cast<Epetra_MpiComm> (comm);
+        std::shared_ptr<Epetra_MpiComm> mpiComm =
+            std::dynamic_pointer_cast<Epetra_MpiComm> (comm);
         PartitionIO<mesh_Type> partitionIO (partsFile, mpiComm);
         partitionIO.write (meshPartPtr);
     }

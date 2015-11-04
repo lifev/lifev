@@ -112,9 +112,9 @@ int main ( int argc, char** argv )
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
     const bool verbose (Comm->MyPID() == 0);
@@ -127,13 +127,13 @@ int main ( int argc, char** argv )
 
     const UInt Nelements (10);
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type ( Comm ) );
+    std::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type ( Comm ) );
 
     regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                     2.0,   2.0,   2.0,
                     -1.0,  -1.0,  -1.0);
 
-    boost::shared_ptr< mesh_Type > meshPtr;
+    std::shared_ptr< mesh_Type > meshPtr;
     {
         MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
         meshPtr = meshPart.meshPartition();
@@ -161,13 +161,13 @@ int main ( int argc, char** argv )
         std::cout << " -- Building the spaces ... " << std::flush;
     }
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 3 > > ETuSpace
+    std::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 3 > > ETuSpace
     ( new ETFESpace< mesh_Type, MapEpetra, 3, 3 > (meshPtr, &feTetraP2, Comm) );
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > ETpSpace
+    std::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > ETpSpace
     ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPtr, &feTetraP1, Comm) );
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > ETuCompSpace
+    std::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > ETuCompSpace
     ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPtr, &feTetraP2, Comm) );
 
     if (verbose)
@@ -198,7 +198,7 @@ int main ( int argc, char** argv )
     LifeChrono chronoI;
     chronoI.start();
 
-    boost::shared_ptr<blockMatrix_Type> ETsystemMatrixI (new blockMatrix_Type ( ETuSpace->map() | ETpSpace->map() ) );
+    std::shared_ptr<blockMatrix_Type> ETsystemMatrixI (new blockMatrix_Type ( ETuSpace->map() | ETpSpace->map() ) );
     *ETsystemMatrixI *= 0.0;
 
     {
@@ -267,7 +267,7 @@ int main ( int argc, char** argv )
     LifeChrono chronoII;
     chronoII.start();
 
-    boost::shared_ptr<blockMatrix_Type> ETsystemMatrixII
+    std::shared_ptr<blockMatrix_Type> ETsystemMatrixII
     (new blockMatrix_Type ( ETuCompSpace->map() | ETuCompSpace->map() | ETuCompSpace->map() | ETpSpace->map() ) );
     *ETsystemMatrixII *= 0.0;
 
@@ -409,7 +409,7 @@ int main ( int argc, char** argv )
     // First, we build the small matrix, assemble it and close it.
     // ---------------------------------------------------------------
 
-    boost::shared_ptr<blockMatrix_Type> ETcomponentMatrixIII
+    std::shared_ptr<blockMatrix_Type> ETcomponentMatrixIII
     (new blockMatrix_Type ( ETuCompSpace->map() ) );
     *ETcomponentMatrixIII *= 0.0;
 
@@ -434,7 +434,7 @@ int main ( int argc, char** argv )
     // We define then the large matrix.
     // ---------------------------------------------------------------
 
-    boost::shared_ptr<blockMatrix_Type> ETsystemMatrixIII
+    std::shared_ptr<blockMatrix_Type> ETsystemMatrixIII
     (new blockMatrix_Type ( ETuCompSpace->map() | ETuCompSpace->map() | ETuCompSpace->map() | ETpSpace->map() ) );
     *ETsystemMatrixIII *= 0.0;
 
@@ -558,7 +558,7 @@ int main ( int argc, char** argv )
     // First, we build the small matrix, assemble it and close it.
     // ---------------------------------------------------------------
 
-    boost::shared_ptr<blockMatrix_Type> ETcomponentMatrixIV
+    std::shared_ptr<blockMatrix_Type> ETcomponentMatrixIV
     (new blockMatrix_Type ( ETuCompSpace->map() ) );
     *ETcomponentMatrixIV *= 0.0;
 
@@ -583,7 +583,7 @@ int main ( int argc, char** argv )
     // We define then the large matrix.
     // ---------------------------------------------------------------
 
-    boost::shared_ptr<blockMatrix_Type> ETsystemMatrixIV
+    std::shared_ptr<blockMatrix_Type> ETsystemMatrixIV
     (new blockMatrix_Type ( ETuCompSpace->map() | ETuCompSpace->map() | ETuCompSpace->map() | ETpSpace->map() ) );
     *ETsystemMatrixIV *= 0.0;
 
@@ -650,7 +650,7 @@ int main ( int argc, char** argv )
         std::cout << " -- Computing the error ... " << std::flush;
     }
 
-    boost::shared_ptr<matrix_Type> checkMatrixIvsII (new matrix_Type ( ETuSpace->map() + ETpSpace->map() ) );
+    std::shared_ptr<matrix_Type> checkMatrixIvsII (new matrix_Type ( ETuSpace->map() + ETpSpace->map() ) );
     *checkMatrixIvsII *= 0.0;
 
     *checkMatrixIvsII += *ETsystemMatrixI;
@@ -661,7 +661,7 @@ int main ( int argc, char** argv )
     Real errorNormIvsII ( checkMatrixIvsII->normInf() );
 
 
-    boost::shared_ptr<matrix_Type> checkMatrixIvsIII (new matrix_Type ( ETuSpace->map() + ETpSpace->map() ) );
+    std::shared_ptr<matrix_Type> checkMatrixIvsIII (new matrix_Type ( ETuSpace->map() + ETpSpace->map() ) );
     *checkMatrixIvsIII *= 0.0;
 
     *checkMatrixIvsIII += *ETsystemMatrixI;
@@ -672,7 +672,7 @@ int main ( int argc, char** argv )
     Real errorNormIvsIII ( checkMatrixIvsIII->normInf() );
 
 
-    boost::shared_ptr<matrix_Type> checkMatrixIvsIV (new matrix_Type ( ETuSpace->map() + ETpSpace->map() ) );
+    std::shared_ptr<matrix_Type> checkMatrixIvsIV (new matrix_Type ( ETuSpace->map() + ETpSpace->map() ) );
     *checkMatrixIvsIV *= 0.0;
 
     *checkMatrixIvsIV += *ETsystemMatrixI;

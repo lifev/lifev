@@ -73,18 +73,18 @@ public:
     typedef MatrixEpetraStructured<Real>            matrixBlock_Type;
     typedef MatrixEpetraStructuredView<Real>        matrixBlockView_Type;
     typedef MatrixEpetra<Real>                      matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>          matrixPtr_type;
+    typedef std::shared_ptr<matrix_Type>          matrixPtr_type;
     typedef VectorEpetra                            vector_Type;
-    typedef boost::shared_ptr<vector_Type>          vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type>          vectorPtr_Type;
 
     typedef Preconditioner                          super_Type;
-    typedef boost::shared_ptr<super_Type>           superPtr_Type;
+    typedef std::shared_ptr<super_Type>           superPtr_Type;
 
     typedef ComposedOperator<Preconditioner>        preconditioner_Type;
-    typedef boost::shared_ptr<preconditioner_Type>  preconditionerPtr_Type;
+    typedef std::shared_ptr<preconditioner_Type>  preconditionerPtr_Type;
 
-    typedef boost::shared_ptr<FESpace<mesh_Type, map_Type> >  FESpacePtr_Type;
-    typedef boost::shared_ptr<BCHandler>            BCHandlerPtr_Type;
+    typedef std::shared_ptr<FESpace<mesh_Type, map_Type> >  FESpacePtr_Type;
+    typedef std::shared_ptr<BCHandler>            BCHandlerPtr_Type;
 
     typedef Teuchos::ParameterList                  list_Type;
     //@}
@@ -94,9 +94,9 @@ public:
     //@{
     //! default constructor
 #ifdef HAVE_MPI
-    PreconditionerPCD ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
+    PreconditionerPCD ( std::shared_ptr<Epetra_Comm> comm = std::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
 #else
-    PreconditionerPCD ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
+    PreconditionerPCD ( std::shared_ptr<Epetra_Comm> comm = std::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
 #endif
 
     //! constructor from matrix A.
@@ -159,8 +159,8 @@ public:
     /*!
         This method set the pointer for the FESpaces needed
         for the construction of the operators Ap, Fp and Mp.
-        @param uFESpace Boost::shared_ptr on the FESpace for the velocity
-        @param pFESpace Boost::shared_ptr on the FESpace for the pressure
+        @param uFESpace std::shared_ptr on the FESpace for the velocity
+        @param pFESpace std::shared_ptr on the FESpace for the pressure
      */
     void setFESpace ( FESpacePtr_Type uFESpace, FESpacePtr_Type pFESpace );
 
@@ -246,7 +246,7 @@ protected:
 private:
     PreconditionerPCD ( const PreconditionerPCD& P ) :
         PreconditionerComposition ( P.M_comm ) {}
-    PreconditionerPCD ( const boost::shared_ptr<PreconditionerPCD>& /*P*/ ) {}
+    PreconditionerPCD ( const std::shared_ptr<PreconditionerPCD>& /*P*/ ) {}
 
     void computeNormalVectors();
 

@@ -108,20 +108,20 @@ public:
 
     typedef FSIOperator                                               super_Type;
     typedef FSIOperator::fluid_Type::matrix_Type                      matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>                            matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type>                            matrixPtr_Type;
     typedef super_Type::solution_Type                                 solution_Type;
     typedef super_Type::solutionPtr_Type                              solutionPtr_Type;
     typedef MonolithicBlock                                           prec_Type;
-    typedef boost::shared_ptr<prec_Type>                              precPtr_Type;
+    typedef std::shared_ptr<prec_Type>                              precPtr_Type;
     typedef MonolithicBlockMatrix                                     blockMatrix_Type;
-    typedef boost::shared_ptr<blockMatrix_Type>                       blockMatrixPtr_Type;
+    typedef std::shared_ptr<blockMatrix_Type>                       blockMatrixPtr_Type;
     typedef FactorySingleton< Factory< FSIMonolithic, std::string > > factory_Type;
     typedef SolverAztecOO                                             solver_Type;
 
     // Added due to ET
     typedef MatrixEpetraStructured<Real>                              matrixBlock_Type;
     typedef MatrixEpetraStructuredView<Real>                          matrixBlockView_Type;
-    typedef boost::shared_ptr<matrixBlock_Type>                      matrixBlockPtr_Type;
+    typedef std::shared_ptr<matrixBlock_Type>                      matrixBlockPtr_Type;
     //@}
 
     // constructors
@@ -439,7 +439,7 @@ public:
     }
 
     //! Returns the monolithic map
-    virtual boost::shared_ptr<MapEpetra>& couplingVariableMap()
+    virtual std::shared_ptr<MapEpetra>& couplingVariableMap()
     {
         return M_monolithicMap;
     }
@@ -584,12 +584,12 @@ protected:
 
     //!@name Protected attributes
     //@{
-    boost::shared_ptr<MapEpetra>                      M_monolithicMap;
-    boost::shared_ptr< MapEpetra >                    M_interfaceMap;///the solid interface map
-    boost::shared_ptr<vector_Type>                    M_beta;
-    boost::shared_ptr<MonolithicBlockMatrix >                   M_monolithicMatrix;
+    std::shared_ptr<MapEpetra>                      M_monolithicMap;
+    std::shared_ptr< MapEpetra >                    M_interfaceMap;///the solid interface map
+    std::shared_ptr<vector_Type>                    M_beta;
+    std::shared_ptr<MonolithicBlockMatrix >                   M_monolithicMatrix;
     precPtr_Type                                      M_precPtr;
-    boost::shared_ptr<vector_Type>                    M_rhsFull;
+    std::shared_ptr<vector_Type>                    M_rhsFull;
 
     fluidBchandlerPtr_Type                            M_BCh_flux;
     solidBchandlerPtr_Type                            M_BChWS;
@@ -600,10 +600,10 @@ protected:
     matrixPtr_Type                                    M_solidBlockPrec;
     matrixPtr_Type                                    M_robinCoupling; //uninitialized if not needed
     matrixPtr_Type                                    M_boundaryMass;
-    boost::shared_ptr<solver_Type>                    M_linearSolver;
-    boost::shared_ptr<vector_Type>                    M_numerationInterface;
+    std::shared_ptr<solver_Type>                    M_linearSolver;
+    std::shared_ptr<vector_Type>                    M_numerationInterface;
     std::vector<fluidBchandlerPtr_Type>                 M_BChs;
-    std::vector<boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > >          M_FESpaces;
+    std::vector<std::shared_ptr<FESpace<mesh_Type, MapEpetra> > >          M_FESpaces;
     bool                                              M_diagonalScale;
     bool                                              M_reusePrec;//!\todo to move to private
     bool                                              M_resetPrec;//!\todo to move to private
@@ -615,8 +615,8 @@ private:
     //!@name Private attributes
     //!@{
     //! operator \f$P^{-1}AA^TP^{-T}\f$, where P is the preconditioner and A is the monolithic matrix
-    boost::shared_ptr<ComposedOperator<Epetra_Operator> > M_preconditionedSymmetrizedMatrix;
-    boost::shared_ptr<vector_Type>                    M_stress;
+    std::shared_ptr<ComposedOperator<Epetra_Operator> > M_preconditionedSymmetrizedMatrix;
+    std::shared_ptr<vector_Type>                    M_stress;
     UInt                                              M_fluxes;
     std::vector<bcName_Type>                          M_BCFluxNames;
     std::vector<UInt>                                 M_fluxOffset;

@@ -63,10 +63,10 @@ public:
     typedef BcHandlerType                                                          bcHandler_Type;
     typedef PhysicalSolverType                                                     physicalSolver_Type;
 
-    typedef boost::shared_ptr< physicalSolver_Type >                               physicalSolverPtr_Type;
+    typedef std::shared_ptr< physicalSolver_Type >                               physicalSolverPtr_Type;
 
     typedef BCInterfaceData                                                        data_Type;
-    typedef boost::shared_ptr< data_Type >                                         dataPtr_Type;
+    typedef std::shared_ptr< data_Type >                                         dataPtr_Type;
 
     //@}
 

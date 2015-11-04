@@ -71,7 +71,7 @@ public:
     //@{
     //typedef Ifpack_Preconditioner                       prec_Type;
     typedef OperatorType                                  operator_Type;
-    typedef typename boost::shared_ptr<operator_Type>     operatorPtr_Type;
+    typedef typename std::shared_ptr<operator_Type>     operatorPtr_Type;
     //@}
 
     //! @name Constructors, destructor
@@ -80,7 +80,7 @@ public:
        The constructor builds an empty chain of composed operators.
        The resulting operator shall be equal to the identity.
     */
-    ComposedOperator ( const  boost::shared_ptr<Epetra_Comm>& comm );
+    ComposedOperator ( const  std::shared_ptr<Epetra_Comm>& comm );
 
     /**
        Copy constructor: it doesn't make a real copy of the operators, it just copies the vector of shared pointer
@@ -213,7 +213,7 @@ public:
     /**
        Returns a shared pointer to the communicator
      */
-    const boost::shared_ptr<Epetra_Comm> commPtr() const;
+    const std::shared_ptr<Epetra_Comm> commPtr() const;
 
     /**
        returns the OperatorDomainMap of the operators contained
@@ -301,7 +301,7 @@ public:
     //!@name Setter Methods
     //!{
     //! Sets the MPI communicator
-    void setComm (const boost::shared_ptr<Epetra_Comm> comm);
+    void setComm (const std::shared_ptr<Epetra_Comm> comm);
     //!}
 
 protected:
@@ -337,7 +337,7 @@ protected:
 // ===================================================
 
 template <typename operator_Type>
-ComposedOperator<operator_Type>::ComposedOperator ( const boost::shared_ptr<Epetra_Comm>& comm)
+ComposedOperator<operator_Type>::ComposedOperator ( const std::shared_ptr<Epetra_Comm>& comm)
     :
     M_operator(),
     M_inverse(),
@@ -590,7 +590,7 @@ Comm() const
 }
 
 template <typename operator_Type>
-const boost::shared_ptr<Epetra_Comm> ComposedOperator<operator_Type>::
+const std::shared_ptr<Epetra_Comm> ComposedOperator<operator_Type>::
 commPtr() const
 {
     return ( M_displayer.comm() );
@@ -621,7 +621,7 @@ OperatorRangeMap() const
 // ===================================================
 
 template <typename operator_Type> void
-ComposedOperator<operator_Type>::setComm (const boost::shared_ptr<Epetra_Comm> comm)
+ComposedOperator<operator_Type>::setComm (const std::shared_ptr<Epetra_Comm> comm)
 {
     //this->M_comm=comm;//copy of the communicator
     M_displayer.setCommunicator (comm);

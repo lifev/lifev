@@ -73,7 +73,7 @@ public:
     //@{
 
     //! Simple constructor with a shared_ptr on the mesh
-    RequestLoopElement ( const boost::shared_ptr<MeshType>& mesh, const UInt regionFlag = 0,
+    RequestLoopElement ( const std::shared_ptr<MeshType>& mesh, const UInt regionFlag = 0,
                          const UInt numVolumes = 0, const UInt * volumeElements = nullptr,
                          const bool integrateOnSubdomains = false )
         : M_mesh ( mesh ), M_regionFlag ( regionFlag ), M_volumeElements( volumeElements ), M_numVolumes( numVolumes ),
@@ -97,7 +97,7 @@ public:
     //@{
 
     //! Getter for the mesh pointer
-    const boost::shared_ptr<MeshType>& mesh() const
+    const std::shared_ptr<MeshType>& mesh() const
     {
         return M_mesh;
     }
@@ -137,7 +137,7 @@ private:
     //@}
 
     // Pointer on the mesh
-    boost::shared_ptr<MeshType> M_mesh;
+    std::shared_ptr<MeshType> M_mesh;
 
     // Data for integration on one subRegion, flag and elements on which iterate
     const UInt                  M_regionFlag;
@@ -166,8 +166,12 @@ private:
  */
 template< typename MeshType >
 RequestLoopElement<MeshType>
+<<<<<<< HEAD
 elements (const boost::shared_ptr<MeshType>& mesh, const UInt flag = 0, const UInt numVolumes = 0,
           const UInt * volumeElements = nullptr, const bool subDomain = false )
+=======
+elements (const std::shared_ptr<MeshType>& mesh, const UInt flag = 0 )
+>>>>>>> 24ac07b... Versione c++11
 {
 
     return RequestLoopElement<MeshType> ( mesh, flag, numVolumes, volumeElements, subDomain );

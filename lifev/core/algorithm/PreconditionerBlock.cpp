@@ -39,13 +39,13 @@
 namespace LifeV
 {
 
-PreconditionerBlock::PreconditionerBlock ( const boost::shared_ptr<Epetra_Comm>& comm ) :
+PreconditionerBlock::PreconditionerBlock ( const std::shared_ptr<Epetra_Comm>& comm ) :
     Preconditioner ( comm )
 {
 
 }
 
-PreconditionerBlock::PreconditionerBlock ( PreconditionerBlock& P, const boost::shared_ptr<Epetra_Comm>& comm ) :
+PreconditionerBlock::PreconditionerBlock ( PreconditionerBlock& P, const std::shared_ptr<Epetra_Comm>& comm ) :
     Preconditioner ( P, comm )
 {
 

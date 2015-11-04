@@ -116,7 +116,7 @@ After having read the datafile as explained in Section \ref{sec:readingData}, we
 \begin{lstlisting}
 // Mesh
 typedef RegionMesh< LinearTetra > mesh_Type;
-boost::shared_ptr< mesh_Type > fullMeshPtr ( new mesh_Type ( Comm ) );
+std::shared_ptr< mesh_Type > fullMeshPtr ( new mesh_Type ( Comm ) );
  
 // Building structured mesh (in this case a cube)
 regularMesh3D ( *fullMeshPtr, 0,
@@ -126,7 +126,7 @@ regularMesh3D ( *fullMeshPtr, 0,
 
 // Partitioning mesh, possibly with overlap
 const UInt overlap ( dataFile( "mesh/overlap", 0 ) );
-boost::shared_ptr< mesh_Type > localMeshPtr;
+std::shared_ptr< mesh_Type > localMeshPtr;
 
 MeshPartitioner< mesh_Type > meshPart;
 
@@ -147,9 +147,9 @@ We next define the finite element space, whose dimension is read by the input fi
 \begin{lstlisting}
 // Finite element space
 typedef FESpace< mesh_Type, MapEpetra >                 uSpaceStd_Type;
-typedef boost::shared_ptr< uSpaceStd_Type >             uSpaceStdPtr_Type;
+typedef std::shared_ptr< uSpaceStd_Type >             uSpaceStdPtr_Type;
 typedef ETFESpace< mesh_Type, MapEpetra, 3, 1 >         uSpaceETA_Type;
-typedef boost::shared_ptr< uSpaceETA_Type >             uSpaceETAPtr_Type;
+typedef std::shared_ptr< uSpaceETA_Type >             uSpaceETAPtr_Type;
 typedef FESpace<mesh_Type, MapEpetra>::function_Type    function_Type;
 
 // Defining finite elements standard and Expression Template spaces
@@ -164,9 +164,9 @@ In order to assembly the system that corresponds to the finite element formulati
 \begin{lstlisting}
 // Matrices and graphs
 typedef Epetra_FECrsGraph                               graph_Type;
-typedef boost::shared_ptr<Epetra_FECrsGraph>            graphPtr_Type;
+typedef std::shared_ptr<Epetra_FECrsGraph>            graphPtr_Type;
 typedef MatrixEpetra< Real >                            matrix_Type;
-typedef boost::shared_ptr< MatrixEpetra< Real > >       matrixPtr_Type;
+typedef std::shared_ptr< MatrixEpetra< Real > >       matrixPtr_Type;
 
 graphPtr_Type systemGraph;
 matrixPtr_Type systemMatrix;
@@ -224,7 +224,7 @@ Next, we build the solution and the right hand side vectors. For the latter, we 
 \begin{lstlisting}
 // Vectors
 typedef VectorEpetra                                    vector_Type;
-typedef boost::shared_ptr<VectorEpetra>                 vectorPtr_Type;
+typedef std::shared_ptr<VectorEpetra>                 vectorPtr_Type;
 
 vectorPtr_Type rhsLap;
 vectorPtr_Type solutionLap;
@@ -251,7 +251,7 @@ Real sourceFunction ( const Real& /*t*/, const Real& x,
              * sin( M_PI * x )  * sin( M_PI * y ) * sin( M_PI * z );
 }
 
-boost::shared_ptr<laplacianFunctor< Real > >  laplacianSourceFunctor ( new laplacianFunctor< Real >( sourceFunction ) );
+std::shared_ptr<laplacianFunctor< Real > >  laplacianSourceFunctor ( new laplacianFunctor< Real >( sourceFunction ) );
 
 {
     using namespace ExpressionAssembly;
@@ -311,9 +311,9 @@ Next we set the solver parameters according to the input file \verb!SolverParamL
 // Solver and preconditioner
 typedef LinearSolver::SolverType                        solver_Type;
 typedef LifeV::Preconditioner                           basePrec_Type;
-typedef boost::shared_ptr<basePrec_Type>                basePrecPtr_Type;
+typedef std::shared_ptr<basePrec_Type>                basePrecPtr_Type;
 typedef PreconditionerIfpack                            prec_Type;
-typedef boost::shared_ptr<prec_Type>                    precPtr_Type;
+typedef std::shared_ptr<prec_Type>                    precPtr_Type;
 
 LinearSolver linearSolver ( Comm );
 linearSolver.setOperator ( systemMatrix );
@@ -380,8 +380,8 @@ VectorSmall< 3 > uGradExactFunction (const Real& /*t*/, const Real& x, const Rea
     return v;
 }
 
-boost::shared_ptr<laplacianFunctor< Real > >  laplacianExactFunctor ( new laplacianFunctor< Real >( uExactFunction ) );
-boost::shared_ptr<laplacianFunctor< VectorSmall<3> > >  laplacianExactGradientFunctor ( new laplacianFunctor< VectorSmall<3> >( uGradExactFunction ) );
+std::shared_ptr<laplacianFunctor< Real > >  laplacianExactFunctor ( new laplacianFunctor< Real >( uExactFunction ) );
+std::shared_ptr<laplacianFunctor< VectorSmall<3> > >  laplacianExactGradientFunctor ( new laplacianFunctor< VectorSmall<3> >( uGradExactFunction ) );
 \end{lstlisting}
 Next, we need to evaluate the norms following their definition, and to do that we still employ the Expression Templates provided in LifeV
 \begin{lstlisting}

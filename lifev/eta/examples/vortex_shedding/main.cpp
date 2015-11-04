@@ -91,23 +91,23 @@ enum StabilizationType {None, VMS, IP};
 typedef RegionMesh<LinearTetra> mesh_Type;
 typedef MatrixEpetra<Real> matrix_Type;
 typedef VectorEpetra vector_Type;
-typedef boost::shared_ptr<VectorEpetra> vectorPtr_Type;
+typedef std::shared_ptr<VectorEpetra> vectorPtr_Type;
 
 typedef MatrixEpetraStructured<Real> matrix_block_type;
 typedef VectorBlockMonolithicEpetra vector_block_type;
-typedef boost::shared_ptr<VectorBlockMonolithicEpetra> vector_blockPtr_type;
+typedef std::shared_ptr<VectorBlockMonolithicEpetra> vector_blockPtr_type;
 
 typedef FESpace< mesh_Type, MapEpetra > fespace_Type;
-typedef boost::shared_ptr< fespace_Type > fespacePtr_Type;
+typedef std::shared_ptr< fespace_Type > fespacePtr_Type;
 
 typedef FESpace< mesh_Type, MapEpetra > fespace_Type;
-typedef boost::shared_ptr< fespace_Type > fespacePtr_Type;
+typedef std::shared_ptr< fespace_Type > fespacePtr_Type;
 
 typedef ETFESpace< mesh_Type, MapEpetra, 3, 3 > etaUspace_Type;
-typedef boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 3 > > etaUspacePtr_Type;
+typedef std::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 3 > > etaUspacePtr_Type;
 
 typedef ETFESpace< mesh_Type, MapEpetra, 3, 1 > etaPspace_Type;
-typedef boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > etaPspacePtr_Type;
+typedef std::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > etaPspacePtr_Type;
 
 }
 
@@ -185,11 +185,11 @@ main ( int argc, char** argv )
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
     int nproc;
     MPI_Comm_size (MPI_COMM_WORLD, &nproc);
 #else
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
     const bool verbose (Comm->MyPID() == 0);
@@ -264,7 +264,7 @@ main ( int argc, char** argv )
         std::cout << std::endl << "[Loading the mesh]" << std::endl;
     }
 
-    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr (new RegionMesh<LinearTetra>);
+    std::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr (new RegionMesh<LinearTetra>);
 
 
     MeshData meshData;
@@ -394,10 +394,10 @@ main ( int argc, char** argv )
     }
 
     // Initialize the full matrix, the nonconvective part, and the mass matrix (for time advancing)
-    boost::shared_ptr<matrix_block_type> systemMatrix (new matrix_block_type ( ETuFESpace->map() | ETpFESpace->map() ) );
-    boost::shared_ptr<matrix_block_type> baseMatrix (new matrix_block_type ( ETuFESpace->map() | ETpFESpace->map() ) );
-    boost::shared_ptr<matrix_block_type> convMatrix (new matrix_block_type ( ETuFESpace->map() | ETpFESpace->map() ) );
-    boost::shared_ptr<matrix_block_type> massMatrix (new matrix_block_type ( ETuFESpace->map() | ETpFESpace->map() ) );
+    std::shared_ptr<matrix_block_type> systemMatrix (new matrix_block_type ( ETuFESpace->map() | ETpFESpace->map() ) );
+    std::shared_ptr<matrix_block_type> baseMatrix (new matrix_block_type ( ETuFESpace->map() | ETpFESpace->map() ) );
+    std::shared_ptr<matrix_block_type> convMatrix (new matrix_block_type ( ETuFESpace->map() | ETpFESpace->map() ) );
+    std::shared_ptr<matrix_block_type> massMatrix (new matrix_block_type ( ETuFESpace->map() | ETpFESpace->map() ) );
 
     *systemMatrix *= 0.0;
     *baseMatrix   *= 0.0;
@@ -412,7 +412,7 @@ main ( int argc, char** argv )
     // Perform the assembly of the base matrix with ETA
 
     {
-        boost::shared_ptr<NormalizeFct> normalize (new NormalizeFct);
+        std::shared_ptr<NormalizeFct> normalize (new NormalizeFct);
 
         using namespace ExpressionAssembly;
 
@@ -621,7 +621,7 @@ main ( int argc, char** argv )
                 }*/
             }
 
-            boost::shared_ptr<matrix_block_type> stabMatrix (new matrix_block_type ( ETuFESpace->map() | ETpFESpace->map() ) );
+            std::shared_ptr<matrix_block_type> stabMatrix (new matrix_block_type ( ETuFESpace->map() | ETpFESpace->map() ) );
             *stabMatrix *= 0;
             stabMatrix->globalAssemble();
             *systemMatrix += *stabMatrix;
@@ -649,7 +649,7 @@ main ( int argc, char** argv )
             *solution *= 0;
 
             // LinearSolver needs the monolithic matrix
-            boost::shared_ptr<matrix_Type> systemMatrixNoBlock (new matrix_Type ( systemMatrix->matrixPtr() ) );
+            std::shared_ptr<matrix_Type> systemMatrixNoBlock (new matrix_Type ( systemMatrix->matrixPtr() ) );
             linearSolver.setMatrix (*systemMatrix);
             linearSolver.solveSystem (*rhs, *solution, systemMatrixNoBlock);
         }
@@ -789,8 +789,8 @@ main ( int argc, char** argv )
 
 #define RESIDUAL_EXPLICIT value(TauM) * h_K * value(ETuFESpace, *residualVector)
 
-        boost::shared_ptr<matrix_block_type> stabMatrix (new matrix_block_type ( ETuFESpace->map() | ETpFESpace->map() ) );
-        boost::shared_ptr<matrix_block_type> residualMatrix (new matrix_block_type ( ETuFESpace->map() | ETpFESpace->map() ) );
+        std::shared_ptr<matrix_block_type> stabMatrix (new matrix_block_type ( ETuFESpace->map() | ETpFESpace->map() ) );
+        std::shared_ptr<matrix_block_type> residualMatrix (new matrix_block_type ( ETuFESpace->map() | ETpFESpace->map() ) );
         vector_block_type NSRhs ( ETuFESpace->map() | ETpFESpace->map(), Repeated );
         vectorPtr_Type residualVector;
         residualVector.reset (new vector_Type (solutionMap, Unique) );
@@ -803,7 +803,7 @@ main ( int argc, char** argv )
         if (stabilizationMethod == VMS)
         {
 
-            boost::shared_ptr<NormalizeFct> normalize (new NormalizeFct);
+            std::shared_ptr<NormalizeFct> normalize (new NormalizeFct);
 
             using namespace ExpressionAssembly;
 
@@ -906,7 +906,7 @@ main ( int argc, char** argv )
 
         if (stabilizationMethod == VMS)
         {
-            boost::shared_ptr<NormalizeFct> normalize (new NormalizeFct);
+            std::shared_ptr<NormalizeFct> normalize (new NormalizeFct);
 
             using namespace ExpressionAssembly;
             // RHS, consistency term for SUPG (6) and turbulence model (8)
@@ -954,7 +954,7 @@ main ( int argc, char** argv )
         *solution *= 0;
 
         // LinearSolver needs the monolithic matrix
-        boost::shared_ptr<matrix_Type> systemMatrixNoBlock (new matrix_Type ( systemMatrix->matrixPtr() ) );
+        std::shared_ptr<matrix_Type> systemMatrixNoBlock (new matrix_Type ( systemMatrix->matrixPtr() ) );
         linearSolver.setMatrix (*systemMatrix);
         linearSolver.solveSystem (*rhs, *solution, systemMatrixNoBlock);
 

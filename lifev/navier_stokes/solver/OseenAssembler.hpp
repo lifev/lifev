@@ -73,11 +73,11 @@ public:
     typedef MapEpetra                        map_Type;
 
     typedef FESpace<meshType, map_Type>      fespace_Type;
-    typedef boost::shared_ptr<fespace_Type>  fespacePtr_Type;
+    typedef std::shared_ptr<fespace_Type>  fespacePtr_Type;
 
     typedef AssemblyElemental::function_Type function_Type;
 
-    typedef boost::shared_ptr<matrixType>    matrixPtr_Type;
+    typedef std::shared_ptr<matrixType>    matrixPtr_Type;
 
     typedef LifeChrono                       chrono_Type;
 
@@ -262,13 +262,13 @@ public:
 private:
 
     typedef CurrentFE                            currentFE_Type;
-    typedef boost::scoped_ptr<currentFE_Type>    currentFEPtr_Type;
+    typedef std::unique_ptr<currentFE_Type>    currentFEPtr_Type;
 
     typedef MatrixElemental                              localMatrix_Type;
-    typedef boost::scoped_ptr<localMatrix_Type>          localMatrixPtr_Type;
+    typedef std::unique_ptr<localMatrix_Type>          localMatrixPtr_Type;
 
     typedef VectorElemental                              localVector_Type;
-    typedef boost::scoped_ptr<localVector_Type>          localVectorPtr_Type;
+    typedef std::unique_ptr<localVector_Type>          localVectorPtr_Type;
 
 
     //! @name Private Methods

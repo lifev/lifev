@@ -79,14 +79,14 @@ public:
     //! @name Public Types
     //@{
     typedef Epetra_Comm comm_Type;
-    typedef boost::shared_ptr<comm_Type> commPtr_Type;
+    typedef std::shared_ptr<comm_Type> commPtr_Type;
     typedef Epetra_Map map_Type;
-    typedef boost::shared_ptr<map_Type> mapPtr_Type;
-    typedef boost::shared_ptr<const map_Type> constMapPtr_Type;
+    typedef std::shared_ptr<map_Type> mapPtr_Type;
+    typedef std::shared_ptr<const map_Type> constMapPtr_Type;
     typedef Epetra_Operator operator_Type;
-    typedef boost::shared_ptr<operator_Type> operatorPtr_Type;
+    typedef std::shared_ptr<operator_Type> operatorPtr_Type;
     typedef Epetra_MultiVector vector_Type;
-    typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type> vectorPtr_Type;
     //@}
 
     //! @name Destructor

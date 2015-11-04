@@ -61,8 +61,8 @@ int main (int argc, char** argv)
     MeshData mesh_data;
     mesh_data.setup (data_file, "space_discretization");
 
-    boost::shared_ptr<Epetra_Comm> uselessComm (new Epetra_MpiComm (MPI_COMM_WORLD) );
-    boost::shared_ptr<RegionMesh<LinearTetra> > mesh (new RegionMesh<LinearTetra> ( uselessComm) );
+    std::shared_ptr<Epetra_Comm> uselessComm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<RegionMesh<LinearTetra> > mesh (new RegionMesh<LinearTetra> ( uselessComm) );
 
     readMesh (*mesh, mesh_data);
 
@@ -111,19 +111,19 @@ int main (int argc, char** argv)
         MeshData mesh_data2;
         mesh_data2.setup (data_file, "second_mesh/space_discretization");
 
-        boost::shared_ptr<RegionMesh<LinearTetra> > mesh2;
+        std::shared_ptr<RegionMesh<LinearTetra> > mesh2;
         mesh2.reset (new RegionMesh<LinearTetra> (uselessComm) );
 
         readMesh (*mesh2, mesh_data2);
 
-        boost::shared_ptr<FESpace<RegionMesh<LinearTetra>, MapEpetra> > firstFESpace;
+        std::shared_ptr<FESpace<RegionMesh<LinearTetra>, MapEpetra> > firstFESpace;
         firstFESpace.reset (new FESpace<RegionMesh<LinearTetra>, MapEpetra> (mesh,  "P1", 3, uselessComm) );
 
-        boost::shared_ptr<FESpace<RegionMesh<LinearTetra>, MapEpetra> > secondFESpace;
+        std::shared_ptr<FESpace<RegionMesh<LinearTetra>, MapEpetra> > secondFESpace;
         secondFESpace.reset (new FESpace<RegionMesh<LinearTetra>, MapEpetra> (mesh2, "P1", 3, uselessComm) );
 
 
-        boost::shared_ptr<DOFInterface3Dto3D>  dofEdgeFluidToEdgeSolid ( new DOFInterface3Dto3D );
+        std::shared_ptr<DOFInterface3Dto3D>  dofEdgeFluidToEdgeSolid ( new DOFInterface3Dto3D );
 
         dofEdgeFluidToEdgeSolid->setup (firstFESpace->refFE(), firstFESpace->dof(),
                                         secondFESpace->refFE(), secondFESpace->dof()

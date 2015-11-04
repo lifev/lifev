@@ -91,10 +91,10 @@ public:
 
     typedef OseenSolverShapeDerivative< mesh_Type >           fluid_Type;
     typedef fluid_Type::vector_Type                           fluidVector_Type;
-    typedef boost::shared_ptr< fluidVector_Type >             fluidVectorPtr_Type;
+    typedef std::shared_ptr< fluidVector_Type >             fluidVectorPtr_Type;
 
     typedef Exporter< mesh_Type >                             IOFile_Type;
-    typedef boost::shared_ptr< IOFile_Type >                  IOFilePtr_Type;
+    typedef std::shared_ptr< IOFile_Type >                  IOFilePtr_Type;
     typedef ExporterData< mesh_Type >                         IOData_Type;
 
     typedef ExporterEnsight< mesh_Type >                      ensightIOFile_Type;
@@ -103,15 +103,15 @@ public:
 #endif
 
     typedef BCHandler                                         bc_Type;
-    typedef boost::shared_ptr< bc_Type >                      bcPtr_Type;
+    typedef std::shared_ptr< bc_Type >                        bcPtr_Type;
     typedef BCInterface3D< bc_Type, fluid_Type >              bcInterface_Type;
-    typedef boost::shared_ptr< bcInterface_Type >             bcInterfacePtr_Type;
+    typedef std::shared_ptr< bcInterface_Type >               bcInterfacePtr_Type;
 
     typedef TimeAdvanceBDFNavierStokes< fluidVector_Type >    bdf_Type;
     typedef OseenData                                         data_Type;
 
     typedef FESpace< mesh_Type, MapEpetra >                   FESpace_Type;
-    typedef boost::shared_ptr< FESpace_Type >                 FESpacePtr_Type;
+    typedef std::shared_ptr< FESpace_Type >                 FESpacePtr_Type;
 
     //@}
 
@@ -448,13 +448,13 @@ private:
     std::string                             M_fileName; //TODO Temporary - To be removed
 
     // Fluid problem
-    boost::shared_ptr< fluid_Type >         M_fluid;
+    std::shared_ptr< fluid_Type >         M_fluid;
     bcInterfacePtr_Type                     M_bc;
-    boost::shared_ptr< bdf_Type >           M_bdf;
-    boost::shared_ptr< data_Type >          M_data;
-    boost::shared_ptr< MeshData >           M_meshData;
-    boost::shared_ptr< MeshPartitioner_Type > M_mesh;
-    boost::shared_ptr< MapEpetra >          M_map;
+    std::shared_ptr< bdf_Type >           M_bdf;
+    std::shared_ptr< data_Type >          M_data;
+    std::shared_ptr< MeshData >           M_meshData;
+    std::shared_ptr< MeshPartitioner_Type > M_mesh;
+    std::shared_ptr< MapEpetra >          M_map;
     fluidVectorPtr_Type                     M_solution;
 
     // Linear Fluid problem

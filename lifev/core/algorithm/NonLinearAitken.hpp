@@ -69,7 +69,7 @@ public:
     //@{
 
     typedef VectorType                            vector_Type;
-    typedef boost::shared_ptr< vector_Type >      vectorPtr_Type;
+    typedef std::shared_ptr< vector_Type >      vectorPtr_Type;
 
     //@}
 
@@ -164,7 +164,7 @@ public:
      *
      * @param omegaRange array with the minimum and the maximum of Omega
      */
-    void setOmegaRange ( const boost::array< Real, 2 >& omegaRange )
+    void setOmegaRange ( const std::array< Real, 2 >& omegaRange )
     {
         M_rangeOmega = omegaRange;
     }
@@ -259,7 +259,7 @@ private:
     bool M_useDefaultOmega;
 
     // The max & min values for Omega
-    boost::array< Real, 2 > M_rangeOmega;
+    std::array< Real, 2 > M_rangeOmega;
 
     // Minimize on omega or omega^-1
     bool M_inverseOmega;
