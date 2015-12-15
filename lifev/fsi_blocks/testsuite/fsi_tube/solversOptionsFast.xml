@@ -75,7 +75,7 @@
                     <Parameter name="fact: relax value"          type="double" value="1e-10"/>
                     <Parameter name="partitioner: overlap"       type="int"    value="2"/>
                     <Parameter name="schwarz: reordering type"   type="string" value="none"/>
-                    <Parameter name="schwarz: filter singletons" type="bool" value="true"/>
+                    <Parameter name="schwarz: filter singletons" type="bool" value="false"/>
                      <!-- rcm, metis -->
                 </ParameterList>
             </ParameterList>
@@ -84,7 +84,7 @@
 
     <ParameterList name="ApproximatedSchurOperatorFluid">
             <Parameter name="use preconditioner as approximated inverse" type="bool" value="true"/>
-            <Parameter name="preconditioner type" type="string" value="Ifpack"/>
+            <Parameter name="preconditioner type" type="string" value="ML"/>
             <ParameterList name="solver">
                <Parameter name="Linear Solver Type" type="string" value="AztecOO"/>
                <ParameterList name="AztecOO">
@@ -100,7 +100,7 @@
             <ParameterList name="preconditioner">
                 <ParameterList name="ML">
                     <ParameterList name="options">
-                        <Parameter name="default values" type="string" value="NSSA"/>
+                        <Parameter name="default values" type="string" value="DD"/>
                     <Parameter name="ML validate parameter list" type="bool" value="true"/>
                     <Parameter name="aggregation: threshold" type="double" value="0.01"/>
                     <Parameter name="aggregation: type" type="string" value="Uncoupled-MIS"/>
@@ -109,12 +109,11 @@
                     <Parameter name="coarse: type" type="string" value="Amesos-KLU"/>
                     <Parameter name="increasing or decreasing" type="string" value="increasing"/>
                     <Parameter name="PDE equations" type="int" value="1"/>
-                    <Parameter name="cycle applications" type="int" value="1"/>
-                    <Parameter name="max levels" type="int" value="2"/>
+                    <Parameter name="cycle applications" type="int" value="3"/>
+                    <Parameter name="max levels" type="int" value="3"/>
                     <Parameter name="smoother: pre or post" type="string" value="pre"/>
-                    <Parameter name="smoother: sweeps" type="int" value="3"/>
-                    <Parameter name="smoother: type" type="string" value="IFPACK"/>
-                    <Parameter name="smoother: ifpack overlap" type="int" value="0"/>
+                    <Parameter name="smoother: sweeps" type="int" value="1"/>
+                    <Parameter name="smoother: type" type="string" value="Chebyshev"/>
                     <Parameter name="energy minimization: enable" type="bool" value="true"/>
                     <Parameter name="repartition: enable" type="int" value="1"/>
                     <Parameter name="repartition: partitioner" type="string" value="ParMETIS"/>
@@ -143,7 +142,7 @@
           	          <Parameter name="fact: relax value"          type="double" value="1e-10"/>
                	     <Parameter name="partitioner: overlap"       type="int"    value="2"/>
                     	<Parameter name="schwarz: reordering type"   type="string" value="none"/>
-                    	<Parameter name="schwarz: filter singletons" type="bool" value="true"/>
+                    	<Parameter name="schwarz: filter singletons" type="bool" value="false"/>
                      	<!-- rcm, metis -->
                 	</ParameterList>
             	 </ParameterList>
@@ -171,21 +170,17 @@
             <ParameterList name="ML">
                 <Parameter name="recompute" type="bool" value="true"/>
                 <ParameterList name="options">
-                    <Parameter name="default values" type="string" value="NSSA"/>
+                    <Parameter name="default values" type="string" value="SA"/>
                     <Parameter name="ML validate parameter list" type="bool" value="true"/>
-                    <Parameter name="aggregation: threshold" type="double" value="0.01"/>
                     <Parameter name="aggregation: type" type="string" value="Uncoupled-MIS"/>
-                    <Parameter name="coarse: pre or post" type="string" value="both"/>
-                    <Parameter name="coarse: sweeps" type="int" value="1"/>
                     <Parameter name="coarse: type" type="string" value="Amesos-KLU"/>
-                    <Parameter name="increasing or decreasing" type="string" value="increasing"/>
                     <Parameter name="PDE equations" type="int" value="3"/>
-                    <Parameter name="cycle applications" type="int" value="1"/>
-                    <Parameter name="max levels" type="int" value="2"/>
+                    <Parameter name="cycle applications" type="int" value="2"/>
+                    <Parameter name="max levels" type="int" value="3"/>
                     <Parameter name="smoother: pre or post" type="string" value="both"/>
                     <Parameter name="smoother: sweeps" type="int" value="3"/>
-                    <Parameter name="smoother: type" type="string" value="IFPACK"/>
-                    <Parameter name="smoother: ifpack overlap" type="int" value="2"/>
+                    <Parameter name="smoother: type" type="string" value="Gauss-Seidel"/>
+                    <Parameter name="smoother: damping factor" type="double" value="0.79"/>
                     <Parameter name="energy minimization: enable" type="bool" value="true"/>
                     <Parameter name="repartition: enable" type="int" value="1"/>
                     <Parameter name="repartition: partitioner" type="string" value="ParMETIS"/>
@@ -214,7 +209,7 @@
           	    <Parameter name="fact: relax value"          type="double" value="1e-10"/>
                    <Parameter name="partitioner: overlap"       type="int"    value="2"/>
                    <Parameter name="schwarz: reordering type"   type="string" value="none"/>
-                   <Parameter name="schwarz: filter singletons" type="bool" value="true"/>
+                   <Parameter name="schwarz: filter singletons" type="bool" value="false"/>
                    <!-- rcm, metis -->
                </ParameterList>
             </ParameterList>
@@ -223,7 +218,7 @@
 
     <ParameterList name="ALEOperator">
         <Parameter name="use preconditioner as approximated inverse" type="bool" value="true"/>
-        <Parameter name="preconditioner type" type="string" value="Ifpack"/>
+        <Parameter name="preconditioner type" type="string" value="ML"/>
         <!-- ML, Ifpack, TwoLevel-->
         <ParameterList name="solver">
             <Parameter name="Linear Solver Type" type="string" value="AztecOO"/>
@@ -283,7 +278,7 @@
           	    <Parameter name="fact: relax value"          type="double" value="1e-10"/>
                    <Parameter name="partitioner: overlap"       type="int"    value="2"/>
                    <Parameter name="schwarz: reordering type"   type="string" value="none"/>
-                   <Parameter name="schwarz: filter singletons" type="bool" value="true"/>
+                   <Parameter name="schwarz: filter singletons" type="bool" value="false"/>
                    <!-- rcm, metis -->
                </ParameterList>
             </ParameterList>
@@ -367,7 +362,7 @@
             <Parameter name="max_iter" type="int" value="200"/>
             <Parameter name="output" type="string" value="all_res"/>
             <Parameter name="scaling" type="string" value="none"/>
-            <Parameter name="solver" type="string" value="gmresr"/>
+            <Parameter name="solver" type="string" value="gmres"/>
             <Parameter name="tol" type="double" value="1e-06"/>
         </ParameterList>
     </ParameterList>

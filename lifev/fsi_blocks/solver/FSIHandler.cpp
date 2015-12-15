@@ -1223,60 +1223,60 @@ FSIHandler::applyBCresidual(VectorEpetra& r_u, VectorEpetra& r_ds, VectorEpetra&
 void
 FSIHandler::assembleStructureInterfaceMass()
 {
-//	// INITIALIZE MATRIX WITH THE MAP OF THE INTERFACE
-//	matrixPtr_Type structure_interfaceMass( new matrix_Type ( M_displacementFESpace->map(), 50 ) );
-//	structure_interfaceMass->zero();
-//
-//	// ASSEMBLE MASS MATRIX AT THE INTERFACE
-//	QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
-//	{
-//		using namespace ExpressionAssembly;
-//		integrate ( boundary (M_displacementETFESpace->mesh(), M_datafile("interface/flag", 1) ),
-//					myBDQR,
-//					M_displacementETFESpace,
-//					M_displacementETFESpace,
-//					//Boundary Mass
-//					dot(phi_i,phi_j)
-//		)
-//		>> structure_interfaceMass;
-//	}
-//	structure_interfaceMass->globalAssemble();
-//
-//	mapPtr_Type M_mapStuctureGammaVectorial;
-//	M_StructureToFluidInterpolant->getVectorialInterpolationMap(M_mapStuctureGammaVectorial);
-//
-//	// RESTRICT MATRIX TO INTERFACE DOFS ONLY
-//	M_interface_mass_structure.reset(new matrix_Type ( *M_mapStuctureGammaVectorial, 50 ) );
-//	structure_interfaceMass->restrict ( M_mapStuctureGammaVectorial, M_numerationInterfaceStructure,
-//										M_structureDisplacement->size()/3, M_interface_mass_structure );
+	// INITIALIZE MATRIX WITH THE MAP OF THE INTERFACE
+	matrixPtr_Type structure_interfaceMass( new matrix_Type ( M_displacementFESpace->map(), 50 ) );
+	structure_interfaceMass->zero();
+
+	// ASSEMBLE MASS MATRIX AT THE INTERFACE
+	QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
+	{
+		using namespace ExpressionAssembly;
+		integrate ( boundary (M_displacementETFESpace->mesh(), M_datafile("interface/flag", 1) ),
+					myBDQR,
+					M_displacementETFESpace,
+					M_displacementETFESpace,
+					//Boundary Mass
+					dot(phi_i,phi_j)
+		)
+		>> structure_interfaceMass;
+	}
+	structure_interfaceMass->globalAssemble();
+
+	mapPtr_Type M_mapStuctureGammaVectorial;
+	M_StructureToFluidInterpolant->getVectorialInterpolationMap(M_mapStuctureGammaVectorial);
+
+	// RESTRICT MATRIX TO INTERFACE DOFS ONLY
+	M_interface_mass_structure.reset(new matrix_Type ( *M_mapStuctureGammaVectorial, 50 ) );
+	structure_interfaceMass->restrict ( M_mapStuctureGammaVectorial, M_numerationInterfaceStructure,
+										M_structureDisplacement->size()/3, M_interface_mass_structure );
 }
 
 void
 FSIHandler::applyInverseFluidMassOnGamma ( const vectorPtr_Type& weakLambda, vectorPtr_Type& strongLambda )
 {
-//	Teuchos::RCP< Teuchos::ParameterList > belosList = Teuchos::rcp ( new Teuchos::ParameterList );
-//	belosList = Teuchos::getParametersFromXmlFile ( "SolverParamList_rbf3d.xml" );
-//
-//	// Preconditioner
-//	prec_Type* precRawPtr;
-//	basePrecPtr_Type precPtr;
-//	precRawPtr = new prec_Type;
-//	precRawPtr->setDataFromGetPot ( M_datafile, "prec" );
-//	precPtr.reset ( precRawPtr );
-//
-//	// Linear Solver
-//	LinearSolver solverOne;
-//	solverOne.setCommunicator ( M_comm );
-//	solverOne.setParameters ( *belosList );
-//	solverOne.setPreconditioner ( precPtr );
-//
-//	// Solution
-//	strongLambda->zero();
-//
-//	// Solve system
-//	solverOne.setOperator ( M_interface_mass_fluid );
-//	solverOne.setRightHandSide ( weakLambda );
-//	solverOne.solve ( strongLambda );
+	Teuchos::RCP< Teuchos::ParameterList > belosList = Teuchos::rcp ( new Teuchos::ParameterList );
+	belosList = Teuchos::getParametersFromXmlFile ( "SolverParamList_rbf3d.xml" );
+
+	// Preconditioner
+	prec_Type* precRawPtr;
+	basePrecPtr_Type precPtr;
+	precRawPtr = new prec_Type;
+	precRawPtr->setDataFromGetPot ( M_datafile, "prec" );
+	precPtr.reset ( precRawPtr );
+
+	// Linear Solver
+	LinearSolver solverOne;
+	solverOne.setCommunicator ( M_comm );
+	solverOne.setParameters ( *belosList );
+	solverOne.setPreconditioner ( precPtr );
+
+	// Solution
+	strongLambda->zero();
+
+	// Solve system
+	solverOne.setOperator ( M_interface_mass_fluid );
+	solverOne.setRightHandSide ( weakLambda );
+	solverOne.solve ( strongLambda );
 }
 
 void
@@ -1354,39 +1354,19 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 	if ( M_nonconforming )
 	{
-		/*
-		vectorPtr_Type lambda_km1 ( new vector_Type ( *M_lagrangeMap ) );
-		lambda_km1->zero();
-		UInt offset_lagrange = M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize();
-		lambda_km1->subset( solution, *M_lagrangeMap, offset_lagrange, 0);
-
 		//----------------------------------------------//
 		// Residual, part 1: compute the fluid residual //
 		//----------------------------------------------//
 
 		M_displayer.leaderPrint ( "[FSI] - Computing residual of the fluid \n" ) ;
 
-		// Initialize vector for the fluid velocity residual
-		vectorPtr_Type velocity_residual( new vector_Type ( M_fluid->uFESpace()->map ( ) ) );
-		velocity_residual->zero();
-
-		// Initialize vector for the fluid pressure residual
-		vectorPtr_Type fluid_pressure_residual( new vector_Type ( M_fluid->pFESpace()->map ( ) ) );
-		fluid_pressure_residual->zero();
-
 		// Evaluate the residual coming from the fluid
-		M_fluid->evaluateResidual( M_beta, velocity_km1, pressure_km1, M_rhs_velocity, velocity_residual, fluid_pressure_residual);
+		M_fluid->evaluateResidual( M_beta, u_k, p_k, M_rhs_velocity, res_u, res_p);
 
 		vectorPtr_Type lambda_km1_omegaF ( new vector_Type ( M_fluid->uFESpace()->map() ) );
-		M_FluidToStructureInterpolant->expandGammaToOmega_Known(lambda_km1, lambda_km1_omegaF);
+		M_FluidToStructureInterpolant->expandGammaToOmega_Known(lambda_k, lambda_km1_omegaF);
 
-		// TODO: Maybe this part can be optimized, since it is not necessary to
-		// instantiate fluid_velocity_residual, but just velocity_residual could
-		// be used.
-		vectorPtr_Type fluid_velocity_residual( new vector_Type ( M_fluid->uFESpace()->map ( ) ) );
-		fluid_velocity_residual->zero();
-		*fluid_velocity_residual += *velocity_residual;
-		*fluid_velocity_residual += *lambda_km1_omegaF;
+		*res_u += *lambda_km1_omegaF;
 
 		//--------------------------------------------------//
 		// Residual, part 2: compute the structure residual //
@@ -1394,17 +1374,14 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 		M_displayer.leaderPrint ( "[FSI] - Computing residual structure \n" ) ;
 
-		vectorPtr_Type structure_displacement_km1 ( new vector_Type ( M_displacementFESpace->map() ) );
-		structure_displacement_km1->zero();
 		UInt offset_displacment_structure = M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize();
-		structure_displacement_km1->subset( solution, M_displacementFESpace->map(), offset_displacment_structure, 0);
 
 		// Vector containing the residual of the structural part
-		vectorPtr_Type residual_structure_displacement( new vector_Type ( M_displacementFESpace->map() ) );
-		residual_structure_displacement->zero();
+		res_ds->zero();
 
-		// Compute residual of the structure part only
-		*residual_structure_displacement = (*M_matrixStructure)*(*structure_displacement_km1);
+		*res_ds = ( ( ( 1.0/ ( M_dt * M_dt * M_structureTimeAdvance->get_beta() ) ) * ( (*M_structure->mass_matrix_no_bc() ) * (*ds_k) ) ) +
+				  ( (*M_structure->stiffness_matrix_no_bc() ) * (*ds_k) ) -
+				  ( (*M_structure->mass_matrix_no_bc() ) * (*M_structureTimeAdvance->get_csi()) ) );
 
 		// WARNING: INTERPOLATING THE WEAK RESIDUAL FOR THE MOMENT, LATER USING THE MASSES
 
@@ -1417,7 +1394,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 			M_displayer.leaderPrint ( "[FSI] - From weak to strong residual - fluid \n" ) ;
 			vectorPtr_Type tmp_gamma_f ( new vector_Type ( M_lagrangeMap ) );
 			tmp_gamma_f->zero();
-			applyInverseFluidMassOnGamma( lambda_km1, tmp_gamma_f );
+			applyInverseFluidMassOnGamma( lambda_k, tmp_gamma_f );
 
 			M_displayer.leaderPrint ( "[FSI] - Interpolating strong residual \n" ) ;
 			vectorPtr_Type tmp_omega_f ( new vector_Type ( M_fluid->uFESpace()->map() ) );
@@ -1450,7 +1427,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 			M_StructureToFluidInterpolant->expandGammaToOmega_Known( out_gamma_s, structure_weak_residual );
 
-			*residual_structure_displacement -= *structure_weak_residual;
+			*res_ds -= *structure_weak_residual;
 		}
 		else
 		{
@@ -1463,10 +1440,8 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 			M_FluidToStructureInterpolant->solution(structure_weak_residual);
 
-			*residual_structure_displacement -= *structure_weak_residual;
+			*res_ds -= *structure_weak_residual;
 		}
-
-		*residual_structure_displacement -= *M_rhsStructure;
 
 		//-------------------------------------------------//
 		// Residual, part 3: compute the coupling residual //
@@ -1474,17 +1449,16 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 		M_displayer.leaderPrint ( "[FSI] - Computing residual coupling velocities \n" ) ;
 
+		res_lambda->zero();
+
 		vectorPtr_Type velocity_km1_gamma( new vector_Type ( *M_lagrangeMap ) );
 		velocity_km1_gamma->zero();
-
-		M_FluidToStructureInterpolant->restrictOmegaToGamma_Known(velocity_km1, velocity_km1_gamma);
+		M_FluidToStructureInterpolant->restrictOmegaToGamma_Known(u_k, velocity_km1_gamma);
 
 		vectorPtr_Type structure_vel( new vector_Type ( M_displacementFESpace->map() ) );
 		structure_vel->zero();
 
-		*structure_vel += *structure_displacement_km1;
-		*structure_vel /= M_dt;
-		*structure_vel *= M_structureTimeAdvance->coefficientFirstDerivative ( 0 );
+		*structure_vel = ( ( M_structureTimeAdvance->get_gamma()/(M_dt * M_structureTimeAdvance->get_beta() ) ) * (*ds_k) );
 
 		vectorPtr_Type res_couplingVel_omega_f ( new vector_Type ( M_fluid->uFESpace()->map() ) );
 		res_couplingVel_omega_f->zero();
@@ -1498,8 +1472,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 		M_FluidToStructureInterpolant->restrictOmegaToGamma_Known(res_couplingVel_omega_f, res_couplingVel_gamma_f);
 
-		*velocity_km1_gamma -= *res_couplingVel_gamma_f;
-		*velocity_km1_gamma -= *M_rhsCouplingVelocities;
+		*res_lambda = (*velocity_km1_gamma - *res_couplingVel_gamma_f + *M_rhsCouplingVelocities );
 
 		//--------------------------------------------//
 		// Residual, part 4: compute the ALE residual //
@@ -1507,7 +1480,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 		M_displayer.leaderPrint ( "[FSI] - Computing residual ALE \n" ) ;
 
-		M_StructureToFluidInterpolant->updateRhs ( structure_displacement_km1 );
+		M_StructureToFluidInterpolant->updateRhs ( ds_k );
 
 		M_StructureToFluidInterpolant->interpolate();
 
@@ -1521,15 +1494,13 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 		res_ale_ale->zero();
 
-		*res_ale_ale = ( *M_ale->matrix ( ) ) * ( *meshDisplacement );
+		*res_ale_ale = ( *M_ale->matrix ( ) ) * ( *df_k );
 
-		vectorPtr_Type res_ALE ( new vector_Type ( M_aleFESpace->map() ) );
+		res_df->zero();
 
-		res_ALE->zero();
+		*res_df -= *res_ds_ale;
 
-		*res_ALE -= *res_ds_ale;
-
-		*res_ALE += *res_ale_ale;
+		*res_df += *res_ale_ale;
 
 		//---------------------------------------//
 		// Residual, part 5: monolithic residual //
@@ -1537,12 +1508,6 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 		M_displayer.leaderPrint ( "[FSI] - Gathering all components of the residual  \n" ) ;
 
-		residual.subset(*fluid_velocity_residual, M_fluid->uFESpace()->map(), 0, 0 );
-		residual.subset(*fluid_pressure_residual, M_fluid->pFESpace()->map(), 0, M_fluid->uFESpace()->map().mapSize() );
-		residual.subset(*residual_structure_displacement, M_displacementFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() );
-		residual.subset(*velocity_km1_gamma, *M_lagrangeMap, 0, offset_lagrange );
-		residual.subset(*res_ALE, M_aleFESpace->map(), 0, offset );
-		*/
 	}
 	else
 	{
@@ -1618,7 +1583,6 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	residual.subset(*res_ds, M_displacementFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() );
 	residual.subset(*res_lambda, *M_lagrangeMap, 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize() );
 	residual.subset(*res_df, M_aleFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize() );
-
 
 	if (M_printResiduals)
 	{
@@ -1715,7 +1679,6 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 
 	if ( M_nonconforming )
 	{
-		/*
 		M_applyOperatorJacobianNonConforming->setComm ( M_comm );
 		M_applyOperatorJacobianNonConforming->setTimeStep ( M_dt );
 		M_applyOperatorJacobianNonConforming->setDatafile ( M_datafile );
@@ -1743,7 +1706,9 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 
 		M_applyOperatorJacobianNonConforming->setInterpolants ( M_FluidToStructureInterpolant, M_StructureToFluidInterpolant, M_useMasses );
 
-		M_applyOperatorJacobianNonConforming->setCoefficientFirstDerivative ( M_structureTimeAdvance->coefficientFirstDerivative ( 0 ) );
+		M_applyOperatorJacobianNonConforming->setGamma ( M_structureTimeAdvance->get_gamma() );
+
+		M_applyOperatorJacobianNonConforming->setBeta ( M_structureTimeAdvance->get_beta() );
 
 		if ( M_useShapeDerivatives )
 		{
@@ -1752,7 +1717,6 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 		}
 
 		M_invOper->setOperator(M_applyOperatorJacobianNonConforming);
-	    */
 	}
 	else
 	{
@@ -1775,13 +1739,12 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 
     if ( M_nonconforming)
     {
-    	/*
-    	M_prec->setCoefficientFirstDerivative ( M_structureTimeAdvance->coefficientFirstDerivative ( 0 ) );
+    	M_prec->setGamma ( M_structureTimeAdvance->get_gamma() );
+    	M_prec->setBeta ( M_structureTimeAdvance->get_beta() );
     	M_prec->setVelocityFESpace ( M_fluid->uFESpace() );
     	M_prec->setBCInterface ( M_interfaceFluidBC );
     	M_prec->setTimeStep ( M_dt );
     	M_prec->setMonolithicMap ( M_monolithicMap );
-    	*/
     }
     else
     {

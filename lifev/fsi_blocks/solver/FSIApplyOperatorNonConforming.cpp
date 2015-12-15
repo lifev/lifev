@@ -298,9 +298,7 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 	VectorEpetraPtr_Type structure_vel( new VectorEpetra_Type ( *M_ds_map ) );
 	structure_vel->zero();
 
-	*structure_vel += *M_X_displacement;
-	*structure_vel /= M_timeStep;
-	*structure_vel *= M_coefficientFirstDerivative;
+	*structure_vel += ( M_gamma / (M_timeStep*M_beta) * (*M_X_displacement) );
 
 	M_StructureToFluidInterpolant->updateRhs(structure_vel);
 	M_StructureToFluidInterpolant->interpolate();
