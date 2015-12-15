@@ -1,4 +1,5 @@
 SET(interpolation_HEADERS
+  interpolation/Interpolation.hpp
   interpolation/RBFInterpolation.hpp
   interpolation/RBFlocallyRescaledScalar.hpp
   interpolation/RBFlocallyRescaledVectorial.hpp
