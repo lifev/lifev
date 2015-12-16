@@ -194,7 +194,7 @@ int main (int argc, char** argv )
     intergrid.buildUnknownInterfaceMap();
 
     intergrid.buildOperators();
-
+    
     vectorPtr_Type Solid_vector_one (new vector_Type (Solid_fieldFESpace->map(), Unique) );
     Solid_fieldFESpace->interpolate ( static_cast<FESpace_Type::function_Type> ( exact_sol_easy ), *Solid_vector_one, 0.0 );
 
@@ -226,7 +226,6 @@ int main (int argc, char** argv )
     // GET THE SOLUTION
     intergrid.solution (Fluid_solution);
     
-    /*
     Fluid_solution->spy("Fluid_solution");
 
     // GET THE SOLUTION ON GAMMA
@@ -235,13 +234,6 @@ int main (int argc, char** argv )
 
     Fluid_solutionOnGamma->spy("Fluid_solutionOnGamma");
     
-    // PERFORMING INTERPOLATION WITH A VECTOR OF ONE
-    intergrid.interpolate();
-    
-    // GET THE SOLUTION
-    intergrid.solution (Fluid_solution);
-	*/
-
     // EXPORTING THE SOLUTION
     ExporterHDF5<mesh_Type> Fluid_exporter (dataFile, Fluid_localMesh, "Results", Comm->MyPID() );
     Fluid_exporter.setMeshProcId (Fluid_localMesh, Comm->MyPID() );
@@ -249,7 +241,7 @@ int main (int argc, char** argv )
     Fluid_exporter.addVariable (ExporterData<mesh_Type>::VectorField, "Solution", Fluid_fieldFESpace, Fluid_solution, UInt (0) );
     Fluid_exporter.postProcess (0);
     Fluid_exporter.closeFile();
-
+    
 //    std::cout << "aaaaaaaaaaa";
 //
 //    for (int i = 0; i < 3000000; ++i )

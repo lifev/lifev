@@ -175,6 +175,8 @@ private:
     parameterList_Type  M_belosList;
 
     vectorPtr_Type      M_solutionOnGamma;
+    
+    Real                M_links;
 };
 
 Interpolation::Interpolation()
@@ -222,7 +224,6 @@ Interpolation::projectionOperator()
 	// Total number of dofs taken into account
 	int LocalNodesNumber = M_GIdsUnknownMesh.size();
 
-	std::vector<double>  RBF_radius (LocalNodesNumber);
 	std::vector<std::vector<int>> MatrixGraph (LocalNodesNumber);
 	int* GlobalID = new int[LocalNodesNumber];
 	int k = 0;
@@ -253,8 +254,7 @@ Interpolation::projectionOperator()
 
 		// For each of them, identify the neighbors on the other mesh within a certain number of circles M_links
 		MatrixGraph[k] = M_dof_connectivity_known[nearestPoint];
-		RBF_radius[k] = computeRBFradius_unknown ( *it, MatrixGraph[k]);
-		std::cout << RBF_radius[k] << "  ";
+		// RBF_radius[k] = computeRBFradius_unknown ( *it, MatrixGraph[k]);
 		++k;
 	}
 	M_projectionOperator.reset (new matrix_Type (*M_projectionOperatorMap, 100) );
@@ -271,7 +271,7 @@ Interpolation::projectionOperator()
 							M_xcoord_known[MatrixGraph[i][it]],
 							M_ycoord_known[MatrixGraph[i][it]],
 							M_zcoord_known[MatrixGraph[i][it]],
-							RBF_radius[i]);
+							M_links /*RBF_radius[i]*/ );
 
 			M_projectionOperator->addToCoefficient( (*M_numerationInterfaceUnknown)( GlobalID[i] ),
 													(*(M_numerationInterfaceKnownColumns[M_pid]))(MatrixGraph[i][it]),
@@ -330,7 +330,7 @@ Interpolation::interpolationOperator()
 	{
 		GlobalID[k] = *it;
 		MatrixGraph[k] = M_dof_connectivity_known[*it];
-		RBF_radius[k] = computeRBFradius_known ( *it, MatrixGraph[k] );
+		//RBF_radius[k] = computeRBFradius_known ( *it, MatrixGraph[k] );
 		// std::cout << "DOF " << *it << " has radius " << RBF_radius[k] << std::endl;
 		++k;
 	}
@@ -353,7 +353,7 @@ Interpolation::interpolationOperator()
 							M_xcoord_known[MatrixGraph[i][it]],
 							M_ycoord_known[MatrixGraph[i][it]],
 							M_zcoord_known[MatrixGraph[i][it]],
-							RBF_radius[i] );
+							M_links /*RBF_radius[i]*/ );
 
 			M_interpolationOperator->addToCoefficient( (*M_numerationInterfaceKnown)( GlobalID[i] ),
 													   (*(M_numerationInterfaceKnownColumns[M_pid]))(MatrixGraph[i][it]),
@@ -422,6 +422,44 @@ Interpolation::buildTableDofs_known ( const FESpacePtr_Type& fespace )
 
 	M_dof_connectivity_known.resize(numTotalDof);
 
+    M_links = 0.4;
+    
+    for ( int i = 0; i < numTotalDof; ++i )
+    {
+        if ( M_marker_known[i] == M_flag)
+        {
+            for ( int j = 0; j < numTotalDof; ++j )
+            {
+                if ( M_marker_known[j] == M_flag)
+                {
+                    Real distance = std::sqrt( (M_xcoord_known[i] - M_xcoord_known[j])*(M_xcoord_known[i] - M_xcoord_known[j]) +
+                                               (M_ycoord_known[i] - M_ycoord_known[j])*(M_ycoord_known[i] - M_ycoord_known[j]) +
+                                               (M_zcoord_known[i] - M_zcoord_known[j])*(M_zcoord_known[i] - M_zcoord_known[j]) );
+                    if ( distance < M_links )
+                    {
+                        M_dof_connectivity_known[i].push_back(j);
+                    }
+                }
+            }
+        }
+    }
+
+    /*
+    for ( int i = 0; i < numTotalDof; ++i )
+    {
+        if ( M_marker_known[i] == M_flag)
+        {
+            std::cout << "GID " << i;
+            for ( int k = 0; k < M_dof_connectivity_known[i].size(); ++k )
+            {
+                std::cout << "  " << M_dof_connectivity_known[i][k];
+            }
+            std::cout << "\n";
+        }
+    }
+    */
+    
+    /*
 	for ( int i = 0; i < numTotalDof; ++i )
 	{
 		for ( int k = 0; k < dof_element_connectivity[i].size(); ++k )
@@ -436,7 +474,9 @@ Interpolation::buildTableDofs_known ( const FESpacePtr_Type& fespace )
 		std::sort( M_dof_connectivity_known[i].begin(), M_dof_connectivity_known[i].end() );
 		M_dof_connectivity_known[i].erase( unique( M_dof_connectivity_known[i].begin(), M_dof_connectivity_known[i].end() ), M_dof_connectivity_known[i].end() );
 	}
-
+    */
+    
+    
 	/*
 	// stampa coordinate
 	if ( fespace->map().commPtr()->MyPID() == 0 )
@@ -521,25 +561,7 @@ Interpolation::buildTableDofs_unknown ( const FESpacePtr_Type& fespace )
 			M_marker_unknown[localToGlobalMapOnBFacet1[lDof1]] = FaceDof[lDof1];
 		}
 	}
-
-	M_dof_connectivity_unknown.resize(numTotalDof);
-
-	for ( int i = 0; i < numTotalDof; ++i )
-	{
-		for ( int k = 0; k < dof_element_connectivity[i].size(); ++k )
-		{
-			feBd1.update ( fespace->mesh()->boundaryFacet ( dof_element_connectivity[i][k] ), UPDATE_ONLY_CELL_NODES );
-			std::vector<ID> localToGlobalMapOnBFacet1 = fespace->dof().localToGlobalMapOnBdFacet ( dof_element_connectivity[i][k] );
-			for (ID lDof1 = 0; lDof1 < localToGlobalMapOnBFacet1.size(); lDof1++)
-			{
-				M_dof_connectivity_unknown[i].push_back(localToGlobalMapOnBFacet1[lDof1]);
-			}
-		}
-		std::sort( M_dof_connectivity_unknown[i].begin(), M_dof_connectivity_unknown[i].end() );
-		M_dof_connectivity_unknown[i].erase( unique( M_dof_connectivity_unknown[i].begin(), M_dof_connectivity_unknown[i].end() ), M_dof_connectivity_unknown[i].end() );
-	}
-
-
+    
 	/*
 	if ( fespace->map().commPtr()->MyPID() == 0 )
 		for ( int i = 0 ; i < M_xcoord_unknown.size(); ++i )
@@ -675,8 +697,8 @@ Interpolation::buildKnownInterfaceMap()
 
 	M_knownInterfaceMap.reset ( new MapEpetra ( -1, static_cast<int> (dofKnown.size() ), pointerToDofs, M_knownField->mapPtr()->commPtr() ) );
 
-	std::cout << " M_knownInterfaceMap size " << M_knownInterfaceMap->map(Unique)->NumGlobalElements() << std::endl;
-	std::cout << " M_knownInterfaceMap local size " << M_knownInterfaceMap->map(Unique)->NumMyElements() << std::endl;
+	// std::cout << " M_knownInterfaceMap size " << M_knownInterfaceMap->map(Unique)->NumGlobalElements() << std::endl;
+	// std::cout << " M_knownInterfaceMap local size " << M_knownInterfaceMap->map(Unique)->NumMyElements() << std::endl;
 }
 
 void
@@ -939,8 +961,6 @@ Interpolation::restrictOmegaToGamma_Known(const vectorPtr_Type& vectorOnOmega, v
 
 	for ( int i = 0; i < M_numerationInterfaceKnown->epetraVector().MyLength(); ++i )
 	{
-		std::cout << (*vectorOnOmega)(M_numerationInterfaceKnown->blockMap().GID(i)) << "  ";
-
 		(*vectorOnGamma)[(*M_numerationInterfaceKnown)[M_numerationInterfaceKnown->blockMap().GID(i)]]
 		           = (*vectorOnOmega)(M_numerationInterfaceKnown->blockMap().GID(i));
 

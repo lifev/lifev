@@ -17,7 +17,7 @@
        	mesh_dir                 = ./
        	mesh_file                = tube20_circ.mesh
        	mesh_type                = .mesh
-		order                    = P1
+		order                    = P2
 		
 	[../]
 [../]
@@ -27,7 +27,7 @@
        	mesh_dir                 = ./
        	mesh_file                = vessel20.mesh
        	mesh_type                = .mesh
-		order                    = P1
+		order                    = P2
 	
 	[../]
 [../]	
