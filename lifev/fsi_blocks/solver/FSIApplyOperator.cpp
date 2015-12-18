@@ -129,11 +129,23 @@ int FSIApplyOperator::SetUseTranspose(bool useTranspose)
 
 int FSIApplyOperator::Apply(const vector_Type & X, vector_Type & Y) const
 {
+	const VectorEpetra_Type X_vectorEpetra(X, M_monolithicMap, Unique);
+
+	X_vectorEpetra.spy("input_apply");
+
     int error(-1);
     if (M_useTranspose)
         error = applyTranspose(X,Y);
     else
     	error = applyNoTranspose(X,Y);
+
+    VectorEpetra_Type Y_vectorEpetra(Y, M_monolithicMap, Unique);
+    Y_vectorEpetra.spy("output_apply");
+
+    std::cout << "Spy input e output apply completato, digita numero ";
+    int aaaaaaa;
+    std::cin >> aaaaaaa;
+
     return error;
 }
 

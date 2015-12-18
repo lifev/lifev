@@ -6,7 +6,7 @@ SET(interpolation_HEADERS
 CACHE INTERNAL "")
 
 SET(interpolation_SOURCES
-
+  interpolation/Interpolation.cpp
 CACHE INTERNAL "")
 
 

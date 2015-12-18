@@ -19,8 +19,7 @@
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
 
-#include <lifev/core/interpolation/RBFInterpolation.hpp>
-#include <lifev/core/interpolation/RBFlocallyRescaledVectorial.hpp>
+#include <lifev/core/interpolation/Interpolation.hpp>
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
 #include <Teuchos_RCP.hpp>
@@ -53,7 +52,7 @@ public:
     typedef  boost::shared_ptr<mapEpetra_Type>         mapEpetraPtr_Type;
     typedef  VectorEpetra                              VectorEpetra_Type;
     typedef  boost::shared_ptr<VectorEpetra_Type>      VectorEpetraPtr_Type;
-    typedef  boost::shared_ptr<RBFInterpolation<RegionMesh<LinearTetra> > > interpolationPtr_Type;
+    typedef  boost::shared_ptr<Interpolation>          interpolationPtr_Type;
 
 	typedef LifeV::Preconditioner                  basePrec_Type;
 	typedef boost::shared_ptr<basePrec_Type>       basePrecPtr_Type;

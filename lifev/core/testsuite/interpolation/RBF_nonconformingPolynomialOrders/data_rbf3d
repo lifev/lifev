@@ -15,7 +15,7 @@
 [fluid]
     [./space_discretization]
        	mesh_dir                 = ./
-       	mesh_file                = tube20_circ.mesh
+       	mesh_file                = vessel20.mesh
        	mesh_type                = .mesh
 		order                    = P2
 		
@@ -25,7 +25,7 @@
 [solid]
     [./space_discretization]
        	mesh_dir                 = ./
-       	mesh_file                = vessel20.mesh
+       	mesh_file                = tube20.mesh
        	mesh_type                = .mesh
 		order                    = P2
 	

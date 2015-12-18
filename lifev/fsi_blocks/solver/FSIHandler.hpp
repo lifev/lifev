@@ -84,8 +84,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
 #include <Teuchos_RCP.hpp>
-#include <lifev/core/interpolation/RBFInterpolation.hpp>
-#include <lifev/core/interpolation/RBFlocallyRescaledVectorial.hpp>
+#include <lifev/core/interpolation/Interpolation.hpp>
 
 #include <lifev/core/algorithm/LinearSolver.hpp>
 
@@ -138,7 +137,7 @@ public:
 	typedef Teuchos::ParameterList parameterList_Type;
 	typedef boost::shared_ptr<parameterList_Type> parameterListPtr_Type;
 
-	typedef RBFInterpolation<mesh_Type>           interpolation_Type;
+	typedef Interpolation interpolation_Type;
 	typedef boost::shared_ptr<interpolation_Type> interpolationPtr_Type;
 
 	typedef LifeV::Preconditioner            basePrec_Type;
@@ -416,6 +415,9 @@ private:
 	int M_counterSaveEvery;
 
 	vectorPtr_Type M_rhsStructureVelocity;
+
+	basePrecPtr_Type M_precPtr;
+	bool 			 M_precPtrBuilt;
 
 };
 

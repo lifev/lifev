@@ -186,8 +186,8 @@ int main (int argc, char** argv )
     intergrid.buildTableDofs_unknown ( Fluid_fieldFESpace_whole );
 
     // Build table of DOFs
-    intergrid.identifyNodes_known ( Solid_fieldFESpace );
-    intergrid.identifyNodes_unknown ( Fluid_fieldFESpace );
+    intergrid.identifyNodes_known ( );
+    intergrid.identifyNodes_unknown ( );
 
     // build maps
     intergrid.buildKnownInterfaceMap();
@@ -217,6 +217,12 @@ int main (int argc, char** argv )
     Solid_exporter.postProcess (0);
     Solid_exporter.closeFile();
 
+    // EXPORTING THE SOLUTION
+    ExporterHDF5<mesh_Type> Fluid_exporter (dataFile, Fluid_localMesh, "Results", Comm->MyPID() );
+    Fluid_exporter.setMeshProcId (Fluid_localMesh, Comm->MyPID() );
+    Fluid_exporter.exportPID (Fluid_localMesh, Comm, true );
+    Fluid_exporter.addVariable (ExporterData<mesh_Type>::VectorField, "Solution", Fluid_fieldFESpace, Fluid_solution, UInt (0) );
+
     // TESTING THE METHOD updateRhs
     intergrid.updateRhs (Solid_vector);
 
@@ -225,8 +231,21 @@ int main (int argc, char** argv )
 
     // GET THE SOLUTION
     intergrid.solution (Fluid_solution);
-    
-    Fluid_solution->spy("Fluid_solution");
+
+    // EXPORT FIRST SOLUTION
+    Fluid_exporter.postProcess (0);
+
+    // TESTING THE METHOD updateRhs
+    intergrid.updateRhs (Solid_vector_one);
+
+    // PERFORMING INTERPOLATION WITH A VECTOR OF ONE
+    intergrid.interpolate();
+
+    // GET THE SOLUTION
+    intergrid.solution (Fluid_solution);
+
+    // EXPORT FIRST SOLUTION
+    Fluid_exporter.postProcess (1);
 
     // GET THE SOLUTION ON GAMMA
     vectorPtr_Type Fluid_solutionOnGamma;
@@ -234,22 +253,7 @@ int main (int argc, char** argv )
 
     Fluid_solutionOnGamma->spy("Fluid_solutionOnGamma");
     
-    // EXPORTING THE SOLUTION
-    ExporterHDF5<mesh_Type> Fluid_exporter (dataFile, Fluid_localMesh, "Results", Comm->MyPID() );
-    Fluid_exporter.setMeshProcId (Fluid_localMesh, Comm->MyPID() );
-    Fluid_exporter.exportPID (Fluid_localMesh, Comm, true );
-    Fluid_exporter.addVariable (ExporterData<mesh_Type>::VectorField, "Solution", Fluid_fieldFESpace, Fluid_solution, UInt (0) );
-    Fluid_exporter.postProcess (0);
     Fluid_exporter.closeFile();
-    
-//    std::cout << "aaaaaaaaaaa";
-//
-//    for (int i = 0; i < 3000000; ++i )
-//    	for (int j = 0; j < 3000000; ++j )
-//    		int a = i + j;
-
-
-
 
 #ifdef HAVE_MPI
     MPI_Finalize();

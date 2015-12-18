@@ -346,7 +346,7 @@
             <Parameter name="Solver Type" type="string" value="BlockGmres"/>
             <Parameter name="Preconditioner Side" type="string" value="Right"/>
             <ParameterList name="options">
-                <Parameter name="Flexible Gmres" type="bool" value="false"/>
+                <Parameter name="Flexible Gmres" type="bool" value="true"/>
                 <Parameter name="Output Frequency" type="int" value="1"/>
                 <Parameter name="Block Size" type="int" value="200"/>
                 <Parameter name="Num Blocks" type="int" value="200"/>

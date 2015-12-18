@@ -157,6 +157,8 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
     
 	const VectorEpetra_Type X_vectorEpetra(X, M_monolithicMap, Unique);
 
+//	X_vectorEpetra.spy("input_apply");
+
 	//! Extract each component of the input vector
 	M_X_velocity->zero();
 	M_X_velocity->subset(X_vectorEpetra, *M_u_map, 0, 0);
@@ -340,6 +342,12 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 	Y_vectorEpetra.subset(*M_Y_displacement, M_Y_displacement->map(), 0, M_fluid );
 	Y_vectorEpetra.subset(*M_Y_lambda, M_Y_lambda->map(), 0, M_structure );
 	Y_vectorEpetra.subset(*M_Y_geometry, M_Y_geometry->map(), 0, M_lambda );
+
+//	Y_vectorEpetra.spy("output_apply");
+
+//	std::cout << "Spy input e output apply completato, digita numero ";
+//	int aaaaaaa;
+//	std::cin >> aaaaaaa;
 
 	Y = dynamic_cast<Epetra_MultiVector &>( Y_vectorEpetra.epetraVector() );
 

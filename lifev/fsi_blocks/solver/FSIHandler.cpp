@@ -64,7 +64,8 @@ M_gravity ( 0.0 ),
 M_considerGravity ( false ),
 M_moveMesh ( true ),
 M_nonconforming ( false ),
-M_lambda_num_structure ( false )
+M_lambda_num_structure ( false ),
+M_precPtrBuilt ( false )
 {
 }
 
@@ -587,6 +588,7 @@ void FSIHandler::buildInterfaceMaps ()
 			M_dofStructureToFluid->setup ( M_fluid->uFESpace()->refFE(), M_fluid->uFESpace()->dof(), M_displacementFESpaceSerial->refFE(), M_displacementFESpaceSerial->dof() );
 			M_dofStructureToFluid->update ( *M_fluid->uFESpace()->mesh(), interface, *M_displacementFESpaceSerial->mesh(), interface, tolerance, &flag);
 			M_localDofMap.reset(new std::map<UInt, UInt> ( M_dofStructureToFluid->localDofMap ( ) ) );
+			M_displacementFESpaceSerial.reset();
 		}
 		else
 		{
@@ -614,27 +616,45 @@ void FSIHandler::buildInterfaceMaps ()
 		belosList = Teuchos::getParametersFromXmlFile ( "SolverParamList_rbf3d.xml" );
 
 		// Flags of the coupling
-		int nFlags = 1;
-		std::vector<int> flags (nFlags);
-		flags[0] = 1;
-
 		M_displayer.leaderPrint ( "\n\t Creating fluid to structure interpolant" ) ;
-		// Creating fluid to structure interpolation operator
-		M_FluidToStructureInterpolant.reset ( interpolation_Type::InterpolationFactory::instance().createObject (M_datafile("interpolation/interpolation_Type","none")));
-		M_FluidToStructureInterpolant->setup( M_fluidMesh, M_fluidLocalMesh, M_structureMesh, M_structureLocalMesh, flags);
-		M_FluidToStructureInterpolant->setupRBFData (M_fluidVelocity, M_structureDisplacement, M_datafile, belosList);
-		M_FluidToStructureInterpolant->buildOperators();
 
+		const std::string uOrder = M_datafile ( "fluid/space_discretization/vel_order", "P1");
+		FESpacePtr_Type fluid_FESpace_whole ( new FESpace_Type ( M_fluidMesh, uOrder, 3, M_comm) );
+
+		const std::string dOrder = M_datafile ( "solid/space_discretization/order", "P1");
+		FESpacePtr_Type solid_FESpace_whole ( new FESpace_Type ( M_structureMesh, dOrder, 3, M_comm) );
+
+		// Creating fluid (known) to structure (unknown) interpolation operator
+		M_FluidToStructureInterpolant.reset( new interpolation_Type);
+		M_FluidToStructureInterpolant->setup(M_datafile, belosList);
+		M_FluidToStructureInterpolant->setMeshSize(MeshUtility::MeshStatistics::computeSize(*M_fluidMesh).maxH);
+		M_FluidToStructureInterpolant->setFlag(1);
+		M_FluidToStructureInterpolant->setVectors(M_fluidVelocity, M_structureDisplacement);
+		M_FluidToStructureInterpolant->buildTableDofs_known ( fluid_FESpace_whole );
+		M_FluidToStructureInterpolant->buildTableDofs_unknown ( solid_FESpace_whole );
+		M_FluidToStructureInterpolant->identifyNodes_known ( );
+		M_FluidToStructureInterpolant->identifyNodes_unknown ( );
+		M_FluidToStructureInterpolant->buildKnownInterfaceMap();
+		M_FluidToStructureInterpolant->buildUnknownInterfaceMap();
+		M_FluidToStructureInterpolant->buildOperators();
 		M_FluidToStructureInterpolant->getKnownInterfaceMap(M_fluidInterfaceMap);
 
 
 		M_displayer.leaderPrint ( "\n\t Creating structure to fluid interpolant\n" ) ;
-		// Creating structure to fluid interpolation operator
-		M_StructureToFluidInterpolant.reset ( interpolation_Type::InterpolationFactory::instance().createObject (M_datafile("interpolation/interpolation_Type","none")));
-		M_StructureToFluidInterpolant->setup( M_structureMesh, M_structureLocalMesh, M_fluidMesh, M_fluidLocalMesh, flags);
-		M_StructureToFluidInterpolant->setupRBFData ( M_structureDisplacement, M_fluidVelocity, M_datafile, belosList);
-		M_StructureToFluidInterpolant->buildOperators();
 
+		// Creating structure (known) to fluid (unknown) interpolation operator
+		M_StructureToFluidInterpolant.reset( new interpolation_Type);
+		M_StructureToFluidInterpolant->setup(M_datafile, belosList);
+		M_StructureToFluidInterpolant->setMeshSize(MeshUtility::MeshStatistics::computeSize(*M_structureMesh).maxH);
+		M_StructureToFluidInterpolant->setFlag(1);
+		M_StructureToFluidInterpolant->setVectors(M_structureDisplacement, M_fluidVelocity);
+		M_StructureToFluidInterpolant->buildTableDofs_known ( solid_FESpace_whole );
+		M_StructureToFluidInterpolant->buildTableDofs_unknown ( fluid_FESpace_whole );
+		M_StructureToFluidInterpolant->identifyNodes_known ( );
+		M_StructureToFluidInterpolant->identifyNodes_unknown ( );
+		M_StructureToFluidInterpolant->buildKnownInterfaceMap();
+		M_StructureToFluidInterpolant->buildUnknownInterfaceMap();
+		M_StructureToFluidInterpolant->buildOperators();
 		M_StructureToFluidInterpolant->getKnownInterfaceMap(M_structureInterfaceMap);
 
 		// Getting a scalar map that will be used for the lagrange multipliers
@@ -970,6 +990,11 @@ FSIHandler::solveFSIproblem ( )
 	LifeChrono smallThingsChrono;
 	M_time = M_t_zero + M_dt;
 
+	// Clean unpartitioned mesh
+	M_fluidMesh.reset();
+	M_structureMesh.reset();
+
+	// Build monolithic map
 	buildMonolithicMap ( );
 
     M_solution.reset ( new VectorEpetra ( *M_monolithicMap ) );
@@ -1258,17 +1283,20 @@ FSIHandler::applyInverseFluidMassOnGamma ( const vectorPtr_Type& weakLambda, vec
 	belosList = Teuchos::getParametersFromXmlFile ( "SolverParamList_rbf3d.xml" );
 
 	// Preconditioner
-	prec_Type* precRawPtr;
-	basePrecPtr_Type precPtr;
-	precRawPtr = new prec_Type;
-	precRawPtr->setDataFromGetPot ( M_datafile, "prec" );
-	precPtr.reset ( precRawPtr );
+	if ( !M_precPtrBuilt )
+	{
+		prec_Type* precRawPtr;
+		precRawPtr = new prec_Type;
+		precRawPtr->setDataFromGetPot ( M_datafile, "prec" );
+		M_precPtr.reset ( precRawPtr );
+		M_precPtrBuilt = true;
+	}
 
 	// Linear Solver
 	LinearSolver solverOne;
 	solverOne.setCommunicator ( M_comm );
 	solverOne.setParameters ( *belosList );
-	solverOne.setPreconditioner ( precPtr );
+	solverOne.setPreconditioner ( M_precPtr );
 
 	// Solution
 	strongLambda->zero();
@@ -1283,6 +1311,8 @@ void
 FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, const UInt iter_newton)
 {
 	residual.zero();
+
+//	solution.spy("solution");
 
 	// Create empty vectors to store each component of the FSI residual
 
@@ -1670,6 +1700,12 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 	if ( !M_nonconforming )
 		initializeApplyOperatorJacobian();
+
+//	residual.spy("residual");
+//
+//	std::cout << "Spy residuo e soluzione completato, digita numero ";
+//	int aaaaaaa;
+//	std::cin >> aaaaaaa;
 }
 
 void

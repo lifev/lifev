@@ -24,7 +24,7 @@
 
     	[../space_discretization]
     		mesh_dir        = ./
-    		mesh_file       = tube20_rotated.mesh     # tube20_rotated.mesh can be used for nonconforming simulation
+    		mesh_file       = fluido.mesh     # tube20_rotated.mesh can be used for nonconforming simulation
     									              # tube20.mesh both for conforming and nonconforming
     		mesh_type       = .mesh
     		vel_order       = P1
@@ -44,9 +44,9 @@
 
     	[./space_discretization]
     		mesh_dir        = ./
-    		mesh_file       = vessel20.mesh
+    		mesh_file       = solido.mesh
     		mesh_type       = .mesh
-    		order           = P1
+    		order           = P2
 
 	    [../model]
 			constitutiveLaw     = isotropic
@@ -86,16 +86,10 @@
 	fluid_vertex_flag     = 20       # tells whether the in/out ring curves on the interface
 	nonconforming         = true     # tells whether the meshes are conformin at the interface (true works just with P1)
 	lambda_num_structure  = false    # if true the lagrange multip. are numbered wrt the structure, if false wrt to the fluid
-	useMasses             = false     # if true we interpolate the strong stresses, if false we interpolate the weak stresses
+	useMasses             = true     # if true we interpolate the strong stresses, if false we interpolate the weak stresses
 
 [../]
 
-[interpolation]
-    interpolation_Type           = RBFlocallyRescaledVectorial
-    n_links                      = 1
-   
-[../]
-    
 [exporter]
     type       = hdf5
     multimesh  = false
@@ -127,22 +121,22 @@
     displayList                  = false
 
     [./ifpack]
-        overlap                  = 2
+        overlap                  = 1
 
         [./fact]
             ilut_level-of-fill   = 1
-            drop_tolerance       = 0.0
+            drop_tolerance       = 0.001
             relax_value          = 0
 
         [../amesos]
             solvertype           = Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
 
         [../partitioner]
-            overlap              = 2
+            overlap              = 1
 
         [../schwarz]
             reordering_type      = none #metis, rcm, none
-            filter_singletons    = true
+            filter_singletons    = false
 
 
 	[../]
