@@ -56,9 +56,14 @@ Real fZero (const Real& t, const Real& x, const Real& y, const Real& z, const ID
 Real pressure (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 {
 	if ( t <= 0.003 )
-		return -13300.0;
+	{
+		return -10000.0;
+		//return -13300.0;
+	}
 	else
+	{
 		return 0.0;
+	}
 }
 
 Real inflow (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
