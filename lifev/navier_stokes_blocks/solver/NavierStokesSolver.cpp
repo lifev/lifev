@@ -22,7 +22,7 @@ NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commP
         M_nonconforming ( dataFile("fluid/nonconforming", false) ),
         M_imposeWeakBC ( dataFile("fluid/weak_bc/use", false) ),
         M_flagWeakBC ( dataFile("fluid/weak_bc/flag", 31) ),
-        M_meshSizeWeakBC ( dataFile("fluid/weak_bc/mesh_size", 0.001) ),
+        M_meshSizeWeakBC ( dataFile("fluid/weak_bc/mesh_size", 0.0) ),
         M_computeAerodynamicLoads ( dataFile("fluid/forces/compute", false) ),
         M_methodAerodynamicLoads ( dataFile("fluid/forces/method", "integral_form") ),
         M_flagBody ( dataFile("fluid/forces/flag", 31 ) )
@@ -81,7 +81,7 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh, const int& id_domain)
 	M_velocityFESpaceScalar.reset (new FESpace<mesh_Type, map_Type> (mesh, uOrder, 1, M_comm) );
 
 	M_fespaceUETA.reset( new ETFESpace_velocity(M_velocityFESpace->mesh(), &(M_velocityFESpace->refFE()), M_comm));
-	M_fespaceUETA_scalar.reset( new ETFESpace_pressure(M_velocityFESpace->mesh(), &(M_velocityFESpace->refFE()), M_comm));
+	M_fespaceUETA_scalar.reset( new ETFESpace_pressure(M_velocityFESpaceScalar->mesh(), &(M_velocityFESpaceScalar->refFE()), M_comm));
 	M_fespacePETA.reset( new ETFESpace_pressure(M_pressureFESpace->mesh(), &(M_pressureFESpace->refFE()), M_comm));
 
 	M_uExtrapolated.reset( new vector_Type ( M_velocityFESpace->map(), Repeated ) );
