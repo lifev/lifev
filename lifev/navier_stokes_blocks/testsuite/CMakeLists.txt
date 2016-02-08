@@ -10,4 +10,5 @@ ADD_SUBDIRECTORIES(
 	Turek_Reynolds_100_semi_implicit
     Turek_Reynolds_20
     non_conforming_fluids
+        evaluate_at_quadrature_points
 )

@@ -118,6 +118,7 @@ SET(expression_HEADERS
 	expression/ExpressionLaplacianJ.hpp
 	expression/EvaluationLaplacianI.hpp
 	expression/EvaluationLaplacianJ.hpp
+    expression/EvaluateAtQuadraturePoint.hpp
 CACHE INTERNAL "")
 
 SET(expression_SOURCES ""
