@@ -939,8 +939,20 @@ void ExporterHDF5<MeshType>::writeScalar (const exporterData_Type& dvar)
        M_HDF5->Write("RHS", RHS);
     */
 
-    UInt size  = dvar.numDOF();
-    UInt start = dvar.start();
+    //UInt size  = dvar.numDOF();
+	UInt size;
+
+	switch ( dvar.where() )
+	{
+	case exporterData_Type::Node:
+		size = dvar.numDOF();
+		break;
+	case exporterData_Type::Cell:
+		size = dvar.storedArrayPtr()->size();
+		break;
+	}
+
+	UInt start = dvar.start();
 
     MapEpetra subMap (dvar.storedArrayPtr()->blockMap(), start, size);
     vector_Type subVar (subMap);
@@ -955,8 +967,21 @@ template <typename MeshType>
 void ExporterHDF5<MeshType>::writeVector (const exporterData_Type& dvar)
 {
 
-    UInt size  = dvar.numDOF();
-    UInt start = dvar.start();
+    //UInt size  = dvar.numDOF();
+
+	UInt size;
+
+	switch ( dvar.where() )
+	{
+	case exporterData_Type::Node:
+		size = dvar.numDOF();
+		break;
+	case exporterData_Type::Cell:
+		size = ( (dvar.storedArrayPtr()->size() ) / ( nDimensions ) );
+		break;
+	}
+
+	UInt start = dvar.start();
 
     // solution array has to be reordered and stored in a Multivector.
     // Using auxiliary arrays:
