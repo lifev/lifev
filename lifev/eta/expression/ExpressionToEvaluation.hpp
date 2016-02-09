@@ -76,6 +76,7 @@
 #include <lifev/eta/expression/ExpressionInterpolateValue.hpp>
 #include <lifev/eta/expression/ExpressionInterpolateGradient.hpp>
 #include <lifev/eta/expression/ExpressionInterpolateLaplacian.hpp>
+#include <lifev/eta/expression/ExpressionReturnAtQuadraturePoints.hpp>
 
 #include <lifev/eta/expression/ExpressionFunctor.hpp>
 
@@ -132,6 +133,7 @@
 #include <lifev/eta/expression/EvaluationInterpolateValue.hpp>
 #include <lifev/eta/expression/EvaluationInterpolateGradient.hpp>
 #include <lifev/eta/expression/EvaluationInterpolateLaplacian.hpp>
+#include <lifev/eta/expression/EvaluationReturnAtQuadraturePoints.hpp>
 
 #include <lifev/eta/expression/EvaluationFunctor.hpp>
 
@@ -539,6 +541,18 @@ class ExpressionToEvaluation <
 {
 public:
     typedef EvaluationInterpolateValue<MeshType, MapType, FESpaceDim, FEFieldDim> evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+    
+// Specialized for a returned value
+template<typename MeshType, typename MapType, UInt FESpaceDim, UInt FEFieldDim, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation <
+ExpressionReturnAtQuadraturePoints<MeshType, MapType, FESpaceDim, FEFieldDim>, testDim, solutionDim, spaceDim >
+{
+public:
+    typedef EvaluationReturnAtQuadraturePoints<MeshType, MapType, FESpaceDim, FEFieldDim> evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();
