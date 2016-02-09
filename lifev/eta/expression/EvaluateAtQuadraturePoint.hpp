@@ -99,15 +99,9 @@ public:
     
     //! @name Operator
     //@{
-    
-    //! Operator wrapping the addTo method
-    inline void operator>> (std::vector<std::vector<Real>>& vector)
-    {
-        evaluate (vector);
-    }
 
     //! Operator wrapping the addTo method
-    inline void operator>> (std::vector<std::vector<VectorSmall<3>>>& vector)
+    inline void operator>> (std::vector<std::vector<VectorSmall<TestSpaceType::field_dim>>>& vector)
     {
         evaluate (vector);
     }
@@ -127,9 +121,8 @@ public:
      sum over the quadrature nodes, assemble in the global
      vector.
      */
-    void evaluate (std::vector<std::vector<Real>>& vec); // for scalar field
     
-    void evaluate (std::vector<std::vector<VectorSmall<3>>>& vec); // for 3D field
+    void evaluate (std::vector<std::vector<VectorSmall<TestSpaceType::field_dim>>>& vec); // for 3D field
     
     //@}
     
@@ -302,7 +295,7 @@ check (std::ostream& out)
 template < typename MeshType, typename TestSpaceType, typename ExpressionType, typename QRAdapterType>
 void
 EvaluateAtQuadraturePoint < MeshType, TestSpaceType, ExpressionType, QRAdapterType>::
-evaluate (std::vector<std::vector<Real>>& vec)
+evaluate (std::vector<std::vector<VectorSmall<TestSpaceType::field_dim>>>& vec)
 {
     UInt nbElements (M_mesh->numElements() );
     UInt nbQuadPt_std (M_qrAdapter.standardQR().nbQuadPt() );
@@ -342,6 +335,7 @@ evaluate (std::vector<std::vector<Real>>& vec)
     
 }
 
+/*
 template < typename MeshType, typename TestSpaceType, typename ExpressionType, typename QRAdapterType>
 void
 EvaluateAtQuadraturePoint < MeshType, TestSpaceType, ExpressionType, QRAdapterType>::
@@ -383,7 +377,7 @@ evaluate (std::vector<std::vector<VectorSmall<3>>>& vec)
     }
     
 }
-    
+*/
     
 } // Namespace ExpressionAssembly
     
