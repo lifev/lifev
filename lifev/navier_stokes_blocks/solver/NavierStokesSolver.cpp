@@ -139,6 +139,7 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh, const int& id_domain)
     	M_stabilization->setETvelocitySpace ( M_fespaceUETA );
     	M_stabilization->setETpressureSpace ( M_fespacePETA );
         M_stabilization->setUseGraph( M_useGraph );
+        M_stabilization->setUseODEfineScale( M_dataFile("fluid/stabilization/ode_fine_scale", false ) );
     }
 
     M_displayer.leaderPrintMax ( " Number of DOFs for the velocity = ", M_velocityFESpace->dof().numTotalDof()*3 ) ;

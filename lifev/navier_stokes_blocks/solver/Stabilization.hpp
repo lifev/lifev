@@ -229,7 +229,13 @@ public:
 
     virtual std::string label () = 0;
 
+    virtual void setUseODEfineScale ( const bool& /*M_useODEfineScale*/ ) {};
+
 private:
+
+    virtual void setupODEfineScale () {};
+
+    virtual void intializeVectorsFineScale () {};
 
 };
 

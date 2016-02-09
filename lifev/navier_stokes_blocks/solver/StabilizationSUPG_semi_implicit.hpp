@@ -212,9 +212,15 @@ public:
 
     std::string label () { return M_label; }
 
+    void setUseODEfineScale ( const bool& useODEfineScale );
+
     //@}
 
 private:
+
+    void setupODEfineScale();
+
+    void intializeVectorsFineScale ();
 
     //! @name Private Attributes
     //@{
@@ -258,6 +264,11 @@ private:
     bool M_useGraph;
 
     std::string M_label;
+
+    bool M_useODEfineScale;
+
+	std::vector<std::vector<VectorSmall<3>>> M_fineScaleVelocity;
+	std::vector<std::vector<Real>> M_fineScalePressure;
 
     //@}
 }; // class StabilizationSUPG_semi_implicit

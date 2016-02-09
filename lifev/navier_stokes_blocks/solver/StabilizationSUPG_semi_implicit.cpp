@@ -18,7 +18,8 @@ namespace LifeV
 //=============================================================================
 
 StabilizationSUPG_semi_implicit::StabilizationSUPG_semi_implicit():
-		M_label("SUPG_semi_implicit")
+		M_label("SUPG_semi_implicit"),
+		M_useODEfineScale ( false )
 {
 }
 
@@ -34,6 +35,46 @@ void StabilizationSUPG_semi_implicit::setConstant(const int & value)
 		M_C_I = 60;
 	else
 		ASSERT(0!=0, "Please implement a suitable value for M_C_I for your velocity FE order");
+}
+
+void StabilizationSUPG_semi_implicit::setUseODEfineScale ( const bool& useODEfineScale )
+{
+	M_useODEfineScale = useODEfineScale;
+	setupODEfineScale();
+	intializeVectorsFineScale(); // metodo che eventualmente permette restart
+}
+
+void StabilizationSUPG_semi_implicit::setupODEfineScale ( )
+{
+	int numVolumes = M_uFESpace->mesh()->numVolumes();
+	UInt numQuadraturePointsVelocity = M_uFESpace->qr().nbQuadPt();
+	UInt numQuadraturePointsPressure = M_pFESpace->qr().nbQuadPt();
+
+	M_fineScaleVelocity.resize(numVolumes);
+	for ( int i = 0; i < numVolumes; ++i )
+	{
+		M_fineScaleVelocity[i].resize( numQuadraturePointsVelocity );
+		M_fineScalePressure[i].resize( numQuadraturePointsPressure );
+	}
+
+}
+
+void StabilizationSUPG_semi_implicit::intializeVectorsFineScale ( )
+{
+	for ( int i = 0; i < M_uFESpace->mesh()->numVolumes(); ++i )
+	{
+		for ( int j = 0; j < M_uFESpace->qr().nbQuadPt(); ++j )
+		{
+			M_fineScaleVelocity[i][j](0) = 0.;
+			M_fineScaleVelocity[i][j](1) = 0.;
+			M_fineScaleVelocity[i][j](2) = 0.;
+		}
+
+		for ( int j = 0; j < M_pFESpace->qr().nbQuadPt(); ++j )
+		{
+			M_fineScalePressure[i][j] = 0.;
+		}
+	}
 }
 
 void StabilizationSUPG_semi_implicit::buildGraphs()

@@ -6,11 +6,11 @@ SET(solver_HEADERS
   solver/aSIMPLEOperator.hpp
   solver/aPCDOperator.hpp
   solver/Stabilization.hpp
-  solver/StabilizationSUPG.hpp
-  solver/StabilizationVMSLES.hpp
+#  solver/StabilizationSUPG.hpp
+#  solver/StabilizationVMSLES.hpp
   solver/StabilizationSUPG_semi_implicit.hpp
-  solver/StabilizationVMSLES_semi_implicit.hpp
-  solver/StabilizationSUPGALE.hpp
+#  solver/StabilizationVMSLES_semi_implicit.hpp
+#  solver/StabilizationSUPGALE.hpp
   solver/MultipleFluidsHandler.hpp
   solver/MultiFluidApplyOperator.hpp
   solver/DirichletNeumannPreconditionerMultiFluid.hpp
@@ -21,11 +21,11 @@ SET(solver_SOURCES
   solver/NavierStokesOperator.cpp
   solver/aSIMPLEOperator.cpp
   solver/aPCDOperator.cpp
-  solver/StabilizationSUPG.cpp
-  solver/StabilizationVMSLES.cpp
+#  solver/StabilizationSUPG.cpp
+#  solver/StabilizationVMSLES.cpp
   solver/StabilizationSUPG_semi_implicit.cpp
-  solver/StabilizationVMSLES_semi_implicit.cpp
-  solver/StabilizationSUPGALE.cpp
+#  solver/StabilizationVMSLES_semi_implicit.cpp
+#  solver/StabilizationSUPGALE.cpp
   solver/MultipleFluidsHandler.cpp
   solver/MultiFluidApplyOperator.cpp
   solver/DirichletNeumannPreconditionerMultiFluid.cpp

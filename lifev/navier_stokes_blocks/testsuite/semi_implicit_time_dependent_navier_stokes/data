@@ -53,6 +53,7 @@ io_class = new                                    					# possibilities: old or n
     	use             = true
     	type            = SUPG_SEMI_IMPLICIT
     	vel_order       = 2
+    	ode_fine_scale  = true
 
 
     [../miscellaneous]
