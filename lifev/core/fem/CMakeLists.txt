@@ -43,6 +43,7 @@ SET(fem_HEADERS
   fem/TimeData.hpp
   fem/TimeAndExtrapolationHandler.hpp
   fem/Newmark.hpp
+  fem/TimeAndExtrapolationHandlerQuadPts.hpp
 CACHE INTERNAL "")
 
 SET(fem_SOURCES

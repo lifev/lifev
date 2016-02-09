@@ -2,6 +2,7 @@
     mesh_dir   = ./
     mesh_file  = tube20.mesh
     mesh_type  = .mesh
+    fe_order   = P2
 
 [dataTimeHandler]
     orderBDF             = 2
