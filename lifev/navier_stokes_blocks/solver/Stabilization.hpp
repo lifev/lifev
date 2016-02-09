@@ -46,6 +46,7 @@
 #include <lifev/eta/fem/ETFESpace.hpp>
 
 #include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/filter/ExporterHDF5.hpp>
 
 namespace LifeV
 {
@@ -231,11 +232,17 @@ public:
 
     virtual void setUseODEfineScale ( const bool& /*M_useODEfineScale*/ ) {};
 
+    virtual void updateODEfineScale ( const vectorPtr_Type& /*velocity*/, const vectorPtr_Type& /*pressure*/ ) {};
+
+    virtual void setExportFineScaleVelocity ( ExporterHDF5<mesh_Type> & /*exporter*/, const int& /*numElementsTotal*/ ) {};
+
 private:
 
     virtual void setupODEfineScale () {};
 
-    virtual void intializeVectorsFineScale () {};
+    virtual void computeFineScales ( const vectorPtr_Type& /*velocity*/, const vectorPtr_Type& /*pressure*/ ) {};
+
+    virtual void computeFineScalesForVisualization ( const vectorPtr_Type& /*velocity*/, const vectorPtr_Type& /*pressure*/ ) {};
 
 };
 

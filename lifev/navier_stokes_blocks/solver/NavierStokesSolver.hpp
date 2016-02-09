@@ -83,6 +83,7 @@
 #include <lifev/core/algorithm/LinearSolver.hpp>
 #include <lifev/core/algorithm/Preconditioner.hpp>
 #include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/core/filter/ExporterHDF5.hpp>
 
 namespace LifeV
 {
@@ -134,6 +135,8 @@ public:
 
 	// Destructor
 	~NavierStokesSolver();
+
+	void setExportFineScaleVelocity(ExporterHDF5<mesh_Type>& exporter, const int& numElementsTotal);
 
 	// Setup
 	void setup(const meshPtr_Type& mesh, const int& id_domain = 36);

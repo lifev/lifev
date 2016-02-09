@@ -76,6 +76,8 @@
 #include <lifev/eta/expression/Integrate.hpp>
 #include <lifev/eta/expression/BuildGraph.hpp>
 
+#include <lifev/core/fem/TimeAndExtrapolationHandlerQuadPts.hpp>
+
 namespace LifeV
 {
 
@@ -214,13 +216,19 @@ public:
 
     void setUseODEfineScale ( const bool& useODEfineScale );
 
+    void updateODEfineScale ( const vectorPtr_Type& velocity, const vectorPtr_Type& pressure );
+
+    void setExportFineScaleVelocity ( ExporterHDF5<mesh_Type> & exporter, const int& numElementsTotal);
+
     //@}
 
 private:
 
     void setupODEfineScale();
 
-    void intializeVectorsFineScale ();
+    void computeFineScales ( const vectorPtr_Type& velocity, const vectorPtr_Type& pressure );
+
+    void computeFineScalesForVisualization ( const vectorPtr_Type& velocity, const vectorPtr_Type& pressure );
 
     //! @name Private Attributes
     //@{
@@ -267,8 +275,15 @@ private:
 
     bool M_useODEfineScale;
 
-	std::vector<std::vector<VectorSmall<3>>> M_fineScaleVelocity;
-	std::vector<std::vector<Real>> M_fineScalePressure;
+    boost::shared_ptr<TimeAndExtrapolationHandlerQuadPts<3>> M_handlerFineScaleVelocity;
+
+    std::vector<std::vector<VectorSmall<3>>> M_fineScaleVelocityRhs;
+    std::vector<std::vector<VectorSmall<3>>> M_fineScaleVelocity;
+    std::vector<std::vector<VectorSmall<1>>> M_fineScalePressure;
+
+    vectorPtr_Type M_rhsVelocity;
+    vectorPtr_Type M_fineVelocity;
+    vectorPtr_Type M_finePressure;
 
     //@}
 }; // class StabilizationSUPG_semi_implicit

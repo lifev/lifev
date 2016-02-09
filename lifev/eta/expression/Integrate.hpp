@@ -52,6 +52,8 @@
 #include <lifev/eta/expression/IntegrateVectorElement.hpp>
 #include <lifev/eta/expression/IntegrateValueElement.hpp>
 #include <lifev/eta/expression/EvaluateAtQuadraturePoint.hpp>
+#include <lifev/eta/expression/ComputeFineScaleVelocity.hpp>
+#include <lifev/eta/expression/ComputeFineScalePressure.hpp>
 
 //Integration over portions of the domain
 #include <lifev/eta/expression/IntegrateMatrixVolumeID.hpp>
@@ -265,7 +267,109 @@ integrate ( const RequestLoopElement<MeshType>& request,
     return IntegrateVectorElement<MeshType, TestSpaceType, ExpressionType, QRAdapterNeverAdapt>
            (request.mesh(), QRAdapterNeverAdapt (quadrature), testSpace, expression, offset);
 }
-    
+
+//! Compute stress function for vectorial expressions
+/*!
+  @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+
+  This class is an helper function to instantiate the class
+  for performing an integration, here to assemble a vector
+  with a loop on the elements.
+
+  This function is repeated 4 times:
+  versions with and without QR adapter
+  versions with and without Offset
+
+ */
+template < typename MeshType, typename TestSpaceType, typename ExpressionType, typename QRAdapterType>
+ComputeFineScaleVelocity<MeshType, TestSpaceType, ExpressionType, QRAdapterType>
+ComputeFineScaleVel ( const RequestLoopElement<MeshType>& request,
+            const QRAdapterBase<QRAdapterType>& qrAdapterBase,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const ExpressionType& expression,
+            const UInt offset = 0);
+template < typename MeshType, typename TestSpaceType, typename ExpressionType, typename QRAdapterType>
+ComputeFineScaleVelocity<MeshType, TestSpaceType, ExpressionType, QRAdapterType>
+ComputeFineScaleVel ( const RequestLoopElement<MeshType>& request,
+            const QRAdapterBase<QRAdapterType>& qrAdapterBase,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const ExpressionType& expression,
+            const UInt offset)
+{
+    return ComputeFineScaleVelocity<MeshType, TestSpaceType, ExpressionType, QRAdapterType>
+           (request.mesh(), qrAdapterBase.implementation(), testSpace, expression, offset );
+}
+
+template < typename MeshType, typename TestSpaceType, typename ExpressionType>
+ComputeFineScaleVelocity<MeshType, TestSpaceType, ExpressionType, QRAdapterNeverAdapt>
+ComputeFineScaleVel ( const RequestLoopElement<MeshType>& request,
+            const QuadratureRule& quadrature,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const ExpressionType& expression,
+            const UInt offset = 0);
+template < typename MeshType, typename TestSpaceType, typename ExpressionType>
+ComputeFineScaleVelocity<MeshType, TestSpaceType, ExpressionType, QRAdapterNeverAdapt>
+ComputeFineScaleVel ( const RequestLoopElement<MeshType>& request,
+            const QuadratureRule& quadrature,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const ExpressionType& expression,
+            const UInt offset)
+{
+    return ComputeFineScaleVelocity<MeshType, TestSpaceType, ExpressionType, QRAdapterNeverAdapt>
+           (request.mesh(), QRAdapterNeverAdapt (quadrature), testSpace, expression, offset );
+}
+
+//! Compute stress function for vectorial expressions
+/*!
+  @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+
+  This class is an helper function to instantiate the class
+  for performing an integration, here to assemble a vector
+  with a loop on the elements.
+
+  This function is repeated 4 times:
+  versions with and without QR adapter
+  versions with and without Offset
+
+ */
+template < typename MeshType, typename TestSpaceType, typename ExpressionType, typename QRAdapterType>
+ComputeFineScalePressure<MeshType, TestSpaceType, ExpressionType, QRAdapterType>
+ComputeFineScalePres ( const RequestLoopElement<MeshType>& request,
+            const QRAdapterBase<QRAdapterType>& qrAdapterBase,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const ExpressionType& expression,
+            const UInt offset = 0);
+template < typename MeshType, typename TestSpaceType, typename ExpressionType, typename QRAdapterType>
+ComputeFineScalePressure<MeshType, TestSpaceType, ExpressionType, QRAdapterType>
+ComputeFineScalePres ( const RequestLoopElement<MeshType>& request,
+            const QRAdapterBase<QRAdapterType>& qrAdapterBase,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const ExpressionType& expression,
+            const UInt offset)
+{
+    return ComputeFineScalePressure<MeshType, TestSpaceType, ExpressionType, QRAdapterType>
+           (request.mesh(), qrAdapterBase.implementation(), testSpace, expression, offset );
+}
+
+template < typename MeshType, typename TestSpaceType, typename ExpressionType>
+ComputeFineScalePressure<MeshType, TestSpaceType, ExpressionType, QRAdapterNeverAdapt>
+ComputeFineScalePres ( const RequestLoopElement<MeshType>& request,
+            const QuadratureRule& quadrature,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const ExpressionType& expression,
+            const UInt offset = 0);
+template < typename MeshType, typename TestSpaceType, typename ExpressionType>
+ComputeFineScalePressure<MeshType, TestSpaceType, ExpressionType, QRAdapterNeverAdapt>
+ComputeFineScalePres ( const RequestLoopElement<MeshType>& request,
+            const QuadratureRule& quadrature,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const ExpressionType& expression,
+            const UInt offset)
+{
+    return ComputeFineScalePressure<MeshType, TestSpaceType, ExpressionType, QRAdapterNeverAdapt>
+           (request.mesh(), QRAdapterNeverAdapt (quadrature), testSpace, expression, offset );
+}
+
 //! Integrate function for vectorial expressions
 /*!
  @author Davide Forti <davide.forti@epfl.ch>

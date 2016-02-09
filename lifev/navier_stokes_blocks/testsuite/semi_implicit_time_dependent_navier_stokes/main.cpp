@@ -81,6 +81,7 @@ main ( int argc, char** argv )
     MeshData meshData;
     meshData.setup (dataFile, "fluid/space_discretization");
     readMesh (*fullMeshPtr, meshData);
+    int numElementsTotal = fullMeshPtr->numElements();
 
     // mesh partitioner
     MeshPartitioner< mesh_Type >  meshPart (fullMeshPtr, Comm);
@@ -136,28 +137,18 @@ main ( int argc, char** argv )
         
     // Exporter
     std::string outputName = dataFile ( "exporter/filename", "result");
-    boost::shared_ptr< Exporter<mesh_Type > > exporter;
-    std::string const exporterType =  dataFile ( "exporter/type", "ensight");
-
-#ifdef HAVE_HDF5
-    if (exporterType.compare ("hdf5") == 0)
-    {
-    	exporter.reset ( new ExporterHDF5<mesh_Type > ( dataFile, outputName ) );
-    	exporter->setPostDir ( "./" );
-    	exporter->setMeshProcId ( localMeshPtr, Comm->MyPID() );
-    }
-#endif
-    else if(exporterType.compare ("vtk") == 0)
-    {
-    	exporter.reset ( new ExporterVTK<mesh_Type > ( dataFile, outputName ) );
-    	exporter->setPostDir ( "./" );
-    	exporter->setMeshProcId ( localMeshPtr, Comm->MyPID() );
-    }
-
+    boost::shared_ptr< ExporterHDF5<mesh_Type > > exporter;
+    exporter.reset ( new ExporterHDF5<mesh_Type > ( dataFile, outputName ) );
+    exporter->setPostDir ( "./" );
+    exporter->setMeshProcId ( localMeshPtr, Comm->MyPID() );
     vectorPtr_Type velocity( new vector_Type(ns.uFESpace()->map(), exporter->mapType() ) );
     vectorPtr_Type pressure( new vector_Type(ns.pFESpace()->map(), exporter->mapType() ) );
     exporter->addVariable ( ExporterData<mesh_Type>::VectorField, "velocity", ns.uFESpace(), velocity, UInt (0) );
     exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "pressure", ns.pFESpace(), pressure, UInt (0) );
+
+    if ( dataFile ( "fluid/stabilization/ode_fine_scale", false) )
+    	ns.setExportFineScaleVelocity(*exporter, numElementsTotal);
+
     exporter->postProcess ( t0 );
 
     // Boundary conditions

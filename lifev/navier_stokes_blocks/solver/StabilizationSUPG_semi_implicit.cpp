@@ -1,7 +1,7 @@
 #include <lifev/navier_stokes_blocks/solver/StabilizationSUPG_semi_implicit.hpp>
 
 // MACRO TO DEFINE TAU_M
-#define TAU_M 	       value(1)/( eval(squareroot,TAU_M_DEN) )
+#define TAU_M 	       value(1.0)/( eval(squareroot,TAU_M_DEN) )
 #define TAU_M_DEN      TAU_M_DEN_DT + TAU_M_DEN_VEL + TAU_M_DEN_VISC
 #define TAU_M_DEN_DT   value(M_density*M_density)*value(M_bdfOrder*M_bdfOrder)/value(M_timestep * M_timestep)
 #define TAU_M_DEN_VEL  value(M_density*M_density)*dot(value(M_fespaceUETA, velocity_extrapolated_rep), value(M_fespaceUETA, velocity_extrapolated_rep))/(h_K*h_K)
@@ -9,6 +9,20 @@
 
 // MACRO TO DEFINE TAU_C
 #define TAU_C (h_K*h_K)/(TAU_M)
+
+// MACRO BELOW FOR FINE SCALE
+#define TAU_M_NO_DT value(1.0)/( eval( squareroot, TAU_M_DEN_VEL + TAU_M_DEN_VISC ) )
+#define TAU_C_NO_DT (h_K*h_K)/(TAU_M_NO_DT)
+
+// MACRO FOR EVALUATION OF THE FINE SCALE VELOCITY
+#define TAU_M_UPRIME          value(1.0)/( eval(squareroot,TAU_M_DEN_UPRIME) )
+#define TAU_M_DEN_UPRIME      TAU_M_DEN_DT + TAU_M_DEN_VEL_UPRIME + TAU_M_DEN_VISC_UPRIME
+#define TAU_M_DEN_VEL_UPRIME  value(M_density*M_density)*dot(value(M_fespaceUETA, *velocity_repeated), value(M_fespaceUETA, *velocity_repeated))/(h_K*h_K)
+#define TAU_M_DEN_VISC_UPRIME value(M_C_I)*value(M_viscosity*M_viscosity)/(h_K*h_K*h_K*h_K)
+
+// MACRO FOR EVALUATION OF THE FINE SCALE PRESSURE
+#define TAU_M_NO_DT_UPRIME value(1.0)/( eval( squareroot, TAU_M_DEN_VEL_UPRIME + TAU_M_DEN_VISC_UPRIME ) )
+#define TAU_C_NO_DT_PPRIME (h_K*h_K)/(TAU_M_NO_DT_UPRIME)
 
 namespace LifeV
 {
@@ -41,7 +55,6 @@ void StabilizationSUPG_semi_implicit::setUseODEfineScale ( const bool& useODEfin
 {
 	M_useODEfineScale = useODEfineScale;
 	setupODEfineScale();
-	intializeVectorsFineScale(); // metodo che eventualmente permette restart
 }
 
 void StabilizationSUPG_semi_implicit::setupODEfineScale ( )
@@ -50,31 +63,164 @@ void StabilizationSUPG_semi_implicit::setupODEfineScale ( )
 	UInt numQuadraturePointsVelocity = M_uFESpace->qr().nbQuadPt();
 	UInt numQuadraturePointsPressure = M_pFESpace->qr().nbQuadPt();
 
+	std::vector<std::vector<VectorSmall<3>>> velocity_fine;
+	velocity_fine.resize(numVolumes);
+
 	M_fineScaleVelocity.resize(numVolumes);
+	M_fineScalePressure.resize(numVolumes);
+	M_fineScaleVelocityRhs.resize(numVolumes);
+
 	for ( int i = 0; i < numVolumes; ++i )
 	{
+		velocity_fine[i].resize( numQuadraturePointsVelocity );
+		M_fineScaleVelocityRhs[i].resize( numQuadraturePointsVelocity );
 		M_fineScaleVelocity[i].resize( numQuadraturePointsVelocity );
-		M_fineScalePressure[i].resize( numQuadraturePointsPressure );
+		M_fineScalePressure[i].resize( numQuadraturePointsVelocity );
+
+		for ( int j = 0; j < numQuadraturePointsVelocity; ++j )
+		{
+			velocity_fine[i][j](0) = 0.0;
+			velocity_fine[i][j](1) = 0.0;
+			velocity_fine[i][j](2) = 0.0;
+
+			M_fineScaleVelocity[i][j](0) = 0.0;
+			M_fineScaleVelocity[i][j](1) = 0.0;
+			M_fineScaleVelocity[i][j](2) = 0.0;
+
+			M_fineScalePressure[i][j](0) = 0.0;
+
+			M_fineScaleVelocityRhs[i][j](0) = 0.0;
+			M_fineScaleVelocityRhs[i][j](1) = 0.0;
+			M_fineScaleVelocityRhs[i][j](2) = 0.0;
+		}
 	}
+
+	M_handlerFineScaleVelocity.reset( new TimeAndExtrapolationHandlerQuadPts<3> ( ) );
+	M_handlerFineScaleVelocity->setBDForder(M_timestep);
+	std::vector<std::vector<std::vector<VectorSmall<3>>>> initial_state_velocity;
+	for ( int i = 0; i < M_bdfOrder; ++i )
+	{
+		initial_state_velocity.push_back ( velocity_fine );
+	}
+	M_handlerFineScaleVelocity->initialize(initial_state_velocity);
 
 }
 
-void StabilizationSUPG_semi_implicit::intializeVectorsFineScale ( )
+void StabilizationSUPG_semi_implicit::updateODEfineScale ( const vectorPtr_Type& velocity, const vectorPtr_Type& pressure )
 {
-	for ( int i = 0; i < M_uFESpace->mesh()->numVolumes(); ++i )
+	computeFineScales(velocity, pressure );
+	computeFineScalesForVisualization ( velocity, pressure );
+	M_handlerFineScaleVelocity->shift(M_fineScaleVelocity);
+	M_handlerFineScaleVelocity->rhsContribution(M_fineScaleVelocityRhs);
+}
+
+void StabilizationSUPG_semi_implicit::computeFineScales ( const vectorPtr_Type& velocity, const vectorPtr_Type& pressure )
+{
+	vectorPtr_Type velocity_repeated( new vector_Type( *velocity, Repeated ) );
+	vectorPtr_Type pressure_repeated( new vector_Type( *pressure, Repeated ) );
+	vectorPtr_Type velocity_rhs_repeated( new vector_Type( *M_rhsVelocity, Repeated) );
+
+	using namespace ExpressionAssembly;
+
+	boost::shared_ptr<SquareRoot_supg_semi_implicit> squareroot(new SquareRoot_supg_semi_implicit());
+
+	EvaluateAtQuadrature ( elements (  M_uFESpace->mesh() ),
+						   M_uFESpace->qr(),
+						   M_fespaceUETA,
+						   TAU_M_UPRIME * (
+	                              value(-M_density*M_alpha/M_timestep)*value(M_fespaceUETA, *velocity_repeated)
+	                              +value(M_density)*value(M_fespaceUETA, *velocity_rhs_repeated)
+	                              -value(M_density)*value(M_fespaceUETA, *velocity_repeated)*grad(M_fespaceUETA, *velocity_repeated)
+	                              -grad(M_fespacePETA, *pressure_repeated)
+	                              +value(M_viscosity)*laplacian(M_fespaceUETA, *velocity_repeated)
+	                              +value(M_density)*quadpts(M_fespaceUETA, M_fineScaleVelocityRhs )
+	                              )
+	) >> M_fineScaleVelocity;
+
+	/*
+	for ( int i = 0; i < M_uFESpace->mesh()->numElements(); ++i )
 	{
 		for ( int j = 0; j < M_uFESpace->qr().nbQuadPt(); ++j )
 		{
-			M_fineScaleVelocity[i][j](0) = 0.;
-			M_fineScaleVelocity[i][j](1) = 0.;
-			M_fineScaleVelocity[i][j](2) = 0.;
-		}
-
-		for ( int j = 0; j < M_pFESpace->qr().nbQuadPt(); ++j )
-		{
-			M_fineScalePressure[i][j] = 0.;
+			std::cout << M_fineScaleVelocity[i][j] << " ";
 		}
 	}
+	*/
+
+	EvaluateAtQuadrature ( elements (  M_uFESpace->mesh() ),
+						   M_uFESpace->qr(),
+						   M_fespacePETA,
+						   TAU_C_NO_DT_PPRIME * trace( grad ( M_fespaceUETA, *velocity_repeated ) )
+	) >> M_fineScalePressure;
+}
+
+//=============================================================================================
+void StabilizationSUPG_semi_implicit::computeFineScalesForVisualization ( const vectorPtr_Type& velocity, const vectorPtr_Type& pressure )
+{
+	 QuadratureRule qr ( quadRuleTetra1pt );
+
+	 using namespace ExpressionAssembly;
+
+	 vectorPtr_Type velocity_repeated( new vector_Type( *velocity, Repeated ) );
+	 vectorPtr_Type pressure_repeated( new vector_Type( *pressure, Repeated ) );
+	 vectorPtr_Type velocity_rhs_repeated( new vector_Type( *M_rhsVelocity, Repeated) );
+
+	 boost::shared_ptr<SquareRoot_supg_semi_implicit> squareroot(new SquareRoot_supg_semi_implicit());
+
+	 ComputeFineScaleVel ( elements (  M_fespaceUETA->mesh() ),
+			 	 	 	 	 	qr,
+			 	 	 	 	    M_fespaceUETA,
+			 	 	 	 	    TAU_M_UPRIME * (
+			 	 	 	 	    		value(-M_density*M_alpha/M_timestep)*value(M_fespaceUETA, *velocity_repeated)
+			 	 	 	 	    		+value(M_density)*value(M_fespaceUETA, *velocity_rhs_repeated)
+			 	 	 	 	    		-value(M_density)*value(M_fespaceUETA, *velocity_repeated)*grad(M_fespaceUETA, *velocity_repeated)
+			 	 	 	 	    		-grad(M_fespacePETA, *pressure_repeated)
+			 	 	 	 	    		+value(M_viscosity)*laplacian(M_fespaceUETA, *velocity_repeated)
+			 	 	 	 	    		+value(M_density)*quadpts(M_fespaceUETA, M_fineScaleVelocityRhs )
+			 	 	 	 	    )
+	 ) >> *M_fineVelocity;
+
+	 ComputeFineScalePres ( elements (  M_pFESpace->mesh() ),
+			 	 	 	    qr,
+			 	 	 	    M_fespacePETA,
+			 	 	 	    TAU_C_NO_DT_PPRIME * trace( grad ( M_fespaceUETA, *velocity_repeated ) )
+	 ) >> *M_finePressure;
+
+}
+
+void StabilizationSUPG_semi_implicit::setExportFineScaleVelocity ( ExporterHDF5<mesh_Type> & exporter, const int& numElementsTotal )
+{
+	int numVolumes = M_uFESpace->mesh()->numVolumes();
+	std::vector<int> id_elem;
+	std::vector<int> id_elem_scalar;
+	for ( int i = 0; i < numVolumes; ++i )
+	{
+		id_elem_scalar.push_back ( M_uFESpace->mesh()->element(i).id() );
+
+		for ( int j = 0; j < 3; ++j )
+		{
+			id_elem.push_back ( M_uFESpace->mesh()->element(i).id() + numElementsTotal * j );
+		}
+	}
+
+	int* pointerToDofs_scalar (0);
+	pointerToDofs_scalar = &id_elem_scalar[0];
+	boost::shared_ptr<MapEpetra> map_scalar ( new MapEpetra ( -1, static_cast<int> (id_elem_scalar.size() ), pointerToDofs_scalar, M_uFESpace->map().commPtr() ) );
+
+	int* pointerToDofs (0);
+	pointerToDofs = &id_elem[0];
+	boost::shared_ptr<MapEpetra> map ( new MapEpetra ( -1, static_cast<int> (id_elem.size() ), pointerToDofs, M_uFESpace->map().commPtr() ) );
+
+	M_fineVelocity.reset ( new vector_Type (*map,  Unique ) );
+	M_fineVelocity->zero();
+
+	M_finePressure.reset ( new vector_Type (*map,  Unique ) );
+	M_finePressure->zero();
+
+	exporter.addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "fine scale velocity", M_uFESpace, M_fineVelocity, UInt (0),
+			ExporterData< mesh_Type >::UnsteadyRegime, ExporterData< mesh_Type >::Cell );
+	exporter.addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, "fine scale pressure", M_pFESpace, M_finePressure, UInt (0),
+				ExporterData< mesh_Type >::UnsteadyRegime, ExporterData< mesh_Type >::Cell );
 }
 
 void StabilizationSUPG_semi_implicit::buildGraphs()
@@ -196,19 +342,37 @@ void StabilizationSUPG_semi_implicit::apply_matrix( const vector_Type& velocityE
 
 	using namespace ExpressionAssembly;
 
-	integrate(
+	if ( M_useODEfineScale )
+	{
+		integrate(
 				elements(M_uFESpace->mesh()),
 				M_uFESpace->qr(),
 				M_fespaceUETA, // test  w -> phi_i
 				M_fespaceUETA, // trial u^{n+1} -> phi_j
-              
-		 TAU_M*value(M_density*M_density)*value(M_alpha/M_timestep) * dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), phi_j )
-		+TAU_M*value(M_density*M_density) * dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_j) )
-        +TAU_C*div(phi_i)*div(phi_j)
-        -TAU_M*value(M_density*M_viscosity)*dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), laplacian(phi_j) )
-              
-			) >> M_block_00;
-    
+
+				TAU_M*value(M_density*M_density)*value(M_alpha/M_timestep) * dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), phi_j )
+				+TAU_M*value(M_density*M_density) * dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_j) )
+				+TAU_C_NO_DT*div(phi_i)*div(phi_j)
+				-TAU_M*value(M_density*M_viscosity)*dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), laplacian(phi_j) )
+
+		) >> M_block_00;
+	}
+	else
+	{
+		integrate(
+				elements(M_uFESpace->mesh()),
+				M_uFESpace->qr(),
+				M_fespaceUETA, // test  w -> phi_i
+				M_fespaceUETA, // trial u^{n+1} -> phi_j
+
+				TAU_M*value(M_density*M_density)*value(M_alpha/M_timestep) * dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), phi_j )
+				+TAU_M*value(M_density*M_density) * dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_j) )
+				+TAU_C*div(phi_i)*div(phi_j)
+				-TAU_M*value(M_density*M_viscosity)*dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), laplacian(phi_j) )
+
+		) >> M_block_00;
+	}
+
 	M_block_00->globalAssemble();
 
 	integrate(
@@ -256,6 +420,8 @@ void StabilizationSUPG_semi_implicit::apply_vector( vectorPtr_Type& rhs_velocity
                                                     const vector_Type& velocityExtrapolated,
                                                     const vector_Type& velocity_rhs)
 {
+	M_rhsVelocity.reset( new vector_Type ( velocity_rhs, Unique ) );
+
 	// missing force, terms 11 and 12
 
     vector_Type velocity_rhs_rep( velocity_rhs, Repeated);
@@ -265,25 +431,52 @@ void StabilizationSUPG_semi_implicit::apply_vector( vectorPtr_Type& rhs_velocity
 
     using namespace ExpressionAssembly;
 
-	integrate(
+    if ( M_useODEfineScale )
+	{
+    	integrate(
+    			elements(M_uFESpace->mesh()),
+    			M_uFESpace->qr(),
+    			M_fespaceUETA,
+
+    			TAU_M*value(M_density*M_density)*dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), value(M_fespaceUETA, velocity_rhs_rep) )
+    			+TAU_M*value(M_density*M_density)*dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), quadpts(M_fespaceUETA, M_fineScaleVelocityRhs) )
+
+    	) >> rhs_velocity;
+
+    	integrate(
+    			elements(M_uFESpace->mesh()),
+    			M_pFESpace->qr(),
+    			M_fespacePETA,
+
+    			TAU_M*value(M_density)*dot( grad(phi_i), value(M_fespaceUETA, velocity_rhs_rep))
+    			+TAU_M*value(M_density)*dot( grad(phi_i), quadpts(M_fespaceUETA, M_fineScaleVelocityRhs))
+
+    	) >> rhs_pressure;
+
+
+	}
+	else
+	{
+		integrate(
 				elements(M_uFESpace->mesh()),
 				M_uFESpace->qr(),
 				M_fespaceUETA,
-              
-     TAU_M*value(M_density*M_density)*dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), value(M_fespaceUETA, velocity_rhs_rep) )
-	  			 
-              )
-			 >> rhs_velocity;
 
-	integrate(
+				TAU_M*value(M_density*M_density)*dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), value(M_fespaceUETA, velocity_rhs_rep) )
+
+		) >> rhs_velocity;
+
+		integrate(
 				elements(M_uFESpace->mesh()),
 				M_pFESpace->qr(),
 				M_fespacePETA,
-    
-     TAU_M*value(M_density)*dot( grad(phi_i), value(M_fespaceUETA, velocity_rhs_rep))
-	  
-			 )
-		     >> rhs_pressure;
+
+				TAU_M*value(M_density)*dot( grad(phi_i), value(M_fespaceUETA, velocity_rhs_rep))
+
+		) >> rhs_pressure;
+	}
+
+
 }
 
 } // namespace LifeV

@@ -147,6 +147,11 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh, const int& id_domain)
     
 }
 
+void NavierStokesSolver::setExportFineScaleVelocity( ExporterHDF5<mesh_Type>& exporter, const int& numElementsTotal)
+{
+	M_stabilization->setExportFineScaleVelocity ( exporter, numElementsTotal );
+}
+
 void NavierStokesSolver::setSolversOptions(const Teuchos::ParameterList& solversOptions)
 {
     boost::shared_ptr<Teuchos::ParameterList> monolithicOptions;
@@ -700,6 +705,10 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
 {
 	applyBoundaryConditions ( bc, time );
 	solveTimeStep();
+	if ( M_dataFile("fluid/stabilization/ode_fine_scale", false ) )
+	{
+		M_stabilization->updateODEfineScale ( M_velocity, M_pressure );
+	}
 }
 
 void NavierStokesSolver::solveTimeStep( )
