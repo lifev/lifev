@@ -699,6 +699,10 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time, const vecto
 {
 	applyBoundaryConditions ( bc, time, velocities);
 	solveTimeStep();
+	if ( M_dataFile("fluid/stabilization/ode_fine_scale", false ) )
+	{
+		M_stabilization->updateODEfineScale ( M_velocity, M_pressure );
+	}
 }
 
 void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
