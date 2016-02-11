@@ -457,12 +457,19 @@ main ( int argc, char** argv )
     	}
 
     	Q_inflow = 394*Q;
-    	Q_flag4  = 20.33*Q; // left_common_carotid
-    	Q_flag5  = 21.21*Q; // right_common_carotid
-    	Q_flag6  = 4.754*Q; // right_vertebral
-    	Q_flag7  = 22.79*Q; // right_subclavian
-    	Q_flag8  = 2.974*Q; // left_vertebral
-    	Q_flag9  = 21.11*Q; // left_subclavian
+    	Q_flag4  = 20.25*Q; // left_common_carotid
+    	Q_flag5  = 21.82*Q; // right_common_carotid
+    	Q_flag6  = 1.43*Q; // right_vertebral
+    	Q_flag7  = 24.77*Q; // right_subclavian
+    	Q_flag8  = 4.69*Q; // left_vertebral
+    	Q_flag9  = 21.54*Q; // left_subclavian
+
+    	Real pressureValue = 1500.0/2.51*(299.5*Q);
+
+    	if (verbose)
+    	{
+    		std::cout << "\nImposing outflow pressure of " << pressureValue << " dyne/cm^2\n\n";
+    	}
 
     	Real alpha_flowrate_inflow = Q_inflow/Q_hat_inflow;
     	Real alpha_flowrate_flag4  = Q_flag4/Q_hat_flag4;
