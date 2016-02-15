@@ -100,6 +100,8 @@ main ( int argc, char** argv )
     ns.setParameters();
     ns.buildSystem();
 
+    Real saveAfter = dataFile("fluid/save_after", 0.0);
+
     bool useStabilization = dataFile("fluid/stabilization/use", false);
     std::string stabilizationType = dataFile("fluid/stabilization/type", "none");
         
@@ -158,7 +160,7 @@ main ( int argc, char** argv )
     if ( dataFile ( "fluid/stabilization/ode_fine_scale", false) )
         	ns.setExportFineScaleVelocity(*exporter, numElementsTotal);
 
-    exporter->postProcess ( t0 );
+    // exporter->postProcess ( t0 );
 
     // Boundary conditions
     boost::shared_ptr<BCHandler> bc ( new BCHandler (*BCh_fluid ()) );
@@ -448,8 +450,21 @@ main ( int argc, char** argv )
 
     	if ( (time >= 0.05 && time <= 0.42) || (time >= (0.05+T_heartbeat) && time <= (0.42+T_heartbeat) ) || (time >= (0.05+2*T_heartbeat) && time <= (0.42+2*T_heartbeat) ) || (time >= (0.05+3*T_heartbeat) && time <= (0.42+3*T_heartbeat) ) )
     	{
-    		// Q_in = 2.422818092859456e+8*std::pow(time,8)-4.764207344433996e+8*std::pow(time,7) + 3.993883831476327e+8*std::pow(time,6) -1.867066900011057e+8*std::pow(time,5) +0.533079809563519e+8*std::pow(time,4) -0.094581323616832e+8*std::pow(time,3) +0.009804512311267e+8*std::pow(time,2) -0.000482942399225e+8*time+0.000008651437192e+8;
-    		Q = 2.117637666632775e+04*std::pow(time-i_HeartBeat*T_heartbeat,6)-3.370930726888496e+04*std::pow(time-i_HeartBeat*T_heartbeat,5)+2.133377678002176e+04*std::pow(time-i_HeartBeat*T_heartbeat,4)-6.666366536069445e+03*std::pow(time-i_HeartBeat*T_heartbeat,3)+1.011772959679957e+03*std::pow(time-i_HeartBeat*T_heartbeat,2)-6.023975547926423e+01*(time-i_HeartBeat*T_heartbeat)+1.192718364532979e+00;
+    		// nuova
+    		Q = -2.314569820334801e+09*std::pow(time-i_HeartBeat*T_heartbeat,9) +
+    				4.952537061974133e+09*std::pow(time-i_HeartBeat*T_heartbeat,8) -
+    				4.532060231242586e+09*std::pow(time-i_HeartBeat*T_heartbeat,7) +
+    				2.325743716202249e+09*std::pow(time-i_HeartBeat*T_heartbeat,6) -
+    				7.387577876374097e+08*std::pow(time-i_HeartBeat*T_heartbeat,5) +
+    				1.514516710083440e+08*std::pow(time-i_HeartBeat*T_heartbeat,4) -
+    				2.018053394181958e+07*std::pow(time-i_HeartBeat*T_heartbeat,3) +
+    				1.667954643625200e+06*std::pow(time-i_HeartBeat*T_heartbeat,2) -
+    				7.160662399848596e+04*(time-i_HeartBeat*T_heartbeat) +
+    				1.184312187078482e+03;
+    		Q = Q/394;
+
+    		// usata prima
+    		//Q = 2.117637666632775e+04*std::pow(time-i_HeartBeat*T_heartbeat,6)-3.370930726888496e+04*std::pow(time-i_HeartBeat*T_heartbeat,5)+2.133377678002176e+04*std::pow(time-i_HeartBeat*T_heartbeat,4)-6.666366536069445e+03*std::pow(time-i_HeartBeat*T_heartbeat,3)+1.011772959679957e+03*std::pow(time-i_HeartBeat*T_heartbeat,2)-6.023975547926423e+01*(time-i_HeartBeat*T_heartbeat)+1.192718364532979e+00;
     	}
     	else
     	{
@@ -464,7 +479,7 @@ main ( int argc, char** argv )
     	Q_flag8  = 4.69*Q; // left_vertebral
     	Q_flag9  = 21.54*Q; // left_subclavian
 
-    	Real pressureValue = 1500.0/2.51*(299.5*Q);
+    	Real pressureValue = 1500.0/2.51*(Q_inflow - Q_flag4 - Q_flag5 - Q_flag6 - Q_flag7 - Q_flag8 - Q_flag9);
 
     	if (verbose)
     	{
@@ -481,7 +496,6 @@ main ( int argc, char** argv )
 
     	if (verbose)
     	{
-    		/*
     	    		std::cout << "Q_inflow: " << Q_inflow << std::endl << std::endl;
     	    		std::cout << "Q_flag4: "  << Q_flag4  << std::endl << std::endl;
     	    		std::cout << "Q_flag5: "  << Q_flag5  << std::endl << std::endl;
@@ -489,7 +503,7 @@ main ( int argc, char** argv )
     	    		std::cout << "Q_flag7: "  << Q_flag7  << std::endl << std::endl;
     	    		std::cout << "Q_flag8: "  << Q_flag8  << std::endl << std::endl;
     	    		std::cout << "Q_flag9: "  << Q_flag9  << std::endl << std::endl;
-    		 */
+    	    		std::cout << "Q_outflow: "  << Q_inflow - Q_flag4 - Q_flag5 - Q_flag6 - Q_flag7 - Q_flag8 - Q_flag9  << std::endl << std::endl;
     	}
 
     	velAndPressure_inflow->zero();
@@ -577,17 +591,20 @@ main ( int argc, char** argv )
     	}
     	else if ( orderBDF == 2 )
     	{
-    		if ( time_step_count == (counterSaveEvery-2) )
+//    		if ( time_step_count == (counterSaveEvery-2) )
+//    		{
+//    			exporter->postProcess ( time );
+//    		}
+//    		else if ( time_step_count == (counterSaveEvery-1) )
+//    		{
+//    			exporter->postProcess ( time );
+//    		}
+    		if ( time_step_count == counterSaveEvery )
     		{
-    			exporter->postProcess ( time );
-    		}
-    		else if ( time_step_count == (counterSaveEvery-1) )
-    		{
-    			exporter->postProcess ( time );
-    		}
-    		else if ( time_step_count == counterSaveEvery )
-    		{
-    			exporter->postProcess ( time );
+    			if ( time >= saveAfter )
+    			{
+    				exporter->postProcess ( time );
+    			}
     			counterSaveEvery += saveEvery;
     		}
     	}
