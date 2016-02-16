@@ -27,9 +27,11 @@ filename   = result_aorta_semi_implicit
 
     options_preconditioner = solversOptionsFast
     preconditionerType     = SIMPLE # SIMPLE or PCD
-    save_every             = 20
+    save_every             = 1
     use_graph              = false
     save_after             = 0.38
+    penalize_reverse_flow  = true
+    flag_outflow           = 2
     
     [./physics]
     density         = 1.0    # density
@@ -44,17 +46,17 @@ filename   = result_aorta_semi_implicit
 
     [../space_discretization]
     mesh_dir        = ./
-    mesh_file       = Aorta_fluid_30K_NE.mesh
+    mesh_file       = Aorta_fluid_1M_NE.mesh
     mesh_type       = .mesh
 
-    vel_order       = P1
-    pres_order      = P1
+    vel_order       = P2
+    pres_order      = P2
     stiff_strain    = true
 
     [../stabilization]
     use             = true
     type            = SUPG_SEMI_IMPLICIT
-    vel_order       = 1
+    vel_order       = 2
     ode_fine_scale  = true
 
     [../miscellaneous]

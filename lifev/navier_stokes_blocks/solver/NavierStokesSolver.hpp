@@ -564,6 +564,9 @@ private:
 	std::string M_methodAerodynamicLoads;
 	UInt M_flagBody;
 
+	bool M_penalizeReverseFlow;
+	UInt M_flagPenalizeReverseFlow;
+
 }; // class NavierStokesSolver
 
 } // namespace LifeV

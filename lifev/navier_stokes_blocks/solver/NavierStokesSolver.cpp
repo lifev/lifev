@@ -4,6 +4,32 @@
 namespace LifeV
 {
 
+class SignFunction
+{
+public:
+    typedef Real return_Type;
+
+    inline return_Type operator() (const Real& a)
+    {
+    	if ( a < 0 )
+    	{
+    		k = k + 1;
+    		return a;
+    	}
+    	else
+    	{
+    		return 0.0;
+    	}
+    }
+
+    SignFunction() { k = 0; }
+    SignFunction (const SignFunction&) {}
+    ~SignFunction() {}
+    int k;
+    int interrogate () { return k; }
+    void clear_k () { k = 0; }
+};
+
 NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commPtr_Type& communicator):
 		M_comm(communicator),
 		M_dataFile(dataFile),
@@ -70,6 +96,10 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh, const int& id_domain)
 			M_stiffStrain = M_dataFile("fluid/slave_space_discretization/stiff_strain", true);
 		}
 	}
+
+	// Penalization reverse flow
+	M_penalizeReverseFlow = M_dataFile("fluid/penalize_reverse_flow", false);
+	M_flagPenalizeReverseFlow = M_dataFile("fluid/flag_outflow", 2);
 
 	M_uOrder = uOrder;
 	M_pOrder = pOrder;
@@ -556,6 +586,39 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 			>> M_C;
 		}
 
+		if ( M_penalizeReverseFlow )
+		{
+			M_displayer.leaderPrint ( "\n\n Check penalization... " ) ;
+
+			boost::shared_ptr<SignFunction> signEvaluation(new SignFunction());
+			signEvaluation->clear_k();
+
+			VectorSmall<3> normal;
+			normal[0] = 0.27995;
+			normal[1] = -2.4455e-5;
+			normal[2] = -0.96;
+
+			QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
+			integrate (
+					boundary (M_fespaceUETA->mesh(), M_flagPenalizeReverseFlow),
+					myBDQR,
+					M_fespaceUETA,
+					M_fespaceUETA,
+					value(-1.0*M_density)*eval( signEvaluation, dot(value(M_fespaceUETA, *M_uExtrapolated),normal))*dot(phi_i, phi_j)
+			)
+			>> M_C;
+
+			int penalized = signEvaluation->interrogate();
+
+			if ( penalized > 0 )
+			{
+				M_displayer.leaderPrint ( " PENALIZED!\n\n" ) ;
+			}
+			else
+			{
+				M_displayer.leaderPrint ( " not needed\n\n" ) ;
+			}
+		}
 	}
 	M_C->globalAssemble();
 
