@@ -8,7 +8,7 @@
 #define TAU_M_DEN_VISC value(M_C_I)*value(M_viscosity*M_viscosity)/(h_K*h_K*h_K*h_K)
 
 #define TAU_M_TILDE 	       value(1.0)/( TAU_M_DEN_DT_NOSQUARED + eval(squareroot,TAU_M_DEN_VEL+TAU_M_DEN_VISC) )
-#define TAU_M_DEN_DT_NOSQUARED value(M_density)*value(M_bdfOrder)/value(M_timestep)
+#define TAU_M_DEN_DT_NOSQUARED value(M_density)*value(M_alpha)/value(M_timestep)
 
 // MACRO TO DEFINE TAU_C
 #define TAU_C (h_K*h_K)/(TAU_M)
@@ -99,7 +99,8 @@ void StabilizationSUPG_semi_implicit::setupODEfineScale ( )
 	}
 
 	M_handlerFineScaleVelocity.reset( new TimeAndExtrapolationHandlerQuadPts<3> ( ) );
-	M_handlerFineScaleVelocity->setBDForder(M_timestep);
+	M_handlerFineScaleVelocity->setBDForder(M_bdfOrder);
+	M_handlerFineScaleVelocity->setTimeStep(M_timestep);
 	std::vector<std::vector<std::vector<VectorSmall<3>>>> initial_state_velocity;
 	for ( int i = 0; i < M_bdfOrder; ++i )
 	{
@@ -139,16 +140,6 @@ void StabilizationSUPG_semi_implicit::computeFineScales ( const vectorPtr_Type& 
 	                              +value(M_density)*quadpts(M_fespaceUETA, M_fineScaleVelocityRhs )
 	                              )
 	) >> M_fineScaleVelocity;
-
-	/*
-	for ( int i = 0; i < M_uFESpace->mesh()->numElements(); ++i )
-	{
-		for ( int j = 0; j < M_uFESpace->qr().nbQuadPt(); ++j )
-		{
-			std::cout << M_fineScaleVelocity[i][j] << " ";
-		}
-	}
-	*/
 
 	EvaluateAtQuadrature ( elements (  M_uFESpace->mesh() ),
 						   M_uFESpace->qr(),
@@ -495,8 +486,8 @@ void StabilizationSUPG_semi_implicit::apply_vector( vectorPtr_Type& rhs_velocity
     			M_pFESpace->qr(),
     			M_fespacePETA,
 
-    			TAU_M*value(M_density)*dot( grad(phi_i), value(M_fespaceUETA, velocity_rhs_rep))
-    			+TAU_M*value(M_density)*dot( grad(phi_i), quadpts(M_fespaceUETA, M_fineScaleVelocityRhs))
+    			TAU_M_TILDE*value(M_density)*dot( grad(phi_i), value(M_fespaceUETA, velocity_rhs_rep))
+    			+TAU_M_TILDE*value(M_density)*dot( grad(phi_i), quadpts(M_fespaceUETA, M_fineScaleVelocityRhs))
 
     	) >> rhs_pressure;
 
