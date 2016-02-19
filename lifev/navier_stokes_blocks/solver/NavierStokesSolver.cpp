@@ -11,23 +11,28 @@ public:
 
     inline return_Type operator() (const Real& a)
     {
+    	//std::cout << a;
     	if ( a < 0 )
     	{
-    		k = k + 1;
+//    		k = k + 1;
     		return a;
     	}
     	else
     	{
+//    		z = z + 1;
     		return 0.0;
     	}
     }
 
-    SignFunction() { k = 0; }
+    SignFunction( const boost::shared_ptr<Epetra_Comm>& communicator ) { k = 0; z = 0; comm = communicator; }
     SignFunction (const SignFunction&) {}
     ~SignFunction() {}
-    int k;
-    int interrogate () { return k; }
+    int k, z;
+    boost::shared_ptr<Epetra_Comm> comm;
+    int interrogate_k () { int k_global; comm->MaxAll(&k,&k_global,1); return k_global; }
+    int interrogate_z () { int z_global; comm->MaxAll(&z,&z_global,1); return z_global; }
     void clear_k () { k = 0; }
+    void clear_z () { z = 0; }
 };
 
 NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commPtr_Type& communicator):
@@ -588,10 +593,11 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 
 		if ( M_penalizeReverseFlow )
 		{
-			M_displayer.leaderPrint ( "\n\n Check penalization... " ) ;
+//			M_displayer.leaderPrint ( "\n\n Check penalization... " ) ;
 
-			boost::shared_ptr<SignFunction> signEvaluation(new SignFunction());
+			boost::shared_ptr<SignFunction> signEvaluation(new SignFunction(M_comm));
 			signEvaluation->clear_k();
+			signEvaluation->clear_z();
 
 			VectorSmall<3> normal;
 			normal[0] = 0.27995;
@@ -608,16 +614,18 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 			)
 			>> M_C;
 
-			int penalized = signEvaluation->interrogate();
-
-			if ( penalized > 0 )
-			{
-				M_displayer.leaderPrint ( " PENALIZED!\n\n" ) ;
-			}
-			else
-			{
-				M_displayer.leaderPrint ( " not needed\n\n" ) ;
-			}
+//			int penalized = signEvaluation->interrogate_k();
+//			int not_penalized = signEvaluation->interrogate_z();
+//
+//			if ( penalized > 0 )
+//			{
+//				M_displayer.leaderPrint ( " PENALIZED!\n\n" ) ;
+//			}
+//
+//			if ( not_penalized > 0 )
+//			{
+//				M_displayer.leaderPrint ( " NOT PENALIZED!\n\n" ) ;
+//			}
 		}
 	}
 	M_C->globalAssemble();

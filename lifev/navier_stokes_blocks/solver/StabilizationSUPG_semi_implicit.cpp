@@ -7,6 +7,9 @@
 #define TAU_M_DEN_VEL  value(M_density*M_density)*dot(value(M_fespaceUETA, velocity_extrapolated_rep), value(M_fespaceUETA, velocity_extrapolated_rep))/(h_K*h_K)
 #define TAU_M_DEN_VISC value(M_C_I)*value(M_viscosity*M_viscosity)/(h_K*h_K*h_K*h_K)
 
+#define TAU_M_TILDE 	       value(1.0)/( TAU_M_DEN_DT_NOSQUARED + eval(squareroot,TAU_M_DEN_VEL+TAU_M_DEN_VISC) )
+#define TAU_M_DEN_DT_NOSQUARED value(M_density)*value(M_bdfOrder)/value(M_timestep)
+
 // MACRO TO DEFINE TAU_C
 #define TAU_C (h_K*h_K)/(TAU_M)
 
@@ -15,8 +18,8 @@
 #define TAU_C_NO_DT (h_K*h_K)/(TAU_M_NO_DT)
 
 // MACRO FOR EVALUATION OF THE FINE SCALE VELOCITY
-#define TAU_M_UPRIME          value(1.0)/( eval(squareroot,TAU_M_DEN_UPRIME) )
-#define TAU_M_DEN_UPRIME      TAU_M_DEN_DT + TAU_M_DEN_VEL_UPRIME + TAU_M_DEN_VISC_UPRIME
+#define TAU_M_UPRIME          value(1.0)/( TAU_M_DEN_DT_NOSQUARED + eval(squareroot,TAU_M_DEN_UPRIME) )
+#define TAU_M_DEN_UPRIME      TAU_M_DEN_VEL_UPRIME + TAU_M_DEN_VISC_UPRIME
 #define TAU_M_DEN_VEL_UPRIME  value(M_density*M_density)*dot(value(M_fespaceUETA, *velocity_repeated), value(M_fespaceUETA, *velocity_repeated))/(h_K*h_K)
 #define TAU_M_DEN_VISC_UPRIME value(M_C_I)*value(M_viscosity*M_viscosity)/(h_K*h_K*h_K*h_K)
 
@@ -350,10 +353,10 @@ void StabilizationSUPG_semi_implicit::apply_matrix( const vector_Type& velocityE
 				M_fespaceUETA, // test  w -> phi_i
 				M_fespaceUETA, // trial u^{n+1} -> phi_j
 
-				TAU_M*value(M_density*M_density)*value(M_alpha/M_timestep) * dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), phi_j )
-				+TAU_M*value(M_density*M_density) * dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_j) )
+				TAU_M_TILDE*value(M_density*M_density)*value(M_alpha/M_timestep) * dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), phi_j )
+				+TAU_M_TILDE*value(M_density*M_density) * dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_j) )
 				+TAU_C_NO_DT*div(phi_i)*div(phi_j)
-				-TAU_M*value(M_density*M_viscosity)*dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), laplacian(phi_j) )
+				-TAU_M_TILDE*value(M_density*M_viscosity)*dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), laplacian(phi_j) )
 
 		) >> M_block_00;
 	}
@@ -375,42 +378,86 @@ void StabilizationSUPG_semi_implicit::apply_matrix( const vector_Type& velocityE
 
 	M_block_00->globalAssemble();
 
-	integrate(
+	if ( M_useODEfineScale )
+	{
+		integrate(
 				elements(M_uFESpace->mesh()),
 				M_pFESpace->qr(),
 				M_fespacePETA, // test  q -> phi_i
 				M_fespaceUETA, // trial u^{n+1} -> phi_j
-              
-		 TAU_M*value(M_density*M_alpha/M_timestep)*dot( grad(phi_i), phi_j )
-		+TAU_M*value(M_density) * dot( grad(phi_i), value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_j) )
-		-TAU_M*value(M_viscosity)*dot(grad(phi_i), laplacian(phi_j))
-	         
-              ) >> M_block_10;
-	
-    M_block_10->globalAssemble( M_uFESpace->mapPtr(), M_pFESpace->mapPtr() );
 
-	integrate(
-				elements(M_uFESpace->mesh()),
-				M_uFESpace->qr(),
-				M_fespaceUETA, // test  w -> phi_i
-				M_fespacePETA, // trial p^{n+1} -> phi_j
-		 
-        TAU_M*value(M_density)*dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), grad(phi_j) )
-		     
-              ) >> M_block_01;
-	
-    M_block_01->globalAssemble( M_pFESpace->mapPtr(), M_uFESpace->mapPtr() );
+				TAU_M_TILDE*value(M_density*M_alpha/M_timestep)*dot( grad(phi_i), phi_j )
+				+TAU_M_TILDE*value(M_density) * dot( grad(phi_i), value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_j) )
+				-TAU_M_TILDE*value(M_viscosity)*dot(grad(phi_i), laplacian(phi_j))
 
-	integrate(
+		) >> M_block_10;
+	}
+	else
+	{
+		integrate(
 				elements(M_uFESpace->mesh()),
 				M_pFESpace->qr(),
-				M_fespacePETA, // test   q -> phi_i
-				M_fespacePETA, // trial  p^{n+1} -> phi_j
-	
-        TAU_M*dot(  grad(phi_j), grad(phi_i) )
-		     
-              ) >> M_block_11;
-	
+				M_fespacePETA, // test  q -> phi_i
+				M_fespaceUETA, // trial u^{n+1} -> phi_j
+
+				TAU_M*value(M_density*M_alpha/M_timestep)*dot( grad(phi_i), phi_j )
+				+TAU_M*value(M_density) * dot( grad(phi_i), value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_j) )
+				-TAU_M*value(M_viscosity)*dot(grad(phi_i), laplacian(phi_j))
+
+		) >> M_block_10;
+	}
+    M_block_10->globalAssemble( M_uFESpace->mapPtr(), M_pFESpace->mapPtr() );
+
+    if ( M_useODEfineScale )
+    {
+    	integrate(
+    			elements(M_uFESpace->mesh()),
+    			M_uFESpace->qr(),
+    			M_fespaceUETA, // test  w -> phi_i
+    			M_fespacePETA, // trial p^{n+1} -> phi_j
+
+    			TAU_M_TILDE*value(M_density)*dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), grad(phi_j) )
+
+    	) >> M_block_01;
+    }
+    else
+    {
+    	integrate(
+    			elements(M_uFESpace->mesh()),
+    			M_uFESpace->qr(),
+    			M_fespaceUETA, // test  w -> phi_i
+    			M_fespacePETA, // trial p^{n+1} -> phi_j
+
+    			TAU_M*value(M_density)*dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), grad(phi_j) )
+
+    	) >> M_block_01;
+    }
+    M_block_01->globalAssemble( M_pFESpace->mapPtr(), M_uFESpace->mapPtr() );
+
+    if ( M_useODEfineScale )
+    {
+    	integrate(
+    			elements(M_uFESpace->mesh()),
+    			M_pFESpace->qr(),
+    			M_fespacePETA, // test   q -> phi_i
+    			M_fespacePETA, // trial  p^{n+1} -> phi_j
+
+    			TAU_M_TILDE*dot(  grad(phi_j), grad(phi_i) )
+
+    	) >> M_block_11;
+    }
+    else
+    {
+    	integrate(
+    			elements(M_uFESpace->mesh()),
+    			M_pFESpace->qr(),
+    			M_fespacePETA, // test   q -> phi_i
+    			M_fespacePETA, // trial  p^{n+1} -> phi_j
+
+    			TAU_M*dot(  grad(phi_j), grad(phi_i) )
+
+    	) >> M_block_11;
+    }
     M_block_11->globalAssemble();
     
 }
@@ -438,8 +485,8 @@ void StabilizationSUPG_semi_implicit::apply_vector( vectorPtr_Type& rhs_velocity
     			M_uFESpace->qr(),
     			M_fespaceUETA,
 
-    			TAU_M*value(M_density*M_density)*dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), value(M_fespaceUETA, velocity_rhs_rep) )
-    			+TAU_M*value(M_density*M_density)*dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), quadpts(M_fespaceUETA, M_fineScaleVelocityRhs) )
+    			TAU_M_TILDE*value(M_density*M_density)*dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), value(M_fespaceUETA, velocity_rhs_rep) )
+    			+TAU_M_TILDE*value(M_density*M_density)*dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), quadpts(M_fespaceUETA, M_fineScaleVelocityRhs) )
 
     	) >> rhs_velocity;
 
@@ -462,7 +509,7 @@ void StabilizationSUPG_semi_implicit::apply_vector( vectorPtr_Type& rhs_velocity
 				M_uFESpace->qr(),
 				M_fespaceUETA,
 
-				TAU_M*value(M_density*M_density)*dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), value(M_fespaceUETA, velocity_rhs_rep) )
+				TAU_M_TILDE*value(M_density*M_density)*dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), value(M_fespaceUETA, velocity_rhs_rep) )
 
 		) >> rhs_velocity;
 
