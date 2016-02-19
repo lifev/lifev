@@ -74,7 +74,7 @@
 //#include <lifev/navier_stokes_blocks/solver/StabilizationSUPG.hpp>
 //#include <lifev/navier_stokes_blocks/solver/StabilizationVMSLES.hpp>
 #include <lifev/navier_stokes_blocks/solver/StabilizationSUPG_semi_implicit.hpp>
-//#include <lifev/navier_stokes_blocks/solver/StabilizationVMSLES_semi_implicit.hpp>
+#include <lifev/navier_stokes_blocks/solver/StabilizationVMSLES_semi_implicit.hpp>
 //#include <lifev/navier_stokes_blocks/solver/StabilizationSUPGALE.hpp>
 
 #include <Teuchos_ParameterList.hpp>

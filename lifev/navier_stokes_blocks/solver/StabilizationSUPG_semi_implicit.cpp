@@ -500,7 +500,7 @@ void StabilizationSUPG_semi_implicit::apply_vector( vectorPtr_Type& rhs_velocity
 				M_uFESpace->qr(),
 				M_fespaceUETA,
 
-				TAU_M_TILDE*value(M_density*M_density)*dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), value(M_fespaceUETA, velocity_rhs_rep) )
+				TAU_M*value(M_density*M_density)*dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), value(M_fespaceUETA, velocity_rhs_rep) )
 
 		) >> rhs_velocity;
 
