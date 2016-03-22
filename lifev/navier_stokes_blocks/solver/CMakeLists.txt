@@ -9,7 +9,8 @@ SET(solver_HEADERS
 #  solver/StabilizationSUPG.hpp
 #  solver/StabilizationVMSLES.hpp
   solver/StabilizationSUPG_semi_implicit.hpp
-  solver/StabilizationVMSLES_semi_implicit.hpp
+  solver/StabilizationVMSLES_new.hpp
+#  solver/StabilizationVMSLES_semi_implicit.hpp
 #  solver/StabilizationSUPGALE.hpp
   solver/MultipleFluidsHandler.hpp
   solver/MultiFluidApplyOperator.hpp
@@ -24,7 +25,8 @@ SET(solver_SOURCES
 #  solver/StabilizationSUPG.cpp
 #  solver/StabilizationVMSLES.cpp
   solver/StabilizationSUPG_semi_implicit.cpp
-  solver/StabilizationVMSLES_semi_implicit.cpp
+  solver/StabilizationVMSLES_new.cpp
+#  solver/StabilizationVMSLES_semi_implicit.cpp
 #  solver/StabilizationSUPGALE.cpp
   solver/MultipleFluidsHandler.cpp
   solver/MultiFluidApplyOperator.cpp

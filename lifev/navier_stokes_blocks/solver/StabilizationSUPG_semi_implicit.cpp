@@ -144,7 +144,7 @@ void StabilizationSUPG_semi_implicit::computeFineScales ( const vectorPtr_Type& 
 	EvaluateAtQuadrature ( elements (  M_uFESpace->mesh() ),
 						   M_uFESpace->qr(),
 						   M_fespacePETA,
-						   TAU_C_NO_DT_PPRIME * trace( grad ( M_fespaceUETA, *velocity_repeated ) )
+						   value(-1.0) * TAU_C_NO_DT_PPRIME * trace( grad ( M_fespaceUETA, *velocity_repeated ) )
 	) >> M_fineScalePressure;
 }
 
@@ -177,7 +177,7 @@ void StabilizationSUPG_semi_implicit::computeFineScalesForVisualization ( const 
 	 ComputeFineScalePres ( elements (  M_pFESpace->mesh() ),
 			 	 	 	    qr,
 			 	 	 	    M_fespacePETA,
-			 	 	 	    TAU_C_NO_DT_PPRIME * trace( grad ( M_fespaceUETA, *velocity_repeated ) )
+			 	 	 	    value(-1.0) * TAU_C_NO_DT_PPRIME * trace( grad ( M_fespaceUETA, *velocity_repeated ) )
 	 ) >> *M_finePressure;
 
 }
