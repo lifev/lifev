@@ -58,6 +58,9 @@ public:
 
     // get the value of alpha that should go in front of the term u_(n+1) (see the paper cited at the beginning of the doc)
     Real alpha();
+    
+    // extrapolation
+    void extrapolate(vector_Type& extrapolation);
 
 private:
 
@@ -199,6 +202,57 @@ TimeAndExtrapolationHandlerQuadPts<DIM>::rhsContribution(vector_Type& rhs_bdf)
     }
 }
 
+template <UInt DIM>
+void
+TimeAndExtrapolationHandlerQuadPts<DIM>::extrapolate(vector_Type& extrapolation)
+{
+    ASSERT( M_timeStep != 0, "Timestep has not been set, please use TimeAndExtrapolationHandler::setTimeStep(const Real dt) ");
+    
+    switch (M_BDForder) {
+        case 1:
+            for (int i = 0 ; i < M_states[0].size() ; ++i ) // loop elements
+            {
+                for (int j = 0 ; j < M_states[0][0].size(); ++j ) // loop quadrature points
+                {
+                    for (int k = 0 ; k < DIM; ++k ) // loop quadrature points
+                    {
+                        extrapolation[i][j](k) = M_states[M_sizeStencil-1][i][j](k); // u_star = u_n
+                    }
+                }
+            }
+            break;
+        case 2:
+            for (int i = 0 ; i < M_states[0].size() ; ++i ) // loop elements
+            {
+                for (int j = 0 ; j < M_states[0][0].size(); ++j ) // loop quadrature points
+                {
+                    for (int k = 0 ; k < DIM; ++k ) // loop quadrature points
+                    {
+                        extrapolation[i][j](k) = 2*M_states[M_sizeStencil-1][i][j](k) - M_states[M_sizeStencil-2][i][j](k);
+                        // u_star = 2*u_n - u_{n-1}
+                    }
+                }
+            }
+            break;
+        case 3:
+            for (int i = 0 ; i < M_states[0].size() ; ++i ) // loop elements
+            {
+                for (int j = 0 ; j < M_states[0][0].size(); ++j ) // loop quadrature points
+                {
+                    for (int k = 0 ; k < DIM; ++k ) // loop quadrature points
+                    {
+                        extrapolation[i][j](k) = 3.0*M_states[M_sizeStencil-1][i][j](k) - 3.0*M_states[M_sizeStencil-2][i][j](k) +
+                                                     M_states[M_sizeStencil-3][i][j](k);
+                        // u_star = 3*u_n - 3*u_{n-1} + u_{n-2}
+                    }
+                }
+            }
+            break;
+        default:
+            break;
+    }
+}
+    
 template <UInt DIM>
 Real
 TimeAndExtrapolationHandlerQuadPts<DIM>::alpha()
