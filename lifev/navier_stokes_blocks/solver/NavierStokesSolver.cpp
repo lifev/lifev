@@ -557,6 +557,7 @@ void NavierStokesSolver::buildSystem()
 void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vectorPtr_Type& rhs_velocity )
 {
 	// Note that u_star HAS to extrapolated from outside. Hence it works also for FSI in this manner.
+    M_velocityExtrapolated.reset( new vector_Type ( *u_star, Unique ) );
 	M_uExtrapolated.reset( new vector_Type ( *u_star, Repeated ) );
 
 	// Update convective term
@@ -637,11 +638,14 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
         M_displayer.leaderPrint ( "\tF - Assembling semi-implicit stabilization terms... ");
         LifeChrono chrono;
         chrono.start();
-        
-        if ( M_stabilizationType.compare("SUPG_SEMI_IMPLICIT")==0  )
-            M_stabilization->apply_matrix( *u_star );
-        else if ( M_stabilizationType.compare("VMSLES_SEMI_IMPLICIT")==0 )
-            M_stabilization->apply_matrix( *u_star, *M_pressure_extrapolated, *rhs_velocity);
+
+        if ( M_useStabilization )
+        {
+            if ( M_stabilizationType.compare("VMSLES_SEMI_IMPLICIT")==0 )
+                M_stabilization->apply_matrix( *u_star, *M_pressure_extrapolated, *rhs_velocity);
+            else
+                M_stabilization->apply_matrix( *u_star );
+        }
         
         *M_block00 += *M_stabilization->block_00();
         
@@ -752,7 +756,10 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time, const vecto
 	solveTimeStep();
 	if ( M_dataFile("fluid/stabilization/ode_fine_scale", false ) )
 	{
-		M_stabilization->updateODEfineScale ( M_velocity, M_pressure );
+        if ( M_stabilizationType.compare("SUPG_SEMI_IMPLICIT")==0 )
+            M_stabilization->updateODEfineScale ( M_velocity, M_pressure );
+        else if ( M_stabilizationType.compare("VMSLES_NEW")==0  )
+            M_stabilization->updateODEfineScale ( M_velocity, M_pressure, M_velocityExtrapolated );
 	}
 }
 
@@ -762,7 +769,10 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
 	solveTimeStep();
 	if ( M_dataFile("fluid/stabilization/ode_fine_scale", false ) )
 	{
-		M_stabilization->updateODEfineScale ( M_velocity, M_pressure );
+        if ( M_stabilizationType.compare("SUPG_SEMI_IMPLICIT")==0 )
+            M_stabilization->updateODEfineScale ( M_velocity, M_pressure );
+        else if ( M_stabilizationType.compare("VMSLES_NEW")==0  )
+            M_stabilization->updateODEfineScale ( M_velocity, M_pressure, M_velocityExtrapolated );
 	}
 }
 

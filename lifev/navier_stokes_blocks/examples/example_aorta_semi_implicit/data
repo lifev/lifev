@@ -30,7 +30,7 @@ filename   = result_aorta_semi_implicit
     save_every             = 1
     use_graph              = false
     save_after             = 0.01
-    penalize_reverse_flow  = true
+    penalize_reverse_flow  = false
     flag_outflow           = 2
     
     [./physics]
@@ -40,7 +40,7 @@ filename   = result_aorta_semi_implicit
     [../time_discretization]
     initialtime     = 0.05
     endtime         = 3.2
-    timestep        = 0.01
+    timestep        = 0.005
 
     BDF_order       = 2
 
@@ -55,7 +55,7 @@ filename   = result_aorta_semi_implicit
 
     [../stabilization]
     use             = true
-    type            = VMSLES_SEMI_IMPLICIT
+    type            = VMSLES_NEW #VMSLES_NEW, SUPG_SEMI_IMPLICIT
     vel_order       = 1
     ode_fine_scale  = true
 

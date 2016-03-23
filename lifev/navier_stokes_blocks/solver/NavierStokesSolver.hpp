@@ -74,7 +74,8 @@
 //#include <lifev/navier_stokes_blocks/solver/StabilizationSUPG.hpp>
 //#include <lifev/navier_stokes_blocks/solver/StabilizationVMSLES.hpp>
 #include <lifev/navier_stokes_blocks/solver/StabilizationSUPG_semi_implicit.hpp>
-#include <lifev/navier_stokes_blocks/solver/StabilizationVMSLES_semi_implicit.hpp>
+#include <lifev/navier_stokes_blocks/solver/StabilizationVMSLES_new.hpp>
+//#include <lifev/navier_stokes_blocks/solver/StabilizationVMSLES_semi_implicit.hpp>
 //#include <lifev/navier_stokes_blocks/solver/StabilizationSUPGALE.hpp>
 
 #include <Teuchos_ParameterList.hpp>
@@ -490,6 +491,7 @@ private:
     vectorPtr_Type M_velocity;
     vectorPtr_Type M_pressure;
     vectorPtr_Type M_velocityRhs;
+    vectorPtr_Type M_velocityExtrapolated;
 
     boost::shared_ptr<map_Type> M_monolithicMap;
     vectorPtr_Type M_solution;

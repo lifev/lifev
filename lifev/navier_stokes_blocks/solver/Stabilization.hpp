@@ -234,15 +234,17 @@ public:
 
     virtual void updateODEfineScale ( const vectorPtr_Type& /*velocity*/, const vectorPtr_Type& /*pressure*/ ) {};
 
+    virtual void updateODEfineScale ( const vectorPtr_Type& /*velocity*/, const vectorPtr_Type& /*pressure*/, const vectorPtr_Type& /*vel_extrap*/ ) {};
+    
     virtual void setExportFineScaleVelocity ( ExporterHDF5<mesh_Type> & /*exporter*/, const int& /*numElementsTotal*/ ) {};
 
 private:
 
     virtual void setupODEfineScale () {};
 
-    virtual void computeFineScales ( const vectorPtr_Type& /*velocity*/, const vectorPtr_Type& /*pressure*/ ) {};
+    virtual void computeFineScales ( const vectorPtr_Type& /*velocity*/, const vectorPtr_Type& /*pressure*/, const vectorPtr_Type& /*vel_extrap*/ ) {};
 
-    virtual void computeFineScalesForVisualization ( const vectorPtr_Type& /*velocity*/, const vectorPtr_Type& /*pressure*/ ) {};
+    virtual void computeFineScalesForVisualization ( const vectorPtr_Type& /*velocity*/, const vectorPtr_Type& /*pressure*/, const vectorPtr_Type& /*vel_extrap*/ ) {};
 
 };
 
