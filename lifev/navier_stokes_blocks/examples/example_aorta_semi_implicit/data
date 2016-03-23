@@ -49,14 +49,14 @@ filename   = result_aorta_semi_implicit
     mesh_file       = Aorta_fluid_30K_NE.mesh
     mesh_type       = .mesh
 
-    vel_order       = P1
-    pres_order      = P1
+    vel_order       = P2
+    pres_order      = P2
     stiff_strain    = true
 
     [../stabilization]
     use             = true
     type            = VMSLES_NEW #VMSLES_NEW, SUPG_SEMI_IMPLICIT
-    vel_order       = 1
+    vel_order       = 2
     ode_fine_scale  = true
 
     [../miscellaneous]
