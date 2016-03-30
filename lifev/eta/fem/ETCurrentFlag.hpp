@@ -52,7 +52,7 @@ namespace LifeV
 
   \section flag_definition What is a flag?
 
-  At first sight, we might think that a flag is a complicated class implemented to do exaclty what we want,
+  At first sight, we might think that a flag is a complicated class implemented to do exactly what we want,
   with overloaded operators... Actually, it is much simpler: a LifeV::flag_Type is just an unsigned integer.
 
   \section flag_primitive How to define a flag?
@@ -136,7 +136,7 @@ typedef unsigned int flag_Type;
 // PRIMITIVE FLAGS
 // The flags containing "ONLY" are not intended to be directly used.
 // They are rather meant to be composed into other flags that take
-// care for the completness of the procedure.
+// care for the completeness of the procedure.
 
 // Do nothing flag
 const flag_Type ET_UPDATE_NONE (0);
@@ -177,8 +177,11 @@ const flag_Type ET_UPDATE_ONLY_DIAMETER (1024);
 // Update the measure of the triangle
 const flag_Type ET_UPDATE_ONLY_MEASURE (2048);
 
+// Update the metric tensor of the tetrahedra
+const flag_Type ET_UPDATE_ONLY_METRIC (4096);
+
 // Update everything
-const flag_Type ET_UPDATE_ALL (4096 - 1);
+const flag_Type ET_UPDATE_ALL (8192 - 1);
 
 
 // COMPOSITE FLAGS
@@ -229,6 +232,10 @@ const flag_Type ET_UPDATE_LAPLACIAN  (ET_UPDATE_ONLY_CELL_NODE
 // Flag for the diameter of the cell
 const flag_Type ET_UPDATE_DIAMETER (ET_UPDATE_ONLY_CELL_NODE
                                     | ET_UPDATE_ONLY_DIAMETER);
+
+// Flag for the metric of the cell
+const flag_Type ET_UPDATE_METRIC (ET_UPDATE_ONLY_CELL_NODE
+                                    | ET_UPDATE_ONLY_METRIC);
 
 // Flag for the diameter of the cell
 const flag_Type ET_UPDATE_MEASURE (ET_UPDATE_WDET
