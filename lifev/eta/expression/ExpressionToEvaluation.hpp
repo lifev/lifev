@@ -81,6 +81,8 @@
 #include <lifev/eta/expression/ExpressionFunctor.hpp>
 
 #include <lifev/eta/expression/ExpressionHK.hpp>
+#include <lifev/eta/expression/ExpressionMetricTensor.hpp>
+#include <lifev/eta/expression/ExpressionMetricVector.hpp>
 #include <lifev/eta/expression/ExpressionMeas.hpp>
 #include <lifev/eta/expression/ExpressionMeasBDCurrentFE.hpp>
 #include <lifev/eta/expression/ExpressionPosition.hpp>
@@ -138,6 +140,8 @@
 #include <lifev/eta/expression/EvaluationFunctor.hpp>
 
 #include <lifev/eta/expression/EvaluationHK.hpp>
+#include <lifev/eta/expression/EvaluationMetricTensor.hpp>
+#include <lifev/eta/expression/EvaluationMetricVector.hpp>
 #include <lifev/eta/expression/EvaluationMeas.hpp>
 #include <lifev/eta/expression/EvaluationMeasBDCurrentFE.hpp>
 #include <lifev/eta/expression/EvaluationPosition.hpp>
@@ -846,6 +850,28 @@ class ExpressionToEvaluation<ExpressionHK, testDim, solutionDim, spaceDim>
 {
 public:
     typedef EvaluationHK<spaceDim> evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+// Specialized for G
+template<UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionMetricTensor, testDim, solutionDim, spaceDim>
+{
+public:
+    typedef EvaluationMetricTensor<spaceDim> evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+// Specialized for g
+template<UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionMetricVector, testDim, solutionDim, spaceDim>
+{
+public:
+    typedef EvaluationMetricVector<spaceDim> evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();

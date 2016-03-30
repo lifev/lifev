@@ -12,6 +12,8 @@ SET(expression_HEADERS
 	expression/EvaluationExtract2.hpp
 	expression/EvaluationFunctor.hpp
 	expression/EvaluationHK.hpp
+	expression/EvaluationMetricTensor.hpp
+	expression/EvaluationMetricVector.hpp
 	expression/EvaluationIfCrossed.hpp
 	expression/EvaluationInterpolateGradient.hpp
 	expression/EvaluationInterpolateLaplacian.hpp
@@ -55,6 +57,8 @@ SET(expression_HEADERS
 	expression/ExpressionExtract2.hpp
 	expression/ExpressionFunctor.hpp
 	expression/ExpressionHK.hpp
+	expression/ExpressionMetricTensor.hpp
+	expression/ExpressionMetricVector.hpp
 	expression/ExpressionIfCrossed.hpp
 	expression/ExpressionInterpolateGradient.hpp
 	expression/ExpressionInterpolateLaplacian.hpp
@@ -129,6 +133,8 @@ SET(expression_SOURCES ""
 	expression/ExpressionDphiI.cpp
 	expression/ExpressionDphiJ.cpp
 	expression/ExpressionHK.cpp
+	expression/ExpressionMetricTensor.cpp
+	expression/ExpressionMetricVector.cpp
 	expression/ExpressionMeas.cpp
 	expression/ExpressionPhiI.cpp
 	expression/ExpressionPhiJ.cpp
