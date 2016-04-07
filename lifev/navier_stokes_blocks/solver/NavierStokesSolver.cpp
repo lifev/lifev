@@ -249,24 +249,13 @@ void NavierStokesSolver::buildGraphs()
 
 		// Graph stiffness, block (0,0)
 		M_A_graph.reset (new Epetra_FECrsGraph (Copy, * (M_velocityFESpace->map().map (Unique) ), 0) );
-		if (M_stiffStrain)
-		{
-			buildGraph ( elements (M_fespaceUETA->mesh() ),
-						 quadRuleTetra4pt,
-						 M_fespaceUETA,
-						 M_fespaceUETA,
-						 value( 0.5 * M_viscosity ) * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) )
-			) >> M_A_graph;
-		}
-		else
-		{
-			buildGraph ( elements (M_fespaceUETA->mesh() ),
-						 quadRuleTetra4pt,
-						 M_fespaceUETA,
-						 M_fespaceUETA,
-						 M_viscosity * dot( grad(phi_i) , grad(phi_j) + transpose(grad(phi_j)) )
-			) >> M_A_graph;
-		}
+
+		buildGraph ( elements (M_fespaceUETA->mesh() ),
+				quadRuleTetra4pt,
+				M_fespaceUETA,
+				M_fespaceUETA,
+				value( 0.5 * M_viscosity ) * dot( grad(phi_i) , grad(phi_j) + transpose(grad(phi_j)) )
+		) >> M_A_graph;
 		M_A_graph->GlobalAssemble();
         M_A_graph->OptimizeStorage();
 
@@ -517,25 +506,13 @@ void NavierStokesSolver::buildSystem()
 		
         M_B->globalAssemble( M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
 
-		if ( M_stiffStrain )
-		{
-			integrate( elements(M_fespaceUETA->mesh()),
-					   M_velocityFESpace->qr(),
-					   M_fespaceUETA,
-					   M_fespaceUETA,
-					   value( M_viscosity ) * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) )
-			) >> M_A;
-		}
-		else
-		{
-			integrate( elements(M_fespaceUETA->mesh()),
-					   M_velocityFESpace->qr(),
-					   M_fespaceUETA,
-				 	   M_fespaceUETA,
-					   value ( M_viscosity ) * dot( grad(phi_i) , grad(phi_j) + transpose(grad(phi_j)) )
-			) >> M_A;
-		}
-		
+        integrate( elements(M_fespaceUETA->mesh()),
+        		M_velocityFESpace->qr(),
+        		M_fespaceUETA,
+        		M_fespaceUETA,
+        		value( M_viscosity ) * dot( grad(phi_i), grad(phi_j) + transpose(grad(phi_j)) )
+        ) >> M_A;
+
         M_A->globalAssemble();
 		
 		M_block01->zero();
@@ -767,13 +744,14 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
 {
 	applyBoundaryConditions ( bc, time );
 	solveTimeStep();
-	if ( M_dataFile("fluid/stabilization/ode_fine_scale", false ) )
-	{
-        if ( M_stabilizationType.compare("SUPG_SEMI_IMPLICIT")==0 )
-            M_stabilization->updateODEfineScale ( M_velocity, M_pressure );
-        else if ( M_stabilizationType.compare("VMSLES_NEW")==0  )
-            M_stabilization->updateODEfineScale ( M_velocity, M_pressure, M_velocityExtrapolated );
-	}
+	if (M_useStabilization)
+		if ( M_dataFile("fluid/stabilization/ode_fine_scale", false ) )
+		{
+			if ( M_stabilizationType.compare("SUPG_SEMI_IMPLICIT")==0 )
+				M_stabilization->updateODEfineScale ( M_velocity, M_pressure );
+			else if ( M_stabilizationType.compare("VMSLES_NEW")==0  )
+				M_stabilization->updateODEfineScale ( M_velocity, M_pressure, M_velocityExtrapolated );
+		}
 }
 
 void NavierStokesSolver::solveTimeStep( )
