@@ -53,7 +53,8 @@ NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commP
         M_meshSizeWeakBC ( dataFile("fluid/weak_bc/mesh_size", 0.0) ),
         M_computeAerodynamicLoads ( dataFile("fluid/forces/compute", false) ),
         M_methodAerodynamicLoads ( dataFile("fluid/forces/method", "integral_form") ),
-        M_flagBody ( dataFile("fluid/forces/flag", 31 ) )
+        M_flagBody ( dataFile("fluid/forces/flag", 31 ) ),
+        M_solve_blocks ( dataFile("fluid/solve_blocks", true ) )
 {
 	M_prec.reset ( Operators::NSPreconditionerFactory::instance().createObject (dataFile("fluid/preconditionerType","none")));
 }
@@ -772,85 +773,197 @@ void NavierStokesSolver::solveTimeStep( )
     chrono.stop();
     M_displayer.leaderPrintMax(" done in " , chrono.diff() );
 
-    //(2) Set the data for the preconditioner
+    /* Testing approach in which we form explicitly the NS matrix from the blocks -- begin */
 
-	M_displayer.leaderPrint( "\tPreconditioner operator - set up the block operator...");
-    chrono.reset();
-    chrono.start();
-
-    if ( std::strcmp(M_prec->Label(),"aSIMPLEOperator")==0 )
+    if ( !M_solve_blocks )
     {
-        if (M_useStabilization)
-        {
-            M_prec->setUp(M_block00, M_block10, M_block01, M_block11);
-        }
-        else
-        {
-            M_prec->setUp(M_block00, M_block10, M_block01);
-        }
+		MatrixBlockStructure structure;
+		std::vector<UInt> colstr(2,0);
+		colstr[0]=M_velocityFESpace->map().map(Unique)->NumGlobalElements();
+		colstr[1]=M_pressureFESpace->map().map(Unique)->NumGlobalElements();
+		structure.setBlockStructure(colstr,colstr);
 
-    	M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
-    	M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
-    	M_prec->updateApproximatedMomentumOperator();
-    	M_prec->updateApproximatedSchurComplementOperator();
-    }
-    else if ( std::strcmp(M_prec->Label(),"aPCDOperator")==0 )
-    {
-    	updatePCD(M_uExtrapolated);
-    	M_prec->setUp(M_block00, M_block10, M_block01, M_Fp, M_Mp, M_Mu);
-    	M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
-    	M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
-    	M_prec->updateApproximatedMomentumOperator();
-    	M_prec->updateApproximatedSchurComplementOperator();
-    	M_prec->updateApproximatedPressureMassOperator();
-    }
+		matrixPtr_Type monolithic_matrix( new matrix_Type ( M_velocityFESpace->map() + M_pressureFESpace->map() ) );
 
-    chrono.stop();
-    M_displayer.leaderPrintMax(" done in " , chrono.diff() );
+		// ------------ Block (0,0)
 
-    //(3) Set the solver for the linear system
-    M_displayer.leaderPrint( "\tset up the Trilinos solver...");
-    chrono.start();
-    std::string solverType(M_pListLinSolver->get<std::string>("Linear Solver Type"));
-    M_invOper.reset(Operators::InvertibleOperatorFactory::instance().createObject(solverType));
+		boost::shared_ptr<MatrixEpetraStructuredView<double> > view_block00;
+		view_block00 = MatrixEpetraStructuredUtility::createBlockView( monolithic_matrix, structure, 0, 0);
 
-    M_invOper->setParameterList(M_pListLinSolver->sublist(solverType));
-    M_invOper->setOperator(M_oper);
-    M_invOper->setPreconditioner(M_prec);
+		MatrixBlockStructure blockStructure_block00;
+		std::vector<UInt> r_00(1,0), c_00(1,0);
+		r_00[0] = M_velocityFESpace->map().map(Unique)->NumGlobalElements();
+		c_00[0] = M_velocityFESpace->map().map(Unique)->NumGlobalElements();
+		blockStructure_block00.setBlockStructure(r_00, c_00);
 
-    chrono.stop();
-    M_displayer.leaderPrintMax(" done in " , chrono.diff() );
+		boost::shared_ptr<MatrixEpetraStructuredView<double> > matrixView_00_single;
+		matrixView_00_single = MatrixEpetraStructuredUtility::createBlockView ( M_block00, blockStructure_block00, 0, 0);
+		MatrixEpetraStructuredUtility::copyBlock( matrixView_00_single, view_block00);
 
-    // Solving the system
-    BlockEpetra_Map upMap;
-    upMap.setUp ( M_velocityFESpace->map().map(Unique), M_pressureFESpace->map().map(Unique));
+		// ------------ end Block (0,0)
 
-    if ( M_useStabilization )
-    {
-        vector_Type rhs ( *M_monolithicMap, Unique );
-        vector_Type sol ( *M_monolithicMap, Unique );
-     
-        rhs.zero();
-        sol.zero();
-        
-        rhs.subset ( *M_rhs, M_velocityFESpace->map(), 0, 0 );
-        rhs.subset ( *M_rhs_pressure, M_pressureFESpace->map(), 0, M_velocityFESpace->map().mapSize() );
-        
-        M_invOper->ApplyInverse(rhs.epetraVector(), sol.epetraVector());
-        
-        M_velocity->subset ( sol, M_velocityFESpace->map(), 0, 0 );
-        M_pressure->subset ( sol, M_pressureFESpace->map(), M_velocityFESpace->map().mapSize(), 0 );
+		// ------------ Block (0,1)
+
+		boost::shared_ptr<MatrixEpetraStructuredView<double> > view_block01;
+		view_block01 = MatrixEpetraStructuredUtility::createBlockView( monolithic_matrix, structure, 0, 1);
+
+		MatrixBlockStructure blockStructure_block01;
+		std::vector<UInt> r_01(1,0), c_01(1,0);
+		r_01[0] = M_velocityFESpace->map().map(Unique)->NumGlobalElements();
+		c_01[0] = M_pressureFESpace->map().map(Unique)->NumGlobalElements();
+		blockStructure_block01.setBlockStructure(r_01, c_01);
+
+		boost::shared_ptr<MatrixEpetraStructuredView<double> > matrixView_01_single;
+		matrixView_01_single = MatrixEpetraStructuredUtility::createBlockView ( M_block01, blockStructure_block01, 0, 0);
+		MatrixEpetraStructuredUtility::copyBlock( matrixView_01_single, view_block01);
+
+		// ------------ end Block (0,1)
+
+		// ------------ Block (1,0)
+
+		boost::shared_ptr<MatrixEpetraStructuredView<double> > view_block10;
+		view_block10 = MatrixEpetraStructuredUtility::createBlockView( monolithic_matrix, structure, 1, 0);
+
+		MatrixBlockStructure blockStructure_block10;
+		std::vector<UInt> r_10(1,0), c_10(1,0);
+		r_10[0] = M_pressureFESpace->map().map(Unique)->NumGlobalElements();
+		c_10[0] = M_velocityFESpace->map().map(Unique)->NumGlobalElements();
+		blockStructure_block10.setBlockStructure(r_10, c_10);
+
+		boost::shared_ptr<MatrixEpetraStructuredView<double> > matrixView_10_single;
+		matrixView_10_single = MatrixEpetraStructuredUtility::createBlockView ( M_block10, blockStructure_block10, 0, 0);
+		MatrixEpetraStructuredUtility::copyBlock( matrixView_10_single, view_block10);
+
+		// ------------ end Block (1,0)
+
+		if (M_useStabilization)
+		{
+			// ------------ Block (1,1)
+
+			boost::shared_ptr<MatrixEpetraStructuredView<double> > view_block11;
+			view_block11 = MatrixEpetraStructuredUtility::createBlockView( monolithic_matrix, structure, 1, 1);
+
+			MatrixBlockStructure blockStructure_block11;
+			std::vector<UInt> r_11(1,0), c_11(1,0);
+			r_11[0] = M_pressureFESpace->map().map(Unique)->NumGlobalElements();
+			c_11[0] = M_pressureFESpace->map().map(Unique)->NumGlobalElements();
+			blockStructure_block11.setBlockStructure(r_11, c_11);
+
+			boost::shared_ptr<MatrixEpetraStructuredView<double> > matrixView_11_single;
+			matrixView_11_single = MatrixEpetraStructuredUtility::createBlockView ( M_block11, blockStructure_block11, 0, 0);
+			MatrixEpetraStructuredUtility::copyBlock( matrixView_11_single, view_block11);
+
+			// ------------ end Block (1,1)
+		}
+
+		monolithic_matrix->globalAssemble();
+
+		if ( M_useStabilization )
+		{
+			vector_Type rhs ( *M_monolithicMap, Unique );
+			vector_Type sol ( *M_monolithicMap, Unique );
+
+			rhs.zero();
+			sol.zero();
+
+			rhs.subset ( *M_rhs, M_velocityFESpace->map(), 0, 0 );
+			rhs.subset ( *M_rhs_pressure, M_pressureFESpace->map(), 0, M_velocityFESpace->map().mapSize() );
+
+			// SOLVE
+			SolverAztecOO linearSolver;
+			linearSolver.setCommunicator ( M_comm  );
+			linearSolver.setDataFromGetPot ( M_dataFile, "solver");
+			linearSolver.setupPreconditioner ( M_dataFile, "prec");
+			linearSolver.setMatrix (*monolithic_matrix);
+			linearSolver.solveSystem (rhs, sol, monolithic_matrix);
+
+			M_velocity->subset ( sol, M_velocityFESpace->map(), 0, 0 );
+			M_pressure->subset ( sol, M_pressureFESpace->map(), M_velocityFESpace->map().mapSize(), 0 );
+		}
+		/* Testing approach in which we form explicitly the NS matrix from the blocks -- end */
     }
     else
     {
-        BlockEpetra_MultiVector up(upMap, 1), rhs(upMap, 1);
-        rhs.block(0).Update(1.0, M_rhs->epetraVector(), 0.);
+    	//(2) Set the data for the preconditioner
 
-        // Solving the linear system
-        M_invOper->ApplyInverse(rhs,up);
+		M_displayer.leaderPrint( "\tPreconditioner operator - set up the block operator...");
+		chrono.reset();
+		chrono.start();
 
-        M_velocity->epetraVector().Update(1.0,up.block(0),0.0);
-        M_pressure->epetraVector().Update(1.0,up.block(1),0.0);
+		if ( std::strcmp(M_prec->Label(),"aSIMPLEOperator")==0 )
+		{
+			if (M_useStabilization)
+			{
+				M_prec->setUp(M_block00, M_block10, M_block01, M_block11);
+			}
+			else
+			{
+				M_prec->setUp(M_block00, M_block10, M_block01);
+			}
+
+			M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
+			M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
+			M_prec->updateApproximatedMomentumOperator();
+			M_prec->updateApproximatedSchurComplementOperator();
+		}
+		else if ( std::strcmp(M_prec->Label(),"aPCDOperator")==0 )
+		{
+			updatePCD(M_uExtrapolated);
+			M_prec->setUp(M_block00, M_block10, M_block01, M_Fp, M_Mp, M_Mu);
+			M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
+			M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
+			M_prec->updateApproximatedMomentumOperator();
+			M_prec->updateApproximatedSchurComplementOperator();
+			M_prec->updateApproximatedPressureMassOperator();
+		}
+
+		chrono.stop();
+		M_displayer.leaderPrintMax(" done in " , chrono.diff() );
+
+		//(3) Set the solver for the linear system
+		M_displayer.leaderPrint( "\tset up the Trilinos solver...");
+		chrono.start();
+		std::string solverType(M_pListLinSolver->get<std::string>("Linear Solver Type"));
+		M_invOper.reset(Operators::InvertibleOperatorFactory::instance().createObject(solverType));
+
+		M_invOper->setParameterList(M_pListLinSolver->sublist(solverType));
+		M_invOper->setOperator(M_oper);
+		M_invOper->setPreconditioner(M_prec);
+
+		chrono.stop();
+		M_displayer.leaderPrintMax(" done in " , chrono.diff() );
+
+		// Solving the system
+		BlockEpetra_Map upMap;
+		upMap.setUp ( M_velocityFESpace->map().map(Unique), M_pressureFESpace->map().map(Unique));
+
+		if ( M_useStabilization )
+		{
+			vector_Type rhs ( *M_monolithicMap, Unique );
+			vector_Type sol ( *M_monolithicMap, Unique );
+
+			rhs.zero();
+			sol.zero();
+
+			rhs.subset ( *M_rhs, M_velocityFESpace->map(), 0, 0 );
+			rhs.subset ( *M_rhs_pressure, M_pressureFESpace->map(), 0, M_velocityFESpace->map().mapSize() );
+
+			M_invOper->ApplyInverse(rhs.epetraVector(), sol.epetraVector());
+
+			M_velocity->subset ( sol, M_velocityFESpace->map(), 0, 0 );
+			M_pressure->subset ( sol, M_pressureFESpace->map(), M_velocityFESpace->map().mapSize(), 0 );
+		}
+		else
+		{
+			BlockEpetra_MultiVector up(upMap, 1), rhs(upMap, 1);
+			rhs.block(0).Update(1.0, M_rhs->epetraVector(), 0.);
+
+			// Solving the linear system
+			M_invOper->ApplyInverse(rhs,up);
+
+			M_velocity->epetraVector().Update(1.0,up.block(0),0.0);
+			M_pressure->epetraVector().Update(1.0,up.block(1),0.0);
+		}
     }
 
     if ( M_computeAerodynamicLoads )

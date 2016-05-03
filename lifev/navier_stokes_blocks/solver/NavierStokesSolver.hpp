@@ -86,6 +86,12 @@
 #include <lifev/core/algorithm/PreconditionerIfpack.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
 
+#include <lifev/core/array/MatrixEpetraStructured.hpp>
+#include <lifev/core/array/MatrixEpetraStructuredView.hpp>
+#include <lifev/core/array/MatrixBlockStructure.hpp>
+#include <lifev/core/array/MatrixEpetraStructuredUtility.hpp>
+#include <lifev/core/algorithm/SolverAztecOO.hpp>
+
 namespace LifeV
 {
 
@@ -568,6 +574,8 @@ private:
 
 	bool M_penalizeReverseFlow;
 	UInt M_flagPenalizeReverseFlow;
+
+	bool M_solve_blocks;
 
 }; // class NavierStokesSolver
 
