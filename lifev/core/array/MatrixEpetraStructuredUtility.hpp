@@ -1000,7 +1000,8 @@ createBlockView ( boost::shared_ptr<MatrixEpetra<DataType> > matrixPtr,
                              blockStructure.columnBlockFirstIndex ( columnIndex ),
                              blockStructure.blockNumRows ( rowIndex ),
                              blockStructure.blockNumColumns ( columnIndex ),
-                             matrixPtr->matrixPtr().get() );
+                             /*matrixPtr->matrixPtr().get()*/
+                             &(*matrixPtr) );
 
     return matrixBlockView;
 }
