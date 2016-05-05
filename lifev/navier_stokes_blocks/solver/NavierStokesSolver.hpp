@@ -415,6 +415,8 @@ public:
 
     void solveLaplacian( const UInt& flag, bcPtr_Type& bc_laplacian, vectorPtr_Type& laplacianSolution );
 
+    void updateSystem_ALE( const vectorPtr_Type& u_star, const vectorPtr_Type& w, const vectorPtr_Type& rhs_velocity );
+
 private:
 
 	// build the graphs

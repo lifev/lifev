@@ -121,6 +121,17 @@ public:
      */
     virtual void apply_matrix(	const vector_Type& /*velocityExtrapolated*/ ) {};
 
+    //! @name Interfaces for the NS in moving domain, semi-implicit
+    //@{
+
+    //! Updates the system matrix in Navier-Stokes simulations in ALE coordinates
+    //  with semi-implicit treatment of the convective term.
+    /*!
+         @param velocityExtrapolated extrapolation of the fluid velocity
+         @param velocityALE ALE velocity
+     */
+    virtual void apply_matrix(	const vector_Type& /*velocityExtrapolated*/, const vector_Type& /*velocityALE*/ ) {};
+
     
     //! Adds to the right hand side the contribution coming from the SUPG stabilization
     //  in Navier-Stokes simulations in fixed coordinates. Usef for NS semi-implicit
@@ -134,6 +145,7 @@ public:
                                 vectorPtr_Type& /*rhs_pressure*/,
                                 const vector_Type& /*velocity_extrapolated*/,
                                 const vector_Type& /*velocity_rhs*/) {};
+
 
     //@}
     

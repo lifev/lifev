@@ -91,6 +91,7 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh, const int& id_domain)
 			uOrder = M_dataFile("fluid/master_space_discretization/vel_order","P1");
 			pOrder = M_dataFile("fluid/master_space_discretization/pres_order","P1");
 			M_stiffStrain = M_dataFile("fluid/master_space_discretization/stiff_strain", true);
+
 		}
 		else if ( id_domain == 1 )
 		{
@@ -157,9 +158,19 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh, const int& id_domain)
 
     if ( M_useStabilization )
     {
-    	M_stabilization.reset ( StabilizationFactory::instance().createObject ( M_dataFile("fluid/stabilization/type","none") ) );
+    	if ( id_domain == 0 )
+    	{
+    		M_stabilization.reset ( StabilizationFactory::instance().createObject ( "SUPG_SEMI_IMPLICIT_ALE" ) );
+    	}
+    	else
+    	{
+    		M_stabilization.reset ( StabilizationFactory::instance().createObject ( M_dataFile("fluid/stabilization/type","none") ) );
+
+    	}
+
     	if (M_comm->MyPID() == 0)
     		std::cout << "\nUsing the " << M_stabilization->label() << " stabilization\n\n";
+
     	M_stabilization->setVelocitySpace(M_velocityFESpace);
     	M_stabilization->setPressureSpace(M_pressureFESpace);
     	M_stabilization->setDensity(M_density);
@@ -1852,6 +1863,115 @@ void NavierStokesSolver::solveLaplacian( const UInt& flag, bcPtr_Type& bc_laplac
     solver.solve ( Phi_h );
 
     *laplacianSolution = *Phi_h;
+}
+
+// method which updates the system when using NS in ALE frame of reference
+void NavierStokesSolver::updateSystem_ALE( const vectorPtr_Type& u_star, const vectorPtr_Type& w, const vectorPtr_Type& rhs_velocity )
+{
+	vectorPtr_Type beta ( new vector_Type ( *u_star - *w ) );
+	vectorPtr_Type beta_repeated ( new vector_Type ( *beta, Repeated ) );
+
+	// Note that u_star HAS to extrapolated from outside. Hence it works also for FSI in this manner.
+	M_uExtrapolated.reset( new vector_Type ( *u_star, Repeated ) );
+	vectorPtr_Type w_repeated ( new vector_Type ( *w, Repeated ) );
+
+	// Update convective term
+	M_C->zero();
+	{
+		using namespace ExpressionAssembly;
+		integrate( elements(M_fespaceUETA->mesh()),
+				M_velocityFESpace->qr(),
+				M_fespaceUETA,
+				M_fespaceUETA,
+				dot( M_density * value(M_fespaceUETA, *beta_repeated )*grad(phi_j), phi_i) // semi-implicit treatment of the convective term
+		)
+		>> M_C;
+	}
+
+	M_C->globalAssemble();
+
+	// Get the matrix corresponding to the block (0,0)
+	M_block00->zero();
+	*M_block00 += *M_Mu;
+	*M_block00 *= M_alpha/M_timeStep;
+	*M_block00 += *M_A;
+	*M_block00 += *M_C;
+    if ( !M_useStabilization )
+        M_block00->globalAssemble();
+
+	// Get the right hand side with inertia contribution
+	M_rhs.reset( new vector_Type ( M_velocityFESpace->map(), Unique ) );
+	M_rhs->zero();
+
+	if ( !M_steady )
+		*M_rhs = *M_Mu* (*rhs_velocity);
+
+	M_block01->zero();
+	*M_block01 += *M_Btranspose;
+
+	M_block10->zero();
+	*M_block10 += *M_B;
+
+    if ( !M_fullyImplicit && M_useStabilization )
+    {
+        M_displayer.leaderPrint ( "\tF - Assembling semi-implicit stabilization terms... ");
+        LifeChrono chrono;
+        chrono.start();
+
+        if ( M_useStabilization ) // Available only SUPG_SEMI_IMPLICIT_ALE
+        {
+        	M_stabilization->apply_matrix( *u_star, *w );
+        }
+
+        *M_block00 += *M_stabilization->block_00();
+
+        *M_block01 += *M_stabilization->block_01();
+
+        *M_block10 += *M_stabilization->block_10();
+
+        M_block11->zero();
+        *M_block11 += *M_stabilization->block_11();
+        M_block11->globalAssemble();
+
+        M_rhs_pressure.reset( new vector_Type ( M_pressureFESpace->map(), Unique ) );
+        M_rhs_pressure->zero();
+
+        M_stabilization->apply_vector( M_rhs, M_rhs_pressure, *u_star, *rhs_velocity);
+
+        M_rhs_pressure->globalAssemble();
+
+        chrono.stop();
+        M_displayer.leaderPrintMax ( " done in ", chrono.diff() ) ;
+    }
+
+    if ( M_imposeWeakBC )
+    {
+    	using namespace ExpressionAssembly;
+
+    	QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
+
+    	integrate( boundary(M_fespaceUETA->mesh(), M_flagWeakBC),
+    			myBDQR,
+    			M_fespaceUETA,
+    			M_fespacePETA,
+    			dot( phi_i, phi_j * Nface)
+    	)
+    	>> M_block01;
+
+    	integrate( boundary(M_fespaceUETA->mesh(), M_flagWeakBC),
+    			myBDQR,
+    			M_fespacePETA,
+    			M_fespaceUETA,
+    			value(-1.0)*dot(phi_i*Nface, phi_j)
+    	)
+    	>> M_block10;
+    }
+
+    M_rhs->globalAssemble();
+    M_block00->globalAssemble();
+    M_block01->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
+    M_block10->globalAssemble(M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
+
 }
 
 }
