@@ -1936,7 +1936,7 @@ void NavierStokesSolver::updateSystem_ALE( const vectorPtr_Type& u_star, const v
         M_rhs_pressure.reset( new vector_Type ( M_pressureFESpace->map(), Unique ) );
         M_rhs_pressure->zero();
 
-        M_stabilization->apply_vector( M_rhs, M_rhs_pressure, *u_star, *rhs_velocity);
+        M_stabilization->apply_vector( M_rhs, M_rhs_pressure, *u_star, *w, *rhs_velocity);
 
         M_rhs_pressure->globalAssemble();
 
