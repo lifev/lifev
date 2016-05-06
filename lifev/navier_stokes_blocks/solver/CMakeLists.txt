@@ -9,6 +9,7 @@ SET(solver_HEADERS
 #  solver/StabilizationSUPG.hpp
 #  solver/StabilizationVMSLES.hpp
   solver/StabilizationSUPG_semi_implicit.hpp
+  solver/StabilizationSUPG_semi_implicit_ale.hpp
   solver/StabilizationVMSLES_new.hpp
   solver/StabilizationVMSLES_semi_implicit.hpp
 #  solver/StabilizationSUPGALE.hpp
@@ -25,6 +26,7 @@ SET(solver_SOURCES
 #  solver/StabilizationSUPG.cpp
 #  solver/StabilizationVMSLES.cpp
   solver/StabilizationSUPG_semi_implicit.cpp
+  solver/StabilizationSUPG_semi_implicit_ale.cpp
   solver/StabilizationVMSLES_new.cpp
   solver/StabilizationVMSLES_semi_implicit.cpp
 #  solver/StabilizationSUPGALE.cpp
