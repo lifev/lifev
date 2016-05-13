@@ -359,11 +359,22 @@ void StabilizationSUPG_semi_implicit::apply_matrix( const vector_Type& velocityE
 				M_fespaceUETA, // test  w -> phi_i
 				M_fespaceUETA, // trial u^{n+1} -> phi_j
 
+				TAU_M* (
+						dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), value(M_density*M_density*M_alpha/M_timestep) * phi_j
+																						 +value(M_density*M_density) * value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_j)
+																						 -value(M_density*M_viscosity)*laplacian(phi_j)
+						   )
+
+				)
+
+				+ TAU_C*div(phi_i)*div(phi_j)
+
+				/*
 				TAU_M*value(M_density*M_density)*value(M_alpha/M_timestep) * dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), phi_j )
 				+TAU_M*value(M_density*M_density) * dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_j) )
 				+TAU_C*div(phi_i)*div(phi_j)
 				-TAU_M*value(M_density*M_viscosity)*dot( value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_i), laplacian(phi_j) )
-
+				*/
 		) >> M_block_00;
 	}
 
@@ -391,9 +402,21 @@ void StabilizationSUPG_semi_implicit::apply_matrix( const vector_Type& velocityE
 				M_fespacePETA, // test  q -> phi_i
 				M_fespaceUETA, // trial u^{n+1} -> phi_j
 
+				TAU_M *  (
+
+						dot( grad(phi_i), value(M_density*M_alpha/M_timestep)*phi_j
+										 +value(M_density)*value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_j)
+										 -value(M_viscosity)*laplacian(phi_j)
+						   )
+
+				)
+
+
+				/*
 				TAU_M*value(M_density*M_alpha/M_timestep)*dot( grad(phi_i), phi_j )
 				+TAU_M*value(M_density) * dot( grad(phi_i), value(M_fespaceUETA, velocity_extrapolated_rep)*grad(phi_j) )
 				-TAU_M*value(M_viscosity)*dot(grad(phi_i), laplacian(phi_j))
+				*/
 
 		) >> M_block_10;
 	}
