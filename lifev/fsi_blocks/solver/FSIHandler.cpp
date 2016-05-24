@@ -377,6 +377,19 @@ void FSIHandler::setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_
 	M_aleBC       		= aleBC;
 }
 
+
+void FSIHandler::setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& fluidBC_residual,
+										 const bcPtr_Type& structureBC, const bcPtr_Type& structureBC_residual,
+										 const bcPtr_Type& aleBC, const bcPtr_Type& aleBC_residual )
+{
+	M_fluidBC 	  		   = fluidBC;
+	M_fluidBC_residual 	   = fluidBC_residual;
+	M_structureBC 		   = structureBC;
+	M_structureBC_residual = structureBC_residual;
+	M_aleBC       		   = aleBC;
+	M_aleBC_residual       = aleBC_residual;
+}
+
 void FSIHandler::setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& fluidBC_residual, const bcPtr_Type& structureBC, const bcPtr_Type& aleBC,
 		const bcPtr_Type& aleBC_residual )
 {
@@ -426,8 +439,8 @@ void FSIHandler::initializeTimeAdvance ( )
     
     // Structure time advance
     M_structureTimeAdvance.reset ( new Newmark );
-    M_structureTimeAdvance->set_beta(0.25);
-    M_structureTimeAdvance->set_gamma(0.5);
+    M_structureTimeAdvance->set_beta(0.49);
+    M_structureTimeAdvance->set_gamma(0.9);
     M_structureTimeAdvance->set_timestep(M_dt);
 
     if ( !M_restart )
@@ -1257,10 +1270,10 @@ FSIHandler::applyBCresidual(VectorEpetra& r_u, VectorEpetra& r_ds, VectorEpetra&
 	r_u.zero();
 	r_u = ru_copy;
 
-	if ( !M_structureBC->bcUpdateDone() )
-		M_structureBC->bcUpdate ( *M_displacementFESpace->mesh(), M_displacementFESpace->feBd(), M_displacementFESpace->dof() );
+	if ( !M_structureBC_residual->bcUpdateDone() )
+		M_structureBC_residual->bcUpdate ( *M_displacementFESpace->mesh(), M_displacementFESpace->feBd(), M_displacementFESpace->dof() );
 
-	bcManageRhs ( r_ds, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC, M_displacementFESpace->feBd(), 1.0, M_time );
+	bcManageRhs ( r_ds, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC_residual, M_displacementFESpace->feBd(), 1.0, M_time );
 
 	if ( !M_aleBC_residual->bcUpdateDone() )
 		M_aleBC_residual->bcUpdate ( *M_aleFESpace->mesh(), M_aleFESpace->feBd(), M_aleFESpace->dof() );
@@ -1693,7 +1706,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		M_matrixStructure->zero();
 		Real coefficient = 1.0/ ( M_dt * M_dt * M_structureTimeAdvance->get_beta() );
 		M_structureNeoHookean->update_jacobian( ds_k, coefficient, M_matrixStructure);
-		bcManageMatrix( *M_matrixStructure, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC, //deve essere bc residual dopo
+		bcManageMatrix( *M_matrixStructure, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC_residual,
 				        M_displacementFESpace->feBd(), 1.0, M_time);
 	}
 

@@ -6,4 +6,5 @@ ADD_SUBDIRECTORIES(
     fsi_restart
     Bypass
     #fsi_couplingMapsVectorial
+    fsi_ventricle_aorta
 )

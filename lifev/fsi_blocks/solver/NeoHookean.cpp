@@ -94,8 +94,8 @@ NeoHookean::evaluate_residual( const vectorPtr_Type& solution, const Real& coeff
 	integrate ( elements ( M_displacementFESpace_ETA->mesh() ),
 			M_displacementFESpace->qr(),
 			M_displacementFESpace_ETA,
-			value ( coefficient ) * dot( value( M_displacementFESpace_ETA, *solution_rep ), phi_i )  -
-			dot ( value ( M_displacementFESpace_ETA, *csi_rep ), phi_i ) +
+			value ( coefficient * M_density ) * dot( value( M_displacementFESpace_ETA, *solution_rep ), phi_i )  -
+			value ( M_density ) * dot ( value ( M_displacementFESpace_ETA, *csi_rep ), phi_i ) +
 			value ( M_mu ) * pow (J, -2.0 / 3.0) * (dot ( F - value (1.0 / 3.0) * I_C * F_T, grad (phi_i) ) )
 			+ value (1.0 / 2.0) * value ( M_bulk ) * ( pow ( J , 2.0) - J + log (J) ) * dot (  F_T, grad (phi_i) )
 	) >> residual;
@@ -132,7 +132,7 @@ NeoHookean::update_jacobian(const vectorPtr_Type& solution, const Real& coeffici
 			M_displacementFESpace_ETA,
 			M_displacementFESpace_ETA,
 			/* Inertia term */
-			value ( coefficient ) * dot( phi_i, phi_j )
+			value ( coefficient * M_density ) * dot( phi_i, phi_j )
 			/*Isochoric Part*/
 			/*Stiffness matrix : int { -2/3 * mu * J^(-2/3) *( F^-T : \nabla \delta ) ( F : \nabla \v ) } */
 			+ value (-2.0 / 3.0) * value ( M_mu ) * pow (J, - (2.0 / 3.0) )  * dot ( F_T , grad (phi_j) ) * dot ( F , grad (phi_i) )

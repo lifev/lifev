@@ -168,6 +168,10 @@ public:
 
     void setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& fluidBC_residual, const bcPtr_Type& structureBC, const bcPtr_Type& aleBC);
 
+    void setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& fluidBC_residual,
+    							 const bcPtr_Type& structureBC, const bcPtr_Type& structureBC_residual,
+    							 const bcPtr_Type& aleBC, const bcPtr_Type& aleBC_residual);
+
     void setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& fluidBC_residual, const bcPtr_Type& structureBC, const bcPtr_Type& aleBC,
     							 const bcPtr_Type& aleBC_residual);
 
@@ -292,6 +296,7 @@ private:
     bcPtr_Type M_fluidBC;
     bcPtr_Type M_fluidBC_residual;
     bcPtr_Type M_structureBC;
+    bcPtr_Type M_structureBC_residual;
     bcPtr_Type M_aleBC;
     bcPtr_Type M_interfaceFluidBC;
     bcPtr_Type M_aleBC_residual;
