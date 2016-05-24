@@ -35,11 +35,10 @@
                 <ParameterList name="options">
                     <Parameter name="default values" type="string" value="NSSA"/>
                     <Parameter name="ML validate parameter list" type="bool" value="true"/>
-                    <Parameter name="aggregation: threshold" type="double" value="0.01"/>
                     <Parameter name="aggregation: type" type="string" value="Uncoupled-MIS"/>
                     <Parameter name="coarse: pre or post" type="string" value="both"/>
                     <Parameter name="coarse: sweeps" type="int" value="1"/>
-                    <Parameter name="coarse: type" type="string" value="Amesos-KLU"/>
+                    <Parameter name="coarse: type" type="string" value="Amesos-UMFPACK"/>
                     <Parameter name="increasing or decreasing" type="string" value="increasing"/>
                     <Parameter name="PDE equations" type="int" value="3"/>
                     <Parameter name="cycle applications" type="int" value="3"/>
@@ -100,13 +99,12 @@
             <ParameterList name="preconditioner">
                 <ParameterList name="ML">
                     <ParameterList name="options">
-                        <Parameter name="default values" type="string" value="DD"/>
+                        <Parameter name="default values" type="string" value="SA"/>
                     <Parameter name="ML validate parameter list" type="bool" value="true"/>
-                    <Parameter name="aggregation: threshold" type="double" value="0.01"/>
                     <Parameter name="aggregation: type" type="string" value="Uncoupled-MIS"/>
                     <Parameter name="coarse: pre or post" type="string" value="both"/>
                     <Parameter name="coarse: sweeps" type="int" value="1"/>
-                    <Parameter name="coarse: type" type="string" value="Amesos-KLU"/>
+                    <Parameter name="coarse: type" type="string" value="Amesos-UMFPACK"/>
                     <Parameter name="increasing or decreasing" type="string" value="increasing"/>
                     <Parameter name="PDE equations" type="int" value="1"/>
                     <Parameter name="cycle applications" type="int" value="3"/>

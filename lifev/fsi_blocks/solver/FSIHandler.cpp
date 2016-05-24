@@ -65,7 +65,8 @@ M_considerGravity ( false ),
 M_moveMesh ( true ),
 M_nonconforming ( false ),
 M_lambda_num_structure ( false ),
-M_precPtrBuilt ( false )
+M_precPtrBuilt ( false ),
+M_linearElasticity ( true )
 {
 }
 
@@ -160,6 +161,8 @@ FSIHandler::readPartitionedMeshes( )
 
 void FSIHandler::setup ( )
 {
+	M_linearElasticity = M_datafile ( "solid/linear_elasticity", true );
+
 	M_saveEvery = M_datafile ( "exporter/save_every", 1 );
 
 	M_counterSaveEvery = M_saveEvery;
@@ -176,7 +179,14 @@ void FSIHandler::setup ( )
     M_fluid->pFESpace()->setQuadRule(M_fluid->uFESpace()->qr());
 
 	// Structure
-	M_structure.reset ( new LinearElasticity ( M_comm ) );
+    if ( M_linearElasticity )
+    {
+    	M_structure.reset ( new LinearElasticity ( M_comm ) );
+    }
+    else
+    {
+    	M_structureNeoHookean.reset ( new NeoHookean ( M_comm ) );
+    }
 
 	// setup of the structural class
 	setupStructure();
@@ -204,7 +214,10 @@ void FSIHandler::setup ( )
 	M_ale->setUp( M_datafile );
 
 	// Structure
-	M_structure->assemble_matrices(M_dt, M_structureTimeAdvance->get_beta(), M_structureBC);
+	if ( M_linearElasticity )
+	{
+		M_structure->assemble_matrices(M_dt, M_structureTimeAdvance->get_beta(), M_structureBC);
+	}
 
 	// Data needed by the Newton algorithm
 	M_relativeTolerance = M_datafile ( "newton/reltol", 1.e-4);
@@ -325,12 +338,22 @@ void FSIHandler::setupStructure ( )
 	Real young = M_datafile("solid/model/young",0.0);
 	Real poisson = M_datafile("solid/model/poisson",0.0);
 
-	M_structure->setCoefficients(density, young, poisson);
-	M_structure->setup(M_structureLocalMesh, dOrder);
-
-	M_displacementFESpace = M_structure->fespace();
-	M_displacementETFESpace = M_structure->et_fespace();
-	M_displacementFESpaceScalar.reset ( new FESpace_Type (M_structureLocalMesh, dOrder, 1, M_comm) );
+	if ( M_linearElasticity )
+	{
+		M_structure->setCoefficients(density, young, poisson);
+		M_structure->setup(M_structureLocalMesh, dOrder);
+		M_displacementFESpace = M_structure->fespace();
+		M_displacementETFESpace = M_structure->et_fespace();
+		M_displacementFESpaceScalar.reset ( new FESpace_Type (M_structureLocalMesh, dOrder, 1, M_comm) );
+	}
+	else
+	{
+		M_structureNeoHookean->setCoefficients(density, young, poisson);
+		M_structureNeoHookean->setup(M_structureLocalMesh, dOrder);
+		M_displacementFESpace = M_structureNeoHookean->fespace();
+		M_displacementETFESpace = M_structureNeoHookean->et_fespace();
+		M_displacementFESpaceScalar.reset ( new FESpace_Type (M_structureLocalMesh, dOrder, 1, M_comm) );
+	}
 
 	if ( !M_usePartitionedMeshes )
 		M_displacementFESpaceSerial.reset ( new FESpace_Type (M_structureMesh, dOrder, 3, M_comm) );
@@ -565,7 +588,6 @@ void FSIHandler::initializeTimeAdvance ( )
     // Post-Processing of the initial solution
 	M_exporterFluid->postProcess(M_t_zero);
 	M_exporterStructure->postProcess(M_t_zero);
-
 }
 
 void FSIHandler::buildInterfaceMaps ()
@@ -1016,14 +1038,16 @@ FSIHandler::solveFSIproblem ( )
 	M_ale->applyBoundaryConditions ( *M_aleBC );
 
 	// Apply boundary conditions for the structure problem (the matrix will not change during the simulation, it is linear elasticity)
-	getMatrixStructure ( );
-
-	M_displayer.leaderPrint ( "\t Set and approximate structure block in the preconditioner.. " ) ;
-	smallThingsChrono.start();
-	M_prec->setStructureBlock ( M_matrixStructure );
-	M_prec->updateApproximatedStructureMomentumOperator ( );
-	smallThingsChrono.stop();
-	M_displayer.leaderPrintMax ( "done in ", smallThingsChrono.diff() ) ;
+	if ( M_linearElasticity )
+	{
+		getMatrixStructure ( );
+		M_displayer.leaderPrint ( "\t Set and approximate structure block in the preconditioner.. " ) ;
+		smallThingsChrono.start();
+		M_prec->setStructureBlock ( M_matrixStructure );
+		M_prec->updateApproximatedStructureMomentumOperator ( );
+		smallThingsChrono.stop();
+		M_displayer.leaderPrintMax ( "done in ", smallThingsChrono.diff() ) ;
+	}
 
 	// Set blocks for the preconditioners: geometry
 	smallThingsChrono.reset();
@@ -1555,11 +1579,19 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		// Residual for the solid //
 		//------------------------//
 
-		*res_ds = ( ( ( 1.0/ ( M_dt * M_dt * M_structureTimeAdvance->get_beta() ) ) * ( (*M_structure->mass_matrix_no_bc() ) * (*ds_k) ) ) +
-					( (*M_structure->stiffness_matrix_no_bc() ) * (*ds_k) ) +
-				    ( (*M_coupling->lambdaToStructureMomentum() ) * (*lambda_k) ) -
-				    ( (*M_structure->mass_matrix_no_bc() ) * (*M_structureTimeAdvance->get_csi()) ) );
-
+		if ( M_linearElasticity )
+		{
+			*res_ds = ( ( ( 1.0/ ( M_dt * M_dt * M_structureTimeAdvance->get_beta() ) ) * ( (*M_structure->mass_matrix_no_bc() ) * (*ds_k) ) ) +
+						( (*M_structure->stiffness_matrix_no_bc() ) * (*ds_k) ) +
+						( (*M_coupling->lambdaToStructureMomentum() ) * (*lambda_k) ) -
+						( (*M_structure->mass_matrix_no_bc() ) * (*M_structureTimeAdvance->get_csi()) ) );
+		}
+		else
+		{
+			Real coefficient = 1.0/ ( M_dt * M_dt * M_structureTimeAdvance->get_beta() );
+			M_structureNeoHookean->evaluate_residual(ds_k, coefficient, M_structureTimeAdvance->get_csi(), res_ds );
+			*res_ds += ( (*M_coupling->lambdaToStructureMomentum() ) * (*lambda_k) );
+		}
 		//---------------------------------------//
 		// Residual for the lagrange multipliers //
 		//---------------------------------------//
@@ -1654,6 +1686,17 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 	M_fluid->applyBoundaryConditionsJacobian ( M_fluidBC );
 
+	if ( !M_linearElasticity )
+	{
+		M_displayer.leaderPrint ( "\nAssembly Jacobian structure" ) ;
+		M_matrixStructure.reset (new matrix_Type ( M_displacementFESpace->map() ) );
+		M_matrixStructure->zero();
+		Real coefficient = 1.0/ ( M_dt * M_dt * M_structureTimeAdvance->get_beta() );
+		M_structureNeoHookean->update_jacobian( ds_k, coefficient, M_matrixStructure);
+		bcManageMatrix( *M_matrixStructure, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC, //deve essere bc residual dopo
+				        M_displacementFESpace->feBd(), 1.0, M_time);
+	}
+
 	//----------------------------------------------------//
 	// Post-step bis: Compute the shape derivatives block //
 	//----------------------------------------------------//
@@ -1700,12 +1743,6 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 	if ( !M_nonconforming )
 		initializeApplyOperatorJacobian();
-
-//	residual.spy("residual");
-//
-//	std::cout << "Spy residuo e soluzione completato, digita numero ";
-//	int aaaaaaa;
-//	std::cin >> aaaaaaa;
 }
 
 void
@@ -1771,6 +1808,17 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 	if (M_useShapeDerivatives)
 	{
 		M_prec->setShapeDerivativesBlocks(M_ale->shapeDerivativesVelocity(), M_ale->shapeDerivativesPressure());
+	}
+
+	if ( !M_linearElasticity )
+	{
+		LifeChrono smallThingsChrono;
+		M_displayer.leaderPrint ( "\t Set and approximate structure block in the preconditioner.. " ) ;
+		smallThingsChrono.start();
+		M_prec->setStructureBlock ( M_matrixStructure );
+		M_prec->updateApproximatedStructureMomentumOperator ( );
+		smallThingsChrono.stop();
+		M_displayer.leaderPrintMax ( "done in ", smallThingsChrono.diff() ) ;
 	}
 
     if ( M_nonconforming)

@@ -90,6 +90,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <lifev/fsi_blocks/solver/FSIApplyOperatorNonConforming.hpp>
 
+#include <lifev/fsi_blocks/solver/NeoHookean.hpp>
+
 namespace LifeV
 {
 
@@ -278,6 +280,7 @@ private:
     // navier-stokes solver
     boost::shared_ptr<NavierStokesSolver> M_fluid;
     boost::shared_ptr<LinearElasticity> M_structure;
+    boost::shared_ptr<NeoHookean> M_structureNeoHookean;
     boost::shared_ptr<ALESolver> M_ale;
 
     // time advance for the structure
@@ -418,6 +421,7 @@ private:
 
 	basePrecPtr_Type M_precPtr;
 	bool 			 M_precPtrBuilt;
+	bool 			 M_linearElasticity;
 
 };
 

@@ -6,6 +6,9 @@ SET(solver_HEADERS
   solver/FSIApplyOperatorNonConforming.hpp
   solver/DirichletNeumannPreconditioner.hpp
   solver/LinearElasticity.hpp
+  solver/NeoHookean.hpp
+  solver/AssemblyElementalStructure.hpp
+  solver/ExpressionDefinitions.hpp
 CACHE INTERNAL "")
 
 SET(solver_SOURCES
@@ -16,6 +19,9 @@ SET(solver_SOURCES
   solver/FSIApplyOperatorNonConforming.cpp	
   solver/DirichletNeumannPreconditioner.cpp
   solver/LinearElasticity.cpp
+  solver/NeoHookean.cpp
+  solver/AssemblyElementalStructure.cpp
+  solver/ExpressionDefinitions.cpp
 CACHE INTERNAL "")
 
 
