@@ -407,10 +407,6 @@ FastAssembler::assembleGradGrad_vectorial( matrixPtr_Type& matrix )
     	w_quad[q] = M_qr->weight(q);
     }
 
-//    double dtime = omp_get_wtime();
-//    double dtime2 = dtime;
-
-    //#pragma omp parallel shared(M_rows,M_cols,M_vals) firstprivate( w_quad, ndof, NumQuadPoints)
     #pragma omp parallel firstprivate( w_quad, ndof, NumQuadPoints)
     {
         int i_el, i_elem, i_dof, q, d1, d2, i_test, i_trial;
@@ -470,8 +466,68 @@ FastAssembler::assembleGradGrad_vectorial( matrixPtr_Type& matrix )
         }
     }
 
-//    dtime = omp_get_wtime() - dtime;
-//    printf("\n\nelapsed time partial: %f\n\n", dtime);
+    for ( int k = 0; k < M_numElements; ++k )
+    {
+    	matrix->matrixPtr()->InsertGlobalValues ( ndof, M_rows[k], ndof, M_cols[k], M_vals[k], Epetra_FECrsMatrix::ROW_MAJOR);
+    	for ( UInt d1 = 1; d1 < 3 ; d1++ )
+    	{
+    		for ( UInt i = 0; i <  ndof; i++ )
+    		{
+    			M_rows[k][i] += M_numScalarDofs;
+    			M_cols[k][i] += M_numScalarDofs;
+    		}
+    		matrix->matrixPtr()->InsertGlobalValues ( ndof, M_rows[k], ndof, M_cols[k], M_vals[k], Epetra_FECrsMatrix::ROW_MAJOR);
+    	}
+    }
+
+}
+//=========================================================================
+void
+FastAssembler::assembleMass_vectorial( matrixPtr_Type& matrix )
+{
+    int ndof = M_referenceFE->nbDof();
+    int NumQuadPoints = M_qr->nbQuadPt();
+
+    double w_quad[NumQuadPoints];
+    for ( int q = 0; q < NumQuadPoints ; q++ )
+    {
+    	w_quad[q] = M_qr->weight(q);
+    }
+
+    #pragma omp parallel firstprivate( w_quad, ndof, NumQuadPoints)
+    {
+        int i_el, i_elem, i_dof, q, d1, d2, i_test, i_trial;
+        double integral;
+
+        double dphi_phys[ndof][NumQuadPoints][3];
+
+        // ELEMENTI
+        #pragma omp for
+        for ( i_el = 0; i_el <  M_numElements ; i_el++ )
+        {
+        	i_elem = i_el;
+
+            // DOF - test
+            for ( i_test = 0; i_test <  ndof; i_test++ )
+            {
+                M_rows[i_elem][i_test] = M_elements[i_elem][i_test];
+
+                // DOF - trial
+                for ( i_trial = 0; i_trial <  ndof; i_trial++ )
+                {
+                    M_cols[i_elem][i_trial] = M_elements[i_elem][i_trial];
+
+                    integral = 0.0;
+                    // QUAD
+                    for ( q = 0; q < NumQuadPoints ; q++ )
+                    {
+                    	integral += M_phi[i_test][q] * M_phi[i_trial][q]*w_quad[q];
+                    }
+                    M_vals[i_elem][i_test][i_trial] = integral * M_detJacobian[i_elem];
+                }
+            }
+        }
+    }
 
     for ( int k = 0; k < M_numElements; ++k )
     {
@@ -487,8 +543,59 @@ FastAssembler::assembleGradGrad_vectorial( matrixPtr_Type& matrix )
     	}
     }
 
-//    dtime2 = omp_get_wtime() - dtime2;
-//    printf("\n\nelapsed time total: %f\n\n", dtime2);
+}
+//=========================================================================
+void
+FastAssembler::assembleMass_scalar( matrixPtr_Type& matrix )
+{
+    int ndof = M_referenceFE->nbDof();
+    int NumQuadPoints = M_qr->nbQuadPt();
+
+    double w_quad[NumQuadPoints];
+    for ( int q = 0; q < NumQuadPoints ; q++ )
+    {
+    	w_quad[q] = M_qr->weight(q);
+    }
+
+    #pragma omp parallel firstprivate( w_quad, ndof, NumQuadPoints)
+    {
+        int i_el, i_elem, i_dof, q, d1, d2, i_test, i_trial;
+        double integral;
+
+        double dphi_phys[ndof][NumQuadPoints][3];
+
+        // ELEMENTI
+        #pragma omp for
+        for ( i_el = 0; i_el <  M_numElements ; i_el++ )
+        {
+        	i_elem = i_el;
+
+            // DOF - test
+            for ( i_test = 0; i_test <  ndof; i_test++ )
+            {
+                M_rows[i_elem][i_test] = M_elements[i_elem][i_test];
+
+                // DOF - trial
+                for ( i_trial = 0; i_trial <  ndof; i_trial++ )
+                {
+                    M_cols[i_elem][i_trial] = M_elements[i_elem][i_trial];
+
+                    integral = 0.0;
+                    // QUAD
+                    for ( q = 0; q < NumQuadPoints ; q++ )
+                    {
+                    	integral += M_phi[i_test][q] * M_phi[i_trial][q]*w_quad[q];
+                    }
+                    M_vals[i_elem][i_test][i_trial] = integral * M_detJacobian[i_elem];
+                }
+            }
+        }
+    }
+
+    for ( int k = 0; k < M_numElements; ++k )
+    {
+    	matrix->matrixPtr()->InsertGlobalValues ( ndof, M_rows[k], ndof, M_cols[k], M_vals[k], Epetra_FECrsMatrix::ROW_MAJOR);
+    }
 
 }
 //=========================================================================

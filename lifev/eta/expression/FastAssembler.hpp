@@ -87,6 +87,10 @@ public:
 
 	void assembleGradGrad_vectorial( matrixPtr_Type& matrix );
 
+	void assembleMass_vectorial( matrixPtr_Type& matrix );
+
+	void assembleMass_scalar( matrixPtr_Type& matrix );
+
 	void assembleConvective( matrix_Type& matrix, const vector_Type& u_h );
 
 	void assembleConvective( matrixPtr_Type& matrix, const vector_Type& u_h );
