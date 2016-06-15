@@ -77,7 +77,7 @@
 #endif
 
 #include <lifev/core/Core_config.h>
-#include <lifev/structure/Structure_config.h>
+//#include <lifev/structure/Structure_config.h>
 #include <LifeV_config.h>
 
 #ifndef __cplusplus
