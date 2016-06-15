@@ -608,47 +608,16 @@ FastAssembler::assembleConvective( matrixPtr_Type& matrix, const vector_Type& u_
 void
 FastAssembler::assembleConvective( matrix_Type& matrix, const vector_Type& u_h )
 {
-    double ** local_matrix;
-
     int ndof = M_referenceFE->nbDof();
     int NumQuadPoints = M_qr->nbQuadPt();
     int ndof_vec = M_referenceFE->nbDof()*3;
 
-    double*** M_vals = new double** [M_numElements];
-
-    for ( int i_elem = 0; i_elem <  M_numElements; i_elem++ )
-    {
-        M_vals[i_elem] = new double* [ ndof ];
-        for ( int i = 0; i <  ndof; i++ )
-        {
-            M_vals[i_elem][i] = new double [ ndof ];
-        }
-    }
-
-    int** M_rows = new int* [M_numElements];
-
-    for ( int i_elem = 0; i_elem <  M_numElements; i_elem++ )
-    {
-    	M_rows[i_elem] = new int [ ndof ];
-    }
-
-    int** M_cols = new int* [M_numElements];
-
-    for ( int i_elem = 0; i_elem <  M_numElements; i_elem++ )
-    {
-    	M_cols[i_elem] = new int [ ndof ];
-    }
-
     double w_quad[NumQuadPoints];
     for ( int q = 0; q < NumQuadPoints ; q++ )
-	{
-        w_quad[q] = M_qr->weight(q);
+    {
+    	w_quad[q] = M_qr->weight(q);
     }
 
-    //double dtime = omp_get_wtime();
-    //double dtime2 = dtime;
-
-    //#pragma omp parallel shared(M_rows,M_cols,M_vals) firstprivate( w_quad, ndof, NumQuadPoints)
     #pragma omp parallel firstprivate( w_quad, ndof, NumQuadPoints)
     {
         int i_elem, i_dof, q, d1, d2, i_test, i_trial, e_idof;;
@@ -723,9 +692,6 @@ FastAssembler::assembleConvective( matrix_Type& matrix, const vector_Type& u_h )
         }
     }
 
-    //dtime = omp_get_wtime() - dtime;
-    //printf("\n\nelapsed time partial: %f\n\n", dtime);
-
     for ( int k = 0; k < M_numElements; ++k )
     {
     	matrix.matrixPtr()->InsertGlobalValues ( ndof, M_rows[k], ndof, M_cols[k], M_vals[k], Epetra_FECrsMatrix::ROW_MAJOR);
@@ -739,29 +705,5 @@ FastAssembler::assembleConvective( matrix_Type& matrix, const vector_Type& u_h )
         	matrix.matrixPtr()->InsertGlobalValues ( ndof, M_rows[k], ndof, M_cols[k], M_vals[k], Epetra_FECrsMatrix::ROW_MAJOR);
     	}
     }
-
-    //dtime2 = omp_get_wtime() - dtime2;
-    //printf("\n\nelapsed time total: %f\n\n", dtime2);
-
-    // cleaning memory
-    for( int i = 0 ; i < M_numElements ; i++ )
-    {
-        for ( int j = 0; j < ndof; j++ )
-        {
-            delete [] M_vals[i][j];
-        }
-        delete [] M_vals[i];
-    }
-    delete [] M_vals;
-
-
-    for( int i = 0 ; i < M_numElements ; i++ )
-    {
-    	delete [] M_rows[i];
-    	delete [] M_cols[i];
-    }
-    delete [] M_rows;
-    delete [] M_cols;
-
 }
 //=========================================================================
