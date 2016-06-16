@@ -19,7 +19,7 @@
     	[../time_discretization]
     		initialtime     = 0.0
     		endtime	        = 0.01
-    		timestep        = 0.001
+    		timestep        = 0.0025
     		BDF_order       = 2		 # order 1 or 2
 
     	[../space_discretization]
@@ -42,7 +42,7 @@
 
 [solid]
 
-		linear_elasticity   = true
+		linear_elasticity   = false
 		
     	[./space_discretization]
     		mesh_dir        = ./

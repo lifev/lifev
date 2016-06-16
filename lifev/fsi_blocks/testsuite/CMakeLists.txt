@@ -7,4 +7,5 @@ ADD_SUBDIRECTORIES(
     Bypass
     #fsi_couplingMapsVectorial
     fsi_ventricle_aorta
+    fsi_ventricle_aorta_inflate
 )
