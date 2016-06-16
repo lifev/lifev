@@ -61,6 +61,14 @@ FastAssembler::~FastAssembler()
 
 	for( int i = 0 ; i < M_numElements ; i++ )
 	{
+		delete [] M_elements[i];
+	}
+	delete [] M_elements;
+
+	//---------------------
+
+	for( int i = 0 ; i < M_numElements ; i++ )
+	{
 		for ( int j = 0; j < M_referenceFE->nbDof(); j++ )
 		{
 			delete [] M_vals[i][j];
@@ -69,6 +77,7 @@ FastAssembler::~FastAssembler()
 	}
 	delete [] M_vals;
 
+	//---------------------
 
 	for( int i = 0 ; i < M_numElements ; i++ )
 	{
@@ -83,6 +92,7 @@ void
 FastAssembler::allocateSpace ( const int& numElements, CurrentFE* fe, const fespacePtr_Type& fespace )
 {
 	M_numElements = numElements;
+
 	M_numScalarDofs = fespace->dof().numTotalDof();
 
 	M_detJacobian = new double[ M_numElements ];
@@ -202,15 +212,13 @@ FastAssembler::allocateSpace ( const int& numElements, CurrentFE* fe, const fesp
     {
     	M_cols[i_elem] = new int [ M_referenceFE->nbDof() ];
     }
-
-    int M_nbRow = M_referenceFE->nbDof();
-    int M_nbColumn = M_referenceFE->nbDof();
 }
 //=========================================================================
 void
 FastAssembler::allocateSpace( const int& numElements, CurrentFE* fe, const fespacePtr_Type& fespace, const UInt* meshSub_elements )
 {
 	M_numElements = numElements;
+
 	M_numScalarDofs = fespace->dof().numTotalDof();
 
 	M_detJacobian = new double[ M_numElements ];
@@ -317,10 +325,6 @@ FastAssembler::assembleGradGrad_scalar( matrixPtr_Type& matrix )
     	w_quad[q] = M_qr->weight(q);
     }
 
-    double dtime = omp_get_wtime();
-    double dtime2 = dtime;
-
-    //#pragma omp parallel shared(M_rows,M_cols,M_vals) firstprivate( w_quad, ndof, NumQuadPoints)
     #pragma omp parallel firstprivate( w_quad, ndof, NumQuadPoints)
     {
         int i_el, i_elem, i_dof, q, d1, d2, i_test, i_trial;
@@ -377,21 +381,13 @@ FastAssembler::assembleGradGrad_scalar( matrixPtr_Type& matrix )
                     M_vals[i_elem][i_test][i_trial] = integral * M_detJacobian[i_elem];
                 }
             }
-//			#pragma omp critical
-//            matrix->matrixPtr()->InsertGlobalValues ( ndof, M_rows[i_elem], ndof, M_cols[i_elem], M_vals[i_elem], Epetra_FECrsMatrix::ROW_MAJOR);
         }
     }
-
-    dtime = omp_get_wtime() - dtime;
-    printf("\n\nelapsed time partial: %f\n\n", dtime);
 
     for ( int k = 0; k < M_numElements; ++k )
     {
     	matrix->matrixPtr()->InsertGlobalValues ( ndof, M_rows[k], ndof, M_cols[k], M_vals[k], Epetra_FECrsMatrix::ROW_MAJOR);
     }
-
-    dtime2 = omp_get_wtime() - dtime2;
-    printf("\n\nelapsed time total: %f\n\n", dtime2);
 
 }
 //=========================================================================
@@ -707,3 +703,95 @@ FastAssembler::assembleConvective( matrix_Type& matrix, const vector_Type& u_h )
     }
 }
 //=========================================================================
+// NAVIER STOKES MATRICES
+//=========================================================================
+void
+FastAssembler::NS_constant_terms_00( matrixPtr_Type& matrix )
+{
+	int ndof = M_referenceFE->nbDof();
+	int NumQuadPoints = M_qr->nbQuadPt();
+
+	double w_quad[NumQuadPoints];
+	for ( int q = 0; q < NumQuadPoints ; q++ )
+	{
+		w_quad[q] = M_qr->weight(q);
+	}
+
+	#pragma omp parallel firstprivate( w_quad, ndof, NumQuadPoints)
+	{
+		int i_el, i_elem, i_dof, q, d1, d2, i_test, i_trial;
+		double integral;
+
+		double dphi_phys[ndof][NumQuadPoints][3];
+
+		// ELEMENTI
+		#pragma omp for
+		for ( i_el = 0; i_el <  M_numElements ; i_el++ )
+		{
+			i_elem = i_el;
+
+			// DOF
+			for ( i_dof = 0; i_dof <  ndof; i_dof++ )
+			{
+				// QUAD
+				for (  q = 0; q < NumQuadPoints ; q++ )
+				{
+					// DIM 1
+					for ( d1 = 0; d1 < 3 ; d1++ )
+					{
+						dphi_phys[i_dof][q][d1] = 0.0;
+
+						// DIM 2
+						for ( d2 = 0; d2 < 3 ; d2++ )
+						{
+							dphi_phys[i_dof][q][d1] += M_invJacobian[i_elem][d1][d2] * M_dphi[i_dof][q][d2];
+						}
+					}
+				}
+			}
+
+			// DOF - test
+			for ( i_test = 0; i_test <  ndof; i_test++ )
+			{
+				M_rows[i_elem][i_test] = M_elements[i_elem][i_test];
+
+				// DOF - trial
+				for ( i_trial = 0; i_trial <  ndof; i_trial++ )
+				{
+					M_cols[i_elem][i_trial] = M_elements[i_elem][i_trial];
+
+					integral = 0.0;
+					// QUAD
+					for ( q = 0; q < NumQuadPoints ; q++ )
+					{
+						integral += M_phi[i_test][q] * M_phi[i_trial][q]*w_quad[q]; // MASS
+						// DIM 1
+						for ( d1 = 0; d1 < 3 ; d1++ )
+						{
+							integral += dphi_phys[i_test][q][d1] * dphi_phys[i_trial][q][d1]*w_quad[q]; // STIFFNESS
+						}
+					}
+					M_vals[i_elem][i_test][i_trial] = integral * M_detJacobian[i_elem];
+				}
+			}
+		}
+	}
+
+	//std::cout << "I am proc " << M_comm->MyPID() << "\n";
+
+	for ( int k = 0; k < M_numElements; ++k )
+	{
+		matrix->matrixPtr()->InsertGlobalValues ( ndof, M_rows[k], ndof, M_cols[k], M_vals[k], Epetra_FECrsMatrix::ROW_MAJOR);
+		for ( UInt d1 = 1; d1 < 3 ; d1++ )
+		{
+			for ( UInt i = 0; i <  ndof; i++ )
+			{
+				M_rows[k][i] += M_numScalarDofs;
+				M_cols[k][i] += M_numScalarDofs;
+			}
+			matrix->matrixPtr()->InsertGlobalValues ( ndof, M_rows[k], ndof, M_cols[k], M_vals[k], Epetra_FECrsMatrix::ROW_MAJOR);
+		}
+	}
+
+}
+

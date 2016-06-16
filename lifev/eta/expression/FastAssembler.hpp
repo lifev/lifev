@@ -27,14 +27,13 @@
 
 /*!
  *   @file
-     @brief This file contains the definition of the buildGraph function.
+     @brief This file contains the definition of the FastAssembler class.
 
-     This function is used to precompute the graph of a finite element
-     matrix, allowing the matrix to be build in closed, optimized form,
-     which makes the assembly procedure more efficient
+     This function is used to perform an efficient assembly of FE matrices
+     where the test and trial functions are the same.
 
-     @date 03/2013
-     @author Radu Popescu <radu.popescu@epfl.ch>
+     @date 06/2016
+     @author Davide Forti <davide.forti@epfl.ch>
  */
 
 #ifndef FASTASSEMBLER_HPP
@@ -75,25 +74,83 @@ public:
     typedef boost::shared_ptr<fespace_Type> fespacePtr_Type;
 
 
+    //! Constructor
+    /*!
+     * @param mesh - input mesh
+     * @param comm - communicator
+     * @param refFE - reference FE space of test functions
+     * @param qr - quadrature rule to be used for the integration
+     */
     FastAssembler( const meshPtr_Type& mesh, const commPtr_Type& comm, const ReferenceFE* refFE, const qr_Type* qr );
 
+    //! Destructor
 	~FastAssembler();
 
+	//! @name Methods
+	//@{
+
+	//! Allocate space for members before the assembly
+	/*!
+	 * @param numElements - data file
+	 * @param fe - current FE
+	 * @param fespace - FE space
+	 */
 	void allocateSpace( const int& numElements, CurrentFE* fe, const fespacePtr_Type& fespace );
 
+	//! Allocate space for members before the assembly
+	/*!
+	 * @param numElements - data file
+	 * @param fe - current FE
+	 * @param fespace - FE space
+	 * @param meshSub_elements - list of indices if one wants to allocate space only for a portion of the elements of the mesh
+	 */
 	void allocateSpace( const int& numElements, CurrentFE* fe, const fespacePtr_Type& fespace, const UInt* meshSub_elements );
 
+	//! FE Assembly of scalar grad-grad
+	/*!
+	 * @param matrix - global matrix
+	 */
 	void assembleGradGrad_scalar( matrixPtr_Type& matrix );
 
+	//! FE Assembly of vectorial grad-grad
+	/*!
+	 * @param matrix - global matrix
+	 */
 	void assembleGradGrad_vectorial( matrixPtr_Type& matrix );
 
+	//! FE Assembly of vectorial mass matrix
+	/*!
+	 * @param matrix - global matrix
+	 */
 	void assembleMass_vectorial( matrixPtr_Type& matrix );
 
+	//! FE Assembly of scalar mass matrix
+	/*!
+	 * @param matrix - global matrix
+	 */
 	void assembleMass_scalar( matrixPtr_Type& matrix );
 
+	//! FE Assembly of NS constant terms (no scaling by coefficients like density or bdf)
+	/*!
+	 * @param matrix - global matrix
+	 */
+	void NS_constant_terms_00( matrixPtr_Type& matrix ); // Navier-Stokes constant terms belonging to block (0,0): mass + stiffness
+
+	//! FE Assembly of NS constant terms (no scaling by coefficients like viscosity)
+	/*!
+	 * @param matrix - global matrix
+	 * @param matrix - velocity vector
+	 */
 	void assembleConvective( matrix_Type& matrix, const vector_Type& u_h );
 
+	//! FE Assembly of NS constant terms (no scaling by coefficients like viscosity)
+	/*!
+	 * @param matrix - global matrix
+	 * @param matrix - velocity vector
+	 */
 	void assembleConvective( matrixPtr_Type& matrix, const vector_Type& u_h );
+
+	//@}
 
 private:
 
@@ -103,7 +160,7 @@ private:
 	int M_numElements;
 	int M_numScalarDofs;
 	int M_numElementsMerked;
-	double * M_GID;
+
 	double * M_detJacobian;
 	double *** M_invJacobian;
 
