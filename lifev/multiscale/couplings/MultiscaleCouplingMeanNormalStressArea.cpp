@@ -174,7 +174,7 @@ MultiscaleCouplingMeanNormalStressArea::exportListOfPerturbedModels ( const UInt
     debugStream ( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::exportListOfPerturbedModels( localCouplingVariableID ) \n";
 #endif
 
-    if ( localCouplingVariableID == M_flowRateInterfaces + 1 )
+    if ( static_cast<Int>(localCouplingVariableID) == M_flowRateInterfaces + 1 )
     {
         for ( UInt i ( 0 ); i < 2; ++i )
             if ( myModel ( i ) )

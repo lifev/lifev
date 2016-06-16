@@ -15,7 +15,7 @@ git remote add github git@github.com:lifev/lifev.git
 2- update NEWS.md
 
 3- commit Version.cmake and NEWS.md
-   X_Y_Z=3.10.0
+   X_Y_Z=3.10.1
 
    git commit -m"Releasing ${X_Y_Z}" Version.cmake NEWS.md HOWTO.release  lifev/core/LifeVersion.hpp
 

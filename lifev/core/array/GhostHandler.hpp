@@ -1304,7 +1304,7 @@ void GhostHandler<MeshType>::extendGraphFE ( graphPtr_Type elemGraph,
     {
         int const& currentPoint = myPoints[ k ];
         // mark as SUBD_INT point only if the point is owned by current process
-        if ( pointPID[ currentPoint ] == M_me )
+        if ( pointPID[ currentPoint ] == static_cast<Int>(M_me) )
         {
             // check if all element neighbors are on this proc
             for ( neighbors_Type::const_iterator neighborIt = M_pointElementNeighborsList[ currentPoint ].begin();
@@ -1525,7 +1525,7 @@ void GhostHandler<MeshType>::extendGraphFE ( const vertexPartitionPtr_Type& elem
     {
         int const& currentPoint = myPoints[ k ];
         // mark as SUBD_INT point only if the point is owned by current process
-        if ( pointPID[ currentPoint ] == partIndex )
+        if ( pointPID[ currentPoint ] == static_cast<Int>(partIndex) )
         {
             // check if all element neighbors are on this proc
             for ( neighbors_Type::const_iterator neighborIt = M_pointElementNeighborsList[ currentPoint ].begin();

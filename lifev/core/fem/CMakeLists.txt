@@ -44,6 +44,8 @@ SET(fem_HEADERS
   fem/TimeAndExtrapolationHandler.hpp
   fem/Newmark.hpp
   fem/TimeAndExtrapolationHandlerQuadPts.hpp
+  fem/FastAssembler.hpp
+  fem/FastAssemblerMixed.hpp
 CACHE INTERNAL "")
 
 SET(fem_SOURCES
@@ -77,6 +79,8 @@ SET(fem_SOURCES
   fem/TimeData.cpp
   fem/TimeAndExtrapolationHandler.cpp
   fem/Newmark.cpp
+  fem/FastAssembler.cpp
+  fem/FastAssemblerMixed.cpp
 CACHE INTERNAL "")
 
 

@@ -575,7 +575,7 @@ MeshPartBuilder<MeshType>::markEntityOwnership (const entityPID_Type& entityPID)
     for ( UInt e = 0; e < M_meshPart->numElements(); e++ )
     {
         typename MeshType::element_Type& element = M_meshPart->element (e);
-        if (entityPID.elements[element.id()] != static_cast<UInt> (M_partIndex) )
+        if (entityPID.elements[element.id()] != static_cast<Int>(M_partIndex) )
         {
             element.setFlag ( EntityFlags::GHOST );
         }
@@ -584,7 +584,7 @@ MeshPartBuilder<MeshType>::markEntityOwnership (const entityPID_Type& entityPID)
     for ( UInt f = 0; f < M_meshPart->numFacets(); f++ )
     {
         typename MeshType::facet_Type& facet = M_meshPart->facet (f);
-        if (entityPID.facets[facet.id()] != static_cast<UInt> (M_partIndex) )
+        if (entityPID.facets[facet.id()] != static_cast<Int>(M_partIndex) )
         {
             facet.setFlag ( EntityFlags::GHOST );
         }
@@ -593,16 +593,16 @@ MeshPartBuilder<MeshType>::markEntityOwnership (const entityPID_Type& entityPID)
     for ( UInt r = 0; r < M_meshPart->numRidges(); r++ )
     {
         typename MeshType::ridge_Type& ridge = M_meshPart->ridge (r);
-        if (entityPID.ridges[ridge.id()] != static_cast<UInt> (M_partIndex) )
+        if (entityPID.ridges[ridge.id()] != static_cast<Int>(M_partIndex) )
         {
             ridge.setFlag ( EntityFlags::GHOST );
         }
     }
 
-    for ( UInt p = 0; p < M_meshPart->numPoints(); p++ )
+    for ( UInt p = 0; p < M_meshPart->numPoints(); ++p )
     {
         typename MeshType::point_Type& point = M_meshPart->point (p);
-        if (entityPID.points[point.id()] != static_cast<UInt> (M_partIndex) )
+        if (entityPID.points[point.id()] != static_cast<Int>(M_partIndex) )
         {
             point.setFlag ( EntityFlags::GHOST );
         }

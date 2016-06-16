@@ -50,7 +50,7 @@
 #endif
 
 #if !defined(LIFEV_VERSION_MICRO)
-#define LIFEV_VERSION_MICRO 0
+#define LIFEV_VERSION_MICRO 1
 #endif
 
 #if !defined(LIFEV_VERSION)

@@ -92,9 +92,9 @@ void VerifySolutions::ComputeCorrelation()
     // Compute Correlation matrix
     M_CorrelationMatrix.Shape (corrVectorsList.size(), corrVectorsList.size() );
 
-    for (int i (0); i < M_VectorList.size(); ++i)
+    for (size_t i (0); i < M_VectorList.size(); ++i)
     {
-        for (int j (i); j < M_VectorList.size(); ++j)
+        for (size_t j (i); j < M_VectorList.size(); ++j)
         {
             M_CorrelationMatrix (i, j) = corrVectorsList[i].dot (corrVectorsList[j]);
             M_CorrelationMatrix (j, i) = M_CorrelationMatrix (i, j);

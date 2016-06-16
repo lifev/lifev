@@ -231,7 +231,7 @@ PreconditionerIfpack::createIfpackList ( list_Type&         list,
     std::string schurPrec = dataFile ( (section + "/" + subSection + "/shylu/schur_prec").data(), "ILU stand-alone");
     shyluList.set ("Schur Preconditioner", schurPrec);
     Int shyluSymmetry = dataFile ( (section + "/" + subSection + "/shylu/symmetry").data(), 1);
-    shyluList.set ("Symmetry", 1);
+    shyluList.set ("Symmetry", shyluSymmetry);
     Int innerMaxIter = dataFile ( (section + "/" + subSection + "/shylu/inner_solver_iterations").data(), 5);
     shyluList.set ("Inner Solver MaxIters", innerMaxIter);
     double innerTol = dataFile ( (section + "/" + subSection + "/shylu/inner_solver_tolerance").data(), 1e-10);
