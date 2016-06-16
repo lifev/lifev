@@ -762,7 +762,7 @@ addToClosed (MatrixType& mat)
         bool isPreviousAdapted (true);
 
         #pragma omp for schedule(runtime)
-        for (UInt iElement (0); iElement < nbElements; ++iElement)
+        for (UInt iElement = 0; iElement < nbElements; ++iElement)
         {
             // Update the quadrature rule adapter
             qrAdapter.update (iElement);
