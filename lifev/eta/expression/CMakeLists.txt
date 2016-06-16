@@ -110,8 +110,6 @@ SET(expression_HEADERS
 	expression/EvaluationVectorFromNonConstantMatrix.hpp
 	expression/ExpressionPatchArea.hpp
 	expression/EvaluationPatchArea.hpp
-	expression/FastAssembler.hpp
-	expression/FastAssemblerMixed.hpp
 CACHE INTERNAL "")
 
 SET(expression_SOURCES ""
@@ -126,8 +124,6 @@ SET(expression_SOURCES ""
 	expression/ExpressionPosition.cpp
 	expression/ExpressionNormal.cpp
 	expression/ExpressionScalar.cpp
-	expression/FastAssembler.cpp
-	expression/FastAssemblerMixed.cpp
 CACHE INTERNAL "")
 
 

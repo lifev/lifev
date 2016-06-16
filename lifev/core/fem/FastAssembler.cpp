@@ -1,4 +1,4 @@
-#include <lifev/eta/expression/FastAssembler.hpp>
+#include <lifev/core/fem/FastAssembler.hpp>
 #include <chrono>
 #include <omp.h>
 using namespace std::chrono;
