@@ -43,6 +43,7 @@ SET(fem_HEADERS
   fem/TimeData.hpp
   fem/FastAssembler.hpp
   fem/FastAssemblerMixed.hpp
+  fem/MatrixGraph.hpp
 CACHE INTERNAL "")
 
 SET(fem_SOURCES
@@ -76,6 +77,7 @@ SET(fem_SOURCES
   fem/TimeData.cpp
   fem/FastAssembler.cpp
   fem/FastAssemblerMixed.cpp
+  fem/MatrixGraph.cpp
 CACHE INTERNAL "")
 
 
