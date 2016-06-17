@@ -699,7 +699,7 @@ FastAssembler::assembleConvective( matrix_Type& matrix, const vector_Type& u_h )
 
     #pragma omp parallel firstprivate( w_quad, ndof, NumQuadPoints)
     {
-        int i_elem, i_dof, q, d1, d2, i_test, i_trial, e_idof;;
+        int i_elem, i_dof, q, d1, d2, i_test, i_trial, e_idof;
         double integral;
 
         double dphi_phys[ndof][NumQuadPoints][3];

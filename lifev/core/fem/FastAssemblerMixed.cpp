@@ -518,10 +518,13 @@ FastAssemblerMixed::assemble_SUPG_block10 ( matrixPtr_Type& matrix, const vector
     
     #pragma omp parallel firstprivate ( w_quad, ndof_test, ndof_trial, NumQuadPoints )
     {
-        int i_elem, i_dof, q, d1, d2, i_test, i_trial, dim_mat;
-        double integral;
+        int i_elem, i_dof, q, d1, d2, i_test, i_trial, dim_mat, e_idof;
+        double integral, integral_partial;
         
-        double dphi_phys[ndof_test][NumQuadPoints][3]; // Gradient in the physical domain
+        double dphi_phys_test[ndof_test][NumQuadPoints][3]; // Gradient in the physical domain
+        double dphi_phys_trial[ndof_trial][NumQuadPoints][3];
+        
+        double uhq[3][NumQuadPoints];
         
         // ELEMENTI
         #pragma omp for
@@ -536,13 +539,47 @@ FastAssemblerMixed::assemble_SUPG_block10 ( matrixPtr_Type& matrix, const vector
                     // DIM 1
                     for ( d1 = 0; d1 < 3 ; d1++ )
                     {
-                        dphi_phys[i_dof][q][d1] = 0.0;
+                        dphi_phys_test[i_dof][q][d1] = 0.0;
                         
                         // DIM 2
                         for ( d2 = 0; d2 < 3 ; d2++ )
                         {
-                            dphi_phys[i_dof][q][d1] += M_invJacobian[i_elem][d1][d2] * M_dphi_test[i_dof][q][d2];
+                            dphi_phys_test[i_dof][q][d1] += M_invJacobian[i_elem][d1][d2] * M_dphi_test[i_dof][q][d2];
                         }
+                    }
+                }
+            }
+            
+            // DOF -- nota che può essere ottimizzato rishapando il gradiente fisico. Prima q poi d1 poi d2 e poi i_dof
+            for ( i_dof = 0; i_dof <  ndof_trial; i_dof++ )
+            {
+                // QUAD
+                for (  q = 0; q < NumQuadPoints ; q++ )
+                {
+                    // DIM 1
+                    for ( d1 = 0; d1 < 3 ; d1++ )
+                    {
+                        dphi_phys_trial[i_dof][q][d1] = 0.0;
+                        
+                        // DIM 2
+                        for ( d2 = 0; d2 < 3 ; d2++ )
+                        {
+                            dphi_phys_trial[i_dof][q][d1] += M_invJacobian[i_elem][d1][d2] * M_dphi_trial[i_dof][q][d2];
+                        }
+                    }
+                }
+            }
+            
+            // QUAD
+            for (  q = 0; q < NumQuadPoints ; q++ )
+            {
+                for ( d1 = 0; d1 < 3 ; d1++ )
+                {
+                    uhq[d1][q] = 0.0;
+                    for ( i_dof = 0; i_dof < ndof_trial; i_dof++ )
+                    {
+                        e_idof =  M_elements_trial[i_elem][i_dof] + d1*M_numScalarDofs_trial  ;
+                        uhq[d1][q] += u_h[e_idof] * M_phi_trial[i_dof][q];
                     }
                 }
             }
@@ -560,10 +597,17 @@ FastAssemblerMixed::assemble_SUPG_block10 ( matrixPtr_Type& matrix, const vector
                         M_cols[i_elem][i_trial] = M_elements_trial[i_elem][i_trial];
                         
                         integral = 0.0;
+                        
                         // QUAD
                         for ( q = 0; q < NumQuadPoints ; q++ )
                         {
-                            integral += dphi_phys[i_test][q][dim_mat]*M_phi_trial[i_trial][q]*w_quad[q];
+                            integral_partial = 0.0;
+                            for ( d1 = 0; d1 < 3 ; d1++ )
+                            {
+                                integral_partial += dphi_phys_trial[i_trial][q][d1] * uhq[d1][q];
+                            }
+                            integral += ( dphi_phys_test[i_test][q][dim_mat] * M_phi_trial[i_trial][q] +
+                                          dphi_phys_test[i_test][q][dim_mat] * integral_partial ) * w_quad[q];
                         }
                         
                         M_vals[i_elem][dim_mat][i_test][i_trial] = integral * M_detJacobian[i_elem];
