@@ -153,12 +153,18 @@ public:
 	 */
 	void assembleConvective( matrixPtr_Type& matrix, const vector_Type& u_h );
 
-	//! FE Assembly of SUPG terms - work in progress
+	//! FE Assembly of SUPG terms - block (0,0)
 	/*!
 	 * @param matrix - global matrix
 	 * @param matrix - vector extrapolapolated velocity
 	 */
 	void assemble_SUPG_block00( matrixPtr_Type& matrix, const vector_Type& u_h );
+    
+    //! FE Assembly of SUPG terms - block (1,1)
+    /*!
+     * @param matrix - global matrix
+     */
+    void assemble_SUPG_block11( matrixPtr_Type& matrix );
 
 	//@}
 

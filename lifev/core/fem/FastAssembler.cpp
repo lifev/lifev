@@ -1008,3 +1008,15 @@ FastAssembler::assemble_SUPG_block00( matrixPtr_Type& matrix, const vector_Type&
         }
 	}
 }
+
+
+void
+FastAssembler::assemble_SUPG_block11( matrixPtr_Type& matrix )
+{
+    assembleGradGrad_scalar ( matrix );
+}
+
+
+
+
+
