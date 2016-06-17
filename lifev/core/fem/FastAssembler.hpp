@@ -185,9 +185,10 @@ private:
 	double***** M_vals_supg;
 	int** M_rows;
 	int** M_cols;
+    int** M_rows_tmp;
+    int** M_cols_tmp;
 
     bool M_useSUPG;
-
 };
 
 } // Namespace LifeV

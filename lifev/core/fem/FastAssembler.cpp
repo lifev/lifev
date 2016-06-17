@@ -108,8 +108,17 @@ FastAssembler::~FastAssembler()
 			delete [] M_vals_supg[i_elem];
 		}
 		delete [] M_vals_supg;
-	}
+        
+        for( int i = 0 ; i < M_numElements ; i++ )
+        {
+            delete [] M_rows_tmp[i];
+            delete [] M_cols_tmp[i];
+        }
+        delete [] M_rows_tmp;
+        delete [] M_cols_tmp;
+    }
 
+    
 }
 //=========================================================================
 void
@@ -257,10 +266,28 @@ FastAssembler::allocateSpace_SUPG( )
 				for ( int i = 0; i <  M_referenceFE->nbDof(); i++ )
 				{
 					M_vals_supg[i_elem][k][z][i] = new double [ M_referenceFE->nbDof() ];
-				}
+                    for ( int j = 0; j <  M_referenceFE->nbDof(); j++ )
+                    {
+                        M_vals_supg[i_elem][k][z][i][j] = 0.0;
+                    }
+                }
 			}
 		}
 	}
+    
+    M_rows_tmp = new int* [M_numElements];
+    
+    for ( int i_elem = 0; i_elem <  M_numElements; i_elem++ )
+    {
+        M_rows_tmp[i_elem] = new int [ M_referenceFE->nbDof() ];
+    }
+    
+    M_cols_tmp = new int* [M_numElements];
+    
+    for ( int i_elem = 0; i_elem <  M_numElements; i_elem++ )
+    {
+        M_cols_tmp[i_elem] = new int [ M_referenceFE->nbDof() ];
+    }
 }
 //=========================================================================
 void
@@ -872,7 +899,7 @@ FastAssembler::assemble_SUPG_block00( matrixPtr_Type& matrix, const vector_Type&
 	#pragma omp parallel firstprivate( w_quad, ndof, NumQuadPoints)
 	{
 		int i_elem, i_dof, q, d1, d2, i_test, i_trial, e_idof;;
-		double integral;
+		double integral, integral_test, integral_trial;
 
 		double dphi_phys[ndof][NumQuadPoints][3];
 
@@ -901,7 +928,7 @@ FastAssembler::assemble_SUPG_block00( matrixPtr_Type& matrix, const vector_Type&
 					}
 				}
 			}
-
+            
 			// QUAD
 			for (  q = 0; q < NumQuadPoints ; q++ )
 			{
@@ -920,7 +947,7 @@ FastAssembler::assemble_SUPG_block00( matrixPtr_Type& matrix, const vector_Type&
 			for ( i_test = 0; i_test <  ndof; i_test++ )
 			{
 				M_rows[i_elem][i_test] = M_elements[i_elem][i_test];
-
+                
 				// DOF - trial
 				for ( i_trial = 0; i_trial <  ndof; i_trial++ )
 				{
@@ -930,20 +957,21 @@ FastAssembler::assemble_SUPG_block00( matrixPtr_Type& matrix, const vector_Type&
 					// QUAD
 					for ( q = 0; q < NumQuadPoints ; q++ )
 					{
-						double integral_test = 0;
-						double integral_trial = 0;
+						integral_test = 0;
+						integral_trial = 0;
 
 						// DIM 1
 						for ( d1 = 0; d1 < 3 ; d1++ )
 						{
-							integral_test += uhq[d1][q] * dphi_phys[i_test][q][d1];
-							integral_trial += uhq[d1][q] * dphi_phys[i_trial][q][d1]; // terzo indice dphi_phys e' x,y,z
+							integral_test += uhq[d1][q] * dphi_phys[i_test][q][d1];   // w grad(phi_i)
+							integral_trial += uhq[d1][q] * dphi_phys[i_trial][q][d1]; // w grad(phi_j) terzo indice dphi_phys e' derivata in x,y,z
 						}
-						integral += integral_test * integral_trial * w_quad[q];
+						integral += (integral_test * integral_trial + integral_test * M_phi[i_trial][q] ) * w_quad[q];
+                        // above, the term "integral_test * M_phi[i_trial][q]" is the one which comes from (w grad(phi_i), phi_j)
 					}
-					M_vals_supg[i_elem][0][0][i_test][i_trial] = integral *  M_detJacobian[i_elem];
-					M_vals_supg[i_elem][1][1][i_test][i_trial] = integral *  M_detJacobian[i_elem];
-					M_vals_supg[i_elem][2][2][i_test][i_trial] = integral *  M_detJacobian[i_elem];
+                    M_vals_supg[i_elem][0][0][i_test][i_trial] = integral *  M_detJacobian[i_elem]; // (w grad(phi_i), w grad(phi_j) )
+                    M_vals_supg[i_elem][1][1][i_test][i_trial] = integral *  M_detJacobian[i_elem];
+                    M_vals_supg[i_elem][2][2][i_test][i_trial] = integral *  M_detJacobian[i_elem];
 
 					for ( d1 = 0; d1 < 3; d1++ )
 					{
@@ -953,9 +981,9 @@ FastAssembler::assemble_SUPG_block00( matrixPtr_Type& matrix, const vector_Type&
 							// QUAD
 							for ( q = 0; q < NumQuadPoints ; q++ )
 							{
-								integral += dphi_phys[i_test][q][d1] * dphi_phys[i_trial][q][d2] * w_quad[q];
+								integral += dphi_phys[i_test][q][d1] * dphi_phys[i_trial][q][d2] * w_quad[q]; // div(phi_i) * div(phi_j)
 							}
-							M_vals_supg[i_elem][d1][d2][i_test][i_trial] = integral *  M_detJacobian[i_elem];
+                            M_vals_supg[i_elem][d1][d2][i_test][i_trial] += integral *  M_detJacobian[i_elem];
 						}
 					}
 
@@ -964,27 +992,19 @@ FastAssembler::assemble_SUPG_block00( matrixPtr_Type& matrix, const vector_Type&
 		}
 	}
 
-	for ( int k = 0; k < M_numElements; ++k )
+    for ( UInt d1 = 0; d1 < 3 ; d1++ ) // row index
 	{
-		matrix->matrixPtr()->InsertGlobalValues ( ndof, M_rows[k], ndof, M_cols[k], M_vals[k][0][d1], Epetra_FECrsMatrix::ROW_MAJOR);
-	}
-
-	double tmp_rows [][];
-	double tmp_cols [][];
-	for ( UInt d1 = 1; d1 < 3 ; d1++ )
-	{
-		for ( UInt d2 = 1; d2 < 3 ; d2++ )
+		for ( UInt d2 = 0; d2 < 3 ; d2++ ) // column
 		{
 			for ( int k = 0; k < M_numElements; ++k )
 			{
 				for ( UInt i = 0; i <  ndof; i++ )
 				{
-					tmp_rows = M_rows[k][i] + d1 * M_numScalarDofs;
-					tmp_cols = M_cols[k][i] + d2 * M_numScalarDofs;
+					M_rows_tmp[k][i] = M_rows[k][i] + d1 * M_numScalarDofs;
+					M_cols_tmp[k][i] = M_cols[k][i] + d2 * M_numScalarDofs;
 				}
-				matrix->matrixPtr()->InsertGlobalValues ( ndof, tmp_rows[k], ndof, tmp_cols[k], M_vals[k][d1][d2], Epetra_FECrsMatrix::ROW_MAJOR);
+				matrix->matrixPtr()->InsertGlobalValues ( ndof, M_rows_tmp[k], ndof, M_cols_tmp[k], M_vals_supg[k][d1][d2], Epetra_FECrsMatrix::ROW_MAJOR);
 			}
+        }
 	}
-
-
 }
