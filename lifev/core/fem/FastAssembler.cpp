@@ -465,7 +465,11 @@ FastAssembler::assembleGradGrad_vectorial( matrixPtr_Type& matrix )
     for ( int k = 0; k < M_numElements; ++k )
     {
     	matrix->matrixPtr()->InsertGlobalValues ( ndof, M_rows[k], ndof, M_cols[k], M_vals[k], Epetra_FECrsMatrix::ROW_MAJOR);
-    	for ( UInt d1 = 1; d1 < 3 ; d1++ )
+    }
+
+    for ( UInt d1 = 1; d1 < 3 ; d1++ )
+    {
+    	for ( int k = 0; k < M_numElements; ++k )
     	{
     		for ( UInt i = 0; i <  ndof; i++ )
     		{
@@ -528,7 +532,11 @@ FastAssembler::assembleMass_vectorial( matrixPtr_Type& matrix )
     for ( int k = 0; k < M_numElements; ++k )
     {
     	matrix->matrixPtr()->InsertGlobalValues ( ndof, M_rows[k], ndof, M_cols[k], M_vals[k], Epetra_FECrsMatrix::ROW_MAJOR);
-    	for ( UInt d1 = 1; d1 < 3 ; d1++ )
+    }
+
+    for ( UInt d1 = 1; d1 < 3 ; d1++ )
+    {
+    	for ( int k = 0; k < M_numElements; ++k )
     	{
     		for ( UInt i = 0; i <  ndof; i++ )
     		{
@@ -538,7 +546,6 @@ FastAssembler::assembleMass_vectorial( matrixPtr_Type& matrix )
     		matrix->matrixPtr()->InsertGlobalValues ( ndof, M_rows[k], ndof, M_cols[k], M_vals[k], Epetra_FECrsMatrix::ROW_MAJOR);
     	}
     }
-
 }
 //=========================================================================
 void
@@ -691,14 +698,18 @@ FastAssembler::assembleConvective( matrix_Type& matrix, const vector_Type& u_h )
     for ( int k = 0; k < M_numElements; ++k )
     {
     	matrix.matrixPtr()->InsertGlobalValues ( ndof, M_rows[k], ndof, M_cols[k], M_vals[k], Epetra_FECrsMatrix::ROW_MAJOR);
-    	for ( int d1 = 1; d1 < 3 ; d1++ )
+    }
+
+    for ( UInt d1 = 1; d1 < 3 ; d1++ )
+    {
+    	for ( int k = 0; k < M_numElements; ++k )
     	{
-    		for ( int i = 0; i <  ndof; i++ )
+    		for ( UInt i = 0; i <  ndof; i++ )
     		{
-                M_rows[k][i] += M_numScalarDofs;
-                M_cols[k][i] += M_numScalarDofs;
+    			M_rows[k][i] += M_numScalarDofs;
+    			M_cols[k][i] += M_numScalarDofs;
     		}
-        	matrix.matrixPtr()->InsertGlobalValues ( ndof, M_rows[k], ndof, M_cols[k], M_vals[k], Epetra_FECrsMatrix::ROW_MAJOR);
+    		matrix.matrixPtr()->InsertGlobalValues ( ndof, M_rows[k], ndof, M_cols[k], M_vals[k], Epetra_FECrsMatrix::ROW_MAJOR);
     	}
     }
 }
@@ -777,12 +788,14 @@ FastAssembler::NS_constant_terms_00( matrixPtr_Type& matrix )
 		}
 	}
 
-	//std::cout << "I am proc " << M_comm->MyPID() << "\n";
-
 	for ( int k = 0; k < M_numElements; ++k )
 	{
 		matrix->matrixPtr()->InsertGlobalValues ( ndof, M_rows[k], ndof, M_cols[k], M_vals[k], Epetra_FECrsMatrix::ROW_MAJOR);
-		for ( UInt d1 = 1; d1 < 3 ; d1++ )
+	}
+
+	for ( UInt d1 = 1; d1 < 3 ; d1++ )
+	{
+		for ( int k = 0; k < M_numElements; ++k )
 		{
 			for ( UInt i = 0; i <  ndof; i++ )
 			{
@@ -792,6 +805,5 @@ FastAssembler::NS_constant_terms_00( matrixPtr_Type& matrix )
 			matrix->matrixPtr()->InsertGlobalValues ( ndof, M_rows[k], ndof, M_cols[k], M_vals[k], Epetra_FECrsMatrix::ROW_MAJOR);
 		}
 	}
-
 }
 

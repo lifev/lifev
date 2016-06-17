@@ -392,16 +392,33 @@ FastAssemblerMixed::assemble_NS_block01 ( matrixPtr_Type& matrix )
 		}
 	}
 
+//	for ( int k = 0; k < M_numElements; ++k )
+//	{
+//		for ( UInt d1 = 0; d1 < 3 ; d1++ )
+//		{
+//			if ( d1 > 0 )
+//			{
+//				for ( UInt i = 0; i <  ndof_test; i++ )
+//				{
+//					M_rows[k][i] += M_numScalarDofs_test;
+//				}
+//			}
+//			matrix->matrixPtr()->InsertGlobalValues ( ndof_test, M_rows[k], ndof_trial, M_cols[k], M_vals[k][d1], Epetra_FECrsMatrix::ROW_MAJOR);
+//		}
+//	}
+
 	for ( int k = 0; k < M_numElements; ++k )
 	{
-		for ( UInt d1 = 0; d1 < 3 ; d1++ )
+		matrix->matrixPtr()->InsertGlobalValues ( ndof_test, M_rows[k], ndof_trial, M_cols[k], M_vals[k][0], Epetra_FECrsMatrix::ROW_MAJOR);
+	}
+
+	for ( UInt d1 = 1; d1 < 3 ; d1++ )
+	{
+		for ( int k = 0; k < M_numElements; ++k )
 		{
-			if ( d1 > 0 )
+			for ( UInt i = 0; i <  ndof_test; i++ )
 			{
-				for ( UInt i = 0; i <  ndof_test; i++ )
-				{
-					M_rows[k][i] += M_numScalarDofs_test;
-				}
+				M_rows[k][i] += M_numScalarDofs_test;
 			}
 			matrix->matrixPtr()->InsertGlobalValues ( ndof_test, M_rows[k], ndof_trial, M_cols[k], M_vals[k][d1], Epetra_FECrsMatrix::ROW_MAJOR);
 		}
@@ -484,17 +501,34 @@ FastAssemblerMixed::assemble_NS_block10 ( matrixPtr_Type& matrix )
 
 	for ( int k = 0; k < M_numElements; ++k )
 	{
-		for ( UInt d1 = 0; d1 < 3 ; d1++ )
+		matrix->matrixPtr()->InsertGlobalValues ( ndof_test, M_rows[k], ndof_trial, M_cols[k], M_vals[k][0], Epetra_FECrsMatrix::ROW_MAJOR);
+	}
+
+	for ( UInt d1 = 1; d1 < 3 ; d1++ )
+	{
+		for ( int k = 0; k < M_numElements; ++k )
 		{
-			if ( d1 > 0 )
+			for ( UInt i = 0; i <  ndof_trial; i++ )
 			{
-				for ( UInt i = 0; i <  ndof_trial; i++ )
-				{
-					M_cols[k][i] += M_numScalarDofs_trial;
-				}
+				M_cols[k][i] += M_numScalarDofs_trial;
 			}
 			matrix->matrixPtr()->InsertGlobalValues ( ndof_test, M_rows[k], ndof_trial, M_cols[k], M_vals[k][d1], Epetra_FECrsMatrix::ROW_MAJOR);
 		}
 	}
+
+//	for ( int k = 0; k < M_numElements; ++k )
+//	{
+//		for ( UInt d1 = 0; d1 < 3 ; d1++ )
+//		{
+//			if ( d1 > 0 )
+//			{
+//				for ( UInt i = 0; i <  ndof_trial; i++ )
+//				{
+//					M_cols[k][i] += M_numScalarDofs_trial;
+//				}
+//			}
+//			matrix->matrixPtr()->InsertGlobalValues ( ndof_test, M_rows[k], ndof_trial, M_cols[k], M_vals[k][d1], Epetra_FECrsMatrix::ROW_MAJOR);
+//		}
+//	}
 }
 
