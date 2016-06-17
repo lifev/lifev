@@ -13,7 +13,8 @@ FastAssembler::FastAssembler( const meshPtr_Type& mesh, const commPtr_Type& comm
 		M_mesh ( mesh ),
 		M_comm ( comm ),
 		M_referenceFE ( refFE ),
-		M_qr ( qr )
+		M_qr ( qr ),
+		M_useSUPG ( false )
 {
 }
 //=========================================================================
@@ -86,6 +87,29 @@ FastAssembler::~FastAssembler()
 	}
 	delete [] M_rows;
 	delete [] M_cols;
+
+	//---------------------
+	if ( M_useSUPG )
+	{
+		for ( int i_elem = 0; i_elem <  M_numElements; i_elem++ )
+		{
+			for ( int k = 0; k <  3; k++ )
+			{
+				for ( int z = 0; z <  3; z++ )
+				{
+					for ( int i = 0; i <  M_referenceFE->nbDof(); i++ )
+					{
+						delete [] M_vals_supg[i_elem][k][z][i];
+					}
+					delete [] M_vals_supg[i_elem][k][z];
+				}
+				delete [] M_vals_supg[i_elem][k];
+			}
+			delete [] M_vals_supg[i_elem];
+		}
+		delete [] M_vals_supg;
+	}
+
 }
 //=========================================================================
 void
@@ -212,6 +236,31 @@ FastAssembler::allocateSpace ( const int& numElements, CurrentFE* fe, const fesp
     {
     	M_cols[i_elem] = new int [ M_referenceFE->nbDof() ];
     }
+}
+//=========================================================================
+void
+FastAssembler::allocateSpace_SUPG( )
+{
+	M_useSUPG = true;
+
+	M_vals_supg = new double**** [M_numElements];
+
+	for ( int i_elem = 0; i_elem <  M_numElements; i_elem++ )
+	{
+		M_vals_supg[i_elem] = new double*** [ 3 ];
+		for ( int k = 0; k <  3; k++ )
+		{
+			M_vals_supg[i_elem][k] = new double** [ 3 ];
+			for ( int z = 0; z < 3; z++ )
+			{
+				M_vals_supg[i_elem][k][z] = new double* [ M_referenceFE->nbDof() ];
+				for ( int i = 0; i <  M_referenceFE->nbDof(); i++ )
+				{
+					M_vals_supg[i_elem][k][z][i] = new double [ M_referenceFE->nbDof() ];
+				}
+			}
+		}
+	}
 }
 //=========================================================================
 void
@@ -806,4 +855,136 @@ FastAssembler::NS_constant_terms_00( matrixPtr_Type& matrix )
 		}
 	}
 }
+//=========================================================================
+void
+FastAssembler::assemble_SUPG_block00( matrixPtr_Type& matrix, const vector_Type& u_h )
+{
+	int ndof = M_referenceFE->nbDof();
+	int NumQuadPoints = M_qr->nbQuadPt();
+	int ndof_vec = M_referenceFE->nbDof()*3;
 
+	double w_quad[NumQuadPoints];
+	for ( int q = 0; q < NumQuadPoints ; q++ )
+	{
+		w_quad[q] = M_qr->weight(q);
+	}
+
+	#pragma omp parallel firstprivate( w_quad, ndof, NumQuadPoints)
+	{
+		int i_elem, i_dof, q, d1, d2, i_test, i_trial, e_idof;;
+		double integral;
+
+		double dphi_phys[ndof][NumQuadPoints][3];
+
+		double uhq[3][NumQuadPoints];
+
+		// ELEMENTI,
+		#pragma omp for
+		for ( i_elem = 0; i_elem <  M_numElements; i_elem++ )
+		{
+			// DOF
+			for ( i_dof = 0; i_dof <  ndof; i_dof++ )
+			{
+				// QUAD
+				for (  q = 0; q < NumQuadPoints ; q++ )
+				{
+					// DIM 1
+					for ( d1 = 0; d1 < 3 ; d1++ )
+					{
+						dphi_phys[i_dof][q][d1] = 0.0;
+
+						// DIM 2
+						for ( d2 = 0; d2 < 3 ; d2++ )
+						{
+							dphi_phys[i_dof][q][d1] += M_invJacobian[i_elem][d1][d2] * M_dphi[i_dof][q][d2];
+						}
+					}
+				}
+			}
+
+			// QUAD
+			for (  q = 0; q < NumQuadPoints ; q++ )
+			{
+				for ( d1 = 0; d1 < 3 ; d1++ )
+				{
+					uhq[d1][q] = 0.0;
+					for ( i_dof = 0; i_dof <  ndof; i_dof++ )
+					{
+						e_idof =  M_elements[i_elem][i_dof] + d1*M_numScalarDofs  ;
+						uhq[d1][q] += u_h[e_idof] * M_phi[i_dof][q];
+					}
+				}
+			}
+
+			// DOF - test
+			for ( i_test = 0; i_test <  ndof; i_test++ )
+			{
+				M_rows[i_elem][i_test] = M_elements[i_elem][i_test];
+
+				// DOF - trial
+				for ( i_trial = 0; i_trial <  ndof; i_trial++ )
+				{
+					M_cols[i_elem][i_trial] = M_elements[i_elem][i_trial];
+
+					integral = 0.0;
+					// QUAD
+					for ( q = 0; q < NumQuadPoints ; q++ )
+					{
+						double integral_test = 0;
+						double integral_trial = 0;
+
+						// DIM 1
+						for ( d1 = 0; d1 < 3 ; d1++ )
+						{
+							integral_test += uhq[d1][q] * dphi_phys[i_test][q][d1];
+							integral_trial += uhq[d1][q] * dphi_phys[i_trial][q][d1]; // terzo indice dphi_phys e' x,y,z
+						}
+						integral += integral_test * integral_trial * w_quad[q];
+					}
+					M_vals_supg[i_elem][0][0][i_test][i_trial] = integral *  M_detJacobian[i_elem];
+					M_vals_supg[i_elem][1][1][i_test][i_trial] = integral *  M_detJacobian[i_elem];
+					M_vals_supg[i_elem][2][2][i_test][i_trial] = integral *  M_detJacobian[i_elem];
+
+					for ( d1 = 0; d1 < 3; d1++ )
+					{
+						for ( d2 = 0; d2 < 3; d2++ )
+						{
+							integral = 0.0;
+							// QUAD
+							for ( q = 0; q < NumQuadPoints ; q++ )
+							{
+								integral += dphi_phys[i_test][q][d1] * dphi_phys[i_trial][q][d2] * w_quad[q];
+							}
+							M_vals_supg[i_elem][d1][d2][i_test][i_trial] = integral *  M_detJacobian[i_elem];
+						}
+					}
+
+				}
+			}
+		}
+	}
+
+	for ( int k = 0; k < M_numElements; ++k )
+	{
+		matrix->matrixPtr()->InsertGlobalValues ( ndof, M_rows[k], ndof, M_cols[k], M_vals[k][0][d1], Epetra_FECrsMatrix::ROW_MAJOR);
+	}
+
+	double tmp_rows [][];
+	double tmp_cols [][];
+	for ( UInt d1 = 1; d1 < 3 ; d1++ )
+	{
+		for ( UInt d2 = 1; d2 < 3 ; d2++ )
+		{
+			for ( int k = 0; k < M_numElements; ++k )
+			{
+				for ( UInt i = 0; i <  ndof; i++ )
+				{
+					tmp_rows = M_rows[k][i] + d1 * M_numScalarDofs;
+					tmp_cols = M_cols[k][i] + d2 * M_numScalarDofs;
+				}
+				matrix->matrixPtr()->InsertGlobalValues ( ndof, tmp_rows[k], ndof, tmp_cols[k], M_vals[k][d1][d2], Epetra_FECrsMatrix::ROW_MAJOR);
+			}
+	}
+
+
+}
