@@ -392,21 +392,6 @@ FastAssemblerMixed::assemble_NS_block01 ( matrixPtr_Type& matrix )
 		}
 	}
 
-//	for ( int k = 0; k < M_numElements; ++k )
-//	{
-//		for ( UInt d1 = 0; d1 < 3 ; d1++ )
-//		{
-//			if ( d1 > 0 )
-//			{
-//				for ( UInt i = 0; i <  ndof_test; i++ )
-//				{
-//					M_rows[k][i] += M_numScalarDofs_test;
-//				}
-//			}
-//			matrix->matrixPtr()->InsertGlobalValues ( ndof_test, M_rows[k], ndof_trial, M_cols[k], M_vals[k][d1], Epetra_FECrsMatrix::ROW_MAJOR);
-//		}
-//	}
-
 	for ( int k = 0; k < M_numElements; ++k )
 	{
 		matrix->matrixPtr()->InsertGlobalValues ( ndof_test, M_rows[k], ndof_trial, M_cols[k], M_vals[k][0], Epetra_FECrsMatrix::ROW_MAJOR);
@@ -515,20 +500,98 @@ FastAssemblerMixed::assemble_NS_block10 ( matrixPtr_Type& matrix )
 			matrix->matrixPtr()->InsertGlobalValues ( ndof_test, M_rows[k], ndof_trial, M_cols[k], M_vals[k][d1], Epetra_FECrsMatrix::ROW_MAJOR);
 		}
 	}
-
-//	for ( int k = 0; k < M_numElements; ++k )
-//	{
-//		for ( UInt d1 = 0; d1 < 3 ; d1++ )
-//		{
-//			if ( d1 > 0 )
-//			{
-//				for ( UInt i = 0; i <  ndof_trial; i++ )
-//				{
-//					M_cols[k][i] += M_numScalarDofs_trial;
-//				}
-//			}
-//			matrix->matrixPtr()->InsertGlobalValues ( ndof_test, M_rows[k], ndof_trial, M_cols[k], M_vals[k][d1], Epetra_FECrsMatrix::ROW_MAJOR);
-//		}
-//	}
 }
+
+//=====================================================================================================
+void
+FastAssemblerMixed::assemble_SUPG_block10 ( matrixPtr_Type& matrix, const vector_Type& u_h )
+{
+    int ndof_test = M_referenceFE_test->nbDof();
+    int ndof_trial = M_referenceFE_trial->nbDof();
+    int NumQuadPoints = M_qr_integration->nbQuadPt();
+    
+    double w_quad[NumQuadPoints];
+    for ( int q = 0; q < NumQuadPoints ; q++ )
+    {
+        w_quad[q] = M_qr_integration->weight(q);
+    }
+    
+    #pragma omp parallel firstprivate ( w_quad, ndof_test, ndof_trial, NumQuadPoints )
+    {
+        int i_elem, i_dof, q, d1, d2, i_test, i_trial, dim_mat;
+        double integral;
+        
+        double dphi_phys[ndof_test][NumQuadPoints][3]; // Gradient in the physical domain
+        
+        // ELEMENTI
+        #pragma omp for
+        for ( i_elem = 0; i_elem <  M_numElements ; i_elem++ )
+        {
+            // DOF
+            for ( i_dof = 0; i_dof <  ndof_test; i_dof++ )
+            {
+                // QUAD
+                for (  q = 0; q < NumQuadPoints ; q++ )
+                {
+                    // DIM 1
+                    for ( d1 = 0; d1 < 3 ; d1++ )
+                    {
+                        dphi_phys[i_dof][q][d1] = 0.0;
+                        
+                        // DIM 2
+                        for ( d2 = 0; d2 < 3 ; d2++ )
+                        {
+                            dphi_phys[i_dof][q][d1] += M_invJacobian[i_elem][d1][d2] * M_dphi_test[i_dof][q][d2];
+                        }
+                    }
+                }
+            }
+            
+            for ( dim_mat = 0; dim_mat < 3 ; dim_mat++ )
+            {
+                // DOF - test
+                for ( i_test = 0; i_test <  ndof_test; i_test++ )
+                {
+                    M_rows[i_elem][i_test] = M_elements_test[i_elem][i_test];
+                    
+                    // DOF - trial
+                    for ( i_trial = 0; i_trial < ndof_trial; i_trial++ )
+                    {
+                        M_cols[i_elem][i_trial] = M_elements_trial[i_elem][i_trial];
+                        
+                        integral = 0.0;
+                        // QUAD
+                        for ( q = 0; q < NumQuadPoints ; q++ )
+                        {
+                            integral += dphi_phys[i_test][q][dim_mat]*M_phi_trial[i_trial][q]*w_quad[q];
+                        }
+                        
+                        M_vals[i_elem][dim_mat][i_test][i_trial] = integral * M_detJacobian[i_elem];
+                    }
+                }
+            }
+        }
+    }
+    
+    for ( int k = 0; k < M_numElements; ++k )
+    {
+        matrix->matrixPtr()->InsertGlobalValues ( ndof_test, M_rows[k], ndof_trial, M_cols[k], M_vals[k][0], Epetra_FECrsMatrix::ROW_MAJOR);
+    }
+    
+    for ( UInt d1 = 1; d1 < 3 ; d1++ )
+    {
+        for ( int k = 0; k < M_numElements; ++k )
+        {
+            for ( UInt i = 0; i <  ndof_trial; i++ )
+            {
+                M_cols[k][i] += M_numScalarDofs_trial;
+            }
+            matrix->matrixPtr()->InsertGlobalValues ( ndof_test, M_rows[k], ndof_trial, M_cols[k], M_vals[k][d1], Epetra_FECrsMatrix::ROW_MAJOR);
+        }
+    }
+}
+
+
+
+
 

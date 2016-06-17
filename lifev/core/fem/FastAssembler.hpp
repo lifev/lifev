@@ -142,21 +142,21 @@ public:
 	//! FE Assembly of NS constant terms (no scaling by coefficients like viscosity)
 	/*!
 	 * @param matrix - global matrix
-	 * @param matrix - velocity vector
+	 * @param u_h - velocity vector
 	 */
 	void assembleConvective( matrix_Type& matrix, const vector_Type& u_h );
 
 	//! FE Assembly of NS constant terms (no scaling by coefficients like viscosity)
 	/*!
 	 * @param matrix - global matrix
-	 * @param matrix - velocity vector
+	 * @param u_h - velocity vector
 	 */
 	void assembleConvective( matrixPtr_Type& matrix, const vector_Type& u_h );
 
 	//! FE Assembly of SUPG terms - block (0,0)
 	/*!
 	 * @param matrix - global matrix
-	 * @param matrix - vector extrapolapolated velocity
+	 * @param u_h - vector extrapolapolated velocity
 	 */
 	void assemble_SUPG_block00( matrixPtr_Type& matrix, const vector_Type& u_h );
     
