@@ -123,6 +123,13 @@ public:
      */
     void assemble_SUPG_block10 ( matrixPtr_Type& matrix, const vector_Type& u_h );
 
+    //! FE Assembly block (0,1) of SUPG stabilization for Navier-Stokes
+    /*!
+     * @param matrix - global matrix, in this case the block (0,1) of Navier-Stokes
+     * @param u_h - vector extrapolapolated velocity
+     */
+    void assemble_SUPG_block01 ( matrixPtr_Type& matrix, const vector_Type& u_h );
+    
 	//@}
 
 private:
