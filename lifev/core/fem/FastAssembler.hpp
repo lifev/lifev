@@ -107,7 +107,10 @@ public:
 	void allocateSpace( const int& numElements, CurrentFE* fe, const fespacePtr_Type& fespace, const UInt* meshSub_elements );
 
 	//! Allocate space for supg before the assembly
-	void allocateSpace_SUPG( );
+	/*!
+	 * @param fe - current FE
+	 */
+	void allocateSpace_SUPG( CurrentFE* fe );
 
 	//! FE Assembly of scalar grad-grad
 	/*!
@@ -195,6 +198,8 @@ private:
     int** M_cols_tmp;
 
     bool M_useSUPG;
+    double *** M_G; // metric tensor
+    double ** M_g; // metric vector
 };
 
 } // Namespace LifeV

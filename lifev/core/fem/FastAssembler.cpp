@@ -116,6 +116,19 @@ FastAssembler::~FastAssembler()
         }
         delete [] M_rows_tmp;
         delete [] M_cols_tmp;
+
+
+        for( int i = 0 ; i < M_numElements ; i++ )
+        {
+        	for ( int j = 0; j < 3; j++ )
+        	{
+        		delete [] M_G[i][j];
+        	}
+        	delete [] M_G[i];
+        	delete [] M_g[i];
+        }
+        delete [] M_G;
+        delete [] M_g;
     }
 
     
@@ -248,7 +261,7 @@ FastAssembler::allocateSpace ( const int& numElements, CurrentFE* fe, const fesp
 }
 //=========================================================================
 void
-FastAssembler::allocateSpace_SUPG( )
+FastAssembler::allocateSpace_SUPG( CurrentFE* fe )
 {
 	M_useSUPG = true;
 
@@ -288,6 +301,71 @@ FastAssembler::allocateSpace_SUPG( )
     {
         M_cols_tmp[i_elem] = new int [ M_referenceFE->nbDof() ];
     }
+
+    //-------------------------------------------------------------------------------------------------
+
+    M_G = new double** [ M_numElements];
+    M_g = new double* [ M_numElements];
+
+    for ( int i = 0; i <  M_numElements; i++ )
+    {
+    	M_G[i] = new double* [ 3 ];
+    	M_g[i] = new double [ 3 ];
+    	for ( int j = 0; j < 3 ; j++ )
+    	{
+    		M_G[i][j] = new double [ 3 ];
+    	}
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    for ( int i = 0; i < M_numElements; i++ )
+    {
+    	Real x1 = fe->cellNode(0,0); Real y1 = fe->cellNode(0,1); Real z1 = fe->cellNode(0,2);
+    	Real x2 = fe->cellNode(1,0); Real y2 = fe->cellNode(1,1); Real z2 = fe->cellNode(1,2);
+    	Real x3 = fe->cellNode(2,0); Real y3 = fe->cellNode(2,1); Real z3 = fe->cellNode(2,2);
+    	Real x4 = fe->cellNode(3,0); Real y4 = fe->cellNode(3,1); Real z4 = fe->cellNode(3,2);
+
+    	// Jacobian matrix
+    	Real J11 = x2-x1;
+    	Real J12 = x3-x1;
+    	Real J13 = x4-x1;
+    	Real J21 = y2-y1;
+    	Real J22 = y3-y1;
+    	Real J23 = y4-y1;
+    	Real J31 = z2-z1;
+    	Real J32 = z3-z1;
+    	Real J33 = z4-z1;
+
+    	Real detJ =  (x2-x1)*( (y3-y1) * (z4-z1) - (y4-y1) * (z3-z1) ) - (x3-x1) * ( (y2-y1)*(z4-z1) - (z2-z1)*(y4-y1) ) + (x4-x1) * ( (y2-y1)*(z3-z1) - (z2-z1)*(y3-y1) );
+
+    	Real invJ11 = 1.0/detJ*(J22*J33-J32*J23);
+    	Real invJ12 = 1.0/detJ*(J13*J32-J33*J12);
+    	Real invJ13 = 1.0/detJ*(J12*J23-J22*J13);
+    	Real invJ21 = 1.0/detJ*(J23*J31-J33*J21);
+    	Real invJ22 = 1.0/detJ*(J11*J33-J31*J13);
+    	Real invJ23 = 1.0/detJ*(J13*J21-J23*J11);
+    	Real invJ31 = 1.0/detJ*(J21*J32-J31*J22);
+    	Real invJ32 = 1.0/detJ*(J12*J31-J32*J11);
+    	Real invJ33 = 1.0/detJ*(J11*J22-J21*J12);
+
+    	M_G[i][0][0] = invJ11*invJ11 + invJ21*invJ21 + invJ31*invJ31;
+    	M_G[i][0][1] = invJ11*invJ12 + invJ21*invJ22 + invJ31*invJ32;
+    	M_G[i][0][2] = invJ11*invJ13 + invJ21*invJ23 + invJ31*invJ33;
+
+    	M_G[i][1][0] = invJ12*invJ11 + invJ22*invJ21 + invJ32*invJ31;
+    	M_G[i][1][1] = invJ12*invJ12 + invJ22*invJ22 + invJ32*invJ32;
+    	M_G[i][1][2] = invJ12*invJ13 + invJ22*invJ23 + invJ32*invJ33;
+
+    	M_G[i][2][0] = invJ13*invJ11 + invJ23*invJ21 + invJ33*invJ31;
+    	M_G[i][2][1] = invJ13*invJ12 + invJ23*invJ22 + invJ33*invJ32;
+    	M_G[i][2][2] = invJ13*invJ13 + invJ23*invJ23 + invJ33*invJ33;
+
+    	M_g[i][0] = invJ11 + invJ21 + invJ31;
+    	M_g[i][1] = invJ12 + invJ22 + invJ32;
+    	M_g[i][2] = invJ13 + invJ23 + invJ33;
+    }
+
 }
 //=========================================================================
 void
@@ -898,7 +976,7 @@ FastAssembler::assemble_SUPG_block00( matrixPtr_Type& matrix, const vector_Type&
 
 	#pragma omp parallel firstprivate( w_quad, ndof, NumQuadPoints)
 	{
-		int i_elem, i_dof, q, d1, d2, i_test, i_trial, e_idof;;
+		int i_elem, i_dof, q, d1, d2, i_test, i_trial, e_idof;
 		double integral, integral_test, integral_trial;
 
 		double dphi_phys[ndof][NumQuadPoints][3];

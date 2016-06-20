@@ -559,7 +559,7 @@ FastAssemblerMixed::assemble_SUPG_block10 ( matrixPtr_Type& matrix, const vector
                     for ( d1 = 0; d1 < 3 ; d1++ )
                     {
                         dphi_phys_trial[i_dof][q][d1] = 0.0;
-                        
+
                         // DIM 2
                         for ( d2 = 0; d2 < 3 ; d2++ )
                         {
