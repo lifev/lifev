@@ -16,6 +16,7 @@ SET(solver_HEADERS
   solver/MultipleFluidsHandler.hpp
   solver/MultiFluidApplyOperator.hpp
   solver/DirichletNeumannPreconditionerMultiFluid.hpp
+  solver/FastAssemblerNS.hpp
 CACHE INTERNAL "")
 
 SET(solver_SOURCES
@@ -33,6 +34,7 @@ SET(solver_SOURCES
   solver/MultipleFluidsHandler.cpp
   solver/MultiFluidApplyOperator.cpp
   solver/DirichletNeumannPreconditionerMultiFluid.cpp
+  solver/FastAssemblerNS.cpp
 CACHE INTERNAL "")
 
 
