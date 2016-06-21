@@ -106,6 +106,12 @@ public:
 	 */
 	void allocateSpace( const int& numElements, CurrentFE* fe, const fespacePtr_Type& fespace, const UInt* meshSub_elements );
 
+	//! Allocate space for supg before the assembly
+	/*!
+	 * @param fe - current FE
+	 */
+	void allocateSpace_SUPG( CurrentFE* fe );
+
 	//! FE Assembly of scalar grad-grad
 	/*!
 	 * @param matrix - global matrix
@@ -139,16 +145,29 @@ public:
 	//! FE Assembly of NS constant terms (no scaling by coefficients like viscosity)
 	/*!
 	 * @param matrix - global matrix
-	 * @param matrix - velocity vector
+	 * @param u_h - velocity vector
 	 */
 	void assembleConvective( matrix_Type& matrix, const vector_Type& u_h );
 
 	//! FE Assembly of NS constant terms (no scaling by coefficients like viscosity)
 	/*!
 	 * @param matrix - global matrix
-	 * @param matrix - velocity vector
+	 * @param u_h - velocity vector
 	 */
 	void assembleConvective( matrixPtr_Type& matrix, const vector_Type& u_h );
+
+	//! FE Assembly of SUPG terms - block (0,0)
+	/*!
+	 * @param matrix - global matrix
+	 * @param u_h - vector extrapolapolated velocity
+	 */
+	void assemble_SUPG_block00( matrixPtr_Type& matrix, const vector_Type& u_h );
+    
+    //! FE Assembly of SUPG terms - block (1,1)
+    /*!
+     * @param matrix - global matrix
+     */
+    void assemble_SUPG_block11( matrixPtr_Type& matrix );
 
 	//@}
 
@@ -172,11 +191,15 @@ private:
 	const ReferenceFE* M_referenceFE;
 
 	double*** M_vals;
+	double***** M_vals_supg;
 	int** M_rows;
 	int** M_cols;
+    int** M_rows_tmp;
+    int** M_cols_tmp;
 
-    // methods
-
+    bool M_useSUPG;
+    double *** M_G; // metric tensor
+    double ** M_g; // metric vector
 };
 
 } // Namespace LifeV
