@@ -166,8 +166,19 @@ public:
     //! FE Assembly of SUPG terms - block (1,1)
     /*!
      * @param matrix - global matrix
+     * @param u_h - vector extrapolapolated velocity
      */
-    void assemble_SUPG_block11( matrixPtr_Type& matrix );
+    void assemble_SUPG_block11( matrixPtr_Type& matrix, const vector_Type& u_h );
+
+    //! Set physical parameters for NS
+    /*!
+     * @param density - density of the fluid
+     * @param viscosity - viscosity of the fluid
+     * @param timestep - timestep for the simulation
+     * @param orderBDF - order time integrator BDF
+     * @param C_I - is 30 for P1 and 60 for P2
+     */
+    void setConstants_NavierStokes( const Real& density, const Real& viscosity, const Real& timestep, const Real& orderBDF, const Real& C_I );
 
 	//@}
 
@@ -200,6 +211,14 @@ private:
     bool M_useSUPG;
     double *** M_G; // metric tensor
     double ** M_g; // metric vector
+    double ** M_Tau_M; // coefficient Tau_M
+    double ** M_Tau_C; // coefficient Tau_C
+
+    double M_density;
+    double M_viscosity;
+    double M_timestep;
+    double M_orderBDF;
+    double M_C_I;
 };
 
 } // Namespace LifeV
