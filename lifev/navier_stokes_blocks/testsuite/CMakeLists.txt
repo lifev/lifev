@@ -12,4 +12,5 @@ ADD_SUBDIRECTORIES(
     non_conforming_fluids
     evaluate_at_quadrature_points
     rotating_disk
+    fast_assembly
 )
