@@ -136,6 +136,12 @@ public:
 	 */
 	void assembleMass_scalar( matrixPtr_Type& matrix );
 
+	//! FE Assembly of laplacian PhiI laplacian PhiJ
+	/*!
+	 * @param matrix - global matrix
+	 */
+	void assembleLaplacianPhiILaplacianPhiJ_vectorial( matrixPtr_Type& matrix );
+
 	//! FE Assembly of NS constant terms (no scaling by coefficients like density or bdf)
 	/*!
 	 * @param matrix - global matrix
@@ -196,6 +202,7 @@ private:
 
 	double ** M_phi;
 	double *** M_dphi;
+	double **** M_d2phi;
     double ** M_elements;
 
 	const qr_Type* M_qr;

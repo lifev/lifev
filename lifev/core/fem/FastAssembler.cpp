@@ -60,6 +60,22 @@ FastAssembler::~FastAssembler()
 
 	//---------------------
 
+	for( int i = 0 ; i < M_referenceFE->nbDof() ; i++ )
+	{
+		for ( int j = 0; j < M_qr->nbQuadPt(); j++ )
+		{
+			for ( int k = 0; k < 3; k++ )
+			{
+				delete [] M_d2phi[i][j][k];
+			}
+			delete [] M_d2phi[i][j];
+		}
+		delete [] M_d2phi[i];
+	}
+	delete [] M_d2phi;
+
+	//---------------------
+
 	for( int i = 0 ; i < M_numElements ; i++ )
 	{
 		delete [] M_elements[i];
@@ -164,7 +180,7 @@ FastAssembler::allocateSpace ( const int& numElements, CurrentFE* fe, const fesp
 
 	for ( int i = 0; i < M_numElements; i++ )
 	{
-		fe->update( M_mesh->element (i), UPDATE_DPHI );
+		fe->update( M_mesh->element (i), UPDATE_D2PHI );
 		M_detJacobian[i] = fe->detJacobian(0);
 		for ( int j = 0; j < 3; j++ )
 		{
@@ -213,6 +229,38 @@ FastAssembler::allocateSpace ( const int& numElements, CurrentFE* fe, const fesp
     		for (UInt j (0); j < 3; ++j)
     		{
     			M_dphi[i][q][j] = M_referenceFE->dPhi (i, j, M_qr->quadPointCoor (q) );
+    		}
+    	}
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    M_d2phi = new double*** [ M_referenceFE->nbDof() ];
+
+    for ( int i = 0; i <  M_referenceFE->nbDof(); i++ )
+    {
+    	M_d2phi[i] = new double** [ M_qr->nbQuadPt() ];
+    	for ( int j = 0; j < M_qr->nbQuadPt() ; j++ )
+    	{
+    		M_d2phi[i][j] = new double* [ 3 ];
+    		for ( int k = 0; k < 3 ; k++ )
+    		{
+    			M_d2phi[i][j][k] = new double [ 3 ];
+    		}
+    	}
+    }
+
+    //D2PHI REF
+    for (UInt q (0); q < M_qr->nbQuadPt(); ++q)
+    {
+    	for (UInt i (0); i < M_referenceFE->nbDof(); ++i)
+    	{
+    		for (UInt j (0); j < 3; ++j)
+    		{
+    			for (UInt k (0); k < 3; ++k)
+    			{
+    				M_d2phi[i][q][j][k] = M_referenceFE->d2Phi (i, j, k, M_qr->quadPointCoor (q) );
+    			}
     		}
     	}
     }
@@ -1206,7 +1254,7 @@ FastAssembler::assemble_SUPG_block11( matrixPtr_Type& matrix, const vector_Type&
 		matrix->matrixPtr()->InsertGlobalValues ( ndof, M_rows[k], ndof, M_cols[k], M_vals[k], Epetra_FECrsMatrix::ROW_MAJOR);
 	}
 }
-
+//=========================================================================
 void
 FastAssembler::setConstants_NavierStokes( const Real& density, const Real& viscosity, const Real& timestep, const Real& orderBDF, const Real& C_I )
 {
@@ -1216,6 +1264,108 @@ FastAssembler::setConstants_NavierStokes( const Real& density, const Real& visco
 	M_orderBDF = orderBDF;
 	M_C_I = C_I;
 }
+//=========================================================================
+void
+FastAssembler::assembleLaplacianPhiILaplacianPhiJ_vectorial( matrixPtr_Type& matrix )
+{
+    int ndof = M_referenceFE->nbDof();
+    int NumQuadPoints = M_qr->nbQuadPt();
 
+    double w_quad[NumQuadPoints];
+    for ( int q = 0; q < NumQuadPoints ; q++ )
+    {
+    	w_quad[q] = M_qr->weight(q);
+    }
+
+    #pragma omp parallel firstprivate( w_quad, ndof, NumQuadPoints)
+    {
+        int i_el, i_elem, i_dof, q, d1, d2, i_test, i_trial, iCoor, jCoor, k1, k2;
+        double integral, partialSum, integral_test, integral_trial;
+
+        double d2phi_phys[ndof][NumQuadPoints][3][3];
+
+        // ELEMENTI
+        #pragma omp for
+        for ( i_elem = 0; i_elem <  M_numElements ; i_elem++ )
+        {
+        	// QUAD
+        	for (  q = 0; q < NumQuadPoints ; q++ )
+        	{
+        		// DOF
+        		for ( i_dof = 0; i_dof <  ndof; i_dof++ )
+        		{
+        			// DIM 1
+        			for ( iCoor = 0; iCoor < 3 ; iCoor++ )
+        			{
+        				// DIM 2
+        				for ( jCoor = 0; jCoor < 3 ; jCoor++ )
+        				{
+        					partialSum = 0.0;
+        					// DIM 1
+        					for ( k1 = 0; k1 < 3 ; k1++ )
+        					{
+        						// DIM 2
+        						for ( k2 = 0; k2 < 3 ; k2++ )
+        						{
+        							partialSum += M_invJacobian[i_elem][iCoor][k1]
+        							        	  * M_d2phi[i_dof][q][k1][k2]
+        							        	  * M_invJacobian[i_elem][jCoor][k2];
+        						}
+        					}
+        					d2phi_phys[i_dof][q][iCoor][jCoor] = partialSum;
+        				}
+        			}
+        		}
+        	}
+
+            // DOF - test
+            for ( i_test = 0; i_test <  ndof; i_test++ )
+            {
+                M_rows[i_elem][i_test] = M_elements[i_elem][i_test];
+
+                // DOF - trial
+                for ( i_trial = 0; i_trial <  ndof; i_trial++ )
+                {
+                    M_cols[i_elem][i_trial] = M_elements[i_elem][i_trial];
+
+                    integral = 0.0;
+                    // QUAD
+                    for ( q = 0; q < NumQuadPoints ; q++ )
+                    {
+                    	integral_test = 0.0;
+                    	integral_trial = 0.0;
+                        // DIM 1
+                        for ( d1 = 0; d1 < 3 ; d1++ )
+                        {
+                        	integral_test += d2phi_phys[i_test][q][d1][d1];
+                        	integral_trial += d2phi_phys[i_trial][q][d1][d1];
+                        }
+                        integral += integral_test * integral_trial * w_quad[q];
+                    }
+                    M_vals[i_elem][i_test][i_trial] = integral * M_detJacobian[i_elem];
+                }
+            }
+        }
+    }
+
+    for ( int k = 0; k < M_numElements; ++k )
+    {
+    	matrix->matrixPtr()->InsertGlobalValues ( ndof, M_rows[k], ndof, M_cols[k], M_vals[k], Epetra_FECrsMatrix::ROW_MAJOR);
+    }
+
+    for ( UInt d1 = 1; d1 < 3 ; d1++ )
+    {
+    	for ( int k = 0; k < M_numElements; ++k )
+    	{
+    		for ( UInt i = 0; i <  ndof; i++ )
+    		{
+    			M_rows[k][i] += M_numScalarDofs;
+    			M_cols[k][i] += M_numScalarDofs;
+    		}
+    		matrix->matrixPtr()->InsertGlobalValues ( ndof, M_rows[k], ndof, M_cols[k], M_vals[k], Epetra_FECrsMatrix::ROW_MAJOR);
+    	}
+    }
+
+}
 
 
