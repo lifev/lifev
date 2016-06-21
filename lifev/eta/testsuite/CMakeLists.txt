@@ -14,5 +14,4 @@ ADD_SUBDIRECTORIES(
   #VMS
   #VMS_Cylinder
   repeated_mesh_2D
-  fast_assembly
 )
