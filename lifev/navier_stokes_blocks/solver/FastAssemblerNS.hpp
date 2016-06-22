@@ -137,6 +137,7 @@ private:
 	double ** M_phi_pressure;
 	double *** M_dphi_velocity;
 	double *** M_dphi_pressure;
+	double **** M_d2phi_velocity;
     double ** M_elements_velocity;
     double ** M_elements_pressure;
 

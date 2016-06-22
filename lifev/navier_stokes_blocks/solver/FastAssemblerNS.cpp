@@ -66,6 +66,22 @@ FastAssemblerNS::~FastAssemblerNS()
 
 	//---------------------
 
+	for( int i = 0 ; i < M_referenceFE_velocity->nbDof() ; i++ )
+	{
+		for ( int j = 0; j < M_qr->nbQuadPt(); j++ )
+		{
+			for ( int k = 0; k < 3; k++ )
+			{
+				delete [] M_d2phi_velocity[i][j][k];
+			}
+			delete [] M_d2phi_velocity[i][j];
+		}
+		delete [] M_d2phi_velocity[i];
+	}
+	delete [] M_d2phi_velocity;
+
+	//---------------------
+
 	for ( int i = 0; i < M_referenceFE_pressure->nbDof(); i++ )
 	{
 		delete [] M_phi_pressure[i];
@@ -277,7 +293,7 @@ FastAssemblerNS::allocateSpace ( CurrentFE* current_fe_velocity, const bool& use
 
 	for ( int i = 0; i < M_numElements; i++ )
 	{
-		current_fe_velocity->update( M_mesh->element (i), UPDATE_DPHI );
+		current_fe_velocity->update( M_mesh->element (i), UPDATE_D2PHI );
 		M_detJacobian[i] = current_fe_velocity->detJacobian(0);
 		for ( int j = 0; j < 3; j++ )
 		{
@@ -330,6 +346,40 @@ FastAssemblerNS::allocateSpace ( CurrentFE* current_fe_velocity, const bool& use
 			for (UInt j (0); j < 3; ++j)
 			{
 				M_dphi_velocity[i][q][j] = M_referenceFE_velocity->dPhi (i, j, M_qr->quadPointCoor (q) );
+			}
+		}
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	// D2PHI VELOCITY
+	//-------------------------------------------------------------------------------------------------
+
+	M_d2phi_velocity = new double*** [ M_referenceFE_velocity->nbDof() ];
+
+	for ( int i = 0; i <  M_referenceFE_velocity->nbDof(); i++ )
+	{
+		M_d2phi_velocity[i] = new double** [ M_qr->nbQuadPt() ];
+		for ( int j = 0; j < M_qr->nbQuadPt() ; j++ )
+		{
+			M_d2phi_velocity[i][j] = new double* [ 3 ];
+			for ( int k = 0; k < 3 ; k++ )
+			{
+				M_d2phi_velocity[i][j][k] = new double [ 3 ];
+			}
+		}
+	}
+
+	//D2PHI REF
+	for (UInt q (0); q < M_qr->nbQuadPt(); ++q)
+	{
+		for (UInt i (0); i < M_referenceFE_velocity->nbDof(); ++i)
+		{
+			for (UInt j (0); j < 3; ++j)
+			{
+				for (UInt k (0); k < 3; ++k)
+				{
+					M_d2phi_velocity[i][q][j][k] = M_referenceFE_velocity->d2Phi (i, j, k, M_qr->quadPointCoor (q) );
+				}
 			}
 		}
 	}
@@ -662,11 +712,12 @@ FastAssemblerNS::assemble_supg_terms( matrixPtr_Type& block00, matrixPtr_Type& b
 
 	#pragma omp parallel firstprivate( w_quad, ndof_velocity, ndof_pressure, NumQuadPoints)
 	{
-		int i_elem, i_dof, q, d1, d2, i_test, i_trial, e_idof, dim_mat;
-		double integral, integral_test, integral_trial, integral_partial;
+		int i_elem, i_dof, q, d1, d2, i_test, i_trial, e_idof, dim_mat, iCoor, jCoor, k1, k2;
+		double integral, integral_test, integral_trial, integral_partial, integral_lapl, partialSum;
 
 		double dphi_phys_velocity[ndof_velocity][NumQuadPoints][3];
 		double dphi_phys_pressure[ndof_pressure][NumQuadPoints][3];
+		double d2phi_phys_velocity[ndof_velocity][NumQuadPoints][3][3];
 		double uhq[3][NumQuadPoints];
 
 		// ELEMENTI,
@@ -708,6 +759,36 @@ FastAssemblerNS::assemble_supg_terms( matrixPtr_Type& block00, matrixPtr_Type& b
 						for ( d2 = 0; d2 < 3 ; d2++ )
 						{
 							dphi_phys_pressure[i_dof][q][d1] += M_invJacobian[i_elem][d1][d2] * M_dphi_pressure[i_dof][q][d2];
+						}
+					}
+				}
+			}
+
+			// QUAD
+			for (  q = 0; q < NumQuadPoints ; q++ )
+			{
+				// DOF
+				for ( i_dof = 0; i_dof <  ndof_velocity; i_dof++ )
+				{
+					// DIM 1
+					for ( iCoor = 0; iCoor < 3 ; iCoor++ )
+					{
+						// DIM 2
+						for ( jCoor = 0; jCoor < 3 ; jCoor++ )
+						{
+							partialSum = 0.0;
+							// DIM 1
+							for ( k1 = 0; k1 < 3 ; k1++ )
+							{
+								// DIM 2
+								for ( k2 = 0; k2 < 3 ; k2++ )
+								{
+									partialSum += M_invJacobian[i_elem][iCoor][k1]
+									              * M_d2phi_velocity[i_dof][q][k1][k2]
+									              * M_invJacobian[i_elem][jCoor][k2];
+								}
+							}
+							d2phi_phys_velocity[i_dof][q][iCoor][jCoor] = partialSum;
 						}
 					}
 				}
@@ -764,16 +845,19 @@ FastAssemblerNS::assemble_supg_terms( matrixPtr_Type& block00, matrixPtr_Type& b
 					// QUAD
 					for ( q = 0; q < NumQuadPoints ; q++ )
 					{
-						integral_test = 0;
-						integral_trial = 0;
+						integral_test = 0.0;
+						integral_trial = 0.0;
+						integral_lapl = 0.0;
 
 						// DIM 1
 						for ( d1 = 0; d1 < 3 ; d1++ )
 						{
+							integral_lapl += d2phi_phys_velocity[i_trial][q][d1][d1];
 							integral_test += uhq[d1][q] * dphi_phys_velocity[i_test][q][d1];   // w grad(phi_i)
 							integral_trial += uhq[d1][q] * dphi_phys_velocity[i_trial][q][d1]; // w grad(phi_j) terzo indice dphi_phys e' derivata in x,y,z
 						}
-						integral += M_Tau_M[i_elem][q] * (integral_test * integral_trial + integral_test * M_phi_velocity[i_trial][q] ) * w_quad[q];
+						integral += M_Tau_M[i_elem][q] * (integral_test * integral_trial + integral_test * M_phi_velocity[i_trial][q]
+						                                  - integral_test * integral_lapl ) * w_quad[q];
 						// above, the term "integral_test * M_phi[i_trial][q]" is the one which comes from (w grad(phi_i), phi_j)
 					}
 					M_vals_supg[i_elem][0][0][i_test][i_trial] = integral *  M_detJacobian[i_elem]; // (w grad(phi_i), w grad(phi_j) )
@@ -810,7 +894,7 @@ FastAssemblerNS::assemble_supg_terms( matrixPtr_Type& block00, matrixPtr_Type& b
 							integral_partial = 0.0;
 							for ( d1 = 0; d1 < 3 ; d1++ )
 							{
-								integral_partial += dphi_phys_velocity[i_test][q][d1] * uhq[d1][q];
+								integral_partial += ( dphi_phys_velocity[i_test][q][d1] * uhq[d1][q] );
 							}
 							integral += M_Tau_M[i_elem][q] * dphi_phys_pressure[i_trial][q][dim_mat] * integral_partial * w_quad[q];
 						}
@@ -859,7 +943,7 @@ FastAssemblerNS::assemble_supg_terms( matrixPtr_Type& block00, matrixPtr_Type& b
 							integral_partial = 0.0;
 							for ( d1 = 0; d1 < 3 ; d1++ )
 							{
-								integral_partial += dphi_phys_velocity[i_trial][q][d1] * uhq[d1][q];
+								integral_partial += ( dphi_phys_velocity[i_trial][q][d1] * uhq[d1][q] - d2phi_phys_velocity[i_trial][q][d1][d1] );
 							}
 							integral += M_Tau_M[i_elem][q] * ( dphi_phys_pressure[i_test][q][dim_mat] * M_phi_velocity[i_trial][q] +
 										                       dphi_phys_pressure[i_test][q][dim_mat] * integral_partial ) * w_quad[q];
