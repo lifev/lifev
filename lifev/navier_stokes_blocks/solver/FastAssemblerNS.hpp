@@ -104,6 +104,17 @@ public:
 	 * @param C_I - is 30 for P1 and 60 for P2
 	 */
 	void setConstants_NavierStokes( const Real& density, const Real& viscosity, const Real& timestep, const Real& orderBDF, const Real& C_I );
+    
+    //! Set physical parameters for NS
+    /*!
+     * @param density - density of the fluid
+     * @param viscosity - viscosity of the fluid
+     * @param timestep - timestep for the simulation
+     * @param orderBDF - order time integrator BDF
+     * @param C_I - is 30 for P1 and 60 for P2
+     * @param alpha - coefficient BDF in front of u_{n+1}
+     */
+    void setConstants_NavierStokes( const Real& density, const Real& viscosity, const Real& timestep, const Real& orderBDF, const Real& C_I, const Real& alpha );
 
 	//! Allocate space for members before the assembly
 	/*!
@@ -111,7 +122,7 @@ public:
 	 */
 	void allocateSpace( CurrentFE* current_fe_velocity, const bool& use_supg );
 
-	//! Allocate space for members before the assembly
+	//! Assemble SUPG terms
 	/*!
 	 * @param block00 - block00 stabilization
 	 * @param block01 - block01 stabilization
@@ -119,6 +130,15 @@ public:
 	 * @param block11 - block11 stabilization
 	 */
 	void assemble_supg_terms( matrixPtr_Type& block00, matrixPtr_Type& block01, matrixPtr_Type& block10, matrixPtr_Type& block11, const vector_Type& u_h  );
+    
+    //! Assemble all the VMS-LES terms
+    /*!
+     * @param block00 - block00 stabilization
+     * @param block01 - block01 stabilization
+     * @param block10 - block10 stabilization
+     * @param block11 - block11 stabilization
+     */
+    void assemble_vmsles_terms( matrixPtr_Type& block00, matrixPtr_Type& block01, matrixPtr_Type& block10, matrixPtr_Type& block11, const vector_Type& u_h  );
 
 	//@}
 
@@ -166,12 +186,14 @@ private:
     double ** M_g; // metric vector
     double ** M_Tau_M; // coefficient Tau_M
     double ** M_Tau_C; // coefficient Tau_C
-
+    double ** M_Tau_M_hat; // coefficient Tau_M_hat for VMSLES at quadrature
+    
     double M_density;
     double M_viscosity;
     double M_timestep;
     double M_orderBDF;
     double M_C_I;
+    double M_alpha;
 };
 
 } // Namespace LifeV
