@@ -1270,8 +1270,8 @@ FastAssemblerNS::assemble_vmsles_terms( matrixPtr_Type& block00, matrixPtr_Type&
                             {
                                 integral_partial += ( dphi_phys_velocity[i_trial][q][d1] * uhq[d1][q] - d2phi_phys_velocity[i_trial][q][d1][d1] );
                             }
-                            integral += M_Tau_M[i_elem][q] * ( dphi_phys_pressure[i_test][q][dim_mat] * M_phi_velocity[i_trial][q] +
-                                                              dphi_phys_pressure[i_test][q][dim_mat] * integral_partial ) * w_quad[q];
+                            integral += M_Tau_M_hat[i_elem][q] * ( dphi_phys_pressure[i_test][q][dim_mat] * M_phi_velocity[i_trial][q] +
+                                                                   dphi_phys_pressure[i_test][q][dim_mat] * integral_partial ) * w_quad[q];
                         }
                         
                         M_vals_supg_10[i_elem][dim_mat][i_test][i_trial] = integral * M_detJacobian[i_elem];
@@ -1318,8 +1318,7 @@ FastAssemblerNS::assemble_vmsles_terms( matrixPtr_Type& block00, matrixPtr_Type&
     {
         block11->matrixPtr()->InsertGlobalValues ( ndof_pressure, M_rows_pressure[k], ndof_pressure, M_cols_pressure[k], M_vals_11[k], Epetra_FECrsMatrix::ROW_MAJOR);
     }
-    
-    /*
+
     for ( UInt d1 = 0; d1 < 3 ; d1++ )
     {
         for ( int k = 0; k < M_numElements; ++k )
@@ -1331,5 +1330,4 @@ FastAssemblerNS::assemble_vmsles_terms( matrixPtr_Type& block00, matrixPtr_Type&
             block10->matrixPtr()->InsertGlobalValues ( ndof_pressure, M_rows_pressure[k], ndof_velocity, M_cols_tmp[k], M_vals_supg_10[k][d1], Epetra_FECrsMatrix::ROW_MAJOR);
         }
     }
-    */
 }
