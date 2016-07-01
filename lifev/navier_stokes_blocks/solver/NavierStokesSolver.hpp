@@ -93,6 +93,8 @@
 #include <lifev/core/array/MatrixEpetraStructuredUtility.hpp>
 #include <lifev/core/algorithm/SolverAztecOO.hpp>
 
+#include <lifev/core/fem/PostProcessingBoundary.hpp>
+
 namespace LifeV
 {
 
@@ -417,6 +419,12 @@ public:
     void solveLaplacian( const UInt& flag, bcPtr_Type& bc_laplacian, vectorPtr_Type& laplacianSolution );
 
     void updateSystem_ALE( const vectorPtr_Type& u_star, const vectorPtr_Type& w, const vectorPtr_Type& rhs_velocity );
+    
+    void setupPostProc( );
+
+    Real flux ( const markerID_Type& flag, const vector_Type& velocity );
+    
+    Real area ( const markerID_Type& flag );
 
 private:
 
@@ -579,6 +587,9 @@ private:
 	UInt M_flagPenalizeReverseFlow;
 
 	bool M_solve_blocks;
+    
+    //! Postprocessing class
+    boost::shared_ptr<PostProcessingBoundary<mesh_Type> > M_postProcessing;
 
 }; // class NavierStokesSolver
 

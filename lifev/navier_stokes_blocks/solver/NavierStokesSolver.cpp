@@ -735,7 +735,7 @@ void NavierStokesSolver::applyBoundaryConditions ( bcPtr_Type & bc, const Real& 
 	updateBCHandler(bc);
 	bcManage ( *M_block00, *M_rhs, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 1.0, time );
     bcManageMatrix( *M_block01, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 0.0, 0.0);
-
+    
     *M_rhs += *velocities;
 }
 
@@ -1753,7 +1753,7 @@ void NavierStokesSolver::preprocessBoundary(const Real& nx, const Real& ny, cons
 
 	bcManageRhs ( *Phi_h_flag, *M_velocityFESpaceScalar->mesh(), M_velocityFESpaceScalar->dof(),  bc, M_velocityFESpaceScalar->feBd(), 1., 0.);
 
-	*Phi_h_flag *= *Phi_h;
+	*Phi_h_flag *= *Phi_h; // Element by element multiplication
 
 	Q_hat = 0.0;
 
@@ -1973,5 +1973,31 @@ void NavierStokesSolver::updateSystem_ALE( const vectorPtr_Type& u_star, const v
     M_block10->globalAssemble(M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
 
 }
+    
+void
+NavierStokesSolver::setupPostProc( )
+{
+    M_postProcessing.reset ( new PostProcessingBoundary<mesh_Type> ( M_velocityFESpace->mesh(),
+                                                                    &M_velocityFESpace->feBd(),
+                                                                    &M_velocityFESpace->dof(),
+                                                                    &M_pressureFESpace->feBd(),
+                                                                    &M_pressureFESpace->dof(),
+                                                                    *M_monolithicMap ) );
 
+}
+
+Real
+NavierStokesSolver::flux ( const markerID_Type& flag, const vector_Type& velocity )
+{
+    vector_Type velocity_rep ( velocity, Repeated );
+    
+    return M_postProcessing->flux ( velocity_rep, flag );
+}
+
+Real
+NavierStokesSolver::area ( const markerID_Type& flag )
+{
+    return M_postProcessing->measure ( flag );
+}
+    
 }
