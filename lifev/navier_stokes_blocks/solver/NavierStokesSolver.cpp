@@ -1990,7 +1990,6 @@ Real
 NavierStokesSolver::flux ( const markerID_Type& flag, const vector_Type& velocity )
 {
     vector_Type velocity_rep ( velocity, Repeated );
-    
     return M_postProcessing->flux ( velocity_rep, flag );
 }
 
@@ -1999,5 +1998,5 @@ NavierStokesSolver::area ( const markerID_Type& flag )
 {
     return M_postProcessing->measure ( flag );
 }
-    
+
 }
