@@ -425,6 +425,8 @@ public:
     Real flux ( const markerID_Type& flag, const vector_Type& velocity );
     
     Real area ( const markerID_Type& flag );
+    
+    Real pres ( const markerID_Type& flag, const vector_Type& pressure );
 
 private:
 

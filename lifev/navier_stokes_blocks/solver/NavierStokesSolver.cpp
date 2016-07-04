@@ -1999,4 +1999,11 @@ NavierStokesSolver::area ( const markerID_Type& flag )
     return M_postProcessing->measure ( flag );
 }
 
+Real
+NavierStokesSolver::pres ( const markerID_Type& flag, const vector_Type& pressure )
+{
+    vector_Type pressure_rep ( pressure, Repeated );
+    return M_postProcessing->average ( pressure_rep, flag, 1 ) [0];
+}
+    
 }
