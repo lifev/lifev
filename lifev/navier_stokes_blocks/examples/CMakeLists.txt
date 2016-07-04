@@ -2,8 +2,9 @@ INCLUDE(TribitsAddExecutableAndTest)
 INCLUDE(AddSubdirectories)
 
 ADD_SUBDIRECTORIES(
-	example_aorta_fully_implicit
-	example_aorta_semi_implicit
+#example_aorta_fully_implicit
+#example_aorta_semi_implicit
 	example_carotid_semi_implicit
-	example_external_flow
+#example_external_flow
+    example_aorta_0176
 )
