@@ -131,6 +131,13 @@ public:
      */
     void assemble_constant_terms( matrixPtr_Type& mass, matrixPtr_Type& stiffness, matrixPtr_Type& grad, matrixPtr_Type& div );
     
+    //! FE Assembly of NS constant terms (no scaling by coefficients like viscosity)
+    /*!
+     * @param matrix - global matrix
+     * @param u_h - velocity vector
+     */
+    void assembleConvective( matrixPtr_Type& matrix, const vector_Type& u_h );
+    
 	//! Assemble SUPG terms
 	/*!
 	 * @param block00 - block00 stabilization
