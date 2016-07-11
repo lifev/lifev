@@ -138,6 +138,13 @@ public:
      */
     void assembleConvective( matrixPtr_Type& matrix, const vector_Type& u_h );
     
+    //! FE Assembly of NS nonlinear term
+    /*!
+     * @param matrix - matrix
+     * @param u_h - velocity vector previous Newton step
+     */
+    void jacobianNS( matrixPtr_Type& matrix, const vector_Type& u_h );
+    
 	//! Assemble SUPG terms
 	/*!
 	 * @param block00 - block00 stabilization

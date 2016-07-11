@@ -1369,7 +1369,7 @@ FastAssemblerNS::assembleConvective( matrixPtr_Type& matrix, const vector_Type& 
                             integral += uhq[d1][q] * dphi_phys_velocity[i_trial][q][d1] * M_phi_velocity[i_test][q] * w_quad[q];
                         }
                     }
-                    M_vals_00[i_elem][i_test][i_trial] = integral *  M_detJacobian[i_elem];
+                    M_vals_00[i_elem][i_test][i_trial] = M_density * integral *  M_detJacobian[i_elem];
                 }
             }
         }
@@ -1400,3 +1400,173 @@ FastAssemblerNS::assembleConvective( matrixPtr_Type& matrix, const vector_Type& 
     }
 }
 
+//=========================================================================
+void
+FastAssemblerNS::jacobianNS( matrixPtr_Type& matrix, const vector_Type& u_h )
+{
+    int ndof_velocity = M_referenceFE_velocity->nbDof();
+    int NumQuadPoints = M_qr->nbQuadPt();
+    int ndof_vec = M_referenceFE_velocity->nbDof()*3;
+    M_numScalarDofs =  M_fespace_velocity->dof().numTotalDof();
+    
+    double w_quad[NumQuadPoints];
+    for ( int q = 0; q < NumQuadPoints ; q++ )
+    {
+        w_quad[q] = M_qr->weight(q);
+    }
+    
+    #pragma omp parallel firstprivate( w_quad, ndof_velocity, NumQuadPoints)
+    {
+        int i_elem, i_dof, q, d1, d2, i_test, i_trial, e_idof;
+        double integral, integral_00, integral_01, integral_02, integral_10, integral_11, integral_12;
+        double integral_20, integral_21, integral_22;
+        
+        double dphi_phys_velocity[ndof_velocity][NumQuadPoints][3];
+        
+        double duhq[3][3][NumQuadPoints];
+        
+        // ELEMENTI,
+        #pragma omp for
+        for ( i_elem = 0; i_elem <  M_numElements; i_elem++ )
+        {
+            
+            // DOF
+            for ( i_dof = 0; i_dof <  ndof_velocity; i_dof++ )
+            {
+                // QUAD
+                for (  q = 0; q < NumQuadPoints ; q++ )
+                {
+                    // DIM 1
+                    for ( d1 = 0; d1 < 3 ; d1++ )
+                    {
+                        dphi_phys_velocity[i_dof][q][d1] = 0.0;
+                        
+                        // DIM 2
+                        for ( d2 = 0; d2 < 3 ; d2++ )
+                        {
+                            dphi_phys_velocity[i_dof][q][d1] += M_invJacobian[i_elem][d1][d2] * M_dphi_velocity[i_dof][q][d2];
+                        }
+                    }
+                }
+            }
+            
+            // QUAD
+            for (  q = 0; q < NumQuadPoints ; q++ )
+            {
+                for ( d1 = 0; d1 < 3 ; d1++ )
+                {
+                    for ( d2 = 0; d2 < 3 ; d2++ )
+                    {
+                        duhq[d1][d2][q] = 0.0;
+                        for ( i_dof = 0; i_dof <  ndof_velocity; i_dof++ )
+                        {
+                            e_idof =  M_elements_velocity[i_elem][i_dof] + d1*M_numScalarDofs  ;
+                            duhq[d1][d2][q] += u_h[e_idof] * dphi_phys_velocity[i_dof][q][d2];
+                        }
+                    }
+                }
+            }
+            
+            // DOF - test
+            for ( i_test = 0; i_test <  ndof_velocity; i_test++ )
+            {
+                M_rows_velocity[i_elem][i_test] = M_elements_velocity[i_elem][i_test];
+                // DOF - trial
+                for ( i_trial = 0; i_trial <  ndof_velocity; i_trial++ )
+                {
+                    M_cols_velocity[i_elem][i_trial] = M_elements_velocity[i_elem][i_trial];
+                    
+                    M_vals_supg[i_elem][0][0][i_test][i_trial] = 0.0;
+                    M_vals_supg[i_elem][0][1][i_test][i_trial] = 0.0;
+                    M_vals_supg[i_elem][0][2][i_test][i_trial] = 0.0;
+                    M_vals_supg[i_elem][1][0][i_test][i_trial] = 0.0;
+                    M_vals_supg[i_elem][1][1][i_test][i_trial] = 0.0;
+                    M_vals_supg[i_elem][1][2][i_test][i_trial] = 0.0;
+                    M_vals_supg[i_elem][2][0][i_test][i_trial] = 0.0;
+                    M_vals_supg[i_elem][2][1][i_test][i_trial] = 0.0;
+                    M_vals_supg[i_elem][2][2][i_test][i_trial] = 0.0;
+                    integral_00 = 0.0;
+                    integral_01 = 0.0;
+                    integral_02 = 0.0;
+                    integral_10 = 0.0;
+                    integral_11 = 0.0;
+                    integral_12 = 0.0;
+                    integral_20 = 0.0;
+                    integral_21 = 0.0;
+                    integral_22 = 0.0;
+                    // QUAD
+                    for ( q = 0; q < NumQuadPoints ; q++ )
+                    {
+                        integral_00 += M_phi_velocity[i_test][q] * duhq[0][0][q] * M_phi_velocity[i_trial][q] * w_quad[q];
+                        
+                        integral_01 += M_phi_velocity[i_test][q] * duhq[0][1][q] * M_phi_velocity[i_trial][q] * w_quad[q];
+                        
+                        integral_02 += M_phi_velocity[i_test][q] * duhq[0][2][q] * M_phi_velocity[i_trial][q] * w_quad[q];
+                        
+                        integral_10 += M_phi_velocity[i_test][q] * duhq[1][0][q] * M_phi_velocity[i_trial][q] * w_quad[q];
+                        
+                        integral_11 += M_phi_velocity[i_test][q] * duhq[1][1][q] * M_phi_velocity[i_trial][q] * w_quad[q];
+                        
+                        integral_12 += M_phi_velocity[i_test][q] * duhq[1][2][q] * M_phi_velocity[i_trial][q] * w_quad[q];
+                        
+                        integral_20 += M_phi_velocity[i_test][q] * duhq[2][0][q] * M_phi_velocity[i_trial][q] * w_quad[q];
+                        
+                        integral_21 += M_phi_velocity[i_test][q] * duhq[2][1][q] * M_phi_velocity[i_trial][q] * w_quad[q];
+                        
+                        integral_22 += M_phi_velocity[i_test][q] * duhq[2][2][q] * M_phi_velocity[i_trial][q] * w_quad[q];
+                        
+                    }
+                    M_vals_supg[i_elem][0][0][i_test][i_trial] = M_density * integral_00 * M_detJacobian[i_elem];
+                    M_vals_supg[i_elem][0][1][i_test][i_trial] = M_density * integral_01 * M_detJacobian[i_elem];
+                    M_vals_supg[i_elem][0][2][i_test][i_trial] = M_density * integral_02 * M_detJacobian[i_elem];
+                    M_vals_supg[i_elem][1][0][i_test][i_trial] = M_density * integral_10 * M_detJacobian[i_elem];
+                    M_vals_supg[i_elem][1][1][i_test][i_trial] = M_density * integral_11 * M_detJacobian[i_elem];
+                    M_vals_supg[i_elem][1][2][i_test][i_trial] = M_density * integral_12 * M_detJacobian[i_elem];
+                    M_vals_supg[i_elem][2][0][i_test][i_trial] = M_density * integral_20 * M_detJacobian[i_elem];
+                    M_vals_supg[i_elem][2][1][i_test][i_trial] = M_density * integral_21 * M_detJacobian[i_elem];
+                    M_vals_supg[i_elem][2][2][i_test][i_trial] = M_density * integral_22 * M_detJacobian[i_elem];
+                }
+            }
+        }
+    }
+    
+    for ( UInt d1 = 0; d1 < 3 ; d1++ ) // row index
+    {
+        for ( int k = 0; k < M_numElements; ++k )
+        {
+            for ( UInt i = 0; i <  ndof_velocity; i++ )
+            {
+                M_rows_tmp[k][i] = M_rows_velocity[k][i] + d1 * M_numScalarDofs;
+            }
+            matrix->matrixPtr()->InsertGlobalValues ( ndof_velocity, M_rows_tmp[k],
+                                                      ndof_velocity, M_cols_velocity[k],
+                                                      M_vals_supg[k][d1][0],
+                                                      Epetra_FECrsMatrix::ROW_MAJOR);
+            
+        }
+        
+        for ( int k = 0; k < M_numElements; ++k )
+        {
+            for ( UInt i = 0; i <  ndof_velocity; i++ )
+            {
+                M_cols_tmp[k][i] = M_cols_velocity[k][i] + M_numScalarDofs;
+            }
+            matrix->matrixPtr()->InsertGlobalValues ( ndof_velocity, M_rows_tmp[k],
+                                                      ndof_velocity, M_cols_tmp[k],
+                                                      M_vals_supg[k][d1][1],
+                                                      Epetra_FECrsMatrix::ROW_MAJOR);
+        }
+        
+        for ( int k = 0; k < M_numElements; ++k )
+        {
+            for ( UInt i = 0; i <  ndof_velocity; i++ )
+            {
+                M_cols_tmp[k][i] = M_cols_velocity[k][i] + 2 * M_numScalarDofs;
+            }
+            matrix->matrixPtr()->InsertGlobalValues ( ndof_velocity, M_rows_tmp[k],
+                                                      ndof_velocity, M_cols_tmp[k],
+                                                      M_vals_supg[k][d1][2],
+                                                      Epetra_FECrsMatrix::ROW_MAJOR);
+        }
+    }
+}
