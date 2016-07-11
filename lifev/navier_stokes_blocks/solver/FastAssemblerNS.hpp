@@ -122,6 +122,15 @@ public:
 	 */
 	void allocateSpace( CurrentFE* current_fe_velocity, const bool& use_supg );
 
+    //! Assemble constant terms NS
+    /*!
+     * @param mass - mass matrix
+     * @param stiffness - stiffness matrix
+     * @param grad - block01
+     * @param div - block10
+     */
+    void assemble_constant_terms( matrixPtr_Type& mass, matrixPtr_Type& stiffness, matrixPtr_Type& grad, matrixPtr_Type& div );
+    
 	//! Assemble SUPG terms
 	/*!
 	 * @param block00 - block00 stabilization
@@ -131,15 +140,6 @@ public:
 	 */
 	void assemble_supg_terms( matrixPtr_Type& block00, matrixPtr_Type& block01, matrixPtr_Type& block10, matrixPtr_Type& block11, const vector_Type& u_h  );
     
-    //! Assemble all the VMS-LES terms
-    /*!
-     * @param block00 - block00 stabilization
-     * @param block01 - block01 stabilization
-     * @param block10 - block10 stabilization
-     * @param block11 - block11 stabilization
-     */
-    void assemble_vmsles_terms( matrixPtr_Type& block00, matrixPtr_Type& block01, matrixPtr_Type& block10, matrixPtr_Type& block11, const vector_Type& u_h  );
-
 	//@}
 
 private:
