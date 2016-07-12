@@ -125,6 +125,8 @@ SET(expression_HEADERS
     expression/EvaluateAtQuadraturePoint.hpp
     expression/EvaluationReturnAtQuadraturePoints.hpp
     expression/ExpressionReturnAtQuadraturePoints.hpp
+    expression/ExpressionDetJacobian.hpp
+    expression/EvaluationDetJacobian.hpp
 CACHE INTERNAL "")
 
 SET(expression_SOURCES ""
@@ -143,6 +145,7 @@ SET(expression_SOURCES ""
 	expression/ExpressionScalar.cpp
 	expression/ExpressionLaplacianI.cpp
 	expression/ExpressionLaplacianJ.cpp
+    expression/ExpressionDetJacobian.cpp
 CACHE INTERNAL "")
 
 

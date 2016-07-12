@@ -95,6 +95,9 @@ template <UInt dim>
 class EvaluationHK;
 
 template <UInt dim>
+class EvaluationDetJacobian;
+
+template <UInt dim>
 class EvaluationMetricTensor;
 
 template <UInt dim>
@@ -166,6 +169,10 @@ class ETCurrentFE<spaceDim, 1>
     //!Friend to allow direct access to the raw data
     template <UInt dim>
     friend class ExpressionAssembly::EvaluationHK;
+
+    //!Friend to allow direct access to the raw data
+    template <UInt dim>
+    friend class ExpressionAssembly::EvaluationDetJacobian;
 
     //!Friend to allow direct access to the raw data
     template <UInt dim>
@@ -396,6 +403,16 @@ public:
     {
     	ASSERT (M_isDiameterUpdated, "Diameter has not been updated");
     	return M_diameter;
+    }
+
+    //! Getter for the eterminant of the jacobian of the current element
+    /*!
+      @return The diameter of the current element
+     */
+    Real detJac() const
+    {
+    	ASSERT (M_isWDetUpdated, "Determinant has not been updated");
+    	return M_detJacobian[0];
     }
 
     //! Getter for the metricTensor of the current element

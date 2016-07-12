@@ -81,6 +81,7 @@
 #include <lifev/eta/expression/ExpressionFunctor.hpp>
 
 #include <lifev/eta/expression/ExpressionHK.hpp>
+#include <lifev/eta/expression/ExpressionDetJacobian.hpp>
 #include <lifev/eta/expression/ExpressionMetricTensor.hpp>
 #include <lifev/eta/expression/ExpressionMetricVector.hpp>
 #include <lifev/eta/expression/ExpressionMeas.hpp>
@@ -140,6 +141,7 @@
 #include <lifev/eta/expression/EvaluationFunctor.hpp>
 
 #include <lifev/eta/expression/EvaluationHK.hpp>
+#include <lifev/eta/expression/EvaluationDetJacobian.hpp>
 #include <lifev/eta/expression/EvaluationMetricTensor.hpp>
 #include <lifev/eta/expression/EvaluationMetricVector.hpp>
 #include <lifev/eta/expression/EvaluationMeas.hpp>
@@ -850,6 +852,17 @@ class ExpressionToEvaluation<ExpressionHK, testDim, solutionDim, spaceDim>
 {
 public:
     typedef EvaluationHK<spaceDim> evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+// Specialized for detJ
+template<UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionDetJacobian, testDim, solutionDim, spaceDim>
+{
+public:
+    typedef EvaluationDetJacobian<spaceDim> evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();
