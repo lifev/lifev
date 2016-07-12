@@ -49,6 +49,8 @@
 #include <lifev/core/fem/BCManage.hpp>
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/util/Displayer.hpp>
+#include <lifev/eta/fem/ETFESpace.hpp>
+#include <lifev/eta/expression/Integrate.hpp>
 
 namespace LifeV
 {
@@ -79,6 +81,8 @@ public:
     typedef boost::shared_ptr<matrix_Type> matrixPtr_Type;
     typedef VectorEpetra vector_Type;
     typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
+    typedef ETFESpace< mesh_Type, MapEpetra, 3, 3 > ETFESpaceAle_Type;
+    typedef boost::shared_ptr<ETFESpaceAle_Type> ETFESpaceAlePtr_Type;
 
     //@}
 
@@ -259,6 +263,11 @@ private:
     Real                           M_diffusion;
 
     UInt                           M_offset;
+
+    bool 						   M_linearElasticity;
+    Real                           M_young;
+    Real						   M_poisson;
+    ETFESpaceAlePtr_Type           M_aleFESpace_ETA;
 };
 
 } // namespace LifeV

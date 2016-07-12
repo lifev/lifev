@@ -21,7 +21,10 @@ ALESolver::ALESolver ( FESpace<mesh_Type, MapEpetra>& mmFESpace,
     M_disp                  ( ),
     M_secondRHS             ( ),
     M_diffusion             ( 1. ),
-    M_offset                (0)
+    M_offset                (0),
+    M_linearElasticity      (false),
+    M_young					(0.0),
+    M_poisson				(0.0)
 {
 }
 
@@ -38,7 +41,10 @@ ALESolver::ALESolver ( FESpace<mesh_Type, MapEpetra>& mmFESpace,
     M_elmat                 ( M_FESpace.fe().nbFEDof(), nDimensions, nDimensions ),
     M_secondRHS             ( ),
     M_diffusion             ( 1. ),
-    M_offset                (offset)
+    M_offset                (offset),
+    M_linearElasticity      (false),
+    M_young					(0.0),
+    M_poisson				(0.0)
 {
 }
 
@@ -49,14 +55,19 @@ ALESolver::ALESolver ( FESpace<mesh_Type, MapEpetra>& mmFESpace,
 
 void ALESolver::setUp ( const GetPot& dataFile )
 {
-    M_diffusion = dataFile ("mesh_motion/diffusion", 1.0);
+	M_linearElasticity = dataFile ("ale/useLinearElasticity", false);
+
+	M_diffusion = dataFile ("ale/diffusion", 1.0);
+
+    M_young = dataFile ("solid/model/young", 0.0);
+
+    M_poisson = dataFile ("solid/model/poisson", 0.0);
 
     computeMatrix( );
 
     M_secondRHS.reset (new vector_Type (M_FESpace.map() ) );
     M_disp.reset (new vector_Type (M_FESpace.map() ) );
 }
-
 
 void ALESolver::iterate ( BCHandler& BCh )
 {
@@ -115,19 +126,40 @@ void ALESolver::computeMatrix( )
 
     M_matrHE.reset ( new matrix_Type (M_localMap ) );
 
-    UInt totalDof   = M_FESpace.dof().numTotalDof();
-    // Loop on elements
-    for ( UInt i = 0; i < M_FESpace.mesh()->numVolumes(); ++i )
+    if ( M_linearElasticity )
     {
-        // Updating derivatives
-        M_FESpace.fe().updateFirstDerivQuadPt ( M_FESpace.mesh()->volumeList ( i ) );
-        M_elmat.zero();
-        AssemblyElemental::stiff ( M_diffusion, M_elmat, M_FESpace.fe(), 0, 0, 3 );
-        // Assembling
-        for ( UInt j = 0; j < M_FESpace.fieldDim(); ++j )
-        {
-            assembleMatrix ( *M_matrHE, M_elmat, M_FESpace.fe(), M_FESpace.dof(), j, j, j * totalDof + M_offset, j * totalDof + M_offset );
-        }
+    	using namespace ExpressionAssembly;
+    	M_aleFESpace_ETA.reset( new ETFESpaceAle_Type ( M_FESpace.mesh(), &(M_FESpace.refFE()), M_FESpace.map().commPtr() ) );
+
+    	Real lambda = ( M_young * M_poisson ) / ( ( 1.0 + M_poisson ) * ( 1.0 - 2.0 * M_poisson ) );
+    	Real mu = M_young / ( 2.0 * ( 1.0 + M_poisson ) );
+
+    	integrate ( elements (M_aleFESpace_ETA->mesh() ),
+    			              M_FESpace.qr(),
+    			              M_aleFESpace_ETA,
+    			              M_aleFESpace_ETA,
+    			              pow( value(0.0228)/detJ, 0.8) * (
+    			              value( mu ) * dot ( grad(phi_i) , grad(phi_j) + transpose( grad(phi_j) ) ) +
+    			              value( lambda ) * div(phi_i) * div(phi_j)
+    			              	  	  	  	  	  	    )
+    			  ) >> M_matrHE;
+    }
+    else
+    {
+    	UInt totalDof   = M_FESpace.dof().numTotalDof();
+    	// Loop on elements
+    	for ( UInt i = 0; i < M_FESpace.mesh()->numVolumes(); ++i )
+    	{
+    		// Updating derivatives
+    		M_FESpace.fe().updateFirstDerivQuadPt ( M_FESpace.mesh()->volumeList ( i ) );
+    		M_elmat.zero();
+    		AssemblyElemental::stiff ( M_diffusion, M_elmat, M_FESpace.fe(), 0, 0, 3 );
+    		// Assembling
+    		for ( UInt j = 0; j < M_FESpace.fieldDim(); ++j )
+    		{
+    			assembleMatrix ( *M_matrHE, M_elmat, M_FESpace.fe(), M_FESpace.dof(), j, j, j * totalDof + M_offset, j * totalDof + M_offset );
+    		}
+    	}
     }
 
     M_matrHE->globalAssemble();
