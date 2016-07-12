@@ -4,11 +4,11 @@
 #define TAU_M 	       value(1)/( eval(squareroot,TAU_M_DEN) )
 #define TAU_M_DEN      TAU_M_DEN_DT + TAU_M_DEN_VEL + TAU_M_DEN_VISC
 #define TAU_M_DEN_DT   value(M_density*M_density)*value(M_bdfOrder*M_bdfOrder)/value(M_timestep * M_timestep)
-#define TAU_M_DEN_VEL  value(M_density*M_density)*dot(value(M_fespaceUETA, beta_km1), value(M_fespaceUETA, beta_km1))/(h_K*h_K)
-#define TAU_M_DEN_VISC value(M_C_I)*value(M_viscosity*M_viscosity)/(h_K*h_K*h_K*h_K)
+#define TAU_M_DEN_VEL  value(M_density*M_density)*dot(value(M_fespaceUETA, beta_km1), G * value(M_fespaceUETA, beta_km1))
+#define TAU_M_DEN_VISC ( value(M_C_I)*value(M_viscosity*M_viscosity) *dot (G, G) )
 
 // MACRO TO DEFINE TAU_C
-#define TAU_C (h_K*h_K)/(TAU_M)
+#define TAU_C value(1.0)/( dot(g, TAU_M*g ) )
 
 namespace LifeV
 {
@@ -201,7 +201,7 @@ void StabilizationSUPGALE::apply_matrix( const vector_Type& convective_velocity_
 				M_fespacePETA, // test  q -> phi_i
 				M_fespaceUETA, // trial \delta u -> phi_j
 		/*(11)*/  TAU_M * value(M_alpha*M_density/M_timestep) * dot( grad(phi_i), phi_j )
-		/*(12)*/ +TAU_M * value(M_density) * dot( grad(M_fespaceUETA, u_km1)*grad(phi_i), phi_j )
+		/*(12)*/ +TAU_M * value(M_density) * dot( grad(phi_i), grad(M_fespaceUETA, u_km1)*phi_j )
 		/*(13)*/ +TAU_M * value(M_density) * dot( grad(phi_i), value(M_fespaceUETA, beta_km1)*grad(phi_j) )
 		/*(15)*/ -TAU_M * value(M_viscosity) * dot( grad(phi_i), laplacian(phi_j) )
 	         ) >> M_block_10;
