@@ -439,8 +439,8 @@ void FSIHandler::initializeTimeAdvance ( )
     
     // Structure time advance
     M_structureTimeAdvance.reset ( new Newmark );
-    M_structureTimeAdvance->set_beta(0.49);
-    M_structureTimeAdvance->set_gamma(0.9);
+    M_structureTimeAdvance->set_beta(0.25);
+    M_structureTimeAdvance->set_gamma(0.5);
     M_structureTimeAdvance->set_timestep(M_dt);
 
     if ( !M_restart )
