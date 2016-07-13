@@ -94,6 +94,7 @@
 #include <lifev/core/algorithm/SolverAztecOO.hpp>
 
 #include <lifev/core/fem/PostProcessingBoundary.hpp>
+#include <lifev/navier_stokes_blocks/solver/FastAssemblerNS.hpp>
 
 namespace LifeV
 {
@@ -592,6 +593,9 @@ private:
     
     //! Postprocessing class
     boost::shared_ptr<PostProcessingBoundary<mesh_Type> > M_postProcessing;
+
+    bool M_useFastAssembly;
+    boost::shared_ptr<FastAssemblerNS> M_fastAssembler;
 
 }; // class NavierStokesSolver
 

@@ -54,7 +54,8 @@ NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commP
         M_computeAerodynamicLoads ( dataFile("fluid/forces/compute", false) ),
         M_methodAerodynamicLoads ( dataFile("fluid/forces/method", "integral_form") ),
         M_flagBody ( dataFile("fluid/forces/flag", 31 ) ),
-        M_solve_blocks ( dataFile("fluid/solve_blocks", true ) )
+        M_solve_blocks ( dataFile("fluid/solve_blocks", true ) ),
+        M_useFastAssembly ( dataFile("fluid/use_fast_assembly", false ) )
 {
 	M_prec.reset ( Operators::NSPreconditionerFactory::instance().createObject (dataFile("fluid/preconditionerType","none")));
 }
@@ -139,6 +140,16 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh, const int& id_domain)
     M_monolithicMap.reset( new map_Type ( M_velocityFESpace->map() ) );
     *M_monolithicMap += M_pressureFESpace->map();
     
+    if ( M_useFastAssembly ) // currently works for fully implicit NS within FSI or for P2-P1
+    {
+    	M_fastAssembler.reset( new FastAssemblerNS ( M_velocityFESpace->mesh(), M_comm,
+    												 &(M_velocityFESpace->refFE()), &(M_pressureFESpace->refFE()),
+    												 M_velocityFESpace, M_pressureFESpace,
+    												 &(M_velocityFESpace->qr()) ) );
+    	M_fastAssembler->allocateSpace ( &(M_velocityFESpace->fe()), true );
+    }
+
+
     if ( M_fullyImplicit )
     {
     	M_displayer.leaderPrint ( " F - solving nonlinear Navier-Stokes\n");
@@ -431,6 +442,12 @@ void NavierStokesSolver::buildPCDGraphs()
 
 void NavierStokesSolver::buildSystem()
 {
+	if ( M_useFastAssembly )
+	{
+		M_fastAssembler->setConstants_NavierStokes(M_density, M_viscosity, M_timeStep, 2.0, 30.0, M_alpha );
+		M_fastAssembler->updateGeoQuantities ( &(M_velocityFESpace->fe()) );
+	}
+
 	if ( M_useGraph && !M_graphIsBuilt )
 		buildGraphs();
 
@@ -485,6 +502,15 @@ void NavierStokesSolver::buildSystem()
         M_Jacobian->zero();
     }
 
+    if ( M_useFastAssembly )
+    {
+    	M_fastAssembler->assemble_constant_terms( M_Mu, M_A, M_Btranspose, M_B );
+    	M_Mu->globalAssemble();
+    	M_Btranspose->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
+    	M_B->globalAssemble( M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
+    	M_A->globalAssemble();
+    }
+    else
 	{
 		using namespace ExpressionAssembly;
 
@@ -526,18 +552,18 @@ void NavierStokesSolver::buildSystem()
         ) >> M_A;
 
         M_A->globalAssemble();
-		
-		M_block01->zero();
-		M_block10->zero();
-		*M_block01 += *M_Btranspose;
-		*M_block10 += *M_B;
-        
-        if ( !M_useStabilization )
-        {
-            M_block01->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
-            M_block10->globalAssemble( M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
-        }
 	}
+
+    M_block01->zero();
+    M_block10->zero();
+    *M_block01 += *M_Btranspose;
+    *M_block10 += *M_B;
+
+    if ( !M_useStabilization )
+    {
+    	M_block01->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
+    	M_block10->globalAssemble( M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
+    }
 
 	chrono.stop();
 	M_displayer.leaderPrintMax ( " done in ", chrono.diff() ) ;
@@ -552,17 +578,24 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 	// Update convective term
 	M_C->zero();
 	{
-		using namespace ExpressionAssembly;
-		integrate( elements(M_fespaceUETA->mesh()),
-				M_velocityFESpace->qr(),
-				M_fespaceUETA,
-				M_fespaceUETA,
-				dot( M_density * value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) // semi-implicit treatment of the convective term
-		)
-		>> M_C;
-
+		if ( M_useFastAssembly )
+		{
+			M_fastAssembler->assembleConvective( M_C, *M_uExtrapolated );
+		}
+		else
+		{
+			using namespace ExpressionAssembly;
+			integrate( elements(M_fespaceUETA->mesh()),
+					M_velocityFESpace->qr(),
+					M_fespaceUETA,
+					M_fespaceUETA,
+					dot( M_density * value(M_fespaceUETA, *M_uExtrapolated)*grad(phi_j), phi_i) // semi-implicit treatment of the convective term
+			)
+			>> M_C;
+		}
 		if ( M_imposeWeakBC )
 		{
+			using namespace ExpressionAssembly;
 			QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
 
 			integrate( boundary(M_fespaceUETA->mesh(), M_flagWeakBC),
@@ -588,6 +621,7 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 			normal[0] = -0.270724;
 			normal[1] = -0.263217;
 			normal[2] = 0.925973;
+			using namespace ExpressionAssembly;
 
 			QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
 			integrate (
@@ -1520,11 +1554,6 @@ void NavierStokesSolver::evalResidual(vector_Type& residual, const vector_Type& 
     	M_block11->zero();
     	*M_block11 += *M_stabilization->block_11();
     	M_block11->globalAssemble();
-
-//    	M_block00->spy("block00");
-//    	M_block01->spy("block01");
-//    	M_block10->spy("block10");
-//    	M_block11->spy("block11");
     }
 
 }
@@ -1538,14 +1567,21 @@ void NavierStokesSolver::updateConvectiveTerm ( const vectorPtr_Type& velocity)
     // Update convective term
     M_C->zero();
     {
-        using namespace ExpressionAssembly;
-        integrate ( elements (M_fespaceUETA->mesh() ),
-                    M_velocityFESpace->qr(),
-                    M_fespaceUETA,
-                    M_fespaceUETA,
-                    dot ( M_density * value (M_fespaceUETA, *velocity_repeated) *grad (phi_j), phi_i)
-                  )
-                >> M_C;
+    	if ( M_useFastAssembly )
+    	{
+    		M_fastAssembler->assembleConvective( M_C, *velocity_repeated );
+    	}
+    	else
+    	{
+			using namespace ExpressionAssembly;
+			integrate ( elements (M_fespaceUETA->mesh() ),
+						M_velocityFESpace->qr(),
+						M_fespaceUETA,
+						M_fespaceUETA,
+						dot ( M_density * value (M_fespaceUETA, *velocity_repeated) *grad (phi_j), phi_i)
+					  )
+					>> M_C;
+    	}
     }
     M_C->globalAssemble();
     
@@ -1570,14 +1606,21 @@ void NavierStokesSolver::updateJacobian( const vector_Type& u_k )
 
 	if ( M_fullyImplicit )
 	{
-		using namespace ExpressionAssembly;
-		integrate( elements(M_fespaceUETA->mesh()),
-					M_velocityFESpace->qr(),
-					M_fespaceUETA,
-					M_fespaceUETA,
-					dot( M_density * phi_j * grad(M_fespaceUETA, uk_rep), phi_i )
-		)
-		>> M_Jacobian;
+		if ( M_useFastAssembly )
+		{
+			M_fastAssembler->jacobianNS( M_Jacobian, uk_rep );
+		}
+		else
+		{
+			using namespace ExpressionAssembly;
+			integrate( elements(M_fespaceUETA->mesh()),
+						M_velocityFESpace->qr(),
+						M_fespaceUETA,
+						M_fespaceUETA,
+						dot( M_density * phi_j * grad(M_fespaceUETA, uk_rep), phi_i )
+			)
+			>> M_Jacobian;
+		}
 	}
     M_Jacobian->globalAssemble();
     
@@ -1592,27 +1635,78 @@ void NavierStokesSolver::updateStabilization( const vector_Type& convective_velo
 	 	 	 	 	 	 	 	 	 	 	  const vector_Type& velocity_rhs )
 {
 	M_displayer.leaderPrint ( "[F] - Update Jacobian stabilization terms\n" ) ;
-	M_stabilization->apply_matrix(convective_velocity_previous_newton_step,
-								  velocity_previous_newton_step,
-								  pressure_previous_newton_step,
-								  velocity_rhs);
 
-	*M_block00 += *M_stabilization->block_00();
-	M_block00->globalAssemble();
+	if ( M_useFastAssembly )
+	{
+		vector_Type beta_km1( convective_velocity_previous_newton_step, Repeated);
+		vector_Type u_km1( velocity_previous_newton_step, Repeated);
+		vector_Type p_km1( pressure_previous_newton_step, Repeated);
+		vector_Type u_bdf( velocity_rhs, Repeated);
 
-	M_block01->zero();
-	*M_block01 += *M_Btranspose;
-	*M_block01 += *M_stabilization->block_01();
-	M_block01->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
+		M_block01->zero();
+		M_block10->zero();
+		M_block11->zero();
 
-	M_block10->zero();
-	*M_block10 += *M_B;
-	*M_block10 += *M_stabilization->block_10();
-	M_block10->globalAssemble(M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
+		matrixPtr_Type systemMatrix_fast_block_00 (new matrix_Type ( M_velocityFESpace->map() ) );
+		matrixPtr_Type systemMatrix_fast_block_01 (new matrix_Type ( M_velocityFESpace->map() ) );
+		matrixPtr_Type systemMatrix_fast_block_10 (new matrix_Type ( M_pressureFESpace->map() ) );
+		matrixPtr_Type systemMatrix_fast_block_11 (new matrix_Type ( M_pressureFESpace->map() ) );
+		systemMatrix_fast_block_00->zero();
+		systemMatrix_fast_block_01->zero();
+		systemMatrix_fast_block_10->zero();
+		systemMatrix_fast_block_11->zero();
 
-	M_block11->zero();
-	*M_block11 += *M_stabilization->block_11();
-	M_block11->globalAssemble();
+		M_fastAssembler->supg_FI_FSI_terms( systemMatrix_fast_block_00, systemMatrix_fast_block_01, systemMatrix_fast_block_10, systemMatrix_fast_block_11,
+		                                    beta_km1, u_km1, p_km1, u_bdf);
+
+		systemMatrix_fast_block_00->globalAssemble();
+		systemMatrix_fast_block_01->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
+		systemMatrix_fast_block_10->globalAssemble( M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr() );
+		systemMatrix_fast_block_11->globalAssemble();
+
+		*M_block00 += *systemMatrix_fast_block_00;
+		M_block00->globalAssemble();
+
+		M_block01->zero();
+		*M_block01 += *M_Btranspose;
+		*M_block01 += *systemMatrix_fast_block_01;
+		M_block01->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
+
+		M_block10->zero();
+		*M_block10 += *M_B;
+		*M_block10 += *systemMatrix_fast_block_10;
+		M_block10->globalAssemble(M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
+
+		M_block11->zero();
+		*M_block11 += *systemMatrix_fast_block_11;
+		M_block11->globalAssemble();
+	}
+	else
+	{
+		M_stabilization->apply_matrix(convective_velocity_previous_newton_step,
+										  velocity_previous_newton_step,
+										  pressure_previous_newton_step,
+										  velocity_rhs);
+
+		*M_block00 += *M_stabilization->block_00();
+		M_block00->globalAssemble();
+
+		M_block01->zero();
+		*M_block01 += *M_Btranspose;
+		*M_block01 += *M_stabilization->block_01();
+		M_block01->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
+
+		M_block10->zero();
+		*M_block10 += *M_B;
+		*M_block10 += *M_stabilization->block_10();
+		M_block10->globalAssemble(M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
+
+		M_block11->zero();
+		*M_block11 += *M_stabilization->block_11();
+		M_block11->globalAssemble();
+	}
+
+
 }
 
 void NavierStokesSolver::solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol )
