@@ -122,6 +122,29 @@ public:
 	 */
 	void allocateSpace( CurrentFE* current_fe_velocity, const bool& use_supg );
 
+    //! Assemble constant terms NS
+    /*!
+     * @param mass - mass matrix
+     * @param stiffness - stiffness matrix
+     * @param grad - block01
+     * @param div - block10
+     */
+    void assemble_constant_terms( matrixPtr_Type& mass, matrixPtr_Type& stiffness, matrixPtr_Type& grad, matrixPtr_Type& div );
+    
+    //! FE Assembly of NS constant terms (no scaling by coefficients like viscosity)
+    /*!
+     * @param matrix - global matrix
+     * @param u_h - velocity vector
+     */
+    void assembleConvective( matrixPtr_Type& matrix, const vector_Type& u_h );
+    
+    //! FE Assembly of NS nonlinear term
+    /*!
+     * @param matrix - matrix
+     * @param u_h - velocity vector previous Newton step
+     */
+    void jacobianNS( matrixPtr_Type& matrix, const vector_Type& u_h );
+    
 	//! Assemble SUPG terms
 	/*!
 	 * @param block00 - block00 stabilization
@@ -131,15 +154,26 @@ public:
 	 */
 	void assemble_supg_terms( matrixPtr_Type& block00, matrixPtr_Type& block01, matrixPtr_Type& block10, matrixPtr_Type& block11, const vector_Type& u_h  );
     
-    //! Assemble all the VMS-LES terms
+    //! Assemble SUPG terms fully implicit for FSI
     /*!
      * @param block00 - block00 stabilization
      * @param block01 - block01 stabilization
      * @param block10 - block10 stabilization
      * @param block11 - block11 stabilization
+     * @param beta_km1 - vector: fluid_velocity - ale_velocity
+     * @param u_km1 - velocity previous Newton step
+     * @param p_km1 - pressure previous Newton step
+     * @param u_bdf - vector time discretization fluid velocity
      */
-    void assemble_vmsles_terms( matrixPtr_Type& block00, matrixPtr_Type& block01, matrixPtr_Type& block10, matrixPtr_Type& block11, const vector_Type& u_h  );
-
+    void supg_FI_FSI_terms ( matrixPtr_Type& block00,
+                             matrixPtr_Type& block01,
+                             matrixPtr_Type& block10,
+                             matrixPtr_Type& block11,
+                             const vector_Type& beta_km1,
+                             const vector_Type& u_km1,
+                             const vector_Type& p_km1,
+                             const vector_Type& u_bdf);
+    
 	//@}
 
 private:
