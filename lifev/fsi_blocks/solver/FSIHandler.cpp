@@ -66,7 +66,8 @@ M_moveMesh ( true ),
 M_nonconforming ( false ),
 M_lambda_num_structure ( false ),
 M_precPtrBuilt ( false ),
-M_linearElasticity ( true )
+M_linearElasticity ( true ),
+M_disregardRestart ( false )
 {
 }
 
@@ -164,6 +165,8 @@ void FSIHandler::setup ( )
 	M_linearElasticity = M_datafile ( "solid/linear_elasticity", true );
 
 	M_saveEvery = M_datafile ( "exporter/save_every", 1 );
+
+	M_disregardRestart = M_datafile ( "exporter/disregardRestart", false );
 
 	M_counterSaveEvery = M_saveEvery;
 
@@ -1184,7 +1187,7 @@ FSIHandler::solveFSIproblem ( )
 		}
 		else if ( M_orderBDF == 2 )
 		{
-			if ( time_step_count == (M_counterSaveEvery-1) )
+			if ( time_step_count == (M_counterSaveEvery-1) && !M_disregardRestart )
 			{
 				M_exporterFluid->postProcess(M_time);
 				M_exporterStructure->postProcess(M_time);

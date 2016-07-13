@@ -428,6 +428,8 @@ private:
 	bool 			 M_precPtrBuilt;
 	bool 			 M_linearElasticity;
 
+	bool             M_disregardRestart; // if true disregards correct exporter as function of BDF
+
 };
 
 } // end namespace LifeV
