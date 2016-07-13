@@ -8,4 +8,7 @@ ADD_SUBDIRECTORIES(
     #fsi_couplingMapsVectorial
     fsi_ventricle_aorta
     fsi_ventricle_aorta_inflate
+    #fsi_elastic_beam
+    #fsi_challenge
+    fsi_aorta
 )
