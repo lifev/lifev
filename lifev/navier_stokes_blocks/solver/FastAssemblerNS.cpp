@@ -1937,10 +1937,122 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                     M_vals_supg[i_elem][2][2][i_test][i_trial] = (i_22 + integral) *  M_detJacobian[i_elem];
                     
                 }
+                
+                for ( i_trial = 0; i_trial <  ndof_pressure; i_trial++ )
+                {
+                    for ( dim_mat = 0; dim_mat < 3 ; dim_mat++ )
+                    {
+                        M_cols_pressure[i_elem][i_trial] = M_elements_pressure[i_elem][i_trial];
+                        M_vals_supg_01[i_elem][dim_mat][i_test][i_trial] = 0.0;
+                        
+                        integral = 0.0;
+                        
+                        // QUAD
+                        for ( q = 0; q < NumQuadPoints ; q++ )
+                        {
+                            integral_partial = 0.0;
+                            for ( d1 = 0; d1 < 3 ; d1++ )
+                            {
+                                integral_partial += ( dphi_phys_velocity[i_test][q][d1] * beta_km1_q[d1][q] );
+                            }
+                            integral += M_Tau_M[i_elem][q] * dphi_phys_pressure[i_trial][q][dim_mat] * integral_partial * w_quad[q];
+                        }
+                        M_vals_supg_01[i_elem][dim_mat][i_test][i_trial] = integral * M_detJacobian[i_elem];
+                    }
+                }
+                
+            }// end test
+            
+            for ( i_test = 0; i_test <  ndof_pressure; i_test++ )
+            {
+                M_rows_pressure[i_elem][i_test] = M_elements_pressure[i_elem][i_test];
+                
+                // DOF - trial
+                for ( i_trial = 0; i_trial <  ndof_pressure; i_trial++ )
+                {
+                    M_vals_11[i_elem][i_test][i_trial] = 0.0;
+                    integral = 0.0;
+                    // QUAD
+                    for ( q = 0; q < NumQuadPoints ; q++ )
+                    {
+                        // DIM 1
+                        for ( d1 = 0; d1 < 3 ; d1++ )
+                        {
+                            integral += M_Tau_M[i_elem][q] * dphi_phys_pressure[i_test][q][d1] * dphi_phys_pressure[i_trial][q][d1]*w_quad[q];
+                        }
+                    }
+                    M_vals_11[i_elem][i_test][i_trial] = integral * M_detJacobian[i_elem];
+                }
             }
-        }
-        
-    }
+            
+            // DOF - test
+            for ( i_test = 0; i_test <  ndof_pressure; i_test++ )
+            {
+                // DOF - trial
+                for ( i_trial = 0; i_trial < ndof_velocity; i_trial++ )
+                {
+                    i_00 = 0.0;
+                    i_10 = 0.0;
+                    i_20 = 0.0;
+                    
+                    M_vals_supg_10[i_elem][0][i_test][i_trial] = 0.0;
+                    M_vals_supg_10[i_elem][1][i_test][i_trial] = 0.0;
+                    M_vals_supg_10[i_elem][2][i_test][i_trial] = 0.0;
+                    
+                    // QUAD
+                    for ( q = 0; q < NumQuadPoints ; q++ )
+                    {
+                        i_00 += M_Tau_M[i_elem][q] * (
+                                                    M_alpha * M_density / M_timestep * dphi_phys_pressure[i_test][q][0] * M_phi_velocity[i_trial][q]
+                                                   
+                                                   +M_density * ( dphi_phys_pressure[i_test][q][0] * M_phi_velocity[i_trial][q] * d_ukm1_q[0][0][q]
+                                                                 +dphi_phys_pressure[i_test][q][1] * M_phi_velocity[i_trial][q] * d_ukm1_q[1][0][q]
+                                                                 +dphi_phys_pressure[i_test][q][2] * M_phi_velocity[i_trial][q] * d_ukm1_q[2][0][q]
+                                                                )
+                                                   +M_density * dphi_phys_pressure[i_test][q][0] * (
+                                                                                                     dphi_phys_velocity[i_trial][q][0]*beta_km1_q[0][q]
+                                                                                                    +dphi_phys_velocity[i_trial][q][1]*beta_km1_q[1][q]
+                                                                                                    +dphi_phys_velocity[i_trial][q][2]*beta_km1_q[2][q]
+                                                                                                   )
+                                                     ) * w_quad[q];
+                        
+                        i_10 += M_Tau_M[i_elem][q] * (
+                                                      M_alpha * M_density / M_timestep * dphi_phys_pressure[i_test][q][1] * M_phi_velocity[i_trial][q]
+                                                      +M_density * ( dphi_phys_pressure[i_test][q][0] * M_phi_velocity[i_trial][q] * d_ukm1_q[0][1][q]
+                                                                    +dphi_phys_pressure[i_test][q][1] * M_phi_velocity[i_trial][q] * d_ukm1_q[1][1][q]
+                                                                    +dphi_phys_pressure[i_test][q][2] * M_phi_velocity[i_trial][q] * d_ukm1_q[2][1][q]
+                                                                    )
+                                                      +M_density * dphi_phys_pressure[i_test][q][1] * (
+                                                                                                       dphi_phys_velocity[i_trial][q][0]*beta_km1_q[0][q]
+                                                                                                       +dphi_phys_velocity[i_trial][q][1]*beta_km1_q[1][q]
+                                                                                                       +dphi_phys_velocity[i_trial][q][2]*beta_km1_q[2][q]
+                                                                                                       )
+                                                      
+                                                      ) * w_quad[q];
+                        
+                        i_20 += M_Tau_M[i_elem][q] * (
+                                                      M_alpha * M_density / M_timestep * dphi_phys_pressure[i_test][q][2] * M_phi_velocity[i_trial][q]
+                                                      +M_density * ( dphi_phys_pressure[i_test][q][0] * M_phi_velocity[i_trial][q] * d_ukm1_q[0][2][q]
+                                                                    +dphi_phys_pressure[i_test][q][1] * M_phi_velocity[i_trial][q] * d_ukm1_q[1][2][q]
+                                                                    +dphi_phys_pressure[i_test][q][2] * M_phi_velocity[i_trial][q] * d_ukm1_q[2][2][q]
+                                                                    )
+                                                      +M_density * dphi_phys_pressure[i_test][q][2] * (
+                                                                                                       dphi_phys_velocity[i_trial][q][0]*beta_km1_q[0][q]
+                                                                                                       +dphi_phys_velocity[i_trial][q][1]*beta_km1_q[1][q]
+                                                                                                       +dphi_phys_velocity[i_trial][q][2]*beta_km1_q[2][q]
+                                                                                                       )
+                                                      
+                                                      ) * w_quad[q];
+                    }
+                    
+                    M_vals_supg_10[i_elem][0][i_test][i_trial] = i_00 * M_detJacobian[i_elem];
+                    M_vals_supg_10[i_elem][1][i_test][i_trial] = i_10 * M_detJacobian[i_elem];
+                    M_vals_supg_10[i_elem][2][i_test][i_trial] = i_20 * M_detJacobian[i_elem];
+                }
+            }
+            
+        }// end elements
+    }// end parallel region
     
     for ( UInt d1 = 0; d1 < 3 ; d1++ ) // row index
     {
@@ -1953,6 +2065,10 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
             block00->matrixPtr()->InsertGlobalValues ( ndof_velocity, M_rows_tmp[k],
                                                        ndof_velocity, M_cols_velocity[k],
                                                        M_vals_supg[k][d1][0],
+                                                       Epetra_FECrsMatrix::ROW_MAJOR);
+            block01->matrixPtr()->InsertGlobalValues ( ndof_velocity, M_rows_tmp[k],
+                                                       ndof_pressure, M_cols_pressure[k],
+                                                       M_vals_supg_01[k][d1],
                                                        Epetra_FECrsMatrix::ROW_MAJOR);
         }
         
@@ -1977,6 +2093,29 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
             block00->matrixPtr()->InsertGlobalValues ( ndof_velocity, M_rows_tmp[k],
                                                        ndof_velocity, M_cols_tmp[k],
                                                        M_vals_supg[k][d1][2],
+                                                       Epetra_FECrsMatrix::ROW_MAJOR);
+        }
+    }
+    
+    for ( int k = 0; k < M_numElements; ++k )
+    {
+        block11->matrixPtr()->InsertGlobalValues ( ndof_pressure, M_rows_pressure[k],
+                                                   ndof_pressure, M_cols_pressure[k],
+                                                   M_vals_11[k],
+                                                   Epetra_FECrsMatrix::ROW_MAJOR);
+    }
+    
+    for ( UInt d1 = 0; d1 < 3 ; d1++ )
+    {
+        for ( int k = 0; k < M_numElements; ++k )
+        {
+            for ( UInt i = 0; i <  ndof_velocity; i++ )
+            {
+                M_cols_tmp[k][i] = M_cols_velocity[k][i] + d1 * M_numScalarDofs;
+            }
+            block10->matrixPtr()->InsertGlobalValues ( ndof_pressure, M_rows_pressure[k],
+                                                       ndof_velocity, M_cols_tmp[k],
+                                                       M_vals_supg_10[k][d1],
                                                        Epetra_FECrsMatrix::ROW_MAJOR);
         }
     }
