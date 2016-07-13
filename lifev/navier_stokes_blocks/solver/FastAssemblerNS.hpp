@@ -173,7 +173,12 @@ public:
                              const vector_Type& u_km1,
                              const vector_Type& p_km1,
                              const vector_Type& u_bdf);
-    
+    //! Assemble SUPG terms fully implicit for FSI
+        /*!
+         * @param current_fe_velocity - current FE needed to update geom quantities (for FSI when moving mesh)
+         */
+
+    void updateGeoQuantities ( CurrentFE* current_fe );
 	//@}
 
 private:

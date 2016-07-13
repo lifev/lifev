@@ -279,6 +279,44 @@ FastAssemblerNS::setConstants_NavierStokes( const Real& density, const Real& vis
 }
 //=========================================================================
 void
+FastAssemblerNS::updateGeoQuantities ( CurrentFE* current_fe )
+{
+	for ( int i = 0; i < M_numElements; i++ )
+	{
+		current_fe->update( M_mesh->element (i), UPDATE_D2PHI );
+		M_detJacobian[i] = current_fe->detJacobian(0);
+		for ( int j = 0; j < 3; j++ )
+		{
+			for ( int k = 0; k < 3; k++ )
+			{
+				M_invJacobian[i][j][k] = current_fe->tInverseJacobian(j,k,2);
+			}
+		}
+	}
+
+	if ( M_useSUPG )
+	{
+		for ( int i = 0; i < M_numElements; i++ )
+		{
+			M_G[i][0][0] = M_invJacobian[i][0][0]*M_invJacobian[i][0][0] + M_invJacobian[i][0][1]*M_invJacobian[i][0][1] + M_invJacobian[i][0][2]*M_invJacobian[i][0][2];
+			M_G[i][0][1] = M_invJacobian[i][0][0]*M_invJacobian[i][1][0] + M_invJacobian[i][0][1]*M_invJacobian[i][1][1] + M_invJacobian[i][0][2]*M_invJacobian[i][1][2];
+			M_G[i][0][2] = M_invJacobian[i][0][0]*M_invJacobian[i][2][0] + M_invJacobian[i][0][1]*M_invJacobian[i][2][1] + M_invJacobian[i][0][2]*M_invJacobian[i][2][2];
+
+			M_G[i][1][0] = M_invJacobian[i][1][0]*M_invJacobian[i][0][0] + M_invJacobian[i][1][1]*M_invJacobian[i][0][1] + M_invJacobian[i][1][2]*M_invJacobian[i][0][2];
+			M_G[i][1][1] = M_invJacobian[i][1][0]*M_invJacobian[i][1][0] + M_invJacobian[i][1][1]*M_invJacobian[i][1][1] + M_invJacobian[i][1][2]*M_invJacobian[i][1][2];
+			M_G[i][1][2] = M_invJacobian[i][1][0]*M_invJacobian[i][2][0] + M_invJacobian[i][1][1]*M_invJacobian[i][2][1] + M_invJacobian[i][1][2]*M_invJacobian[i][2][2];
+
+			M_G[i][2][0] = M_invJacobian[i][2][0]*M_invJacobian[i][0][0] + M_invJacobian[i][2][1]*M_invJacobian[i][0][1] + M_invJacobian[i][2][2]*M_invJacobian[i][0][2];
+			M_G[i][2][1] = M_invJacobian[i][2][0]*M_invJacobian[i][1][0] + M_invJacobian[i][2][1]*M_invJacobian[i][1][1] + M_invJacobian[i][2][2]*M_invJacobian[i][1][2];
+			M_G[i][2][2] = M_invJacobian[i][2][0]*M_invJacobian[i][2][0] + M_invJacobian[i][2][1]*M_invJacobian[i][2][1] + M_invJacobian[i][2][2]*M_invJacobian[i][2][2];
+			M_g[i][0] = M_invJacobian[i][0][0] + M_invJacobian[i][0][1] + M_invJacobian[i][0][2];
+			M_g[i][1] = M_invJacobian[i][1][0] + M_invJacobian[i][1][1] + M_invJacobian[i][1][2];
+			M_g[i][2] = M_invJacobian[i][2][0] + M_invJacobian[i][2][1] + M_invJacobian[i][2][2];
+		}
+	}
+}
+//=========================================================================
+void
 FastAssemblerNS::allocateSpace ( CurrentFE* current_fe_velocity, const bool& use_supg )
 {
 	M_useSUPG = use_supg;
