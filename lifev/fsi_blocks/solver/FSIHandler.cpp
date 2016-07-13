@@ -1108,7 +1108,7 @@ FSIHandler::solveFSIproblem ( )
 		M_displayer.leaderPrint ( "\n-----------------------------------\n" ) ;
 		M_displayer.leaderPrintMax ( "FSI - solving now for time ", M_time ) ;
 		M_displayer.leaderPrint ( "\n" ) ;
-		iterChrono.start();
+		double time_timestep = omp_get_wtime();
 
 		updateSystem ( );
 
@@ -1133,9 +1133,9 @@ FSIHandler::solveFSIproblem ( )
 		UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
 											M_nonLinearLineSearch, 0, 2, M_out_res, M_time);
 
-		iterChrono.stop();
+		time_timestep = omp_get_wtime() - time_timestep;
 		M_displayer.leaderPrint ( "\n" ) ;
-		M_displayer.leaderPrintMax ( "FSI - timestep solved in ", iterChrono.diff() ) ;
+		M_displayer.leaderPrintMax ( "FSI - timestep solved in ", time_timestep ) ;
 		M_displayer.leaderPrint ( "-----------------------------------\n\n" ) ;
 
 		// Writing the norms into a file
