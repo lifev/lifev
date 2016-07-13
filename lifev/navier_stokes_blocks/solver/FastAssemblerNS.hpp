@@ -154,6 +154,26 @@ public:
 	 */
 	void assemble_supg_terms( matrixPtr_Type& block00, matrixPtr_Type& block01, matrixPtr_Type& block10, matrixPtr_Type& block11, const vector_Type& u_h  );
     
+    //! Assemble SUPG terms fully implicit for FSI
+    /*!
+     * @param block00 - block00 stabilization
+     * @param block01 - block01 stabilization
+     * @param block10 - block10 stabilization
+     * @param block11 - block11 stabilization
+     * @param beta_km1 - vector: fluid_velocity - ale_velocity
+     * @param u_km1 - velocity previous Newton step
+     * @param p_km1 - pressure previous Newton step
+     * @param u_bdf - vector time discretization fluid velocity
+     */
+    void supg_FI_FSI_terms ( matrixPtr_Type& block00,
+                             matrixPtr_Type& block01,
+                             matrixPtr_Type& block10,
+                             matrixPtr_Type& block11,
+                             const vector_Type& beta_km1,
+                             const vector_Type& u_km1,
+                             const vector_Type& p_km1,
+                             const vector_Type& u_bdf);
+    
 	//@}
 
 private:
