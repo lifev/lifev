@@ -198,6 +198,30 @@ public:
 
     void setGravity ( const Real& gravity, const Real& gravity_direction);
 
+    Real getTime () { return M_time; };
+
+    Real getStartTime () { return M_t_zero; };
+
+    void setTime (const Real& time ) { M_time = time; };
+
+    Real getTimeStep () { return M_dt; };
+
+    Real getEndTime () { return M_t_end; };
+
+    boost::shared_ptr<NavierStokesSolver> getFluid() { return M_fluid; };
+
+    void intializeTimeLoop ( );
+
+    void solveTimeStep( );
+
+    void postprocessResults( const int& time_step_count );
+
+    void finalizeExporters ( );
+
+    vectorPtr_Type getFluidVelocity() { return M_fluidVelocity; };
+
+    vectorPtr_Type getFluidPressure() { return M_fluidPressure; };
+
 //@}
 
 private:
@@ -252,6 +276,8 @@ private:
     void assembleStructureInterfaceMass ( );
 
     void applyInverseFluidMassOnGamma ( const vectorPtr_Type& lambda, vectorPtr_Type& strongLambda );
+
+    void solveFSIproblemAorta();
 
     //! communicator
     commPtr_Type M_comm;
@@ -429,6 +455,7 @@ private:
 	bool 			 M_linearElasticity;
 
 	bool             M_disregardRestart; // if true disregards correct exporter as function of BDF
+	bool             M_prescribeInflowFlowrate;
 
 };
 

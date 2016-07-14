@@ -2095,6 +2095,18 @@ NavierStokesSolver::area ( const markerID_Type& flag )
     return M_postProcessing->measure ( flag );
 }
 
+Vector
+NavierStokesSolver::geometricCenter ( const markerID_Type& flag )
+{
+    return M_postProcessing->geometricCenter ( flag );
+}
+
+Vector
+NavierStokesSolver::normal ( const markerID_Type& flag )
+{
+    return M_postProcessing->normal ( flag );
+}
+
 Real
 NavierStokesSolver::pres ( const markerID_Type& flag, const vector_Type& pressure )
 {

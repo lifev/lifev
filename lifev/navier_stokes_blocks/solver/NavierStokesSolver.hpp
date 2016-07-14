@@ -429,6 +429,10 @@ public:
     
     Real pres ( const markerID_Type& flag, const vector_Type& pressure );
 
+    Vector geometricCenter ( const markerID_Type& flag );
+
+    Vector normal ( const markerID_Type& flag );
+
 private:
 
 	// build the graphs

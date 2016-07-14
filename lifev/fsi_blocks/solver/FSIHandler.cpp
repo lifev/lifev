@@ -67,7 +67,8 @@ M_nonconforming ( false ),
 M_lambda_num_structure ( false ),
 M_precPtrBuilt ( false ),
 M_linearElasticity ( true ),
-M_disregardRestart ( false )
+M_disregardRestart ( false ),
+M_prescribeInflowFlowrate ( false )
 {
 }
 
@@ -211,6 +212,7 @@ void FSIHandler::setup ( )
 	M_fluid->setAlpha(M_fluidTimeAdvance->alpha());
 	M_fluid->setTimeStep(M_dt);
 	M_fluid->buildSystem();
+	M_fluid->setupPostProc();
 
 	// Ale
 	M_ale.reset( new ALESolver ( *M_aleFESpace, M_comm ) );
@@ -1206,6 +1208,389 @@ FSIHandler::solveFSIproblem ( )
 }
 
 void
+FSIHandler::intializeTimeLoop ( )
+{
+	LifeChrono smallThingsChrono;
+
+	// Clean unpartitioned mesh
+	M_fluidMesh.reset();
+	M_structureMesh.reset();
+
+	// Build monolithic map
+	buildMonolithicMap ( );
+
+	M_solution.reset ( new VectorEpetra ( *M_monolithicMap ) );
+	M_solution->zero();
+
+	if ( M_restart )
+	{
+		M_solution.reset ( new VectorEpetra ( *M_monolithicMap ) );
+		M_solution->zero();
+
+		M_solution->subset(*M_fluidVelocity, M_fluid->uFESpace()->map(), 0, 0);
+		M_solution->subset(*M_fluidPressure, M_fluid->pFESpace()->map(), 0, M_fluid->uFESpace()->map().mapSize());
+		M_solution->subset(*M_structureDisplacement, M_displacementFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize());
+		M_solution->subset(*M_fluidDisplacement, M_aleFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
+						   M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize() );
+	}
+
+	// Apply boundary conditions for the ale problem (the matrix will not change during the simulation)
+	M_ale->applyBoundaryConditions ( *M_aleBC );
+
+	// Apply boundary conditions for the structure problem (the matrix will not change during the simulation, it is linear elasticity)
+	if ( M_linearElasticity )
+	{
+		getMatrixStructure ( );
+		M_displayer.leaderPrint ( "\t Set and approximate structure block in the preconditioner.. " ) ;
+		smallThingsChrono.start();
+		M_prec->setStructureBlock ( M_matrixStructure );
+		M_prec->updateApproximatedStructureMomentumOperator ( );
+		smallThingsChrono.stop();
+		M_displayer.leaderPrintMax ( "done in ", smallThingsChrono.diff() ) ;
+	}
+
+	// Set blocks for the preconditioners: geometry
+	smallThingsChrono.reset();
+	M_displayer.leaderPrint ( "\t Set and approximate geometry block in the preconditioner... " ) ;
+	smallThingsChrono.start();
+	M_prec->setGeometryBlock ( M_ale->matrix() );
+	M_prec->updateApproximatedGeometryOperator ( );
+	smallThingsChrono.stop();
+	M_displayer.leaderPrintMax ( "done in ", smallThingsChrono.diff() ) ;
+
+	if ( M_nonconforming )
+	{
+		M_prec->setCouplingOperators_nonconforming(M_FluidToStructureInterpolant, M_StructureToFluidInterpolant, M_lagrangeMap);
+		if ( M_useMasses)
+		{
+			M_displayer.leaderPrint ( "[FSI] - Assemble interface mass of the structure for coupling of stresses\n" ) ;
+			assembleStructureInterfaceMass ( );
+		}
+	}
+	else
+	{
+		// Set the coupling blocks in the preconditioner
+		M_prec->setCouplingBlocks ( M_coupling->lambdaToFluidMomentum(),
+									M_coupling->lambdaToStructureMomentum(),
+									M_coupling->structureDisplacementToLambda(),
+									M_coupling->fluidVelocityToLambda(),
+									M_coupling->structureDisplacementToFluidDisplacement() );
+	}
+
+	M_prec->setMonolithicMap ( M_monolithicMap );
+}
+
+void
+FSIHandler::solveTimeStep ( )
+{
+	if ( M_comm->MyPID()==0 )
+	{
+		M_outputLinearIterations << std::endl;
+		M_outputPreconditionerComputation << std::endl;
+		M_outputTimeLinearSolver << std::endl;
+	}
+
+	M_displayer.leaderPrint ( "\n-----------------------------------\n" ) ;
+	M_displayer.leaderPrintMax ( "FSI - solving now for time ", M_time ) ;
+	M_displayer.leaderPrint ( "\n" ) ;
+	double time_timestep = omp_get_wtime();
+
+	updateSystem ( );
+
+	if ( M_extrapolateInitialGuess && M_time == (M_t_zero + M_dt) )
+	{
+		M_displayer.leaderPrint ( "FSI - initializing extrapolation of initial guess\n" ) ;
+		initializeExtrapolation ( );
+	}
+
+	if ( M_extrapolateInitialGuess )
+	{
+		M_displayer.leaderPrint ( "FSI - Extrapolating initial guess for Newton\n" ) ;
+		M_extrapolationSolution->extrapolate (M_orderExtrapolationInitialGuess, *M_solution);
+	}
+
+	// Apply current BC to the solution vector
+	applyBCsolution ( M_solution );
+
+	M_maxiterNonlinear = 10;
+
+	// Using the solution at the previous timestep as initial guess -> TODO: extrapolation
+	UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
+			M_nonLinearLineSearch, 0, 2, M_out_res, M_time);
+
+	time_timestep = omp_get_wtime() - time_timestep;
+	M_displayer.leaderPrint ( "\n" ) ;
+	M_displayer.leaderPrintMax ( "FSI - timestep solved in ", time_timestep ) ;
+	M_displayer.leaderPrint ( "-----------------------------------\n\n" ) ;
+
+	// Writing the norms into a file
+	if ( M_comm->MyPID()==0 )
+	{
+		// M_outputTimeStep << "Time = " << M_time << " solved in " << iterChrono.diff() << " seconds" << std::endl;
+		M_outputTimeStep << M_time << ", " << time_timestep << std::endl;
+	}
+
+	if ( M_extrapolateInitialGuess )
+		M_extrapolationSolution->shift(*M_solution);
+
+	// Export the solution obtained at the current timestep
+	M_fluidVelocity->subset(*M_solution, M_fluid->uFESpace()->map(), 0, 0);
+	M_fluidPressure->subset(*M_solution, M_fluid->pFESpace()->map(), M_fluid->uFESpace()->map().mapSize(), 0);
+	M_fluidDisplacement->subset(*M_solution, M_aleFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
+			M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize(), 0);
+	M_structureDisplacement->subset(*M_solution, M_displacementFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize(), 0);
+
+	// Updating all the time-advance objects
+	M_fluidTimeAdvance->shift(*M_fluidVelocity);
+	M_structureTimeAdvance->shift(M_structureDisplacement);
+	M_aleTimeAdvance->shift(*M_fluidDisplacement);
+
+	*M_structureVelocity  = *M_structureTimeAdvance->old_first_derivative();
+
+	*M_structureAcceleration = *M_structureTimeAdvance->old_second_derivative();
+}
+
+void
+FSIHandler::postprocessResults( const int& time_step_count )
+{
+	if ( M_orderBDF == 1 )
+	{
+		if ( time_step_count == M_counterSaveEvery )
+		{
+			M_exporterFluid->postProcess(M_time);
+			M_exporterStructure->postProcess(M_time);
+			M_counterSaveEvery += M_saveEvery;
+		}
+	}
+	else if ( M_orderBDF == 2 )
+	{
+		if ( time_step_count == (M_counterSaveEvery-1) && !M_disregardRestart )
+		{
+			M_exporterFluid->postProcess(M_time);
+			M_exporterStructure->postProcess(M_time);
+		}
+		else if ( time_step_count == M_counterSaveEvery )
+		{
+			M_exporterFluid->postProcess(M_time);
+			M_exporterStructure->postProcess(M_time);
+			M_counterSaveEvery += M_saveEvery;
+		}
+	}
+}
+
+void
+FSIHandler::finalizeExporters ( )
+{
+	M_exporterFluid->closeFile();
+	M_exporterStructure->closeFile();
+}
+
+//void
+//FSIHandler::solveFSIproblemAorta ( )
+//{
+//	LifeChrono iterChrono;
+//	LifeChrono smallThingsChrono;
+//	M_time = M_t_zero + M_dt;
+
+//	// Clean unpartitioned mesh
+//	M_fluidMesh.reset();
+//	M_structureMesh.reset();
+//
+//	// Build monolithic map
+//	buildMonolithicMap ( );
+//
+//    M_solution.reset ( new VectorEpetra ( *M_monolithicMap ) );
+//    M_solution->zero();
+//
+//    if ( M_restart )
+//    {
+//        M_solution.reset ( new VectorEpetra ( *M_monolithicMap ) );
+//        M_solution->zero();
+//
+//        M_solution->subset(*M_fluidVelocity, M_fluid->uFESpace()->map(), 0, 0);
+//        M_solution->subset(*M_fluidPressure, M_fluid->pFESpace()->map(), 0, M_fluid->uFESpace()->map().mapSize());
+//        M_solution->subset(*M_structureDisplacement, M_displacementFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize());
+//        M_solution->subset(*M_fluidDisplacement, M_aleFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
+//                           M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize() );
+//    }
+//
+//	// Apply boundary conditions for the ale problem (the matrix will not change during the simulation)
+//	M_ale->applyBoundaryConditions ( *M_aleBC );
+//
+//	// Apply boundary conditions for the structure problem (the matrix will not change during the simulation, it is linear elasticity)
+//	if ( M_linearElasticity )
+//	{
+//		getMatrixStructure ( );
+//		M_displayer.leaderPrint ( "\t Set and approximate structure block in the preconditioner.. " ) ;
+//		smallThingsChrono.start();
+//		M_prec->setStructureBlock ( M_matrixStructure );
+//		M_prec->updateApproximatedStructureMomentumOperator ( );
+//		smallThingsChrono.stop();
+//		M_displayer.leaderPrintMax ( "done in ", smallThingsChrono.diff() ) ;
+//	}
+//
+//	// Set blocks for the preconditioners: geometry
+//	smallThingsChrono.reset();
+//	M_displayer.leaderPrint ( "\t Set and approximate geometry block in the preconditioner... " ) ;
+//	smallThingsChrono.start();
+//	M_prec->setGeometryBlock ( M_ale->matrix() );
+//	M_prec->updateApproximatedGeometryOperator ( );
+//	smallThingsChrono.stop();
+//	M_displayer.leaderPrintMax ( "done in ", smallThingsChrono.diff() ) ;
+//
+//	if ( M_nonconforming )
+//	{
+//		M_prec->setCouplingOperators_nonconforming(M_FluidToStructureInterpolant, M_StructureToFluidInterpolant, M_lagrangeMap);
+//		if ( M_useMasses)
+//		{
+//			M_displayer.leaderPrint ( "[FSI] - Assemble interface mass of the structure for coupling of stresses\n" ) ;
+//			assembleStructureInterfaceMass ( );
+//		}
+//	}
+//	else
+//	{
+//		// Set the coupling blocks in the preconditioner
+//		M_prec->setCouplingBlocks ( M_coupling->lambdaToFluidMomentum(),
+//									M_coupling->lambdaToStructureMomentum(),
+//									M_coupling->structureDisplacementToLambda(),
+//									M_coupling->fluidVelocityToLambda(),
+//									M_coupling->structureDisplacementToFluidDisplacement() );
+//	}
+//
+//	M_prec->setMonolithicMap ( M_monolithicMap );
+
+//	int time_step_count = 0;
+//
+//	int max_index_outflows = 19;
+//	static std::vector<Real> p_n(max_index_outflows, 0.0);
+//	static std::vector<Real> q_n(max_index_outflows, 0.0);
+//	std::vector<UInt> flags{3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19};
+//
+//	for ( ; M_time <= M_t_end + M_dt / 2.; M_time += M_dt)
+//	{
+//		Vector normals = M_fluid->normal(2);
+//		std::cout << "\n\nArea = " << M_fluid->area(2) << ", geo center = " << M_fluid->geometricCenter(2) << ", normal = " << normals;
+//		if ( M_prescribeInflowFlowrate )
+//		{
+//			S_inflowFlowrateImposed = getFluxInflow(M_time);
+//		}
+//
+//		if ( M_prescribeInflowFlowrate )
+//		{
+//			for ( int i = 0; i < flags.size(); ++i )
+//			{
+//				p_n[flags[i]] = M_fluid->pres(flags[i], *M_fluidPressure);
+//				q_n[flags[i]] = M_fluid->flux(flags[i], *M_fluidVelocity );
+//			}
+//		}
+//
+//        if ( M_comm->MyPID()==0 )
+//        {
+//            M_outputLinearIterations << std::endl;
+//            M_outputPreconditionerComputation << std::endl;
+//            M_outputTimeLinearSolver << std::endl;
+//        }
+//
+//        time_step_count += 1;
+//
+//		M_displayer.leaderPrint ( "\n-----------------------------------\n" ) ;
+//		M_displayer.leaderPrintMax ( "FSI - solving now for time ", M_time ) ;
+//		M_displayer.leaderPrint ( "\n" ) ;
+//		double time_timestep = omp_get_wtime();
+//
+//		updateSystem ( );
+//
+//		if ( M_extrapolateInitialGuess && M_time == (M_t_zero + M_dt) )
+//		{
+//			M_displayer.leaderPrint ( "FSI - initializing extrapolation of initial guess\n" ) ;
+//			initializeExtrapolation ( );
+//		}
+//
+//		if ( M_extrapolateInitialGuess )
+//		{
+//			M_displayer.leaderPrint ( "FSI - Extrapolating initial guess for Newton\n" ) ;
+//			M_extrapolationSolution->extrapolate (M_orderExtrapolationInitialGuess, *M_solution);
+//		}
+//
+//		// Apply current BC to the solution vector
+//		applyBCsolution ( M_solution );
+//
+//		M_maxiterNonlinear = 10;
+//
+//		// Using the solution at the previous timestep as initial guess -> TODO: extrapolation
+//		UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
+//											M_nonLinearLineSearch, 0, 2, M_out_res, M_time);
+//
+//		time_timestep = omp_get_wtime() - time_timestep;
+//		M_displayer.leaderPrint ( "\n" ) ;
+//		M_displayer.leaderPrintMax ( "FSI - timestep solved in ", time_timestep ) ;
+//		M_displayer.leaderPrint ( "-----------------------------------\n\n" ) ;
+//
+//		// Writing the norms into a file
+//		if ( M_comm->MyPID()==0 )
+//		{
+//			// M_outputTimeStep << "Time = " << M_time << " solved in " << iterChrono.diff() << " seconds" << std::endl;
+//			M_outputTimeStep << M_time << ", " << iterChrono.diff() << std::endl;
+//		}
+//
+//		iterChrono.reset();
+//
+//		if ( M_extrapolateInitialGuess )
+//			M_extrapolationSolution->shift(*M_solution);
+//
+//		// Export the solution obtained at the current timestep
+//		M_fluidVelocity->subset(*M_solution, M_fluid->uFESpace()->map(), 0, 0);
+//		M_fluidPressure->subset(*M_solution, M_fluid->pFESpace()->map(), M_fluid->uFESpace()->map().mapSize(), 0);
+//		M_fluidDisplacement->subset(*M_solution, M_aleFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
+//         	   	  	  	  	  	  	  	  	  	  	  	  	  	  	  M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize(), 0);
+//		M_structureDisplacement->subset(*M_solution, M_displacementFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize(), 0);
+//
+//		// Updating all the time-advance objects
+//		M_fluidTimeAdvance->shift(*M_fluidVelocity);
+//		M_structureTimeAdvance->shift(M_structureDisplacement);
+//		M_aleTimeAdvance->shift(*M_fluidDisplacement);
+//
+//		*M_structureVelocity  = *M_structureTimeAdvance->old_first_derivative();
+//
+//		*M_structureAcceleration = *M_structureTimeAdvance->old_second_derivative();
+//
+//
+//		// This part below handles the exporter of the solution.
+//		// In particular, given a number of timesteps at which
+//		// we ask to export the solution (from datafile), here
+//		// the code takes care of exporting the solution also at
+//		// the previous timesteps such that, if later a restart
+//		// of the simulation is performed, it works correctly.
+//		if ( M_orderBDF == 1 )
+//		{
+//			if ( time_step_count == M_counterSaveEvery )
+//			{
+//				M_exporterFluid->postProcess(M_time);
+//				M_exporterStructure->postProcess(M_time);
+//				M_counterSaveEvery += M_saveEvery;
+//			}
+//		}
+//		else if ( M_orderBDF == 2 )
+//		{
+//			if ( time_step_count == (M_counterSaveEvery-1) && !M_disregardRestart )
+//			{
+//				M_exporterFluid->postProcess(M_time);
+//				M_exporterStructure->postProcess(M_time);
+//			}
+//			else if ( time_step_count == M_counterSaveEvery )
+//			{
+//				M_exporterFluid->postProcess(M_time);
+//				M_exporterStructure->postProcess(M_time);
+//				M_counterSaveEvery += M_saveEvery;
+//			}
+//		}
+//	}
+//
+//	M_exporterFluid->closeFile();
+//	M_exporterStructure->closeFile();
+//}
+
+void
 FSIHandler::initializeExtrapolation( )
 {
 //	// Initialize vector in the extrapolation object for the initial guess of Newton
@@ -1421,6 +1806,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	//--------------------------------------------------------------------//
 
 	M_fluid->buildSystem();
+	M_fluid->setupPostProc();
 
 	if ( M_nonconforming )
 	{
