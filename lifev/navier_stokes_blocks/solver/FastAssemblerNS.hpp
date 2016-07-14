@@ -173,6 +173,23 @@ public:
                              const vector_Type& u_km1,
                              const vector_Type& p_km1,
                              const vector_Type& u_bdf);
+    
+    //! Assemble VMSLES terms
+    /*!
+     * @param block00 - block00 stabilization
+     * @param block01 - block01 stabilization
+     * @param block10 - block10 stabilization
+     * @param block11 - block11 stabilization
+     * @param fine_scale - fine scale vector
+     * @param u_extr - velocity extrapolated
+     */
+    void vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
+                                      matrixPtr_Type& block01,
+                                      matrixPtr_Type& block10,
+                                      matrixPtr_Type& block11,
+                                      const std::vector<std::vector<VectorSmall<3>>>& fine_scale,
+                                      const vector_Type& u_extr);
+    
     //! Assemble SUPG terms fully implicit for FSI
         /*!
          * @param current_fe_velocity - current FE needed to update geom quantities (for FSI when moving mesh)
