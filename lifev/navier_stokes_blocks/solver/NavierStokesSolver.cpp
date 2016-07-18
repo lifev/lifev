@@ -444,6 +444,7 @@ void NavierStokesSolver::buildSystem()
 {
 	if ( M_useFastAssembly )
 	{
+		M_displayer.leaderPrint ( " F - Using fast assembly\n");
 		M_fastAssembler->setConstants_NavierStokes(M_density, M_viscosity, M_timeStep, 2.0, 30.0, M_alpha );
 		M_fastAssembler->updateGeoQuantities ( &(M_velocityFESpace->fe()) );
 	}
@@ -669,7 +670,16 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
             if ( M_stabilizationType.compare("VMSLES_SEMI_IMPLICIT")==0 )
                 M_stabilization->apply_matrix( *u_star, *M_pressure_extrapolated, *rhs_velocity);
             else
-                M_stabilization->apply_matrix( *u_star );
+            {
+            	if ( M_useFastAssembly )
+            	{
+            		M_stabilization->setFastAssembler( M_fastAssembler );
+            		M_fastAssembler->setAlpha(M_alpha);
+            		M_fastAssembler->setTimeStep(M_timeStep);
+            	}
+
+            	M_stabilization->apply_matrix( *u_star );
+            }
         }
         
         *M_block00 += *M_stabilization->block_00();
@@ -681,6 +691,7 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
         M_block11->zero();
         *M_block11 += *M_stabilization->block_11();
         M_block11->globalAssemble();
+        M_block11->spy("block11");
 
         M_rhs_pressure.reset( new vector_Type ( M_pressureFESpace->map(), Unique ) );
         M_rhs_pressure->zero();

@@ -207,11 +207,26 @@ public:
     									  const vector_Type& u_extr);
 
     //! Assemble SUPG terms fully implicit for FSI
-        /*!
-         * @param current_fe_velocity - current FE needed to update geom quantities (for FSI when moving mesh)
-         */
+    /*!
+     * @param current_fe_velocity - current FE needed to update geom quantities (for FSI when moving mesh)
+     */
 
     void updateGeoQuantities ( CurrentFE* current_fe );
+
+    //! Set alpha
+    /*!
+     * @param alpha - time advance coefficient
+     */
+
+    void setAlpha ( const Real& alpha ) { M_alpha = alpha; };
+
+    //! Set time step
+    /*!
+     * @param timestep - time step of the simulation
+     */
+
+    void setTimeStep ( const Real& timestep ) { M_timestep = timestep; };
+
 	//@}
 
 private:

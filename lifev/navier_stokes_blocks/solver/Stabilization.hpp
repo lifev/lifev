@@ -48,6 +48,8 @@
 #include <lifev/core/array/MatrixEpetra.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
 
+#include <lifev/navier_stokes_blocks/solver/FastAssemblerNS.hpp>
+
 namespace LifeV
 {
 
@@ -249,6 +251,8 @@ public:
     virtual void updateODEfineScale ( const vectorPtr_Type& /*velocity*/, const vectorPtr_Type& /*pressure*/, const vectorPtr_Type& /*vel_extrap*/ ) {};
     
     virtual void setExportFineScaleVelocity ( ExporterHDF5<mesh_Type> & /*exporter*/, const int& /*numElementsTotal*/ ) {};
+
+    virtual void setFastAssembler ( boost::shared_ptr<FastAssemblerNS>&  /*fast_assembler*/) {};
 
 private:
 
