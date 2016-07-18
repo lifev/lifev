@@ -2745,3 +2745,502 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
         }
     }
 }
+
+void
+FastAssemblerNS::vmsles_semi_implicit_termsP1P1 ( matrixPtr_Type& block00,
+                                                  matrixPtr_Type& block01,
+                                                  matrixPtr_Type& block10,
+                                                  matrixPtr_Type& block11,
+                                                  const std::vector<std::vector<VectorSmall<3>>>& fine_scale,
+                                                  const vector_Type& u_extr )
+{
+    int ndof_velocity = M_referenceFE_velocity->nbDof();
+    int ndof_pressure = M_referenceFE_pressure->nbDof();
+    int NumQuadPoints = M_qr->nbQuadPt();
+    int ndof_vec = M_referenceFE_velocity->nbDof()*3;
+    M_numScalarDofs =  M_fespace_velocity->dof().numTotalDof();
+
+    double w_quad[NumQuadPoints];
+    for ( int q = 0; q < NumQuadPoints ; q++ )
+    {
+        w_quad[q] = M_qr->weight(q);
+    }
+
+    #pragma omp parallel firstprivate( w_quad, ndof_velocity, ndof_pressure, NumQuadPoints)
+    {
+        int i_elem, i_dof, q, d1, d2, i_test, i_trial, e_idof, dim_mat, iCoor, jCoor, k1, k2;
+        double integral, integral_test, integral_trial, integral_partial, integral_lapl, partialSum;
+
+        double dphi_phys_velocity[ndof_velocity][NumQuadPoints][3];
+        double dphi_phys_pressure[ndof_pressure][NumQuadPoints][3];
+        double uhq[3][NumQuadPoints];
+        double i_00, i_01, i_02, i_10, i_11, i_12, i_20, i_21, i_22;
+
+
+        // ELEMENTI,
+        #pragma omp for
+        for ( i_elem = 0; i_elem <  M_numElements; i_elem++ )
+        {
+            // DOF
+            for ( i_dof = 0; i_dof <  ndof_velocity; i_dof++ )
+            {
+                // QUAD
+                for (  q = 0; q < NumQuadPoints ; q++ )
+                {
+                    // DIM 1
+                    for ( d1 = 0; d1 < 3 ; d1++ )
+                    {
+                        dphi_phys_velocity[i_dof][q][d1] = 0.0;
+
+                        // DIM 2
+                        for ( d2 = 0; d2 < 3 ; d2++ )
+                        {
+                            dphi_phys_velocity[i_dof][q][d1] += M_invJacobian[i_elem][d1][d2] * M_dphi_velocity[i_dof][q][d2];
+                        }
+                    }
+                }
+            }
+
+            for ( i_dof = 0; i_dof <  ndof_pressure; i_dof++ )
+            {
+                // QUAD
+                for (  q = 0; q < NumQuadPoints ; q++ )
+                {
+                    // DIM 1
+                    for ( d1 = 0; d1 < 3 ; d1++ )
+                    {
+                        dphi_phys_pressure[i_dof][q][d1] = 0.0;
+
+                        // DIM 2
+                        for ( d2 = 0; d2 < 3 ; d2++ )
+                        {
+                            dphi_phys_pressure[i_dof][q][d1] += M_invJacobian[i_elem][d1][d2] * M_dphi_pressure[i_dof][q][d2];
+                        }
+                    }
+                }
+            }
+
+            // QUAD
+            for (  q = 0; q < NumQuadPoints ; q++ )
+            {
+                for ( d1 = 0; d1 < 3 ; d1++ )
+                {
+                    uhq[d1][q] = 0.0;
+                    for ( i_dof = 0; i_dof <  ndof_velocity; i_dof++ )
+                    {
+                        e_idof =  M_elements_velocity[i_elem][i_dof] + d1*M_numScalarDofs  ;
+                        uhq[d1][q] += u_extr[e_idof] * M_phi_velocity[i_dof][q];
+                    }
+                }
+            }
+
+            // STABILIZZAZIONE - coefficienti Tau_M e Tau_C
+            for (  q = 0; q < NumQuadPoints ; q++ )
+            {
+                M_Tau_M[i_elem][q] = 1.0/std::sqrt(
+                                                   M_density*M_density*( uhq[0][q]*( M_G[i_elem][0][0]* uhq[0][q] +  M_G[i_elem][0][1] * uhq[1][q] + M_G[i_elem][0][2] * uhq[2][q] ) +
+                                                                         uhq[1][q]*( M_G[i_elem][1][0]* uhq[0][q] +  M_G[i_elem][1][1] * uhq[1][q] + M_G[i_elem][1][2] * uhq[2][q] ) +
+                                                                         uhq[2][q]*( M_G[i_elem][2][0]* uhq[0][q] +  M_G[i_elem][2][1] * uhq[1][q] + M_G[i_elem][2][2] * uhq[2][q]   )
+                                                                         ) 	// TAU_M_DEN_VEL
+                                                   +M_C_I*M_viscosity*M_viscosity*(
+                                                                                   M_G[i_elem][0][0]*M_G[i_elem][0][0] + M_G[i_elem][0][1]*M_G[i_elem][0][1] + M_G[i_elem][0][2]*M_G[i_elem][0][2] +
+                                                                                   M_G[i_elem][1][0]*M_G[i_elem][1][0] + M_G[i_elem][1][1]*M_G[i_elem][1][1] + M_G[i_elem][1][2]*M_G[i_elem][1][2] +
+                                                                                   M_G[i_elem][2][0]*M_G[i_elem][2][0] + M_G[i_elem][2][1]*M_G[i_elem][2][1] + M_G[i_elem][2][2]*M_G[i_elem][2][2]
+                                                                                   )  // TAU_M_DEN_VISC*/
+                                                   );
+
+                M_Tau_C[i_elem][q] = 1.0/( M_g[i_elem][0]*M_Tau_M[i_elem][q]*M_g[i_elem][0] +
+                                          M_g[i_elem][1]*M_Tau_M[i_elem][q]*M_g[i_elem][1] +
+                                          M_g[i_elem][2]*M_Tau_M[i_elem][q]*M_g[i_elem][2]
+                                          );
+
+                M_Tau_M_hat[i_elem][q] = 1.0/( M_alpha * M_density / M_timestep + 1.0/M_Tau_M[i_elem][q]);
+            }
+
+            // DOF - test
+            for ( i_test = 0; i_test <  ndof_velocity; i_test++ )
+            {
+                M_rows_velocity[i_elem][i_test] = M_elements_velocity[i_elem][i_test];
+
+                // DOF - trial
+                for ( i_trial = 0; i_trial <  ndof_velocity; i_trial++ )
+                {
+                    M_cols_velocity[i_elem][i_trial] = M_elements_velocity[i_elem][i_trial];
+
+                    i_00 = 0.0; i_01 = 0.0; i_02 = 0.0; i_10 = 0.0; i_11 = 0.0; i_12 = 0.0; i_20 = 0.0; i_21 = 0.0; i_22 = 0.0;
+
+                    M_vals_supg[i_elem][0][0][i_test][i_trial] = 0.0;
+                    M_vals_supg[i_elem][0][1][i_test][i_trial] = 0.0;
+                    M_vals_supg[i_elem][0][2][i_test][i_trial] = 0.0;
+                    M_vals_supg[i_elem][1][0][i_test][i_trial] = 0.0;
+                    M_vals_supg[i_elem][1][1][i_test][i_trial] = 0.0;
+                    M_vals_supg[i_elem][1][2][i_test][i_trial] = 0.0;
+                    M_vals_supg[i_elem][2][0][i_test][i_trial] = 0.0;
+                    M_vals_supg[i_elem][2][1][i_test][i_trial] = 0.0;
+                    M_vals_supg[i_elem][2][2][i_test][i_trial] = 0.0;
+
+                    double tmp_supg = 0.0;
+                    double tmp_supg_test = 0.0;
+                    double tmp_supg_trial = 0.0;
+
+                    // QUAD
+                    for ( q = 0; q < NumQuadPoints ; q++ )
+                    {
+    tmp_supg = M_alpha * M_density * M_density / M_timestep * (
+    dphi_phys_velocity[i_test][q][0] * uhq[0][q] + dphi_phys_velocity[i_test][q][1] * uhq[1][q] + dphi_phys_velocity[i_test][q][2] * uhq[2][q]
+                                                               ) * M_phi_velocity[i_trial][q];
+
+    tmp_supg_test =
+    dphi_phys_velocity[i_test][q][0] * uhq[0][q] + dphi_phys_velocity[i_test][q][1] * uhq[1][q] + dphi_phys_velocity[i_test][q][2] * uhq[2][q];
+
+    tmp_supg_trial =
+    dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q];
+
+                        i_00 += ( M_Tau_M_hat[i_elem][q] * (
+    M_alpha * M_density * M_density / M_timestep * dphi_phys_velocity[i_test][q][0] * fine_scale[i_elem][q][0] * M_phi_velocity[i_trial][q] +
+    M_density * dphi_phys_velocity[i_test][q][0] * fine_scale[i_elem][q][0] * (
+        dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q]
+                                                                              )
+    // VMS
+    +M_alpha * M_density * M_density / M_timestep * ( dphi_phys_velocity[i_test][q][0] * uhq[0][q] * M_phi_velocity[i_trial][q] )
+    +M_density * M_density * dphi_phys_velocity[i_test][q][0] * uhq[0][q] * (
+       dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q]
+                                                                            )
+    // SUPG
+    +tmp_supg
+    +M_density * M_density * tmp_supg_test*tmp_supg_trial
+                        									)
+                                 + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][0] * dphi_phys_velocity[i_trial][q][0]
+
+                                ) * w_quad[q];
+
+                        i_01 += ( M_Tau_M_hat[i_elem][q] * (
+    M_alpha * M_density * M_density / M_timestep * dphi_phys_velocity[i_test][q][1] * fine_scale[i_elem][q][0] * M_phi_velocity[i_trial][q] +
+    M_density * dphi_phys_velocity[i_test][q][1] * fine_scale[i_elem][q][0] * (
+        dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q]
+                                                                              )
+    // VMS
+    +M_alpha * M_density * M_density / M_timestep * ( dphi_phys_velocity[i_test][q][1] * uhq[0][q] * M_phi_velocity[i_trial][q] )
+    +M_density * M_density * dphi_phys_velocity[i_test][q][1] * uhq[0][q] * (
+       dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q]
+                                                                            )
+
+                                                            )
+                                 + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][0] * dphi_phys_velocity[i_trial][q][1]
+                                 ) * w_quad[q];
+
+                        i_02 += ( M_Tau_M_hat[i_elem][q] * (
+    M_alpha * M_density * M_density / M_timestep * dphi_phys_velocity[i_test][q][2] * fine_scale[i_elem][q][0] * M_phi_velocity[i_trial][q] +
+    M_density * dphi_phys_velocity[i_test][q][2] * fine_scale[i_elem][q][0] * (
+        dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q]
+                                                                              )
+
+   // VMS
+   +M_alpha * M_density * M_density / M_timestep * ( dphi_phys_velocity[i_test][q][2] * uhq[0][q] * M_phi_velocity[i_trial][q] )
+   +M_density * M_density * dphi_phys_velocity[i_test][q][2] * uhq[0][q] * (
+      dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q]
+                                                                           )
+                                                         )
+                                 + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][0] * dphi_phys_velocity[i_trial][q][2]
+                                 ) * w_quad[q];
+
+                        i_10 += ( M_Tau_M_hat[i_elem][q] * (
+    M_alpha * M_density * M_density / M_timestep * dphi_phys_velocity[i_test][q][0] * fine_scale[i_elem][q][1] * M_phi_velocity[i_trial][q] +
+    M_density * dphi_phys_velocity[i_test][q][0] * fine_scale[i_elem][q][1] * (
+        dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q]
+                                                                              )
+
+   // VMS
+   +M_alpha * M_density * M_density / M_timestep * ( dphi_phys_velocity[i_test][q][0] * uhq[1][q] * M_phi_velocity[i_trial][q] )
+   +M_density * M_density * dphi_phys_velocity[i_test][q][0] * uhq[1][q] * (
+      dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q]
+                                                                           )
+                                                            )
+                                 + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][1] * dphi_phys_velocity[i_trial][q][0]
+                                                         ) * w_quad[q];
+
+                        i_11 += ( M_Tau_M_hat[i_elem][q] * (
+    M_alpha * M_density * M_density / M_timestep * dphi_phys_velocity[i_test][q][1] * fine_scale[i_elem][q][1] * M_phi_velocity[i_trial][q] +
+    M_density * dphi_phys_velocity[i_test][q][1] * fine_scale[i_elem][q][1] * (
+        dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q]
+                                                                              )
+
+   // VMS
+   +M_alpha * M_density * M_density / M_timestep * ( dphi_phys_velocity[i_test][q][1] * uhq[1][q] * M_phi_velocity[i_trial][q] )
+   +M_density * M_density * dphi_phys_velocity[i_test][q][1] * uhq[1][q] * (
+      dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q]
+                                                                           )
+   // SUPG
+   +tmp_supg
+   +M_density * M_density * tmp_supg_test*tmp_supg_trial
+                                                          )
+                                 + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][1] * dphi_phys_velocity[i_trial][q][1]
+                                                         ) * w_quad[q];
+
+                        i_12 += ( M_Tau_M_hat[i_elem][q] * (
+    M_alpha * M_density * M_density / M_timestep * dphi_phys_velocity[i_test][q][2] * fine_scale[i_elem][q][1] * M_phi_velocity[i_trial][q] +
+    M_density * dphi_phys_velocity[i_test][q][2] * fine_scale[i_elem][q][1] * (
+        dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q]
+                                                                              )
+   // VMS
+   +M_alpha * M_density * M_density / M_timestep * ( dphi_phys_velocity[i_test][q][2] * uhq[1][q] * M_phi_velocity[i_trial][q] )
+   +M_density * M_density * dphi_phys_velocity[i_test][q][2] * uhq[1][q] * (
+      dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q]
+                                                                           )
+                                                            )
+                                 + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][1] * dphi_phys_velocity[i_trial][q][2]
+                                                         ) * w_quad[q];
+
+                        i_20 += ( M_Tau_M_hat[i_elem][q] * (
+    M_alpha * M_density * M_density / M_timestep * dphi_phys_velocity[i_test][q][0] * fine_scale[i_elem][q][2] * M_phi_velocity[i_trial][q] +
+    M_density * dphi_phys_velocity[i_test][q][0] * fine_scale[i_elem][q][2] * (
+        dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q]
+                                                                              )
+   // VMS
+   +M_alpha * M_density * M_density / M_timestep * ( dphi_phys_velocity[i_test][q][0] * uhq[2][q] * M_phi_velocity[i_trial][q] )
+   +M_density * M_density * dphi_phys_velocity[i_test][q][0] * uhq[2][q] * (
+      dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q]
+                                                                           )
+                                                            )
+                                 + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][2] * dphi_phys_velocity[i_trial][q][0]
+                                                         ) * w_quad[q];
+
+                        i_21 += ( M_Tau_M_hat[i_elem][q] * (
+    M_alpha * M_density * M_density / M_timestep * dphi_phys_velocity[i_test][q][1] * fine_scale[i_elem][q][2] * M_phi_velocity[i_trial][q] +
+    M_density * dphi_phys_velocity[i_test][q][1] * fine_scale[i_elem][q][2] * (
+        dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q]
+                                                                              )
+  // VMS
+  +M_alpha * M_density * M_density / M_timestep * ( dphi_phys_velocity[i_test][q][1] * uhq[2][q] * M_phi_velocity[i_trial][q] )
+  +M_density * M_density * dphi_phys_velocity[i_test][q][1] * uhq[2][q] * (
+     dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q]
+                                                                          )
+                                                            )
+                                 + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][2] * dphi_phys_velocity[i_trial][q][1]
+                                                         ) * w_quad[q];
+
+                        i_22 += ( M_Tau_M_hat[i_elem][q] * (
+    M_alpha * M_density * M_density / M_timestep * dphi_phys_velocity[i_test][q][2] * fine_scale[i_elem][q][2] * M_phi_velocity[i_trial][q] +
+    M_density * dphi_phys_velocity[i_test][q][2] * fine_scale[i_elem][q][2] * (
+        dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q]
+                                                                              )
+   // VMS
+   +M_alpha * M_density * M_density / M_timestep * ( dphi_phys_velocity[i_test][q][2] * uhq[2][q] * M_phi_velocity[i_trial][q] )
+   +M_density * M_density * dphi_phys_velocity[i_test][q][2] * uhq[2][q] * (
+      dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q]
+                                                                           )
+   // SUPG
+   +tmp_supg
+   +M_density * M_density * tmp_supg_test*tmp_supg_trial
+                                                            )
+                                 + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][2] * dphi_phys_velocity[i_trial][q][2]
+                                                         ) * w_quad[q];
+
+
+                    } // end quadrature
+
+                    M_vals_supg[i_elem][0][0][i_test][i_trial] = (i_00 ) *  M_detJacobian[i_elem];
+                    M_vals_supg[i_elem][0][1][i_test][i_trial] = (i_01 ) *  M_detJacobian[i_elem];
+                    M_vals_supg[i_elem][0][2][i_test][i_trial] = (i_02 ) *  M_detJacobian[i_elem];
+                    M_vals_supg[i_elem][1][0][i_test][i_trial] = (i_10 ) *  M_detJacobian[i_elem];
+                    M_vals_supg[i_elem][1][1][i_test][i_trial] = (i_11 ) *  M_detJacobian[i_elem];
+                    M_vals_supg[i_elem][1][2][i_test][i_trial] = (i_12 ) *  M_detJacobian[i_elem];
+                    M_vals_supg[i_elem][2][0][i_test][i_trial] = (i_20 ) *  M_detJacobian[i_elem];
+                    M_vals_supg[i_elem][2][1][i_test][i_trial] = (i_21 ) *  M_detJacobian[i_elem];
+                    M_vals_supg[i_elem][2][2][i_test][i_trial] = (i_22 ) *  M_detJacobian[i_elem];
+
+                } // end trial
+
+                for ( i_trial = 0; i_trial <  ndof_pressure; i_trial++ )
+                {
+                    M_cols_pressure[i_elem][i_trial] = M_elements_pressure[i_elem][i_trial];
+                    M_vals_supg_01[i_elem][0][i_test][i_trial] = 0.0;
+                    M_vals_supg_01[i_elem][1][i_test][i_trial] = 0.0;
+                    M_vals_supg_01[i_elem][2][i_test][i_trial] = 0.0;
+
+                    i_00 = 0.0;
+                    i_10 = 0.0;
+                    i_20 = 0.0;
+
+                    // QUAD
+                    for ( q = 0; q < NumQuadPoints ; q++ )
+                    {
+                        i_00 += M_Tau_M_hat[i_elem][q] * (
+                                dphi_phys_velocity[i_test][q][0] * fine_scale[i_elem][q][0] * dphi_phys_pressure[i_trial][q][0]
+                               +dphi_phys_velocity[i_test][q][1] * fine_scale[i_elem][q][0] * dphi_phys_pressure[i_trial][q][1]
+                               +dphi_phys_velocity[i_test][q][2] * fine_scale[i_elem][q][0] * dphi_phys_pressure[i_trial][q][2]
+                               +M_density * (
+    (dphi_phys_velocity[i_test][q][0] * uhq[0][q] + dphi_phys_velocity[i_test][q][1] * uhq[1][q] + dphi_phys_velocity[i_test][q][2] * uhq[2][q])
+    * dphi_phys_pressure[i_trial][q][0]
+    + dphi_phys_velocity[i_test][q][0] * uhq[0][q] * dphi_phys_pressure[i_trial][q][0]
+    + dphi_phys_velocity[i_test][q][1] * uhq[0][q] * dphi_phys_pressure[i_trial][q][1]
+    + dphi_phys_velocity[i_test][q][2] * uhq[0][q] * dphi_phys_pressure[i_trial][q][2]
+                                             )
+                                                          ) * w_quad[q];
+
+                        i_10 += M_Tau_M_hat[i_elem][q] * (
+                                dphi_phys_velocity[i_test][q][0] * fine_scale[i_elem][q][1] * dphi_phys_pressure[i_trial][q][0]
+                               +dphi_phys_velocity[i_test][q][1] * fine_scale[i_elem][q][1] * dphi_phys_pressure[i_trial][q][1]
+                               +dphi_phys_velocity[i_test][q][2] * fine_scale[i_elem][q][1] * dphi_phys_pressure[i_trial][q][2]
+                               +M_density * (
+    (dphi_phys_velocity[i_test][q][0] * uhq[0][q] + dphi_phys_velocity[i_test][q][1] * uhq[1][q] + dphi_phys_velocity[i_test][q][2] * uhq[2][q])
+    * dphi_phys_pressure[i_trial][q][1]
+    + dphi_phys_velocity[i_test][q][0] * uhq[1][q] * dphi_phys_pressure[i_trial][q][0]
+    + dphi_phys_velocity[i_test][q][1] * uhq[1][q] * dphi_phys_pressure[i_trial][q][1]
+    + dphi_phys_velocity[i_test][q][2] * uhq[1][q] * dphi_phys_pressure[i_trial][q][2]
+                                             )
+                                                          ) * w_quad[q];
+
+                        i_20 += M_Tau_M_hat[i_elem][q] * (
+                                dphi_phys_velocity[i_test][q][0] * fine_scale[i_elem][q][2] * dphi_phys_pressure[i_trial][q][0]
+                               +dphi_phys_velocity[i_test][q][1] * fine_scale[i_elem][q][2] * dphi_phys_pressure[i_trial][q][1]
+                               +dphi_phys_velocity[i_test][q][2] * fine_scale[i_elem][q][2] * dphi_phys_pressure[i_trial][q][2]
+                               +M_density * (
+    (dphi_phys_velocity[i_test][q][0] * uhq[0][q] + dphi_phys_velocity[i_test][q][1] * uhq[1][q] + dphi_phys_velocity[i_test][q][2] * uhq[2][q])
+    * dphi_phys_pressure[i_trial][q][2]
+    + dphi_phys_velocity[i_test][q][0] * uhq[2][q] * dphi_phys_pressure[i_trial][q][0]
+    + dphi_phys_velocity[i_test][q][1] * uhq[2][q] * dphi_phys_pressure[i_trial][q][1]
+    + dphi_phys_velocity[i_test][q][2] * uhq[2][q] * dphi_phys_pressure[i_trial][q][2]
+                                             )
+                                                          ) * w_quad[q];
+                    }
+
+                    M_vals_supg_01[i_elem][0][i_test][i_trial] = i_00 * M_detJacobian[i_elem];
+                    M_vals_supg_01[i_elem][1][i_test][i_trial] = i_10 * M_detJacobian[i_elem];
+                    M_vals_supg_01[i_elem][2][i_test][i_trial] = i_20 * M_detJacobian[i_elem];
+
+                }
+
+            } // end dof test
+
+            // DOF - test - assemblo blocchi (1,0) e (1,1)
+            for ( i_test = 0; i_test <  ndof_pressure; i_test++ )
+            {
+                M_rows_pressure[i_elem][i_test] = M_elements_pressure[i_elem][i_test];
+
+                // DOF - trial
+                for ( i_trial = 0; i_trial <  ndof_pressure; i_trial++ )
+                {
+                    M_vals_11[i_elem][i_test][i_trial] = 0.0;
+
+                    integral = 0.0;
+                    // QUAD
+                    for ( q = 0; q < NumQuadPoints ; q++ )
+                    {
+                        // DIM 1
+                        for ( d1 = 0; d1 < 3 ; d1++ )
+                        {
+                            integral += M_Tau_M_hat[i_elem][q] * dphi_phys_pressure[i_test][q][d1] * dphi_phys_pressure[i_trial][q][d1]*w_quad[q];
+                        }
+                    }
+                    M_vals_11[i_elem][i_test][i_trial] = integral * M_detJacobian[i_elem];
+                }
+            }
+
+            // DOF - test
+            for ( i_test = 0; i_test <  ndof_pressure; i_test++ )
+            {
+                // DOF - trial
+                for ( i_trial = 0; i_trial < ndof_velocity; i_trial++ )
+                {
+                    i_00 = 0.0;
+                    i_01 = 0.0;
+                    i_02 = 0.0;
+
+                    // QUAD
+                    for ( q = 0; q < NumQuadPoints ; q++ )
+                    {
+                        i_00 += M_Tau_M_hat[i_elem][q] * (
+         M_density * M_alpha / M_timestep * dphi_phys_pressure[i_test][q][0] * M_phi_velocity[i_trial][q]
+        +M_density * dphi_phys_pressure[i_test][q][0] * (
+          dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q]
+                                                        )
+
+                                                         ) * w_quad[q];
+
+                        i_01 += M_Tau_M_hat[i_elem][q] * (
+         M_density * M_alpha / M_timestep * dphi_phys_pressure[i_test][q][1] * M_phi_velocity[i_trial][q]
+        +M_density * dphi_phys_pressure[i_test][q][1] * (
+          dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q]
+                                                        )
+
+                                                         ) * w_quad[q];
+
+                        i_02 += M_Tau_M_hat[i_elem][q] * (
+         M_density * M_alpha / M_timestep * dphi_phys_pressure[i_test][q][2] * M_phi_velocity[i_trial][q]
+        +M_density * dphi_phys_pressure[i_test][q][2] * (
+          dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q]
+                                                        )
+                                                         ) * w_quad[q];
+                    }
+
+                    M_vals_supg_10[i_elem][0][i_test][i_trial] = i_00 * M_detJacobian[i_elem];
+                    M_vals_supg_10[i_elem][1][i_test][i_trial] = i_01 * M_detJacobian[i_elem];
+                    M_vals_supg_10[i_elem][2][i_test][i_trial] = i_02 * M_detJacobian[i_elem];
+                }
+            }
+
+        }
+    }
+
+    for ( UInt d1 = 0; d1 < 3 ; d1++ ) // row index
+    {
+        for ( int k = 0; k < M_numElements; ++k )
+        {
+            for ( UInt i = 0; i <  ndof_velocity; i++ )
+            {
+                M_rows_tmp[k][i] = M_rows_velocity[k][i] + d1 * M_numScalarDofs;
+            }
+            block00->matrixPtr()->InsertGlobalValues ( ndof_velocity, M_rows_tmp[k],
+                                                       ndof_velocity, M_cols_velocity[k],
+                                                       M_vals_supg[k][d1][0],
+                                                       Epetra_FECrsMatrix::ROW_MAJOR);
+
+            block01->matrixPtr()->InsertGlobalValues ( ndof_velocity, M_rows_tmp[k],
+                                                       ndof_pressure, M_cols_pressure[k],
+                                                       M_vals_supg_01[k][d1],
+                                                       Epetra_FECrsMatrix::ROW_MAJOR);
+        }
+
+        for ( int k = 0; k < M_numElements; ++k )
+        {
+            for ( UInt i = 0; i <  ndof_velocity; i++ )
+            {
+                M_cols_tmp[k][i] = M_cols_velocity[k][i] + M_numScalarDofs;
+            }
+            block00->matrixPtr()->InsertGlobalValues ( ndof_velocity, M_rows_tmp[k],
+                                                       ndof_velocity, M_cols_tmp[k],
+                                                       M_vals_supg[k][d1][1],
+                                                       Epetra_FECrsMatrix::ROW_MAJOR);
+        }
+
+        for ( int k = 0; k < M_numElements; ++k )
+        {
+            for ( UInt i = 0; i <  ndof_velocity; i++ )
+            {
+                M_cols_tmp[k][i] = M_cols_velocity[k][i] + 2 * M_numScalarDofs;
+            }
+            block00->matrixPtr()->InsertGlobalValues ( ndof_velocity, M_rows_tmp[k],
+                                                       ndof_velocity, M_cols_tmp[k],
+                                                       M_vals_supg[k][d1][2],
+                                                       Epetra_FECrsMatrix::ROW_MAJOR);
+        }
+    }
+
+    for ( int k = 0; k < M_numElements; ++k )
+    {
+        block11->matrixPtr()->InsertGlobalValues ( ndof_pressure, M_rows_pressure[k], ndof_pressure, M_cols_pressure[k], M_vals_11[k], Epetra_FECrsMatrix::ROW_MAJOR);
+    }
+
+    for ( UInt d1 = 0; d1 < 3 ; d1++ )
+    {
+        for ( int k = 0; k < M_numElements; ++k )
+        {
+            for ( UInt i = 0; i <  ndof_velocity; i++ )
+            {
+                M_cols_tmp[k][i] = M_cols_velocity[k][i] + d1 * M_numScalarDofs;
+            }
+            block10->matrixPtr()->InsertGlobalValues ( ndof_pressure, M_rows_pressure[k], ndof_velocity, M_cols_tmp[k], M_vals_supg_10[k][d1], Epetra_FECrsMatrix::ROW_MAJOR);
+        }
+    }
+}
