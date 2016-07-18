@@ -2333,7 +2333,9 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                                                               )
     -M_viscosity * dphi_phys_velocity[i_test][q][0] * fine_scale[i_elem][q][0] *
                ( d2phi_phys_velocity[i_trial][q][0][0] + d2phi_phys_velocity[i_trial][q][1][1] + d2phi_phys_velocity[i_trial][q][2][2] )
-                                                         )
+    // VMS
+    +M_alpha * M_density * M_density / M_timestep * ( dphi_phys_velocity[i_test][q][0] * uhq[0][q] * M_phi_velocity[i_trial][q] )
+                                                            )
                                  + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][0] * dphi_phys_velocity[i_trial][q][0]
                                  
                                 ) * w_quad[q];
@@ -2345,7 +2347,9 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                                                               )
     -M_viscosity * dphi_phys_velocity[i_test][q][1] * fine_scale[i_elem][q][0] *
                ( d2phi_phys_velocity[i_trial][q][0][0] + d2phi_phys_velocity[i_trial][q][1][1] + d2phi_phys_velocity[i_trial][q][2][2] )
-                                                         )
+    // VMS
+    +M_alpha * M_density * M_density / M_timestep * ( dphi_phys_velocity[i_test][q][1] * uhq[0][q] * M_phi_velocity[i_trial][q] )
+                                                            )
                                  + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][0] * dphi_phys_velocity[i_trial][q][1]
                                  ) * w_quad[q];
                         
@@ -2356,6 +2360,8 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                                                               )
    -M_viscosity * dphi_phys_velocity[i_test][q][2] * fine_scale[i_elem][q][0] *
               ( d2phi_phys_velocity[i_trial][q][0][0] + d2phi_phys_velocity[i_trial][q][1][1] + d2phi_phys_velocity[i_trial][q][2][2] )
+   // VMS
+   +M_alpha * M_density * M_density / M_timestep * ( dphi_phys_velocity[i_test][q][2] * uhq[0][q] * M_phi_velocity[i_trial][q] )
                                                          )
                                  + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][0] * dphi_phys_velocity[i_trial][q][2]
                                  ) * w_quad[q];
@@ -2367,6 +2373,8 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                                                               )
    -M_viscosity * dphi_phys_velocity[i_test][q][0] * fine_scale[i_elem][q][1] *
               ( d2phi_phys_velocity[i_trial][q][0][0] + d2phi_phys_velocity[i_trial][q][1][1] + d2phi_phys_velocity[i_trial][q][2][2] )
+   // VMS
+   +M_alpha * M_density * M_density / M_timestep * ( dphi_phys_velocity[i_test][q][0] * uhq[1][q] * M_phi_velocity[i_trial][q] )
                                                             )
                                  + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][1] * dphi_phys_velocity[i_trial][q][0]
                                                          ) * w_quad[q];
@@ -2378,6 +2386,8 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                                                               )
    -M_viscosity * dphi_phys_velocity[i_test][q][1] * fine_scale[i_elem][q][1] *
               ( d2phi_phys_velocity[i_trial][q][0][0] + d2phi_phys_velocity[i_trial][q][1][1] + d2phi_phys_velocity[i_trial][q][2][2] )
+   // VMS
+   +M_alpha * M_density * M_density / M_timestep * ( dphi_phys_velocity[i_test][q][1] * uhq[1][q] * M_phi_velocity[i_trial][q] )
                                                             )
                                  + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][1] * dphi_phys_velocity[i_trial][q][1]
                                                          ) * w_quad[q];
@@ -2389,6 +2399,8 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                                                               )
    -M_viscosity * dphi_phys_velocity[i_test][q][2] * fine_scale[i_elem][q][1] *
               ( d2phi_phys_velocity[i_trial][q][0][0] + d2phi_phys_velocity[i_trial][q][1][1] + d2phi_phys_velocity[i_trial][q][2][2] )
+   // VMS
+   +M_alpha * M_density * M_density / M_timestep * ( dphi_phys_velocity[i_test][q][2] * uhq[1][q] * M_phi_velocity[i_trial][q] )
                                                             )
                                  + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][1] * dphi_phys_velocity[i_trial][q][2]
                                                          ) * w_quad[q];
@@ -2400,6 +2412,8 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                                                               )
    -M_viscosity * dphi_phys_velocity[i_test][q][0] * fine_scale[i_elem][q][2] *
               ( d2phi_phys_velocity[i_trial][q][0][0] + d2phi_phys_velocity[i_trial][q][1][1] + d2phi_phys_velocity[i_trial][q][2][2] )
+   // VMS
+   +M_alpha * M_density * M_density / M_timestep * ( dphi_phys_velocity[i_test][q][0] * uhq[2][q] * M_phi_velocity[i_trial][q] )
                                                             )
                                  + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][2] * dphi_phys_velocity[i_trial][q][0]
                                                          ) * w_quad[q];
@@ -2411,6 +2425,8 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                                                               )
    -M_viscosity * dphi_phys_velocity[i_test][q][1] * fine_scale[i_elem][q][2] *
               ( d2phi_phys_velocity[i_trial][q][0][0] + d2phi_phys_velocity[i_trial][q][1][1] + d2phi_phys_velocity[i_trial][q][2][2] )
+  // VMS
+  +M_alpha * M_density * M_density / M_timestep * ( dphi_phys_velocity[i_test][q][1] * uhq[2][q] * M_phi_velocity[i_trial][q] )
                                                             )
                                  + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][2] * dphi_phys_velocity[i_trial][q][1]
                                                          ) * w_quad[q];
@@ -2422,6 +2438,8 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                                                               )
    -M_viscosity * dphi_phys_velocity[i_test][q][2] * fine_scale[i_elem][q][2] *
               ( d2phi_phys_velocity[i_trial][q][0][0] + d2phi_phys_velocity[i_trial][q][1][1] + d2phi_phys_velocity[i_trial][q][2][2] )
+   // VMS
+   +M_alpha * M_density * M_density / M_timestep * ( dphi_phys_velocity[i_test][q][2] * uhq[2][q] * M_phi_velocity[i_trial][q] )
                                                             )
                                  + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][2] * dphi_phys_velocity[i_trial][q][2]
                                                          ) * w_quad[q];
