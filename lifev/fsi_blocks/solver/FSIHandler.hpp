@@ -427,6 +427,7 @@ private:
 	interpolationPtr_Type M_StructureToFluidInterpolant;
 
 	matrixPtr_Type M_interface_mass_structure;
+	matrixPtr_Type M_interface_mass_structure_robin;
 	matrixPtr_Type M_interface_mass_fluid;
 
 	bool M_lambda_num_structure;
@@ -456,7 +457,7 @@ private:
 
 	bool             M_disregardRestart; // if true disregards correct exporter as function of BDF
 	bool             M_prescribeInflowFlowrate;
-
+	vectorPtr_Type   M_dsk;
 };
 
 } // end namespace LifeV

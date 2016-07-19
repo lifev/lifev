@@ -919,6 +919,30 @@ FSIHandler::getMatrixStructure ( )
 
 	M_matrixStructure->zero();
 
+	M_interface_mass_structure_robin.reset (new matrix_Type ( M_displacementFESpace->map() ) );
+	M_interface_mass_structure_robin->zero();
+
+	if ( M_datafile("solid/robin_external_wall", false ) )
+	{
+		M_displayer.leaderPrint ("\nUsing Robin BC at the external wall of the structure\n");
+		Real alpha_robin = M_datafile("solid/robin_elastic", 100000.0 );
+
+		// ASSEMBLE ROBIN BC MATRIX AT THE INTERFACE
+		QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
+		{
+			using namespace ExpressionAssembly;
+			integrate ( boundary (M_displacementETFESpace->mesh(), M_datafile("solid/externalWallFlag", 210 ) ),
+					myBDQR,
+					M_displacementETFESpace,
+					M_displacementETFESpace,
+					value(alpha_robin) * dot(phi_i, phi_j)
+			)
+			>>M_interface_mass_structure_robin;
+		}
+	}
+	M_interface_mass_structure_robin->globalAssemble();
+
+	*M_matrixStructure += *M_interface_mass_structure_robin;
 	*M_matrixStructure += *(M_structure->jacobian());
 
 	M_matrixStructure->globalAssemble();
@@ -1661,6 +1685,14 @@ FSIHandler::applyBCresidual(VectorEpetra& r_u, VectorEpetra& r_ds, VectorEpetra&
 	if ( !M_structureBC_residual->bcUpdateDone() )
 		M_structureBC_residual->bcUpdate ( *M_displacementFESpace->mesh(), M_displacementFESpace->feBd(), M_displacementFESpace->dof() );
 
+	if ( M_datafile("solid/robin_external_wall", false ) )
+	{
+		VectorEpetra rds_robin( M_displacementFESpace->map(), Unique);
+		rds_robin.zero();
+		rds_robin = *M_interface_mass_structure_robin * (*M_dsk);
+		r_ds += rds_robin;
+	}
+
 	bcManageRhs ( r_ds, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC_residual, M_displacementFESpace->feBd(), 1.0, M_time );
 
 	if ( !M_aleBC_residual->bcUpdateDone() )
@@ -1775,6 +1807,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	lambda_k->subset(solution,  *M_lagrangeMap, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize(), 0);
 	df_k->subset(solution,  M_aleFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize(), 0);
 
+	M_dsk.reset( new vector_Type ( *ds_k ) );
 	//---------------//
 	// Move the mesh //
 	//---------------//
