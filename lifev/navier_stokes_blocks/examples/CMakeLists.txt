@@ -7,4 +7,5 @@ ADD_SUBDIRECTORIES(
 	example_carotid_semi_implicit
 #example_external_flow
     example_aorta_0176
+    example_aorta_0095
 )
