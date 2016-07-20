@@ -92,6 +92,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <lifev/fsi_blocks/solver/NeoHookean.hpp>
 
+#include <lifev/fsi_blocks/testsuite/fsi_aorta/AlfaRobinFunctor.hpp>
+
 namespace LifeV
 {
 
@@ -458,6 +460,7 @@ private:
 	bool             M_disregardRestart; // if true disregards correct exporter as function of BDF
 	bool             M_prescribeInflowFlowrate;
 	vectorPtr_Type   M_dsk;
+	boost::shared_ptr<AlfaRobinFunctor> M_alfaRobin;
 };
 
 } // end namespace LifeV

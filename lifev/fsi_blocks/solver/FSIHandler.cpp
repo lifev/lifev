@@ -444,8 +444,8 @@ void FSIHandler::initializeTimeAdvance ( )
     
     // Structure time advance
     M_structureTimeAdvance.reset ( new Newmark );
-    M_structureTimeAdvance->set_beta(0.25);
-    M_structureTimeAdvance->set_gamma(0.5);
+    M_structureTimeAdvance->set_beta(0.49); // 0.25
+    M_structureTimeAdvance->set_gamma(0.9); // 0.5
     M_structureTimeAdvance->set_timestep(M_dt);
 
     if ( !M_restart )
@@ -926,6 +926,7 @@ FSIHandler::getMatrixStructure ( )
 	{
 		M_displayer.leaderPrint ("\nUsing Robin BC at the external wall of the structure\n");
 		Real alpha_robin = M_datafile("solid/robin_elastic", 100000.0 );
+		M_alfaRobin.reset( new AlfaRobinFunctor() );
 
 		// ASSEMBLE ROBIN BC MATRIX AT THE INTERFACE
 		QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
@@ -935,7 +936,7 @@ FSIHandler::getMatrixStructure ( )
 					myBDQR,
 					M_displacementETFESpace,
 					M_displacementETFESpace,
-					value(alpha_robin) * dot(phi_i, phi_j)
+					eval(M_alfaRobin, X) * dot(phi_i, phi_j)
 			)
 			>>M_interface_mass_structure_robin;
 		}
