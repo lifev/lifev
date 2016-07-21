@@ -9,6 +9,7 @@ SET(fem_HEADERS
   fem/BCManage.hpp
   fem/BCManageNormal.hpp
   fem/BCVector.hpp
+  fem/BDFSecondOrderDerivative.hpp
   fem/CurrentFE.hpp
   fem/CurrentFEManifold.hpp
   fem/DOF.hpp
@@ -58,6 +59,7 @@ SET(fem_SOURCES
   fem/BCIdentifier.cpp
   fem/BCManage.cpp
   fem/BCVector.cpp
+  fem/BDFSecondOrderDerivative.cpp
   fem/CurrentFE.cpp
   fem/CurrentFEManifold.cpp
   fem/DOF.cpp
