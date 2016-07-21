@@ -691,7 +691,6 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
         M_block11->zero();
         *M_block11 += *M_stabilization->block_11();
         M_block11->globalAssemble();
-        M_block11->spy("block11");
 
         M_rhs_pressure.reset( new vector_Type ( M_pressureFESpace->map(), Unique ) );
         M_rhs_pressure->zero();
