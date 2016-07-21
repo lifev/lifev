@@ -600,6 +600,8 @@ private:
 
     bool M_useFastAssembly;
     boost::shared_ptr<FastAssemblerNS> M_fastAssembler;
+    Real M_orderBDF;
+    UInt M_orderVel;
 
 }; // class NavierStokesSolver
 

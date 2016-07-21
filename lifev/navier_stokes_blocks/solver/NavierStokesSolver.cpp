@@ -55,7 +55,9 @@ NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commP
         M_methodAerodynamicLoads ( dataFile("fluid/forces/method", "integral_form") ),
         M_flagBody ( dataFile("fluid/forces/flag", 31 ) ),
         M_solve_blocks ( dataFile("fluid/solve_blocks", true ) ),
-        M_useFastAssembly ( dataFile("fluid/use_fast_assembly", false ) )
+        M_useFastAssembly ( dataFile("fluid/use_fast_assembly", false ) ),
+        M_orderBDF ( dataFile("fluid/time_discretization/BDF_order", 2 ) ),
+        M_orderVel ( dataFile("fluid/stabilization/vel_order", 2 ) )
 {
 	M_prec.reset ( Operators::NSPreconditionerFactory::instance().createObject (dataFile("fluid/preconditionerType","none")));
 }
@@ -445,7 +447,16 @@ void NavierStokesSolver::buildSystem()
 	if ( M_useFastAssembly )
 	{
 		M_displayer.leaderPrint ( " F - Using fast assembly\n");
-		M_fastAssembler->setConstants_NavierStokes(M_density, M_viscosity, M_timeStep, 2.0, 30.0, M_alpha );
+        
+        if ( M_orderVel == 1 )
+        {
+            M_fastAssembler->setConstants_NavierStokes(M_density, M_viscosity, M_timeStep, M_orderBDF, 30.0, M_alpha );
+        }
+        else if ( M_orderVel == 2 )
+        {
+            M_fastAssembler->setConstants_NavierStokes(M_density, M_viscosity, M_timeStep, M_orderBDF, 60.0, M_alpha );
+        }
+        
 		M_fastAssembler->updateGeoQuantities ( &(M_velocityFESpace->fe()) );
 	}
 
