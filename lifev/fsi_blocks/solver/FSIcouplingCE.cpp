@@ -28,7 +28,21 @@ FSIcouplingCE::setUp ( const Real& timeStep, const Real& interfaceDofs, const Re
 }
 
 void
-FSIcouplingCE::buildBlocks ( std::map<ID, ID> const& localDofMap, const bool& lambda_num_structure )
+FSIcouplingCE::setUp ( const Real& timeStep, const Real& interfaceDofs, const Real& coefficientBDF,
+	     	 	 	   const mapPtr_Type& interfaceMap, const FESpacePtr_Type& fluidVelocityFESpace,
+	     	 	 	   const FESpacePtr_Type& structureDisplacementFESpace, const vectorPtr_Type& numerationInterface )
+{
+	M_timeStep = timeStep;
+	M_interface = interfaceDofs; // Number of interface dofs per component
+	M_fluidVelocityFESpace = fluidVelocityFESpace;
+	M_structureDisplacementFESpace = structureDisplacementFESpace;
+	M_interfaceMap = interfaceMap;
+	M_numerationInterface = numerationInterface;
+	M_coefficientBDF = coefficientBDF;
+}
+
+void
+FSIcouplingCE::buildBlocks ( std::map<ID, ID> const& localDofMap, const bool& lambda_num_structure, bool useBDF )
 {
 	// if lambda_num_structure = true, lambda follows the numeration of the structure
 	// if lambda_num_structure = false, lambda follows the numeration of the fluid
@@ -149,7 +163,15 @@ FSIcouplingCE::buildBlocks ( std::map<ID, ID> const& localDofMap, const bool& la
 
 	// ----------------------------------------------------------------------------------------------------------------------------
 
-	value = ( (-1.0 * M_gamma) / ( M_timeStep * M_beta ) );
+	if ( useBDF )
+	{
+		value = ( (-1.0) / ( M_timeStep ) * M_coefficientBDF );
+	}
+	else
+	{
+		value = ( (-1.0 * M_gamma) / ( M_timeStep * M_beta ) );
+	}
+
 	M_structureDisplacementToLambda.reset ( new MatrixEpetra<Real> ( *M_interfaceMap ) );
 
 	if ( lambda_num_structure )

@@ -62,6 +62,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <lifev/core/fem/TimeAndExtrapolationHandler.hpp>
 #include <lifev/core/fem/Newmark.hpp>
+#include <lifev/core/fem/BDFSecondOrderDerivative.hpp>
 
 #include <lifev/core/fem/DOFInterface3Dto3D.hpp>
 
@@ -461,6 +462,9 @@ private:
 	bool             M_prescribeInflowFlowrate;
 	vectorPtr_Type   M_dsk;
 	boost::shared_ptr<AlfaRobinFunctor> M_alfaRobin;
+	bool             M_useBDF;
+	boost::shared_ptr<BDFSecondOrderDerivative> M_structureTimeAdvanceBDF;
+	UInt             M_orderBDFSolid;
 };
 
 } // end namespace LifeV

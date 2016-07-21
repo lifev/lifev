@@ -87,11 +87,15 @@ public:
     //! Destructor
     ~FSIcouplingCE();
 
-    void buildBlocks ( std::map<ID, ID> const& locDofMap, const bool& lambda_num_structure );
+    void buildBlocks ( std::map<ID, ID> const& locDofMap, const bool& lambda_num_structure, bool useBDF = false );
 
     void setUp ( const Real& timeStep, const Real& interfaceDofs, const Real& beta, const Real& gamma,
     			 const mapPtr_Type& interfaceMap, const FESpacePtr_Type& fluidVelocityFESpace,
-    			 const FESpacePtr_Type& structureDisplacementFESpace, const vectorPtr_Type& numerationInterface);
+    			 const FESpacePtr_Type& structureDisplacementFESpace, const vectorPtr_Type& numerationInterface );
+
+    void setUp ( const Real& timeStep, const Real& interfaceDofs, const Real& coefficientBDF,
+    		     const mapPtr_Type& interfaceMap, const FESpacePtr_Type& fluidVelocityFESpace,
+    		     const FESpacePtr_Type& structureDisplacementFESpace, const vectorPtr_Type& numerationInterface );
 
     matrixPtr_Type lambdaToFluidMomentum() const
     {
@@ -142,6 +146,7 @@ private:
     Real M_timeStep;
     Real M_beta;
     Real M_gamma;
+    Real M_coefficientBDF;
 };
 
 } // end namespace LifeV

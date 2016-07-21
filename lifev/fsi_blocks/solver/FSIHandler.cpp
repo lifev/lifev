@@ -68,7 +68,8 @@ M_lambda_num_structure ( false ),
 M_precPtrBuilt ( false ),
 M_linearElasticity ( true ),
 M_disregardRestart ( false ),
-M_prescribeInflowFlowrate ( false )
+M_prescribeInflowFlowrate ( false ),
+M_useBDF ( false )
 {
 }
 
@@ -163,6 +164,8 @@ FSIHandler::readPartitionedMeshes( )
 
 void FSIHandler::setup ( )
 {
+	M_useBDF = M_datafile ( "solid/time_discretization/useBDF", false );
+
 	M_linearElasticity = M_datafile ( "solid/linear_elasticity", true );
 
 	M_saveEvery = M_datafile ( "exporter/save_every", 1 );
@@ -221,7 +224,14 @@ void FSIHandler::setup ( )
 	// Structure
 	if ( M_linearElasticity )
 	{
-		M_structure->assemble_matrices(M_dt, M_structureTimeAdvance->get_beta(), M_structureBC);
+		if ( M_useBDF )
+		{
+			M_structure->assemble_matrices(M_dt, M_structureTimeAdvanceBDF->massCoefficient(), M_structureBC, M_useBDF);
+		}
+		else
+		{
+			M_structure->assemble_matrices(M_dt, M_structureTimeAdvance->get_beta(), M_structureBC, M_useBDF);
+		}
 	}
 
 	// Data needed by the Newton algorithm
@@ -309,8 +319,11 @@ void FSIHandler::setupExporters( )
 	M_exporterFluid->addVariable ( ExporterData<mesh_Type>::ScalarField, "f - pressure", M_fluid->pFESpace(), M_fluidPressure, UInt (0) );
 	M_exporterFluid->addVariable ( ExporterData<mesh_Type>::VectorField, "f - displacement", M_aleFESpace, M_fluidDisplacement, UInt (0) );
 	M_exporterStructure->addVariable ( ExporterData<mesh_Type>::VectorField, "s - displacement", M_displacementFESpace, M_structureDisplacement, UInt (0) );
-	M_exporterStructure->addVariable ( ExporterData<mesh_Type>::VectorField, "s - velocity", M_displacementFESpace, M_structureVelocity, UInt (0) );
-	M_exporterStructure->addVariable ( ExporterData<mesh_Type>::VectorField, "s - acceleration", M_displacementFESpace, M_structureAcceleration, UInt (0) );
+	if ( !M_useBDF )
+	{
+		M_exporterStructure->addVariable ( ExporterData<mesh_Type>::VectorField, "s - velocity", M_displacementFESpace, M_structureVelocity, UInt (0) );
+		M_exporterStructure->addVariable ( ExporterData<mesh_Type>::VectorField, "s - acceleration", M_displacementFESpace, M_structureAcceleration, UInt (0) );
+	}
 }
 
 void
@@ -441,12 +454,23 @@ void FSIHandler::initializeTimeAdvance ( )
     M_aleTimeAdvance->setTimeStep(M_dt);
     vector_Type disp_mesh_initial ( M_aleFESpace->map() );
     std::vector<vector_Type> initialStateALE;
+    std::vector<vector_Type> initialStateSolid;
     
-    // Structure time advance
-    M_structureTimeAdvance.reset ( new Newmark );
-    M_structureTimeAdvance->set_beta(0.49); // 0.25
-    M_structureTimeAdvance->set_gamma(0.9); // 0.5
-    M_structureTimeAdvance->set_timestep(M_dt);
+    if ( M_useBDF )
+    {
+    	M_structureTimeAdvanceBDF.reset ( new BDFSecondOrderDerivative );
+    	M_structureTimeAdvanceBDF->setTimeStep(M_dt);
+    	M_orderBDFSolid = M_datafile("solid/time_discretization/BDF_order",2);
+    	M_structureTimeAdvanceBDF->setBDForder( M_orderBDFSolid );
+    }
+    else
+    {
+		// Structure time advance
+		M_structureTimeAdvance.reset ( new Newmark );
+		M_structureTimeAdvance->set_beta(0.49); // 0.25
+		M_structureTimeAdvance->set_gamma(0.9); // 0.5
+		M_structureTimeAdvance->set_timestep(M_dt);
+    }
 
     if ( !M_restart )
     {
@@ -459,15 +483,25 @@ void FSIHandler::initializeTimeAdvance ( )
         disp_mesh_initial.zero() ;
         for ( UInt i = 0; i < M_orderBDF; ++i )
             initialStateALE.push_back(disp_mesh_initial);
-        
-        vectorPtr_Type ds_initial ( new vector_Type ( M_displacementFESpace->map() ) );
-        vectorPtr_Type vs_initial ( new vector_Type ( M_displacementFESpace->map() ) );
-        vectorPtr_Type as_initial ( new vector_Type ( M_displacementFESpace->map() ) );
-        ds_initial->zero();
-        vs_initial->zero();
-        as_initial->zero();
-        M_structureTimeAdvance->initialize(ds_initial, vs_initial, as_initial);
-        
+
+        // Solid
+        if ( M_useBDF )
+        {
+        	vector_Type ds_initial ( M_displacementFESpace->map() );
+        	ds_initial.zero();
+        	for ( UInt i = 0; i < (M_orderBDFSolid+1); ++i )
+        		initialStateSolid.push_back(ds_initial);
+        }
+        else
+        {
+        	vectorPtr_Type ds_initial ( new vector_Type ( M_displacementFESpace->map() ) );
+        	vectorPtr_Type vs_initial ( new vector_Type ( M_displacementFESpace->map() ) );
+        	vectorPtr_Type as_initial ( new vector_Type ( M_displacementFESpace->map() ) );
+        	ds_initial->zero();
+        	vs_initial->zero();
+        	as_initial->zero();
+        	M_structureTimeAdvance->initialize(ds_initial, vs_initial, as_initial);
+        }
     }
     else
     {
@@ -602,6 +636,12 @@ void FSIHandler::initializeTimeAdvance ( )
 
     // ALE
     M_aleTimeAdvance->initialize(initialStateALE);
+
+    // Solid - BDF case
+    if ( M_useBDF )
+    {
+    	M_structureTimeAdvanceBDF->initialize(initialStateSolid);
+    }
 
     // Post-Processing of the initial solution
 	M_exporterFluid->postProcess(M_t_zero);
@@ -880,16 +920,32 @@ FSIHandler::assembleCoupling ( )
 
 	if ( M_lambda_num_structure )
 	{
-		M_coupling->setUp ( M_dt, M_structureInterfaceMap->mapSize()/3.0 , M_structureTimeAdvance->get_beta(), M_structureTimeAdvance->get_gamma(),
-							M_lagrangeMap, M_fluid->uFESpace(), M_displacementFESpace, M_numerationInterface );
+		if ( M_useBDF )
+		{
+			M_coupling->setUp ( M_dt, M_structureInterfaceMap->mapSize()/3.0 , M_structureTimeAdvanceBDF->coefficientFirstDerivative(),
+							    M_lagrangeMap, M_fluid->uFESpace(), M_displacementFESpace, M_numerationInterface );
+		}
+		else
+		{
+			M_coupling->setUp ( M_dt, M_structureInterfaceMap->mapSize()/3.0 , M_structureTimeAdvance->get_beta(), M_structureTimeAdvance->get_gamma(),
+								M_lagrangeMap, M_fluid->uFESpace(), M_displacementFESpace, M_numerationInterface );
+		}
 	}
 	else
 	{
-		M_coupling->setUp ( M_dt, M_fluidInterfaceMap->mapSize()/3.0 , M_structureTimeAdvance->get_beta(), M_structureTimeAdvance->get_gamma(),
-							M_lagrangeMap, M_fluid->uFESpace(), M_displacementFESpace, M_numerationInterface );
+		if ( M_useBDF )
+		{
+			M_coupling->setUp ( M_dt, M_fluidInterfaceMap->mapSize()/3.0 , M_structureTimeAdvanceBDF->coefficientFirstDerivative(),
+								M_lagrangeMap, M_fluid->uFESpace(), M_displacementFESpace, M_numerationInterface );
+		}
+		else
+		{
+			M_coupling->setUp ( M_dt, M_fluidInterfaceMap->mapSize()/3.0 , M_structureTimeAdvance->get_beta(), M_structureTimeAdvance->get_gamma(),
+								M_lagrangeMap, M_fluid->uFESpace(), M_displacementFESpace, M_numerationInterface );
+		}
 	}
 
-	M_coupling->buildBlocks ( *M_localDofMap, M_lambda_num_structure );
+	M_coupling->buildBlocks ( *M_localDofMap, M_lambda_num_structure, M_useBDF );
 }
 
 void
@@ -952,15 +1008,27 @@ FSIHandler::getMatrixStructure ( )
 void
 FSIHandler::get_structure_coupling_velocities ( )
 {
-	M_structureTimeAdvance->compute_csi( );
+	if ( M_useBDF )
+	{
+		M_rhsStructureVelocity.reset ( new vector_Type ( M_displacementFESpace->map(), Unique ) );
 
-	M_rhsStructureVelocity.reset ( new vector_Type ( M_displacementFESpace->map(), Unique ) );
+		M_structureTimeAdvanceBDF->first_der_old_dts( *M_rhsStructureVelocity );
 
-	M_rhsStructureVelocity->zero();
+		*M_rhsStructureVelocity *= ( -1.0 / M_dt );
 
-	*M_rhsStructureVelocity = ( ( M_dt * M_structureTimeAdvance->get_gamma() ) * (*M_structureTimeAdvance->get_csi() )   -
-								( M_dt * ( 1.0 - M_structureTimeAdvance->get_gamma() ) ) * ( *M_structureTimeAdvance->old_second_derivative() ) -
-								*M_structureTimeAdvance->old_first_derivative() );
+	}
+	else
+	{
+		M_structureTimeAdvance->compute_csi( );
+
+		M_rhsStructureVelocity.reset ( new vector_Type ( M_displacementFESpace->map(), Unique ) );
+
+		M_rhsStructureVelocity->zero();
+
+		*M_rhsStructureVelocity = ( ( M_dt * M_structureTimeAdvance->get_gamma() ) * (*M_structureTimeAdvance->get_csi() )   -
+									( M_dt * ( 1.0 - M_structureTimeAdvance->get_gamma() ) ) * ( *M_structureTimeAdvance->old_second_derivative() ) -
+									*M_structureTimeAdvance->old_first_derivative() );
+	}
 }
 
 void
@@ -1189,13 +1257,24 @@ FSIHandler::solveFSIproblem ( )
 
 		// Updating all the time-advance objects
 		M_fluidTimeAdvance->shift(*M_fluidVelocity);
-		M_structureTimeAdvance->shift(M_structureDisplacement);
+
+		if ( M_useBDF )
+		{
+			M_structureTimeAdvanceBDF->shift(*M_structureDisplacement);
+		}
+		else
+		{
+			M_structureTimeAdvance->shift(M_structureDisplacement);
+		}
+
 		M_aleTimeAdvance->shift(*M_fluidDisplacement);
 
-		*M_structureVelocity  = *M_structureTimeAdvance->old_first_derivative();
+		if ( !M_useBDF )
+		{
+			*M_structureVelocity  = *M_structureTimeAdvance->old_first_derivative();
 
-		*M_structureAcceleration = *M_structureTimeAdvance->old_second_derivative();
-
+			*M_structureAcceleration = *M_structureTimeAdvance->old_second_derivative();
+		}
 
 		// This part below handles the exporter of the solution.
 		// In particular, given a number of timesteps at which
@@ -1367,12 +1446,24 @@ FSIHandler::solveTimeStep ( )
 
 	// Updating all the time-advance objects
 	M_fluidTimeAdvance->shift(*M_fluidVelocity);
-	M_structureTimeAdvance->shift(M_structureDisplacement);
+
+	if ( M_useBDF )
+	{
+		M_structureTimeAdvanceBDF->shift(*M_structureDisplacement);
+	}
+	else
+	{
+		M_structureTimeAdvance->shift(M_structureDisplacement);
+	}
+
 	M_aleTimeAdvance->shift(*M_fluidDisplacement);
 
-	*M_structureVelocity  = *M_structureTimeAdvance->old_first_derivative();
+	if ( !M_useBDF )
+	{
+		*M_structureVelocity  = *M_structureTimeAdvance->old_first_derivative();
 
-	*M_structureAcceleration = *M_structureTimeAdvance->old_second_derivative();
+		*M_structureAcceleration = *M_structureTimeAdvance->old_second_derivative();
+	}
 }
 
 void
@@ -1869,9 +1960,22 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		// Vector containing the residual of the structural part
 		res_ds->zero();
 
-		*res_ds = ( ( ( 1.0/ ( M_dt * M_dt * M_structureTimeAdvance->get_beta() ) ) * ( (*M_structure->mass_matrix_no_bc() ) * (*ds_k) ) ) +
-				  ( (*M_structure->stiffness_matrix_no_bc() ) * (*ds_k) ) -
-				  ( (*M_structure->mass_matrix_no_bc() ) * (*M_structureTimeAdvance->get_csi()) ) );
+		if ( M_useBDF )
+		{
+			vectorPtr_Type old_second_der_terms ( new vector_Type ( M_displacementFESpace->map() ) );
+			old_second_der_terms->zero();
+			M_structureTimeAdvanceBDF->second_der_old_dts(*old_second_der_terms);
+
+			*res_ds = ( ( ( 1.0 / ( M_dt * M_dt ) * M_structureTimeAdvanceBDF->massCoefficient() ) * ( (*M_structure->mass_matrix_no_bc() ) * (*ds_k) ) ) +
+					  ( (*M_structure->stiffness_matrix_no_bc() ) * (*ds_k) ) -
+					  ( ( 1.0 / ( M_dt * M_dt ) ) * ( ( *M_structure->mass_matrix_no_bc() ) * ( *old_second_der_terms ) ) ) );
+		}
+		else
+		{
+			*res_ds = ( ( ( 1.0/ ( M_dt * M_dt * M_structureTimeAdvance->get_beta() ) ) * ( (*M_structure->mass_matrix_no_bc() ) * (*ds_k) ) ) +
+					  ( (*M_structure->stiffness_matrix_no_bc() ) * (*ds_k) ) -
+					  ( (*M_structure->mass_matrix_no_bc() ) * (*M_structureTimeAdvance->get_csi()) ) );
+		}
 
 		// WARNING: INTERPOLATING THE WEAK RESIDUAL FOR THE MOMENT, LATER USING THE MASSES
 
@@ -2017,15 +2121,41 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 		if ( M_linearElasticity )
 		{
-			*res_ds = ( ( ( 1.0/ ( M_dt * M_dt * M_structureTimeAdvance->get_beta() ) ) * ( (*M_structure->mass_matrix_no_bc() ) * (*ds_k) ) ) +
-						( (*M_structure->stiffness_matrix_no_bc() ) * (*ds_k) ) +
-						( (*M_coupling->lambdaToStructureMomentum() ) * (*lambda_k) ) -
-						( (*M_structure->mass_matrix_no_bc() ) * (*M_structureTimeAdvance->get_csi()) ) );
+			if ( M_useBDF )
+			{
+				vectorPtr_Type old_second_der_terms ( new vector_Type ( M_displacementFESpace->map() ) );
+				old_second_der_terms->zero();
+				M_structureTimeAdvanceBDF->second_der_old_dts(*old_second_der_terms);
+
+				*res_ds = ( ( ( 1.0 / ( M_dt * M_dt ) * M_structureTimeAdvanceBDF->massCoefficient() ) * ( (*M_structure->mass_matrix_no_bc() ) * (*ds_k) ) ) +
+						    ( (*M_structure->stiffness_matrix_no_bc() ) * (*ds_k) ) +
+						    ( (*M_coupling->lambdaToStructureMomentum() ) * (*lambda_k) ) +
+						    ( ( 1.0 / ( M_dt * M_dt ) ) * ( ( *M_structure->mass_matrix_no_bc() ) * ( *old_second_der_terms ) ) ) );
+			}
+			else
+			{
+				*res_ds = ( ( ( 1.0/ ( M_dt * M_dt * M_structureTimeAdvance->get_beta() ) ) * ( (*M_structure->mass_matrix_no_bc() ) * (*ds_k) ) ) +
+							( (*M_structure->stiffness_matrix_no_bc() ) * (*ds_k) ) +
+							( (*M_coupling->lambdaToStructureMomentum() ) * (*lambda_k) ) -
+							( (*M_structure->mass_matrix_no_bc() ) * (*M_structureTimeAdvance->get_csi()) ) );
+			}
 		}
 		else
 		{
-			Real coefficient = 1.0/ ( M_dt * M_dt * M_structureTimeAdvance->get_beta() );
-			M_structureNeoHookean->evaluate_residual(ds_k, coefficient, M_structureTimeAdvance->get_csi(), res_ds );
+			if ( M_useBDF )
+			{
+				Real coefficient = 1.0/ ( M_dt * M_dt ) * M_structureTimeAdvanceBDF->massCoefficient();
+				vectorPtr_Type old_second_der_terms ( new vector_Type ( M_displacementFESpace->map() ) );
+				old_second_der_terms->zero();
+				M_structureTimeAdvanceBDF->second_der_old_dts(*old_second_der_terms);
+				*old_second_der_terms *= ( 1.0 / ( M_dt * M_dt ) );
+				M_structureNeoHookean->evaluate_residual(ds_k, coefficient, old_second_der_terms, res_ds );
+			}
+			else
+			{
+				Real coefficient = 1.0/ ( M_dt * M_dt * M_structureTimeAdvance->get_beta() );
+				M_structureNeoHookean->evaluate_residual(ds_k, coefficient, M_structureTimeAdvance->get_csi(), res_ds );
+			}
 			*res_ds += ( (*M_coupling->lambdaToStructureMomentum() ) * (*lambda_k) );
 		}
 		//---------------------------------------//
@@ -2127,7 +2257,17 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		M_displayer.leaderPrint ( "\nAssembly Jacobian structure" ) ;
 		M_matrixStructure.reset (new matrix_Type ( M_displacementFESpace->map() ) );
 		M_matrixStructure->zero();
-		Real coefficient = 1.0/ ( M_dt * M_dt * M_structureTimeAdvance->get_beta() );
+
+		Real coefficient;
+		if ( M_useBDF )
+		{
+			coefficient = 1.0/ ( M_dt * M_dt ) * M_structureTimeAdvanceBDF->massCoefficient();
+		}
+		else
+		{
+			coefficient = 1.0/ ( M_dt * M_dt * M_structureTimeAdvance->get_beta() );
+		}
+
 		M_structureNeoHookean->update_jacobian( ds_k, coefficient, M_matrixStructure);
 		bcManageMatrix( *M_matrixStructure, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC_residual,
 				        M_displacementFESpace->feBd(), 1.0, M_time);

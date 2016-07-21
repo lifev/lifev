@@ -63,7 +63,7 @@ LinearElasticity::setup( const meshPtr_Type& mesh, const std::string dOrder)
 }
 
 void
-LinearElasticity::assemble_matrices ( const Real timestep, const Real beta, bcPtr_Type & bc)
+LinearElasticity::assemble_matrices ( const Real timestep, const Real coeff, bcPtr_Type & bc, bool useBDF )
 {
 	ASSERT( M_density != 0.0, "density coefficient has not been set in LinearElasticity");
 	ASSERT( M_young != 0.0,   "young coefficient has not been set in LinearElasticity");
@@ -95,7 +95,16 @@ LinearElasticity::assemble_matrices ( const Real timestep, const Real beta, bcPt
 	// jacobian matrix
 
 	*M_jacobian += *M_mass_no_bc;
-	*M_jacobian *= ( 1.0/( timestep*timestep*beta ) );
+
+	if ( useBDF )
+	{
+		*M_jacobian *= ( 1.0/( timestep*timestep ) * coeff );
+	}
+	else
+	{
+		*M_jacobian *= ( 1.0/( timestep*timestep*coeff ) );
+	}
+
 	*M_jacobian += *M_stiffness_no_bc;
 
 	// Apply BC to the jacobian
