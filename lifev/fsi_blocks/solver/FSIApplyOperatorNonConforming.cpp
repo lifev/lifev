@@ -14,7 +14,8 @@ namespace Operators
 
 FSIApplyOperatorNonConforming::FSIApplyOperatorNonConforming():
     M_label("FSIApplyOperatorNonConforming"),
-    M_useTranspose(false)
+    M_useTranspose(false),
+    M_useBDFStructure (false)
 {
 
 }
@@ -300,8 +301,15 @@ FSIApplyOperatorNonConforming::Apply(const vector_Type & X, vector_Type & Y) con
 	VectorEpetraPtr_Type structure_vel( new VectorEpetra_Type ( *M_ds_map ) );
 	structure_vel->zero();
 
-	*structure_vel += ( M_gamma / (M_timeStep*M_beta) * (*M_X_displacement) );
-
+    if ( M_useBDFStructure )
+    {
+        *structure_vel += ( M_coefficientBDF / M_timeStep * (*M_X_displacement) );
+    }
+    else
+    {
+        *structure_vel += ( M_gamma / (M_timeStep*M_beta) * (*M_X_displacement) );
+    }
+    
 	M_StructureToFluidInterpolant->updateRhs(structure_vel);
 	M_StructureToFluidInterpolant->interpolate();
 

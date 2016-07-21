@@ -172,6 +172,8 @@ public:
     void setGamma (Real gamma){ M_gamma = gamma;};
 
     void setBeta (Real beta){ M_beta = beta;};
+    
+    void setBDFcoeff (Real bdf_coef){ M_coefficientBDF = bdf_coef; M_useBDFStructure = true; };
 
     //@}
 
@@ -303,7 +305,10 @@ private:
     Real M_gamma;
     Real M_beta;
 
+    Real M_coefficientBDF;
+
     bool M_useMasses;
+    bool M_useBDFStructure;
 
 };
 

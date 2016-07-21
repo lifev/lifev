@@ -1967,7 +1967,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 			M_structureTimeAdvanceBDF->second_der_old_dts(*old_second_der_terms);
 
 			*res_ds = ( ( ( 1.0 / ( M_dt * M_dt ) * M_structureTimeAdvanceBDF->massCoefficient() ) * ( (*M_structure->mass_matrix_no_bc() ) * (*ds_k) ) ) +
-					  ( (*M_structure->stiffness_matrix_no_bc() ) * (*ds_k) ) -
+					  ( (*M_structure->stiffness_matrix_no_bc() ) * (*ds_k) ) +
 					  ( ( 1.0 / ( M_dt * M_dt ) ) * ( ( *M_structure->mass_matrix_no_bc() ) * ( *old_second_der_terms ) ) ) );
 		}
 		else
@@ -2052,8 +2052,15 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		vectorPtr_Type structure_vel( new vector_Type ( M_displacementFESpace->map() ) );
 		structure_vel->zero();
 
-		*structure_vel = ( ( M_structureTimeAdvance->get_gamma()/(M_dt * M_structureTimeAdvance->get_beta() ) ) * (*ds_k) );
-
+        if ( M_useBDF )
+        {
+            *structure_vel = ( ( M_structureTimeAdvanceBDF->coefficientFirstDerivative()/ M_dt ) * (*ds_k) );
+        }
+        else
+        {
+            *structure_vel = ( ( M_structureTimeAdvance->get_gamma()/(M_dt * M_structureTimeAdvance->get_beta() ) ) * (*ds_k) );
+        }
+        
 		vectorPtr_Type res_couplingVel_omega_f ( new vector_Type ( M_fluid->uFESpace()->map() ) );
 		res_couplingVel_omega_f->zero();
 
@@ -2355,10 +2362,17 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 
 		M_applyOperatorJacobianNonConforming->setInterpolants ( M_FluidToStructureInterpolant, M_StructureToFluidInterpolant, M_useMasses );
 
-		M_applyOperatorJacobianNonConforming->setGamma ( M_structureTimeAdvance->get_gamma() );
-
-		M_applyOperatorJacobianNonConforming->setBeta ( M_structureTimeAdvance->get_beta() );
-
+        if ( M_useBDF )
+        {
+            M_applyOperatorJacobianNonConforming->setBDFcoeff ( M_structureTimeAdvanceBDF->coefficientFirstDerivative() );
+        }
+        else
+        {
+            M_applyOperatorJacobianNonConforming->setGamma ( M_structureTimeAdvance->get_gamma() );
+            
+            M_applyOperatorJacobianNonConforming->setBeta ( M_structureTimeAdvance->get_beta() );
+        }
+        
 		if ( M_useShapeDerivatives )
 		{
 			M_applyOperatorJacobianNonConforming->setShapeDerivativesBlocks ( M_ale->shapeDerivativesVelocity(),
@@ -2399,9 +2413,16 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
 
     if ( M_nonconforming)
     {
-    	M_prec->setGamma ( M_structureTimeAdvance->get_gamma() );
-    	M_prec->setBeta ( M_structureTimeAdvance->get_beta() );
-    	M_prec->setVelocityFESpace ( M_fluid->uFESpace() );
+        if ( M_useBDF )
+        {
+            M_prec->setBDFcoeff ( M_structureTimeAdvanceBDF->coefficientFirstDerivative() );
+        }
+        else
+        {
+            M_prec->setGamma ( M_structureTimeAdvance->get_gamma() );
+            M_prec->setBeta ( M_structureTimeAdvance->get_beta() );
+        }
+        M_prec->setVelocityFESpace ( M_fluid->uFESpace() );
     	M_prec->setBCInterface ( M_interfaceFluidBC );
     	M_prec->setTimeStep ( M_dt );
     	M_prec->setMonolithicMap ( M_monolithicMap );
