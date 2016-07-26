@@ -985,18 +985,36 @@ FSIHandler::getMatrixStructure ( )
 		M_alfaRobin.reset( new AlfaRobinFunctor() );
 
 		// ASSEMBLE ROBIN BC MATRIX AT THE INTERFACE
-		QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
+		if ( M_datafile("solid/robin_by_functor", false ) )
 		{
-			using namespace ExpressionAssembly;
-			integrate ( boundary (M_displacementETFESpace->mesh(), M_datafile("solid/externalWallFlag", 210 ) ),
-					myBDQR,
-					M_displacementETFESpace,
-					M_displacementETFESpace,
-					eval(M_alfaRobin, X) * dot(phi_i, phi_j)
-			)
-			>>M_interface_mass_structure_robin;
+			QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
+			{
+				using namespace ExpressionAssembly;
+				integrate ( boundary (M_displacementETFESpace->mesh(), M_datafile("solid/externalWallFlag", 210 ) ),
+						myBDQR,
+						M_displacementETFESpace,
+						M_displacementETFESpace,
+						eval ( M_alfaRobin, X ) * dot(phi_i, phi_j)
+				)
+				>>M_interface_mass_structure_robin;
+			}
+		}
+		else
+		{
+			QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
+			{
+				using namespace ExpressionAssembly;
+				integrate ( boundary (M_displacementETFESpace->mesh(), M_datafile("solid/externalWallFlag", 210 ) ),
+						myBDQR,
+						M_displacementETFESpace,
+						M_displacementETFESpace,
+						value ( alpha_robin ) * dot(phi_i, phi_j)
+				)
+				>>M_interface_mass_structure_robin;
+			}
 		}
 	}
+
 	M_interface_mass_structure_robin->globalAssemble();
 
 	*M_matrixStructure += *M_interface_mass_structure_robin;
