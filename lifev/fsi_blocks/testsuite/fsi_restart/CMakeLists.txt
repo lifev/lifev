@@ -42,48 +42,48 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(mesh_structure_tube_restart
 
 TRIBITS_COPY_FILES_TO_BINARY_DIR(fluid_results_h5_restart_P1
 CREATE_SYMLINK
-SOURCE_FILES result_p1_fluid.h5
+SOURCE_FILES fluid_P1P1.h5
 SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi_blocks/testsuite/fsi_restart
 )
 
 TRIBITS_COPY_FILES_TO_BINARY_DIR(fluid_results_xmf_restart_P1
 CREATE_SYMLINK
-SOURCE_FILES result_p1_fluid.xmf
+SOURCE_FILES fluid_P1P1.xmf
 SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi_blocks/testsuite/fsi_restart
 )
 
 TRIBITS_COPY_FILES_TO_BINARY_DIR(structure_results_h5_restart_P1
 CREATE_SYMLINK
-SOURCE_FILES result_p1_structure.h5
+SOURCE_FILES structure_P1.h5
 SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi_blocks/testsuite/fsi_restart
 )
 
 TRIBITS_COPY_FILES_TO_BINARY_DIR(structure_results_xmf_restart_P1
 CREATE_SYMLINK
-SOURCE_FILES result_p1_structure.xmf
+SOURCE_FILES structure_P1.xmf
 SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi_blocks/testsuite/fsi_restart
 )
  
 TRIBITS_COPY_FILES_TO_BINARY_DIR(fluid_results_h5_restart_P2
 CREATE_SYMLINK
-SOURCE_FILES result_p2_fluid.h5
+SOURCE_FILES fluid_P2P1.h5
 SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi_blocks/testsuite/fsi_restart
 )
 
 TRIBITS_COPY_FILES_TO_BINARY_DIR(fluid_results_xmf_restart_P2
 CREATE_SYMLINK
-SOURCE_FILES result_p2_fluid.xmf
+SOURCE_FILES fluid_P2P1.xmf
 SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi_blocks/testsuite/fsi_restart
 )
 
 TRIBITS_COPY_FILES_TO_BINARY_DIR(structure_results_h5_restart_P2
 CREATE_SYMLINK
-SOURCE_FILES result_p2_structure.h5
+SOURCE_FILES structure_P2.h5
 SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi_blocks/testsuite/fsi_restart
 )
 
 TRIBITS_COPY_FILES_TO_BINARY_DIR(structure_results_xmf_restart_P2
 CREATE_SYMLINK
-SOURCE_FILES result_p2_structure.xmf
+SOURCE_FILES structure_P2.xmf
 SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi_blocks/testsuite/fsi_restart
 )

@@ -100,6 +100,18 @@ bcPtr_Type BCh_structure ()
     return bc;
 }
 
+bcPtr_Type BCh_structure_residual ()
+{
+    BCFunctionBase zero_function (fZero);
+    
+    bcPtr_Type bc (new BCHandler );
+    
+    bc->addBC ("Inflow",     INLET,  	 Essential,      Full, zero_function, 3);
+    bc->addBC ("Outflow",    OUTLET, 	 Essential,      Full, zero_function, 3);
+    
+    return bc;
+}
+    
 bcPtr_Type BCh_ale ()
 {
     BCFunctionBase zero_function (fZero);
