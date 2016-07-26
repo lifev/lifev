@@ -304,6 +304,7 @@ void FSIHandler::setupExporters( )
 	M_fluidVelocity.reset ( new VectorEpetra ( M_fluid->uFESpace()->map(), M_exporterFluid->mapType() ) );
 	M_fluidPressure.reset ( new VectorEpetra ( M_fluid->pFESpace()->map(), M_exporterFluid->mapType() ) );
 	M_fluidDisplacement.reset ( new VectorEpetra ( M_aleFESpace->map(), M_exporterFluid->mapType() ) );
+    M_Lagrange.reset ( new VectorEpetra ( M_fluid->uFESpace()->map(), M_exporterFluid->mapType() ) );
 	M_structureDisplacement.reset ( new VectorEpetra ( M_displacementFESpace->map(), M_exporterStructure->mapType() ) );
 	M_structureVelocity.reset ( new VectorEpetra ( M_displacementFESpace->map(), M_exporterStructure->mapType() ) );
 	M_structureAcceleration.reset ( new VectorEpetra ( M_displacementFESpace->map(), M_exporterStructure->mapType() ) );
@@ -311,6 +312,7 @@ void FSIHandler::setupExporters( )
     M_fluidVelocity->zero();
     M_fluidPressure->zero();
     M_fluidDisplacement->zero();
+    M_Lagrange->zero(); // vector needed for a correct restart of the FSI simulation
     M_structureDisplacement->zero();
     M_structureVelocity->zero();
     M_structureAcceleration->zero();
@@ -318,6 +320,8 @@ void FSIHandler::setupExporters( )
 	M_exporterFluid->addVariable ( ExporterData<mesh_Type>::VectorField, "f - velocity", M_fluid->uFESpace(), M_fluidVelocity, UInt (0) );
 	M_exporterFluid->addVariable ( ExporterData<mesh_Type>::ScalarField, "f - pressure", M_fluid->pFESpace(), M_fluidPressure, UInt (0) );
 	M_exporterFluid->addVariable ( ExporterData<mesh_Type>::VectorField, "f - displacement", M_aleFESpace, M_fluidDisplacement, UInt (0) );
+    M_exporterFluid->addVariable ( ExporterData<mesh_Type>::VectorField, "f - lagrange", M_fluid->uFESpace(), M_Lagrange, UInt (0) );
+    
 	M_exporterStructure->addVariable ( ExporterData<mesh_Type>::VectorField, "s - displacement", M_displacementFESpace, M_structureDisplacement, UInt (0) );
 	if ( !M_useBDF )
 	{
@@ -533,6 +537,10 @@ void FSIHandler::initializeTimeAdvance ( )
             aleRestart.reset ( new vector_Type (M_aleFESpace->map(),  Unique ) );
             aleRestart->zero();
             
+            vectorPtr_Type lagrangeRestart;
+            lagrangeRestart.reset ( new vector_Type (M_fluid->uFESpace()->map(),  Unique ) );
+            lagrangeRestart->zero();
+            
             vectorPtr_Type structureRestart;
             structureRestart.reset ( new vector_Type (M_displacementFESpace->map(),  Unique ) );
             structureRestart->zero();
@@ -566,6 +574,13 @@ void FSIHandler::initializeTimeAdvance ( )
                                                            UInt (0),
                                                            LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
             
+            LifeV::ExporterData<mesh_Type> lagrangeReader (LifeV::ExporterData<mesh_Type>::VectorField,
+                                                           std::string ("f - lagrange." + iterationString),
+                                                           M_fluid->uFESpace(),
+                                                           lagrangeRestart,
+                                                           UInt (0),
+                                                           LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+            
             LifeV::ExporterData<mesh_Type> structureReader(LifeV::ExporterData<mesh_Type>::VectorField,
                                                            std::string ("s - displacement." + iterationString),
                                                            M_displacementFESpace,
@@ -591,6 +606,7 @@ void FSIHandler::initializeTimeAdvance ( )
             M_importerFluid->readVariable (velocityReader);
             M_importerFluid->readVariable (pressureReader);
             M_importerFluid->readVariable (aleReader);
+            M_importerFluid->readVariable (lagrangeReader);
             M_importerStructure->readVariable (structureReader);
             M_importerStructure->readVariable (structureVelocityReader);
             M_importerStructure->readVariable (structureAccelerationReader);
@@ -603,6 +619,7 @@ void FSIHandler::initializeTimeAdvance ( )
                 *M_fluidVelocity = *velocityRestart;
                 *M_fluidPressure = *pressureRestart;
                 *M_fluidDisplacement = *aleRestart;
+                *M_Lagrange = *lagrangeRestart;
                 *M_structureDisplacement = *structureRestart;
                 *M_structureVelocity = *structureVelocityRestart;
                 *M_structureAcceleration = *structureAccelerationRestart;
@@ -1141,8 +1158,11 @@ FSIHandler::solveFSIproblem ( )
         M_solution->subset(*M_fluidVelocity, M_fluid->uFESpace()->map(), 0, 0);
         M_solution->subset(*M_fluidPressure, M_fluid->pFESpace()->map(), 0, M_fluid->uFESpace()->map().mapSize());
         M_solution->subset(*M_structureDisplacement, M_displacementFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize());
-        M_solution->subset(*M_fluidDisplacement, M_aleFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
-                           M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize() );
+        M_LagrangeRestart.reset( new vector_Type (*M_lagrangeMap, Unique ) );
+        *M_LagrangeRestart = ( *(M_coupling->fluidVelocityToLambda()) * (*M_Lagrange) );
+        M_solution->subset(*M_LagrangeRestart, *M_lagrangeMap, 0, M_fluid->uFESpace()->map().mapSize() +
+                            M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize() );
+        M_solution->subset(*M_fluidDisplacement, M_aleFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize() );
     }
 
 	// Apply boundary conditions for the ale problem (the matrix will not change during the simulation)
@@ -1226,10 +1246,9 @@ FSIHandler::solveFSIproblem ( )
 		applyBCsolution ( M_solution );
 
 		M_maxiterNonlinear = 10;
-
+        
 		// Using the solution at the previous timestep as initial guess -> TODO: extrapolation
-		UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
-											M_nonLinearLineSearch, 0, 2, M_out_res, M_time);
+		UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax, M_nonLinearLineSearch, 0, 2, M_out_res, M_time);
 
 		time_timestep = omp_get_wtime() - time_timestep;
 		M_displayer.leaderPrint ( "\n" ) ;
@@ -1251,8 +1270,15 @@ FSIHandler::solveFSIproblem ( )
 		// Export the solution obtained at the current timestep
 		M_fluidVelocity->subset(*M_solution, M_fluid->uFESpace()->map(), 0, 0);
 		M_fluidPressure->subset(*M_solution, M_fluid->pFESpace()->map(), M_fluid->uFESpace()->map().mapSize(), 0);
-		M_fluidDisplacement->subset(*M_solution, M_aleFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
-         	   	  	  	  	  	  	  	  	  	  	  	  	  	  	  M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize(), 0);
+        
+        vector_Type lagrange (*M_lagrangeMap, Unique);
+        lagrange.zero();
+        lagrange.subset(*M_solution, *M_lagrangeMap, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
+                        M_displacementFESpace->map().mapSize(), 0);
+
+        *M_Lagrange = ( *(M_coupling->lambdaToFluidMomentum()) * lagrange );
+        
+        M_fluidDisplacement->subset(*M_solution, M_aleFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize(), 0);
 		M_structureDisplacement->subset(*M_solution, M_displacementFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize(), 0);
 
 		// Updating all the time-advance objects
@@ -1334,8 +1360,8 @@ FSIHandler::intializeTimeLoop ( )
 		M_solution->subset(*M_fluidVelocity, M_fluid->uFESpace()->map(), 0, 0);
 		M_solution->subset(*M_fluidPressure, M_fluid->pFESpace()->map(), 0, M_fluid->uFESpace()->map().mapSize());
 		M_solution->subset(*M_structureDisplacement, M_displacementFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize());
-		M_solution->subset(*M_fluidDisplacement, M_aleFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
-						   M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize() );
+        *M_Lagrange = ( *(M_coupling->fluidVelocityToLambda()) * (*M_LagrangeRestart) );
+		M_solution->subset(*M_fluidDisplacement, M_aleFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize()+M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize() );
 	}
 
 	// Apply boundary conditions for the ale problem (the matrix will not change during the simulation)
@@ -1440,8 +1466,9 @@ FSIHandler::solveTimeStep ( )
 	// Export the solution obtained at the current timestep
 	M_fluidVelocity->subset(*M_solution, M_fluid->uFESpace()->map(), 0, 0);
 	M_fluidPressure->subset(*M_solution, M_fluid->pFESpace()->map(), M_fluid->uFESpace()->map().mapSize(), 0);
-	M_fluidDisplacement->subset(*M_solution, M_aleFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
-			M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize(), 0);
+    M_Lagrange->subset(*M_solution, *M_lagrangeMap, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
+                          M_displacementFESpace->map().mapSize(), 0);
+    M_fluidDisplacement->subset(*M_solution, M_aleFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize(), 0);
 	M_structureDisplacement->subset(*M_solution, M_displacementFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize(), 0);
 
 	// Updating all the time-advance objects
@@ -1500,211 +1527,6 @@ FSIHandler::finalizeExporters ( )
 	M_exporterFluid->closeFile();
 	M_exporterStructure->closeFile();
 }
-
-//void
-//FSIHandler::solveFSIproblemAorta ( )
-//{
-//	LifeChrono iterChrono;
-//	LifeChrono smallThingsChrono;
-//	M_time = M_t_zero + M_dt;
-
-//	// Clean unpartitioned mesh
-//	M_fluidMesh.reset();
-//	M_structureMesh.reset();
-//
-//	// Build monolithic map
-//	buildMonolithicMap ( );
-//
-//    M_solution.reset ( new VectorEpetra ( *M_monolithicMap ) );
-//    M_solution->zero();
-//
-//    if ( M_restart )
-//    {
-//        M_solution.reset ( new VectorEpetra ( *M_monolithicMap ) );
-//        M_solution->zero();
-//
-//        M_solution->subset(*M_fluidVelocity, M_fluid->uFESpace()->map(), 0, 0);
-//        M_solution->subset(*M_fluidPressure, M_fluid->pFESpace()->map(), 0, M_fluid->uFESpace()->map().mapSize());
-//        M_solution->subset(*M_structureDisplacement, M_displacementFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize());
-//        M_solution->subset(*M_fluidDisplacement, M_aleFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
-//                           M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize() );
-//    }
-//
-//	// Apply boundary conditions for the ale problem (the matrix will not change during the simulation)
-//	M_ale->applyBoundaryConditions ( *M_aleBC );
-//
-//	// Apply boundary conditions for the structure problem (the matrix will not change during the simulation, it is linear elasticity)
-//	if ( M_linearElasticity )
-//	{
-//		getMatrixStructure ( );
-//		M_displayer.leaderPrint ( "\t Set and approximate structure block in the preconditioner.. " ) ;
-//		smallThingsChrono.start();
-//		M_prec->setStructureBlock ( M_matrixStructure );
-//		M_prec->updateApproximatedStructureMomentumOperator ( );
-//		smallThingsChrono.stop();
-//		M_displayer.leaderPrintMax ( "done in ", smallThingsChrono.diff() ) ;
-//	}
-//
-//	// Set blocks for the preconditioners: geometry
-//	smallThingsChrono.reset();
-//	M_displayer.leaderPrint ( "\t Set and approximate geometry block in the preconditioner... " ) ;
-//	smallThingsChrono.start();
-//	M_prec->setGeometryBlock ( M_ale->matrix() );
-//	M_prec->updateApproximatedGeometryOperator ( );
-//	smallThingsChrono.stop();
-//	M_displayer.leaderPrintMax ( "done in ", smallThingsChrono.diff() ) ;
-//
-//	if ( M_nonconforming )
-//	{
-//		M_prec->setCouplingOperators_nonconforming(M_FluidToStructureInterpolant, M_StructureToFluidInterpolant, M_lagrangeMap);
-//		if ( M_useMasses)
-//		{
-//			M_displayer.leaderPrint ( "[FSI] - Assemble interface mass of the structure for coupling of stresses\n" ) ;
-//			assembleStructureInterfaceMass ( );
-//		}
-//	}
-//	else
-//	{
-//		// Set the coupling blocks in the preconditioner
-//		M_prec->setCouplingBlocks ( M_coupling->lambdaToFluidMomentum(),
-//									M_coupling->lambdaToStructureMomentum(),
-//									M_coupling->structureDisplacementToLambda(),
-//									M_coupling->fluidVelocityToLambda(),
-//									M_coupling->structureDisplacementToFluidDisplacement() );
-//	}
-//
-//	M_prec->setMonolithicMap ( M_monolithicMap );
-
-//	int time_step_count = 0;
-//
-//	int max_index_outflows = 19;
-//	static std::vector<Real> p_n(max_index_outflows, 0.0);
-//	static std::vector<Real> q_n(max_index_outflows, 0.0);
-//	std::vector<UInt> flags{3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19};
-//
-//	for ( ; M_time <= M_t_end + M_dt / 2.; M_time += M_dt)
-//	{
-//		Vector normals = M_fluid->normal(2);
-//		std::cout << "\n\nArea = " << M_fluid->area(2) << ", geo center = " << M_fluid->geometricCenter(2) << ", normal = " << normals;
-//		if ( M_prescribeInflowFlowrate )
-//		{
-//			S_inflowFlowrateImposed = getFluxInflow(M_time);
-//		}
-//
-//		if ( M_prescribeInflowFlowrate )
-//		{
-//			for ( int i = 0; i < flags.size(); ++i )
-//			{
-//				p_n[flags[i]] = M_fluid->pres(flags[i], *M_fluidPressure);
-//				q_n[flags[i]] = M_fluid->flux(flags[i], *M_fluidVelocity );
-//			}
-//		}
-//
-//        if ( M_comm->MyPID()==0 )
-//        {
-//            M_outputLinearIterations << std::endl;
-//            M_outputPreconditionerComputation << std::endl;
-//            M_outputTimeLinearSolver << std::endl;
-//        }
-//
-//        time_step_count += 1;
-//
-//		M_displayer.leaderPrint ( "\n-----------------------------------\n" ) ;
-//		M_displayer.leaderPrintMax ( "FSI - solving now for time ", M_time ) ;
-//		M_displayer.leaderPrint ( "\n" ) ;
-//		double time_timestep = omp_get_wtime();
-//
-//		updateSystem ( );
-//
-//		if ( M_extrapolateInitialGuess && M_time == (M_t_zero + M_dt) )
-//		{
-//			M_displayer.leaderPrint ( "FSI - initializing extrapolation of initial guess\n" ) ;
-//			initializeExtrapolation ( );
-//		}
-//
-//		if ( M_extrapolateInitialGuess )
-//		{
-//			M_displayer.leaderPrint ( "FSI - Extrapolating initial guess for Newton\n" ) ;
-//			M_extrapolationSolution->extrapolate (M_orderExtrapolationInitialGuess, *M_solution);
-//		}
-//
-//		// Apply current BC to the solution vector
-//		applyBCsolution ( M_solution );
-//
-//		M_maxiterNonlinear = 10;
-//
-//		// Using the solution at the previous timestep as initial guess -> TODO: extrapolation
-//		UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
-//											M_nonLinearLineSearch, 0, 2, M_out_res, M_time);
-//
-//		time_timestep = omp_get_wtime() - time_timestep;
-//		M_displayer.leaderPrint ( "\n" ) ;
-//		M_displayer.leaderPrintMax ( "FSI - timestep solved in ", time_timestep ) ;
-//		M_displayer.leaderPrint ( "-----------------------------------\n\n" ) ;
-//
-//		// Writing the norms into a file
-//		if ( M_comm->MyPID()==0 )
-//		{
-//			// M_outputTimeStep << "Time = " << M_time << " solved in " << iterChrono.diff() << " seconds" << std::endl;
-//			M_outputTimeStep << M_time << ", " << iterChrono.diff() << std::endl;
-//		}
-//
-//		iterChrono.reset();
-//
-//		if ( M_extrapolateInitialGuess )
-//			M_extrapolationSolution->shift(*M_solution);
-//
-//		// Export the solution obtained at the current timestep
-//		M_fluidVelocity->subset(*M_solution, M_fluid->uFESpace()->map(), 0, 0);
-//		M_fluidPressure->subset(*M_solution, M_fluid->pFESpace()->map(), M_fluid->uFESpace()->map().mapSize(), 0);
-//		M_fluidDisplacement->subset(*M_solution, M_aleFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
-//         	   	  	  	  	  	  	  	  	  	  	  	  	  	  	  M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize(), 0);
-//		M_structureDisplacement->subset(*M_solution, M_displacementFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize(), 0);
-//
-//		// Updating all the time-advance objects
-//		M_fluidTimeAdvance->shift(*M_fluidVelocity);
-//		M_structureTimeAdvance->shift(M_structureDisplacement);
-//		M_aleTimeAdvance->shift(*M_fluidDisplacement);
-//
-//		*M_structureVelocity  = *M_structureTimeAdvance->old_first_derivative();
-//
-//		*M_structureAcceleration = *M_structureTimeAdvance->old_second_derivative();
-//
-//
-//		// This part below handles the exporter of the solution.
-//		// In particular, given a number of timesteps at which
-//		// we ask to export the solution (from datafile), here
-//		// the code takes care of exporting the solution also at
-//		// the previous timesteps such that, if later a restart
-//		// of the simulation is performed, it works correctly.
-//		if ( M_orderBDF == 1 )
-//		{
-//			if ( time_step_count == M_counterSaveEvery )
-//			{
-//				M_exporterFluid->postProcess(M_time);
-//				M_exporterStructure->postProcess(M_time);
-//				M_counterSaveEvery += M_saveEvery;
-//			}
-//		}
-//		else if ( M_orderBDF == 2 )
-//		{
-//			if ( time_step_count == (M_counterSaveEvery-1) && !M_disregardRestart )
-//			{
-//				M_exporterFluid->postProcess(M_time);
-//				M_exporterStructure->postProcess(M_time);
-//			}
-//			else if ( time_step_count == M_counterSaveEvery )
-//			{
-//				M_exporterFluid->postProcess(M_time);
-//				M_exporterStructure->postProcess(M_time);
-//				M_counterSaveEvery += M_saveEvery;
-//			}
-//		}
-//	}
-//
-//	M_exporterFluid->closeFile();
-//	M_exporterStructure->closeFile();
-//}
 
 void
 FSIHandler::initializeExtrapolation( )
@@ -1960,22 +1782,43 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		// Vector containing the residual of the structural part
 		res_ds->zero();
 
-		if ( M_useBDF )
-		{
-			vectorPtr_Type old_second_der_terms ( new vector_Type ( M_displacementFESpace->map() ) );
-			old_second_der_terms->zero();
-			M_structureTimeAdvanceBDF->second_der_old_dts(*old_second_der_terms);
+        if ( M_linearElasticity )
+        {
+            if ( M_useBDF )
+            {
+                vectorPtr_Type old_second_der_terms ( new vector_Type ( M_displacementFESpace->map() ) );
+                old_second_der_terms->zero();
+                M_structureTimeAdvanceBDF->second_der_old_dts(*old_second_der_terms);
 
-			*res_ds = ( ( ( 1.0 / ( M_dt * M_dt ) * M_structureTimeAdvanceBDF->massCoefficient() ) * ( (*M_structure->mass_matrix_no_bc() ) * (*ds_k) ) ) +
-					  ( (*M_structure->stiffness_matrix_no_bc() ) * (*ds_k) ) +
-					  ( ( 1.0 / ( M_dt * M_dt ) ) * ( ( *M_structure->mass_matrix_no_bc() ) * ( *old_second_der_terms ) ) ) );
-		}
-		else
-		{
-			*res_ds = ( ( ( 1.0/ ( M_dt * M_dt * M_structureTimeAdvance->get_beta() ) ) * ( (*M_structure->mass_matrix_no_bc() ) * (*ds_k) ) ) +
-					  ( (*M_structure->stiffness_matrix_no_bc() ) * (*ds_k) ) -
-					  ( (*M_structure->mass_matrix_no_bc() ) * (*M_structureTimeAdvance->get_csi()) ) );
-		}
+                *res_ds = ( ( ( 1.0 / ( M_dt * M_dt ) * M_structureTimeAdvanceBDF->massCoefficient() ) * ( (*M_structure->mass_matrix_no_bc() ) * (*ds_k) ) ) +
+                          ( (*M_structure->stiffness_matrix_no_bc() ) * (*ds_k) ) +
+                          ( ( 1.0 / ( M_dt * M_dt ) ) * ( ( *M_structure->mass_matrix_no_bc() ) * ( *old_second_der_terms ) ) ) );
+            }
+            else
+            {
+                *res_ds = ( ( ( 1.0/ ( M_dt * M_dt * M_structureTimeAdvance->get_beta() ) ) * ( (*M_structure->mass_matrix_no_bc() ) * (*ds_k) ) ) +
+                          ( (*M_structure->stiffness_matrix_no_bc() ) * (*ds_k) ) -
+                          ( (*M_structure->mass_matrix_no_bc() ) * (*M_structureTimeAdvance->get_csi()) ) );
+            }
+        }
+        else
+        {
+            if ( M_useBDF )
+            {
+                Real coefficient = 1.0/ ( M_dt * M_dt ) * M_structureTimeAdvanceBDF->massCoefficient();
+                vectorPtr_Type old_second_der_terms ( new vector_Type ( M_displacementFESpace->map() ) );
+                old_second_der_terms->zero();
+                M_structureTimeAdvanceBDF->second_der_old_dts(*old_second_der_terms);
+                *old_second_der_terms *= ( 1.0 / ( M_dt * M_dt ) );
+                M_structureNeoHookean->evaluate_residual(ds_k, coefficient, old_second_der_terms, res_ds );
+            }
+            else
+            {
+                Real coefficient = 1.0/ ( M_dt * M_dt * M_structureTimeAdvance->get_beta() );
+                M_structureNeoHookean->evaluate_residual(ds_k, coefficient, M_structureTimeAdvance->get_csi(), res_ds );
+            }
+
+        }
 
 		// WARNING: INTERPOLATING THE WEAK RESIDUAL FOR THE MOMENT, LATER USING THE MASSES
 
@@ -2116,13 +1959,15 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		// Residual for the fluid //
 		//------------------------//
 
-		// Evaluate the residual coming from the fluid ( without coupling for the moment )
+        // Evaluate the residual coming from the fluid ( without coupling for the moment )
 		M_fluid->evaluateResidual( M_beta, u_k, p_k, M_rhs_velocity, res_u, res_p);
 
-		// Adding the coupling contribution
+        // Adding the coupling contribution
 		*res_u += ( *(M_coupling->lambdaToFluidMomentum()) * (*lambda_k) );
 
-		//------------------------//
+		//res_u->spy("res_u");
+        
+        //------------------------//
 		// Residual for the solid //
 		//------------------------//
 
@@ -2246,7 +2091,8 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		}
 	}
 
-
+    //int aaaaa;
+    //std::cin >> aaaaa;
 	//---------------------------------------------//
 	// Post-step: update the Jacobian of the fluid //
 	//---------------------------------------------//

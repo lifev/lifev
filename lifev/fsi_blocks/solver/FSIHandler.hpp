@@ -358,6 +358,8 @@ private:
 	vectorPtr_Type M_fluidVelocity;
 	vectorPtr_Type M_fluidPressure;
 	vectorPtr_Type M_fluidDisplacement;
+    vectorPtr_Type M_Lagrange;
+    vectorPtr_Type M_LagrangeRestart;
 	vectorPtr_Type M_structureDisplacement;
 	vectorPtr_Type M_structureVelocity;
 	vectorPtr_Type M_structureAcceleration;
