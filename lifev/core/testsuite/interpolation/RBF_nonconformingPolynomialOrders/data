@@ -25,13 +25,18 @@
 [solid]
     [./space_discretization]
        	mesh_dir                 = ./
-       	mesh_file                = tube20.mesh
+       	mesh_file                = tube20_circ.mesh
        	mesh_type                = .mesh
-		order                    = P2
+		order                    = P1
 	
 	[../]
 [../]	
-    
+
+[flag]
+    interface = 1
+
+[../]
+
 [prec]
     prectype                     = Ifpack # Ifpack or ML
     displayList                  = false

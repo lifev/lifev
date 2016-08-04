@@ -95,7 +95,7 @@ Real exact_sol (const Real& /*t*/, const Real& x, const Real& y, const Real& z, 
 	}
 }
 
-Real exact_sol_easy (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
+Real exact_sol_easy (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
 	switch (i)
 	{
@@ -117,6 +117,9 @@ Real exact_sol_easy (const Real& /*t*/, const Real& x, const Real& y, const Real
 
 int main (int argc, char** argv )
 {
+    // Testing interpolation between the interface between two grids that are nonconforming
+    // and discretized by nonconforming FE spaces
+    
     typedef VectorEpetra                          vector_Type;
     typedef boost::shared_ptr<vector_Type >       vectorPtr_Type;
     typedef RegionMesh<LinearTetra >              mesh_Type;
@@ -133,7 +136,7 @@ int main (int argc, char** argv )
 
     // DATAFILE
     GetPot command_line (argc, argv);
-    GetPot dataFile ( command_line.follow ("data_rbf3d", 2, "-f", "--file" ) );
+    GetPot dataFile ( command_line.follow ("data", 2, "-f", "--file" ) );
 
     // BELOS XML file
     Teuchos::RCP< Teuchos::ParameterList > belosList = Teuchos::rcp ( new Teuchos::ParameterList );
@@ -161,11 +164,10 @@ int main (int argc, char** argv )
     Fluid_mesh_part.doPartition (Fluid_mesh_ptr, Comm);
     Fluid_localMesh = Fluid_mesh_part.meshPartition();
 
-    // ORDINE SPAZI FE
+    // FE spaces
     std::string orderFluid = dataFile("fluid/space_discretization/order","default");
     std::string orderStructure = dataFile("solid/space_discretization/order","default");
 
-    // CREO SPAZI ELEMENTI FINITI
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > Solid_fieldFESpace_whole (new FESpace<mesh_Type, MapEpetra> (Solid_mesh_ptr, orderStructure, 3, Comm) );
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > Fluid_fieldFESpace_whole (new FESpace<mesh_Type, MapEpetra> (Fluid_mesh_ptr, orderFluid, 3, Comm) );
 
@@ -174,8 +176,9 @@ int main (int argc, char** argv )
 
     Interpolation intergrid;
     intergrid.setup(dataFile, belosList);
-    intergrid.setFlag(1);
-
+    intergrid.setFlag( dataFile("flag/interface", 1 ) );
+    intergrid.setMeshSize(MeshUtility::MeshStatistics::computeSize(*Fluid_mesh_ptr).maxH);
+    
     // Set vectors for interpolation
     vectorPtr_Type Solid_vector (new vector_Type (Solid_fieldFESpace->map(), Unique) );
     vectorPtr_Type Fluid_solution (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
@@ -250,15 +253,22 @@ int main (int argc, char** argv )
     // GET THE SOLUTION ON GAMMA
     vectorPtr_Type Fluid_solutionOnGamma;
     intergrid.getSolutionOnGamma (Fluid_solutionOnGamma);
-
-    Fluid_solutionOnGamma->spy("Fluid_solutionOnGamma");
     
     Fluid_exporter.closeFile();
 
+    Real check = Fluid_solution->norm2();
+    
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
-
-    return (EXIT_SUCCESS);
+    
+    if ( (check - 1542.4) < 0.1 )
+    {
+        return ( EXIT_SUCCESS );
+    }
+    else
+    {
+        return ( EXIT_FAILURE );
+    }
 
 }
