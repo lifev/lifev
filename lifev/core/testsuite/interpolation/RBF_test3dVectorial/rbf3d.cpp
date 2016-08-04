@@ -97,7 +97,7 @@ Real exact_sol (const Real& /*t*/, const Real& x, const Real& y, const Real& z, 
 	}
 }
 
-Real exact_sol_easy (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
+Real exact_sol_easy (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
 	switch (i)
 	{
@@ -180,11 +180,11 @@ int main (int argc, char** argv )
 
     // NUMBER OF FLAGS CONSIDERED: THE DOFS WHOSE FLAG IS 1 AND 20 ARE TAKEN INTO ACCOUNT
     // NOTE: from mesh to mesh the vector of flag has to contain one element with value -1
-    int nFlags = 1;
+    int nFlags = 2;
     std::vector<int> flags (nFlags);
-    flags[0] = 100;
-    //flags[1] = 20;
-
+    flags[0] = 1;
+    flags[1] = 20;
+    
     // INITIALIZE THE INTERPOLANT
     interpolationPtr_Type RBFinterpolant;
 
@@ -222,13 +222,9 @@ int main (int argc, char** argv )
     // GET THE SOLUTION
     RBFinterpolant->solution (Fluid_solution);
     
-    Fluid_solution->spy("Fluid_solution");
-
     // GET THE SOLUTION ON GAMMA
     vectorPtr_Type Fluid_solutionOnGamma;
     RBFinterpolant->getSolutionOnGamma (Fluid_solutionOnGamma);
-
-    Fluid_solutionOnGamma->spy("Fluid_solutionOnGamma");
 
     // TESTING THE METHOD updateRhs
     RBFinterpolant->updateRhs (Solid_vector);
@@ -249,7 +245,8 @@ int main (int argc, char** argv )
     for ( UInt j = 0; j < 3; ++j)
         for ( UInt i = 0; i < Fluid_exact_solution->epetraVector().MyLength(); ++i )
             if ( Fluid_exact_solution->blockMap().GID (i) < Fluid_mesh_ptr->pointList.size())
-                if ( Fluid_mesh_ptr->point ( Fluid_exact_solution->blockMap().GID (i) ).markerID() == 100  )
+                if ( Fluid_mesh_ptr->point ( Fluid_exact_solution->blockMap().GID (i) ).markerID() == flags[0] ||
+                     Fluid_mesh_ptr->point ( Fluid_exact_solution->blockMap().GID (i) ).markerID() == flags[1] )
                     if ( Fluid_exact_solution->blockMap().LID ( static_cast<EpetraInt_Type> ( Fluid_exact_solution->blockMap().GID (i) + Fluid_exact_solution->size()/3*j ) ) != -1)
                     {
                         switch (j)
@@ -269,22 +266,13 @@ int main (int argc, char** argv )
                     }
 
     // COMPUTING SOME ERRORS
-    Real err_Inf = myError->normInf();
-    Real err_L2  = myError->norm2()/Solid_mesh_ptr->numVertices();
-
-    if(Comm->MyPID()==0)
-    {
-        std::cout << "Error, norm_Inf = " <<  err_Inf  << std::endl;
-        std::cout << "Error, normL2   = " <<  err_L2   << std::endl;
-    }
+    Real err_inf  = myError->normInf();
 
     // EXPORTING THE SOLUTION
     ExporterHDF5<mesh_Type> Fluid_exporter (dataFile, Fluid_localMesh, "Results", Comm->MyPID() );
     Fluid_exporter.setMeshProcId (Fluid_localMesh, Comm->MyPID() );
     Fluid_exporter.exportPID (Fluid_localMesh, Comm, true );
-    Fluid_exporter.addVariable (ExporterData<mesh_Type>::VectorField, "Exact solution", Fluid_fieldFESpace, Fluid_exact_solution, UInt (0) );
     Fluid_exporter.addVariable (ExporterData<mesh_Type>::VectorField, "Solution", Fluid_fieldFESpace, Fluid_solution, UInt (0) );
-    Fluid_exporter.addVariable (ExporterData<mesh_Type>::VectorField, "Error", Fluid_fieldFESpace, myError, UInt (0) );
     Fluid_exporter.postProcess (0);
     Fluid_exporter.closeFile();
 
@@ -292,6 +280,13 @@ int main (int argc, char** argv )
     MPI_Finalize();
 #endif
 
-    return (EXIT_SUCCESS);
+    if ( std::abs(err_inf) < 1.0e-1 )
+    {
+        return ( EXIT_SUCCESS );
+    }
+    else
+    {
+        return ( EXIT_FAILURE );
+    }
 
 }
