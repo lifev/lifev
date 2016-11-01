@@ -155,7 +155,7 @@ main ( int argc, char** argv )
     if ( dataFile ( "fluid/stabilization/ode_fine_scale", false) )
         	ns.setExportFineScaleVelocity(*exporter, numElementsTotal);
 
-    // exporter->postProcess ( t0 );
+    exporter->postProcess ( t0 );
 
     // Boundary conditions
     boost::shared_ptr<BCHandler> bc ( new BCHandler (*BCh_fluid ()) );
@@ -233,34 +233,29 @@ main ( int argc, char** argv )
     		std::cout << "\nTimestep solved in " << iterChrono.diff() << " s\n";
         
     	// This part below handles the exporter of the solution.
-    	// In particular, given a number of timesteps at which
-    	// we ask to export the solution (from datafile), here
-    	// the code takes care of exporting the solution also at
-    	// the previous timesteps such that, if later a restart
-    	// of the simulation is performed, it works correctly.
+    	// The code takes care of exporting the solution also at
+    	// the previous time steps such that, if later a restart
+    	// of the simulation is performed, it will works correctly.
     	if ( orderBDF == 1 )
     	{
-    		if ( time_step_count == (counterSaveEvery-1) )
+    		if ( time_step_count == counterSaveEvery )
     		{
-    			exporter->postProcess ( time );
-    		}
-    		else if ( time_step_count == counterSaveEvery )
-    		{
-    			exporter->postProcess ( time );
-    			counterSaveEvery += saveEvery;
+    			if ( time >= saveAfter )
+    			{
+    				exporter->postProcess ( time );
+    			}
     		}
     	}
     	else if ( orderBDF == 2 )
     	{
-//    		if ( time_step_count == (counterSaveEvery-2) )
-//    		{
-//    			exporter->postProcess ( time );
-//    		}
-//    		else if ( time_step_count == (counterSaveEvery-1) )
-//    		{
-//    			exporter->postProcess ( time );
-//    		}
-    		if ( time_step_count == counterSaveEvery )
+    		if ( time_step_count == (counterSaveEvery-1) )
+    		{
+    			if ( time >= saveAfter )
+    			{
+    				exporter->postProcess ( time );
+    			}
+    		}
+    		else if ( time_step_count == counterSaveEvery )
     		{
     			if ( time >= saveAfter )
     			{

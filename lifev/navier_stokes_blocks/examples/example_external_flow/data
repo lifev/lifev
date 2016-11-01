@@ -1,10 +1,5 @@
-# -*- getpot -*- (GetPot mode activation for emacs)
-#-------------------------------------------------
-#      Data file for RossEthierSteinman test case
-#-------------------------------------------------
-
 [exporter]
-	type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
+	type       = hdf5 
 	multimesh  = false
 	start      = 0
 	save       = 1
@@ -19,7 +14,8 @@
 
     options_preconditioner = solversOptionsFast
     preconditionerType     = SIMPLE 
-    save_every             = 1
+    save_every             = 4
+    save_after             = 0.005
     penalize_reverse_flow  = true
     flag_outflow           = 3
     
@@ -42,7 +38,7 @@
 
     [../stabilization]
     	use             = true
-    	type            = VMSLES_SEMI_IMPLICIT
+    	type            = SUPG_SEMI_IMPLICIT
     	vel_order       = 1
     
     [../miscellaneous]
