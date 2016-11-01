@@ -50,7 +50,7 @@ namespace LifeV
 
 Real zeroFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    return 0;
+    return 0.0;
 }
 
 Real inflowFunction(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)

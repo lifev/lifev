@@ -37,7 +37,7 @@
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
-#include <lifev/navier_stokes_blocks/solver/NavierStokesSolver.hpp>
+#include <lifev/navier_stokes_blocks/solver/NavierStokesSolverBlocks.hpp>
 #include <lifev/core/fem/TimeAndExtrapolationHandler.hpp>
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
@@ -90,7 +90,7 @@ main ( int argc, char** argv )
     fullMeshPtr.reset();
 
     // create the solver
-    NavierStokesSolver ns( dataFile, Comm);
+    NavierStokesSolverBlocks ns( dataFile, Comm);
     ns.setup(localMeshPtr);
     ns.setParameters();
     ns.buildSystem();
@@ -181,8 +181,8 @@ main ( int argc, char** argv )
     int time_step_count = 0;
 
     VectorSmall<2> AerodynamicCoefficients;
-    Real S = 1.0*4.0;
-    Real factor = 2.0/(1000.0*22.0*22.0*S); // 2/(rho*V^2*S)
+    Real S = 0.5;
+    Real factor = 2.0/(1000.0*22.0*22.0*S);
     std::ofstream outputFile_coefficients;
 
     if ( verbose )

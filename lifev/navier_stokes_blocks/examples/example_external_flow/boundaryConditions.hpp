@@ -62,11 +62,11 @@ bcPtr_Type BCh_fluid ()
 
     bcPtr_Type bcH (new BCHandler );
 
-    bcH->addBC( "Inflow",       2, Essential, Full,      	uInflow, 3 );
+    bcH->addBC( "Inflow",       1, Essential, Full,      	uInflow, 3 );
     bcH->addBC( "Outflow",      3, Natural,   Full,      	uZero,   3 );
-    bcH->addBC( "TopBottom",    4, Essential, Component, 	uZero,   yComp  );
+    bcH->addBC( "TopBottom",    2, Essential, Component, 	uZero,   yComp  );
     bcH->addBC( "LeftRight",    5, Essential, Component, 	uZero,   zComp  );
-    bcH->addBC ("Cylinder" ,    6, Essential, Full,    	    uZero,	 3 );
+    bcH->addBC ("Cylinder" ,    4, Essential, Full,    	    uZero,	 3 );
 
     return bcH;
 }
@@ -77,7 +77,7 @@ bcPtr_Type BCh_drag ()
 
 	BCFunctionBase uOneX( oneFunctionX );
 
-	bcH->addBC( "CylinderDrag",   6, Essential, Full, uOneX, 3 );
+	bcH->addBC( "CylinderDrag",   4, Essential, Full, uOneX, 3 );
 
 	return bcH;
 }
@@ -88,7 +88,7 @@ bcPtr_Type BCh_lift ()
 
 	BCFunctionBase uOneY( oneFunctionY );
 
-	bcH->addBC( "CylinderLift",   6, Essential, Full, uOneY, 3 );
+	bcH->addBC( "CylinderLift",   4, Essential, Full, uOneY, 3 );
 
 	return bcH;
 }
