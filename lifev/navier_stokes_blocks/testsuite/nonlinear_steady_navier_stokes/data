@@ -1,24 +1,26 @@
 # -*- getpot -*- (GetPot mode activation for emacs)
-#-------------------------------------------------
-#      Data file for RossEthierSteinman test case
-#-------------------------------------------------
+#-------------------------------------------------------------
+#      Data file for nonlinear_steady_navier_stokes test case
+#-------------------------------------------------------------
 
-* #offline partitioner details
 [offline_partitioner]
-useOfflinePartitionedMesh = false                  					# true for loading an already partitioned mesh, false to partition the mesh online
-num_parts = 18                                     					# must be the same of the number of parts when we partioned offline the mesh
-hdf5_file_name = cylinder_coarse_18_MeshPartitionTool_ParMETIS.h5                       # file generated running test partion_io (main_write) - REQUIRED - 
-io_class = new                                    					# possibilities: old or new, use new
+	useOfflinePartitionedMesh = false 						 # true for loading an already partitioned mesh, false to partition the mesh online
+	hdf5_file_name = tube20_4__MeshPartitionTool_ParMETIS.h5 # file generated running test offline_partion_io (main_write)
+	io_class = new 					  						 # possibilities: old or new, use new
+
+[../]
 
 [exporter]
-type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
-multimesh  = false
-start      = 0
-save       = 1
-filename   = steady_fluid
+	type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
+	multimesh  = false
+	start      = 0
+	save       = 1
+	filename   = steady_fluid
+
+[../]
 
 [newton]
-	abstol          		=  1.e-4
+	abstol          		=  1.e-8
 	reltol          		=  1.e-4
 	etamax          		=  1.e-4
 	maxiter         		=  10
@@ -34,19 +36,20 @@ filename   = steady_fluid
     save_every             = 1
     
     [./physics]
-    density         = 1.0    # density
-    viscosity       = 0.035  # viscosity
+    	density         = 1.0    # density
+    	viscosity       = 0.035  # viscosity
 
     [../space_discretization]
-    mesh_dir        = ./
-    mesh_file       = tube20.mesh
-    mesh_type       = .mesh
-    vel_order       = P2
-    pres_order      = P1
-    stiff_strain    = false
+    	mesh_dir        = ./
+    	mesh_file       = tube20.mesh
+    	mesh_type       = .mesh
+    	vel_order       = P2
+    	pres_order      = P1
     
     [../miscellaneous]
-    verbose         = 1
-    steady          = true
+    	verbose         = 1
+    	steady          = true
 
-[../]
+	[../]
+	
+[../]	

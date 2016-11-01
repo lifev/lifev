@@ -48,70 +48,17 @@
 namespace LifeV
 {
 
-Real fZero (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
+Real fZero (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
 	return 0.0;
 }
 
-Real inflow_up (const Real& t, const Real& x, const Real& y, const Real& /*z*/, const ID& i)
+Real fPressure (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    Real max_peak  = 30;//630;
-    Real Tr        = 0.5;
-    Real peak      = 0.0;
-    Real xc        = 0.0;
-    Real yc        = 27.15;
-    Real zc        = -29.5;
-    
-    peak = max_peak;
-    
-    Real radius = 21.9*0.5;
-    Real radiusSquared = radius*radius;
-    
-	switch (i)
-	{
-	case 0:
-		return 0.0;
-		break;
-	case 1:
-		return 0.0;
-		break;
-	case 2:
-		return peak*( radiusSquared - ( (x-xc)*(x-xc)+(y-yc)*(y-yc) ))/(radiusSquared);
-		break;
-	}
-	return 0;
+    return 10.0;
 }
-
-Real inflow_down (const Real& t, const Real& x, const Real& y, const Real& /*z*/, const ID& i)
-{
-    Real max_peak  = 5;//615;
-    Real Tr        = 0.01;
-    Real peak      = 0.0;
-    Real xc        = 0.0;
-    Real yc        = -27.15;
-    Real zc        = -29.5;
-
-    peak = max_peak;
-
-    Real radius = 21.9*0.5;
-    Real radiusSquared = radius*radius;
-
-	switch (i)
-	{
-	case 0:
-		return 0.0;
-		break;
-	case 1:
-		return 0.0;
-		break;
-	case 2:
-		return peak*( radiusSquared - ( (x-xc)*(x-xc)+(y-yc)*(y-yc) ))/(radiusSquared);
-		break;
-	}
-	return 0;
-}
-
-Real inflow_cyl (const Real& t, const Real& x, const Real& y, const Real& /*z*/, const ID& i)
+    
+Real inflow_cyl (const Real& /*t*/, const Real& x, const Real& y, const Real& /*z*/, const ID& i)
 {
 	double r = std::sqrt (x * x + y * y);
 	double D = 1.0;
@@ -120,7 +67,6 @@ Real inflow_cyl (const Real& t, const Real& x, const Real& y, const Real& /*z*/,
 
 	if (i == 2)
 	{
-		//return  2.0 *  ( r*r - ( (x - x0) * (x - x0) + (y - y0) * (y - y0) ) ) / (r*r);
 		return 90 *3 * nu * Re / D / 2 * 2 * ( (D / 2.) * (D / 2.) - r * r);
 	}
 

@@ -46,10 +46,10 @@
 #include "ud_functions.hpp"
 
 #define INLET       2
+
 #define WALL        1
+
 #define OUTLET      3
-#define RINGIN      20
-#define RINGOUT     30
 
 namespace LifeV
 {
@@ -59,25 +59,16 @@ typedef boost::shared_ptr<BCHandler> bcPtr_Type;
 bcPtr_Type BCh_fluid ()
 {
 	BCFunctionBase zero_function (fZero);
-
+    
 	BCFunctionBase inflow_function_cyl (inflow_cyl);
 
     bcPtr_Type bc (new BCHandler );
 
-    bc->addBC ("Inlet", INLET, Essential, Full, inflow_function_cyl, 3);
-
-    bc->addBC ("Wall",  WALL,  Essential, Full, zero_function,       3);
-
-    return bc;
-}
-
-bcPtr_Type BCh_PCD ()
-{
-    BCFunctionBase zero_function (fZero);
-
-    bcPtr_Type bc (new BCHandler );
-
-    bc->addBC ("Outflow", OUTLET, Essential, Full, zero_function, 3);
+    bc->addBC ("Inlet", INLET, Essential, Full, inflow_function_cyl, 3); // Inflow velocity
+    
+    bc->addBC ("Wall",  WALL,  Essential, Full, zero_function, 3);   // Zero velocity lateral walls
+    
+    bc->addBC ("Outflow",  OUTLET,  Natural, Normal, zero_function); // Homogeneous Neumann
 
     return bc;
 }

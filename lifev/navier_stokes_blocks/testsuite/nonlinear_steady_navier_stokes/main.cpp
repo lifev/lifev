@@ -37,12 +37,13 @@
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
-#include <lifev/navier_stokes_blocks/solver/NavierStokesSolver.hpp>
+#include <lifev/navier_stokes_blocks/solver/NavierStokesSolverBlocks.hpp>
 #include <lifev/core/fem/TimeAndExtrapolationHandler.hpp>
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #include <lifev/core/filter/ExporterVTK.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
+#include <lifev/core/filter/PartitionIO.hpp>
 
 #include "boundaryConditions.hpp"
 
@@ -64,6 +65,9 @@ main ( int argc, char** argv )
     verbose = true;
 #endif
 
+    Real normTwo_Velo;
+    Real normTwo_Pres;
+
     {
 
     typedef RegionMesh<LinearTetra> mesh_Type;
@@ -76,20 +80,32 @@ main ( int argc, char** argv )
     std::string data_file_name = command_line.follow (defaultDataName.c_str(), 2, "-f", "--file");
     GetPot dataFile( data_file_name );
 
-    // reading the mesh
-    boost::shared_ptr<mesh_Type > fullMeshPtr ( new mesh_Type ( Comm ) );
-    MeshData meshData;
-    meshData.setup (dataFile, "fluid/space_discretization");
-    readMesh (*fullMeshPtr, meshData);
-
-    // mesh partitioner
-    MeshPartitioner< mesh_Type >  meshPart (fullMeshPtr, Comm);
+    // Mesh
     boost::shared_ptr<mesh_Type > localMeshPtr ( new mesh_Type ( Comm ) );
-    localMeshPtr = meshPart.meshPartition();
-    fullMeshPtr.reset();
+
+    if ( dataFile ( "offline_partitioner/useOfflinePartitionedMesh", false) )
+    {
+    	boost::shared_ptr<Epetra_MpiComm> comm = boost::dynamic_pointer_cast<Epetra_MpiComm>(Comm);
+    	const std::string partsFileName (dataFile ("offline_partitioner/hdf5_file_name", "name.h5") );
+    	PartitionIO<mesh_Type > partitionIO (partsFileName, comm);
+    	partitionIO.read (localMeshPtr);
+    }
+    else
+    {
+    	// reading the mesh
+    	boost::shared_ptr<mesh_Type > fullMeshPtr ( new mesh_Type ( Comm ) );
+    	MeshData meshData;
+    	meshData.setup (dataFile, "fluid/space_discretization");
+    	readMesh (*fullMeshPtr, meshData);
+
+    	// mesh partitioner
+    	MeshPartitioner< mesh_Type >  meshPart (fullMeshPtr, Comm);
+    	localMeshPtr = meshPart.meshPartition();
+    	fullMeshPtr.reset();
+    }
 
     // create the solver
-    NavierStokesSolver ns( dataFile, Comm);
+    NavierStokesSolverBlocks ns( dataFile, Comm);
     ns.setup(localMeshPtr);
     ns.setParameters();
     ns.buildSystem();
@@ -114,6 +130,7 @@ main ( int argc, char** argv )
     	exporter->setMeshProcId ( localMeshPtr, Comm->MyPID() );
     }
 
+    // Vectors post-processing
     vectorPtr_Type velocity( new vector_Type(ns.uFESpace()->map(), exporter->mapType() ) );
     vectorPtr_Type pressure( new vector_Type(ns.pFESpace()->map(), exporter->mapType() ) );
     exporter->addVariable ( ExporterData<mesh_Type>::VectorField, "velocity", ns.uFESpace(), velocity, UInt (0) );
@@ -122,25 +139,27 @@ main ( int argc, char** argv )
 
     // Boundary conditions
     boost::shared_ptr<BCHandler> bc ( new BCHandler (*BCh_fluid ()) );
+    
+    // Set boundary conditions
+    ns.setBoundaryConditions( bc );
+    
+    // Solve problem
+    ns.iterate_steady( );
 
-    std::string preconditioner = dataFile("fluid/preconditionerType","none");
-
-    if ( preconditioner.compare("PCD") == 0 )
-    {
-    	boost::shared_ptr<BCHandler> bc_pcd ( new BCHandler (*BCh_PCD ()) );
-    	ns.setBCpcd(bc_pcd);
-    }
-
-    ns.setBC( bc );
-
-    ns.iterate_steady( bc );
-
+    // Get the velocity
     ns.updateVelocity(velocity);
+    
+    // Get the pressure
     ns.updatePressure(pressure);
 
+    // Do post-processing
     exporter->postProcess ( 1.0 );
 
+    // Close file post-processing
     exporter->closeFile();
+
+    normTwo_Velo  = velocity->norm2();
+    normTwo_Pres  = pressure->norm2();
 
 	}
 
@@ -151,7 +170,15 @@ main ( int argc, char** argv )
     }
     MPI_Finalize();
 #endif
-    return ( EXIT_SUCCESS );
+
+    if ( std::abs(normTwo_Velo - 108.783606 ) < 1.0e-4 && std::abs(normTwo_Pres - 129.597065 ) < 1.0e-4 )
+    {
+    	return ( EXIT_SUCCESS );
+    }
+    else
+    {
+    	return ( EXIT_FAILURE );
+    }
 }
 
 
