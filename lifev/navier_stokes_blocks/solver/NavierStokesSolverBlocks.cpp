@@ -518,8 +518,13 @@ void NavierStokesSolverBlocks::updateSystem( const vectorPtr_Type& u_star, const
 		}
 		if ( M_imposeWeakBC )
 		{
+			// Reference for essential BCs imposed weakly:
+			// - Y. Bazilevs, K. Takizawa and E. Tezduyar. Computational Fluid-Structre Interaction. Page 70.
 			using namespace ExpressionAssembly;
 			QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
+
+			M_block00_weakBC.reset ( new matrix_Type ( M_velocityFESpace->map() ) );
+			M_block00_weakBC->zero();
 
 			integrate( boundary(M_fespaceUETA->mesh(), M_flagWeakBC),
 					   myBDQR,
@@ -528,12 +533,12 @@ void NavierStokesSolverBlocks::updateSystem( const vectorPtr_Type& u_star, const
 						value(-1.0)*value(M_viscosity)*dot( phi_i, ( grad(phi_j) + transpose( grad(phi_j) ) ) * Nface )
 					   -value(M_viscosity)*dot( ( grad(phi_i) + transpose( grad(phi_i) ) ) * Nface, phi_j )
 					   -value(M_density)*dot( phi_i, dot( value(M_fespaceUETA, *M_uExtrapolated), Nface ) * phi_j )
-					   +value(10.0)*value(M_viscosity)/value(M_meshSizeWeakBC)*dot( phi_i - dot( phi_i, Nface)*Nface, phi_j - dot( phi_j, Nface)*Nface )
-					   +value(10.0)*value(M_viscosity)/value(M_meshSizeWeakBC)*( dot( phi_i, Nface)*dot( phi_j, Nface) )
-					   // +value(30.0)*value(M_viscosity)/value(M_meshSizeWeakBC)*dot( phi_i - dot( phi_i, Nface)*Nface, phi_j - dot( phi_j, Nface)*Nface )
-					   // +value(300.0)*value(M_viscosity)/value(M_meshSizeWeakBC)*( dot( phi_i, Nface)*dot( phi_j, Nface) )
+					   +value(4.0)*value(M_viscosity)/value(M_meshSizeWeakBC)*dot( phi_i - dot( phi_i, Nface)*Nface, phi_j - dot( phi_j, Nface)*Nface )
+					   +value(4.0)*value(M_viscosity)/value(M_meshSizeWeakBC)*( dot( phi_i, Nface)*dot( phi_j, Nface) )
 			)
-			>> M_C;
+			>> M_block00_weakBC;
+			M_block00_weakBC->globalAssemble();
+			*M_C += *M_block00_weakBC;
 		}
 
 		if ( M_penalizeReverseFlow )
@@ -632,9 +637,13 @@ void NavierStokesSolverBlocks::updateSystem( const vectorPtr_Type& u_star, const
 
     if ( M_imposeWeakBC )
     {
+    	// Reference for essential BCs imposed weakly:
+    	// - Y. Bazilevs, K. Takizawa and E. Tezduyar. Computational Fluid-Structre Interaction. Page 70.
     	using namespace ExpressionAssembly;
 
     	QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
+
+    	M_block01_weakBC.reset( new matrix_Type(M_velocityFESpace->map() ) );
 
     	integrate( boundary(M_fespaceUETA->mesh(), M_flagWeakBC),
     			myBDQR,
@@ -642,7 +651,9 @@ void NavierStokesSolverBlocks::updateSystem( const vectorPtr_Type& u_star, const
     			M_fespacePETA,
     			dot( phi_i, phi_j * Nface)
     	)
-    	>> M_block01;
+    	>> M_block01_weakBC;
+    	M_block01_weakBC->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
+    	*M_block01 += *M_block01_weakBC;
 
     	integrate( boundary(M_fespaceUETA->mesh(), M_flagWeakBC),
     			myBDQR,
@@ -674,6 +685,12 @@ void NavierStokesSolverBlocks::applyBoundaryConditions ( bcPtr_Type & bc, const 
 
 		*M_block00_noBC += *M_block00;
 		*M_block01_noBC += *M_block01;
+
+		if ( M_imposeWeakBC )
+		{
+			*M_block00_noBC -= *M_block00_weakBC;
+			*M_block01_noBC -= *M_block01_weakBC;
+		}
 
         M_block00_noBC->globalAssemble();
         M_block01_noBC->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );

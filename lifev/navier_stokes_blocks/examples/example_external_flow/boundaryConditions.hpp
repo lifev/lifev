@@ -26,9 +26,8 @@
 
 /*!
  *  @file
- *  @brief File containing the boundary conditions for the Monolithic Test
+ *  @brief File containing the boundary conditions of the external fluid flow example
  *
- *  @date 2009-04-09
  *  @author Davide Forti <davide.forti@epfl.ch>
  *
  *  Contains the functions to be assigned as boundary conditions, in the file boundaryConditions.hpp . The functions
@@ -66,7 +65,7 @@ bcPtr_Type BCh_fluid ()
     bcH->addBC( "Outflow",      3, Natural,   Full,      	uZero,   3 );
     bcH->addBC( "TopBottom",    2, Essential, Component, 	uZero,   yComp  );
     bcH->addBC( "LeftRight",    5, Essential, Component, 	uZero,   zComp  );
-    bcH->addBC ("Cylinder" ,    4, Essential, Full,    	    uZero,	 3 );
+    //bcH->addBC ("Cylinder" ,    4, Essential, Full,    	    uZero,	 3 );
 
     return bcH;
 }

@@ -771,6 +771,9 @@ private:
     Real M_orderBDF;
     UInt M_orderVel;
 
+    matrixPtr_Type M_block00_weakBC;
+    matrixPtr_Type M_block01_weakBC;
+
 }; // class NavierStokesSolverBlocks
 
 } // namespace LifeV

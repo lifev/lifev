@@ -46,9 +46,9 @@
     	steady          = false
     
     [../weak_bc]
-    	use             = false
-    	flag            = 200
-    	mesh_size       = 0.01
+    	use             = true  # if here you put true, then comment line 68 in the boundaryConditions.hpp file
+    	flag            = 4     # flag of the cylinder
+    	mesh_size       = 0.1   # mesh size in the normal direction of the cylinder
     
     [../forces]
     	compute         = true
