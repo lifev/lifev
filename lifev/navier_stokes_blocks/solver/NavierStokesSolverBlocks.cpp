@@ -1,4 +1,4 @@
-#include <lifev/navier_stokes_blocks/solver/NavierStokesSolver.hpp>
+#include <lifev/navier_stokes_blocks/solver/NavierStokesSolverBlocks.hpp>
 
 
 namespace LifeV
@@ -32,7 +32,7 @@ public:
     void clear_z () { z = 0; }
 };
 
-NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commPtr_Type& communicator):
+NavierStokesSolverBlocks::NavierStokesSolverBlocks(const dataFile_Type dataFile, const commPtr_Type& communicator):
 		M_comm(communicator),
 		M_dataFile(dataFile),
 		M_displayer(communicator),
@@ -52,21 +52,20 @@ NavierStokesSolver::NavierStokesSolver(const dataFile_Type dataFile, const commP
         M_flagWeakBC ( dataFile("fluid/weak_bc/flag", 31) ),
         M_meshSizeWeakBC ( dataFile("fluid/weak_bc/mesh_size", 0.0) ),
         M_computeAerodynamicLoads ( dataFile("fluid/forces/compute", false) ),
-        M_methodAerodynamicLoads ( dataFile("fluid/forces/method", "integral_form") ),
         M_flagBody ( dataFile("fluid/forces/flag", 31 ) ),
         M_solve_blocks ( dataFile("fluid/solve_blocks", true ) ),
         M_useFastAssembly ( dataFile("fluid/use_fast_assembly", false ) ),
         M_orderBDF ( dataFile("fluid/time_discretization/BDF_order", 2 ) ),
         M_orderVel ( dataFile("fluid/stabilization/vel_order", 2 ) )
 {
-	M_prec.reset ( Operators::NSPreconditionerFactory::instance().createObject (dataFile("fluid/preconditionerType","none")));
+	M_prec.reset ( Operators::NSPreconditionerFactory::instance().createObject (dataFile("fluid/preconditionerType","SIMPLE")));
 }
 
-NavierStokesSolver::~NavierStokesSolver()
+NavierStokesSolverBlocks::~NavierStokesSolverBlocks()
 {
 }
 
-void NavierStokesSolver::setParameters( )
+void NavierStokesSolverBlocks::setParameters( )
 {
     std::string optionsPrec = M_dataFile("fluid/options_preconditioner","solverOptionsFast");
     optionsPrec += ".xml";
@@ -75,7 +74,7 @@ void NavierStokesSolver::setParameters( )
 	setSolversOptions(*solversOptions);
 }
 
-void NavierStokesSolver::setup(const meshPtr_Type& mesh, const int& id_domain)
+void NavierStokesSolverBlocks::setup(const meshPtr_Type& mesh, const int& id_domain)
 {
 	std::string uOrder;
 	std::string pOrder;
@@ -84,7 +83,7 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh, const int& id_domain)
 	{
 		uOrder = M_dataFile("fluid/space_discretization/vel_order","P1");
 		pOrder = M_dataFile("fluid/space_discretization/pres_order","P1");
-		M_stiffStrain = M_dataFile("fluid/space_discretization/stiff_strain", true);
+		M_stiffStrain = M_dataFile("fluid/space_discretization/stiff_strain", false );
 
 	}
 	else
@@ -93,14 +92,14 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh, const int& id_domain)
 		{
 			uOrder = M_dataFile("fluid/master_space_discretization/vel_order","P1");
 			pOrder = M_dataFile("fluid/master_space_discretization/pres_order","P1");
-			M_stiffStrain = M_dataFile("fluid/master_space_discretization/stiff_strain", true);
+			M_stiffStrain = M_dataFile("fluid/master_space_discretization/stiff_strain", false );
 
 		}
 		else if ( id_domain == 1 )
 		{
 			uOrder = M_dataFile("fluid/slave_space_discretization/vel_order","P1");
 			pOrder = M_dataFile("fluid/slave_space_discretization/pres_order","P1");
-			M_stiffStrain = M_dataFile("fluid/slave_space_discretization/stiff_strain", true);
+			M_stiffStrain = M_dataFile("fluid/slave_space_discretization/stiff_strain", false );
 		}
 	}
 
@@ -204,19 +203,19 @@ void NavierStokesSolver::setup(const meshPtr_Type& mesh, const int& id_domain)
     
 }
 
-void NavierStokesSolver::setExportFineScaleVelocity( ExporterHDF5<mesh_Type>& exporter, const int& numElementsTotal)
+void NavierStokesSolverBlocks::setExportFineScaleVelocity( ExporterHDF5<mesh_Type>& exporter, const int& numElementsTotal)
 {
 	M_stabilization->setExportFineScaleVelocity ( exporter, numElementsTotal );
 }
 
-void NavierStokesSolver::setSolversOptions(const Teuchos::ParameterList& solversOptions)
+void NavierStokesSolverBlocks::setSolversOptions(const Teuchos::ParameterList& solversOptions)
 {
     boost::shared_ptr<Teuchos::ParameterList> monolithicOptions;
     monolithicOptions.reset(new Teuchos::ParameterList(solversOptions.sublist("MonolithicOperator")) );
     M_pListLinSolver = monolithicOptions;
 }
 
-void NavierStokesSolver::buildGraphs()
+void NavierStokesSolverBlocks::buildGraphs()
 {
 	M_displayer.leaderPrint ( " F - Pre-building the graphs... ");
 	LifeChrono chrono;
@@ -354,95 +353,7 @@ void NavierStokesSolver::buildGraphs()
 	M_displayer.leaderPrintMax ( "   done in ", chrono.diff() ) ;
 }
 
-void NavierStokesSolver::updatePCD(const vectorPtr_Type& velocity)
-{
-	// Note: for semi-implicit treatment of the convective term velocity is an extrapolation. When the convective term is treated in a fully-implicit
-	// manner, velocoty is given from the previous newton step. Pay attantion when calling updatePCD, give in input the correct vector. In this way the
-	// method is flexible and can handle both scenarios.
-
-	vectorPtr_Type velocityRepeated( new vector_Type ( *velocity, Repeated ) );
-
-	if ( !M_graphPCDisBuilt )
-		buildPCDGraphs();
-
-	M_displayer.leaderPrint ( " F - Assembling PCD terms... ");
-	LifeChrono chrono;
-	chrono.start();
-
-	{
-		using namespace ExpressionAssembly;
-
-		M_Mp.reset (new matrix_Type ( M_pressureFESpace->map(), *M_Mp_graph ) );
-		M_Mp->zero();
-		integrate ( elements (M_fespaceUETA->mesh() ),
-					M_pressureFESpace->qr(),
-					M_fespacePETA,
-					M_fespacePETA,
-					phi_i * phi_j
-				  ) >> M_Mp;
-		M_Mp->globalAssemble();
-
-		// Graph pressure mass
-		M_Fp.reset (new matrix_Type ( M_pressureFESpace->map(), *M_Fp_graph ) );
-		integrate ( elements (M_fespacePETA->mesh() ),
-					M_pressureFESpace->qr(),
-					M_fespacePETA,
-					M_fespacePETA,
-					value( M_density*M_alpha/M_timeStep ) * phi_i * phi_j
-					+ value( 0.5 * M_viscosity ) * dot( grad(phi_i) + grad(phi_i) , grad(phi_j) + grad(phi_j) )
-					+ value( M_density ) * dot( value(M_fespaceUETA, *velocityRepeated),grad(phi_j)) * phi_i
-				  ) >> M_Fp;
-	}
-
-	bcManageMatrix( *M_Fp, *M_pressureFESpace->mesh(), M_pressureFESpace->dof(), *M_bcPCD, M_pressureFESpace->feBd(), 1.0, 0.0);
-	M_Fp->globalAssemble();
-
-	chrono.stop();
-	M_displayer.leaderPrintMax ( "   done in ", chrono.diff() ) ;
-}
-
-void NavierStokesSolver::buildPCDGraphs()
-{
-	M_displayer.leaderPrint ( " F - Pre-building the graphs for PCD... ");
-	LifeChrono chrono;
-	chrono.start();
-
-	{
-		using namespace ExpressionAssembly;
-
-		// Graph pressure mass
-		M_Mp_graph.reset (new Epetra_FECrsGraph (Copy, * (M_pressureFESpace->map().map (Unique) ), 0) );
-		buildGraph ( elements (M_fespacePETA->mesh() ),
-					 quadRuleTetra4pt,
-					 M_fespacePETA,
-					 M_fespacePETA,
-					 phi_i * phi_j
-				   ) >> M_Mp_graph;
-		M_Mp_graph->GlobalAssemble();
-		M_Mp_graph->OptimizeStorage();
-
-		// Graph pressure mass
-		M_Fp_graph.reset (new Epetra_FECrsGraph (Copy, * (M_pressureFESpace->map().map (Unique) ), 0) );
-		buildGraph ( elements (M_fespacePETA->mesh() ),
-					 quadRuleTetra4pt,
-					 M_fespacePETA,
-					 M_fespacePETA,
-					 value( M_density*M_alpha/M_timeStep ) * phi_i * phi_j
-					 + value( 0.5 * M_viscosity ) * dot( grad(phi_i) + grad(phi_i) , grad(phi_j) + grad(phi_j) )
-					 + value( M_density ) * dot( value(M_fespaceUETA, *M_uExtrapolated),grad(phi_j)) * phi_i
-				   ) >> M_Fp_graph;
-		M_Fp_graph->GlobalAssemble();
-		M_Fp_graph->OptimizeStorage();
-
-	}
-
-	M_graphPCDisBuilt = true;
-
-	chrono.stop();
-	M_displayer.leaderPrintMax ( "   done in ", chrono.diff() ) ;
-}
-
-void NavierStokesSolver::buildSystem()
+void NavierStokesSolverBlocks::buildSystem()
 {
 	if ( M_useFastAssembly )
 	{
@@ -581,7 +492,7 @@ void NavierStokesSolver::buildSystem()
 	M_displayer.leaderPrintMax ( " done in ", chrono.diff() ) ;
 }
 
-void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vectorPtr_Type& rhs_velocity )
+void NavierStokesSolverBlocks::updateSystem( const vectorPtr_Type& u_star, const vectorPtr_Type& rhs_velocity )
 {
 	// Note that u_star HAS to extrapolated from outside. Hence it works also for FSI in this manner.
     M_velocityExtrapolated.reset( new vector_Type ( *u_star, Unique ) );
@@ -627,21 +538,26 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 
 		if ( M_penalizeReverseFlow )
 		{
+			this->setupPostProc();
 			boost::shared_ptr<SignFunction> signEvaluation(new SignFunction(M_comm));
 
-			VectorSmall<3> normal;
-			normal[0] = -0.270724;
-			normal[1] = -0.263217;
-			normal[2] = 0.925973;
+			VectorSmall<3> Normal;
+
+			Vector n = this->normal(M_flagPenalizeReverseFlow);
+			Normal[0] = n[0];
+			Normal[1] = n[1];
+			Normal[2] = n[2];
+
 			using namespace ExpressionAssembly;
 
+			// Penalizing back flow
 			QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
 			integrate (
 					boundary (M_fespaceUETA->mesh(), M_flagPenalizeReverseFlow),
 					myBDQR,
 					M_fespaceUETA,
 					M_fespaceUETA,
-					value(-1.0*M_density)*eval( signEvaluation, dot(value(M_fespaceUETA, *M_uExtrapolated),normal))*dot(phi_i, phi_j)
+					value(-1.0*M_density)*eval( signEvaluation, dot(value(M_fespaceUETA, *M_uExtrapolated),Normal))*dot(phi_i, phi_j)
 			)
 			>> M_C;
 		}
@@ -744,19 +660,7 @@ void NavierStokesSolver::updateSystem( const vectorPtr_Type& u_star, const vecto
 
 }
 
-void NavierStokesSolver::applyGravityForce ( const Real& gravity, const Real& gravityDirection)
-{
-	vectorPtr_Type gravity_vector ( new vector_Type ( M_velocityFESpace->map(), Unique ) );
-	vectorPtr_Type gravity_component ( new vector_Type ( M_velocityFESpaceScalar->map(), Unique ) );
-
-	gravity_component->zero();
-	*gravity_component += gravity;
-	gravity_vector->subset(*gravity_component, M_velocityFESpaceScalar->map(), 0, gravityDirection*M_velocityFESpaceScalar->dof().numTotalDof() );
-
-	*M_rhs += *M_Mu* (*gravity_vector);
-}
-
-void NavierStokesSolver::applyBoundaryConditions ( bcPtr_Type & bc, const Real& time )
+void NavierStokesSolverBlocks::applyBoundaryConditions ( bcPtr_Type & bc, const Real& time )
 {
 	if ( M_computeAerodynamicLoads )
 	{
@@ -785,7 +689,7 @@ void NavierStokesSolver::applyBoundaryConditions ( bcPtr_Type & bc, const Real& 
     bcManageMatrix( *M_block01, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 0.0, 0.0);
 }
 
-void NavierStokesSolver::applyBoundaryConditions ( bcPtr_Type & bc, const Real& time, const vectorPtr_Type& velocities )
+void NavierStokesSolverBlocks::applyBoundaryConditions ( bcPtr_Type & bc, const Real& time, const vectorPtr_Type& velocities )
 {
 	/* Used only for example aorta semi implicit */
 
@@ -796,7 +700,7 @@ void NavierStokesSolver::applyBoundaryConditions ( bcPtr_Type & bc, const Real& 
     *M_rhs += *velocities;
 }
 
-void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time, const vectorPtr_Type& velocities )
+void NavierStokesSolverBlocks::iterate( bcPtr_Type & bc, const Real& time, const vectorPtr_Type& velocities )
 {
 	applyBoundaryConditions ( bc, time, velocities);
 	solveTimeStep();
@@ -809,7 +713,7 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time, const vecto
 	}
 }
 
-void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
+void NavierStokesSolverBlocks::iterate( bcPtr_Type & bc, const Real& time )
 {
 	applyBoundaryConditions ( bc, time );
 	solveTimeStep();
@@ -823,7 +727,7 @@ void NavierStokesSolver::iterate( bcPtr_Type & bc, const Real& time )
 		}
 }
 
-void NavierStokesSolver::solveTimeStep( )
+void NavierStokesSolverBlocks::solveTimeStep( )
 {
 	//(1) Set up the OseenOperator
     M_displayer.leaderPrint( "\tNS operator - set up the block operator...");
@@ -841,253 +745,94 @@ void NavierStokesSolver::solveTimeStep( )
     chrono.stop();
     M_displayer.leaderPrintMax(" done in " , chrono.diff() );
 
-    /* Testing approach in which we form explicitly the NS matrix from the blocks -- begin */
+    //(2) Set the data for the preconditioner
 
-    if ( !M_solve_blocks )
+    M_displayer.leaderPrint( "\tPreconditioner operator - set up the block operator...");
+    chrono.reset();
+    chrono.start();
+
+    if ( std::strcmp(M_prec->Label(),"aSIMPLEOperator")==0 )
     {
-		MatrixBlockStructure structure;
-		std::vector<UInt> colstr(2,0);
-		colstr[0]=M_velocityFESpace->map().map(Unique)->NumGlobalElements();
-		colstr[1]=M_pressureFESpace->map().map(Unique)->NumGlobalElements();
-		structure.setBlockStructure(colstr,colstr);
+    	if (M_useStabilization)
+    	{
+    		M_prec->setUp(M_block00, M_block10, M_block01, M_block11);
+    	}
+    	else
+    	{
+    		M_prec->setUp(M_block00, M_block10, M_block01);
+    	}
 
-		matrixPtr_Type monolithic_matrix( new matrix_Type ( M_velocityFESpace->map() + M_pressureFESpace->map() ) );
+    	M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
+    	M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
+    	M_prec->updateApproximatedMomentumOperator();
+    	M_prec->updateApproximatedSchurComplementOperator();
+    }
 
-		// ------------ Block (0,0)
+    chrono.stop();
+    M_displayer.leaderPrintMax(" done in " , chrono.diff() );
 
-		boost::shared_ptr<MatrixEpetraStructuredView<double> > view_block00;
-		view_block00 = MatrixEpetraStructuredUtility::createBlockView( monolithic_matrix, structure, 0, 0);
+    //(3) Set the solver for the linear system
+    M_displayer.leaderPrint( "\tset up the Trilinos solver...");
+    chrono.start();
+    std::string solverType(M_pListLinSolver->get<std::string>("Linear Solver Type"));
+    M_invOper.reset(Operators::InvertibleOperatorFactory::instance().createObject(solverType));
 
-		MatrixBlockStructure blockStructure_block00;
-		std::vector<UInt> r_00(1,0), c_00(1,0);
-		r_00[0] = M_velocityFESpace->map().map(Unique)->NumGlobalElements();
-		c_00[0] = M_velocityFESpace->map().map(Unique)->NumGlobalElements();
-		blockStructure_block00.setBlockStructure(r_00, c_00);
+    M_invOper->setParameterList(M_pListLinSolver->sublist(solverType));
+    M_invOper->setOperator(M_oper);
+    M_invOper->setPreconditioner(M_prec);
 
-		boost::shared_ptr<MatrixEpetraStructuredView<double> > matrixView_00_single;
-		matrixView_00_single = MatrixEpetraStructuredUtility::createBlockView ( M_block00, blockStructure_block00, 0, 0);
-		MatrixEpetraStructuredUtility::copyBlock( matrixView_00_single, view_block00);
+    chrono.stop();
+    M_displayer.leaderPrintMax(" done in " , chrono.diff() );
 
-		// ------------ end Block (0,0)
+    // Solving the system
+    BlockEpetra_Map upMap;
+    upMap.setUp ( M_velocityFESpace->map().map(Unique), M_pressureFESpace->map().map(Unique));
 
-		// ------------ Block (0,1)
+    if ( M_useStabilization )
+    {
+    	vector_Type rhs ( *M_monolithicMap, Unique );
+    	vector_Type sol ( *M_monolithicMap, Unique );
 
-		boost::shared_ptr<MatrixEpetraStructuredView<double> > view_block01;
-		view_block01 = MatrixEpetraStructuredUtility::createBlockView( monolithic_matrix, structure, 0, 1);
+    	rhs.zero();
+    	sol.zero();
 
-		MatrixBlockStructure blockStructure_block01;
-		std::vector<UInt> r_01(1,0), c_01(1,0);
-		r_01[0] = M_velocityFESpace->map().map(Unique)->NumGlobalElements();
-		c_01[0] = M_pressureFESpace->map().map(Unique)->NumGlobalElements();
-		blockStructure_block01.setBlockStructure(r_01, c_01);
+    	rhs.subset ( *M_rhs, M_velocityFESpace->map(), 0, 0 );
+    	rhs.subset ( *M_rhs_pressure, M_pressureFESpace->map(), 0, M_velocityFESpace->map().mapSize() );
 
-		boost::shared_ptr<MatrixEpetraStructuredView<double> > matrixView_01_single;
-		matrixView_01_single = MatrixEpetraStructuredUtility::createBlockView ( M_block01, blockStructure_block01, 0, 0);
-		MatrixEpetraStructuredUtility::copyBlock( matrixView_01_single, view_block01);
+    	M_invOper->ApplyInverse(rhs.epetraVector(), sol.epetraVector());
 
-		// ------------ end Block (0,1)
-
-		// ------------ Block (1,0)
-
-		boost::shared_ptr<MatrixEpetraStructuredView<double> > view_block10;
-		view_block10 = MatrixEpetraStructuredUtility::createBlockView( monolithic_matrix, structure, 1, 0);
-
-		MatrixBlockStructure blockStructure_block10;
-		std::vector<UInt> r_10(1,0), c_10(1,0);
-		r_10[0] = M_pressureFESpace->map().map(Unique)->NumGlobalElements();
-		c_10[0] = M_velocityFESpace->map().map(Unique)->NumGlobalElements();
-		blockStructure_block10.setBlockStructure(r_10, c_10);
-
-		boost::shared_ptr<MatrixEpetraStructuredView<double> > matrixView_10_single;
-		matrixView_10_single = MatrixEpetraStructuredUtility::createBlockView ( M_block10, blockStructure_block10, 0, 0);
-		MatrixEpetraStructuredUtility::copyBlock( matrixView_10_single, view_block10);
-
-		// ------------ end Block (1,0)
-
-		if (M_useStabilization)
-		{
-			// ------------ Block (1,1)
-
-			boost::shared_ptr<MatrixEpetraStructuredView<double> > view_block11;
-			view_block11 = MatrixEpetraStructuredUtility::createBlockView( monolithic_matrix, structure, 1, 1);
-
-			MatrixBlockStructure blockStructure_block11;
-			std::vector<UInt> r_11(1,0), c_11(1,0);
-			r_11[0] = M_pressureFESpace->map().map(Unique)->NumGlobalElements();
-			c_11[0] = M_pressureFESpace->map().map(Unique)->NumGlobalElements();
-			blockStructure_block11.setBlockStructure(r_11, c_11);
-
-			boost::shared_ptr<MatrixEpetraStructuredView<double> > matrixView_11_single;
-			matrixView_11_single = MatrixEpetraStructuredUtility::createBlockView ( M_block11, blockStructure_block11, 0, 0);
-			MatrixEpetraStructuredUtility::copyBlock( matrixView_11_single, view_block11);
-
-			// ------------ end Block (1,1)
-		}
-
-		monolithic_matrix->globalAssemble();
-
-		if ( M_useStabilization )
-		{
-			vector_Type rhs ( *M_monolithicMap, Unique );
-			vector_Type sol ( *M_monolithicMap, Unique );
-
-			rhs.zero();
-			sol.zero();
-
-			rhs.subset ( *M_rhs, M_velocityFESpace->map(), 0, 0 );
-			rhs.subset ( *M_rhs_pressure, M_pressureFESpace->map(), 0, M_velocityFESpace->map().mapSize() );
-
-			// SOLVE
-			SolverAztecOO linearSolver;
-			linearSolver.setCommunicator ( M_comm  );
-			linearSolver.setDataFromGetPot ( M_dataFile, "solver");
-			linearSolver.setupPreconditioner ( M_dataFile, "prec");
-			linearSolver.setMatrix (*monolithic_matrix);
-			linearSolver.solveSystem (rhs, sol, monolithic_matrix);
-
-			M_velocity->subset ( sol, M_velocityFESpace->map(), 0, 0 );
-			M_pressure->subset ( sol, M_pressureFESpace->map(), M_velocityFESpace->map().mapSize(), 0 );
-		}
-		/* Testing approach in which we form explicitly the NS matrix from the blocks -- end */
+    	M_velocity->subset ( sol, M_velocityFESpace->map(), 0, 0 );
+    	M_pressure->subset ( sol, M_pressureFESpace->map(), M_velocityFESpace->map().mapSize(), 0 );
     }
     else
     {
-    	//(2) Set the data for the preconditioner
+    	BlockEpetra_MultiVector up(upMap, 1), rhs(upMap, 1);
+    	rhs.block(0).Update(1.0, M_rhs->epetraVector(), 0.);
 
-		M_displayer.leaderPrint( "\tPreconditioner operator - set up the block operator...");
-		chrono.reset();
-		chrono.start();
+    	// Solving the linear system
+    	M_invOper->ApplyInverse(rhs,up);
 
-		if ( std::strcmp(M_prec->Label(),"aSIMPLEOperator")==0 )
-		{
-			if (M_useStabilization)
-			{
-				M_prec->setUp(M_block00, M_block10, M_block01, M_block11);
-			}
-			else
-			{
-				M_prec->setUp(M_block00, M_block10, M_block01);
-			}
-
-			M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
-			M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
-			M_prec->updateApproximatedMomentumOperator();
-			M_prec->updateApproximatedSchurComplementOperator();
-		}
-		else if ( std::strcmp(M_prec->Label(),"aPCDOperator")==0 )
-		{
-			updatePCD(M_uExtrapolated);
-			M_prec->setUp(M_block00, M_block10, M_block01, M_Fp, M_Mp, M_Mu);
-			M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
-			M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
-			M_prec->updateApproximatedMomentumOperator();
-			M_prec->updateApproximatedSchurComplementOperator();
-			M_prec->updateApproximatedPressureMassOperator();
-		}
-
-		chrono.stop();
-		M_displayer.leaderPrintMax(" done in " , chrono.diff() );
-
-		//(3) Set the solver for the linear system
-		M_displayer.leaderPrint( "\tset up the Trilinos solver...");
-		chrono.start();
-		std::string solverType(M_pListLinSolver->get<std::string>("Linear Solver Type"));
-		M_invOper.reset(Operators::InvertibleOperatorFactory::instance().createObject(solverType));
-
-		M_invOper->setParameterList(M_pListLinSolver->sublist(solverType));
-		M_invOper->setOperator(M_oper);
-		M_invOper->setPreconditioner(M_prec);
-
-		chrono.stop();
-		M_displayer.leaderPrintMax(" done in " , chrono.diff() );
-
-		// Solving the system
-		BlockEpetra_Map upMap;
-		upMap.setUp ( M_velocityFESpace->map().map(Unique), M_pressureFESpace->map().map(Unique));
-
-		if ( M_useStabilization )
-		{
-			vector_Type rhs ( *M_monolithicMap, Unique );
-			vector_Type sol ( *M_monolithicMap, Unique );
-
-			rhs.zero();
-			sol.zero();
-
-			rhs.subset ( *M_rhs, M_velocityFESpace->map(), 0, 0 );
-			rhs.subset ( *M_rhs_pressure, M_pressureFESpace->map(), 0, M_velocityFESpace->map().mapSize() );
-
-			M_invOper->ApplyInverse(rhs.epetraVector(), sol.epetraVector());
-
-			M_velocity->subset ( sol, M_velocityFESpace->map(), 0, 0 );
-			M_pressure->subset ( sol, M_pressureFESpace->map(), M_velocityFESpace->map().mapSize(), 0 );
-		}
-		else
-		{
-			BlockEpetra_MultiVector up(upMap, 1), rhs(upMap, 1);
-			rhs.block(0).Update(1.0, M_rhs->epetraVector(), 0.);
-
-			// Solving the linear system
-			M_invOper->ApplyInverse(rhs,up);
-
-			M_velocity->epetraVector().Update(1.0,up.block(0),0.0);
-			M_pressure->epetraVector().Update(1.0,up.block(1),0.0);
-		}
+    	M_velocity->epetraVector().Update(1.0,up.block(0),0.0);
+    	M_pressure->epetraVector().Update(1.0,up.block(1),0.0);
     }
+
 
     if ( M_computeAerodynamicLoads )
     {
-    	// Computation of aerodynamic forces
+    	// Computation of aerodynamic forces in Residual form, see [Forti and Dede, 2015]
+    	M_forces.reset ( new vector_Type ( M_velocityFESpace->map(), Unique ) );
 
-    	if ( M_methodAerodynamicLoads.compare("residual_form") == 0 )
-    	{
-    		/* Residual form, see [Forti, Dede 2015] */
+    	M_forces->zero();
 
-    		M_forces.reset ( new vector_Type ( M_velocityFESpace->map(), Unique ) );
-    		M_forces->zero();
+    	*M_forces += *M_rhs_noBC;
 
-    		*M_forces += *M_rhs_noBC;
+    	*M_forces -= *M_block00_noBC * ( *M_velocity );
 
-    		*M_forces -= *M_block00_noBC * ( *M_velocity );
-
-    		*M_forces -= *M_block01_noBC * ( *M_pressure );
-    	}
-    	else if( M_methodAerodynamicLoads.compare("integral_form") == 0 )
-    	{
-    		/* Direct evaluation by integrals */
-
-    		vector_Type forces_rep( M_velocityFESpace->map(), Repeated );
-    		forces_rep.zero();
-
-    		vector_Type velo_rep ( *M_velocity, Repeated);
-    		vector_Type pres_rep ( *M_pressure, Repeated);
-
-    		QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
-    		MatrixSmall<3, 3> Eye;
-    		Eye *= 0.0;
-    		Eye[0][0] = 1;
-    		Eye[1][1] = 1;
-    		Eye[2][2] = 1;
-
-    		{
-    			using namespace ::LifeV::ExpressionAssembly;
-
-    			integrate ( boundary (M_fespaceUETA->mesh(), M_flagBody),
-    					myBDQR,
-    					M_fespaceUETA,
-    					value(M_viscosity)* dot( phi_i, ( grad(M_fespaceUETA, velo_rep) + transpose( grad(M_fespaceUETA, velo_rep) ) ) * Nface )
-    					-dot( phi_i, value(M_fespacePETA, pres_rep) * Nface )
-    			) >> forces_rep;
-    		}
-
-    		forces_rep.globalAssemble();
-
-    		M_forces.reset ( new vector_Type ( forces_rep, Unique ) );
-    		*M_forces *= -1;
-    	}
+    	*M_forces -= *M_block01_noBC * ( *M_pressure );
     }
 }
 
-VectorSmall<2> NavierStokesSolver::computeForces( BCHandler& bcHDrag,
+VectorSmall<2> NavierStokesSolverBlocks::computeForces( BCHandler& bcHDrag,
 												  BCHandler& bcHLift )
 {
 	bcHDrag.bcUpdate ( *M_velocityFESpace->mesh(), M_velocityFESpace->feBd(), M_velocityFESpace->dof() );
@@ -1115,36 +860,12 @@ VectorSmall<2> NavierStokesSolver::computeForces( BCHandler& bcHDrag,
 	return Forces;
 }
 
-void NavierStokesSolver::iterate_nonlinear( bcPtr_Type & bc, const Real& time, const vectorPtr_Type& velocities )
+void NavierStokesSolverBlocks::iterate_nonlinear( const Real& time )
 {
-	applyBoundaryConditionsSolution ( bc, time );
+	applyBoundaryConditionsSolution ( time );
 
-	vectorPtr_Type imposeVelocity ( new vector_Type ( M_velocityFESpace->map(), Unique ) );
-	imposeVelocity->zero();
-
-	imposeVelocity->subset ( *M_solution, M_velocityFESpace->map(), 0, 0 );
-
-	*imposeVelocity += *velocities;
-
-	M_solution->subset ( *imposeVelocity, M_velocityFESpace->map(), 0, 0 );
-
-	// Call Newton
-	UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
-										M_nonLinearLineSearch, 0, 2, M_out_res, 0.0);
-
-    if (status == EXIT_FAILURE)
-    {
-        M_displayer.leaderPrint(" WARNING: Newton  failed " );
-    }
+    M_time = time;
     
-	M_velocity->subset ( *M_solution, M_velocityFESpace->map(), 0, 0 );
-	M_pressure->subset ( *M_solution, M_pressureFESpace->map(), M_velocityFESpace->map().mapSize(), 0 );
-}
-
-void NavierStokesSolver::iterate_nonlinear( bcPtr_Type & bc, const Real& time )
-{
-	applyBoundaryConditionsSolution ( bc, time );
-
 	// Call Newton
 	UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
 			M_nonLinearLineSearch, 0, 2, M_out_res, 0.0);
@@ -1165,33 +886,34 @@ void NavierStokesSolver::iterate_nonlinear( bcPtr_Type & bc, const Real& time )
 	M_pressure->subset ( *M_solution, M_pressureFESpace->map(), M_velocityFESpace->map().mapSize(), 0 );
 }
 
-void NavierStokesSolver::iterate_steady( bcPtr_Type & bc )
+void NavierStokesSolverBlocks::iterate_steady( )
 {
 	// Initialize the solution
 	M_solution->zero();
 
-	applyBoundaryConditionsSolution ( bc, 0.0 ); // the second argument is zero since the problem is steady
+	applyBoundaryConditionsSolution ( 0.0 ); // the second argument is zero since the problem is steady
 
 	// Call Newton
-	UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
+	UInt status;
+	status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
 			M_nonLinearLineSearch, 0, 2, M_out_res, 0.0);
 
 	M_velocity->subset ( *M_solution, M_velocityFESpace->map(), 0, 0 );
 	M_pressure->subset ( *M_solution, M_pressureFESpace->map(), M_velocityFESpace->map().mapSize(), 0 );
 }
 
-void NavierStokesSolver::applyBoundaryConditionsSolution ( bcPtr_Type & bc, const Real& time )
+void NavierStokesSolverBlocks::applyBoundaryConditionsSolution ( const Real& time )
 {
-	updateBCHandler(bc);
-	bcManageRhs ( *M_solution, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 1.0, time );
+	updateBCHandler(M_bc_sol);
+	bcManageRhs ( *M_solution, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *M_bc_sol, M_velocityFESpace->feBd(), 1.0, time );
 }
 
-void NavierStokesSolver::updateBCHandler( bcPtr_Type & bc )
+void NavierStokesSolverBlocks::updateBCHandler( bcPtr_Type & bc )
 {
 	bc->bcUpdate ( *M_velocityFESpace->mesh(), M_velocityFESpace->feBd(), M_velocityFESpace->dof() );
 }
 
-void NavierStokesSolver::evaluateResidual( const vectorPtr_Type& convective_velocity,
+void NavierStokesSolverBlocks::evaluateResidual( const vectorPtr_Type& convective_velocity,
 					   	   	   	   	   	   const vectorPtr_Type& velocity_km1,
 					   	   	   	   	   	   const vectorPtr_Type& pressure_km1,
 					   	   	   	   	   	   const vectorPtr_Type& rhs_velocity,
@@ -1264,7 +986,7 @@ void NavierStokesSolver::evaluateResidual( const vectorPtr_Type& convective_velo
 	*residualPressure = res_pressure_unique;
 }
 
-void NavierStokesSolver::evaluateResidual( const vectorPtr_Type& convective_velocity,
+void NavierStokesSolverBlocks::evaluateResidual( const vectorPtr_Type& convective_velocity,
 					   	   	   	   	   	   const vectorPtr_Type& velocity_km1,
 					   	   	   	   	   	   const vectorPtr_Type& pressure_km1,
 					   	   	   	   	   	   const vectorPtr_Type& rhs_velocity,
@@ -1337,7 +1059,7 @@ void NavierStokesSolver::evaluateResidual( const vectorPtr_Type& convective_velo
 
 }
 
-void NavierStokesSolver::assembleInterfaceMass( matrixPtr_Type& mass_interface, const mapPtr_Type& interface_map,
+void NavierStokesSolverBlocks::assembleInterfaceMass( matrixPtr_Type& mass_interface, const mapPtr_Type& interface_map,
 												markerID_Type interfaceFlag, const vectorPtr_Type& numerationInterface,
 												const UInt& offset)
 {
@@ -1365,7 +1087,7 @@ void NavierStokesSolver::assembleInterfaceMass( matrixPtr_Type& mass_interface, 
 	fluid_interfaceMass->restrict ( interface_map, numerationInterface, offset, mass_interface );
 }
 
-void NavierStokesSolver::computeForcesNonLinear(vectorPtr_Type& force, const vectorPtr_Type& solution)
+void NavierStokesSolverBlocks::computeForcesNonLinear(vectorPtr_Type& force, const vectorPtr_Type& solution)
 {
   // Forces to zero                                                                                                                                   
   force->zero();
@@ -1433,7 +1155,7 @@ void NavierStokesSolver::computeForcesNonLinear(vectorPtr_Type& force, const vec
   force->subset ( *res_pressure, M_pressureFESpace->map(), 0, M_velocityFESpace->map().mapSize() );
 }
 
-void NavierStokesSolver::evalResidual(vector_Type& residual, const vector_Type& solution, const UInt iter_newton)
+void NavierStokesSolverBlocks::evalResidual(vector_Type& residual, const vector_Type& solution, const UInt /*iter_newton*/ )
 {
 	// Residual to zero
 	residual.zero();
@@ -1545,8 +1267,15 @@ void NavierStokesSolver::evalResidual(vector_Type& residual, const vector_Type& 
     vector_Type res_velocity_unique ( *res_velocity, Unique );
     vector_Type res_pressure_unique ( *res_pressure, Unique );
 
-    bcManageRhs ( res_velocity_unique, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *M_bc, M_velocityFESpace->feBd(), 0.0, 0.0 );
-
+    if ( M_steady )
+    {
+        applyBoundaryConditionsResidual(res_velocity_unique);
+    }
+    else
+    {
+        applyBoundaryConditionsResidual(res_velocity_unique, M_time );
+    }
+    
     residual.subset ( res_velocity_unique, M_velocityFESpace->map(), 0, 0 );
     residual.subset ( res_pressure_unique, M_pressureFESpace->map(), 0, M_velocityFESpace->map().mapSize() );
 
@@ -1579,7 +1308,43 @@ void NavierStokesSolver::evalResidual(vector_Type& residual, const vector_Type& 
 
 }
 
-void NavierStokesSolver::updateConvectiveTerm ( const vectorPtr_Type& velocity)
+void NavierStokesSolverBlocks::applyBoundaryConditionsResidual ( vector_Type& r_u, const Real& time )
+{
+    //! Extract each component of the input vector
+    VectorEpetra ru_copy(r_u, Unique);
+    
+    //! Apply BC on each component
+    if ( !M_bc_res_essential->bcUpdateDone() )
+        M_bc_res_essential->bcUpdate ( *M_velocityFESpace->mesh(),
+                                        M_velocityFESpace->feBd(),
+                                        M_velocityFESpace->dof() );
+
+    if ( !M_bc_res_natural->bcUpdateDone() )
+        M_bc_res_natural->bcUpdate ( *M_velocityFESpace->mesh(),
+                                      M_velocityFESpace->feBd(),
+                                      M_velocityFESpace->dof() );
+
+    bcManageRhs ( ru_copy,
+                 *M_velocityFESpace->mesh(),
+                  M_velocityFESpace->dof(),
+                 *M_bc_res_natural,
+                  M_velocityFESpace->feBd(),
+                  1.0,
+                  time );
+
+    bcManageRhs ( ru_copy,
+                 *M_velocityFESpace->mesh(),
+                  M_velocityFESpace->dof(),
+                 *M_bc_res_essential,
+                  M_velocityFESpace->feBd(),
+                  0.0,
+                  0.0 );
+    
+    r_u.zero();
+    r_u = ru_copy;
+}
+    
+void NavierStokesSolverBlocks::updateConvectiveTerm ( const vectorPtr_Type& velocity)
 {
     // Note that u_star HAS to extrapolated from outside. Hence it works also for FSI in this manner.
     vectorPtr_Type velocity_repeated;
@@ -1618,7 +1383,7 @@ void NavierStokesSolver::updateConvectiveTerm ( const vectorPtr_Type& velocity)
     	M_block00->globalAssemble( );
 }
 
-void NavierStokesSolver::updateJacobian( const vector_Type& u_k )
+void NavierStokesSolverBlocks::updateJacobian( const vector_Type& u_k )
 {
 	vector_Type uk_rep ( u_k, Repeated );
 	M_Jacobian->zero();
@@ -1650,7 +1415,7 @@ void NavierStokesSolver::updateJacobian( const vector_Type& u_k )
 		M_block00->globalAssemble( );
 }
 
-void NavierStokesSolver::updateStabilization( const vector_Type& convective_velocity_previous_newton_step,
+void NavierStokesSolverBlocks::updateStabilization( const vector_Type& convective_velocity_previous_newton_step,
 	 	 	 	 	 	 	 	 	 	 	  const vector_Type& velocity_previous_newton_step,
 	 	 	 	 	 	 	 	 	 	 	  const vector_Type& pressure_previous_newton_step,
 	 	 	 	 	 	 	 	 	 	 	  const vector_Type& velocity_rhs )
@@ -1730,10 +1495,10 @@ void NavierStokesSolver::updateStabilization( const vector_Type& convective_velo
 
 }
 
-void NavierStokesSolver::solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol )
+void NavierStokesSolverBlocks::solveJac( vector_Type& increment, const vector_Type& residual, const Real /*linearRelTol*/ )
 {
 	// Apply BCs on the jacobian matrix
-	applyBoundaryConditionsJacobian ( M_bc );
+	applyBoundaryConditionsJacobian ( M_bc_sol );
 
 	//(1) Set up the OseenOperator
 	M_displayer.leaderPrint( "\tNS operator - set up the block operator...");
@@ -1772,16 +1537,7 @@ void NavierStokesSolver::solveJac( vector_Type& increment, const vector_Type& re
 		M_prec->updateApproximatedMomentumOperator();
 		M_prec->updateApproximatedSchurComplementOperator();
 	}
-	else if ( std::strcmp(M_prec->Label(),"aPCDOperator")==0 )
-	{
-		updatePCD(M_uExtrapolated);
-		M_prec->setUp(M_block00, M_block10, M_block01, M_Fp, M_Mp, M_Mu);
-		M_prec->setDomainMap(M_oper->OperatorDomainBlockMapPtr());
-		M_prec->setRangeMap(M_oper->OperatorRangeBlockMapPtr());
-		M_prec->updateApproximatedMomentumOperator();
-		M_prec->updateApproximatedSchurComplementOperator();
-		M_prec->updateApproximatedPressureMassOperator();
-	}
+	
 	chrono.stop();
 	M_displayer.leaderPrintMax(" done in " , chrono.diff() );
 
@@ -1813,56 +1569,15 @@ void NavierStokesSolver::solveJac( vector_Type& increment, const vector_Type& re
     increment_velocity.subset(increment);
     increment_pressure.subset(increment, M_velocityFESpace->dof().numTotalDof() * 3);
     
-    Real normInf_velocity = increment_velocity.normInf();
-    Real normInf_pressure = increment_pressure.normInf();
-    
-    // Writing the norms into a file
-    if ( M_comm->MyPID()==0 )
-    {
-        std::cout << " normInf_velocity = " << normInf_velocity << ", normInf_pressure = " << normInf_pressure << "\n";
-    }
-    
 }
 
-void NavierStokesSolver::applyBoundaryConditionsJacobian ( bcPtr_Type & bc )
+void NavierStokesSolverBlocks::applyBoundaryConditionsJacobian ( bcPtr_Type & bc )
 {
 	bcManageMatrix( *M_block00, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 1.0, 0.0);
 	bcManageMatrix( *M_block01, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 0.0, 0.0);
 }
 
-void NavierStokesSolver::integrateForces ( const vectorPtr_Type & velocity, const vectorPtr_Type & pressure)
-{
-	vector_Type forces_rep( M_velocityFESpace->map(), Repeated );
-	forces_rep.zero();
-
-	vector_Type velo_rep ( *velocity, Repeated);
-	vector_Type pres_rep ( *pressure, Repeated);
-
-	QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
-	MatrixSmall<3, 3> Eye;
-	Eye *= 0.0;
-	Eye[0][0] = 1;
-	Eye[1][1] = 1;
-	Eye[2][2] = 1;
-
-	{
-		using namespace ::LifeV::ExpressionAssembly;
-
-		integrate ( boundary (M_fespaceUETA->mesh(), M_flagBody ),
-				myBDQR,
-				M_fespaceUETA,
-				value(M_viscosity)* dot( phi_i, ( grad(M_fespaceUETA, velo_rep) + transpose( grad(M_fespaceUETA, velo_rep) ) ) * Nface )
-				-dot( phi_i, value(M_fespacePETA, pres_rep) * Nface )
-		) >> forces_rep;
-	}
-
-	forces_rep.globalAssemble();
-
-	M_forces.reset ( new vector_Type ( forces_rep, Unique ) );
-	*M_forces *= -1;
-}
-
-void NavierStokesSolver::preprocessBoundary(const Real& nx, const Real& ny, const Real& nz, BCHandler& bc, Real& Q_hat, const vectorPtr_Type& Phi_h, const UInt flag,
+void NavierStokesSolverBlocks::preprocessBoundary(const Real& nx, const Real& ny, const Real& nz, BCHandler& bc, Real& Q_hat, const vectorPtr_Type& Phi_h, const UInt flag,
 					    					vectorPtr_Type& Phi_h_flag, vectorPtr_Type& V_hat_x, vectorPtr_Type& V_hat_y, vectorPtr_Type& V_hat_z)
 {
 	Phi_h_flag.reset ( new vector_Type ( M_velocityFESpaceScalar->map() ) );
@@ -1911,7 +1626,7 @@ void NavierStokesSolver::preprocessBoundary(const Real& nx, const Real& ny, cons
 	*V_hat_z *= nz;
 }
 
-void NavierStokesSolver::solveLaplacian( const UInt& flag, bcPtr_Type& bc_laplacian, vectorPtr_Type& laplacianSolution)
+void NavierStokesSolverBlocks::solveLaplacian( const UInt& /*flag*/, bcPtr_Type& bc_laplacian, vectorPtr_Type& laplacianSolution)
 {
     // Update BCs for the laplacian problem
     bc_laplacian->bcUpdate ( *M_velocityFESpaceScalar->mesh(), M_velocityFESpaceScalar->feBd(), M_velocityFESpaceScalar->dof() );
@@ -1981,118 +1696,9 @@ void NavierStokesSolver::solveLaplacian( const UInt& flag, bcPtr_Type& bc_laplac
 
     *laplacianSolution = *Phi_h;
 }
-
-// method which updates the system when using NS in ALE frame of reference
-void NavierStokesSolver::updateSystem_ALE( const vectorPtr_Type& u_star, const vectorPtr_Type& w, const vectorPtr_Type& rhs_velocity )
-{
-	vectorPtr_Type beta ( new vector_Type ( *u_star - *w ) );
-	vectorPtr_Type beta_repeated ( new vector_Type ( *beta, Repeated ) );
-
-	// Note that u_star HAS to extrapolated from outside. Hence it works also for FSI in this manner.
-	M_uExtrapolated.reset( new vector_Type ( *u_star, Repeated ) );
-	vectorPtr_Type w_repeated ( new vector_Type ( *w, Repeated ) );
-
-	// Update convective term
-	M_C->zero();
-	{
-		using namespace ExpressionAssembly;
-		integrate( elements(M_fespaceUETA->mesh()),
-				M_velocityFESpace->qr(),
-				M_fespaceUETA,
-				M_fespaceUETA,
-				dot( M_density * value(M_fespaceUETA, *beta_repeated )*grad(phi_j), phi_i) // semi-implicit treatment of the convective term
-		)
-		>> M_C;
-	}
-
-	M_C->globalAssemble();
-
-	// Get the matrix corresponding to the block (0,0)
-	M_block00->zero();
-	*M_block00 += *M_Mu;
-	*M_block00 *= M_alpha/M_timeStep;
-	*M_block00 += *M_A;
-	*M_block00 += *M_C;
-    if ( !M_useStabilization )
-        M_block00->globalAssemble();
-
-	// Get the right hand side with inertia contribution
-	M_rhs.reset( new vector_Type ( M_velocityFESpace->map(), Unique ) );
-	M_rhs->zero();
-
-	if ( !M_steady )
-		*M_rhs = *M_Mu* (*rhs_velocity);
-
-	M_block01->zero();
-	*M_block01 += *M_Btranspose;
-
-	M_block10->zero();
-	*M_block10 += *M_B;
-
-    if ( !M_fullyImplicit && M_useStabilization )
-    {
-        M_displayer.leaderPrint ( "\tF - Assembling semi-implicit stabilization terms... ");
-        LifeChrono chrono;
-        chrono.start();
-
-        if ( M_useStabilization ) // Available only SUPG_SEMI_IMPLICIT_ALE
-        {
-        	M_stabilization->apply_matrix( *u_star, *w );
-        }
-
-        *M_block00 += *M_stabilization->block_00();
-
-        *M_block01 += *M_stabilization->block_01();
-
-        *M_block10 += *M_stabilization->block_10();
-
-        M_block11->zero();
-        *M_block11 += *M_stabilization->block_11();
-        M_block11->globalAssemble();
-
-        M_rhs_pressure.reset( new vector_Type ( M_pressureFESpace->map(), Unique ) );
-        M_rhs_pressure->zero();
-
-        M_stabilization->apply_vector( M_rhs, M_rhs_pressure, *u_star, *w, *rhs_velocity);
-
-        M_rhs_pressure->globalAssemble();
-
-        chrono.stop();
-        M_displayer.leaderPrintMax ( " done in ", chrono.diff() ) ;
-    }
-
-    if ( M_imposeWeakBC )
-    {
-    	using namespace ExpressionAssembly;
-
-    	QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
-
-    	integrate( boundary(M_fespaceUETA->mesh(), M_flagWeakBC),
-    			myBDQR,
-    			M_fespaceUETA,
-    			M_fespacePETA,
-    			dot( phi_i, phi_j * Nface)
-    	)
-    	>> M_block01;
-
-    	integrate( boundary(M_fespaceUETA->mesh(), M_flagWeakBC),
-    			myBDQR,
-    			M_fespacePETA,
-    			M_fespaceUETA,
-    			value(-1.0)*dot(phi_i*Nface, phi_j)
-    	)
-    	>> M_block10;
-    }
-
-    M_rhs->globalAssemble();
-    M_block00->globalAssemble();
-    M_block01->globalAssemble( M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr() );
-    M_block10->globalAssemble(M_velocityFESpace->mapPtr(), M_pressureFESpace->mapPtr());
-
-}
     
 void
-NavierStokesSolver::setupPostProc( )
+NavierStokesSolverBlocks::setupPostProc( )
 {
     M_postProcessing.reset ( new PostProcessingBoundary<mesh_Type> ( M_velocityFESpace->mesh(),
                                                                     &M_velocityFESpace->feBd(),
@@ -2104,35 +1710,56 @@ NavierStokesSolver::setupPostProc( )
 }
 
 Real
-NavierStokesSolver::flux ( const markerID_Type& flag, const vector_Type& velocity )
+NavierStokesSolverBlocks::flux ( const markerID_Type& flag, const vector_Type& velocity )
 {
     vector_Type velocity_rep ( velocity, Repeated );
     return M_postProcessing->flux ( velocity_rep, flag );
 }
 
 Real
-NavierStokesSolver::area ( const markerID_Type& flag )
+NavierStokesSolverBlocks::area ( const markerID_Type& flag )
 {
     return M_postProcessing->measure ( flag );
 }
 
 Vector
-NavierStokesSolver::geometricCenter ( const markerID_Type& flag )
+NavierStokesSolverBlocks::geometricCenter ( const markerID_Type& flag )
 {
     return M_postProcessing->geometricCenter ( flag );
 }
 
 Vector
-NavierStokesSolver::normal ( const markerID_Type& flag )
+NavierStokesSolverBlocks::normal ( const markerID_Type& flag )
 {
     return M_postProcessing->normal ( flag );
 }
 
 Real
-NavierStokesSolver::pres ( const markerID_Type& flag, const vector_Type& pressure )
+NavierStokesSolverBlocks::pres ( const markerID_Type& flag, const vector_Type& pressure )
 {
     vector_Type pressure_rep ( pressure, Repeated );
     return M_postProcessing->average ( pressure_rep, flag, 1 ) [0];
+}
+    
+void
+NavierStokesSolverBlocks::setBoundaryConditions ( const bcPtr_Type& bc )
+{
+    M_bc_sol.reset ( new BCHandler ( ) );
+    M_bc_res_essential.reset ( new BCHandler ( ) );
+    M_bc_res_natural.reset ( new BCHandler ( ) );
+    
+    for ( std::vector<BCBase>::iterator it = bc->begin(); it != bc->end(); it++ )
+    {
+        if ( it->type() > 3 ) // meaning esssential
+        {
+            M_bc_sol->addBC( *it );
+            M_bc_res_essential->addBC( *it );
+        }
+        else if ( it->type() == 0 ) // meaning natural
+        {
+            M_bc_res_natural->addBC( *it );
+        }
+    }
 }
     
 }

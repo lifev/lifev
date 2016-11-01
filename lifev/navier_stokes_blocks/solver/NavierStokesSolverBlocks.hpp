@@ -25,11 +25,26 @@
 //@HEADER
 
 /*!
+   @file
+   @brief Navier Stokes solver.
+   @author Davide Forti <davide.forti@epfl.ch>
+   @maintainer Davide Forti <davide.forti@epfl.ch>
+   @date 03-02-2015
 
+   This class implements a Navier-Stokes solver. This solver allows to solve this kind of problems:
+   - Steady NS equations (using P2-P1 or P1Bubble-P1 finite elements)
+   - Unsteady NS equations using a fully-implicit time discretization (SUPG-VMS stabilization available)
+   - Unsteady NS equations using a semi-implicit time discretization (SUPG-VMS and VMS-LES stabilizations available)
+
+   In the testsuite folder several examples which show how to properly use the solver are present.
+
+   If you are using this solver to generate results for publication, please <b>cite</b>:
+   - D. Forti, L. Dede'. <i> Semi-implicit BDF time discretization of the Navier–Stokes equations with VMS-LES modeling in a High Performance Computing framework</i>.
+   	 Comput. Fluids. 197(1):168-182.
  */
 
-#ifndef NAVIERSTOKESSOLVERBLOCK_H
-#define NAVIERSTOKESSOLVERBLOCK_H
+#ifndef NAVIERSTOKESSOLVERBLOCKS_H
+#define NAVIERSTOKESSOLVERBLOCKS_H
 
 #include <lifev/core/LifeV.hpp>
 
@@ -57,7 +72,6 @@
 
 #include <lifev/navier_stokes_blocks/solver/NavierStokesPreconditionerOperator.hpp>
 #include <lifev/navier_stokes_blocks/solver/aSIMPLEOperator.hpp>
-#include <lifev/navier_stokes_blocks/solver/aPCDOperator.hpp>
 
 // utilities
 #include <lifev/core/util/LifeChrono.hpp>
@@ -71,13 +85,11 @@
 #include <lifev/core/filter/GetPot.hpp>
 
 #include <lifev/navier_stokes_blocks/solver/Stabilization.hpp>
-//#include <lifev/navier_stokes_blocks/solver/StabilizationSUPG.hpp>
-//#include <lifev/navier_stokes_blocks/solver/StabilizationVMSLES.hpp>
+#include <lifev/navier_stokes_blocks/solver/StabilizationSUPG.hpp>
 #include <lifev/navier_stokes_blocks/solver/StabilizationSUPG_semi_implicit.hpp>
-#include <lifev/navier_stokes_blocks/solver/StabilizationSUPG_semi_implicit_ale.hpp>
-#include <lifev/navier_stokes_blocks/solver/StabilizationVMSLES_new.hpp>
-#include <lifev/navier_stokes_blocks/solver/StabilizationVMSLES_semi_implicit.hpp>
 #include <lifev/navier_stokes_blocks/solver/StabilizationSUPGALE.hpp>
+#include <lifev/navier_stokes_blocks/solver/StabilizationSUPG_semi_implicit_ale.hpp>
+#include <lifev/navier_stokes_blocks/solver/StabilizationVMSLES_semi_implicit.hpp>
 
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
@@ -85,13 +97,8 @@
 #include <lifev/core/algorithm/LinearSolver.hpp>
 #include <lifev/core/algorithm/Preconditioner.hpp>
 #include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/core/algorithm/PreconditionerML.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
-
-#include <lifev/core/array/MatrixEpetraStructured.hpp>
-#include <lifev/core/array/MatrixEpetraStructuredView.hpp>
-#include <lifev/core/array/MatrixBlockStructure.hpp>
-#include <lifev/core/array/MatrixEpetraStructuredUtility.hpp>
-#include <lifev/core/algorithm/SolverAztecOO.hpp>
 
 #include <lifev/core/fem/PostProcessingBoundary.hpp>
 #include <lifev/navier_stokes_blocks/solver/FastAssemblerNS.hpp>
@@ -99,10 +106,13 @@
 namespace LifeV
 {
 
-class NavierStokesSolver
+class NavierStokesSolverBlocks
 {
 
 public:
+
+	//@name Public Types
+	//@{
 
 	typedef RegionMesh<LinearTetra> mesh_Type;
 	typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
@@ -141,60 +151,134 @@ public:
     typedef boost::shared_ptr<prec_Type>           precPtr_Type;
     typedef Teuchos::RCP< Teuchos::ParameterList > parameterListRCP_Type;
 
+    //@}
+
+    //! @name Constructor and Destructor
+    //@{
+
 	// Constructor
-	NavierStokesSolver(const dataFile_Type dataFile, const commPtr_Type& communicator);
+    NavierStokesSolverBlocks(const dataFile_Type dataFile, const commPtr_Type& communicator);
 
 	// Destructor
-	~NavierStokesSolver();
+	~NavierStokesSolverBlocks();
 
-	void setExportFineScaleVelocity(ExporterHDF5<mesh_Type>& exporter, const int& numElementsTotal);
+	//@}
 
-	// Setup
+	//! @name Methods
+	//@{
+
+	//! Setup for the solver
+	/*!
+	 * @param mesh mesh used
+	 * @param id_domain used just in case of multiple fluids
+	 */
 	void setup(const meshPtr_Type& mesh, const int& id_domain = 36);
 
-	// Assemble constant terms
+	//! Assemble constant terms
 	void buildSystem();
 
-	// Update the convective term and the right hand side, sum contributions of block (0,0) in M_F
+	//! Update the convective term and the right hand side
+	/*!
+	 * @param u_star extrapolate velocity
+	 * @param rhs_velocity right hand side, velocity block
+	 */
 	void updateSystem( const vectorPtr_Type& u_star, const vectorPtr_Type& rhs_velocity );
 
-	// Solve the current timestep, provided the BC
+	//! Solve the current timestep, provided the BC
+	/*!
+	 * @param bc boundary conditions
+	 * @param time current time
+	 */
 	void iterate( bcPtr_Type & bc, const Real& time );
 
-	// Solve the current timestep, provided the BC and a vector of velocities (used only for for aorta)
+	//! Solve the current timestep, provided the BC and a vector of velocities (used only for for aorta example)
+	/*!
+	  * @param bc boundary conditions
+	  * @param time current time
+	  * @param velocities vector of velocity (used for imposing velocity on noncircular inflows)
+	 */
 	void iterate( bcPtr_Type & bc, const Real& time, const vectorPtr_Type& velocities );
 
-	// Solve the steady Navier-Stokes equations, provided the BC
-	void iterate_steady( bcPtr_Type & bc );
+	//! Solve the steady Navier-Stokes equations
+	void iterate_steady( );
 
-	// Solve the Navier-Stokes equations, provided the BC
-	void iterate_nonlinear( bcPtr_Type & bc, const Real& time );
+	//! Solve the Navier-Stokes equations at a certain time
+	/*!
+	 * @param time current time
+	 */
+	void iterate_nonlinear( const Real& time );
 
-	void iterate_nonlinear( bcPtr_Type & bc, const Real& time, const vectorPtr_Type& velocities );
-
+	//! Evaluate the residual of the NS problem
+	/*!
+	 * @param residual residual vector
+	 * @param solution solution vector
+	 * @param iter_newton current newton iteration
+	 */
 	void evalResidual(vector_Type& residual, const vector_Type& solution, const UInt iter_newton);
 
+	//! Evaluate the residual of the NS problem
+	/*!
+	 * @param increment increment vector
+	 * @param residual residual vector
+	 * @param linearRelTol tolerance of the linar solver
+	 */
 	void solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol );
 
-	// Update the Jacobian matrix
+	//! Update the Jacobian matrix, only the term associated with the linearization of the convective term
+	/*!
+	 * @param u_k velocity previous newton step
+	 */
 	void updateJacobian( const vector_Type& u_k );
 
-	// Apply the BCs on the Jacobian matrix
+	//! Apply the BCs semi-implicit case
+	/*!
+	 * @param bc boundary conditions of the problem
+	 * @param time current time
+	 */
+    void applyBoundaryConditions ( bcPtr_Type & bc, const Real& time );
+
+    //! Apply the BCs semi-implicit case (example aorta)
+    /*!
+     * @param bc boundary conditions of the problem
+     * @param time current time
+     * @param velocities vector of velocities to be imposed
+     */
+    void applyBoundaryConditions ( bcPtr_Type & bc, const Real& time, const vectorPtr_Type& velocities );
+
+	//! Apply the BCs on the Jacobian matrix
+	/*!
+	 * @param bc boundary conditions of the problem
+	 */
 	void applyBoundaryConditionsJacobian ( bcPtr_Type & bc );
 
-	void applyBoundaryConditionsSolution ( bcPtr_Type & bc, const Real& time );
+	//! Apply the BCs to the solution
+	/*!
+	 * @param time current time
+	 */
+	void applyBoundaryConditionsSolution ( const Real& time );
 
-	void applyGravityForce ( const Real& gravity, const Real& gravityDirection);
-
+	//! Update the convective term
+	/*!
+	 *	 @param velocity velocity vector
+	 */
 	void updateConvectiveTerm ( const vectorPtr_Type& velocity);
-    
-    void setExtrapolatedPressure( const vectorPtr_Type& pressure_extrapolated ) { M_pressure_extrapolated = pressure_extrapolated; }
 
+	//! Compute Aerodynamic Forces
+	/*!
+	 *	 @param bcHandlerDrag bc to be used for drag computation
+	 *	 @param bcHandlerLift bc to be used for lift computation
+	 */
     VectorSmall<2> computeForces( BCHandler& bcHandlerDrag, BCHandler& bcHandlerLift);
 
+    //! Solve a time step
     void solveTimeStep();
 
-  void computeForcesNonLinear(vectorPtr_Type& force, const vectorPtr_Type& solution);
+    //! Compute Aerodynamic Forces - nonlinear case
+    /*!
+   	 *	 @param force vector containing the forces
+   	 *	 @param solution vector with the solution
+   	 */
+    void computeForcesNonLinear(vectorPtr_Type& force, const vectorPtr_Type& solution);
 
 	//! Evaluates the fluid residual in FSI simulations
 	/*!
@@ -226,13 +310,94 @@ public:
 						   vectorPtr_Type& residualVelocity,
 						   vectorPtr_Type& residualPressure);
 
-
+	//! Update stabilization terms
+	/*!
+	 * @param convective_velocity_previous_newton_step difference between fluid velocity and mesh velocity at previous Newton iteration
+	 * @param velocity_previous_newton_step fluid velocity at previous Newton iteration
+	 * @param pressure_previous_newton_step fluid pressure at previous Newton iteration
+	 * @param velocity_rhs block of the velocity of the rhs
+	 */
 	void updateStabilization( const vector_Type& convective_velocity_previous_newton_step,
 							  const vector_Type& velocity_previous_newton_step,
 							  const vector_Type& pressure_previous_newton_step,
 							  const vector_Type& velocity_rhs );
 
-	// Set coefficient associated to the time discretization scheme
+	//! Computation of forces
+	/*!
+	 * @param velocity velocity vector
+	 * @param pressure pressure vector
+	 */
+	void integrateForces ( const vectorPtr_Type & velocity, const vectorPtr_Type & pressure);
+
+	//! Additional method used for pre-processing on non-circular boundaries (used only in example aorta)
+	/*!
+	 * @param nx x component normal vector to an outflow face
+	 * @param ny y component normal vector to an outflow face
+	 * @param nz z component normal vector to an outflow face
+	 * @param bc boundary conditions
+	 * @param Q_hat reference flowrate to be imposed
+	 * @param Phi_h solution laplacian
+	 * @param flag flag outflow
+	 * @param Phi_h_flag solution laplacian on the outflow flag
+	 * @param V_hat_x reference velocity, x component
+	 * @param V_hat_y reference velocity, y component
+	 * @param V_hat_z reference velocity, z component
+	 */
+	void preprocessBoundary(const Real& nx, const Real& ny, const Real& nz, BCHandler& bc, Real& Q_hat, const vectorPtr_Type& Phi_h, const UInt flag,
+			vectorPtr_Type& Phi_h_flag, vectorPtr_Type& V_hat_x, vectorPtr_Type& V_hat_y, vectorPtr_Type& V_hat_z);
+
+	//! Additional method used for pre-processing on non-circular boundaries (used only in example aorta)
+	/*!
+	 * @param flag flag of the outflow face
+	 * @param bc_laplacian boundary conditions laplacian
+	 * @param laplacianSolution solution laplacian
+	 */
+	void solveLaplacian( const UInt& flag, bcPtr_Type& bc_laplacian, vectorPtr_Type& laplacianSolution );
+
+	//! Additional setup for postprocessing on boundaries
+	void setupPostProc( );
+
+	//! Compute flux through a boundary face of the domain
+	/*!
+	 * @param flag flag of the face
+	 * @param velocity velocity vector
+	 */
+	Real flux ( const markerID_Type& flag, const vector_Type& velocity );
+
+	//! Compute area of a boundary face of the domain
+	/*!
+	 * @param flag flag of the outflow face
+	 */
+	Real area ( const markerID_Type& flag );
+
+	//! Compute mean pressure at a boundary face of the domain
+	/*!
+	 * @param flag flag of the outflow face
+	 * @param pressure pressure vector
+	 */
+	Real pres ( const markerID_Type& flag, const vector_Type& pressure );
+
+	//! Compute center of a boundary face of the domain
+	/*!
+	 * @param flag flag of the face
+	 */
+	Vector geometricCenter ( const markerID_Type& flag );
+
+	//! Compute normal of a boundary face of the domain
+	/*!
+	 * @param flag flag of the face
+	 */
+	Vector normal ( const markerID_Type& flag );
+
+	//@}
+
+	//! @name Set methods
+	//@{
+
+	//! Set coefficient associated to the time discretization scheme
+	/*!
+	 *	@param alpha coefficient BDF scheme in front of u^{n+1}
+	 */
 	void setAlpha(const Real& alpha)
 	{
 		M_alpha = alpha;
@@ -242,109 +407,122 @@ public:
 		}
 	}
 
+	//! Set the rhs vector, velocity component
+	/*!
+	 *	@param vel_rhs rhs vector, velocity component
+	 */
+	void setRhsVelocity ( const vectorPtr_Type& vel_rhs)
+	{
+		M_velocityRhs.reset( new vector_Type ( *vel_rhs ) );
+	}
+
+	//! Set the extrapolated pressure vector (used by semi-implicit VMS-LES stabilization)
+	/*!
+	 * @param pressure_extrapolated pressure extrapolated vector
+	 */
+	void setExtrapolatedPressure( const vectorPtr_Type& pressure_extrapolated ) { M_pressure_extrapolated = pressure_extrapolated; }
+
+	//! Set if one needs to export the fine scale component (when using LES models)
+	/*!
+	 *	@param exporter exporter
+	 *	@param numElementsTotal number of total elements (tetrahedral elements)
+	 */
+	void setExportFineScaleVelocity(ExporterHDF5<mesh_Type>& exporter, const int& numElementsTotal);
+
+	//! Set parameters of the solver
 	void setParameters( );
 
-	// Set coefficient associated to the time discretization scheme
+	//! Set time step
+	/*!
+	 *	@param dt time step size
+	 */
 	void setTimeStep(const Real& dt)
 	{
 		M_timeStep = dt;
 	}
 
-	// Get the velocity FE space
+	//! Set time step
+	/*!
+	 *	@param bc boundary conditions of the problem
+	 */
+	void setBoundaryConditions ( const bcPtr_Type& bc );
+
+	//@}
+
+	//! @name Get methods
+	//@{
+
+	//! Get the velocity FE space
 	const boost::shared_ptr<FESpace<mesh_Type, map_Type> >& uFESpace() const
 	{
 		return M_velocityFESpace;
 	}
 
-	// Get the velocity FE space
+	//! Get the velocity FE space
 	const boost::shared_ptr<FESpace<mesh_Type, map_Type> >& pFESpace() const
 	{
 		return M_pressureFESpace;
 	}
 
-	// Get the velocity FE space
+	//! Get the velocity FE space
 	const boost::shared_ptr<FESpace<mesh_Type, map_Type> >& uFESpace_scalar() const
 	{
 		return M_velocityFESpaceScalar;
 	}
 
+	//! Get the velocity vector
     void updateVelocity(vectorPtr_Type& velocity)
     {
         *velocity = *M_velocity;
     }
 
+    //! Get the pressure vector
     void updatePressure(vectorPtr_Type& pressure)
     {
         *pressure = *M_pressure;
     }
 
-    void applyBoundaryConditions ( bcPtr_Type & bc, const Real& time );
-
-    void applyBoundaryConditions ( bcPtr_Type & bc, const Real& time, const vectorPtr_Type& velocities );
-
+    //! Get the F block
     matrixPtr_Type const& getF() const
     {
     	return M_F;
     }
 
+    //! Get the jacobian block
     matrixPtr_Type const& getJacobian() const
     {
     	return M_Jacobian;
     }
 
+    //! Get the Btranspose block
     matrixPtr_Type const& getBtranspose() const
     {
     	return M_Btranspose;
     }
 
+    //! Get the B block
     matrixPtr_Type const& getB() const
     {
     	return M_B;
     }
 
+    //! Get the rhs
     vectorPtr_Type const& getRhs() const
     {
     	return M_rhs;
     }
 
+    //! Get the rhs vector (pressure part)
     vectorPtr_Type const& getRhsPressure() const
     {
     	return M_rhs_pressure;
-    }
-
-    void setBCpcd(const bcPtr_Type & bc)
-    {
-    	M_bcPCD = bc;
-    }
-
-    void updatePCD(const vectorPtr_Type& velocity);
-
-    matrixPtr_Type const& Fp() const
-    {
-    	return M_Fp;
-    }
-
-    matrixPtr_Type const& Mp() const
-    {
-    	return M_Mp;
     }
 
     matrixPtr_Type const& Mu() const
     {
     	return M_Mu;
     }
-
-    void applyBCMu(bcPtr_Type& pcdBC)
-    {
-    	bcManageMatrix( *M_Mu, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *pcdBC, M_velocityFESpace->feBd(), 1.0, 0.0);
-    	M_Mu->globalAssemble();
-    }
-
-    void setBC ( const bcPtr_Type& bc )
-    {
-    	M_bc = bc;
-    }
-
+    
     Real density (  ) const
     {
     	return M_density;
@@ -355,31 +533,31 @@ public:
     	return M_viscosity;
     }
 
-    void setRhsVelocity ( const vectorPtr_Type& vel_rhs)
-    {
-    	M_velocityRhs.reset( new vector_Type ( *vel_rhs ) );
-    }
-
+    //! Get the (0,0) block
     matrixPtr_Type const& block00() const
     {
     	return M_block00;
     }
 
+    //! Get the (0,1) block
     matrixPtr_Type const& block01() const
     {
     	return M_block01;
     }
 
+    //! Get the (1,0) block
     matrixPtr_Type const& block10() const
     {
     	return M_block10;
     }
 
+    //! Get the (1,1)
     matrixPtr_Type const& block11() const
     {
     	return M_block11;
     }
 
+    //! Get if using a stabilization
     bool useStabilization() const
     {
     	return M_useStabilization;
@@ -388,63 +566,49 @@ public:
     void assembleInterfaceMass( matrixPtr_Type& mass_interface, const mapPtr_Type& interface_map,
     						    markerID_Type interfaceFlag, const vectorPtr_Type& numerationInterface, const UInt& offset );
 
+    //! Get the displayer
     Displayer const& getDisplayer ( ) const { return M_displayer; }
 
+    //! Get the (0,0) block without BCs
     matrixPtr_Type block00_noBC() const
     {
     	return M_block00_noBC;
     }
 
+    //! Get the (0,1) block without BCs
     matrixPtr_Type block01_noBC() const
     {
     	return M_block01_noBC;
     }
 
+    //! Get the rhs without bcs applied
     vectorPtr_Type rhs_noBC() const
     {
     	return M_rhs_noBC;
     }
 
+    //! Get the forces
     vectorPtr_Type getForces() const
     {
     	return M_forces;
     }
 
-    void integrateForces ( const vectorPtr_Type & velocity, const vectorPtr_Type & pressure);
-
-    // Additional method used for pre-processing on non-circular boundaries
-
-    void preprocessBoundary(const Real& nx, const Real& ny, const Real& nz, BCHandler& bc, Real& Q_hat, const vectorPtr_Type& Phi_h, const UInt flag,
-    					    vectorPtr_Type& Phi_h_flag, vectorPtr_Type& V_hat_x, vectorPtr_Type& V_hat_y, vectorPtr_Type& V_hat_z);
-
-    void solveLaplacian( const UInt& flag, bcPtr_Type& bc_laplacian, vectorPtr_Type& laplacianSolution );
-
-    void updateSystem_ALE( const vectorPtr_Type& u_star, const vectorPtr_Type& w, const vectorPtr_Type& rhs_velocity );
+    //@}
     
-    void setupPostProc( );
-
-    Real flux ( const markerID_Type& flag, const vector_Type& velocity );
-    
-    Real area ( const markerID_Type& flag );
-    
-    Real pres ( const markerID_Type& flag, const vector_Type& pressure );
-
-    Vector geometricCenter ( const markerID_Type& flag );
-
-    Vector normal ( const markerID_Type& flag );
-
 private:
 
-	// build the graphs
+	//! Build the graphs
 	void buildGraphs();
 
-	// update the bc handler
+	//! Update the bc handler
 	void updateBCHandler( bcPtr_Type & bc );
 
+	//! Set options preconditioner
     void setSolversOptions(const Teuchos::ParameterList& solversOptions);
 
-    void buildPCDGraphs();
-
+    //! Apply Bc to the residual vector
+    void applyBoundaryConditionsResidual ( vector_Type& r_u, const Real& time = 0.0);
+    
 	// communicator
 	commPtr_Type M_comm;
 
@@ -534,7 +698,8 @@ private:
 	//! Reals
 	Real M_alpha;
 	Real M_timeStep;
-
+    Real M_time;
+    
 	//! Booleans
 	bool M_useGraph;
     bool M_graphIsBuilt;
@@ -568,7 +733,10 @@ private:
 
     // BC handler
     bcPtr_Type M_bc;
-
+    bcPtr_Type M_bc_sol;
+    bcPtr_Type M_bc_res_essential;
+    bcPtr_Type M_bc_res_natural;
+    
     Real M_density;
     Real M_viscosity;
 
@@ -603,7 +771,7 @@ private:
     Real M_orderBDF;
     UInt M_orderVel;
 
-}; // class NavierStokesSolver
+}; // class NavierStokesSolverBlocks
 
 } // namespace LifeV
 

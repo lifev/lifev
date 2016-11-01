@@ -1,4 +1,39 @@
 //@HEADER
+/*
+*******************************************************************************
+
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+
+    This file is part of LifeV.
+
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
+*/
+//@HEADER
+
+/*!
+    @file
+    @brief SIMPLE preconditioner for Navier-Stokes equations.
+
+    @author Davide Forti <davide.forti@epfl.ch>
+    @contributor Umberto Villa
+    @date 08-12-2014
+
+    @maintainer Davide Forti <davide.forti@epfl.ch>
+ */
 
 #include <boost/numeric/ublas/matrix.hpp>
 
@@ -52,41 +87,67 @@ public:
     typedef  boost::shared_ptr<VectorEpetra_Type>      VectorEpetraPtr_Type;
     //@}
 
-    //! @name Constructors
+    //! @name Constructors and Destructors
     //@{
+
     //! Empty constructor
     aSIMPLEOperator();
-    //@}
+
+    //! Destructor
     virtual ~aSIMPLEOperator();
+
+    //@}
 
     //! @name SetUp
     //@{
-    //! SetUp
+
+    //! SetUp - case without stabilization
     /*!
+	 *  @param F block(0,0) of NS matrix
+	 *  @param B block(1,0) of NS matrix
+	 *  @param Btranspose block(0,1) of NS matrix
      */
     void setUp(const matrixEpetraPtr_Type & F,
                const matrixEpetraPtr_Type & B,
                const matrixEpetraPtr_Type & Btranspose);
 
+    //! SetUp - case with stabilization
+    /*!
+     *  @param F block(0,0) of NS matrix
+     *  @param B block(1,0) of NS matrix
+     *  @param Btranspose block(0,1) of NS matrix
+     *  @param D block(1,1) of NS matrix
+     */
     void setUp ( const matrixEpetraPtr_Type & F,
    				 const matrixEpetraPtr_Type & B,
 				 const matrixEpetraPtr_Type & Btranspose,
 				 const matrixEpetraPtr_Type & D );
 
 
-    //! @name Set Methods
+    //! @name Setters
     //@{
+
     //! \warning Transpose of this operator is not supported
     int SetUseTranspose(bool UseTranspose){M_useTranspose = UseTranspose; return 0;}
+
     //! set the domain map
     void setDomainMap(const boost::shared_ptr<BlockEpetra_Map> & domainMap){M_operatorDomainMap = domainMap;}
+
     //! set the range map
     void setRangeMap(const boost::shared_ptr<BlockEpetra_Map> & rangeMap){M_operatorRangeMap = rangeMap;}
+
+    //! Set the momentum preconditioner options
+    void setMomentumOptions(const parameterListPtr_Type & _oList);
+
+    //! Set the Schur Complement preconditioner options
+    void setSchurOptions(const parameterListPtr_Type & _oList);
+
     //@}
 
 
-    //! @name
+    //! @name Methods
     //@{
+
     //! \warning No method \c Apply defined for this operator. It return an error code.
     int Apply(const vector_Type &/*X*/, vector_Type &/*Y*/) const {return -1;};
 
@@ -98,8 +159,16 @@ public:
 
     //! Returns the High Order Yosida approximation of the inverse pressure Schur Complement applied to \c X.
     int ApplyInverse(const vector_Type &X, vector_Type &Y) const;
+
     //! \warning Infinity norm not defined for this operator
     double NormInf() const {return -1.0;}
+
+    //! Updates the momentum preconditioner operator
+    void updateApproximatedMomentumOperator();
+
+    //! Updates the Schur Complement preconditioner operator
+    void updateApproximatedSchurComplementOperator();
+
     //@}
 
     // @name Attribute access functions
@@ -118,25 +187,25 @@ public:
     const map_Type & OperatorRangeMap() const {return *(M_operatorRangeMap->monolithicMap());}
     //@}
 
-    void updateApproximatedMomentumOperator();
-
-    void updateApproximatedSchurComplementOperator();
-
-    void setMomentumOptions(const parameterListPtr_Type & _oList);
-
-    void setSchurOptions(const parameterListPtr_Type & _oList);
+    //! @name Getters
+    //@{
 
     //! Show information about the class
     void showMe();
 
+    //! Return the list of options being used
     void setOptions(const Teuchos::ParameterList& solversOptions);
 
+    //! Return the block(0,0)
     matrixEpetraPtr_Type const& F() const { return M_F; }
 
+    //! Return the block(0,1)
     matrixEpetraPtr_Type const& B() const { return M_B; }
 
+    //! Return the block(1,0)
     matrixEpetraPtr_Type const& Btranspose() const { return M_Btranspose; }
 
+    //@}
 
 private:
 

@@ -64,7 +64,6 @@ void StabilizationSUPG_semi_implicit_ale::setupODEfineScale ( )
 {
 	int numVolumes = M_uFESpace->mesh()->numVolumes();
 	UInt numQuadraturePointsVelocity = M_uFESpace->qr().nbQuadPt();
-	UInt numQuadraturePointsPressure = M_pFESpace->qr().nbQuadPt();
 
 	std::vector<std::vector<VectorSmall<3>>> velocity_fine;
 	velocity_fine.resize(numVolumes);
@@ -80,6 +79,8 @@ void StabilizationSUPG_semi_implicit_ale::setupODEfineScale ( )
 		M_fineScaleVelocity[i].resize( numQuadraturePointsVelocity );
 		M_fineScalePressure[i].resize( numQuadraturePointsVelocity );
 
+		// Here we assume that same quadrature rule
+		// is used for pressure and velocity.
 		for ( int j = 0; j < numQuadraturePointsVelocity; ++j )
 		{
 			velocity_fine[i][j](0) = 0.0;

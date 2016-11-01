@@ -30,10 +30,14 @@
    @maintainer Davide Forti <davide.forti@epfl.ch>
    @date 03-02-2015
 
-   This file contains an ETA implementation of SUPG, fully implicit for the moment.
+   This file contains an ETA implementation of SUPG (for fixed domains), fully implicit.
 
    For reference, see Paper Y. Bazilevs, V.M. Calo, J.A. Cottrell, T.J.R. Hughes, A. Reali, and G. Scovazzi. <i>Variational multiscale
    residual-based turbulence modeling for large eddy simulation of incompressible flows</i>. Comput. Methods Appl. Mech. Engr. 197(1):173–201, 2007.
+
+   If using this class to generate your results, please <b>cite</b>:
+   - D. Forti, L. Dede'. <i> Semi-implicit BDF time discretization of the Navier–Stokes equations with VMS-LES modeling in a High Performance Computing framework</i>.
+   	 Comput. Fluids. 197(1):168-182, 2015.
 
 */
 
@@ -73,6 +77,7 @@
 namespace LifeV
 {
 
+
 class SquareRoot
 {
 public:
@@ -94,6 +99,7 @@ public:
 
     //@name Public Types
     //@{
+
     typedef RegionMesh<LinearTetra> mesh_Type;
     typedef MapEpetra  map_Type;
 
@@ -119,6 +125,7 @@ public:
 
     //! @name Constructor and Destructor
     //@{
+
     //! Default Constructor
     StabilizationSUPG();
 
@@ -127,8 +134,8 @@ public:
 
     //@}
 
-    //! Build the graphs of each single block
-    void buildGraphs();
+    //! @name Methods
+    //@{
 
     //! Updates the jacobian matrix
     /*!
@@ -154,60 +161,131 @@ public:
 			  	   	   const vector_Type& pressure_previous_newton_step,
 			  	   	   const vector_Type& velocity_rhs);
 
+    //! Build the graphs of each single block
+    void buildGraphs();
+
+    //@}
+
+    //! @name Setters
+    //@{
+
+    //! Set velocity FE space
+    /*!
+     * @param velocityFESpace FE space velocity
+     */
     void setVelocitySpace(fespacePtr_Type velocityFESpace){ M_uFESpace = velocityFESpace;}
 
+    //! Set pressure FE space
+    /*!
+     * @param pressureFESpace FE space velocity
+     */
     void setPressureSpace(fespacePtr_Type pressureFESpace){ M_pFESpace = pressureFESpace;}
 
     //! Set the constant C_I for the supg
+    /*!
+     * @param value order of velocity FE degree used
+     */
     void setConstant (const int & value);
 
     //! Set the fluid density
+    /*!
+     * @param density value of density
+     */
     void setDensity (const Real & density) { M_density = density;}
 
     //! Set the bdf order
+    /*!
+     * @param bdfOrder order BDF scheme
+     */
     void setBDForder (const Real & bdfOrder) { M_bdfOrder = bdfOrder;}
 
     //! Set the bdf order
+    /*!
+     * @param alpha value of alpha (coefficient in front of u^n+1) of the BDF scheme
+     */
     void setAlpha (const Real & alpha) { M_alpha = alpha;}
 
     //! Set the fluid dynamic viscosity
+    /*!
+     * @param viscosity value of the dynamic viscosity
+     */
     void setViscosity (const Real & viscosity) { M_viscosity = viscosity;}
 
     //! Set the Epetra communicator
+    /*!
+     * @param comm communicator
+     */
     void setCommunicator (boost::shared_ptr<Epetra_Comm> comm) { M_comm = comm;}
 
     //! Set the time step size
+    /*!
+     * @param timestep time step size
+     */
     void setTimeStep  (const Real & timestep)  { M_timestep = timestep;}
 
+    //! Set Expression Template FE space for velocity
+    /*!
+     * @param velocityEta_fespace Expression Template FE space for velocity
+     */
     void setETvelocitySpace(const ETFESpacePtr_velocity & velocityEta_fespace){ M_fespaceUETA = velocityEta_fespace;}
 
+    //! Set Expression Template FE space for pressure
+    /*!
+     * @param pressureEta_fespace Expression Template FE space for pressure
+     */
     void setETpressureSpace(const ETFESpacePtr_pressure & pressureEta_fespace){ M_fespacePETA = pressureEta_fespace;}
     
+    //! Set if using matrix graph
+    /*!
+     * @param useGraph true or false
+     */
+    void setUseGraph (const bool& useGraph) { M_useGraph = useGraph; }
+
+    //@}
+
     //! @name Getters
     //@{
 
+    //! Get block00 of the stabilization matrix
+    /*!
+     * @return M_block_00  block00 of the stabilization matrix
+     */
     matrixPtr_Type const& block_00() const
     {
     	return M_block_00;
     }
 
+    //! Get block01 of the stabilization matrix
+    /*!
+     * @return M_block_01  block01 of the stabilization matrix
+     */
     matrixPtr_Type const& block_01() const
     {
     	return M_block_01;
     }
 
+    //! Get block10 of the stabilization matrix
+    /*!
+     * @return M_block_10  block10 of the stabilization matrix
+     */
     matrixPtr_Type const& block_10() const
     {
     	return M_block_10;
     }
 
+    //! Get block11 of the stabilization matrix
+    /*!
+     * @return M_block_11  block11 of the stabilization matrix
+     */
     matrixPtr_Type const& block_11() const
     {
     	return M_block_11;
     }
-    
-    void setUseGraph (const bool& useGraph) { M_useGraph = useGraph; }
 
+    //! Get name of stabilization used
+    /*!
+     * @return M_label name of stabilization used
+     */
     std::string label () { return M_label; }
 
     //@}

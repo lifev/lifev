@@ -2,13 +2,13 @@
 
 // MACRO TO DEFINE TAU_M
 #define TAU_M 	       value(1)/( eval(squareroot,TAU_M_DEN) )
-#define TAU_M_DEN      TAU_M_DEN_DT + TAU_M_DEN_VEL + TAU_M_DEN_VISC
-#define TAU_M_DEN_DT   value(M_density*M_density)*value(M_bdfOrder*M_bdfOrder)/value(M_timestep * M_timestep)
-#define TAU_M_DEN_VEL  value(M_density*M_density)*dot(value(M_fespaceUETA, velocity_previous_newton_step_rep), value(M_fespaceUETA, velocity_previous_newton_step_rep))/(h_K*h_K)
-#define TAU_M_DEN_VISC value(M_C_I)*value(M_viscosity*M_viscosity)/(h_K*h_K*h_K*h_K)
+#define TAU_M_DEN      ( TAU_M_DEN_DT + TAU_M_DEN_VEL + TAU_M_DEN_VISC )
+#define TAU_M_DEN_DT   ( value(M_density*M_density)*value(M_bdfOrder*M_bdfOrder)/value(M_timestep * M_timestep) )
+#define TAU_M_DEN_VEL  ( value(M_density*M_density)*dot(value(M_fespaceUETA, velocity_previous_newton_step_rep), G * value(M_fespaceUETA, velocity_previous_newton_step_rep) ) )
+#define TAU_M_DEN_VISC ( value(M_C_I)*value(M_viscosity*M_viscosity) *dot (G, G) )
 
 // MACRO TO DEFINE TAU_C
-#define TAU_C (h_K*h_K)/(TAU_M)
+#define TAU_C ( value(1.0)/( dot(g, TAU_M*g ) ) )
 
 namespace LifeV
 {

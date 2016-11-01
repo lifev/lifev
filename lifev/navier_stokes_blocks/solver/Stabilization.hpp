@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief NavierStokesPreconditionerOperator - Abstract interface for preconditioners for Navier-Stokes
+    @brief Stabilization - Abstract interface of stabilizations for Navier-Stokes
 
     @author Davide Forti <davide.forti@epfl.ch>
     @date 08-12-2014
@@ -79,23 +79,9 @@ public:
 
     virtual ~Stabilization();
 
-    //! Build the graphs of each single block
-    virtual void buildGraphs() = 0;
-
-    //! @name Interfaces for the NS in fixed domain, fully implicit
+    //! @name Methods
     //@{
-    
-    //! Updates the jacobian matrix in Navier-Stokes simulations in fixed coordinates
-    /*!
-       @param velocity_previous_newton_step velocity from the previous Newton step
-       @param pressure_previous_newton_step pressure from the previous Newton step
-       @param velocity_rhs velocity term from approximation time derivative
-     
-    virtual void apply_matrix(	const vector_Type& velocity_previous_newton_step,
-    							const vector_Type& pressure_previous_newton_step,
-    							const vector_Type& velocity_rhs ) {};
-    */
-    
+
     //! Adds to the residual the contribution coming from the SUPG stabilization
     //  in Navier-Stokes simulations in fixed coordinates
     /*!
@@ -111,20 +97,12 @@ public:
     							const vector_Type& /*pressure_previous_newton_step*/,
     							const vector_Type& /*velocity_rhs*/) {};
     
-    //@}
-    
-    //! @name Interfaces for the NS in fixed domain, semi-implicit
-    //@{
-    
     //! Updates the system matrix in Navier-Stokes simulations in fixed coordinates
     //  with semi-implicit treatment of the convective term.
     /*!
      @param velocityExtrapolated extrapolation of the fluid velocity
      */
     virtual void apply_matrix(	const vector_Type& /*velocityExtrapolated*/ ) {};
-
-    //! @name Interfaces for the NS in moving domain, semi-implicit
-    //@{
 
     //! Updates the system matrix in Navier-Stokes simulations in ALE coordinates
     //  with semi-implicit treatment of the convective term.
@@ -147,12 +125,6 @@ public:
                                 vectorPtr_Type& /*rhs_pressure*/,
                                 const vector_Type& /*velocity_extrapolated*/,
                                 const vector_Type& /*velocity_rhs*/) {};
-
-
-    //@}
-    
-    //! @name Interfaces for the NS in fixed domain, VMSLES semi-implicit
-    //@{
     
     //! Updates the system matrix in Navier-Stokes simulations in fixed coordinates
     //  with semi-implicit treatment of the convective term.
@@ -164,10 +136,6 @@ public:
     virtual void apply_matrix(	const vector_Type& /*velocityExtrapolated*/,
                                 const vector_Type& /*pressureExtrapolated*/,
                                 const vector_Type& /*velocity_rhs*/) {};
-    //@}
-    
-    //! @name Interfaces for the NS in moving domain, fully implicit
-    //@{
     
     //! Updates the jacobian matrix in Navier-Stokes simulations in ALE coordinates
     /*!
@@ -200,67 +168,136 @@ public:
 
     //@}
     
-    //! Set the constant C_I for the supg
+    //! @name Setters
+    //@{
+
+    //! Set the constant C_I for the stabilization
+    /*!
+     * @param value order of FE used for velocity
+     */
     virtual void setConstant (const int & value) = 0;;
 
+    //! Build the graphs of each single block
+    virtual void buildGraphs() {};
+
     //! Set the fluid density
+    /*!
+     * @param value order of FE used for velocity
+     */
     virtual void setDensity (const Real & density) = 0;
 
     //! Set the bdf order
+    /*!
+     * @param bdfOrder order of BDF scheme used
+     */
     virtual void setBDForder (const Real & bdfOrder) = 0;
 
-    //! Set the bdf order
+    //! Set the alpha coefficient of the BDF scheme used
+    /*!
+     * @param alpha coefficient BDF in front of u^{n+1}
+     */
     virtual void setAlpha (const Real & alpha) = 0;
 
     //! Set the fluid dynamic viscosity
+    /*!
+     * @param viscosity value of fluid viscosity
+     */
     virtual void setViscosity (const Real & viscosity) = 0;
 
     //! Set the Epetra communicator
+    /*!
+     * @param comm Epetra communicator
+     */
     virtual void setCommunicator (boost::shared_ptr<Epetra_Comm> comm) = 0;
 
     //! Set the time step size
+    /*!
+     * @param timestep time step size
+     */
     virtual void setTimeStep  (const Real & timestep) = 0;
 
+    //! Set FE space for velocity
+    /*!
+     * @param velocityFESpace FE space for velocity
+     */
     virtual void setVelocitySpace(fespacePtr_Type velocityFESpace) = 0;
 
+    //! Set Expression Template FE space for velocity
+    /*!
+     * @param pressureFESpace FE space for pressure
+     */
     virtual void setPressureSpace(fespacePtr_Type pressureFESpace) = 0;
 
+    //! Set Expression Template FE space for velocity
+    /*!
+     * @param velocityEta_fespace Expression Template FE space for velocity
+     */
     virtual void setETvelocitySpace(const ETFESpacePtr_velocity & velocityEta_fespace) = 0;
 
+    //! Set Expression Template FE space for velocity
+    /*!
+     * @param pressureEta_fespace Expression Template FE space for pressure
+     */
     virtual void setETpressureSpace(const ETFESpacePtr_pressure & pressureEta_fespace) = 0;
 
+    //! Set if using the graph
+    /*!
+     * @param useGraph true it uses the graph, false it does not use the graph
+     */
     virtual void setUseGraph (const bool& /*useGraph*/) {};
     
+    //! Set if using dynamic fine scale model
+    virtual void setUseODEfineScale ( const bool& /*M_useODEfineScale*/ ) {};
+
+    //! Set if the user wants to export the fine scale component
+    virtual void setExportFineScaleVelocity ( ExporterHDF5<mesh_Type> & /*exporter*/, const int& /*numElementsTotal*/ ) {};
+
+    //! Set if using the fast assembler
+    virtual void setFastAssembler ( boost::shared_ptr<FastAssemblerNS>&  /*fast_assembler*/) {};
+
+    //@}
+
     //! @name Getters
     //@{
 
+    //! Get block00 of the stabilization matrix
     virtual matrixPtr_Type const& block_00() const = 0;
 
+    //! Get block01 of the stabilization matrix
     virtual matrixPtr_Type const& block_01() const = 0;
 
+    //! Get block10 of the stabilization matrix
     virtual matrixPtr_Type const& block_10() const = 0;
 
+    //! Get block11 of the stabilization matrix
     virtual matrixPtr_Type const& block_11() const = 0;
 
+    //! Get name of stabilization being used
     virtual std::string label () = 0;
 
-    virtual void setUseODEfineScale ( const bool& /*M_useODEfineScale*/ ) {};
-
+    //! Updates the fine scale component
     virtual void updateODEfineScale ( const vectorPtr_Type& /*velocity*/, const vectorPtr_Type& /*pressure*/ ) {};
 
+    //! Updates the fine scale component
     virtual void updateODEfineScale ( const vectorPtr_Type& /*velocity*/, const vectorPtr_Type& /*pressure*/, const vectorPtr_Type& /*vel_extrap*/ ) {};
-    
-    virtual void setExportFineScaleVelocity ( ExporterHDF5<mesh_Type> & /*exporter*/, const int& /*numElementsTotal*/ ) {};
 
-    virtual void setFastAssembler ( boost::shared_ptr<FastAssemblerNS>&  /*fast_assembler*/) {};
+    //@}
 
 private:
 
+    //! @name Private methods
+    //@{
+
+    //! Setup of the fine scale component
     virtual void setupODEfineScale () {};
 
+    //! Compute the fine component of the velocity and pressure
     virtual void computeFineScales ( const vectorPtr_Type& /*velocity*/, const vectorPtr_Type& /*pressure*/, const vectorPtr_Type& /*vel_extrap*/ ) {};
 
+    //! Compute the fine component of the velocity and pressure for visualization
     virtual void computeFineScalesForVisualization ( const vectorPtr_Type& /*velocity*/, const vectorPtr_Type& /*pressure*/, const vectorPtr_Type& /*vel_extrap*/ ) {};
+
+    //@}
 
 };
 

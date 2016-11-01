@@ -81,21 +81,6 @@
 namespace LifeV
 {
 
-class SquareRoot_supg_semi_implicit
-{
-public:
-    typedef Real return_Type;
-
-    inline return_Type operator() (const Real& a)
-    {
-        return std::sqrt(a);
-    }
-
-    SquareRoot_supg_semi_implicit() {}
-    SquareRoot_supg_semi_implicit (const SquareRoot_supg_semi_implicit&) {}
-    ~SquareRoot_supg_semi_implicit() {}
-};
-
 class StabilizationSUPG_semi_implicit : public Stabilization
 {
 public:
@@ -134,9 +119,6 @@ public:
     virtual ~StabilizationSUPG_semi_implicit(){}
 
     //@}
-
-    //! Build the graphs of each single block
-    void buildGraphs();
 
     //! Updates the system matrix in Navier-Stokes simulations in fixed coordinates
     //  with semi-implicit treatment of the convective term.
@@ -214,21 +196,9 @@ public:
 
     std::string label () { return M_label; }
 
-    void setUseODEfineScale ( const bool& useODEfineScale );
-
-    void updateODEfineScale ( const vectorPtr_Type& velocity, const vectorPtr_Type& pressure );
-
-    void setExportFineScaleVelocity ( ExporterHDF5<mesh_Type> & exporter, const int& numElementsTotal);
-
     //@}
 
 private:
-
-    void setupODEfineScale();
-
-    void computeFineScales ( const vectorPtr_Type& velocity, const vectorPtr_Type& pressure );
-
-    void computeFineScalesForVisualization ( const vectorPtr_Type& velocity, const vectorPtr_Type& pressure );
 
     //! @name Private Attributes
     //@{
@@ -298,6 +268,21 @@ namespace
 static bool S_registerStabilizationSUPG_semi_implicit = StabilizationFactory::instance().registerProduct ( "SUPG_SEMI_IMPLICIT",
                                                                                                            &createStabilizationSUPG_semi_implicit );
 }
+
+class SquareRoot_supg_semi_implicit
+{
+public:
+    typedef Real return_Type;
+
+    inline return_Type operator() (const Real& a)
+    {
+        return std::sqrt(a);
+    }
+
+    SquareRoot_supg_semi_implicit() {}
+    SquareRoot_supg_semi_implicit (const SquareRoot_supg_semi_implicit&) {}
+    ~SquareRoot_supg_semi_implicit() {}
+};
 
 } // namespace LifeV
 
