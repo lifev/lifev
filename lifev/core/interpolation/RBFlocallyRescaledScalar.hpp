@@ -274,7 +274,6 @@ void RBFlocallyRescaledScalar<Mesh>::interpolationOperator()
         M_interpolationOperator->matrixPtr()->InsertGlobalValues (GlobalID[i], k, Values, Indices);
     }
     M_interpolationOperator->globalAssemble();
-    M_interpolationOperator->spy("TEST");
     delete Indices;
     delete Values;
     delete ElementsPerRow;
