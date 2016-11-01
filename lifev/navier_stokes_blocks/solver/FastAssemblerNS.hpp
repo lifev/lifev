@@ -30,7 +30,20 @@
      @brief This file contains the definition of the FastAssembler class.
 
      This function is used to perform an efficient assembly of FE matrices
-     where the test and trial functions are the same.
+     where the test and trial functions are the same. This class is experimental
+     and must be used with a lot of care.
+
+     \warning All the routines contained here are supposted to be used/expanded by experts of LifeV
+     since they contain a much faster way of assembling matrices stemming from the discretized
+     NS equations (either in the fully-implicit or semi-implicit case).
+
+     Preliminary tests
+     showed that the assemblers coded here are roughly 20 times faster then
+     ETA based ones. The assembly is done "by hands" and the code is quite
+     hard to be understood.
+
+     To use this class one has first to allocate the memory required and then
+     just call the routines required for the assembly.
 
      @date 06/2016
      @author Davide Forti <davide.forti@epfl.ch>
