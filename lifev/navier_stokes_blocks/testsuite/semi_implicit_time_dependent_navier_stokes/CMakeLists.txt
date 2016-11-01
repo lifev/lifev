@@ -1,9 +1,11 @@
 
 INCLUDE(TribitsAddExecutable)
 
-TRIBITS_ADD_EXECUTABLE(
+TRIBITS_ADD_EXECUTABLE_AND_TEST(
   test_block_solver
   SOURCES main.cpp
+  ARGS -c
+  NUM_MPI_PROCS 2
   COMM serial mpi
 )
 

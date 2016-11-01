@@ -37,7 +37,7 @@
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
-#include <lifev/navier_stokes_blocks/solver/NavierStokesSolver.hpp>
+#include <lifev/navier_stokes_blocks/solver/NavierStokesSolverBlocks.hpp>
 #include <lifev/core/fem/TimeAndExtrapolationHandler.hpp>
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
@@ -63,6 +63,9 @@ main ( int argc, char** argv )
     boost::shared_ptr<Epetra_Comm> Comm( new Epetra_SerialComm () );
     verbose = true;
 #endif
+
+    Real normTwo_Velo;
+    Real normTwo_Pres;
 
     {
 
@@ -90,7 +93,7 @@ main ( int argc, char** argv )
     fullMeshPtr.reset();
 
     // create the solver
-    NavierStokesSolver ns( dataFile, Comm);
+    NavierStokesSolverBlocks ns( dataFile, Comm);
     ns.setup(localMeshPtr);
     ns.setParameters();
     ns.buildSystem();
@@ -156,12 +159,6 @@ main ( int argc, char** argv )
 
     std::string preconditioner = dataFile("fluid/preconditionerType","none");
 
-    if ( preconditioner.compare("PCD") == 0 )
-    {
-    	boost::shared_ptr<BCHandler> bc_pcd ( new BCHandler (*BCh_PCD ()) );
-    	ns.setBCpcd(bc_pcd);
-    }
-
     // Time loop
     LifeChrono iterChrono;
     Real time = t0 + dt;
@@ -217,7 +214,12 @@ main ( int argc, char** argv )
 
     exporter->closeFile();
 
+    normTwo_Velo = velocity->norm2();
+    normTwo_Pres = pressure->norm2();
+
 	}
+
+    std::cout << std::setprecision(9) << "\n\n" << normTwo_Velo << "\n\n" << normTwo_Pres << "\n\n";
 
 #ifdef HAVE_MPI
     if (verbose)
@@ -226,7 +228,15 @@ main ( int argc, char** argv )
     }
     MPI_Finalize();
 #endif
-    return ( EXIT_SUCCESS );
+
+    if ( std::abs(normTwo_Velo - 33.2165 ) < 1.0e-3 && std::abs(normTwo_Pres - 107.0810 ) < 1.0e-3 )
+    {
+    	return ( EXIT_SUCCESS );
+    }
+    else
+    {
+    	return ( EXIT_FAILURE );
+    }
 }
 
 

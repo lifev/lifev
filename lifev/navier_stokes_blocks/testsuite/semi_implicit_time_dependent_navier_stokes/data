@@ -5,17 +5,17 @@
 
 * #offline partitioner details
 [offline_partitioner]
-useOfflinePartitionedMesh = false                  					# true for loading an already partitioned mesh, false to partition the mesh online
-num_parts = 18                                     					# must be the same of the number of parts when we partioned offline the mesh
-hdf5_file_name = cylinder_coarse_18_MeshPartitionTool_ParMETIS.h5                       # file generated running test partion_io (main_write) - REQUIRED - 
-io_class = new                                    					# possibilities: old or new, use new
+useOfflinePartitionedMesh = false  # true for loading an already partitioned mesh, false to partition the mesh online
+num_parts = 18                     # must be the same of the number of parts when we partioned offline the mesh
+hdf5_file_name = cylinder_coarse_18_MeshPartitionTool_ParMETIS.h5  # file generated running test partion_io (main_write) - REQUIRED -
+io_class = new # possibilities: old or new, use new
 
 [exporter]
 	type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
 	multimesh  = false
 	start      = 0
 	save       = 1
-	filename   = result_fluid
+	filename   = result_fluid_semi_implicit
 
 [../]
 
@@ -27,7 +27,7 @@ io_class = new                                    					# possibilities: old or n
 
 [fluid]
     options_preconditioner = solversOptionsFast
-    preconditionerType     = SIMPLE # SIMPLE or PCD
+    preconditionerType     = SIMPLE 
     save_every             = 1
     
     [./physics]
@@ -36,8 +36,8 @@ io_class = new                                    					# possibilities: old or n
 
     [../time_discretization]
     	initialtime     = 0.0
-    	endtime         = 0.3
-    	timestep        = 0.05
+    	endtime         = 6.0
+    	timestep        = 0.5
     	BDF_order       = 2
 
     [../space_discretization]
@@ -45,16 +45,14 @@ io_class = new                                    					# possibilities: old or n
     	mesh_file       = tube20.mesh
     	mesh_type       = .mesh
 
-    	vel_order       = P2
-    	pres_order      = P2
-    	stiff_strain    = true
+    	vel_order       = P1
+    	pres_order      = P1
+    	stiff_strain    = false
 
     [../stabilization]
     	use             = true
-    	type            = SUPG_SEMI_IMPLICIT
-    	vel_order       = 2
-    	ode_fine_scale  = true
-
+        type            = SUPG_SEMI_IMPLICIT # possibile choice: SUPG_SEMI_IMPLICIT, VMSLES_SEMI_IMPLICIT
+    	vel_order       = 1
 
     [../miscellaneous]
     	verbose         = 1
