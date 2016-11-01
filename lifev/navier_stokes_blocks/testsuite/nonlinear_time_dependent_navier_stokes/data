@@ -5,20 +5,23 @@
 
 * #offline partitioner details
 [offline_partitioner]
-useOfflinePartitionedMesh = true                  					# true for loading an already partitioned mesh, false to partition the mesh online
-num_parts = 18                                     					# must be the same of the number of parts when we partioned offline the mesh
-hdf5_file_name = cylinder_coarse_18_MeshPartitionTool_ParMETIS.h5                       # file generated running test partion_io (main_write) - REQUIRED - 
-io_class = new                                    					# possibilities: old or new, use new
+	useOfflinePartitionedMesh = true                  					# true for loading an already partitioned mesh, false to partition the mesh online
+	hdf5_file_name = cylinder_coarse_18_MeshPartitionTool_ParMETIS.h5   # file generated running test partion_io (main_write) - REQUIRED - 
+	io_class = new                                    					# possibilities: old or new, use new
+
+[../]
 
 [exporter]
-type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
-multimesh  = false
-start      = 0
-save       = 1
-filename   = result_fluid
+	type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
+	multimesh  = false
+	start      = 0
+	save       = 1
+	filename   = result_fluid
+
+[../]
 
 [newton]
-	abstol          		=  1.e-5
+	abstol          		=  1.e-6
 	reltol          		=  1.e-5
 	etamax          		=  1.e-5
 	maxiter         		=  10
@@ -30,36 +33,34 @@ filename   = result_fluid
 [fluid]
 
     options_preconditioner = solversOptionsFast
-    preconditionerType     = SIMPLE # SIMPLE or PCD
     save_every             = 1
-    use_graph              = false
 
     [./physics]
-    density         = 1.0   # density
-    viscosity       = 0.035 # viscosity
+    	density         = 1.0   # density
+    	viscosity       = 0.035 # viscosity
 
     [../time_discretization]
-    initialtime     = 0.0
-    endtime         = 10.0
-    timestep        = 0.05
-    BDF_order       = 2
+    	initialtime     = 0.0
+    	endtime         = 6.0
+    	timestep        = 0.5
+    	BDF_order       = 2
 
     [../space_discretization]
-    mesh_dir        = ./
-    mesh_file       = tube20.mesh #FSI_benchmark_fluid_coarse.mesh
-    mesh_type       = .mesh
-
-    vel_order       = P1
-    pres_order      = P1
-    stiff_strain    = true
+    	mesh_dir        = ./
+    	mesh_file       = tube20.mesh
+    	mesh_type       = .mesh
+    	vel_order       = P1
+    	pres_order      = P1
    
 	[../stabilization]
-	use             = true
-    type            = SUPG
-	vel_order       = 1
+		use             = true
+    	type            = SUPG    # possible choices: SUPG
+		vel_order       = 1
 	
     [../miscellaneous]
-    verbose         = 1
-    steady          = false
+    	verbose         = 1
+    	steady          = false
     
+	[../]
+
 [../]

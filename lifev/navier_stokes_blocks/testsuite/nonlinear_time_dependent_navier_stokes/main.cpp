@@ -37,7 +37,7 @@
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
-#include <lifev/navier_stokes_blocks/solver/NavierStokesSolver.hpp>
+#include <lifev/navier_stokes_blocks/solver/NavierStokesSolverBlocks.hpp>
 #include <lifev/core/fem/TimeAndExtrapolationHandler.hpp>
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
@@ -99,7 +99,7 @@ main ( int argc, char** argv )
     timeVelocity.setTimeStep(dt);
 
     // create the solver
-    NavierStokesSolver ns( dataFile, Comm);
+    NavierStokesSolverBlocks ns( dataFile, Comm);
     ns.setup(localMeshPtr);
     ns.setParameters();
 
@@ -141,14 +141,9 @@ main ( int argc, char** argv )
     // Boundary conditions
     boost::shared_ptr<BCHandler> bc ( new BCHandler (*BCh_fluid ()) );
 
-    std::string preconditioner = dataFile("fluid/preconditionerType","none");
-
-    if ( preconditioner.compare("PCD") == 0 )
-    {
-    	boost::shared_ptr<BCHandler> bc_pcd ( new BCHandler (*BCh_PCD ()) );
-    	ns.setBCpcd(bc_pcd);
-    }
-
+    // Set boundary conditions
+    ns.setBoundaryConditions( bc );
+    
     // Time loop
     LifeChrono iterChrono;
     Real time = t0 + dt;
@@ -157,7 +152,6 @@ main ( int argc, char** argv )
 
     ns.setAlpha(timeVelocity.alpha());
     ns.setTimeStep(dt);
-    ns.setBC( bc );
 
     ns.buildSystem();
 
@@ -174,7 +168,7 @@ main ( int argc, char** argv )
 
     	ns.setRhsVelocity(rhs_velocity);
 
-    	ns.iterate_nonlinear( bc, time );
+    	ns.iterate_nonlinear( time );
 
         ns.updateVelocity(velocity);
         ns.updatePressure(pressure);
@@ -192,6 +186,9 @@ main ( int argc, char** argv )
 
     exporter->closeFile();
 
+    Real normTwo_Velo = velocity->norm2();
+    Real normTwo_Pres = pressure->norm2();
+
 #ifdef HAVE_MPI
     if (verbose)
     {
@@ -199,7 +196,15 @@ main ( int argc, char** argv )
     }
     MPI_Finalize();
 #endif
-    return ( EXIT_SUCCESS );
+
+    if ( std::abs(normTwo_Velo - 36.87669 ) < 1.0e-4 && std::abs(normTwo_Pres - 118.83078 ) < 1.0e-4 )
+    {
+    	return ( EXIT_SUCCESS );
+    }
+    else
+    {
+    	return ( EXIT_FAILURE );
+    }
 }
 
 

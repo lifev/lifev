@@ -57,28 +57,22 @@ typedef boost::shared_ptr<BCHandler> bcPtr_Type;
 bcPtr_Type BCh_fluid ()
 {
     BCFunctionBase zero_function (fZero);
+    
+    BCFunctionBase pressure_function (fPressure);
+    
     BCFunctionBase inflow_function (inflow);
 
     bcPtr_Type bc (new BCHandler );
 
     bc->addBC ("Inflow",       INLET,  Essential, Full,   inflow_function, 3);
-    bc->addBC ("Outflow",      OUTLET, Natural,   Normal, zero_function);
+    
+    bc->addBC ("Outflow",     OUTLET,  Natural, Normal, zero_function);
+    
     bc->addBC ("Wall",         WALL,   Essential, Full,   zero_function, 3);
 
     return bc;
 }
-
-bcPtr_Type BCh_PCD ()
-{
-    BCFunctionBase zero_function (fZero);
-
-    bcPtr_Type bc (new BCHandler );
-
-    bc->addBC ("Outflow", OUTLET, Essential, Full, zero_function, 3);
-
-    return bc;
-}
-
+    
 }
 
 #endif
