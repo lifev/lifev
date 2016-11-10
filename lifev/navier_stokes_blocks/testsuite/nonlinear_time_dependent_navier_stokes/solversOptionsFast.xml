@@ -163,8 +163,8 @@
         </ParameterList>
         <ParameterList name="AztecOO">
             <Parameter name="conv" type="string" value="r0"/>
-            <Parameter name="kspace" type="int" value="1500"/>
-            <Parameter name="max_iter" type="int" value="1500"/>
+            <Parameter name="kspace" type="int" value="200"/>
+            <Parameter name="max_iter" type="int" value="200"/>
             <Parameter name="output" type="string" value="all_res"/>
             <Parameter name="scaling" type="string" value="none"/>
             <Parameter name="solver" type="string" value="gmres"/>
