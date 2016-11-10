@@ -10,9 +10,6 @@ SET(solver_HEADERS
   solver/StabilizationSUPG_semi_implicit_ale.hpp
   solver/StabilizationSUPGALE.hpp
   solver/StabilizationVMSLES_semi_implicit.hpp
-  solver/MultipleFluidsHandler.hpp
-  solver/MultiFluidApplyOperator.hpp
-  solver/DirichletNeumannPreconditionerMultiFluid.hpp
   solver/FastAssemblerNS.hpp
 CACHE INTERNAL "")
 
@@ -25,9 +22,6 @@ SET(solver_SOURCES
   solver/StabilizationSUPG_semi_implicit_ale.cpp
   solver/StabilizationSUPGALE.cpp	
   solver/StabilizationVMSLES_semi_implicit.cpp
-  solver/MultipleFluidsHandler.cpp
-  solver/MultiFluidApplyOperator.cpp
-  solver/DirichletNeumannPreconditionerMultiFluid.cpp
   solver/FastAssemblerNS.cpp
 CACHE INTERNAL "")
 

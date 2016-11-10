@@ -82,8 +82,8 @@ protected:
     SolverType_ptr M_solverManager;
     //! Cast to a Belos Preconditioner
     Teuchos::RCP<Belos::EpetraPrecOp> M_belosPrec;
-    static std::auto_ptr< solverManagerMap_Type > S_solverManagerMap;
-    static std::auto_ptr<precSideMap_Type> S_precSideMap;
+    static std::unique_ptr< solverManagerMap_Type > S_solverManagerMap;
+    static std::unique_ptr<precSideMap_Type> S_precSideMap;
 };
 
 inline InvertibleOperator* createBelosOperatorAlgebra() { return new BelosOperatorAlgebra(); }

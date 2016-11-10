@@ -174,8 +174,8 @@ int FSIApplyOperator::applyNoTranspose(const vector_Type & X, vector_Type & Y) c
     ASSERT_PRE(Y.Map().SameAs(*(M_rangeMap->monolithicMap())), "The map of Y is not conforming with range  map.");
     ASSERT_PRE(X.NumVectors() == Y.NumVectors(), "The number of vectors in X and Y is different" );
 
-    const std::auto_ptr<BlockEpetra_MultiVector> Xview( createBlockView(X, *M_domainMap) );
-    const std::auto_ptr<BlockEpetra_MultiVector> Yview( createBlockView(Y, *M_rangeMap) );
+    const std::unique_ptr<BlockEpetra_MultiVector> Xview( createBlockView(X, *M_domainMap) );
+    const std::unique_ptr<BlockEpetra_MultiVector> Yview( createBlockView(Y, *M_rangeMap) );
     BlockEpetra_MultiVector tmpY(*M_rangeMap, X.NumVectors(), true);
 
     Yview->PutScalar(0.0);
@@ -198,8 +198,8 @@ int FSIApplyOperator::applyTranspose(const vector_Type & X, vector_Type & Y) con
     ASSERT_PRE(Y.Map().SameAs(*(M_domainMap->monolithicMap())), "The map of Y is not conforming with range  map.");
     ASSERT_PRE(X.NumVectors() == Y.NumVectors(), "The number of vectors in X and Y is different" );
 
-    const std::auto_ptr<BlockEpetra_MultiVector> Xview( createBlockView(X, *M_rangeMap) );
-    const std::auto_ptr<BlockEpetra_MultiVector> Yview( createBlockView(Y, *M_domainMap) );
+    const std::unique_ptr<BlockEpetra_MultiVector> Xview( createBlockView(X, *M_rangeMap) );
+    const std::unique_ptr<BlockEpetra_MultiVector> Yview( createBlockView(Y, *M_domainMap) );
     BlockEpetra_MultiVector tmpY(*M_domainMap, X.NumVectors(), true);
 
     Yview->PutScalar(0.0);

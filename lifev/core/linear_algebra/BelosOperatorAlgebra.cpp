@@ -23,8 +23,8 @@ namespace LifeV
 namespace Operators
 {
 
-std::auto_ptr<BelosOperatorAlgebra::solverManagerMap_Type> BelosOperatorAlgebra::S_solverManagerMap(BelosOperatorAlgebra::singletonSolverManagerMap());
-std::auto_ptr<BelosOperatorAlgebra::precSideMap_Type> BelosOperatorAlgebra::S_precSideMap(BelosOperatorAlgebra::singletonPrecSideMap());
+std::unique_ptr<BelosOperatorAlgebra::solverManagerMap_Type> BelosOperatorAlgebra::S_solverManagerMap(BelosOperatorAlgebra::singletonSolverManagerMap());
+std::unique_ptr<BelosOperatorAlgebra::precSideMap_Type> BelosOperatorAlgebra::S_precSideMap(BelosOperatorAlgebra::singletonPrecSideMap());
 
 BelosOperatorAlgebra::BelosOperatorAlgebra():
         InvertibleOperator(),
