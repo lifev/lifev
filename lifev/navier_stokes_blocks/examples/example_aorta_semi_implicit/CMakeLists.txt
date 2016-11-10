@@ -24,3 +24,8 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(solverOptionsLaplacian_aorta_semi_implicit
   SOURCE_FILES SolverParamListLaplacian.xml
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+TRIBITS_COPY_FILES_TO_BINARY_DIR(mesh_aorta_semi_implicit
+  SOURCE_FILES Aorta_fluid_30K_NE.mesh
+  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/navier_stokes_blocks/meshes/
+)

@@ -37,7 +37,7 @@
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
-#include <lifev/navier_stokes_blocks/solver/NavierStokesSolver.hpp>
+#include <lifev/navier_stokes_blocks/solver/NavierStokesSolverBlocks.hpp>
 #include <lifev/core/fem/TimeAndExtrapolationHandler.hpp>
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
@@ -47,6 +47,14 @@
 #include "boundaryConditions.hpp"
 
 using namespace LifeV;
+
+typedef RegionMesh<LinearTetra> mesh_Type;
+typedef VectorEpetra vector_Type;
+typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
+
+void scaleInflowVector( const vectorPtr_Type& vecNotScaled,
+                        vectorPtr_Type& vecScaled,
+                        const Real& coefficient );
 
 Real oneFunction (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
@@ -71,9 +79,7 @@ main ( int argc, char** argv )
 
     {
 
-    typedef RegionMesh<LinearTetra> mesh_Type;
-    typedef VectorEpetra vector_Type;
-    typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
+
 
     // Reading the dataFile
     const std::string defaultDataName = "data";
@@ -95,10 +101,11 @@ main ( int argc, char** argv )
     fullMeshPtr.reset();
 
     // create the solver
-    NavierStokesSolver ns( dataFile, Comm);
+    NavierStokesSolverBlocks ns( dataFile, Comm);
     ns.setup(localMeshPtr);
     ns.setParameters();
     ns.buildSystem();
+    ns.setupPostProc();
 
     Real saveAfter = dataFile("fluid/save_after", 0.0);
 
@@ -193,9 +200,6 @@ main ( int argc, char** argv )
 
     // Inflow
 
-    Real nx_inflow = 0.07780;
-    Real ny_inflow = 0.0;
-    Real nz_inflow = 0.99696;
     Real Q_hat_inflow = 0.0;
     vectorPtr_Type Phi_h_inflow;
     vectorPtr_Type V_hat_x_inflow;
@@ -205,16 +209,13 @@ main ( int argc, char** argv )
     bcH_laplacian_inflow.addBC( "Inflow", 3, Essential, Full, one, 1 );
     bcH_laplacian_inflow.bcUpdate ( *ns.uFESpace_scalar()->mesh(), ns.uFESpace_scalar()->feBd(), ns.uFESpace_scalar()->dof() );
 
-    ns.preprocessBoundary ( nx_inflow, ny_inflow, nz_inflow, bcH_laplacian_inflow, Q_hat_inflow, laplacianSolution, 3,
+    ns.preprocessBoundary ( -ns.normal(3)[0], -ns.normal(3)[1], -ns.normal(3)[2], bcH_laplacian_inflow, Q_hat_inflow, laplacianSolution, 3,
     		Phi_h_inflow, V_hat_x_inflow, V_hat_y_inflow, V_hat_z_inflow );
 
     if (verbose)
     	std::cout << "\tValue of inflow, Q_hat = " << Q_hat_inflow << std::endl;
 
     // Outflow 4
-    Real nx_flag4 = 0.0;
-    Real ny_flag4 = 0.206;
-    Real nz_flag4 = 0.978;
     Real Q_hat_flag4 = 0.0;
     vectorPtr_Type Phi_h_outflow4;
     vectorPtr_Type V_hat_x_flag4;
@@ -224,16 +225,13 @@ main ( int argc, char** argv )
     bcH_laplacian_flag4.addBC( "Outflow4", 4, Essential, Full, one, 1 );
     bcH_laplacian_flag4.bcUpdate ( *ns.uFESpace_scalar()->mesh(), ns.uFESpace_scalar()->feBd(), ns.uFESpace_scalar()->dof() );
 
-    ns.preprocessBoundary ( nx_flag4, ny_flag4, nz_flag4, bcH_laplacian_flag4, Q_hat_flag4, laplacianSolution, 4,
+    ns.preprocessBoundary ( ns.normal(4)[0], ns.normal(4)[1], ns.normal(4)[2], bcH_laplacian_flag4, Q_hat_flag4, laplacianSolution, 4,
     		Phi_h_outflow4, V_hat_x_flag4, V_hat_y_flag4, V_hat_z_flag4 );
 
     if (verbose)
     	std::cout << "\tValue of outflow 4, Q_hat = " << Q_hat_flag4 << std::endl;
 
     // Outflow 5
-    Real nx_flag5 = 0.0;
-    Real ny_flag5 = 0.0;
-    Real nz_flag5 = 1.0;
     Real Q_hat_flag5 = 0.0;
     vectorPtr_Type Phi_h_outflow5;
     vectorPtr_Type V_hat_x_flag5;
@@ -243,16 +241,13 @@ main ( int argc, char** argv )
     bcH_laplacian_flag5.addBC( "Outflow5", 5, Essential, Full, one, 1 );
     bcH_laplacian_flag5.bcUpdate ( *ns.uFESpace_scalar()->mesh(), ns.uFESpace_scalar()->feBd(), ns.uFESpace_scalar()->dof() );
 
-    ns.preprocessBoundary ( nx_flag5, ny_flag5, nz_flag5, bcH_laplacian_flag5, Q_hat_flag5, laplacianSolution, 5,
+    ns.preprocessBoundary ( ns.normal(5)[0], ns.normal(5)[1], ns.normal(5)[2], bcH_laplacian_flag5, Q_hat_flag5, laplacianSolution, 5,
     		Phi_h_outflow5, V_hat_x_flag5, V_hat_y_flag5, V_hat_z_flag5 );
 
     if (verbose)
     	std::cout << "\tValue of outflow 5, Q_hat = " << Q_hat_flag5 << std::endl;
 
     // Outflow 6
-    Real nx_flag6 = 0.0;
-    Real ny_flag6 = 0.51;
-    Real nz_flag6 = 0.86;
     Real Q_hat_flag6 = 0.0;
     vectorPtr_Type Phi_h_outflow6;
     vectorPtr_Type V_hat_x_flag6;
@@ -262,16 +257,13 @@ main ( int argc, char** argv )
     bcH_laplacian_flag6.addBC( "Outflow6", 6, Essential, Full, one, 1 );
     bcH_laplacian_flag6.bcUpdate ( *ns.uFESpace_scalar()->mesh(), ns.uFESpace_scalar()->feBd(), ns.uFESpace_scalar()->dof() );
 
-    ns.preprocessBoundary ( nx_flag6, ny_flag6, nz_flag6, bcH_laplacian_flag6, Q_hat_flag6, laplacianSolution, 6,
+    ns.preprocessBoundary ( ns.normal(6)[0], ns.normal(6)[1], ns.normal(6)[2], bcH_laplacian_flag6, Q_hat_flag6, laplacianSolution, 6,
     		Phi_h_outflow6, V_hat_x_flag6, V_hat_y_flag6, V_hat_z_flag6 );
 
     if (verbose)
     	std::cout << "\tValue of outflow 6, Q_hat = " << Q_hat_flag6 << std::endl;
 
     // Outflow 7
-    Real nx_flag7 = 0.0;
-    Real ny_flag7 = -0.807;
-    Real nz_flag7 = -0.589;
     Real Q_hat_flag7 = 0.0;
     vectorPtr_Type Phi_h_outflow7;
     vectorPtr_Type V_hat_x_flag7;
@@ -281,16 +273,13 @@ main ( int argc, char** argv )
     bcH_laplacian_flag7.addBC( "Outflow7", 7, Essential, Full, one, 1 );
     bcH_laplacian_flag7.bcUpdate ( *ns.uFESpace_scalar()->mesh(), ns.uFESpace_scalar()->feBd(), ns.uFESpace_scalar()->dof() );
 
-    ns.preprocessBoundary ( nx_flag7, ny_flag7, nz_flag7, bcH_laplacian_flag7, Q_hat_flag7, laplacianSolution, 7,
+    ns.preprocessBoundary ( ns.normal(7)[0], ns.normal(7)[1], ns.normal(7)[2], bcH_laplacian_flag7, Q_hat_flag7, laplacianSolution, 7,
     		Phi_h_outflow7, V_hat_x_flag7, V_hat_y_flag7, V_hat_z_flag7 );
 
     if (verbose)
     	std::cout << "\tValue of outflow 7, Q_hat = " << Q_hat_flag7 << std::endl;
 
     // Outflow 8
-    Real nx_flag8 = 0.0;
-    Real ny_flag8 = -0.185;
-    Real nz_flag8 = 0.983;
     Real Q_hat_flag8 = 0.0;
     vectorPtr_Type Phi_h_outflow8;
     vectorPtr_Type V_hat_x_flag8;
@@ -300,16 +289,13 @@ main ( int argc, char** argv )
     bcH_laplacian_flag8.addBC( "Outflow8", 8, Essential, Full, one, 1 );
     bcH_laplacian_flag8.bcUpdate ( *ns.uFESpace_scalar()->mesh(), ns.uFESpace_scalar()->feBd(), ns.uFESpace_scalar()->dof() );
 
-    ns.preprocessBoundary ( nx_flag8, ny_flag8, nz_flag8, bcH_laplacian_flag8, Q_hat_flag8, laplacianSolution, 8,
+    ns.preprocessBoundary ( ns.normal(8)[0], ns.normal(8)[1], ns.normal(8)[2], bcH_laplacian_flag8, Q_hat_flag8, laplacianSolution, 8,
     		Phi_h_outflow8, V_hat_x_flag8, V_hat_y_flag8, V_hat_z_flag8);
 
     if (verbose)
     	std::cout << "\tValue of outflow 8, Q_hat = " << Q_hat_flag8 << std::endl;
 
     // Outflow 9
-    Real nx_flag9 = 0.0;
-    Real ny_flag9 = 0.851;
-    Real nz_flag9 = -0.525;
     Real Q_hat_flag9 = 0.0;
     vectorPtr_Type Phi_h_outflow9;
     vectorPtr_Type V_hat_x_flag9;
@@ -319,7 +305,7 @@ main ( int argc, char** argv )
     bcH_laplacian_flag9.addBC( "Outflow9", 9, Essential, Full, one, 1 );
     bcH_laplacian_flag9.bcUpdate ( *ns.uFESpace_scalar()->mesh(), ns.uFESpace_scalar()->feBd(), ns.uFESpace_scalar()->dof() );
 
-    ns.preprocessBoundary ( nx_flag9, ny_flag9, nz_flag9, bcH_laplacian_flag9, Q_hat_flag9, laplacianSolution, 9,
+    ns.preprocessBoundary ( ns.normal(9)[0], ns.normal(9)[1], ns.normal(9)[2], bcH_laplacian_flag9, Q_hat_flag9, laplacianSolution, 9,
     		Phi_h_outflow9, V_hat_x_flag9, V_hat_y_flag9, V_hat_z_flag9);
 
     /* end preprocessing */
@@ -450,7 +436,6 @@ main ( int argc, char** argv )
 
     	if ( (time >= 0.05 && time <= 0.42) || (time >= (0.05+T_heartbeat) && time <= (0.42+T_heartbeat) ) || (time >= (0.05+2*T_heartbeat) && time <= (0.42+2*T_heartbeat) ) || (time >= (0.05+3*T_heartbeat) && time <= (0.42+3*T_heartbeat) ) )
     	{
-    		// nuova
     		Q = -2.314569820334801e+09*std::pow(time-i_HeartBeat*T_heartbeat,9) +
     				4.952537061974133e+09*std::pow(time-i_HeartBeat*T_heartbeat,8) -
     				4.532060231242586e+09*std::pow(time-i_HeartBeat*T_heartbeat,7) +
@@ -463,8 +448,6 @@ main ( int argc, char** argv )
     				1.184312187078482e+03;
     		Q = Q/394;
 
-    		// usata prima
-    		//Q = 2.117637666632775e+04*std::pow(time-i_HeartBeat*T_heartbeat,6)-3.370930726888496e+04*std::pow(time-i_HeartBeat*T_heartbeat,5)+2.133377678002176e+04*std::pow(time-i_HeartBeat*T_heartbeat,4)-6.666366536069445e+03*std::pow(time-i_HeartBeat*T_heartbeat,3)+1.011772959679957e+03*std::pow(time-i_HeartBeat*T_heartbeat,2)-6.023975547926423e+01*(time-i_HeartBeat*T_heartbeat)+1.192718364532979e+00;
     	}
     	else
     	{
@@ -496,16 +479,26 @@ main ( int argc, char** argv )
 
     	if (verbose)
     	{
-    	    		std::cout << "Q_inflow: " << Q_inflow << std::endl << std::endl;
-    	    		std::cout << "Q_flag4: "  << Q_flag4  << std::endl << std::endl;
-    	    		std::cout << "Q_flag5: "  << Q_flag5  << std::endl << std::endl;
-    	    		std::cout << "Q_flag6: "  << Q_flag6  << std::endl << std::endl;
-    	    		std::cout << "Q_flag7: "  << Q_flag7  << std::endl << std::endl;
-    	    		std::cout << "Q_flag8: "  << Q_flag8  << std::endl << std::endl;
-    	    		std::cout << "Q_flag9: "  << Q_flag9  << std::endl << std::endl;
-    	    		std::cout << "Q_outflow: "  << Q_inflow - Q_flag4 - Q_flag5 - Q_flag6 - Q_flag7 - Q_flag8 - Q_flag9  << std::endl << std::endl;
+            std::cout << "Q_inflow: " << Q_inflow << std::endl << std::endl;
+    	    std::cout << "Q_flag4: "  << Q_flag4  << std::endl << std::endl;
+    	    std::cout << "Q_flag5: "  << Q_flag5  << std::endl << std::endl;
+    	    std::cout << "Q_flag6: "  << Q_flag6  << std::endl << std::endl;
+    	    std::cout << "Q_flag7: "  << Q_flag7  << std::endl << std::endl;
+    	    std::cout << "Q_flag8: "  << Q_flag8  << std::endl << std::endl;
+    	    std::cout << "Q_flag9: "  << Q_flag9  << std::endl << std::endl;
+    	    std::cout << "Q_outflow: "  << Q_inflow - Q_flag4 - Q_flag5 - Q_flag6 - Q_flag7 - Q_flag8 - Q_flag9  << std::endl << std::endl;
     	}
 
+    	scaleInflowVector(velAndPressure_inflow_reference, velAndPressure_inflow, alpha_flowrate_inflow );
+        
+        scaleInflowVector(velAndPressure_outflow4_reference, velAndPressure_outflow4, alpha_flowrate_flag4 );
+        scaleInflowVector(velAndPressure_outflow5_reference, velAndPressure_outflow5, alpha_flowrate_flag5 );
+        scaleInflowVector(velAndPressure_outflow6_reference, velAndPressure_outflow6, alpha_flowrate_flag6 );
+        scaleInflowVector(velAndPressure_outflow7_reference, velAndPressure_outflow7, alpha_flowrate_flag7 );
+        scaleInflowVector(velAndPressure_outflow8_reference, velAndPressure_outflow8, alpha_flowrate_flag8 );
+        scaleInflowVector(velAndPressure_outflow9_reference, velAndPressure_outflow9, alpha_flowrate_flag9 );
+        
+        /*
     	velAndPressure_inflow->zero();
     	*velAndPressure_inflow += *velAndPressure_inflow_reference;
     	*velAndPressure_inflow *= alpha_flowrate_inflow;
@@ -533,7 +526,8 @@ main ( int argc, char** argv )
     	velAndPressure_outflow9->zero();
     	*velAndPressure_outflow9 += *velAndPressure_outflow9_reference;
     	*velAndPressure_outflow9 *= alpha_flowrate_flag9;
-
+        */
+        
     	velAndPressure_flowrates->zero();
     	*velAndPressure_flowrates += *velAndPressure_inflow;
     	*velAndPressure_flowrates += *velAndPressure_outflow4;
@@ -630,4 +624,12 @@ main ( int argc, char** argv )
     return ( EXIT_SUCCESS );
 }
 
+void scaleInflowVector( const vectorPtr_Type& vecNotScaled,
+                        vectorPtr_Type& vecScaled,
+                        const Real& coefficient )
+{
+	vecScaled->zero();
+	*vecScaled += *vecNotScaled;
+	*vecScaled *= coefficient;
+}
 

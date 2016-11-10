@@ -48,7 +48,7 @@
 namespace LifeV
 {
 
-Real fZero (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
+Real fZero (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
 	return 0.0;
 }
@@ -78,8 +78,6 @@ Real fPressure (const Real& time, const Real& /*x*/, const Real& /*y*/, const Re
 
 	if ( (time >= 0.05 && time <= 0.42) || (time >= (0.05+T_heartbeat) && time <= (0.42+T_heartbeat) ) || (time >= (0.05+2*T_heartbeat) && time <= (0.42+2*T_heartbeat) ) || (time >= (0.05+3*T_heartbeat) && time <= (0.42+3*T_heartbeat) ) )
 	{
-		// old
-		//Q = 2.117637666632775e+04*std::pow(time-i_HeartBeat*T_heartbeat,6)-3.370930726888496e+04*std::pow(time-i_HeartBeat*T_heartbeat,5)+2.133377678002176e+04*std::pow(time-i_HeartBeat*T_heartbeat,4)-6.666366536069445e+03*std::pow(time-i_HeartBeat*T_heartbeat,3)+1.011772959679957e+03*std::pow(time-i_HeartBeat*T_heartbeat,2)-6.023975547926423e+01*(time-i_HeartBeat*T_heartbeat)+1.192718364532979e+00;
 
 		Q = -2.314569820334801e+09*std::pow(time-i_HeartBeat*T_heartbeat,9) +
 				4.952537061974133e+09*std::pow(time-i_HeartBeat*T_heartbeat,8) -
@@ -109,39 +107,6 @@ Real fPressure (const Real& time, const Real& /*x*/, const Real& /*y*/, const Re
 	Real pressureValue = 1500.0/2.51*(Q_inflow - Q_flag4 - Q_flag5 - Q_flag6 - Q_flag7 - Q_flag8 - Q_flag9);
 
 	return pressureValue;
-}
-
-Real inflow (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
-{
-    Real Q_hat = 1;
-    Real Tr    = 0.1;
-    Real Q     = 0;
-    
-    if (t<=Tr)
-    {
-        Q = Q_hat/2.0*(1.0 - std::cos(t*M_PI/Tr));
-    }
-    else
-    {
-        Q = Q_hat;
-    }
-    
-    Real fluidRadiusSquared = 0.5*0.5;
-    Real A = M_PI * fluidRadiusSquared;
-    
-	switch (i)
-	{
-	case 0:
-		return 0.0;
-		break;
-	case 1:
-		return 0.0;
-		break;
-	case 2:
-		return 2.0*Q/A*(fluidRadiusSquared-(x*x+y*y))/(fluidRadiusSquared);
-		break;
-	}
-	return 0;
 }
 
 }
