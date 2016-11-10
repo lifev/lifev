@@ -65,7 +65,7 @@ bcPtr_Type BCh_fluid ()
     bcH->addBC( "Outflow",      3, Natural,   Full,      	uZero,   3 );
     bcH->addBC( "TopBottom",    2, Essential, Component, 	uZero,   yComp  );
     bcH->addBC( "LeftRight",    5, Essential, Component, 	uZero,   zComp  );
-    //bcH->addBC ("Cylinder" ,    4, Essential, Full,    	    uZero,	 3 );
+    //bcH->addBC ("Cylinder" ,    4, Essential, Full,    	    uZero,	 3 ); // commented since we impose weak bc here, see the datafile
 
     return bcH;
 }
