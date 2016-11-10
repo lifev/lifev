@@ -219,8 +219,6 @@ main ( int argc, char** argv )
 
 	}
 
-    std::cout << std::setprecision(9) << "\n\n" << normTwo_Velo << "\n\n" << normTwo_Pres << "\n\n";
-
 #ifdef HAVE_MPI
     if (verbose)
     {
@@ -229,7 +227,7 @@ main ( int argc, char** argv )
     MPI_Finalize();
 #endif
 
-    if ( std::abs(normTwo_Velo - 33.2165 ) < 1.0e-3 && std::abs(normTwo_Pres - 107.0810 ) < 1.0e-3 )
+    if ( std::abs(normTwo_Velo - 36.8771 ) < 1.0e-3 && std::abs(normTwo_Pres - 118.8213 ) < 1.0e-3 )
     {
     	return ( EXIT_SUCCESS );
     }
