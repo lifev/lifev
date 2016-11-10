@@ -44,7 +44,6 @@
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/navier_stokes/fem/TimeAdvanceBDFNavierStokes.hpp>
 #include <lifev/core/filter/ExporterEnsight.hpp>
-#include <lifev/core/filter/ExporterVTK.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #include <lifev/core/filter/ExporterEmpty.hpp>
 
@@ -542,12 +541,19 @@ NavierStokes<MeshType, Problem>::run()
     problem_Type::setParamsFromGetPot ( dataFile );
 
     UInt numDiscretizations;
-
-    // Loading the discretization to be tested
-    numDiscretizations = dataFile ( "fluid/space_discretization/mesh_number", 1 );
-    for ( UInt i ( 0 ); i < numDiscretizations; ++i )
+    if ( (M_test == SpaceConvergence) || (M_test == None) )
     {
-        M_meshDiscretization.push_back (dataFile ( "fluid/space_discretization/mesh_size", 8, i ) );
+        // Loading the discretization to be tested
+        numDiscretizations = dataFile ( "fluid/space_discretization/mesh_number", 1 );
+        for ( UInt i ( 0 ); i < numDiscretizations; ++i )
+        {
+            M_meshDiscretization.push_back (dataFile ( "fluid/space_discretization/mesh_size", 8, i ) );
+        }
+    }
+    else
+    {
+        M_meshDiscretization.push_back (0); // Just to be sure to have 1 element
+        numDiscretizations = 1;
     }
 
     UInt numFELabels = dataFile ( "fluid/space_discretization/FE_number", 1 );
@@ -620,7 +626,7 @@ NavierStokes<MeshType, Problem>::run()
                 fileName.append (M_pFELabels[iFELabel]);
                 fileName.append (".txt");
                 M_outNorm.open (fileName.c_str() );
-                M_outNorm << "% time / u L2 error / u H1 error / p L2 error \n" << std::flush;
+                M_outNorm << "% time / u L2 error / L2 rel error   p L2 error / L2 rel error \n" << std::flush;
             }
 
             // +-----------------------------------------------+
@@ -635,18 +641,20 @@ NavierStokes<MeshType, Problem>::run()
 
             Int geoDimensions = mesh_Type::S_geoDimensions;
             // Building the mesh from the source
-            if(M_meshSource == RegularMesh) 
-            {
-                    regularMesh3D( *fullMeshPtr, 2, mElem, mElem, mElem, false, 1.0, 1.0, 1.0, -1.0,  -1.0,  -1.0);
+            /*    if(M_meshSource == RegularMesh) Not yet implemented in 2D
+                {
+                    regularMesh3D( *fullMeshPtr,
+                                   1,
+                                   mElem, mElem, mElem,
+                                   false,
+                                   2.0,   2.0,   2.0,
+                                   -1.0,  -1.0,  -1.0);
 
                     if (verbose) std::cout << "Mesh source: regular mesh("
                                            << mElem << "x" << mElem << "x" << mElem << ")" << std::endl;
-                
-                if (verbose){
-                        std::cout << "\n[Mesh size max : " << MeshUtility::MeshStatistics::computeSize ( *fullMeshPtr ).maxH << " ]\n";
                 }
-            }
-            else if(M_meshSource == File)
+                else */
+            if (M_meshSource == File)
             {
                 MeshData meshData;
                 meshData.setup (dataFile, "fluid/space_discretization");
@@ -663,17 +671,16 @@ NavierStokes<MeshType, Problem>::run()
                 }
                 exit (1);
             }
-            
+
             if (verbose)
+            {
                 std::cout << "Partitioning the mesh ... " << std::flush;
-            
-            
+            }
             boost::shared_ptr<mesh_Type > localMeshPtr;
-        
-            MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, M_data->comm);
-            localMeshPtr = meshPart.meshPartition();
-            
-            
+            {
+                MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, M_data->comm);
+                localMeshPtr = meshPart.meshPartition();
+            }
             fullMeshPtr.reset(); //Freeing the global mesh to save memory
 
             // +-----------------------------------------------+
@@ -779,7 +786,6 @@ NavierStokes<MeshType, Problem>::run()
             MapEpetra fullMap (fluid.getMap() );
 
             fluid.setUp (dataFile);
-
             fluid.buildSystem();
 
             MPI_Barrier (MPI_COMM_WORLD);
@@ -843,7 +849,6 @@ NavierStokes<MeshType, Problem>::run()
                 where the * means that the value is obtained by interpolating the quantity
                 using the exact solution.
              */
-            
             Real time = t0 + dt;
             for (  ; time <=  oseenData->dataTime()->initialTime() + dt / 2.; time += dt)
             {
@@ -862,7 +867,6 @@ NavierStokes<MeshType, Problem>::run()
                     uFESpace->interpolate ( static_cast<typename feSpace_Type::function_Type> ( problem_Type::uderexact ), rhs, time);
                     rhs *= -1.;
                     rhs = fluid.matrixMass() * rhs;
-                    fluid.setVelocityRhs(bdf.bdfVelocity().rhsContributionFirstDerivative());
                     fluid.updateSystem ( 0., beta, rhs );
                     fluid.iterate (bcH);
                 }
@@ -870,30 +874,20 @@ NavierStokes<MeshType, Problem>::run()
                 // Computation of the error
                 LifeV::Real urelerr, prelerr, ul2error, pl2error;
 
-                Real uh1error = 0.0;
-                fluid.h1normVelocity(uh1error);
-
                 computeErrors (*fluid.solution(),
                                ul2error, urelerr, uFESpace,
                                pl2error, prelerr, pFESpace,
                                time);
 
-                if (verbose)
-                {
-                	std::cout << "\n[ERRORS]:\n";
-                	std::cout << "Time: " << time  << ", "
-                			<< "L2 velocity error: " << ul2error << ", "
-                			<< "H1 velocity error: " << uh1error << ", "
-                			<< "L2 pressure error: " << pl2error << "\n" << std::flush;
-                }
-
                 if (verbose && M_exportNorms)
                 {
                     M_outNorm << time  << " "
                               << ul2error << " "
-                              << uh1error << " "
-                              << pl2error << "\n" << std::flush;
+                              << urelerr << " "
+                              << pl2error << " "
+                              << prelerr << "\n" << std::flush;
                 }
+
 
                 // Updating bdf
                 bdf.bdfVelocity().shiftRight ( *fluid.solution() );
@@ -921,14 +915,8 @@ NavierStokes<MeshType, Problem>::run()
                 exporter->setPostDir ( "./" ); // This is a test to see if M_post_dir is working
                 exporter->setMeshProcId ( localMeshPtr, M_data->comm->MyPID() );
             }
-#endif
-            else if(exporterType.compare ("vtk") == 0)
-            {
-                exporter.reset ( new ExporterVTK<mesh_Type > ( dataFile, M_outputName ) );
-                exporter->setPostDir ( "./" ); // This is a test to see if M_post_dir is working
-                exporter->setMeshProcId ( localMeshPtr, M_data->comm->MyPID() );
-            }
             else
+#endif
             {
                 if (exporterType.compare ("none") == 0)
                 {
@@ -968,10 +956,6 @@ NavierStokes<MeshType, Problem>::run()
                 std::cout << "Initialization time: " << initChrono.diff() << " s." << std::endl;
             }
 
-            //vector_Type oldVel(uFESpace->map(), Unique);
-            //oldVel.subset(*velAndPressure, uFESpace->map(),0,0);
-
-
             // +-----------------------------------------------+
             // |             Solving the problem               |
             // +-----------------------------------------------+
@@ -996,10 +980,7 @@ NavierStokes<MeshType, Problem>::run()
                 double alpha = bdf.bdfVelocity().coefficientFirstDerivative ( 0 ) / oseenData->dataTime()->timeStep();
 
                 bdf.bdfVelocity().extrapolation (beta); // Extrapolation for the convective term
-
                 bdf.bdfVelocity().updateRHSContribution ( oseenData->dataTime()->timeStep() );
-
-                fluid.setVelocityRhs(bdf.bdfVelocity().rhsContributionFirstDerivative());
 
                 fluid.getDisplayer().leaderPrint ("alpha ", alpha);
                 fluid.getDisplayer().leaderPrint ("\n");
@@ -1008,22 +989,19 @@ NavierStokes<MeshType, Problem>::run()
                 fluid.getDisplayer().leaderPrint ("norm rhs  ", rhs.norm2() );
                 fluid.getDisplayer().leaderPrint ("\n");
 
-//                if (oseenData->conservativeFormulation() )
-//                {
+                if (oseenData->conservativeFormulation() )
+                {
                     rhs  = fluid.matrixMass() * bdf.bdfVelocity().rhsContributionFirstDerivative();
-//                }
+                }
 
                 fluid.updateSystem ( alpha, beta, rhs );
 
-//                if (!oseenData->conservativeFormulation() )
-//                {
-//                    rhs  = fluid.matrixMass() * bdf.bdfVelocity().rhsContributionFirstDerivative();
-//                }
+                if (!oseenData->conservativeFormulation() )
+                {
+                    rhs  = fluid.matrixMass() * bdf.bdfVelocity().rhsContributionFirstDerivative();
+                }
 
                 fluid.iterate ( bcH );
-
-                Real uh1error = 0.0;
-                fluid.h1normVelocity(uh1error);
 
                 bdf.bdfVelocity().shiftRight ( *fluid.solution() );
 
@@ -1034,21 +1012,14 @@ NavierStokes<MeshType, Problem>::run()
                                ul2error, urelerr, uFESpace,
                                pl2error, prelerr, pFESpace,
                                time);
-                if (verbose)
-                {
-                	std::cout << "\n[ERRORS]:\n";
-                	std::cout << "Time: " << time  << ", "
-                			<< "L2 velocity error: " << ul2error << ", "
-                			<< "H1 velocity error: " << uh1error << ", "
-                			<< "L2 pressure error: " << pl2error << "\n" << std::flush;
-                }
 
                 if (verbose && M_exportNorms)
                 {
-                	 M_outNorm << time  << " "
-                			 << ul2error << " "
-                			 << uh1error << " "
-                			 << pl2error << "\n" << std::flush;
+                    M_outNorm << time  << " "
+                              << ul2error << " "
+                              << urelerr << " "
+                              << pl2error << " "
+                              << prelerr << "\n" << std::flush;
                 }
 
                 // Saving the errors for the final test
@@ -1057,10 +1028,6 @@ NavierStokes<MeshType, Problem>::run()
 
                 // Exporting the solution
                 *velAndPressure = *fluid.solution();
-
-                //oldVel *= 0;
-                //oldVel.subset(*velAndPressure, uFESpace->map(),0,0);
-
                 if (M_exportExactSolutions)
                 {
                     pFESpace->interpolate ( static_cast<typename feSpace_Type::function_Type> ( problem_Type::pexact ), *exactPressPtr, time );
@@ -1097,7 +1064,6 @@ NavierStokes<MeshType, Problem>::run()
                 if (verbose) std::cout << "Relative error: E(u)=" << urelerr << ", E(p)=" << prelerr << std::endl
                                            << "Tolerance=" << M_accuracyTol << std::endl;
 
-                /*
                 if (urelerr > M_accuracyTol || prelerr > M_accuracyTol)
                 {
                     if (verbose)
@@ -1106,7 +1072,6 @@ NavierStokes<MeshType, Problem>::run()
                     }
                     throw typename NavierStokes::RESULT_CHANGED_EXCEPTION();
                 }
-                */
             }
             // ** END Accuracy test **
 
@@ -1124,7 +1089,6 @@ NavierStokes<MeshType, Problem>::run()
     } // End of loop on the mesh refinement
 
     // ** BEGIN Space convergence test **
-    /*
     if (verbose && (M_test == SpaceConvergence) )
     {
         bool success;
@@ -1143,7 +1107,6 @@ NavierStokes<MeshType, Problem>::run()
         }
     }
     // ** END Space convergence test **
-    */
     globalChrono.stop();
     if (verbose)
     {

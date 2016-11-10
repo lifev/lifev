@@ -6,29 +6,27 @@
 [exporter]
 multimesh  = false
 start      = 0
-save       = 1
+save       = 10
 
 [fluid]
 
-	conservativeFormulation = false
-    
     [./problem]
     # for  cyl3D.2.2.00.mesh
     Re              = 1
     D               = 1.
     H               = 2.
     centered        = 1
-    initial_sol     = none         # stokes, none
+    initial_sol     = stokes          # stokes, none
 
 
     [../physics]
-    density         = 1.2     # density   [kg/m^3]
-    viscosity       = 0.035   # viscosity [kg/m/s]
+    density         = 1.0           # density   [kg/m^3]
+    viscosity       = 0.03          # viscosity [kg/m/s]
 
     [../time_discretization]
     initialtime     = 0.
-    endtime         = 0.5
-    timestep        = 0.01
+    endtime         = 0.001
+    timestep        = 0.0001
     BDF_order       = 1
 
     [../space_discretization]
@@ -38,39 +36,22 @@ save       = 1
 
     verbose         = 0             # verbose during mesh-reading
     linearized      = 0
-    diagonalize     = 0             # weight, 0=off. for P2P1 better to be on=1
+    diagonalize     = 0 # weight, 0=off. for P2P1 better to be on=1
     div_beta_u_v    = 1             # 1=on, 0=off
-    vel_order       = P1            # P1, P1Bubble, P2
+    vel_order       = P1Bubble          # P1, P1Bubble, P2
     press_order     = P1            # P1, P2
 
-	[../stabilization]
-	use             = true
-	method          = SUPG	        # possible choices: IP, SUPG
-	
-	[../ipstab]
-    gammaBeta       = 0.125
-    gammaDiv        = 0.125
-    gammaPress      = 0.03125
-    reuse           = true
-    max_iter_reuse  = 20
-	
     [../miscellaneous]
     verbose         = 1
     steady          = 0
-    useInflowFlux   = false
 
     [../prec]
-    prectype                = ML # Ifpack or ML
+    prectype                = Ifpack # Ifpack or ML
     displayList             = true
 
         [./ML]
-
-        default_parameter_list  = NSSA  # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
-        inc_or_dec              = increasing
-        max_levels              = 3
-        MLOutput                = 10
-        pde_equations           = 4
-        cycle_applications      = 3
+        analyze_smoother        = false
+        default_parameter_list  = DD-ML    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
 
             [./smoother]
             # smoother type
@@ -79,25 +60,28 @@ save       = 1
             # Amesos-Superlu, Amesos-UMFPACK, Amesos-Superludist, Amesos-MUMPS,
             # user-defined, SuperLU, IFPACK-Chebyshev, self, do-nothing,
             # IC, ICT, ILU, ILUT
-            type            = Gauss-Seidel
-            pre_or_post     = both
-            sweeps          = 3
+            type                    = IFPACK
+            pre_or_post             = pre
+            sweeps                  = 3
+            damping_factor          = 1
 
             [../coarse]
-            type                    = Amesos-KLU
+            type                    = Amesos-UMFPACK
+            #type                    = Amesos-KLU
             sweeps                  = 1
             pre_or_post             = both
- 
-            [../aggregation]
-            threshold               = 0.01
-            type                    = Uncoupled #Uncoupled-MIS    
-      
-            [../energy_minimization]
-            enable                  = true
+            max_size                = 200
 
             [../repartition]
-            enable                  = true
+            enable                  = 1
             partitioner             = ParMETIS
+            max_min_ration          = 1.3
+            min_per_proc            = 500
+
+            [../energy_minimization]
+            enable          = true
+            type            = 3
+            [../]
 
         # ifpack
         [../ifpack]
@@ -131,6 +115,13 @@ save       = 1
     max_iter_reuse  = 80
     kspace          = 100
     tol             = 1.e-10    # AztecOO tolerance
+
+    [../ipstab]
+    gammaBeta       = 0.125
+    gammaDiv        = 0.125
+    gammaPress      = 0.03125
+    reuse           = true
+    max_iter_reuse  = 20
 
 
     [../boundary_conditions]

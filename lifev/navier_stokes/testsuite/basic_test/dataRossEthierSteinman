@@ -5,32 +5,29 @@
 
 
 [exporter]
-type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight or vtk
+type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
 start      = 0
 save       = 1
 
 [NavierStokes]
-initialization         = interpolation #projection   # initialization (L2 projection) or interpolation
-export_norms           = true
+initialization         = projection #projection   # initialization (L2 projection) or interpolation
+export_norms           = false
 export_exact_solutions = true
-test                   = space_convergence
+test                   = accuracy
 accuracy_tolerance     = 0.09
-mesh_source            = regular_mesh
+mesh_source            = file
 
 [fluid]
 
-    conservativeFormulation = false
-    
     [./physics]
     density         = 1.0          # density
-    viscosity       = 0.01          # viscosity
-    flag_strain     = 1
+    viscosity       = .01       # viscosity
 
     [../time_discretization]
     initialtime     = 0.0
-    endtime         = 0.0002
-    timestep        = 0.00001
+    endtime         = 8e-5
+    timestep        = 4e-5
 
     BDF_order       = 1
 
@@ -38,36 +35,26 @@ mesh_source            = regular_mesh
     mesh_dir        = ./
     mesh_file       = cube4x4.mesh
     mesh_type       = .mesh
-    mesh_size       = 6 
 
     verbose         = 0
     linearized      = 0
-    diagonalize     = 0 # weight, 0=off
+    diagonalize     = 1 # weight, 0=off
     div_beta_u_v    = 0 # 1=on, 0=off
-    FE_number       = 1
-    vel_order       = P1
-    press_order     = P1
-    stiff_strain    = false
-    
-	[../stabilization]
-	use             = true
-	method          = SUPG	  # other possible choices: IP, VMS
+    FE_number         = 3
+    vel_order         = 'P1Bubble P1Bubble P2'
+    press_order       = 'P1 P1 P1'
 
     [../miscellaneous]
     verbose         = 1
     steady          = 0
 
     [../prec]
-    prectype                = ML  # Ifpack or ML
+    prectype                = Ifpack # Ifpack or ML
     displayList             = false
 
         [./ML]
-        default_parameter_list  = NSSA  # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
-        inc_or_dec              = increasing
-	    max_levels              = 3
-        MLOutput                = 10
-        pde_equations           = 4
-        cycle_applications      = 3
+        analyze_smoother        = false
+        default_parameter_list  = DD-ML    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
 
             [./smoother]
             # smoother type
@@ -76,26 +63,28 @@ mesh_source            = regular_mesh
             # Amesos-Superlu, Amesos-UMFPACK, Amesos-Superludist, Amesos-MUMPS,
             # user-defined, SuperLU, IFPACK-Chebyshev, self, do-nothing,
             # IC, ICT, ILU, ILUT
-            type            = Gauss-Seidel
-            pre_or_post     = both
-            sweeps          = 3
+            type                    = IFPACK
+            pre_or_post             = pre
+            sweeps                  = 3
+            damping_factor          = 1
 
             [../coarse]
+            #type                   = Amesos-UMFPACK
             type                    = Amesos-KLU
             sweeps                  = 1
             pre_or_post             = both
- 
-	    [../aggregation]
-            threshold               = 0.01
-            type                    = Uncoupled-MIS      
-      
-            [../energy_minimization]
-            enable                  = true
+            max_size                = 200
 
-	    [../repartition]
-            enable                  = true
-            partitioner             = ParMETIS 
-        [../]
+            [../repartition]
+            enable                  = 1
+            partitioner             = ParMETIS
+            max_min_ration          = 1.3
+            min_per_proc            = 500
+
+            [../energy_minimization]
+            enable          = true
+            type            = 3
+            [../]
 
         # ifpack
         [../ifpack]
@@ -124,11 +113,11 @@ mesh_source            = regular_mesh
     scaling         = none
     output          = all # none
     conv            = rhs
-    max_iter        = 1800
+    max_iter        = 200
     reuse           = true
     max_iter_reuse  = 80
     kspace          = 100
-    tol             = 1.e-12    # AztecOO tolerance
+    tol             = 1.e-10    # AztecOO tolerance
 
     [../ipstab]
     gammaBeta  = 0.7
@@ -137,8 +126,8 @@ mesh_source            = regular_mesh
     max_iter_reuse  = 60
 
     [../problem]
-    a = 1.57
-    d = 0.78
+    #a = 1.57
+    #d = 0.78
     sigma = 0
-    neumannList = 1
-    dirichletList = 2,3,4,5,6
+    neumannList = 2
+    dirichletList = 1,2,3,4,5,6
