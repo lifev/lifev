@@ -179,7 +179,7 @@ WSS::WSS ( int                                   argc,
     parameters ( new Private() )
 {
     GetPot command_line (argc, argv);
-    string data_file_name = command_line.follow ("data", 2, "-f", "--file");
+    std::string data_file_name = command_line.follow ("data", 2, "-f", "--file");
     GetPot dataFile ( data_file_name );
     parameters->data_file_name = data_file_name;
 
@@ -478,11 +478,11 @@ main ( int argc, char** argv )
     boost::shared_ptr<Epetra_MpiComm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
     if ( Comm->MyPID() == 0 )
     {
-        cout << "% using MPI" << endl;
+        std::cout << "% using MPI" << std::endl;
     }
 #else
     boost::shared_ptr<Epetra_SerialComm> Comm ( new Epetra_SerialComm() );
-    cout << "% using serial Version" << endl;
+    std::cout << "% using serial Version" << std::endl;
 #endif
 
     WSS wss ( argc, argv, Comm );
