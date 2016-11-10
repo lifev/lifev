@@ -1,10 +1,3 @@
-/*
- * BlockOperator.cpp
- *
- *  Created on: Sep 20, 2010
- *      Author: dforti
- */
-
 #include <lifev/navier_stokes_blocks/solver/NavierStokesOperator.hpp>
 
 namespace LifeV

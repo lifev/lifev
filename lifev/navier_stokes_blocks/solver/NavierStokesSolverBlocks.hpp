@@ -36,7 +36,7 @@
    - Unsteady NS equations using a fully-implicit time discretization (SUPG-VMS stabilization available)
    - Unsteady NS equations using a semi-implicit time discretization (SUPG-VMS and VMS-LES stabilizations available)
 
-   In the testsuite folder several examples which show how to properly use the solver are present.
+   In the testsuite and example folders, several examples which show how to properly use the solver are present.
 
    If you are using this solver to generate results for publication, please <b>cite</b>:
    - D. Forti, L. Dede'. <i> Semi-implicit BDF time discretization of the Navier–Stokes equations with VMS-LES modeling in a High Performance Computing framework</i>.
