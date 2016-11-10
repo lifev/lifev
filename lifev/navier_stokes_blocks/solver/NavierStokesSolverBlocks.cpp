@@ -546,13 +546,6 @@ void NavierStokesSolverBlocks::updateSystem( const vectorPtr_Type& u_star, const
 			this->setupPostProc();
 			boost::shared_ptr<SignFunction> signEvaluation(new SignFunction(M_comm));
 
-			VectorSmall<3> Normal;
-
-			Vector n = this->normal(M_flagPenalizeReverseFlow);
-			Normal[0] = n[0];
-			Normal[1] = n[1];
-			Normal[2] = n[2];
-
 			using namespace ExpressionAssembly;
 
 			// Penalizing back flow
@@ -562,7 +555,7 @@ void NavierStokesSolverBlocks::updateSystem( const vectorPtr_Type& u_star, const
 					myBDQR,
 					M_fespaceUETA,
 					M_fespaceUETA,
-					value(-1.0*M_density)*eval( signEvaluation, dot(value(M_fespaceUETA, *M_uExtrapolated),Normal))*dot(phi_i, phi_j)
+					value(-1.0*M_density)*eval( signEvaluation, dot(value(M_fespaceUETA, *M_uExtrapolated),Nface))*dot(phi_i, phi_j)
 			)
 			>> M_C;
 		}
