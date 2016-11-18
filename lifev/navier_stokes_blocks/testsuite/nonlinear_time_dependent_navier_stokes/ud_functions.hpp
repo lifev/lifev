@@ -58,7 +58,7 @@ Real fPressure (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const R
     return 10.0;
 }
     
-Real inflow (const Real& t, const Real& x, const Real& y, const Real& /*z*/, const ID& i)
+Real inflow (const Real& /*t*/, const Real& x, const Real& y, const Real& /*z*/, const ID& i)
 {
 	double r = std::sqrt (x * x + y * y);
 	double D = 1.0;
