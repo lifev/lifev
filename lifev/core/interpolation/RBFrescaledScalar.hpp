@@ -207,7 +207,7 @@ void RBFrescaledScalar<mesh_Type>::interpolationOperator()
     for (boost::unordered_set<ID>::iterator it = M_GIdsKnownMesh.begin(); it != M_GIdsKnownMesh.end(); ++it)
     {
         GlobalID[k] = *it;
-        MatrixGraph[k] = M_neighbors->neighborsWithinRadius (M_radius, GlobalID[k]);
+        MatrixGraph[k] = M_neighbors->neighborsWithinRadius (GlobalID[k], M_radius);
         MatrixGraph[k].insert (GlobalID[k]);
         ElementsPerRow[k] = MatrixGraph[k].size();
         if (ElementsPerRow[k] > Max_entries)
@@ -283,7 +283,7 @@ void RBFrescaledScalar<mesh_Type>::projectionOperator()
             }
         }
 
-        MatrixGraph[k] = M_neighbors->neighborsWithinRadius (M_radius, nearestPoint);
+        MatrixGraph[k] = M_neighbors->neighborsWithinRadius (nearestPoint, M_radius);
         MatrixGraph[k].insert (nearestPoint);
         ElementsPerRow[k] = MatrixGraph[k].size();
         if (ElementsPerRow[k] > Max_entries)
