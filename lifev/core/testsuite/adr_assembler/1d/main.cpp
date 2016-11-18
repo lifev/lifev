@@ -48,6 +48,7 @@
 #include <lifev/core/algorithm/PreconditionerML.hpp>
 
 #include <lifev/core/algorithm/SolverAztecOO.hpp>
+#include <lifev/core/algorithm/LinearSolver.hpp>
 
 #include <lifev/core/array/MatrixEpetra.hpp>
 
@@ -64,6 +65,10 @@
 #include <lifev/core/mesh/MeshData.hpp>
 
 #include <lifev/core/solver/ADRAssembler.hpp>
+
+#include <Teuchos_ParameterList.hpp>
+#include <Teuchos_XMLParameterListHelpers.hpp>
+#include <Teuchos_RCP.hpp>
 
 using namespace LifeV;
 
@@ -106,8 +111,13 @@ main ( int argc, char* argv[] )
         typedef RegionMesh<LinearLine> mesh_Type;
         typedef MatrixEpetra<Real> matrix_Type;
         typedef VectorEpetra vector_Type;
+        typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
         typedef FESpace<mesh_Type, MapEpetra> feSpace_Type;
         typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
+        typedef LifeV::Preconditioner basePrec_Type;
+        typedef boost::shared_ptr<basePrec_Type> basePrecPtr_Type;
+        typedef LifeV::PreconditionerIfpack prec_Type;
+        typedef boost::shared_ptr<prec_Type> precPtr_Type;
 
         const bool verbose (Comm->MyPID() == 0);
 
@@ -275,9 +285,9 @@ main ( int argc, char* argv[] )
         {
             std::cout << " -- Applying the BCs ... " << std::flush;
         }
-        vector_Type rhsBC (rhs, Unique);
-        bcManage (*systemMatrix, rhsBC, *uFESpace->mesh(), uFESpace->dof(), bchandler, uFESpace->feBd(), 1.0, 0.0);
-        rhs = rhsBC;
+        vectorPtr_Type rhsBC ( new vector_Type (rhs, Unique) );
+        bcManage (*systemMatrix, *rhsBC, *uFESpace->mesh(), uFESpace->dof(), bchandler, uFESpace->feBd(), 1.0, 0.0);
+        rhs = *rhsBC;
         if (verbose)
         {
             std::cout << " done ! " << std::endl;
@@ -288,7 +298,8 @@ main ( int argc, char* argv[] )
         {
             std::cout << " -- Building the solver ... " << std::flush;
         }
-        SolverAztecOO linearSolver;
+        LinearSolver linearSolver;
+
         if (verbose)
         {
             std::cout << " done ! " << std::endl;
@@ -298,8 +309,18 @@ main ( int argc, char* argv[] )
         {
             std::cout << " -- Setting up the solver ... " << std::flush;
         }
-        linearSolver.setDataFromGetPot (dataFile, "solver");
-        linearSolver.setupPreconditioner (dataFile, "prec");
+        Teuchos::RCP< Teuchos::ParameterList > belosList = Teuchos::rcp ( new Teuchos::ParameterList );
+        belosList = Teuchos::getParametersFromXmlFile ( "SolverParamList.xml" );
+
+        linearSolver.setCommunicator ( Comm );
+        linearSolver.setParameters ( *belosList );
+
+        prec_Type* precRawPtr;
+        basePrecPtr_Type precPtr;
+        precRawPtr = new prec_Type;
+        precRawPtr->setDataFromGetPot ( dataFile, "prec" );
+        precPtr.reset ( precRawPtr );
+        linearSolver.setPreconditioner ( precPtr );
         if (verbose)
         {
             std::cout << " done ! " << std::endl;
@@ -309,20 +330,18 @@ main ( int argc, char* argv[] )
         {
             std::cout << " -- Setting matrix in the solver ... " << std::flush;
         }
-        linearSolver.setMatrix (*systemMatrix);
+        linearSolver.setOperator ( systemMatrix );
         if (verbose)
         {
             std::cout << " done ! " << std::endl;
         }
-
-        linearSolver.setCommunicator (Comm);
 
         // Definition of the solution
         if (verbose)
         {
             std::cout << " -- Defining the solution ... " << std::flush;
         }
-        vector_Type solution (uFESpace->map(), Unique);
+        vectorPtr_Type solution (new vector_Type (uFESpace->map(), Unique) );
         if (verbose)
         {
             std::cout << " done ! " << std::endl;
@@ -333,7 +352,8 @@ main ( int argc, char* argv[] )
         {
             std::cout << " -- Solving the system ... " << std::flush;
         }
-        linearSolver.solveSystem (rhsBC, solution, systemMatrix);
+        linearSolver.setRightHandSide ( rhsBC );
+        linearSolver.solve ( solution );
         if (verbose)
         {
             std::cout << " done ! " << std::endl;
@@ -344,11 +364,11 @@ main ( int argc, char* argv[] )
         {
             std::cout << " -- Computing the error ... " << std::flush;
         }
-        vector_Type solutionErr (solution);
+        vector_Type solutionErr (*solution);
         uFESpace->interpolate ( static_cast<feSpace_Type::function_Type> ( exactSolution ), solutionErr, 0.0 );
-        solutionErr -= solution;
+        solutionErr -= *solution;
         solutionErr.abs();
-        Real l2error (uFESpace->l2Error (exactSolution, vector_Type (solution, Repeated), 0.0) );
+        Real l2error (uFESpace->l2Error (exactSolution, vector_Type (*solution, Repeated), 0.0) );
         if (verbose)
         {
             std::cout << " -- done ! " << std::endl;
@@ -384,7 +404,7 @@ main ( int argc, char* argv[] )
         {
             std::cout << " -- Defining the exported quantities ... " << std::flush;
         }
-        boost::shared_ptr<vector_Type> solutionPtr (new vector_Type (solution, Repeated) );
+        boost::shared_ptr<vector_Type> solutionPtr (new vector_Type (*solution, Repeated) );
         boost::shared_ptr<vector_Type> solutionErrPtr (new vector_Type (solutionErr, Repeated) );
         if (verbose)
         {
