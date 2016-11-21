@@ -156,10 +156,15 @@ int main ( int argc, char** argv )
 
     result = integral.dot(vectorOnes);
 
-    std::cout << "\n\nSCALAR CASE " << std::endl;
-    std::cout << "\nThe volume is = " << length*length*length << std::endl;
-    std::cout << "\nThe result is = " << result << std::endl;
-    std::cout << "\nThe error is = " << result-(length*length*length) << std::endl;
+    if ( Comm->MyPID() == 0 )
+    {
+    	std::cout << "\n\nSCALAR CASE " << std::endl;
+    	std::cout << "\nThe volume is = " << length*length*length << std::endl;
+    	std::cout << "\nThe result is = " << result << std::endl;
+    	std::cout << "\nThe error is = " << result-(length*length*length) << std::endl;
+    }
+
+    Real error_scalar = result-length*length*length;
 
     ///////////////////////////////////
     // Testing the vector field case //
@@ -197,16 +202,26 @@ int main ( int argc, char** argv )
 
     result = integralVec.dot(vectorOnesVec);
 
-    std::cout << "\n\nVECTORIAL CASE " << std::endl;
-    std::cout << "\nThe volume is = " << 3*length*length*length << std::endl;
-    std::cout << "\nThe result is = " << result << std::endl;
-    std::cout << "\nThe error is = " << result-(3*(length*length*length)) << "\n\n";
+    if ( Comm->MyPID() == 0 )
+    {
+    	std::cout << "\n\nVECTORIAL CASE " << std::endl;
+    	std::cout << "\nThe volume is = " << 3*length*length*length << std::endl;
+    	std::cout << "\nThe result is = " << result << std::endl;
+    	std::cout << "\nThe error is = " << result-(3*(length*length*length)) << "\n\n";
+    }
+
+    Real error_vectorial = result-3*length*length*length;
 
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
 
-    return ( EXIT_SUCCESS );
+    if ( std::fabs(error_scalar) < 1e-9 && std::fabs(error_vectorial) < 1e-9 )
+    {
+    	return ( EXIT_SUCCESS );
+    }
+
+    return ( EXIT_FAILURE );
 }
 
 

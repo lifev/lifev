@@ -130,17 +130,15 @@ int main ( int argc, char** argv )
     // Testing the scalar field case //
     ///////////////////////////////////
 
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace
-    ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 1, Comm) );
+    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 1, Comm) );
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > ETuSpace
-    ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPtr, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), Comm) );
+    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > ETuSpace ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPtr, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), Comm) );
 
     vector_Type vectorTestFunctions (uSpace->map(), Unique);
     uSpace->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (uTestFunctions), vectorTestFunctions, 0.0);
     vector_Type vectorTestFunctionsRepeated (vectorTestFunctions, Repeated);
 
-    vector_Type vectorOnes (uSpace->map(), Unique);
+    vector_Type vectorOnes (uSpace->map(), Repeated);
     vectorOnes.zero();
     vectorOnes += 1;
 
@@ -157,14 +155,21 @@ int main ( int argc, char** argv )
     		>> integral;
     }
 
+    integral.globalAssemble();
+
     Real result = 0.0;
 
     result = integral.dot(vectorTestFunctions);
 
-    std::cout << "\n\nSCALAR CASE " << std::endl;
-    std::cout << "\nThe volume is = " << length*length*length << std::endl;
-    std::cout << "\nThe result is = " << result << std::endl;
-    std::cout << "\nThe error is = " << result-(length*length*length) << std::endl;
+    if ( Comm->MyPID() == 0 )
+    {
+		std::cout << "\n\nSCALAR CASE " << std::endl;
+		std::cout << "\nThe volume is = " << length*length*length << std::endl;
+		std::cout << "\nThe result is = " << result << std::endl;
+		std::cout << "\nThe error is = " << result-(length*length*length) << std::endl;
+    }
+
+    Real error_scalar = result-length*length*length;
 
     ///////////////////////////////////
     // Testing the vector field case //
@@ -180,7 +185,7 @@ int main ( int argc, char** argv )
     uSpaceVec->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (uTestFunctions), vectorTestFunctionsVec, 0.0);
     vector_Type vectorTestFunctionsRepeatedVec (vectorTestFunctionsVec, Repeated);
 
-    vector_Type vectorOnesVec (uSpaceVec->map(), Unique);
+    vector_Type vectorOnesVec (uSpaceVec->map(), Repeated );
     vectorOnesVec.zero();
     vectorOnesVec += 1;
 
@@ -197,22 +202,31 @@ int main ( int argc, char** argv )
     		>> integralVec;
     }
 
+    integralVec.globalAssemble();
+
     result = 0.0;
-
-    integralVec.spy("vettore.m");
-
     result = integralVec.dot(vectorTestFunctionsVec);
 
-    std::cout << "\n\nVECTORIAL CASE " << std::endl;
-    std::cout << "\nThe volume is = " << (length*length*length)*3 << std::endl;
-    std::cout << "\nThe result is = " << result << std::endl;
-    std::cout << "\nThe error is = " << result-((length*length*length)*3) << "\n\n";
+    if ( Comm->MyPID() == 0 )
+    {
+    	std::cout << "\n\nVECTORIAL CASE " << std::endl;
+    	std::cout << "\nThe volume is = " << (length*length*length)*3 << std::endl;
+    	std::cout << "\nThe result is = " << result << std::endl;
+    	std::cout << "\nThe error is = " << result-((length*length*length)*3) << "\n\n";
+    }
+
+    Real error_vectorial = result-3*length*length*length;
 
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
 
-    return ( EXIT_SUCCESS );
+    if ( std::fabs(error_scalar) < 1e-9 && std::fabs(error_vectorial) < 1e-9 )
+    {
+    	return ( EXIT_SUCCESS );
+    }
+
+    return ( EXIT_FAILURE );
 }
 
 

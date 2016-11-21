@@ -14,8 +14,7 @@ ADD_SUBDIRECTORIES(
   9_ETA_QRProvider
   10_ETA_QR_Advanced
   9_ETA_gradient_interpolation
-  11_TestingLaplacianPhiI
-  12_TestingLaplacianPhiJ
-  13_TestingLaplacianFEVector
-  14_testNS
+  11_ETA_LaplacianPhiI
+  12_ETA_LaplacianPhiJ
+  13_ETA_LaplacianVector
 )

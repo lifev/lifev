@@ -102,16 +102,6 @@ int main ( int argc, char** argv )
 
     boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
 
-    /*
-    GetPot command_line (argc, argv);
-    const std::string dataFileName = command_line.follow ("data", 2, "-f", "--file");
-    GetPot dataFile (dataFileName);
-
-    MeshData meshData;
-    meshData.setup (dataFile, "mesh");
-    readMesh (*fullMeshPtr, meshData);
-	*/
-
     Real length = 3.0;
 
 
@@ -161,10 +151,15 @@ int main ( int argc, char** argv )
     first = integral * vectorTestFunctions;
     result = vectorTestFunctions.dot(first);
 
-    std::cout << "\n\nSCALAR CASE " << std::endl;
-    std::cout << "\nThe volume is = " << 27 << std::endl;
-    std::cout << "\nThe result is = " << result << std::endl;
-    std::cout << "\nThe error is = " << result-27 << std::endl;
+    if ( Comm->MyPID() == 0 )
+    {
+    	std::cout << "\n\nSCALAR CASE " << std::endl;
+    	std::cout << "\nThe volume is = " << 27 << std::endl;
+    	std::cout << "\nThe result is = " << result << std::endl;
+    	std::cout << "\nThe error is = " << result-27 << std::endl;
+    }
+
+    Real error_scalar = result-27.0;
 
     ///////////////////////////////////
     // Testing the vector field case //
@@ -195,24 +190,32 @@ int main ( int argc, char** argv )
 
     integralVec.globalAssemble();
 
-    integralVec.spy("matrice");
-
     result = 0.0;
 
     vector_Type firstVec(uSpaceVec->map());
     firstVec = integralVec * vectorTestFunctionsVec;
     result = vectorTestFunctionsVec.dot(firstVec);
 
-    std::cout << "\n\nVECTORIAL CASE " << std::endl;
-    std::cout << "\nThe volume is = " << 81 << std::endl;
-    std::cout << "\nThe result is = " << result << std::endl;
-    std::cout << "\nThe error is = " << result-81 << "\n\n";
+    if ( Comm->MyPID() == 0 )
+    {
+    	std::cout << "\n\nVECTORIAL CASE " << std::endl;
+    	std::cout << "\nThe volume is = " << 81 << std::endl;
+    	std::cout << "\nThe result is = " << result << std::endl;
+    	std::cout << "\nThe error is = " << result-81 << "\n\n";
+    }
+
+    Real error_vectorial = result-81.0;
 
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
 
-    return ( EXIT_SUCCESS );
+    if ( std::fabs(error_scalar) < 1e-9 && std::fabs(error_vectorial) < 1e-9 )
+    {
+    	return ( EXIT_SUCCESS );
+    }
+
+    return ( EXIT_FAILURE );
 }
 
 
