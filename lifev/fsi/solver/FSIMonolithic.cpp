@@ -110,7 +110,6 @@ FSIMonolithic::setupDOF ( void )
 
     M_fluidMesh.reset();
     M_solidMesh.reset();
-
 }
 
 #ifdef HAVE_HDF5
@@ -347,8 +346,6 @@ FSIMonolithic::iterateMonolithic (const vector_Type& rhs, vector_Type& step)
 
     //M_monolithicMatrix->GlobalAssemble();
     //necessary if we did not imposed Dirichlet b.c.
-
-    M_monolithicMatrix->matrix()->spy("Matrice");
 
     M_linearSolver->setOperator (*M_monolithicMatrix->matrix()->matrixPtr() );
 
@@ -596,6 +593,7 @@ void FSIMonolithic::initializeMonolithicOperator ( std::vector< vectorPtr_Type> 
     {
         initializeTimeAdvance (u0, ds0, df0); // couplingVariableMap()//copy
     }
+
 }
 
 void
@@ -755,87 +753,39 @@ FSIMonolithic::assembleSolidBlock ( UInt iter, const vector_Type& solution )
 void
 FSIMonolithic::assembleFluidBlock (UInt iter, const vector_Type& solution)
 {
-	// M_fluidBlock is a matrix with size of the monolithix system that has the blockcorresposnding to the  fluid part that is nonzero
     M_fluidBlock.reset (new  FSIOperator::fluid_Type::matrix_Type (*M_monolithicMap) );
 
-    // Create a matrix with just the fluid block, with dimensions of the fluid.
-    boost::shared_ptr<MatrixEpetra<Real> >  fluidMatrix (new MatrixEpetra<Real> ( M_fluid->getMap() ) );
-    *fluidMatrix *= 0.0;
-
-    // Create a vector that is the right hand side, just the part associated to the fluid, with dimensions of the fluid
-    vectorPtr_Type fluidRhs ( new vector_Type(M_fluid->getMap() ) );
-    *fluidRhs *= 0;
-    fluidRhs->subset( *this->M_rhs, M_fluid->getMap(), 0, 0 );
-
-    // Coefficient in front of the time derivative, from BDF formula
     Real alpha = M_fluidTimeAdvance->coefficientFirstDerivative ( 0 ) / M_data->dataFluid()->dataTime()->timeStep(); //mesh velocity w
 
-    // Constant terms (TODO to be removed)
-    M_fluid->buildSystem();
+    //This line is based on the hypothesis that the conservativeFormulation flag is set on FALSE
+    M_fluid->updateSystem (alpha, *this->M_beta, *this->M_rhs, M_fluidBlock, solution );
+
+    //This in the case of conservativeFormulation == true
+    // else
+    //   if (! M_fluid->matrixMassPtr().get() )
+    //  M_fluid->buildSystem( );
 
     if (iter == 0)
     {
-    	M_resetPrec = true;
-
-    	M_fluidTimeAdvance->updateRHSContribution ( M_data->dataFluid()->dataTime()->timeStep() );
-
-    	// This is actually an acceleration, it is a combination of the velocities from the previous timesteps (accordingly to the BDF formula used)
-    	// divided by the timestep. Need to get it of just the fluid dimensions
-    	vectorPtr_Type velocityRhs ( new vector_Type(M_fluid->getMap() ) );
-    	velocityRhs->subset( M_fluidTimeAdvance->rhsContributionFirstDerivative(), M_fluid->getMap(), 0, 0 );
-
-    	// Set the contribution to the right hand side
-    	M_fluid->setVelocityRhs( *velocityRhs );
-
-    	if (!M_data->dataFluid()->conservativeFormulation() )
-    	{
-    		*fluidRhs += M_fluid->matrixMass() * ( *velocityRhs );
-    	}
-    	else
-    	{
-    		// NOT SUPPORTED
-    		// *M_rhs += (M_fluidMassTimeAdvance->rhsContributionFirstDerivative() );
-    	}
-
-    	//This line is based on the hypothesis that the conservativeFormulation flag is set on FALSE
-    	// With respect to the former implementation now you do not pass the matrix M_fluidBlock, neither the solution since the nonlinearity due
-    	// to the convective term in the NS equations is treated in a semi-implicit manner. Hence the system matrix does not depend on the solution but just
-    	// on the extrapolation ofthe convective term.
-    	M_fluid->updateSystem (alpha, *this->M_beta, *fluidRhs);
-
-    	// Get the matrix and the rhs from the fluid solver
-    	M_fluid->getMatrixAndRhs(fluidMatrix, fluidRhs);
-
-    	M_rhs->subset(*fluidRhs, M_fluid->getMap(), 0, 0);
-
-    	couplingRhs (M_rhs);
-
-
-    	// Now I need to copy the matrix of the fluid within the global matrix
-    	matrixBlockPtr_Type globalMatrixWithOnlyFluid;
-
-    	if ( !M_data->method().compare ("monolithicGI") ){
-    		globalMatrixWithOnlyFluid.reset (new matrixBlock_Type ( M_fluid->getMap() | M_dFESpace->map() | * (M_monolithicMatrix->interfaceMap() ) |  M_mmFESpace->map() ) );
-    	}
-    	else{
-    		globalMatrixWithOnlyFluid.reset (new matrixBlock_Type ( M_fluid->getMap() | M_dFESpace->map() | * (M_monolithicMatrix->interfaceMap() ) ) );
-    	}
-
-    	MatrixEpetra<Real>* rawPointerToMatrix = new MatrixEpetra<Real> ( *fluidMatrix );
-
-    	matrixBlockView_Type fluidPart (* (globalMatrixWithOnlyFluid->block (0, 0) ) );
-
-    	fluidPart.setup (UInt (0), UInt (0), UInt ( M_offset ), UInt ( M_offset ), rawPointerToMatrix);
-
-    	using namespace MatrixEpetraStructuredUtility;
-
-    	//3. Put the matrix assembled in the solid in the proper vector
-    	copyBlock ( fluidPart, * (globalMatrixWithOnlyFluid->block (0, 0) ) );
-
-    	globalMatrixWithOnlyFluid->globalAssemble();
-
-    	*M_fluidBlock += *globalMatrixWithOnlyFluid;
+        M_resetPrec = true;
+        M_fluidTimeAdvance->updateRHSContribution ( M_data->dataFluid()->dataTime()->timeStep() );
+        if (!M_data->dataFluid()->conservativeFormulation() )
+        {
+            *M_rhs += M_fluid->matrixMass() * (M_fluidTimeAdvance->rhsContributionFirstDerivative() );
+        }
+        else
+        {
+            *M_rhs += (M_fluidMassTimeAdvance->rhsContributionFirstDerivative() );
+        }
+        couplingRhs (M_rhs/*, M_fluidTimeAdvance->stencil()[0]*/);
     }
+    //the conservative formulation as it is now is of order 1. To have higher order (TODO) we need to store the mass matrices computed at the previous time steps.
+    //At the moment, the flag conservativeFormulation should be always kept on FALSE
+    if (M_data->dataFluid()->conservativeFormulation() )
+    {
+        M_fluid->updateSystem (alpha, *this->M_beta, *this->M_rhs, M_fluidBlock, solution );
+    }
+    this->M_fluid->updateStabilization (*M_fluidBlock);
 }
 
 void FSIMonolithic::updateRHS()

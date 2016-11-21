@@ -552,6 +552,7 @@ FSIOperator::buildSystem()
         M_solid->buildSystem (xi);
         M_solid->massMatrix()->globalAssemble();
     }
+
 }
 
 void

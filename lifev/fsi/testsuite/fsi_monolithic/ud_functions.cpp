@@ -684,33 +684,6 @@ Real benchmarkP (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real
     }
 }
 
-Real parabolicInflow (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
-{
-
-	Real Radius	 		= 0.5;
-	Real RadiusSquared 	= 0.5;
-	Real VelMax 		= 2.0;
-	Real x0 			= 0.0;
-	Real y0				= 0.0;
-
-    switch (i)
-    {
-        case 0:
-            return 0.0;
-            break;
-        case 1:
-            return 0.0;
-            break;
-        case 2:
-            return VelMax * ( RadiusSquared - ( (x - x0)*(x - x0) + (y - y0)*(y - y0) ) ) / RadiusSquared;
-            break;
-        default:
-            ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
-            return 0.;
-            break;
-    }
-}
-
 Real LifeV::aortaVelIn::S_timestep;
 
 }

@@ -54,12 +54,11 @@ void FSIMonolithicGE::setupFluidSolid ( UInt const fluxes )
     M_meshMotion.reset (new FSIOperator::meshMotion_Type (*M_mmFESpace,
                                                           M_epetraComm) );
 
-    // Changing the constructor: from the one with the monolithic map to the
-    // one where there is just the fluid
     M_fluid.reset (new FSIOperator::fluid_Type (M_data->dataFluid(),
                                                 *M_uFESpace,
                                                 *M_pFESpace,
                                                 M_epetraComm,
+                                                *M_monolithicMap,
                                                 fluxes) );
 
     M_rhs.reset (new vector_Type (*this->M_monolithicMap) );
@@ -128,12 +127,11 @@ FSIMonolithicGE::evalResidual ( vector_Type&       res,
         interpolateVelocity ( meshVelocityRepeated, interpolatedMeshVelocity );
         // maybe we should use disp here too...
         M_fluidTimeAdvance->extrapolation (*M_beta);
-        *M_beta -= interpolatedMeshVelocity; // convective term, u^* - w^*, M_beta is the vector to be used in the convective term of the fluid
+        *M_beta -= interpolatedMeshVelocity; // convective term, u^* - w^*
 
         // in MonolithicGI here it used M_uk, which comes from disp
         assembleSolidBlock (iter, disp);
         assembleFluidBlock (iter, disp);
-
         *M_rhsFull = *M_rhs;
 
         applyBoundaryConditions();
