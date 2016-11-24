@@ -296,7 +296,7 @@ Structure::run3d()
     //! #################################################################################
     //! BOUNDARY CONDITIONS + SOURCE TERMS
     //! #################################################################################
-    vector <ID> compx (1), compy (1), compz (1), compxy (2), compxz (2), compyz (2);
+    std::vector <ID> compx (1), compy (1), compz (1), compxy (2), compxz (2), compyz (2);
     compx[0] = 0;
     compy[0] = 1, compz[0] = 2;
     compxy[0] = 0;
@@ -574,11 +574,11 @@ main ( int argc, char** argv )
     boost::shared_ptr<Epetra_MpiComm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
     if ( Comm->MyPID() == 0 )
     {
-        cout << "% using MPI" << endl;
+        std::cout << "% using MPI" << std::endl;
     }
 #else
     boost::shared_ptr<Epetra_SerialComm> Comm ( new Epetra_SerialComm() );
-    cout << "% using serial Version" << endl;
+    std::cout << "% using serial Version" << std::endl;
 #endif
 
     Structure structure ( argc, argv, Comm );
