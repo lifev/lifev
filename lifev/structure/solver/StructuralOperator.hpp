@@ -853,10 +853,6 @@ protected:
 
 
     timeAdvancePtr_Type                  M_timeAdvance;
-
-    // Members added to have the thin layer
-
-    matrixPtr_Type                       M_massMatrixThin;
 };
 
 //====================================
@@ -896,8 +892,7 @@ StructuralOperator<Mesh>::StructuralOperator( ) :
     M_invariants                 ( ),
     M_mapMarkersVolumes          ( ),
     M_mapMarkersIndexes          ( ),
-    M_timeAdvance                ( ),
-    M_massMatrixThin             ( )
+    M_timeAdvance                ( )
 {
 
     //    M_Displayer->leaderPrint("I am in the constructor for the solver");
@@ -933,7 +928,6 @@ StructuralOperator<Mesh>::setup (boost::shared_ptr<data_Type>        data,
     M_bodyForceVector.reset            ( new vector_Type (*M_localMap) );
     M_linearSolver.reset               ( new LinearSolver ( comm ) );
     M_disp.reset                       ( new vector_Type (*M_localMap) );
-    M_massMatrixThin.reset             (new matrix_Type (*M_localMap) );
 }
 
 template <typename Mesh>
@@ -955,8 +949,6 @@ StructuralOperator<Mesh>::setup (boost::shared_ptr<data_Type>        data,
     M_massMatrix.reset                (new matrix_Type (*M_localMap) );
     M_systemMatrix.reset              (new matrix_Type (*M_localMap) );
     M_jacobian.reset                  (new matrix_Type (*M_localMap) );
-
-    M_massMatrixThin.reset            (new matrix_Type (*M_localMap) );
 
     M_offset                          = offset;
 
@@ -1120,29 +1112,6 @@ StructuralOperator<Mesh>::computeMassMatrix ( const Real factor)
                 M_dispETFESpace,
                 M_dispETFESpace,
                 value (factorMassMatrix) *  dot ( phi_j , phi_i ) ) >> M_massMatrix;
-
-    if ( M_data->thinLayer() )
-    {
-    	if(this->M_dispETFESpace->map().comm().MyPID()==0)
-    	{
-    		std::cout << "\n\n**********************\n\nBuilding the Interface Mass" << std::endl;
-    		std::cout << "\nh_thin = " << M_data->thinStructureThickness() << ", density = " << M_data->thinStructureDensity()
-    				  << ", flag thin layer = " << M_data->interfaceFlag()
-    				  << "\n\n**********************\n\n" << std::endl;
-    	}
-
-    	QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
-
-    	integrate ( boundary ( this->M_dispETFESpace->mesh(), M_data->interfaceFlag()),
-    				myBDQR,
-    				M_dispETFESpace,
-    				M_dispETFESpace,
-    				value ( factor * M_data->thinStructureDensity() * M_data->thinStructureThickness() ) *  dot ( phi_i , phi_j )
-    	) >> M_massMatrixThin;
-
-    	M_massMatrixThin->globalAssemble();
-    	*M_massMatrix += *M_massMatrixThin; // Adding the interface thin layer contribution to the thick one
-    }
 
     M_massMatrix->globalAssemble();
 

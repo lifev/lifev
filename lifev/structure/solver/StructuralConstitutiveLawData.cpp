@@ -83,14 +83,7 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData() :
     M_absoluteTolerance                ( ),
     M_relativeTolerance                ( ),
     M_errorTolerance                   ( ),
-    M_NonLinearLineSearch              ( ),
-    M_thinLayer						   ( false ),
-    M_thinLayerThickness			   ( ),
-    M_thinLayerDensity				   ( ),
-    M_thinLayerLameI				   ( ),
-    M_thinLayerLameII				   ( ),
-    M_interfaceFlag					   ( ),
-    M_LameThickByFunctors			   ( false )
+    M_NonLinearLineSearch              ( )
 {
 }
 
@@ -126,14 +119,8 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData ( const StructuralC
     M_absoluteTolerance                ( structuralConstitutiveLawData.M_absoluteTolerance ),
     M_relativeTolerance                ( structuralConstitutiveLawData.M_relativeTolerance ),
     M_errorTolerance                   ( structuralConstitutiveLawData.M_errorTolerance ),
-    M_NonLinearLineSearch              ( structuralConstitutiveLawData.M_NonLinearLineSearch ),
-    M_thinLayer						   ( structuralConstitutiveLawData.M_thinLayer ),
-    M_thinLayerThickness			   ( structuralConstitutiveLawData.M_thinLayerThickness ),
-    M_thinLayerDensity				   ( structuralConstitutiveLawData.M_thinLayerDensity ),
-    M_thinLayerLameI				   ( structuralConstitutiveLawData.M_thinLayerLameI ),
-    M_thinLayerLameII				   ( structuralConstitutiveLawData.M_thinLayerLameII ),
-    M_interfaceFlag                    ( structuralConstitutiveLawData.M_interfaceFlag),
-    M_LameThickByFunctors              ( structuralConstitutiveLawData.M_LameThickByFunctors)
+    M_NonLinearLineSearch              ( structuralConstitutiveLawData.M_NonLinearLineSearch )
+
 {
 }
 
@@ -177,13 +164,6 @@ StructuralConstitutiveLawData::operator= ( const StructuralConstitutiveLawData& 
         M_relativeTolerance                = structuralConstitutiveLawData.M_relativeTolerance;
         M_errorTolerance                   = structuralConstitutiveLawData.M_errorTolerance;
         M_NonLinearLineSearch              = structuralConstitutiveLawData.M_NonLinearLineSearch;
-        M_thinLayer						   = structuralConstitutiveLawData.M_thinLayer;
-        M_thinLayerThickness			   = structuralConstitutiveLawData.M_thinLayerThickness;
-        M_thinLayerDensity				   = structuralConstitutiveLawData.M_thinLayerDensity;
-        M_thinLayerLameI				   = structuralConstitutiveLawData.M_thinLayerLameI;
-        M_thinLayerLameII				   = structuralConstitutiveLawData.M_thinLayerLameII;
-        M_interfaceFlag					   = structuralConstitutiveLawData.M_interfaceFlag;
-        M_LameThickByFunctors			   = structuralConstitutiveLawData.M_LameThickByFunctors;
     }
 
     return *this;
@@ -358,30 +338,6 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
     M_errorTolerance = dataFile ( ( section + "/newton/etamax" ).data(), 1.e-03 );
     M_NonLinearLineSearch = static_cast<Int> ( dataFile ( ( section + "/newton/NonLinearLineSearch" ).data(), 0 ) );
 
-    M_LameThickByFunctors = dataFile ( ( section + "/physics/LameThickByFunctor" ).data(), false );
-
-    // thin layer parameters
-    M_thinLayer = dataFile ( ( section + "/physics/use_thin" ).data(), false );
-
-    if ( M_thinLayer )
-    {
-		M_thinLayerThickness = dataFile ( ( section + "/physics/h_thin" ).data(), 0.001 );
-		M_thinLayerDensity = dataFile ( ( section + "/physics/rho_thin" ).data(), 1.2 );
-		M_interfaceFlag = dataFile ( ( section + "/physics/interface" ).data(), 1 );
-
-		Real poisson_thin = dataFile ( ( section + "/physics/poisson_thin" ).data(), 0.3 );
-		Real young_thin = dataFile ( ( section + "/physics/young_thin" ).data(), 3.0e+6 );
-
-		M_thinLayerLameI = young_thin / (2*(1.0+poisson_thin));
-		M_thinLayerLameII = (young_thin*poisson_thin) / ( (1.0+poisson_thin)*(1.0-poisson_thin) );
-
-//		std::cout << "\n\nM_thinLayer = "          << M_thinLayer << "\n"
-//				  << "\n\nM_thinLayerThickness = " << M_thinLayerThickness << "\n"
-//				  << "\n\nM_thinLayerDensity = "   << M_thinLayerDensity << "\n"
-//				  << "\n\nM_thinLayerLameI = "     << M_thinLayerLameI << "\n"
-//				  << "\n\nM_thinLayerLameII = "    << M_thinLayerLameII << "\n"
-//				  << "\n\nM_interfaceFlag = "      << M_interfaceFlag << "\n";
-    }
 }
 
 void

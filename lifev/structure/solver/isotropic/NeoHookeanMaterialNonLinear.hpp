@@ -667,8 +667,8 @@ void NeoHookeanMaterialNonLinear<MeshType>::computeCauchyStressTensor ( const ve
 		evalQuad,
 		this->M_dispETFESpace,
 		meas_K *  dot ( vectorFromMatrix( ( 1 / J )*
-						  ( /*value (1.0 / 2.0) **/ value ( /*(* (this->M_vectorsParameters) ) [1]*/ 1000000.0 ) * ( pow ( J , 2.0) - J + log (J) ) * F_T + // volumetric
-						    value ( /*(* (this->M_vectorsParameters) ) [0]*/ 10000.0 ) * pow (J, -2.0 / 3.0) * ( F - value (1.0 / 3.0) * I_C * F_T )
+						  ( value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( pow ( J , 2.0) - J + log (J) ) * F_T + // volumetric
+						    parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow (J, -2.0 / 3.0) * ( F - value (1.0 / 3.0) * I_C * F_T )
 						    ) *
 						  transpose(F), 0 ), phi_i)
 		) >> sigma_1;
@@ -679,8 +679,8 @@ void NeoHookeanMaterialNonLinear<MeshType>::computeCauchyStressTensor ( const ve
 		evalQuad,
 		this->M_dispETFESpace,
 		meas_K *  dot ( vectorFromMatrix( ( 1 / J )*
-						  ( /*value (1.0 / 2.0) **/ value ( /*(* (this->M_vectorsParameters) ) [1]*/ 1000000.0 ) * ( pow ( J , 2.0) - J + log (J) ) * F_T + // volumetric
-								  value ( /*(* (this->M_vectorsParameters) ) [0]*/ 10000.0 ) * pow (J, -2.0 / 3.0) * ( F - value (1.0 / 3.0) * I_C * F_T ) ) *
+						  ( value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( pow ( J , 2.0) - J + log (J) ) * F_T + // volumetric
+						    parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow (J, -2.0 / 3.0) * ( F - value (1.0 / 3.0) * I_C * F_T ) ) *
 						  transpose( F ) ,  1 ), phi_i)
 		) >> sigma_2;
   sigma_2->globalAssemble();
@@ -689,8 +689,8 @@ void NeoHookeanMaterialNonLinear<MeshType>::computeCauchyStressTensor ( const ve
 		evalQuad,
 		this->M_dispETFESpace,
 		meas_K *  dot ( vectorFromMatrix( ( 1 / J )*
-						  ( /*value (1.0 / 2.0) **/ value ( /*(* (this->M_vectorsParameters) ) [1]*/ 1000000.0 ) * ( pow ( J , 2.0) - J + log (J) ) * F_T + // volumetric
-								  value ( /*(* (this->M_vectorsParameters) ) [0]*/ 10000.0 ) * pow (J, -2.0 / 3.0) * ( F - value (1.0 / 3.0) * I_C * F_T )
+						  ( value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( pow ( J , 2.0) - J + log (J) ) * F_T + // volumetric
+						    parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow (J, -2.0 / 3.0) * ( F - value (1.0 / 3.0) * I_C * F_T )
 						    ) *
 						  transpose( F ) , 2 ), phi_i)
 		) >> sigma_3;

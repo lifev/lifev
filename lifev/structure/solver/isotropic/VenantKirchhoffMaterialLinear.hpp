@@ -40,14 +40,6 @@
 
 #include <lifev/structure/solver/isotropic/StructuralIsotropicConstitutiveLaw.hpp>
 
-// Start include for atheroma problem //
-
-#include <lifev/fsi_blocks/examples/fsi_atheroma_only_thick_varying_young/LameIEvaluationFunctorThick.hpp>
-#include <lifev/fsi_blocks/examples/fsi_atheroma_only_thick_varying_young/LameIIEvaluationFunctorThick.hpp>
-
-// End include for atheroma problem //
-
-
 
 namespace LifeV
 {
@@ -255,17 +247,13 @@ protected:
     //! Matrix Kl: stiffness linear
     matrixPtr_Type                                 M_stiff;
 
-    //! Matrix representing the Laplace-Beltrami operator at the FS interface
-    matrixPtr_Type                                 M_laplaceBeltrami;
-
 };
 
 template <typename MeshType>
 VenantKirchhoffMaterialLinear<MeshType>::VenantKirchhoffMaterialLinear() :
     super             ( ),
     M_linearStiff                ( ),
-    M_stiff                      ( ),
-    M_laplaceBeltrami            ( )
+    M_stiff                      ( )
 {
 }
 
@@ -286,7 +274,6 @@ VenantKirchhoffMaterialLinear<MeshType>::setup (const FESpacePtr_Type& dFESpace,
     this->M_dispETFESpace                 = dETFESpace;
     this->M_localMap                      = monolithicMap;
     this->M_linearStiff.reset             (new matrix_Type (*this->M_localMap) );
-    this->M_laplaceBeltrami.reset         (new matrix_Type (*this->M_localMap) );
     this->M_offset                        = offset;
 
     // The 2 is because the law uses two parameters.
@@ -341,88 +328,26 @@ void VenantKirchhoffMaterialLinear<MeshType>::computeLinearStiff (dataPtr_Type& 
     using namespace ExpressionAssembly;
 
     * (this->M_linearStiff) *= 0.0;
-    * (this->M_laplaceBeltrami) *= 0.0;
 
     //Compute the linear part of the Stiffness Matrix.
     //In the case of Linear Material it is the Stiffness Matrix.
     //In the case of NonLinear Materials it must be added of the non linear part.
 
-    if ( this->M_dataMaterial->lameThickByFunctors() )
-    {
-    	boost::shared_ptr<LameIEvaluationFunctorThick>  LameIEvaluation ( new LameIEvaluationFunctorThick  );
-    	boost::shared_ptr<LameIIEvaluationFunctorThick> LameIIEvaluation( new LameIIEvaluationFunctorThick );
+    integrate ( elements ( this->M_dispETFESpace->mesh() ),
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                parameter ( (* (this->M_vectorsParameters) ) [0]) * div ( phi_i ) * div ( phi_j )
+              ) >> M_linearStiff;
 
-		integrate ( elements ( this->M_dispETFESpace->mesh() ),
-					this->M_dispFESpace->qr(),
-					this->M_dispETFESpace,
-					this->M_dispETFESpace,
-					eval(LameIEvaluation, X) * div ( phi_i ) * div ( phi_j )
-				  ) >> M_linearStiff;
-
-		integrate ( elements ( this->M_dispETFESpace->mesh() ),
-					this->M_dispFESpace->qr(),
-					this->M_dispETFESpace,
-					this->M_dispETFESpace,
-					value ( 2.0 ) * eval(LameIIEvaluation, X) * dot ( sym (grad (phi_j) ) , grad (phi_i) )
-				  ) >> M_linearStiff;
-    }
-    else
-    {
-		integrate ( elements ( this->M_dispETFESpace->mesh() ),
-					this->M_dispFESpace->qr(),
-					this->M_dispETFESpace,
-					this->M_dispETFESpace,
-					parameter ( (* (this->M_vectorsParameters) ) [0]) * div ( phi_i ) * div ( phi_j )
-				  ) >> M_linearStiff;
-
-		integrate ( elements ( this->M_dispETFESpace->mesh() ),
-					this->M_dispFESpace->qr(),
-					this->M_dispETFESpace,
-					this->M_dispETFESpace,
-					value ( 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [1]) * dot ( sym (grad (phi_j) ) , grad (phi_i) )
-				  ) >> M_linearStiff;
-    }
+    integrate ( elements ( this->M_dispETFESpace->mesh() ),
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                value ( 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [1]) * dot ( sym (grad (phi_j) ) , grad (phi_i) )
+              ) >> M_linearStiff;
 
     this->M_linearStiff->globalAssemble();
-
-    if ( this->M_dataMaterial->thinLayer() )
-    {
-    	if(this->M_dispETFESpace->map().comm().MyPID()==0)
-    	{
-    		std::cout << "\n\n**********************\n\nBuilding the Laplace Beltrami operator" << std::endl;
-    		std::cout << "\nh_thin = " << this->M_dataMaterial->thinStructureThickness() << ", lameI = " << this->M_dataMaterial->lameI() << std::flush;
-    		std::cout << ", lameII = " << this->M_dataMaterial->lameII()
-    				  << ", flag thin layer = " << this->M_dataMaterial->interfaceFlag()
-    				  << "\n\n**********************\n\n" << std::endl;
-    	}
-
-    	QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
-
-    	MatrixSmall<3, 3> Eye;
-    	Eye[0][0] = 1.0;
-    	Eye[1][1] = 1.0;
-    	Eye[2][2] = 1.0;
-
-    	using namespace ExpressionAssembly;
-
-    	integrate ( boundary ( this->M_dispETFESpace->mesh(), this->M_dataMaterial->interfaceFlag()),
-    			myBDQR,
-    			this->M_dispETFESpace,
-    			this->M_dispETFESpace,
-    			value( this->M_dataMaterial->thinStructureThickness() * this->M_dataMaterial->lameII() ) *
-    			dot (
-    					( grad (phi_j) + (-1) * grad (phi_j) * outerProduct ( Nface, Nface ) ) +
-    					 transpose (grad (phi_j) + (-1) * grad (phi_j) * outerProduct ( Nface, Nface ) ),
-    					( grad (phi_i) + ( (-1) * grad (phi_i) * outerProduct ( Nface, Nface ) ) )
-    			)
-    			+ value( this->M_dataMaterial->thinStructureThickness() * this->M_dataMaterial->lameI() ) *
-    			dot ( value ( Eye ) , ( grad (phi_j) + (-1) * grad (phi_j) * outerProduct ( Nface, Nface ) ) ) *
-    			dot ( value ( Eye ) , ( grad (phi_i) + (-1) * grad (phi_i) * outerProduct ( Nface, Nface ) ) )
-    	) >> M_laplaceBeltrami;
-
-    	M_laplaceBeltrami->globalAssemble();
-    	*M_linearStiff += *M_laplaceBeltrami; // Adding the interface thin layer contribution to the thick one
-    }
 
     //Initialization of the pointer M_stiff to what is pointed by M_linearStiff
     this->M_stiff = this->M_linearStiff;
