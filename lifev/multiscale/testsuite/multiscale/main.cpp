@@ -129,7 +129,7 @@ main ( Int argc, char** argv )
     std::string problemFolder = commandLine.follow ( "Output", 2, "-o", "--output" );
     Real referenceSolution    = commandLine.follow ( -1., 2, "-c", "--check" );
     UInt coresPerNode         = commandLine.follow (  1, 2, "-ns", "--nodesize" );
-    Real tolerance            = commandLine.follow (  1e-8, 2, "-t", "--tolerance" );
+    Real tolerance            = commandLine.follow (  1e-3, 2, "-t", "--tolerance" );
 
     if ( coresPerNode > static_cast<UInt> ( numberOfProcesses ) )
     {
