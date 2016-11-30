@@ -179,7 +179,7 @@ void FSIHandler::setup ( )
     M_restart = M_datafile ( "importer/restart", false );
     
 	// Fluid
-	M_fluid.reset ( new NavierStokesSolver ( M_datafile, M_comm ) );
+	M_fluid.reset ( new NavierStokesSolverBlocks ( M_datafile, M_comm ) );
 	M_fluid->setup ( M_fluidLocalMesh );
 
     // Temporary fix for Shape derivatives
@@ -282,12 +282,6 @@ void FSIHandler::setup ( )
 
 		if (M_printSteps)
 			M_outputSteps.open ("Steps.txt" );
-	}
-
-	if ( std::strcmp(M_prec->preconditionerTypeFluid(),"aPCDOperator")==0 )
-	{
-		M_pcdBC->bcUpdate ( *M_fluid->pFESpace()->mesh(), M_fluid->pFESpace()->feBd(), M_fluid->pFESpace()->dof() );
-		M_fluid->setBCpcd(M_pcdBC);
 	}
 
 	M_moveMesh = M_datafile ( "fluid/mesh/move_mesh", true);
@@ -999,37 +993,20 @@ FSIHandler::getMatrixStructure ( )
 	{
 		M_displayer.leaderPrint ("\nUsing Robin BC at the external wall of the structure\n");
 		Real alpha_robin = M_datafile("solid/robin_elastic", 100000.0 );
-		M_alfaRobin.reset( new AlfaRobinFunctor() );
 
 		// ASSEMBLE ROBIN BC MATRIX AT THE INTERFACE
-		if ( M_datafile("solid/robin_by_functor", false ) )
+		QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
 		{
-			QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
-			{
-				using namespace ExpressionAssembly;
-				integrate ( boundary (M_displacementETFESpace->mesh(), M_datafile("solid/externalWallFlag", 210 ) ),
-						myBDQR,
-						M_displacementETFESpace,
-						M_displacementETFESpace,
-						eval ( M_alfaRobin, X ) * dot(phi_i, phi_j)
-				)
-				>>M_interface_mass_structure_robin;
-			}
+			using namespace ExpressionAssembly;
+			integrate ( boundary (M_displacementETFESpace->mesh(), M_datafile("solid/externalWallFlag", 210 ) ),
+					myBDQR,
+					M_displacementETFESpace,
+					M_displacementETFESpace,
+					value ( alpha_robin ) * dot(phi_i, phi_j)
+			)
+			>>M_interface_mass_structure_robin;
 		}
-		else
-		{
-			QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
-			{
-				using namespace ExpressionAssembly;
-				integrate ( boundary (M_displacementETFESpace->mesh(), M_datafile("solid/externalWallFlag", 210 ) ),
-						myBDQR,
-						M_displacementETFESpace,
-						M_displacementETFESpace,
-						value ( alpha_robin ) * dot(phi_i, phi_j)
-				)
-				>>M_interface_mass_structure_robin;
-			}
-		}
+
 	}
 
 	M_interface_mass_structure_robin->globalAssemble();
@@ -1244,7 +1221,7 @@ FSIHandler::solveFSIproblem ( )
 		M_displayer.leaderPrint ( "\n-----------------------------------\n" ) ;
 		M_displayer.leaderPrintMax ( "FSI - solving now for time ", M_time ) ;
 		M_displayer.leaderPrint ( "\n" ) ;
-		double time_timestep = omp_get_wtime();
+
 
 		updateSystem ( );
 
@@ -1268,9 +1245,10 @@ FSIHandler::solveFSIproblem ( )
 		// Using the solution at the previous timestep as initial guess -> TODO: extrapolation
 		UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax, M_nonLinearLineSearch, 0, 2, M_out_res, M_time);
 
-		time_timestep = omp_get_wtime() - time_timestep;
+		iterChrono.stop();
+
 		M_displayer.leaderPrint ( "\n" ) ;
-		M_displayer.leaderPrintMax ( "FSI - timestep solved in ", time_timestep ) ;
+		M_displayer.leaderPrintMax ( "FSI - timestep solved in ", iterChrono.diff() ) ;
 		M_displayer.leaderPrint ( "-----------------------------------\n\n" ) ;
 
 		// Writing the norms into a file
@@ -1441,7 +1419,8 @@ FSIHandler::solveTimeStep ( )
 	M_displayer.leaderPrint ( "\n-----------------------------------\n" ) ;
 	M_displayer.leaderPrintMax ( "FSI - solving now for time ", M_time ) ;
 	M_displayer.leaderPrint ( "\n" ) ;
-	double time_timestep = omp_get_wtime();
+	LifeChrono iterChrono;
+	iterChrono.start();
 
 	updateSystem ( );
 
@@ -1466,17 +1445,19 @@ FSIHandler::solveTimeStep ( )
 	UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
 			M_nonLinearLineSearch, 0, 2, M_out_res, M_time);
 
-	time_timestep = omp_get_wtime() - time_timestep;
+	iterChrono.stop();
 	M_displayer.leaderPrint ( "\n" ) ;
-	M_displayer.leaderPrintMax ( "FSI - timestep solved in ", time_timestep ) ;
+	M_displayer.leaderPrintMax ( "FSI - timestep solved in ", iterChrono.diff() ) ;
 	M_displayer.leaderPrint ( "-----------------------------------\n\n" ) ;
 
 	// Writing the norms into a file
 	if ( M_comm->MyPID()==0 )
 	{
 		// M_outputTimeStep << "Time = " << M_time << " solved in " << iterChrono.diff() << " seconds" << std::endl;
-		M_outputTimeStep << M_time << ", " << time_timestep << std::endl;
+		M_outputTimeStep << M_time << ", " << iterChrono.diff() << std::endl;
 	}
+
+	iterChrono.reset();
 
 	if ( M_extrapolateInitialGuess )
 		M_extrapolationSolution->shift(*M_solution);

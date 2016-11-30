@@ -52,7 +52,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 
 // solvers
-#include <lifev/navier_stokes_blocks/solver/NavierStokesSolver.hpp>
+#include <lifev/navier_stokes_blocks/solver/NavierStokesSolverBlocks.hpp>
 #include <lifev/fsi_blocks/solver/LinearElasticity.hpp>
 
 #include <lifev/fsi_blocks/solver/ALESolver.hpp>
@@ -92,8 +92,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/fsi_blocks/solver/FSIApplyOperatorNonConforming.hpp>
 
 #include <lifev/fsi_blocks/solver/NeoHookean.hpp>
-
-#include <lifev/fsi_blocks/testsuite/fsi_aorta/AlfaRobinFunctor.hpp>
 
 namespace LifeV
 {
@@ -211,7 +209,7 @@ public:
 
     Real getEndTime () { return M_t_end; };
 
-    boost::shared_ptr<NavierStokesSolver> getFluid() { return M_fluid; };
+    boost::shared_ptr<NavierStokesSolverBlocks> getFluid() { return M_fluid; };
 
     void intializeTimeLoop ( );
 
@@ -311,7 +309,7 @@ private:
 	solidETFESpacePtr_Type M_displacementETFESpace;
 
     // navier-stokes solver
-    boost::shared_ptr<NavierStokesSolver> M_fluid;
+    boost::shared_ptr<NavierStokesSolverBlocks> M_fluid;
     boost::shared_ptr<LinearElasticity> M_structure;
     boost::shared_ptr<NeoHookean> M_structureNeoHookean;
     boost::shared_ptr<ALESolver> M_ale;
@@ -463,7 +461,6 @@ private:
 	bool             M_disregardRestart; // if true disregards correct exporter as function of BDF
 	bool             M_prescribeInflowFlowrate;
 	vectorPtr_Type   M_dsk;
-	boost::shared_ptr<AlfaRobinFunctor> M_alfaRobin;
 	bool             M_useBDF;
 	boost::shared_ptr<BDFSecondOrderDerivative> M_structureTimeAdvanceBDF;
 	UInt             M_orderBDFSolid;

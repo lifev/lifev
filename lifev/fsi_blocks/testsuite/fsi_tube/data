@@ -9,8 +9,7 @@
 	
 [fluid]
         use_fast_assembly = true
-	    preconditionerType       = SIMPLE # PCD or SIMPLE
-        use_graph                = false
+	    preconditionerType = SIMPLE # PCD or SIMPLE
      
     	[./physics]
     		density         = 1.0    # density, settings used in the paper
@@ -18,7 +17,7 @@
 
     	[../time_discretization]
     		initialtime     = 0.0
-    		endtime	        = 0.01
+    		endtime	        = 0.004
     		timestep        = 0.001
     		BDF_order       = 2		 # order 1 or 2
 
@@ -29,7 +28,6 @@
     		mesh_type       = .mesh
     		vel_order       = P2
     		pres_order      = P1
-    		stiff_strain    = false
     		
     	[../stabilization]
     	    use             = false
@@ -65,7 +63,7 @@
         [../time_discretization]
             useBDF          = false
             initialtime     = 0.0
-            endtime	        = 0.01
+            endtime	        = 0.004
             timestep        = 0.001
             BDF_order       = 2		 # order 1 or 2
 
@@ -129,7 +127,7 @@
 	
 [../]
 
-# Section below needed by Interpolation only. TODO: use only one solver!
+# Section below needed when using nonconforming interfaces only. 
 [prec]
     prectype                     = Ifpack # Ifpack or ML
     displayList                  = false

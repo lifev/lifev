@@ -10,7 +10,6 @@
 
 #include <lifev/navier_stokes_blocks/solver/NavierStokesPreconditionerOperator.hpp>
 #include <lifev/navier_stokes_blocks/solver/aSIMPLEOperator.hpp>
-#include <lifev/navier_stokes_blocks/solver/aPCDOperator.hpp>
 
 #include <lifev/navier_stokes_blocks/solver/NavierStokesOperator.hpp>
 
