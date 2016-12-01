@@ -81,7 +81,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/filter/PartitionIO.hpp>
 #include <lifev/fsi_blocks/filter/DOFInterfaceIO.hpp>
 
-// Includes needed by interpolation when using nonconforming meshes
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
 #include <Teuchos_RCP.hpp>
@@ -167,14 +166,7 @@ public:
 
     void setup ( );
 
-    void setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& fluidBC_residual, const bcPtr_Type& structureBC, const bcPtr_Type& aleBC);
-
-    void setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& fluidBC_residual,
-    							 const bcPtr_Type& structureBC, const bcPtr_Type& structureBC_residual,
-    							 const bcPtr_Type& aleBC, const bcPtr_Type& aleBC_residual);
-
-    void setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& fluidBC_residual, const bcPtr_Type& structureBC, const bcPtr_Type& aleBC,
-    							 const bcPtr_Type& aleBC_residual);
+    void setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& structureBC, const bcPtr_Type& aleBC );
 
     void setFluidInterfaceBoundaryConditions ( const bcPtr_Type& interfaceFluidBC ) { M_interfaceFluidBC = interfaceFluidBC; };
 
@@ -194,8 +186,6 @@ public:
     void solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol );
 
     void setParameterLists( );
-
-    void setBoundaryConditionsPCD ( const bcPtr_Type& pcdBC);
 
     void setGravity ( const Real& gravity, const Real& gravity_direction);
 
@@ -321,12 +311,16 @@ private:
 
     // boundary conditions
     bcPtr_Type M_fluidBC;
-    bcPtr_Type M_fluidBC_residual;
+    bcPtr_Type M_fluidBC_residual_essential;
+    bcPtr_Type M_fluidBC_residual_natural;
     bcPtr_Type M_structureBC;
-    bcPtr_Type M_structureBC_residual;
+    bcPtr_Type M_structureBC_residual_natural;
+    bcPtr_Type M_structureBC_residual_essential;
     bcPtr_Type M_aleBC;
+    bcPtr_Type M_aleBC_residual_natural;
+    bcPtr_Type M_aleBC_residual_essential;
     bcPtr_Type M_interfaceFluidBC;
-    bcPtr_Type M_aleBC_residual;
+    
 
 	//! Displayer to print in parallel (only PID 0 will print)
 	Displayer M_displayer;
@@ -415,8 +409,6 @@ private:
 	bool M_usePartitionedMeshes;
 	boost::shared_ptr<std::map<UInt, UInt> > M_localDofMap;
 
-	//! BCs for the PCD block Fp
-	bcPtr_Type M_pcdBC;
 	bool M_subiterateFluidDirichlet;
 
 	bool M_considerGravity;

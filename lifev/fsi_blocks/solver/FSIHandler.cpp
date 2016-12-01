@@ -384,41 +384,66 @@ void FSIHandler::createAleFESpace()
 	M_aleFESpace.reset ( new FESpace_Type (M_fluidLocalMesh, aleOrder, 3, M_comm) );
 	M_displayer.leaderPrintMax ( " Number of DOFs for the ale = ", M_aleFESpace->dof().numTotalDof()*3 ) ;
 }
-
-void FSIHandler::setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& fluidBC_residual, const bcPtr_Type& structureBC, const bcPtr_Type& aleBC)
+    
+void FSIHandler::setBoundaryConditions ( const bcPtr_Type& fluidBC,
+                                         const bcPtr_Type& structureBC,
+                                         const bcPtr_Type& aleBC )
 {
-	M_fluidBC 	  		= fluidBC;
-	M_fluidBC_residual 	= fluidBC_residual;
-	M_structureBC 		= structureBC;
-	M_aleBC       		= aleBC;
-}
-
-
-void FSIHandler::setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& fluidBC_residual,
-										 const bcPtr_Type& structureBC, const bcPtr_Type& structureBC_residual,
-										 const bcPtr_Type& aleBC, const bcPtr_Type& aleBC_residual )
-{
-	M_fluidBC 	  		   = fluidBC;
-	M_fluidBC_residual 	   = fluidBC_residual;
-	M_structureBC 		   = structureBC;
-	M_structureBC_residual = structureBC_residual;
-	M_aleBC       		   = aleBC;
-	M_aleBC_residual       = aleBC_residual;
-}
-
-void FSIHandler::setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& fluidBC_residual, const bcPtr_Type& structureBC, const bcPtr_Type& aleBC,
-		const bcPtr_Type& aleBC_residual )
-{
-	M_fluidBC 	  		= fluidBC;
-	M_fluidBC_residual 	= fluidBC_residual;
-	M_structureBC 		= structureBC;
-	M_aleBC       		= aleBC;
-	M_aleBC_residual    = aleBC_residual;
-}
-
-void FSIHandler::setBoundaryConditionsPCD ( const bcPtr_Type& pcdBC)
-{
-	M_pcdBC = pcdBC;
+    M_fluidBC.reset ( new BCHandler ( ) );
+    M_fluidBC_residual_natural.reset ( new BCHandler ( ) );
+    M_fluidBC_residual_essential.reset ( new BCHandler ( ) );
+    
+    for ( std::vector<BCBase>::iterator it = fluidBC->begin(); it != fluidBC->end(); it++ )
+    {
+        if ( it->type() > 3 ) // meaning esssential
+        {
+            M_fluidBC->addBC( *it );
+            M_fluidBC_residual_essential->addBC( *it );
+        }
+        else if ( it->type() == 0 ) // meaning natural
+        {
+            M_fluidBC_residual_natural->addBC( *it );
+        }
+    }
+    
+    M_structureBC.reset ( new BCHandler ( ) );
+    M_structureBC_residual_natural.reset ( new BCHandler ( ) );
+    M_structureBC_residual_essential.reset ( new BCHandler ( ) );
+    
+    for ( std::vector<BCBase>::iterator it = structureBC->begin(); it != structureBC->end(); it++ )
+    {
+        if ( it->type() > 3 ) // meaning esssential
+        {
+            M_structureBC->addBC( *it );
+            M_structureBC_residual_essential->addBC( *it );
+        }
+        else if ( it->type() == 0 ) // meaning natural
+        {
+            M_structureBC_residual_natural->addBC( *it );
+        }
+    }
+    
+    M_aleBC.reset ( new BCHandler ( ) );
+    M_aleBC_residual_natural.reset ( new BCHandler ( ) );
+    M_aleBC_residual_essential.reset ( new BCHandler ( ) );
+    
+    for ( std::vector<BCBase>::iterator it = aleBC->begin(); it != aleBC->end(); it++ )
+    {
+        if ( it->type() > 3 ) // meaning esssential
+        {
+            M_aleBC->addBC( *it );
+            M_aleBC_residual_essential->addBC( *it );
+        }
+        else if ( it->type() == 0 ) // meaning natural
+        {
+            M_aleBC_residual_natural->addBC( *it );
+        }
+    }
+    
+    for ( std::vector<BCBase>::iterator it = M_interfaceFluidBC->begin(); it != M_interfaceFluidBC->end(); it++ )
+    {
+        M_aleBC->addBC( *it );
+    }
 }
 
 void FSIHandler::updateBoundaryConditions ( )
@@ -426,7 +451,8 @@ void FSIHandler::updateBoundaryConditions ( )
 	M_fluidBC->bcUpdate ( *M_fluid->uFESpace()->mesh(), M_fluid->uFESpace()->feBd(), M_fluid->uFESpace()->dof() );
 	M_structureBC->bcUpdate ( *M_displacementFESpace->mesh(), M_displacementFESpace->feBd(), M_displacementFESpace->dof() );
 	M_aleBC->bcUpdate ( *M_aleFESpace->mesh(), M_aleFESpace->feBd(), M_aleFESpace->dof() );
-	M_aleBC_residual->bcUpdate ( *M_aleFESpace->mesh(), M_aleFESpace->feBd(), M_aleFESpace->dof() );
+	M_aleBC_residual_essential->bcUpdate ( *M_aleFESpace->mesh(), M_aleFESpace->feBd(), M_aleFESpace->dof() );
+    M_aleBC_residual_natural->bcUpdate ( *M_aleFESpace->mesh(), M_aleFESpace->feBd(), M_aleFESpace->dof() );
 }
 
 void FSIHandler::initializeTimeAdvance ( )
@@ -1149,7 +1175,6 @@ FSIHandler::solveFSIproblem ( )
         M_solution->subset(*M_fluidDisplacement, M_aleFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize() );
     }
 
-	// Apply boundary conditions for the ale problem (the matrix will not change during the simulation)
 	M_ale->applyBoundaryConditions ( *M_aleBC );
 
 	// Apply boundary conditions for the structure problem (the matrix will not change during the simulation, it is linear elasticity)
@@ -1566,10 +1591,10 @@ FSIHandler::applyBCsolution(vectorPtr_Type& M_solution)
 
 	bcManageRhs ( displacement, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC, M_displacementFESpace->feBd(), 1.0, M_time );
 
-	if ( !M_aleBC_residual->bcUpdateDone() )
-		M_aleBC_residual->bcUpdate ( *M_aleFESpace->mesh(), M_aleFESpace->feBd(), M_aleFESpace->dof() );
+	if ( !M_aleBC_residual_essential->bcUpdateDone() )
+		M_aleBC_residual_essential->bcUpdate ( *M_aleFESpace->mesh(), M_aleFESpace->feBd(), M_aleFESpace->dof() );
 
-	bcManageRhs ( geometry, *M_aleFESpace->mesh(), M_aleFESpace->dof(), *M_aleBC_residual, M_aleFESpace->feBd(), 1.0, M_time );
+	bcManageRhs ( geometry, *M_aleFESpace->mesh(), M_aleFESpace->dof(), *M_aleBC_residual_essential, M_aleFESpace->feBd(), 1.0, M_time );
 
 	//! Push local contributions into the global one
 	M_solution->subset(velocity, M_fluid->uFESpace()->map(), 0, 0);
@@ -1586,18 +1611,35 @@ FSIHandler::applyBCresidual(VectorEpetra& r_u, VectorEpetra& r_ds, VectorEpetra&
 	ru_copy *= -1;
 
 	//! Apply BC on each component
-	if ( !M_fluidBC_residual->bcUpdateDone() )
-		M_fluidBC_residual->bcUpdate ( *M_fluid->uFESpace()->mesh(), M_fluid->uFESpace()->feBd(), M_fluid->uFESpace()->dof() );
+	if ( !M_fluidBC_residual_natural->bcUpdateDone() )
+		M_fluidBC_residual_natural->bcUpdate ( *M_fluid->uFESpace()->mesh(), M_fluid->uFESpace()->feBd(), M_fluid->uFESpace()->dof() );
 
-	bcManageRhs ( ru_copy, *M_fluid->uFESpace()->mesh(), M_fluid->uFESpace()->dof(), *M_fluidBC_residual, M_fluid->uFESpace()->feBd(), 1.0, M_time );
+	bcManageRhs ( ru_copy,
+                 *M_fluid->uFESpace()->mesh(),
+                 M_fluid->uFESpace()->dof(),
+                 *M_fluidBC_residual_natural,
+                 M_fluid->uFESpace()->feBd(),
+                 1.0,
+                 M_time );
 
 	ru_copy *= -1;
 
+    if ( !M_fluidBC_residual_essential->bcUpdateDone() )
+        M_fluidBC_residual_essential->bcUpdate ( *M_fluid->uFESpace()->mesh(), M_fluid->uFESpace()->feBd(), M_fluid->uFESpace()->dof() );
+
+    bcManageRhs ( ru_copy,
+                 *M_fluid->uFESpace()->mesh(),
+                 M_fluid->uFESpace()->dof(),
+                 *M_fluidBC_residual_essential,
+                 M_fluid->uFESpace()->feBd(),
+                 0.0, // Homogeneous condition for Dirichlet type on the residual
+                 M_time );
+    
 	r_u.zero();
 	r_u = ru_copy;
 
-	if ( !M_structureBC_residual->bcUpdateDone() )
-		M_structureBC_residual->bcUpdate ( *M_displacementFESpace->mesh(), M_displacementFESpace->feBd(), M_displacementFESpace->dof() );
+	if ( !M_structureBC_residual_natural->bcUpdateDone() )
+		M_structureBC_residual_natural->bcUpdate ( *M_displacementFESpace->mesh(), M_displacementFESpace->feBd(), M_displacementFESpace->dof() );
 
 	if ( M_datafile("solid/robin_external_wall", false ) )
 	{
@@ -1607,13 +1649,34 @@ FSIHandler::applyBCresidual(VectorEpetra& r_u, VectorEpetra& r_ds, VectorEpetra&
 		r_ds += rds_robin;
 	}
 
-	bcManageRhs ( r_ds, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC_residual, M_displacementFESpace->feBd(), 1.0, M_time );
+	bcManageRhs ( r_ds,
+                 *M_displacementFESpace->mesh(),
+                 M_displacementFESpace->dof(),
+                 *M_structureBC_residual_natural,
+                 M_displacementFESpace->feBd(),
+                 1.0,
+                 M_time );
 
-	if ( !M_aleBC_residual->bcUpdateDone() )
-		M_aleBC_residual->bcUpdate ( *M_aleFESpace->mesh(), M_aleFESpace->feBd(), M_aleFESpace->dof() );
+    if ( !M_structureBC_residual_essential->bcUpdateDone() )
+        M_structureBC_residual_essential->bcUpdate ( *M_displacementFESpace->mesh(), M_displacementFESpace->feBd(), M_displacementFESpace->dof() );
 
-	bcManageRhs ( r_df, *M_aleFESpace->mesh(), M_aleFESpace->dof(), *M_aleBC_residual, M_aleFESpace->feBd(), 1.0, M_time );
-
+    bcManageRhs ( r_ds,
+                 *M_displacementFESpace->mesh(),
+                 M_displacementFESpace->dof(),
+                 *M_structureBC_residual_essential,
+                 M_displacementFESpace->feBd(),
+                 0.0, // Homogeneous condition for Dirichlet type on the residual
+                 M_time );
+    
+	if ( !M_aleBC_residual_natural->bcUpdateDone() )
+		M_aleBC_residual_natural->bcUpdate ( *M_aleFESpace->mesh(), M_aleFESpace->feBd(), M_aleFESpace->dof() );
+    
+	bcManageRhs ( r_df, *M_aleFESpace->mesh(), M_aleFESpace->dof(), *M_aleBC_residual_natural, M_aleFESpace->feBd(), 1.0, M_time );
+    
+    if ( !M_aleBC_residual_essential->bcUpdateDone() )
+        M_aleBC_residual_essential->bcUpdate ( *M_aleFESpace->mesh(), M_aleFESpace->feBd(), M_aleFESpace->dof() );
+    
+    bcManageRhs ( r_df, *M_aleFESpace->mesh(), M_aleFESpace->dof(), *M_aleBC_residual_essential, M_aleFESpace->feBd(), 0.0, M_time );
 }
 
 void
@@ -2085,7 +2148,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		}
 
 		M_structureNeoHookean->update_jacobian( ds_k, coefficient, M_matrixStructure);
-		bcManageMatrix( *M_matrixStructure, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC_residual,
+		bcManageMatrix( *M_matrixStructure, *M_displacementFESpace->mesh(), M_displacementFESpace->dof(), *M_structureBC_residual_essential,
 				        M_displacementFESpace->feBd(), 1.0, M_time);
 	}
 
