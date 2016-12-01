@@ -34,7 +34,7 @@
 		linear_elasticity   = true       # model for the structure: if true linear elasticity (also geometrically linear). If false Neohookean.
         robin_external_wall = false      # if true a robin BC at the external wall of the structure is used. If false using homogeneous Neumann   
         externalWallFlag    = 10
-        robin_elastic       = 1.0e+8
+        robin_elastic       = 1.0e+8     # coefficient for the robin boundary condition
 
     	[./space_discretization]
     		mesh_dir        = ./
