@@ -1,37 +1,28 @@
-[offlinePartioner]
-	parts                 = 8
-	readPartitionedMeshes = false
-	fluidPartitionedMesh  = tube20_P2_8.h5
-	solidPartitionedMesh  = vessel20_P2_8.h5
-	interfacePartitioned  = interface_P2_8.h5
-	
-[../]	
-	
 [fluid]
-        use_fast_assembly = true
-	    preconditionerType = SIMPLE # PCD or SIMPLE
+        use_fast_assembly  = true    # FE assembly for the fluid: if true it uses the FAST assembly, if false it uses ETA
+	    preconditionerType = SIMPLE 
      
     	[./physics]
-    		density         = 1.0    # density, settings used in the paper
-    		viscosity       = 0.03   # viscosity, settings used in the paper
+    		density         = 1.0    # fluid density
+    		viscosity       = 0.03   # fluid dynamic viscosity
 
     	[../time_discretization]
     		initialtime     = 0.0
     		endtime	        = 0.004
     		timestep        = 0.001
-    		BDF_order       = 2		 # order 1 or 2
+    		BDF_order       = 2		          # order 1 or 2
 
     	[../space_discretization]
     		mesh_dir        = ./
-    		mesh_file       = tube20.mesh             # tube20_rotated.mesh can be used for nonconforming simulation
-    									              # tube20.mesh both for conforming and nonconforming
+    		mesh_file       = tube20.mesh     # tube20_rotated.mesh can be used for nonconforming simulation
+    									      # tube20.mesh both for conforming and nonconforming
     		mesh_type       = .mesh
-    		vel_order       = P2
+    		vel_order       = P1
     		pres_order      = P1
     		
     	[../stabilization]
-    	    use             = false
-    	    type            = SUPGALE
+    	    use             = true
+    	    type            = SUPGALE 
     	    vel_order       = 1
 
     	[../]
@@ -40,16 +31,16 @@
 
 [solid]
 
-		linear_elasticity   = true
-        robin_external_wall = false
+		linear_elasticity   = true       # model for the structure: if true linear elasticity (also geometrically linear). If false Neohookean.
+        robin_external_wall = false      # if true a robin BC at the external wall of the structure is used. If false using homogeneous Neumann   
         externalWallFlag    = 10
-        robin_elastic       = 1.0e+5
+        robin_elastic       = 1.0e+8
 
     	[./space_discretization]
     		mesh_dir        = ./
     		mesh_file       = vessel20.mesh
     		mesh_type       = .mesh
-    		order           = P2
+    		order           = P1
 
 	    [../model]
 			constitutiveLaw     = isotropic
@@ -61,30 +52,27 @@
 			solidTypeIsotropic 	= linearVenantKirchhoff
 
         [../time_discretization]
-            useBDF          = false
+            useBDF          = true      # if true it uses BDF. If false it uses Newmark
             initialtime     = 0.0
             endtime	        = 0.004
             timestep        = 0.001
-            BDF_order       = 2		 # order 1 or 2
+            BDF_order       = 2		     # order 1 or 2
 
 		[../physics]
-			density   		    = 1.2    # density, settings used in the paper
+			density   		    = 1.2    # density of the structure
 			material_flag       = 1	
-			use_thin  			= false            # if true, using the thin layer structure. If false, not using the thin layer structure.
-		    h_thin    			= 0.02             # thickness thin structure
-		    rho_thin  			= 1.2			   # density thin structure
-		    young_thin          = 3.e+6  		   # Young's modulus thin layer
-		    poisson_thin        = 0.3    		   # poisson thin layer
-		    interface 			= 1.0            # flag of the interface
-		    
+					    
     	[../]
 
 [../]
 
 [ale]
 
+	useLinearElasticity = true		# if true the ALE field is discretized by the linear elasticity equations
+									# if false the ALE field is discretized by the harmonic extension
+	
 	[./space_discretization]
-		order			= P2
+		order	= P1        # this has to be the same of the one used for the fluid velocity
 
 	[./]
 
@@ -94,36 +82,35 @@
 	flag        	      =  1       # default: 1, the mesh flag of the interface
 	tolerance             =  0       # how far points are to be considered the same on the interface
 	fluid_vertex_flag     = 20       # tells whether the in/out ring curves on the interface
-	nonconforming         = false    # tells whether the meshes are conformin at the interface (true works just with P1)
-	lambda_num_structure  = false    # if true the lagrange multip. are numbered wrt the structure, if false wrt to the fluid
-	useMasses             = true     # if true we interpolate the strong stresses, if false we interpolate the weak stresses
+	nonconforming         = false     # tells whether the meshes are conforming at the interface 
+	lambda_num_structure  = false    # if true the lagrange multip. are numbered wrt the structure, if false wrt to the fluid (only in the conforming case)
 
 [../]
 
 [exporter]
-    type       = hdf5
-    multimesh  = false
-    start      = 0
-    save       = 1
-    fluid_filename  = fluid_P1P1
-    structure_filename  = structure_P1
-    save_every = 1
-    disregardRestart = false
+    type               = hdf5
+    multimesh          = false
+    start              = 0
+    save               = 1
+    fluid_filename     = fluid_result
+    structure_filename = structure_result
+    save_every         = 1                   # write solution to file every "save_every" time steps
+    disregardRestart   = false         # exporter does not take care of number of solutions needed to perform restart 
     
 [../]
 
 [newton]
-	abstol          		=  1.e-10
-	reltol          		=  1.e-5
-	etamax          		=  1.e-6
-	maxiter         		=  10
+	abstol          		=  1.e-10  # absoulte tolerance
+	reltol          		=  1.e-5   # relative tolerance
+	etamax          		=  1.e-6   
+	maxiter         		=  10      # maximum number of bblinear 
 	NonLinearLineSearch 	=  0
-	output_Residuals    	=  true
-	output_Steps        	=  true
-	convectiveImplicit      =  true
-	useShapeDerivatives     =  false
-	extrapolateInitialGuess =  false
-	orderExtrapolation      =  2    # it can be 1, 2 or 3
+	output_Residuals    	=  true    # if true a file Residuals.txt is created with all the residuals at each Newton iteration of the simulation
+	output_Steps        	=  true    # if true a file Steps.txt is created with all the steps at each Newton iteration of the simulation
+	convectiveImplicit      =  true    # it has to be true
+	useShapeDerivatives     =  false   # if true using shape derivatives, if false not using shape derivatives in the FSI jacobian matrix
+	extrapolateInitialGuess =  true    # if true the initial guess for Newton is extrapolated, if false it uses the solution at the previous time step
+	orderExtrapolation      =  2       # it can be 1, 2 or 3
 	
 [../]
 
