@@ -606,7 +606,6 @@ void FSIHandler::initializeTimeAdvance ( )
             M_importerStructure->readVariable (structureAccelerationReader);
             
             int iterations = std::atoi (iterationString.c_str() );
-            Real iterationsReal = iterations;
             
             if ( iterInit == 0 )
             {
@@ -706,20 +705,16 @@ void FSIHandler::buildInterfaceMaps ()
 		Teuchos::RCP< Teuchos::ParameterList > belosList = Teuchos::rcp ( new Teuchos::ParameterList );
 		belosList = Teuchos::getParametersFromXmlFile ( "SolverParamList_rbf3d.xml" );
 
-		// Flags of the coupling
-		M_displayer.leaderPrint ( "\n\t Creating fluid to structure interpolant" ) ;
-
 		const std::string uOrder = M_datafile ( "fluid/space_discretization/vel_order", "P1");
 		FESpacePtr_Type fluid_FESpace_whole ( new FESpace_Type ( M_fluidMesh, uOrder, 3, M_comm) );
 
 		const std::string dOrder = M_datafile ( "solid/space_discretization/order", "P1");
 		FESpacePtr_Type solid_FESpace_whole ( new FESpace_Type ( M_structureMesh, dOrder, 3, M_comm) );
 
-		// Creating fluid (known) to structure (unknown) interpolation operator
 		M_FluidToStructureInterpolant.reset( new interpolation_Type);
 		M_FluidToStructureInterpolant->setup(M_datafile, belosList);
 		M_FluidToStructureInterpolant->setMeshSize(MeshUtility::MeshStatistics::computeSize(*M_fluidMesh).maxH);
-		M_FluidToStructureInterpolant->setFlag(1);
+		M_FluidToStructureInterpolant->setFlag( M_datafile("interface/flag", 1) );
 		M_FluidToStructureInterpolant->setVectors(M_fluidVelocity, M_structureDisplacement);
 		M_FluidToStructureInterpolant->buildTableDofs_known ( fluid_FESpace_whole );
 		M_FluidToStructureInterpolant->buildTableDofs_unknown ( solid_FESpace_whole );
@@ -730,14 +725,10 @@ void FSIHandler::buildInterfaceMaps ()
 		M_FluidToStructureInterpolant->buildOperators();
 		M_FluidToStructureInterpolant->getKnownInterfaceMap(M_fluidInterfaceMap);
 
-
-		M_displayer.leaderPrint ( "\n\t Creating structure to fluid interpolant\n" ) ;
-
-		// Creating structure (known) to fluid (unknown) interpolation operator
 		M_StructureToFluidInterpolant.reset( new interpolation_Type);
 		M_StructureToFluidInterpolant->setup(M_datafile, belosList);
 		M_StructureToFluidInterpolant->setMeshSize(MeshUtility::MeshStatistics::computeSize(*M_structureMesh).maxH);
-		M_StructureToFluidInterpolant->setFlag(1);
+		M_StructureToFluidInterpolant->setFlag( M_datafile("interface/flag", 1) );
 		M_StructureToFluidInterpolant->setVectors(M_structureDisplacement, M_fluidVelocity);
 		M_StructureToFluidInterpolant->buildTableDofs_known ( solid_FESpace_whole );
 		M_StructureToFluidInterpolant->buildTableDofs_unknown ( fluid_FESpace_whole );
@@ -806,25 +797,23 @@ void FSIHandler::createInterfaceMaps(std::map<ID, ID> const& locDofMap)
 void FSIHandler::constructInterfaceMap ( const std::map<ID, ID>& locDofMap,
 										 const UInt subdomainMaxId )
 {
-	// subdomainMaxId viene passato come M_displacementFESpace->map().map(Unique)->NumGlobalElements()/nDimensions
-
 	std::map<ID, ID>::const_iterator ITrow;
 
-	Int numtasks = M_comm->NumProc(); // Numero di processi
-	int* numInterfaceDof (new int[numtasks]); // vettore lungo tanti quanti sono i processi
-	int pid = M_comm->MyPID(); // ID processo
+	Int numtasks = M_comm->NumProc();
+	int* numInterfaceDof (new int[numtasks]);
+	int pid = M_comm->MyPID();
 	int numMyElements;
 
 	if ( M_lambda_num_structure )
 	{
-		numMyElements = M_structureInterfaceMap->map (Unique)->NumMyElements(); // numero di elementi sul processo
+		numMyElements = M_structureInterfaceMap->map (Unique)->NumMyElements();
 	}
 	else
 	{
-		numMyElements = M_fluidInterfaceMap->map (Unique)->NumMyElements(); // numero di elementi sul processo
+		numMyElements = M_fluidInterfaceMap->map (Unique)->NumMyElements();
 	}
 
-	numInterfaceDof[pid] = numMyElements; // Ogni processore mette nella propria posizione il numero di elementi di interfaccia che ha
+	numInterfaceDof[pid] = numMyElements;
 
 	mapPtr_Type subMap;
 
@@ -858,7 +847,7 @@ void FSIHandler::constructInterfaceMap ( const std::map<ID, ID>& locDofMap,
 
 	if ( M_lambda_num_structure )
 	{
-		Real M_interface = (UInt) M_structureInterfaceMap->map (Unique)->NumGlobalElements() / nDimensions; // Quanti dof ci sono nella mappa scalare di interfaccia
+		Real M_interface = (UInt) M_structureInterfaceMap->map (Unique)->NumGlobalElements() / nDimensions;
 		for (l = 0, ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
 		{
 			if (M_structureInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second) ) >= 0)
@@ -884,13 +873,13 @@ void FSIHandler::constructInterfaceMap ( const std::map<ID, ID>& locDofMap,
 					couplingVector.push_back ( (*M_numerationInterface) (ITrow->second ) + dim * M_interface );
 				}
 			}
-		}// so the map for the coupling part of the matrix is just Unique
+		}
 
 		M_lagrangeMap.reset (new MapEpetra (-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], M_comm) );
 	}
 	else
 	{
-		Real M_interface = (UInt) M_fluidInterfaceMap->map (Unique)->NumGlobalElements() / nDimensions; // Quanti dof ci sono nella mappa scalare di interfaccia
+		Real M_interface = (UInt) M_fluidInterfaceMap->map (Unique)->NumGlobalElements() / nDimensions;
 		for (l = 0, ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow)
 		{
 			if (M_fluidInterfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->first) ) >= 0)
@@ -916,7 +905,7 @@ void FSIHandler::constructInterfaceMap ( const std::map<ID, ID>& locDofMap,
 					couplingVector.push_back ( (*M_numerationInterface) (ITrow->first ) + dim * M_interface );
 				}
 			}
-		}// so the map for the coupling part of the matrix is just Unique
+		}
 
 		M_lagrangeMap.reset (new MapEpetra (-1, static_cast< Int> ( couplingVector.size() ), &couplingVector[0], M_comm) );
 	}
@@ -1221,7 +1210,7 @@ FSIHandler::solveFSIproblem ( )
 		M_displayer.leaderPrint ( "\n-----------------------------------\n" ) ;
 		M_displayer.leaderPrintMax ( "FSI - solving now for time ", M_time ) ;
 		M_displayer.leaderPrint ( "\n" ) ;
-
+		iterChrono.start();
 
 		updateSystem ( );
 
@@ -1242,8 +1231,7 @@ FSIHandler::solveFSIproblem ( )
 
 		M_maxiterNonlinear = 10;
         
-		// Using the solution at the previous timestep as initial guess -> TODO: extrapolation
-		UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax, M_nonLinearLineSearch, 0, 2, M_out_res, M_time);
+		NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax, M_nonLinearLineSearch, 0, 2, M_out_res, M_time);
 
 		iterChrono.stop();
 
@@ -1254,7 +1242,6 @@ FSIHandler::solveFSIproblem ( )
 		// Writing the norms into a file
 		if ( M_comm->MyPID()==0 )
 		{
-			// M_outputTimeStep << "Time = " << M_time << " solved in " << iterChrono.diff() << " seconds" << std::endl;
 			M_outputTimeStep << M_time << ", " << iterChrono.diff() << std::endl;
 		}
 
@@ -1267,13 +1254,23 @@ FSIHandler::solveFSIproblem ( )
 		M_fluidVelocity->subset(*M_solution, M_fluid->uFESpace()->map(), 0, 0);
 		M_fluidPressure->subset(*M_solution, M_fluid->pFESpace()->map(), M_fluid->uFESpace()->map().mapSize(), 0);
         
-        vector_Type lagrange (*M_lagrangeMap, Unique);
-        lagrange.zero();
-        lagrange.subset(*M_solution, *M_lagrangeMap, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
+        vectorPtr_Type lagrange ( new vector_Type (*M_lagrangeMap, Unique) );
+        vectorPtr_Type Lagrange;
+        lagrange->zero();
+        lagrange->subset(*M_solution, *M_lagrangeMap, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
                         M_displacementFESpace->map().mapSize(), 0);
 
-        *M_Lagrange = ( *(M_coupling->lambdaToFluidMomentum()) * lagrange );
-        
+        if ( !M_nonconforming )
+        {
+        	*M_Lagrange = ( *(M_coupling->lambdaToFluidMomentum()) * (*lagrange) );
+        }
+        else
+        {
+
+        	M_FluidToStructureInterpolant->expandGammaToOmega_Known( lagrange, Lagrange );
+        	*M_Lagrange = *Lagrange;
+        }
+
         M_fluidDisplacement->subset(*M_solution, M_aleFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize(), 0);
 		M_structureDisplacement->subset(*M_solution, M_displacementFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize(), 0);
 
@@ -1304,6 +1301,7 @@ FSIHandler::solveFSIproblem ( )
 		// the code takes care of exporting the solution also at
 		// the previous timesteps such that, if later a restart
 		// of the simulation is performed, it works correctly.
+
 		if ( M_orderBDF == 1 )
 		{
 			if ( time_step_count == M_counterSaveEvery )
@@ -1442,7 +1440,7 @@ FSIHandler::solveTimeStep ( )
 	M_maxiterNonlinear = 10;
 
 	// Using the solution at the previous timestep as initial guess -> TODO: extrapolation
-	UInt status = NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
+	NonLinearRichardson ( *M_solution, *this, M_absoluteTolerance, M_relativeTolerance, M_maxiterNonlinear, M_etaMax,
 			M_nonLinearLineSearch, 0, 2, M_out_res, M_time);
 
 	iterChrono.stop();
@@ -1466,7 +1464,7 @@ FSIHandler::solveTimeStep ( )
 	M_fluidVelocity->subset(*M_solution, M_fluid->uFESpace()->map(), 0, 0);
 	M_fluidPressure->subset(*M_solution, M_fluid->pFESpace()->map(), M_fluid->uFESpace()->map().mapSize(), 0);
     M_Lagrange->subset(*M_solution, *M_lagrangeMap, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() +
-                          M_displacementFESpace->map().mapSize(), 0);
+                        M_displacementFESpace->map().mapSize(), 0);
     M_fluidDisplacement->subset(*M_solution, M_aleFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize(), 0);
 	M_structureDisplacement->subset(*M_solution, M_displacementFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize(), 0);
 
@@ -1530,14 +1528,17 @@ FSIHandler::finalizeExporters ( )
 void
 FSIHandler::initializeExtrapolation( )
 {
-//	// Initialize vector in the extrapolation object for the initial guess of Newton
-//	vector_Type solutionInitial ( *M_monolithicMap );
-//	std::vector<vector_Type> initialStateSolution;
-//	solutionInitial *= 0 ;
-//	for ( UInt i = 0; i < M_orderExtrapolationInitialGuess; ++i )
-//		initialStateSolution.push_back(solutionInitial);
-//
-//	M_extrapolationSolution->initialize(initialStateSolution);
+	// Initialize vector in the extrapolation object for the initial guess of Newton
+	vector_Type solutionInitial ( *M_monolithicMap );
+	std::vector<vector_Type> initialStateSolution;
+	solutionInitial.zero();
+	for ( UInt i = 0; i < M_orderExtrapolationInitialGuess; ++i )
+		initialStateSolution.push_back(solutionInitial);
+
+	M_extrapolationSolution.reset( new TimeAndExtrapolationHandler ( ) );
+	M_extrapolationSolution->setBDForder(M_orderExtrapolationInitialGuess);
+	M_extrapolationSolution->setMaximumExtrapolationOrder(M_orderExtrapolationInitialGuess);
+	M_extrapolationSolution->initialize(initialStateSolution);
 }
 
 void
@@ -1681,8 +1682,7 @@ void
 FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, const UInt iter_newton)
 {
 	residual.zero();
-
-//	solution.spy("solution");
+	M_NewtonIter = iter_newton;
 
 	// Create empty vectors to store each component of the FSI residual
 
@@ -1721,6 +1721,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 	df_k->subset(solution,  M_aleFESpace->map(), M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize() + M_lagrangeMap->mapSize(), 0);
 
 	M_dsk.reset( new vector_Type ( *ds_k ) );
+
 	//---------------//
 	// Move the mesh //
 	//---------------//
@@ -1776,8 +1777,6 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
 		M_displayer.leaderPrint ( "[FSI] - Computing residual structure \n" ) ;
 
-		UInt offset_displacment_structure = M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize();
-
 		// Vector containing the residual of the structural part
 		res_ds->zero();
 
@@ -1819,9 +1818,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 
         }
 
-		// WARNING: INTERPOLATING THE WEAK RESIDUAL FOR THE MOMENT, LATER USING THE MASSES
-
-		if ( M_useMasses )
+        if ( M_useMasses )
 		{
 			M_displayer.leaderPrint ( "[FSI] - Assemble interface mass of the fluid \n" ) ;
 			M_fluid->assembleInterfaceMass ( M_interface_mass_fluid, M_lagrangeMap, M_datafile("interface/flag", 1),
@@ -1964,9 +1961,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
         // Adding the coupling contribution
 		*res_u += ( *(M_coupling->lambdaToFluidMomentum()) * (*lambda_k) );
 
-		//res_u->spy("res_u");
-        
-        //------------------------//
+		//------------------------//
 		// Residual for the solid //
 		//------------------------//
 
@@ -2024,35 +2019,6 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		*res_df = ( ( (*M_coupling->structureDisplacementToFluidDisplacement()) * (*ds_k) ) +
 					( (*M_ale->matrix()) * (*df_k) ) );
 
-		//--------------------------------------//
-		// Third: initialize the apply operator //
-		//--------------------------------------//
-
-		/*
-		initializeApplyOperatorResidual ( );
-
-		//------------------------------------------------//
-		// Forth: assemble the monolithic right hand side //
-		//------------------------------------------------//
-
-		vectorPtr_Type rightHandSide ( new vector_Type ( M_monolithicMap ) );
-		rightHandSide->zero();
-		// get the structure right hand side
-		rightHandSide->subset ( *M_rhsStructure, M_displacementFESpace->map(), 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() );
-		// get the right hand side of the coupling of the velocities
-		rightHandSide->subset ( *M_rhsCouplingVelocities, *M_lagrangeMap, 0, M_fluid->uFESpace()->map().mapSize() + M_fluid->pFESpace()->map().mapSize() + M_displacementFESpace->map().mapSize() );
-
-		//-----------------------------//
-		// Forth: compute the residual //
-		//-----------------------------//
-
-		M_applyOperatorResidual->setMonolithicMap(M_monolithicMap);
-		M_applyOperatorResidual->Apply(solution.epetraVector(), residual.epetraVector());
-		residual -= *rightHandSide;
-
-		// Adding contribution from the fluid
-		residual += *fluid_residual;
-		*/
 	}
 
 	applyBCresidual ( *res_u, *res_ds, *res_df );
@@ -2090,8 +2056,6 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 		}
 	}
 
-    //int aaaaa;
-    //std::cin >> aaaaa;
 	//---------------------------------------------//
 	// Post-step: update the Jacobian of the fluid //
 	//---------------------------------------------//
@@ -2174,7 +2138,7 @@ FSIHandler::evalResidual(vector_Type& residual, const vector_Type& solution, con
 }
 
 void
-FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol )
+FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const Real /*linearRelTol*/ )
 {
 	increment.zero();
 
