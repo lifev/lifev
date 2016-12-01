@@ -131,18 +131,6 @@ main ( int argc, char** argv )
     // --------------------------------//
     // Getting the boundary conditions //
     // --------------------------------//
-
-    /*
-    boost::shared_ptr<BCHandler> fluidBC ( new BCHandler (*BCh_fluid () ) );
-    boost::shared_ptr<BCHandler> fluidBC_residual ( new BCHandler (*BCh_fluid_residual () ) );
-    boost::shared_ptr<BCHandler> structureBC ( new BCHandler (*BCh_structure () ) );
-    boost::shared_ptr<BCHandler> structureBC_residual ( new BCHandler (*BCh_structure_residual () ) );
-    boost::shared_ptr<BCHandler> aleBC ( new BCHandler (*BCh_ale () ) );
-    boost::shared_ptr<BCHandler> aleBC_residual ( new BCHandler (*BCh_ale_residual () ) );
-    boost::shared_ptr<BCHandler> interfaceFluidBC ( new BCHandler (*BCh_interfaceFluid ( ) ) );
-
-    fsi.setBoundaryConditions(fluidBC, fluidBC_residual, structureBC, structureBC_residual, aleBC, aleBC_residual);
-    */
         
     boost::shared_ptr<BCHandler> interfaceFluidBC ( new BCHandler (*BCh_interfaceFluid ( ) ) );
     fsi.setFluidInterfaceBoundaryConditions(interfaceFluidBC);
@@ -151,8 +139,6 @@ main ( int argc, char** argv )
     boost::shared_ptr<BCHandler> structureBC ( new BCHandler (*BCh_structure () ) );
     boost::shared_ptr<BCHandler> aleBC ( new BCHandler (*BCh_ale () ) );
     fsi.setBoundaryConditions( fluidBC, structureBC, aleBC );
-        
-    
 
     std::string preconditioner = dataFile("fluid/preconditionerType","none");
 
