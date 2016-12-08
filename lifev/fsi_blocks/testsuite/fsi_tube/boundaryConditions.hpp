@@ -57,6 +57,7 @@ namespace LifeV
 
 typedef boost::shared_ptr<BCHandler> bcPtr_Type;
 
+// Set here the BCs for the fluid
 bcPtr_Type BCh_fluid ()
 {
     BCFunctionBase zero_function (fZero);
@@ -70,6 +71,7 @@ bcPtr_Type BCh_fluid ()
     return bc;
 }
 
+// Set here the BCs for the structure
 bcPtr_Type BCh_structure ()
 {
     BCFunctionBase zero_function (fZero);
@@ -82,6 +84,7 @@ bcPtr_Type BCh_structure ()
     return bc;
 }
 
+// Set here the BCs for the ale
 bcPtr_Type BCh_ale ()
 {
     BCFunctionBase zero_function (fZero);
@@ -94,6 +97,9 @@ bcPtr_Type BCh_ale ()
     return bc;
 }
 
+// Whatever problem is solved, this function below need to be present
+// as we use it to apply dirichlet BCs at the fluid interface when
+// using the FaCSI preconditioner
 bcPtr_Type BCh_interfaceFluid ()
 {
     BCFunctionBase zero_function (fZero);

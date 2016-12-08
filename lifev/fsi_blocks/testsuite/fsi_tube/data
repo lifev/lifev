@@ -63,7 +63,7 @@
 			material_flag   = 1	
     	
     	[../thin_layer]
-    		use_thin  	    = true     # if true, using the thin layer structure. If false, not using the thin layer structure. Works only with linear structure.
+    		use_thin  	    = false    # if true, using the thin layer structure. If false, not using the thin layer structure. Works only with linear structure.
 		    h_thin    		= 0.01     # thickness thin structure
 		    rho_thin  		= 1.2	   # density thin structure
 		    young_thin      = 3.0e+6   # Young's modulus thin layer

@@ -66,6 +66,8 @@ main ( int argc, char** argv )
     typedef VectorEpetra vector_Type;
     typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
     
+    Real normTwo_sol;
+
     {
     // ---------------------------//
     // Reading the input datafile //
@@ -83,7 +85,7 @@ main ( int argc, char** argv )
     FSIHandler fsi ( Comm );
     
     fsi.setDatafile ( dataFile );
-    
+
     // check about the use of meshes: using partitioned meshes or do we have to partition them online?
 
     bool usePartitionedMeshes = dataFile("offlinePartioner/readPartitionedMeshes", false);
@@ -167,6 +169,8 @@ main ( int argc, char** argv )
 
     fsi.solveFSIproblem ( );
 
+    normTwo_sol = fsi.getFSIsolution()->norm2();
+
     }
 
 #ifdef HAVE_MPI
@@ -176,5 +180,14 @@ main ( int argc, char** argv )
     }
     MPI_Finalize();
 #endif
-    return ( EXIT_SUCCESS );
+
+    if ( std::abs(normTwo_sol - 162041.4945 ) < 1.0e-3 )
+    {
+    	return ( EXIT_SUCCESS );
+    }
+    else
+    {
+    	return ( EXIT_FAILURE );
+    }
+
 }
