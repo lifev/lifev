@@ -213,6 +213,8 @@ public:
 
     vectorPtr_Type getFluidPressure() { return M_fluidPressure; };
 
+    vectorPtr_Type getFSIsolution() { return M_solution; };
+
 //@}
 
 private:
