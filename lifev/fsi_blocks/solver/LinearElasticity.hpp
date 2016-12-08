@@ -59,6 +59,8 @@ public:
 
     void setCoefficients ( const Real density, const Real young, const Real poisson);
 
+    void setCoefficientsThinLayer ( const Real density, const Real young, const Real poisson, const Real thickness, const UInt interface );
+
     void setup( const meshPtr_Type& mesh, const std::string dOrder );
 
     void assemble_matrices ( const Real timestep, const Real beta, bcPtr_Type & bc, bool useBDF = false );
@@ -100,8 +102,20 @@ private:
     matrixPtr_Type M_mass_no_bc;
     matrixPtr_Type M_stiffness_no_bc;
 
+    // Matrices without bc applied thin layer
+    matrixPtr_Type M_mass_no_bc_thin;
+    matrixPtr_Type M_stiffness_no_bc_thin;
+
     // jacobian matrix
     matrixPtr_Type M_jacobian;
+
+    // Parameters used to deal with the thin layer
+    bool				   M_thinLayer;
+    Real 				   M_thinLayerThickness;
+    Real 				   M_thinLayerDensity;
+    Real 				   M_thinLayerLameI;
+    Real 				   M_thinLayerLameII;
+    UInt 				   M_interfaceFlag;
 
 };
 

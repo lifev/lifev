@@ -1,5 +1,5 @@
 [fluid]
-        use_fast_assembly  = true    # FE assembly for the fluid: if true it uses the FAST assembly, if false it uses ETA
+        use_fast_assembly  = true     # FE assembly for the fluid: if true it uses the FAST assembly, if false it uses ETA
 	    preconditionerType = SIMPLE 
      
     	[./physics]
@@ -59,9 +59,16 @@
             BDF_order       = 2		     # order 1 or 2
 
 		[../physics]
-			density   		    = 1.2    # density of the structure
-			material_flag       = 1	
-					    
+			density   		= 1.2    # density of the structure
+			material_flag   = 1	
+    	
+    	[../thin_layer]
+    		use_thin  	    = true     # if true, using the thin layer structure. If false, not using the thin layer structure. Works only with linear structure.
+		    h_thin    		= 0.01     # thickness thin structure
+		    rho_thin  		= 1.2	   # density thin structure
+		    young_thin      = 3.0e+6   # Young's modulus thin layer
+		    poisson_thin    = 0.3      # poisson thin layer            
+    		
     	[../]
 
 [../]

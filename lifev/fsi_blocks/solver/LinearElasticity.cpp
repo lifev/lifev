@@ -9,7 +9,13 @@ LinearElasticity::LinearElasticity( const commPtr_Type& communicator ):
 		M_young(0.0),
 		M_poisson(0.0),
 		M_lambda(0.0),
-		M_mu(0.0)
+		M_mu(0.0),
+		M_thinLayer(false),
+		M_thinLayerThickness(0.0),
+		M_thinLayerDensity(0.0),
+		M_thinLayerLameI(0.0),
+		M_thinLayerLameII(0.0),
+		M_interfaceFlag(0.0)
 {}
 
 LinearElasticity::~LinearElasticity()
@@ -32,6 +38,19 @@ LinearElasticity::setCoefficients ( const Real density, const Real young, const 
 
 	M_mu = M_young / ( 2.0 * ( 1.0 + M_poisson ) );
 
+}
+
+void
+LinearElasticity::setCoefficientsThinLayer ( const Real density, const Real young, const Real poisson, const Real thickness, const UInt interface )
+{
+	M_thinLayer = true;
+	M_thinLayerThickness = thickness;
+	M_thinLayerDensity = density;
+	M_interfaceFlag = interface;
+	M_thinLayerLameI = young / ( 2 * ( 1.0 + poisson ) );
+	M_thinLayerLameII = ( young * poisson ) / ( ( 1.0 + poisson ) * ( 1.0 - poisson ) );
+	M_mass_no_bc_thin.reset( new matrix_Type ( M_displacementFESpace->map() ) );
+	M_stiffness_no_bc_thin.reset( new matrix_Type ( M_displacementFESpace->map() ) );
 }
 
 void
@@ -79,6 +98,22 @@ LinearElasticity::assemble_matrices ( const Real timestep, const Real coeff, bcP
 				value(M_density) * dot ( phi_i, phi_j )
 			  ) >> M_mass_no_bc;
 
+	if ( M_thinLayer )
+	{
+		QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
+		M_mass_no_bc_thin->zero();
+
+		integrate ( boundary ( M_displacementFESpace_ETA->mesh(), M_interfaceFlag ),
+				    myBDQR,
+				    M_displacementFESpace_ETA,
+				    M_displacementFESpace_ETA,
+				    value ( M_thinLayerDensity ) *  dot ( phi_i , phi_j )
+				  ) >> M_mass_no_bc_thin;
+
+		M_mass_no_bc_thin->globalAssemble();
+		*M_mass_no_bc += *M_mass_no_bc_thin;
+	}
+
 	M_mass_no_bc->globalAssemble();
 
 	// stiffness matrix
@@ -89,6 +124,37 @@ LinearElasticity::assemble_matrices ( const Real timestep, const Real coeff, bcP
 				value( M_mu ) * dot ( grad(phi_i) , grad(phi_j) + transpose( grad(phi_j) ) ) +
 				value( M_lambda ) * div(phi_i) * div(phi_j)
 			  ) >> M_stiffness_no_bc;
+
+	if ( M_thinLayer )
+	{
+		QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria7pt) );
+		M_stiffness_no_bc_thin->zero();
+
+		MatrixSmall<3, 3> Eye;
+		Eye[0][0] = 1.0;
+		Eye[1][1] = 1.0;
+		Eye[2][2] = 1.0;
+
+		using namespace ExpressionAssembly;
+
+		integrate ( boundary ( M_displacementFESpace_ETA->mesh(), M_interfaceFlag ),
+					myBDQR,
+					M_displacementFESpace_ETA,
+					M_displacementFESpace_ETA,
+					value( M_thinLayerThickness * M_thinLayerLameII ) *
+					dot (
+						( grad (phi_j) + (-1) * grad (phi_j) * outerProduct ( Nface, Nface ) ) +
+						transpose (grad (phi_j) + (-1) * grad (phi_j) * outerProduct ( Nface, Nface ) ),
+						( grad (phi_i) + ( (-1) * grad (phi_i) * outerProduct ( Nface, Nface ) ) )
+					)
+					+ value( M_thinLayerThickness * M_thinLayerLameI ) *
+					dot ( value ( Eye ) , ( grad (phi_j) + (-1) * grad (phi_j) * outerProduct ( Nface, Nface ) ) ) *
+					dot ( value ( Eye ) , ( grad (phi_i) + (-1) * grad (phi_i) * outerProduct ( Nface, Nface ) ) )
+				) >> M_stiffness_no_bc_thin;
+
+		M_stiffness_no_bc_thin->globalAssemble();
+		*M_stiffness_no_bc += *M_stiffness_no_bc_thin;
+	}
 
 	M_stiffness_no_bc->globalAssemble();
 

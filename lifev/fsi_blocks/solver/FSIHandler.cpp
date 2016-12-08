@@ -357,6 +357,16 @@ void FSIHandler::setupStructure ( )
 	if ( M_linearElasticity )
 	{
 		M_structure->setCoefficients(density, young, poisson);
+
+		if ( M_datafile("solid/thin_layer/use_thin", false ) && M_datafile("solid/linear_elasticity", true ) )
+		{
+			M_structure->setCoefficientsThinLayer ( M_datafile("solid/thin_layer/density",0.0),
+										  	  	  	M_datafile("solid/thin_layer/young_thin",0.0),
+										  	  	  	M_datafile("solid/thin_layer/poisson_thin",0.0),
+										  	  	  	M_datafile("solid/thin_layer/h_thin",0.0),
+										  	  	  	M_datafile("interface/flag",0.0) );
+		}
+
 		M_structure->setup(M_structureLocalMesh, dOrder);
 		M_displacementFESpace = M_structure->fespace();
 		M_displacementETFESpace = M_structure->et_fespace();
