@@ -57,40 +57,24 @@ namespace LifeV
 
 typedef boost::shared_ptr<BCHandler> bcPtr_Type;
 
+// Set here the BCs for the fluid
 bcPtr_Type BCh_fluid ()
 {
     BCFunctionBase zero_function (fZero);
-    BCFunctionBase inflow_function (inflow);
+	BCFunctionBase pressure_wave (pressure);
 
     bcPtr_Type bc (new BCHandler );
-
-    // bc->addBC ("Inflow",  	 INLET,      Essential,  	 Full,   inflow_function, 3);
+    bc->addBC ("Inflow",  	 INLET,      Natural,        Normal, pressure_wave);
     bc->addBC ("INOUTEDGE",  INOUTEDGE,  EssentialEdges, Full,   zero_function,   3);
     bc->addBC ("Outflow",    OUTLET,     Natural,        Normal, zero_function);
 
     return bc;
 }
 
-bcPtr_Type BCh_fluid_residual ()
-{
-    BCFunctionBase zero_function (fZero);
-    BCFunctionBase inflow_function (inflow);
-    BCFunctionBase pressure_wave (pressure);
-
-    bcPtr_Type bc (new BCHandler );
-
-    bc->addBC ("Inflow",  	 INLET,      Natural,        Normal, pressure_wave);
-    // bc->addBC ("Inflow",  	 INLET,      Essential,  	 Full,   zero_function, 3);
-    bc->addBC ("INOUTEDGE",  INOUTEDGE,  EssentialEdges, Full,   zero_function, 3);
-    bc->addBC ("Outflow",    OUTLET,     Natural,        Normal, zero_function);
-
-    return bc;
-}
-
+// Set here the BCs for the structure
 bcPtr_Type BCh_structure ()
 {
     BCFunctionBase zero_function (fZero);
-    BCFunctionBase inflow_function (inflow);
 
     bcPtr_Type bc (new BCHandler );
 
@@ -100,54 +84,22 @@ bcPtr_Type BCh_structure ()
     return bc;
 }
 
-bcPtr_Type BCh_structure_residual ()
-{
-    BCFunctionBase zero_function (fZero);
-    
-    bcPtr_Type bc (new BCHandler );
-    
-    bc->addBC ("Inflow",     INLET,  	 Essential,      Full, zero_function, 3);
-    bc->addBC ("Outflow",    OUTLET, 	 Essential,      Full, zero_function, 3);
-    
-    return bc;
-}
-    
+// Set here the BCs for the ale
 bcPtr_Type BCh_ale ()
 {
     BCFunctionBase zero_function (fZero);
 
-    bcPtr_Type bc_ale (new BCHandler );
-
-    bc_ale->addBC ("Inflow",  INLET,     Essential, Full, zero_function, 3);
-    bc_ale->addBC ("Outflow", OUTLET,    Essential, Full, zero_function, 3);
-    bc_ale->addBC ("Gamma",   FLUIDINTERFACE, Essential, Full, zero_function,   3);
-
-    return bc_ale;
-}
-
-bcPtr_Type BCh_ale_residual ()
-{
-    BCFunctionBase zero_function (fZero);
-
-    bcPtr_Type bc_ale_residual (new BCHandler );
-
-    bc_ale_residual->addBC ("Inflow",  INLET,     Essential, Full, zero_function, 3);
-    bc_ale_residual->addBC ("Outflow", OUTLET,    Essential, Full, zero_function, 3);
-
-    return bc_ale_residual;
-}
-
-bcPtr_Type BCh_PCD ()
-{
-    BCFunctionBase zero_function (fZero);
-
     bcPtr_Type bc (new BCHandler );
 
-    bc->addBC ("Outflow", OUTLET, Essential, Full, zero_function, 3);
+    bc->addBC ("Inflow",  INLET,     Essential, Full, zero_function, 3);
+    bc->addBC ("Outflow", OUTLET,    Essential, Full, zero_function, 3);
 
     return bc;
 }
 
+// Whatever problem is solved, this function below need to be present
+// as we use it to apply dirichlet BCs at the fluid interface when
+// using the FaCSI preconditioner
 bcPtr_Type BCh_interfaceFluid ()
 {
     BCFunctionBase zero_function (fZero);
