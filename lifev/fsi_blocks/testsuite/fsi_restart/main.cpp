@@ -66,6 +66,8 @@ main ( int argc, char** argv )
     typedef VectorEpetra vector_Type;
     typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
     
+    Real normTwo_sol;
+
     {
     // ---------------------------//
     // Reading the input datafile //
@@ -167,6 +169,10 @@ main ( int argc, char** argv )
         
     fsi.solveFSIproblem ( );
 
+    normTwo_sol = fsi.getFSIsolution()->norm2();
+
+    std::cout << "\n\n" << std::setprecision(10) << normTwo_sol << "\n\n";
+
     }
 
 #ifdef HAVE_MPI
@@ -176,5 +182,13 @@ main ( int argc, char** argv )
     }
     MPI_Finalize();
 #endif
-    return ( EXIT_SUCCESS );
+
+    if ( std::abs(normTwo_sol - 162041.4417 ) < 1.0e-3 )
+    {
+    	return ( EXIT_SUCCESS );
+    }
+    else
+    {
+    	return ( EXIT_FAILURE );
+    }
 }

@@ -181,7 +181,7 @@ main ( int argc, char** argv )
     MPI_Finalize();
 #endif
 
-    if ( std::abs(normTwo_sol - 162041.4945 ) < 1.0e-3 )
+    if ( std::abs(normTwo_sol - 162041.4417 ) < 1.0e-3 )
     {
     	return ( EXIT_SUCCESS );
     }

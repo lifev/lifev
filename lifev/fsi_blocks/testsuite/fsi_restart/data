@@ -1,85 +1,85 @@
-[offlinePartioner]
-	parts                 = 12
-	readPartitionedMeshes = false
-	fluidPartitionedMesh  = fluido_P2_12.h5
-	solidPartitionedMesh  = solido_P2_12.h5
-	interfacePartitioned  = interface_P2_12.h5
-	
-[../]	
-	
 [fluid]
-
-    use_fast_assembly       = true
-	preconditionerType      = SIMPLE # PCD or SIMPLE
-    use_graph               = false
-
-        [./physics]
-    		density         = 1.0    # density, settings used in the paper
-    		viscosity       = 0.03   # viscosity, settings used in the paper
+		use_fast_assembly  = true     # FE assembly for the fluid: if true it uses the FAST assembly, if false it uses ETA
+	    preconditionerType = SIMPLE 
+     
+    	[./physics]
+    		density         = 1.0    # fluid density
+    		viscosity       = 0.03   # fluid dynamic viscosity
 
     	[../time_discretization]
-    		initialtime     = 0.005
-    		endtime	        = 0.01
-    		timestep	    = 0.001
-    		BDF_order       = 2		 
+    		initialtime     = 0.003
+    		endtime	        = 0.004
+    		timestep        = 0.001
+    		BDF_order       = 2		          # order 1 or 2
 
     	[../space_discretization]
     		mesh_dir        = ./
-    		mesh_file       = tube20.mesh 		  # tube20_rotated.mesh can be used for nonconforming simulation
-    											  # tube20.mesh both for conforming and nonconforming
+    		mesh_file       = tube20.mesh     # tube20_rotated.mesh can be used for nonconforming simulation
+    									      # tube20.mesh both for conforming and nonconforming
     		mesh_type       = .mesh
-    		vel_order       = P2
+    		vel_order       = P1
     		pres_order      = P1
-    		stiff_strain    = false
-
+    		
     	[../stabilization]
-    	    use             = false
-    	    type            = SUPGALE
-    	    vel_order       = 1	
+    	    use             = true
+    	    type            = SUPGALE 
+    	    vel_order       = 1
 
     	[../]
-
+    	
 [../]
 
 [solid]
 
-        linear_elasticity   = true
-        robin_external_wall = false
+        linear_elasticity   = true       # model for the structure: if true linear elasticity (also geometrically linear). If false Neohookean.
+        robin_external_wall = false      # if true a robin BC at the external wall of the structure is used. If false using homogeneous Neumann   
         externalWallFlag    = 10
+        robin_elastic       = 1.0e+8     # coefficient for the robin boundary condition
 
     	[./space_discretization]
     		mesh_dir        = ./
     		mesh_file       = vessel20.mesh
     		mesh_type       = .mesh
-    		order           = P2
+    		order           = P1
 
 	    [../model]
 			constitutiveLaw     = isotropic
-			young     		    = 3.e+6  # Young's modulus, settings used in the paper
-			poisson   		    = 0.3    # Poisson's ratio, settings used in the paper
+			young     		    = 3.e+6  # Young's modulus
+			poisson   		    = 0.3    # Poisson's ratio
 			bulk				= 1e7
 			alpha 			    = 2.5e6
 			gamma			    = 1.0
 			solidTypeIsotropic 	= linearVenantKirchhoff
 
+        [../time_discretization]
+            useBDF          = true      # if true it uses BDF. If false it uses Newmark
+            initialtime     = 0.003
+            endtime	        = 0.004
+            timestep        = 0.001
+            BDF_order       = 2		     # order 1 or 2
+
 		[../physics]
-			density   		    = 1.2    # density, settings used in the paper
-			material_flag       = 1	
-			use_thin  			= false            # if true, using the thin layer structure. If false, not using the thin layer structure.
-		    h_thin    			= 0.02             # thickness thin structure
-		    rho_thin  			= 1.2			   # density thin structure
-		    young_thin          = 3.e+6            # Young's modulus thin layer
-		    poisson_thin        = 0.3              # poisson thin layer
-		    interface 			= 100.0            # flag of the interface
-		    
+			density   		= 1.2    # density of the structure
+			material_flag   = 1	
+    	
+    	[../thin_layer]
+    		use_thin  	    = false    # if true, using the thin layer structure. If false, not using the thin layer structure. Works only with linear structure.
+		    h_thin    		= 0.01     # thickness thin structure
+		    rho_thin  		= 1.2	   # density thin structure
+		    young_thin      = 3.0e+6   # Young's modulus thin layer
+		    poisson_thin    = 0.3      # poisson thin layer            
+    		
     	[../]
 
 [../]
 
 [ale]
 
+	useLinearElasticity = true		# if true the ALE field is discretized by the linear elasticity equations
+									# if false the ALE field is discretized by the harmonic extension
+	
 	[./space_discretization]
-		order			= P2
+		order	= P1        # this has to be the same of the one used for the fluid velocity
 
 	[./]
 
@@ -89,9 +89,8 @@
 	flag        	      =  1       # default: 1, the mesh flag of the interface
 	tolerance             =  0       # how far points are to be considered the same on the interface
 	fluid_vertex_flag     = 20       # tells whether the in/out ring curves on the interface
-	nonconforming         = false     # tells whether the meshes are conformin at the interface (true works just with P1)
+	nonconforming         = false    # tells whether the meshes are conformin at the interface (true works just with P1)
 	lambda_num_structure  = false    # if true the lagrange multip. are numbered wrt the structure, if false wrt to the fluid
-	useMasses             = true     # if true we interpolate the strong stresses, if false we interpolate the weak stresses
 
 [../]
 
@@ -100,8 +99,8 @@
     multimesh  = false
     start      = 0
     save       = 1
-    fluid_filename  = fluid_P2P1_restarted
-    structure_filename  = structure_P2_restarted
+    fluid_filename  = fluid_result_P1P1_restarted
+    structure_filename  = structure_result_P1_restarted
     save_every = 1
 
 [../]
@@ -110,9 +109,9 @@
     restart             = true
     type                = hdf5
     multimesh           = false
-    initSol             = 00005
-    fluid_filename      = fluid_P2P1
-    structure_filename  = structure_P2
+    initSol             = 00003
+    fluid_filename      = fluid_result_P1P1
+    structure_filename  = structure_result_P1
 
 [../]
 
