@@ -1,11 +1,50 @@
 #ifndef LINEARELASTICITY_H
 #define LINEARELASTICITY_H 1
 
+//@HEADER
 /*
- *  author: DAVIDE FORTI, davide.forti@epfl.ch
- *  Lightweighted class to Handle the time advancing scheme (based on Newmark).
- *
+ *******************************************************************************
+
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+
+    This file is part of LifeV.
+
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+ *******************************************************************************
  */
+//@HEADER
+/*!
+   @file
+   @brief Implementation of Linear elastic structural model
+   @author Davide Forti <davide.forti@epfl.ch>
+   @maintainer Antonello Gerbi <antonello.gerbi@epfl.ch>
+   @date 25-05-2016
+
+   This file contains an ETA implementation of a linear elastic structural model. This class
+   temporary as it will disappear when the new structure model will be released.
+
+   This class contains also an implementation of a thin layer structural model which can be
+   used together with the 3D structure to form a multilayered structure. As a reference for applications
+   of such multilayered computational model in the context of fluid-structure interaction, please refer to:
+
+   * D. Forti, M. Bukac,  A. Quaini, S. Čanić,  and S. Deparis, "A Monolithic Approach to Fluid-Composite Structure
+   Interaction" available as NA & SC Preprint Series No. 47 - February, 2016.
+   (http://www.uh.edu/nsm/_docs/math/NASC-preprint-series/2015_2016/Preprint_No16-47.pdf)
+
+*/
 
 #include <lifev/core/LifeV.hpp>
 
@@ -51,28 +90,78 @@ class LinearElasticity
 
 public:
 
-    // empty constructor
+    // Constructor
+    /*!
+     *  @param communicator Epetra communicator
+     */
     LinearElasticity( const commPtr_Type& communicator );
 
     // empty destructor
     ~LinearElasticity();
 
+    //! Set the physical parameters of the structure
+    /*!
+     *  @param density Density of the structure
+     *  @param young Young modulus of the structure
+     *  @param poisson Poisson ratio of the structure
+     */
     void setCoefficients ( const Real density, const Real young, const Real poisson);
 
+    //! Set the physical parameters of the thin layered structure
+    /*!
+     *  @param density Density of the thin layered structure
+     *  @param young Young modulus of the thin layered structure
+     *  @param poisson Poisson ratio of the thin layered structure
+     *  @param thickness Thickness of the thin layered structure
+     *  @param interface Flag of the thin layered structure
+     */
     void setCoefficientsThinLayer ( const Real density, const Real young, const Real poisson, const Real thickness, const UInt interface );
 
+    //! Setup: build the FE space and the ETA fespace
+    /*!
+     *  @param mesh Computational mesh
+     *  @param dOrder Degree of the finite element used
+     */
     void setup( const meshPtr_Type& mesh, const std::string dOrder );
 
+    //! Assembling matrices (mass and stiffness) which for this model are constant in a time dependent simulation
+    /*!
+     *  @param timestep Value of the time step used
+     *  @param bc Boundary conditions
+     *  @param useBDF Boolean variable which specifies if BDF is used for the structure. By default it is false (therefore, Newmark is used).
+     */
     void assemble_matrices ( const Real timestep, const Real beta, bcPtr_Type & bc, bool useBDF = false );
 
+    //! Getter of the mass matrix whithout boundary conditions applied
+    /*!
+     *  @return M_mass_no_bc mass matrix whithout boundary conditions applied
+     */
     matrixPtr_Type const& mass_matrix_no_bc ( ) const { return M_mass_no_bc; };
 
+    //! Getter of the stiffness matrix whithout boundary conditions applied
+    /*!
+     *  @return M_stiffness_no_bc stiffness matrix whithout boundary conditions applied
+     */
     matrixPtr_Type const& stiffness_matrix_no_bc ( ) const { return M_stiffness_no_bc; };
 
+    //! Getter of the Jacobian matrix
+    /*!
+     *  @return M_jacobian stiffness matrix
+     */
     matrixPtr_Type const& jacobian ( ) const { return M_jacobian; };
 
+    //! Getter of the standard FE space
+    /*!
+     *  @return M_displacementFESpace FE space used for the displacement
+     *
+     */
     const boost::shared_ptr<FESpace<mesh_Type, map_Type> >& fespace ( ) const { return M_displacementFESpace; };
 
+    //! Getter of the ETA FE space
+    /*!
+     *  @return M_displacementFESpace_ETA ETA FE space used for the displacement
+     *
+     */
     const boost::shared_ptr<ETFESpace_displacement >& et_fespace ( ) const { return M_displacementFESpace_ETA; };
 
 private:
