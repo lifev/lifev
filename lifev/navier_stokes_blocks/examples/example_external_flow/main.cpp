@@ -152,9 +152,6 @@ main ( int argc, char** argv )
     exporter->addVariable ( ExporterData<mesh_Type>::VectorField, "velocity", ns.uFESpace(), velocity, UInt (0) );
     exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "pressure", ns.pFESpace(), pressure, UInt (0) );
 
-    if ( dataFile ( "fluid/stabilization/ode_fine_scale", false) )
-        	ns.setExportFineScaleVelocity(*exporter, numElementsTotal);
-
     exporter->postProcess ( t0 );
 
     // Boundary conditions
@@ -171,9 +168,6 @@ main ( int argc, char** argv )
     vectorPtr_Type u_star( new vector_Type(ns.uFESpace()->map(), Unique ) );
     vectorPtr_Type p_star( new vector_Type(ns.pFESpace()->map(), Unique ) );
     vectorPtr_Type rhs_velocity( new vector_Type(ns.uFESpace()->map(), Unique ) );
-    
-    if ( useStabilization && stabilizationType.compare("VMSLES_SEMI_IMPLICIT")==0 )
-        vectorPtr_Type p_star( new vector_Type(ns.pFESpace()->map(), Unique ) );
         
     ns.setAlpha(timeVelocity.alpha());
     ns.setTimeStep(dt);
