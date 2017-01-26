@@ -13,24 +13,24 @@
 ###################################################################################################
 
 [test]
-    num_parts = 128
-    fluid_hdf5_file_name = challenge_fluid_P2_128.h5
-    solid_hdf5_file_name = challenge_solid_P2_128.h5
-    interface_hdf5_file_name = challenge_interface_P2_128.h5
-    fluidVertexFlag = 19
+    num_parts = 4
+    fluid_hdf5_file_name = fluid_P1_4parts.h5
+    solid_hdf5_file_name = solid_P1_4parts.h5
+    interface_hdf5_file_name = interface_P1_4parts.h5
+    fluidVertexFlag = 20
 
 [fluid_mesh]
     mesh_dir       = ./
-    mesh_file      = FSI_benchmark_fluid.mesh
+    mesh_file      = tube20.mesh
     mesh_type      = .mesh
     verbose        = false
-    order   	   = P2
-    interface_flag = 200
+    order   	   = P1
+    interface_flag = 1
     
 [solid_mesh]
     mesh_dir       = ./
-    mesh_file      = FSI_benchmark_solid.mesh
+    mesh_file      = vessel20.mesh
     mesh_type      = .mesh
     verbose        = false
-    order          = P2
-    interface_flag = 200
+    order          = P1
+    interface_flag = 1
