@@ -26,7 +26,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 /*!
 @file
-@brief Settings - File handling the solution of the FSI problem
+@brief Settings - File which handles the coupling blocks of fluid and solid variables 
+ at the fluid-structure interface when conforming discretizations are used.
 
 @author Davide Forti <davide.forti@epfl.ch>
 @date 28-10-2014
@@ -53,7 +54,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 namespace LifeV
 {
 
-//! FSIcouplingCE - File handling the coupling when using the monolithic CE time-discretization
+//! FSIcouplingCE - File handling the coupling blocks when conforming discretizations are used.
 /*!
 *  @author Davide Forti
 */
@@ -87,16 +88,51 @@ public:
     //! Destructor
     ~FSIcouplingCE();
 
+    //! @name Methods
+    //@{
+    
+    //! Builds the coupling blocks
+    /*!
+     \param locDofMap map with dofs at the fluid-structure interface
+     \param lambda_num_structure if true the DOFs at the interface are numbered wrt the solid mesh
+     \param useBDF if true supposes that for the structure a BDF scheme is used
+     */
     void buildBlocks ( std::map<ID, ID> const& locDofMap, const bool& lambda_num_structure, bool useBDF = false );
 
+    //! Set parameters. To be used when Newmark is used on the structure.
+    /*!
+     \param timeStep value of the timestep used
+     \param interfaceDofs number of interface dofs
+     \param beta beta coefficient Newmark scheme
+     \param gamma gamma coefficient Newmark scheme
+     \param interfaceMap map interface dofs
+     \param fluidVelocityFESpace FE space fluid velocity
+     \param structureDisplacementFESpace FE space solid displacement
+     \param numerationInterface vector with global numeration of dofs at the interface
+     */
     void setUp ( const Real& timeStep, const Real& interfaceDofs, const Real& beta, const Real& gamma,
     			 const mapPtr_Type& interfaceMap, const FESpacePtr_Type& fluidVelocityFESpace,
     			 const FESpacePtr_Type& structureDisplacementFESpace, const vectorPtr_Type& numerationInterface );
 
+    //! Set parameters. To be used when Newmark is used on the structure.
+    /*!
+     \param timeStep value of the timestep used
+     \param interfaceDofs number of interface dofs
+     \param coefficientBDF coefficient BDF scheme for first derivative structure
+     \param interfaceMap map interface dofs
+     \param fluidVelocityFESpace FE space fluid velocity
+     \param structureDisplacementFESpace FE space solid displacement
+     \param numerationInterface vector with global numeration of dofs at the interface
+     */
     void setUp ( const Real& timeStep, const Real& interfaceDofs, const Real& coefficientBDF,
     		     const mapPtr_Type& interfaceMap, const FESpacePtr_Type& fluidVelocityFESpace,
     		     const FESpacePtr_Type& structureDisplacementFESpace, const vectorPtr_Type& numerationInterface );
 
+    //@}
+    
+    //! @name Get Methods
+    //@{
+    
     matrixPtr_Type lambdaToFluidMomentum() const
     {
     	return M_lambdaToFluidMomentum;
@@ -122,7 +158,7 @@ public:
     	return M_structureDisplacementToFluidDisplacement;
     }
 
-//@}
+    //@}
 
 private:
 
@@ -131,8 +167,8 @@ private:
 
     matrixPtr_Type M_lambdaToFluidMomentum;
     matrixPtr_Type M_lambdaToStructureMomentum;
-    matrixPtr_Type M_fluidVelocityToLambda; // I need to test if it faster to assemble or to transpose M_lambdaToFluidVelocity
-    matrixPtr_Type M_structureDisplacementToLambda; // I need to test if it faster to assemble or to transpose M_lambdaToStructureDisplacement
+    matrixPtr_Type M_fluidVelocityToLambda;
+    matrixPtr_Type M_structureDisplacementToLambda;
     matrixPtr_Type M_structureDisplacementToFluidDisplacement;
 
     FESpacePtr_Type M_fluidVelocityFESpace;

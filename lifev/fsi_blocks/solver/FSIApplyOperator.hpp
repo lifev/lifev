@@ -22,7 +22,7 @@ namespace LifeV
 
 namespace Operators
 {
-//! @class NavierStokesOperator
+//! @class FSIApplyOperator
 /*! @brief A abstract class for handling n-by-m block operators
  * This class inherits from LifeV::LinearOperator.
  *

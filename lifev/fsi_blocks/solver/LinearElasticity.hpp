@@ -41,7 +41,7 @@
    of such multilayered computational model in the context of fluid-structure interaction, please refer to:
 
    * D. Forti, M. Bukac,  A. Quaini, S. Čanić,  and S. Deparis, "A Monolithic Approach to Fluid-Composite Structure
-   Interaction" available as NA & SC Preprint Series No. 47 - February, 2016.
+   Interaction" available as NA & SC Preprint Series No. 47 - February, 2016. Accepted in JSC.
    (http://www.uh.edu/nsm/_docs/math/NASC-preprint-series/2015_2016/Preprint_No16-47.pdf)
 
 */

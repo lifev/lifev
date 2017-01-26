@@ -26,12 +26,38 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 /*!
 @file
-@brief Settings - File handling the solution of the FSI problem
+@brief FSIHandler - File handling the solution of the FSI problem
 
 @author Davide Forti <davide.forti@epfl.ch>
 @date 28-10-2014
 
-@maintainer Simone Deparis <simone.deparis@epfl.ch>
+@maintainer Antonello Gerbi <antonello.gerbi@epfl.ch>
+ 
+ This class implements a monolithic fully-implicit FSI solver. This solver features:
+ - ALE treatment of the moving fluid domain
+ - Linear/Nonlinear solid models can be used
+ - Conforming/Nonconforming discretizations can be used
+ - For the solid time discretizations one may use BDF of Newmark schemes
+ - FaCSI preconitioner
+ - In the fluid problem, if one chooses P1-P1 FE, a SUPG stabilization stemming from VMS approach can be used.
+ - Mesh motion algorithms based on harmonic extensions or linear elasticity.
+ - Multilayered structural model: a thin layer is considered underneath the thick 3D one. The thin layer is modeled 
+ by a membrane model.
+ 
+ In the testsuite folder, several examples which show how to properly use the solver are present.
+ 
+ If you are using this solver to generate results for publication, please <b>cite</b>:
+ - S. Deparis, D. Forti, G. Grandperrin, A. Quarteroni. <i> FaCSI: a block parallel preconditioner for fluid
+ structure interaction in hemodynamics</i>. JCP (327), 700-718, 2016.
+ - D. Forti, L. Dede'. <i> Semi-implicit BDF time discretization of the Navier–Stokes equations with VMS-LES modeling in a High Performance 
+ Computing framework</i>. Comput. Fluids. 197(1):168-182.
+ - S. Deparis, D. Forti, A. Quarteroni. <i> A fluid-structure interaction algorithm using radial basis function interpolation between non
+ conforming interfaces</i>. In Y. Bazilevs, K. Takizawa (eds.) Advances in Computational Fluid-Structure, Modeling and Simulation in Science,
+ Engineering and Technology. Birkhäuser Basel, 2016.
+ - S. Deparis, D. Forti, P. Gervasio, and A. Quarteroni. <i>INTERNODES: an accurate interpolation-based method for coupling the Galerkin 
+ solutions of PDEs on subdomains featuring non-conforming interfaces</i>. Comput. Fluids. 2016
+ - D. Forti, M. Bukac, A. Quaini, S. Canic, S. Deparis. A monolithic approach to solving fluid-structure interaction between multilayered
+ structures and incompressible, viscous fluids. Accepted in JSC, 2017.
 */
 
 
@@ -156,121 +182,214 @@ public:
     //! Destructor
     ~FSIHandler();
 
+    //! Set the datafile.
+    /*!
+     @param dataFile
+     */
     void setDatafile(const GetPot& dataFile);
 
+    //! Read the fluid and solid meshes.
     void readMeshes( );
 
+    //! Partitioning the fluid and solid meshes.
     void partitionMeshes ( );
 
+    //! Read fluid and solid meshes that have been already partitioned offline
     void readPartitionedMeshes( );
 
+    //! Setup the solver
     void setup ( );
 
+    //! Set the boundary conditions
+    /*!
+     @param fluidBC boundary conditions fluid problem
+     @param structureBC boundary conditions solid problem
+     @param aleBC boundary conditions ALE problem
+     */
     void setBoundaryConditions ( const bcPtr_Type& fluidBC, const bcPtr_Type& structureBC, const bcPtr_Type& aleBC );
 
+    //! Set the boundary conditions
+    /*!
+     @param interfaceFluidBC set dirichlet BC at the fluid interface for prec.
+     */
     void setFluidInterfaceBoundaryConditions ( const bcPtr_Type& interfaceFluidBC ) { M_interfaceFluidBC = interfaceFluidBC; };
 
-    // update all the bc handlers
+    //! Update all the bc handlers
     void updateBoundaryConditions( );
 
+    //! Update the time advancing schemes
     void initializeTimeAdvance ( );
 
+    //! Build the interface map
     void buildInterfaceMaps ( );
 
+    //! Assemble the coupling blocks
     void assembleCoupling ( );
 
+    //! Solves the time loop of the FSI problem
     void solveFSIproblem();
 
+    //! Form the residual of the FSI problem
+    /*!
+     @param residual residual of the FSI problem
+     @param solution current solution of FSI at certain Newton iteration
+     @param iter_newton iteration Newton
+     */
     void evalResidual(vector_Type& residual, const vector_Type& solution, const UInt iter_newton);
 
+    //! Solves J_{FSI} \delta = - R
+    /*!
+     @param increment increment computed by Newton
+     @param residual Rhs linear problem, residual FSI
+     @param linearRelTol tolerance linear solver
+     */
     void solveJac( vector_Type& increment, const vector_Type& residual, const Real linearRelTol );
 
+    //! Set the parameter list of the problem
     void setParameterLists( );
 
+    //! Set gravity, if considered
+    /*!
+     @param gravity value of the gravity
+     @param gravity_direction 0 if x, 1 for y, 2 for z
+    */
     void setGravity ( const Real& gravity, const Real& gravity_direction);
 
+    //! Get the current time
     Real getTime () { return M_time; };
 
+    //! Get initial time
     Real getStartTime () { return M_t_zero; };
 
+    //! Set the current time
     void setTime (const Real& time ) { M_time = time; };
 
+    //! Get the time step size
     Real getTimeStep () { return M_dt; };
 
+    //! Get the end time
     Real getEndTime () { return M_t_end; };
 
+    //! Get the fluid solver
     boost::shared_ptr<NavierStokesSolverBlocks> getFluid() { return M_fluid; };
 
+    //! Method to be used before solveTimeStep. If one does not use
+    // the solveFSIproblem() method, the following methods have to called:
+    // intializeTimeLoop, solveTimeStep, postprocessResults and finalizeExporters.
     void intializeTimeLoop ( );
 
+    //! Solve one time step.
     void solveTimeStep( );
 
+    //! Save the results for post-processing.
+    /*!
+     @param time_step_count index of the time step
+     */
     void postprocessResults( const int& time_step_count );
 
+    //! Close the exporters
     void finalizeExporters ( );
-
+    
+    //! Get the fluid velocity
     vectorPtr_Type getFluidVelocity() { return M_fluidVelocity; };
 
+    //! Get the fluid pressure
     vectorPtr_Type getFluidPressure() { return M_fluidPressure; };
 
+    //! Get the FSI solution
     vectorPtr_Type getFSIsolution() { return M_solution; };
 
 //@}
 
 private:
 
+    //! Moves the fluid mesh
+    /*!
+     @param displacement displacement fluid mesh
+     */
     void moveMesh ( const VectorEpetra& displacement );
 
+    //! Build the monolithic map
     void buildMonolithicMap ( );
 
+    //! Setup solid sub-problem
     void setupStructure ( );
 
+    //! Create ALE FE spaces
     void createAleFESpace();
 
-    // update the bc handler
+    //! Update the bc handler
     void updateBCHandler( bcPtr_Type & bc );
 
+    //! Build std map with local to global indexes dofs interface
     void createInterfaceMaps ( std::map<ID, ID> const& locDofMap );
 
+    //! Build epetra map dofs at the interface
     void constructInterfaceMap ( const std::map<ID, ID>& locDofMap, const UInt subdomainMaxId);
 
+    //! Setup the exporters of fluid and solid
     void setupExporters( );
 
+    //! Instantiate exporter
+    /*!
+     @param exporter exporter
+     @param localMesh mesh
+     @param outputFileName filename output file
+     */
     void instantiateExporter( boost::shared_ptr< Exporter<mesh_Type > > & exporter,
 			  	  	  	  	  const meshPtr_Type& localMesh,
 			  	  	  	  	  const std::string& outputFileName );
-
+    
+    //! Updates term due to coupling of velocities
     void updateSystem ( );
 
-    void initializeApplyOperatorResidual ( );
-
+    //! Operator apply for the Jacobian in the onforming case
     void initializeApplyOperatorJacobian ( );
 
+    //! Get Jacobian matrix structure problem
     void getMatrixStructure ( );
 
+    //! Get vector coupling velocities at interface
     void get_structure_coupling_velocities ( );
 
+    //! Apply BCs solid problem
     void applyBCstructure ( );
 
+    //! Apply BCs solution FSI problem
     void applyBCsolution(vectorPtr_Type& M_solution);
 
+    //! Apply BCs residual FSI problem
+    /*!
+     @param r_u residual momentum fluid
+     @param r_ds residual momentum solid
+     @param r_df residual ALE
+     */
     void applyBCresidual(VectorEpetra& r_u, VectorEpetra& r_ds, VectorEpetra& r_df);
 
+    //! Set options linear solver
     void setSolversOptions(const Teuchos::ParameterList& solversOptions);
 
+    //! Update coupling velocity vector in the conforming case
     void updateRhsCouplingVelocities ( );
 
+    //! Update coupling velocity vector in the nonconforming case
     void updateRhsCouplingVelocities_nonconforming ( );
 
+    //! Extract interface dofs from vector defined on the whole domain
     void structureToInterface (vector_Type& VectorOnGamma, const vector_Type& VectorOnStructure);
 
+    //! Initialize extrapolation for initial guess Newton
     void initializeExtrapolation( );
 
+    //! Assemble interface mass structure at the interface
     void assembleStructureInterfaceMass ( );
 
+    //! Apply inverse of interface mass matrix fluid
+    /*!
+     @param lambda residual weak form
+     @param strongLambda residual strong form
+    */
     void applyInverseFluidMassOnGamma ( const vectorPtr_Type& lambda, vectorPtr_Type& strongLambda );
-
-    void solveFSIproblemAorta();
 
     //! communicator
     commPtr_Type M_comm;

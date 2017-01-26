@@ -2549,38 +2549,6 @@ FSIHandler::updateSystem ( )
 }
 
 void
-FSIHandler::initializeApplyOperatorResidual ( )
-{
-//	Operators::FSIApplyOperator::operatorPtrContainer_Type operDataResidual(5,5);
-//
-//	matrixPtr_Type block00 ( new matrix_Type( M_fluid->uFESpace()->map() ) );
-//	block00->zero(); // put to zero since the fluid part of the residual is assembled directly
-//	block00->globalAssemble();
-//
-//	matrixPtr_Type block10 ( new matrix_Type( M_fluid->pFESpace()->map() ) );
-//	block10->zero(); // put to zero since the fluid part of the residual is assembled directly
-//	block10->globalAssemble( M_fluid->uFESpace()->mapPtr(), M_fluid->pFESpace()->mapPtr() );
-//
-//	matrixPtr_Type block01 ( new matrix_Type( M_fluid->uFESpace()->map() ) );
-//	block01->zero(); // put to zero since the fluid part of the residual is assembled directly
-//	block01->globalAssemble( M_fluid->pFESpace()->mapPtr(), M_fluid->uFESpace()->mapPtr() );
-//
-//	operDataResidual(0,0) = block00->matrixPtr(); // empty block
-//	operDataResidual(0,1) = block01->matrixPtr(); // empty block
-//	operDataResidual(1,0) = block10->matrixPtr(); // empty block
-//	operDataResidual(0,3) = M_coupling->lambdaToFluidMomentum()->matrixPtr();
-//	operDataResidual(2,2) = M_matrixStructure->matrixPtr();
-//	operDataResidual(2,3) = M_coupling->lambdaToStructureMomentum()->matrixPtr();
-//	operDataResidual(3,0) = M_coupling->fluidVelocityToLambda()->matrixPtr();
-//	operDataResidual(3,2) = M_coupling->structureDisplacementToLambda()->matrixPtr();
-//	operDataResidual(4,2) = M_coupling->structureDisplacementToFluidDisplacement()->matrixPtr();
-//	operDataResidual(4,4) = M_ale->matrix()->matrixPtr();
-//
-//	M_applyOperatorResidual->setUp(operDataResidual, M_comm);
-
-}
-
-void
 FSIHandler::initializeApplyOperatorJacobian ( )
 {
 	Operators::FSIApplyOperator::operatorPtrContainer_Type operDataJacobian(5,5);

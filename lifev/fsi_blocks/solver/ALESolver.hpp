@@ -26,14 +26,17 @@
 /*!
     @file
     @brief Classes to hold algorithms for the mesh motion, for instance, involved in a ALE formulation.
+    @author D. Forti
     @author G. Fourestey
     @date 01-10-2007
 
     @contributor Simone Deparis <simone.deparis@epfl.ch>
+    @contributor Davide Forti <davide.forti@epfl.ch>
     @maintainer Simone Deparis <simone.deparis@epfl.ch>
 
     This file contains classes which may be used to compute the extension inside the reference domain of a given
-    displacement at a specified interface
+    displacement at a specified interface. The techniques implemented are the harmonic extension and the 
+    equations of lineary elasticity.
 
 */
 
