@@ -379,7 +379,7 @@ public:
      */
     Real const& laplacian (const UInt& i, const UInt& q) const
     {
-    	ASSERT ( M_isDphiUpdated, "Derivative of the basis functions have not been updated");
+    	ASSERT ( M_isLaplacianUpdated, "Laplacian of the basis functions have not been updated");
     	ASSERT ( i < M_nbFEDof, "No basis function with this index");
     	ASSERT ( q < M_nbQuadPt, "No quadrature point with this index");
     	return M_laplacian[q][i];
