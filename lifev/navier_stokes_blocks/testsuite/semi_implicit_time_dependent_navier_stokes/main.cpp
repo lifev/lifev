@@ -84,7 +84,6 @@ main ( int argc, char** argv )
     MeshData meshData;
     meshData.setup (dataFile, "fluid/space_discretization");
     readMesh (*fullMeshPtr, meshData);
-    int numElementsTotal = fullMeshPtr->numElements();
 
     // mesh partitioner
     MeshPartitioner< mesh_Type >  meshPart (fullMeshPtr, Comm);

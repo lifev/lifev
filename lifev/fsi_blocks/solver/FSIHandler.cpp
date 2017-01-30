@@ -619,7 +619,6 @@ void FSIHandler::initializeTimeAdvance ( )
     			M_importerStructure->readVariable (structureReader);
 
     			int iterations = std::atoi (iterationString.c_str() );
-    			Real iterationsReal = iterations;
 
     			if ( iterInit == 0 )
     			{
@@ -748,7 +747,6 @@ void FSIHandler::initializeTimeAdvance ( )
     			M_importerStructure->readVariable (structureAccelerationReader);
 
     			int iterations = std::atoi (iterationString.c_str() );
-    			Real iterationsReal = iterations;
 
     			if ( iterInit == 0 )
     			{
