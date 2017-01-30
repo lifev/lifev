@@ -358,13 +358,15 @@ Structure::run3d()
     meshData.setup (dataFile, "solid/space_discretization");
 
     boost::shared_ptr<mesh_Type > fullMeshPtr (new RegionMesh<LinearTetra> ( ( parameters->comm ) ) );
+    boost::shared_ptr<mesh_Type > localMeshPtr (new RegionMesh<LinearTetra> ( ( parameters->comm ) ) );
     readMesh (*fullMeshPtr, meshData);
 
     MeshPartitioner< mesh_Type > meshPart ( fullMeshPtr, parameters->comm );
+    localMeshPtr = meshPart.meshPartition();
 
     //! Functional spaces - needed for the computations of the gradients
     std::string dOrder =  dataFile ( "solid/space_discretization/order", "P1");
-    solidFESpacePtr_Type dFESpace ( new solidFESpace_Type (meshPart, dOrder, 3, parameters->comm) );
+    solidFESpacePtr_Type dFESpace ( new solidFESpace_Type (localMeshPtr, dOrder, 3, parameters->comm) );
     solidETFESpacePtr_Type dETFESpace ( new solidETFESpace_Type (meshPart, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
 
 
@@ -582,7 +584,7 @@ Structure::run3d()
         if( !dataStructure->solidTypeIsotropic().compare("exponential") )
         {
             /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
-            LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, solid->dFESpacePtr(), solidDisp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+            LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, dFESpace, solidDisp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
             //Read the variable
             M_importer->readVariable (solutionDispl);

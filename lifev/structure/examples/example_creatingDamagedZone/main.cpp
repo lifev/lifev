@@ -328,6 +328,7 @@ Structure::run3d()
     meshData.setup (dataFile, "solid/space_discretization");
 
     boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr (new RegionMesh<LinearTetra> ( ( parameters->comm ) ) );
+    boost::shared_ptr<RegionMesh<LinearTetra> > localMeshPtr (new RegionMesh<LinearTetra> ( ( parameters->comm ) ) );
     readMesh (*fullMeshPtr, meshData);
 
     //fullMeshPtr->showMe( );
@@ -363,9 +364,10 @@ Structure::run3d()
 
     // Exporting the mesh to check region with changed flag
     MeshPartitioner< mesh_Type > meshPart ( fullMeshPtr, parameters->comm );
+    localMeshPtr = meshPart.meshPartition();
 
     std::string dOrder =  dataFile ( "solid/space_discretization/order", "P1");
-    solidFESpacePtr_Type dFESpace ( new solidFESpace_Type (meshPart, dOrder, 3, parameters->comm) );
+    solidFESpacePtr_Type dFESpace ( new solidFESpace_Type (localMeshPtr, dOrder, 3, parameters->comm) );
     solidETFESpacePtr_Type dETFESpace ( new solidETFESpace_Type (meshPart, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
 
     //! 1. Constructor of the class to compute the tensions
