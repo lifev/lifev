@@ -395,14 +395,14 @@ int main ( int argc, char** argv )
 
     BCFunctionBase ZeroBC ( zeroFunction );
 
-    bcHandler.addBC( "Back",   BACK,   Essential, Scalar, ZeroBC, 1 );
-    bcHandler.addBC( "Left",   LEFT,   Essential, Scalar, ZeroBC, 1 );
-    bcHandler.addBC( "Top",    TOP,    Essential, Scalar, ZeroBC, 1 );
+    bcHandler.addBC( "Back",   BACK,   Essential, Full, ZeroBC, 1 );
+    bcHandler.addBC( "Left",   LEFT,   Essential, Full, ZeroBC, 1 );
+    bcHandler.addBC( "Top",    TOP,    Essential, Full, ZeroBC, 1 );
 
 
-    bcHandler.addBC( "Front",  FRONT,  Essential, Scalar, ZeroBC, 1 );
-    bcHandler.addBC( "Right",  RIGHT,  Essential, Scalar, ZeroBC, 1 );
-    bcHandler.addBC( "Bottom", BOTTOM, Essential, Scalar, ZeroBC, 1 );
+    bcHandler.addBC( "Front",  FRONT,  Essential, Full, ZeroBC, 1 );
+    bcHandler.addBC( "Right",  RIGHT,  Essential, Full, ZeroBC, 1 );
+    bcHandler.addBC( "Bottom", BOTTOM, Essential, Full, ZeroBC, 1 );
 
     bcHandler.bcUpdate( *uFESpace->mesh(), uFESpace->feBd(), uFESpace->dof() );
 
@@ -555,6 +555,7 @@ int main ( int argc, char** argv )
     standardSystemMatrix4->globalAssemble();
     systemMatrixTotal->globalAssemble();
 
+    /*
     standardSystemMatrix1->spy("matrixClassic1" + convertNumProc.str()  );
     standardSystemMatrix2->spy("matrixClassic2" + convertNumProc.str() );
     standardSystemMatrix3->spy("matrixClassic3" + convertNumProc.str()  );
@@ -566,6 +567,7 @@ int main ( int argc, char** argv )
 
     systemMatrixTotal->spy("matrixClassicFull" + convertNumProc.str() );
     matrixMeshSubFull->spy("matrixMeshSubFull" + convertNumProc.str() );
+	*/
 
     solutionLap->zero();
 
