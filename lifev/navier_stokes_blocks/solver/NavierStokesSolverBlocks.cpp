@@ -1585,6 +1585,7 @@ void NavierStokesSolverBlocks::applyBoundaryConditionsJacobian ( bcPtr_Type & bc
 {
 	bcManageMatrix( *M_block00, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 1.0, 0.0);
 	bcManageMatrix( *M_block01, *M_velocityFESpace->mesh(), M_velocityFESpace->dof(), *bc, M_velocityFESpace->feBd(), 0.0, 0.0);
+	M_block01->globalAssemble(M_pressureFESpace->mapPtr(), M_velocityFESpace->mapPtr());
 }
 
 void NavierStokesSolverBlocks::preprocessBoundary(const Real& nx, const Real& ny, const Real& nz, BCHandler& bc, Real& Q_hat, const vectorPtr_Type& Phi_h, const UInt flag,
