@@ -257,6 +257,8 @@ int main ( int argc, char** argv )
 
     // Partition the mesh
     MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
+    boost::shared_ptr < mesh_Type > localMeshPtr (new mesh_Type);
+    localMeshPtr = meshPart.meshPartition();
 
     // Free the global mesh
     fullMeshPtr.reset();
@@ -268,7 +270,7 @@ int main ( int argc, char** argv )
 
     std::string uOrder ("P1");
 
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uFESpace ( new FESpace< mesh_Type, MapEpetra > (meshPart, uOrder, 1, Comm) );
+    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uFESpace ( new FESpace< mesh_Type, MapEpetra > (localMeshPtr, uOrder, 1, Comm) );
     if (verbose)
     {
         std::cout << std::endl << " ### Dof Summary ###: " <<  std::endl;
@@ -283,7 +285,7 @@ int main ( int argc, char** argv )
         std::cout << " Building EA FESpaces  " << std::endl;
     }
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > ETuFESpace ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPart, & (uFESpace->refFE() ), Comm) );
+    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > ETuFESpace ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (localMeshPtr, & (uFESpace->refFE() ), Comm) );
 
     vectorPtr_Type uSolution ( new vector_Type ( ETuFESpace->map() , Unique) );
 

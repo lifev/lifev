@@ -579,6 +579,7 @@ int main ( int argc, char** argv )
     MeshData dataMesh;
     dataMesh.setup (dataFile, "mesh");
     boost::shared_ptr < mesh_Type > fullMeshPtr (new mesh_Type);
+    boost::shared_ptr < mesh_Type > localMeshPtr (new mesh_Type);
     if (verbose)
     {
         std::cout << "Hello " << exactVolume << std::endl;
@@ -601,6 +602,7 @@ int main ( int argc, char** argv )
 
     // Partition the mesh
     MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
+    localMeshPtr = meshPart.meshPartition();
 
     // Free the global mesh
     fullMeshPtr.reset();
@@ -617,9 +619,9 @@ int main ( int argc, char** argv )
     std::string pOrder ("P1");
     std::string lsOrder ("P1");
 
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uFESpace ( new FESpace< mesh_Type, MapEpetra > (meshPart, uOrder, 3, Comm) );
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > pFESpace ( new FESpace< mesh_Type, MapEpetra > (meshPart, pOrder, 1, Comm) );
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > lsFESpace ( new FESpace< mesh_Type, MapEpetra > (meshPart, lsOrder, 1, Comm) );
+    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uFESpace ( new FESpace< mesh_Type, MapEpetra > (localMeshPtr, uOrder, 3, Comm) );
+    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > pFESpace ( new FESpace< mesh_Type, MapEpetra > (localMeshPtr, pOrder, 1, Comm) );
+    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > lsFESpace ( new FESpace< mesh_Type, MapEpetra > (localMeshPtr, lsOrder, 1, Comm) );
 
     if (verbose)
     {
@@ -700,7 +702,6 @@ int main ( int argc, char** argv )
     HJSolver.setCommunicator (Comm);
     HJSolver.setDataFromGetPot (dataFile, "solver");
     HJSolver.setupPreconditioner (dataFile, "prec");
-
 
     if (verbose)
     {
@@ -1273,8 +1274,8 @@ int main ( int argc, char** argv )
 
         NSSolver.setMatrix (*NSMatrix);
 
-        boost::shared_ptr<matrix_type> NSMatrixNoBlock (new matrix_type ( NSMatrix->matrixPtr() ) );
-
+        boost::shared_ptr<matrix_type> NSMatrixNoBlock (new matrix_type ( NSMatrix->map() ) );
+        *NSMatrixNoBlock += *NSMatrix;
         NSSolver.solveSystem (NSRhsUnique, NSSolution, NSMatrixNoBlock);
 
 
