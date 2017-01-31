@@ -54,13 +54,13 @@ main ( int argc, char** argv )
     bool verbose (false);
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
     if ( Comm->MyPID() == 0 )
     {
         verbose = true;
     }
 #else
-    boost::shared_ptr<Epetra_Comm> Comm( new Epetra_SerialComm () );
+    std::shared_ptr<Epetra_Comm> Comm( new Epetra_SerialComm () );
     verbose = true;
 #endif
 
@@ -71,7 +71,7 @@ main ( int argc, char** argv )
 
     typedef RegionMesh<LinearTetra> mesh_Type;
     typedef VectorEpetra vector_Type;
-    typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type> vectorPtr_Type;
 
     // Reading the dataFile
     const std::string defaultDataName = "data";
@@ -80,14 +80,14 @@ main ( int argc, char** argv )
     GetPot dataFile( data_file_name );
 
     // reading the mesh
-    boost::shared_ptr<mesh_Type > fullMeshPtr ( new mesh_Type ( Comm ) );
+    std::shared_ptr<mesh_Type > fullMeshPtr ( new mesh_Type ( Comm ) );
     MeshData meshData;
     meshData.setup (dataFile, "fluid/space_discretization");
     readMesh (*fullMeshPtr, meshData);
 
     // mesh partitioner
     MeshPartitioner< mesh_Type >  meshPart (fullMeshPtr, Comm);
-    boost::shared_ptr<mesh_Type > localMeshPtr ( new mesh_Type ( Comm ) );
+    std::shared_ptr<mesh_Type > localMeshPtr ( new mesh_Type ( Comm ) );
     localMeshPtr = meshPart.meshPartition();
     fullMeshPtr.reset();
 
@@ -139,7 +139,7 @@ main ( int argc, char** argv )
         
     // Exporter
     std::string outputName = dataFile ( "exporter/filename", "result");
-    boost::shared_ptr< ExporterHDF5<mesh_Type > > exporter;
+    std::shared_ptr< ExporterHDF5<mesh_Type > > exporter;
     exporter.reset ( new ExporterHDF5<mesh_Type > ( dataFile, outputName ) );
     exporter->setPostDir ( "./" );
     exporter->setMeshProcId ( localMeshPtr, Comm->MyPID() );
@@ -151,7 +151,7 @@ main ( int argc, char** argv )
     exporter->postProcess ( t0 );
 
     // Boundary conditions
-    boost::shared_ptr<BCHandler> bc ( new BCHandler (*BCh_fluid ()) );
+    std::shared_ptr<BCHandler> bc ( new BCHandler (*BCh_fluid ()) );
 
     std::string preconditioner = dataFile("fluid/preconditionerType","none");
 

@@ -91,7 +91,7 @@ public:
 	//! @name Public Typedef
 	//@{
 	typedef Epetra_CrsMatrix rowMatrix_Type;
-	typedef boost::shared_ptr<rowMatrix_Type> rowMatrixPtr_Type;
+	typedef std::shared_ptr<rowMatrix_Type> rowMatrixPtr_Type;
 	typedef Teuchos::ParameterList pList_Type;
 	//@}
 
@@ -110,7 +110,7 @@ public:
 
     int Compute();
 
-    boost::shared_ptr<RowMatrixPreconditioner> & Preconditioner(){return M_prec;}
+    std::shared_ptr<RowMatrixPreconditioner> & Preconditioner(){return M_prec;}
 
     //! @name Mathematical functions
     //@{
@@ -151,8 +151,8 @@ private:
 
     bool usePreconditionerAsApproximatedInverse;
     rowMatrixPtr_Type M_rowMatrix;
-    boost::shared_ptr<RowMatrixPreconditioner> M_prec;
-    boost::shared_ptr<InvertibleOperator> M_linSolver;
+    std::shared_ptr<RowMatrixPreconditioner> M_prec;
+    std::shared_ptr<InvertibleOperator> M_linSolver;
     pList_Type M_pList;
 
 };

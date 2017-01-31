@@ -115,40 +115,40 @@ public:
 	//@{
 
 	typedef RegionMesh<LinearTetra> mesh_Type;
-	typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
+	typedef std::shared_ptr<mesh_Type> meshPtr_Type;
 
 	typedef MapEpetra map_Type;
-	typedef boost::shared_ptr<map_Type> mapPtr_Type;
+	typedef std::shared_ptr<map_Type> mapPtr_Type;
 
 	typedef MatrixEpetra<Real> matrix_Type;
-	typedef boost::shared_ptr<matrix_Type> matrixPtr_Type;
+	typedef std::shared_ptr<matrix_Type> matrixPtr_Type;
 
 	typedef VectorEpetra vector_Type;
-	typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
+	typedef std::shared_ptr<vector_Type> vectorPtr_Type;
 
 	typedef GetPot dataFile_Type;
-	typedef boost::shared_ptr<dataFile_Type> dataFilePtr_Type;
+	typedef std::shared_ptr<dataFile_Type> dataFilePtr_Type;
 
 	typedef Epetra_Comm comm_Type;
-	typedef boost::shared_ptr< comm_Type > commPtr_Type;
+	typedef std::shared_ptr< comm_Type > commPtr_Type;
 
 	typedef Epetra_FECrsGraph graph_Type;
-	typedef boost::shared_ptr<Epetra_FECrsGraph> graphPtr_Type;
+	typedef std::shared_ptr<Epetra_FECrsGraph> graphPtr_Type;
 
 	typedef ETFESpace<mesh_Type, map_Type, 3, 3 > ETFESpace_velocity;
 	typedef ETFESpace<mesh_Type, map_Type, 3, 1 > ETFESpace_pressure;
 
-	typedef boost::shared_ptr<BCHandler> bcPtr_Type;
+	typedef std::shared_ptr<BCHandler> bcPtr_Type;
 
 	typedef Teuchos::ParameterList parameterList_Type;
-	typedef boost::shared_ptr<parameterList_Type> parameterListPtr_Type;
+	typedef std::shared_ptr<parameterList_Type> parameterListPtr_Type;
 
-    typedef boost::shared_ptr<Epetra_Operator> invOpPtr_Type;
+    typedef std::shared_ptr<Epetra_Operator> invOpPtr_Type;
 
     typedef LifeV::Preconditioner                  basePrec_Type;
-    typedef boost::shared_ptr<basePrec_Type>       basePrecPtr_Type;
+    typedef std::shared_ptr<basePrec_Type>       basePrecPtr_Type;
     typedef LifeV::PreconditionerIfpack            prec_Type;
-    typedef boost::shared_ptr<prec_Type>           precPtr_Type;
+    typedef std::shared_ptr<prec_Type>           precPtr_Type;
     typedef Teuchos::RCP< Teuchos::ParameterList > parameterListRCP_Type;
 
     //@}
@@ -453,19 +453,19 @@ public:
 	//@{
 
 	//! Get the velocity FE space
-	const boost::shared_ptr<FESpace<mesh_Type, map_Type> >& uFESpace() const
+	const std::shared_ptr<FESpace<mesh_Type, map_Type> >& uFESpace() const
 	{
 		return M_velocityFESpace;
 	}
 
 	//! Get the velocity FE space
-	const boost::shared_ptr<FESpace<mesh_Type, map_Type> >& pFESpace() const
+	const std::shared_ptr<FESpace<mesh_Type, map_Type> >& pFESpace() const
 	{
 		return M_pressureFESpace;
 	}
 
 	//! Get the velocity FE space
-	const boost::shared_ptr<FESpace<mesh_Type, map_Type> >& uFESpace_scalar() const
+	const std::shared_ptr<FESpace<mesh_Type, map_Type> >& uFESpace_scalar() const
 	{
 		return M_velocityFESpaceScalar;
 	}
@@ -620,14 +620,14 @@ private:
 	std::string M_pOrder;
 
 	// FE spaces
-	boost::shared_ptr<FESpace<mesh_Type, map_Type> > M_velocityFESpace;
-	boost::shared_ptr<FESpace<mesh_Type, map_Type> > M_pressureFESpace;
-	boost::shared_ptr<FESpace<mesh_Type, map_Type> > M_velocityFESpaceScalar;
+	std::shared_ptr<FESpace<mesh_Type, map_Type> > M_velocityFESpace;
+	std::shared_ptr<FESpace<mesh_Type, map_Type> > M_pressureFESpace;
+	std::shared_ptr<FESpace<mesh_Type, map_Type> > M_velocityFESpaceScalar;
 
 	// ET FE Spaces
-	boost::shared_ptr<ETFESpace_velocity > M_fespaceUETA;
-	boost::shared_ptr<ETFESpace_pressure > M_fespacePETA;
-	boost::shared_ptr<ETFESpace_pressure > M_fespaceUETA_scalar;
+	std::shared_ptr<ETFESpace_velocity > M_fespaceUETA;
+	std::shared_ptr<ETFESpace_pressure > M_fespacePETA;
+	std::shared_ptr<ETFESpace_pressure > M_fespaceUETA_scalar;
 
 	// stiff-strain check
 	bool M_stiffStrain;
@@ -670,7 +670,7 @@ private:
 	matrixPtr_Type M_block11_noBC;
 	vectorPtr_Type M_rhs_noBC;
 	vectorPtr_Type M_forces;
-	boost::shared_ptr<LifeV::Operators::NavierStokesOperator> M_operLoads;
+	std::shared_ptr<LifeV::Operators::NavierStokesOperator> M_operLoads;
 
 	// vectors
 	vectorPtr_Type M_uExtrapolated;
@@ -681,7 +681,7 @@ private:
     vectorPtr_Type M_velocityRhs;
     vectorPtr_Type M_velocityExtrapolated;
 
-    boost::shared_ptr<map_Type> M_monolithicMap;
+    std::shared_ptr<map_Type> M_monolithicMap;
     vectorPtr_Type M_solution;
 
     vectorPtr_Type M_residual_u;
@@ -706,13 +706,13 @@ private:
 	bool M_graphPCDisBuilt;
 
     // Navoer Stokes operator
-	boost::shared_ptr<LifeV::Operators::NavierStokesOperator> M_oper;
+	std::shared_ptr<LifeV::Operators::NavierStokesOperator> M_oper;
 
     // Preconditioner
-	boost::shared_ptr<LifeV::Operators::NavierStokesPreconditionerOperator> M_prec;
+	std::shared_ptr<LifeV::Operators::NavierStokesPreconditionerOperator> M_prec;
 
     // Epetra Operator needed to solve the linear system
-    boost::shared_ptr<Operators::InvertibleOperator> M_invOper;
+    std::shared_ptr<Operators::InvertibleOperator> M_invOper;
 
     // Parameter list solver
     parameterListPtr_Type M_pListLinSolver;
@@ -740,7 +740,7 @@ private:
     Real M_density;
     Real M_viscosity;
 
-    boost::shared_ptr<Stabilization> M_stabilization;
+    std::shared_ptr<Stabilization> M_stabilization;
 
     bool M_useStabilization;
     
@@ -764,10 +764,10 @@ private:
 	bool M_solve_blocks;
     
     //! Postprocessing class
-    boost::shared_ptr<PostProcessingBoundary<mesh_Type> > M_postProcessing;
+    std::shared_ptr<PostProcessingBoundary<mesh_Type> > M_postProcessing;
 
     bool M_useFastAssembly;
-    boost::shared_ptr<FastAssemblerNS> M_fastAssembler;
+    std::shared_ptr<FastAssemblerNS> M_fastAssembler;
     Real M_orderBDF;
     UInt M_orderVel;
 

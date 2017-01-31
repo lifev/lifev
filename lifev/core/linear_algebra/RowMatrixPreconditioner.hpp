@@ -49,7 +49,7 @@ public:
     //@name Typdefs
     //@{
     typedef Epetra_CrsMatrix rowMatrix_Type;
-    typedef boost::shared_ptr<rowMatrix_Type> rowMatrixPtr_Type;
+    typedef std::shared_ptr<rowMatrix_Type> rowMatrixPtr_Type;
     typedef Teuchos::ParameterList pList_Type;
     //@}
 

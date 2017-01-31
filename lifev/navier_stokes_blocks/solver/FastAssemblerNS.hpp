@@ -69,22 +69,22 @@ class FastAssemblerNS
 public:
 
 	typedef RegionMesh< LinearTetra > mesh_Type;
-    typedef boost::shared_ptr<mesh_Type>  meshPtr_Type;
+    typedef std::shared_ptr<mesh_Type>  meshPtr_Type;
 
     typedef VectorEpetra vector_Type;
-    typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type> vectorPtr_Type;
 
     typedef MatrixEpetra<Real> matrix_Type;
-    typedef boost::shared_ptr<matrix_Type> matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type> matrixPtr_Type;
 
     typedef Epetra_Comm comm_Type;
-    typedef boost::shared_ptr< comm_Type > commPtr_Type;
+    typedef std::shared_ptr< comm_Type > commPtr_Type;
 
     typedef QuadratureRule qr_Type;
-    typedef boost::shared_ptr< qr_Type > qrPtr_Type;
+    typedef std::shared_ptr< qr_Type > qrPtr_Type;
 
     typedef FESpace<mesh_Type, MapEpetra> fespace_Type;
-    typedef boost::shared_ptr<fespace_Type> fespacePtr_Type;
+    typedef std::shared_ptr<fespace_Type> fespacePtr_Type;
 
 
     //! Constructor
@@ -264,8 +264,8 @@ private:
 	const qr_Type* M_qr;
 	const ReferenceFE* M_referenceFE_velocity;
 	const ReferenceFE* M_referenceFE_pressure;
-	const boost::shared_ptr<FESpace<mesh_Type, MapEpetra>> M_fespace_velocity;
-	const boost::shared_ptr<FESpace<mesh_Type, MapEpetra>> M_fespace_pressure;
+	const std::shared_ptr<FESpace<mesh_Type, MapEpetra>> M_fespace_velocity;
+	const std::shared_ptr<FESpace<mesh_Type, MapEpetra>> M_fespace_pressure;
 
 	double*** M_vals_00;
 	double*** M_vals_01;

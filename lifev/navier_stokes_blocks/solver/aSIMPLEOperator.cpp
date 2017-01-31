@@ -84,11 +84,11 @@ void aSIMPLEOperator::setUp(const matrixEpetraPtr_Type & F,
 
 void aSIMPLEOperator::setOptions(const Teuchos::ParameterList& solversOptions)
 {
-    boost::shared_ptr<Teuchos::ParameterList> schurOptions;
+    std::shared_ptr<Teuchos::ParameterList> schurOptions;
     schurOptions.reset(new Teuchos::ParameterList(solversOptions.sublist("ApproximatedSchurOperator")) );
     setSchurOptions(schurOptions);
 
-    boost::shared_ptr<Teuchos::ParameterList> momentumOptions;
+    std::shared_ptr<Teuchos::ParameterList> momentumOptions;
     momentumOptions.reset(new Teuchos::ParameterList(solversOptions.sublist("MomentumOperator")) );
     setMomentumOptions(momentumOptions);
 }

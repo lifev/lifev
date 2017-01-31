@@ -68,8 +68,6 @@
 #include <lifev/eta/expression/IntegrateMatrixFaceIDLSAdapted.hpp>
 #include <lifev/eta/expression/IntegrateVectorFaceIDLSAdapted.hpp>
 
-#include <boost/shared_ptr.hpp>
-
 namespace LifeV
 {
 
@@ -285,14 +283,14 @@ template < typename MeshType, typename TestSpaceType, typename ExpressionType, t
 ComputeFineScaleVelocity<MeshType, TestSpaceType, ExpressionType, QRAdapterType>
 ComputeFineScaleVel ( const RequestLoopElement<MeshType>& request,
             const QRAdapterBase<QRAdapterType>& qrAdapterBase,
-            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const std::shared_ptr<TestSpaceType>& testSpace,
             const ExpressionType& expression,
             const UInt offset = 0);
 template < typename MeshType, typename TestSpaceType, typename ExpressionType, typename QRAdapterType>
 ComputeFineScaleVelocity<MeshType, TestSpaceType, ExpressionType, QRAdapterType>
 ComputeFineScaleVel ( const RequestLoopElement<MeshType>& request,
             const QRAdapterBase<QRAdapterType>& qrAdapterBase,
-            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const std::shared_ptr<TestSpaceType>& testSpace,
             const ExpressionType& expression,
             const UInt offset)
 {
@@ -304,14 +302,14 @@ template < typename MeshType, typename TestSpaceType, typename ExpressionType>
 ComputeFineScaleVelocity<MeshType, TestSpaceType, ExpressionType, QRAdapterNeverAdapt>
 ComputeFineScaleVel ( const RequestLoopElement<MeshType>& request,
             const QuadratureRule& quadrature,
-            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const std::shared_ptr<TestSpaceType>& testSpace,
             const ExpressionType& expression,
             const UInt offset = 0);
 template < typename MeshType, typename TestSpaceType, typename ExpressionType>
 ComputeFineScaleVelocity<MeshType, TestSpaceType, ExpressionType, QRAdapterNeverAdapt>
 ComputeFineScaleVel ( const RequestLoopElement<MeshType>& request,
             const QuadratureRule& quadrature,
-            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const std::shared_ptr<TestSpaceType>& testSpace,
             const ExpressionType& expression,
             const UInt offset)
 {
@@ -336,14 +334,14 @@ template < typename MeshType, typename TestSpaceType, typename ExpressionType, t
 ComputeFineScalePressure<MeshType, TestSpaceType, ExpressionType, QRAdapterType>
 ComputeFineScalePres ( const RequestLoopElement<MeshType>& request,
             const QRAdapterBase<QRAdapterType>& qrAdapterBase,
-            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const std::shared_ptr<TestSpaceType>& testSpace,
             const ExpressionType& expression,
             const UInt offset = 0);
 template < typename MeshType, typename TestSpaceType, typename ExpressionType, typename QRAdapterType>
 ComputeFineScalePressure<MeshType, TestSpaceType, ExpressionType, QRAdapterType>
 ComputeFineScalePres ( const RequestLoopElement<MeshType>& request,
             const QRAdapterBase<QRAdapterType>& qrAdapterBase,
-            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const std::shared_ptr<TestSpaceType>& testSpace,
             const ExpressionType& expression,
             const UInt offset)
 {
@@ -355,14 +353,14 @@ template < typename MeshType, typename TestSpaceType, typename ExpressionType>
 ComputeFineScalePressure<MeshType, TestSpaceType, ExpressionType, QRAdapterNeverAdapt>
 ComputeFineScalePres ( const RequestLoopElement<MeshType>& request,
             const QuadratureRule& quadrature,
-            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const std::shared_ptr<TestSpaceType>& testSpace,
             const ExpressionType& expression,
             const UInt offset = 0);
 template < typename MeshType, typename TestSpaceType, typename ExpressionType>
 ComputeFineScalePressure<MeshType, TestSpaceType, ExpressionType, QRAdapterNeverAdapt>
 ComputeFineScalePres ( const RequestLoopElement<MeshType>& request,
             const QuadratureRule& quadrature,
-            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const std::shared_ptr<TestSpaceType>& testSpace,
             const ExpressionType& expression,
             const UInt offset)
 {
@@ -387,14 +385,14 @@ template < typename MeshType, typename TestSpaceType, typename ExpressionType, t
 EvaluateAtQuadraturePoint<MeshType, TestSpaceType, ExpressionType, QRAdapterType>
 EvaluateAtQuadrature ( const RequestLoopElement<MeshType>& request,
            const QRAdapterBase<QRAdapterType>& qrAdapterBase,
-           const boost::shared_ptr<TestSpaceType>& testSpace,
+           const std::shared_ptr<TestSpaceType>& testSpace,
            const ExpressionType& expression,
            const UInt offset = 0);
 template < typename MeshType, typename TestSpaceType, typename ExpressionType, typename QRAdapterType>
 EvaluateAtQuadraturePoint<MeshType, TestSpaceType, ExpressionType, QRAdapterType>
 EvaluateAtQuadrature ( const RequestLoopElement<MeshType>& request,
            const QRAdapterBase<QRAdapterType>& qrAdapterBase,
-           const boost::shared_ptr<TestSpaceType>& testSpace,
+           const std::shared_ptr<TestSpaceType>& testSpace,
            const ExpressionType& expression,
            const UInt offset)
 {
@@ -406,14 +404,14 @@ template < typename MeshType, typename TestSpaceType, typename ExpressionType>
 EvaluateAtQuadraturePoint<MeshType, TestSpaceType, ExpressionType, QRAdapterNeverAdapt>
 EvaluateAtQuadrature ( const RequestLoopElement<MeshType>& request,
            const QuadratureRule& quadrature,
-           const boost::shared_ptr<TestSpaceType>& testSpace,
+           const std::shared_ptr<TestSpaceType>& testSpace,
            const ExpressionType& expression,
            const UInt offset = 0);
 template < typename MeshType, typename TestSpaceType, typename ExpressionType>
 EvaluateAtQuadraturePoint<MeshType, TestSpaceType, ExpressionType, QRAdapterNeverAdapt>
 EvaluateAtQuadrature ( const RequestLoopElement<MeshType>& request,
            const QuadratureRule& quadrature,
-           const boost::shared_ptr<TestSpaceType>& testSpace,
+           const std::shared_ptr<TestSpaceType>& testSpace,
            const ExpressionType& expression,
            const UInt offset)
 {

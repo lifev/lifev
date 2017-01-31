@@ -58,12 +58,12 @@ int TwoLevelPreconditioner::myCompute()
     EPETRA_CHK_ERR(EpetraExt::MatrixMatrix::Multiply(*M_rowMatrix, false, *E, false, *AE));
     EPETRA_CHK_ERR(EpetraExt::MatrixMatrix::Multiply(*R,           false, *AE, false, *RAE));
 
-    boost::shared_ptr<RowMatrixPreconditioner> S(RowMatrixPreconditionerFactory::instance().createObject("Ifpack"));
+    std::shared_ptr<RowMatrixPreconditioner> S(RowMatrixPreconditionerFactory::instance().createObject("Ifpack"));
     S->SetRowMatrix(M_rowMatrix);
     S->SetParameterList(M_pList.sublist("FineLevel"));
     EPETRA_CHK_ERR(S->Compute());
 
-    boost::shared_ptr<ApproximatedInvertibleRowMatrix> Ac(new ApproximatedInvertibleRowMatrix);
+    std::shared_ptr<ApproximatedInvertibleRowMatrix> Ac(new ApproximatedInvertibleRowMatrix);
     Ac->SetRowMatrix(RAE);
     Ac->SetParameterList(M_pList.sublist("CoarseLevel"));
     EPETRA_CHK_ERR(Ac->Compute());

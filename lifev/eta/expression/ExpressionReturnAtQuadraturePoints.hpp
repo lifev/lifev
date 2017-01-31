@@ -44,8 +44,6 @@
 
 #include <lifev/eta/fem/ETFESpace.hpp>
 
-#include <boost/shared_ptr.hpp>
-
 #include <iostream>
 
 namespace LifeV
@@ -94,7 +92,7 @@ public:
     typedef ETFESpace<MeshType, MapType, SpaceDim, FieldDim> fespace_Type;
 
     //! Type for the pointer on the finite element space
-    typedef boost::shared_ptr<fespace_Type> fespacePtr_Type;
+    typedef std::shared_ptr<fespace_Type> fespacePtr_Type;
 
     //! Data vector type - vectorial case
     typedef std::vector<std::vector<VectorSmall<FieldDim>>> vector_Type;
@@ -189,7 +187,7 @@ private:
 template<typename MeshType, typename MapType, UInt SpaceDim, UInt FieldDim>
 inline ExpressionReturnAtQuadraturePoints<MeshType, MapType, SpaceDim, FieldDim>
 quadpts (
-       boost::shared_ptr< ETFESpace<MeshType, MapType, SpaceDim, FieldDim> > fespace,
+       std::shared_ptr< ETFESpace<MeshType, MapType, SpaceDim, FieldDim> > fespace,
        const std::vector<std::vector<VectorSmall<FieldDim>>>& vector
 )
 {

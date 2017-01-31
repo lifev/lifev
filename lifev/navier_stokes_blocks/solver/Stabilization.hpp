@@ -61,19 +61,19 @@ public:
     typedef MapEpetra  map_Type;
 
     typedef VectorEpetra  vector_Type;
-    typedef boost::shared_ptr<vector_Type>  vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type>  vectorPtr_Type;
 
     typedef MatrixEpetra<Real>  matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>  matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type>  matrixPtr_Type;
 
     typedef FESpace< mesh_Type, map_Type > fespace_Type;
-    typedef boost::shared_ptr< fespace_Type > fespacePtr_Type;
+    typedef std::shared_ptr< fespace_Type > fespacePtr_Type;
 
     typedef ETFESpace<mesh_Type, map_Type, 3, 3 > ETFESpace_velocity;
     typedef ETFESpace<mesh_Type, map_Type, 3, 1 > ETFESpace_pressure;
 
-    typedef boost::shared_ptr<ETFESpace_velocity > ETFESpacePtr_velocity;
-    typedef boost::shared_ptr<ETFESpace_pressure > ETFESpacePtr_pressure;
+    typedef std::shared_ptr<ETFESpace_velocity > ETFESpacePtr_velocity;
+    typedef std::shared_ptr<ETFESpace_pressure > ETFESpacePtr_pressure;
 
     Stabilization();
 
@@ -208,7 +208,7 @@ public:
     /*!
      * @param comm Epetra communicator
      */
-    virtual void setCommunicator (boost::shared_ptr<Epetra_Comm> comm) = 0;
+    virtual void setCommunicator (std::shared_ptr<Epetra_Comm> comm) = 0;
 
     //! Set the time step size
     /*!
@@ -253,7 +253,7 @@ public:
     virtual void setExportFineScaleVelocity ( ExporterHDF5<mesh_Type> & /*exporter*/, const int& /*numElementsTotal*/ ) {};
 
     //! Set if using the fast assembler
-    virtual void setFastAssembler ( boost::shared_ptr<FastAssemblerNS>&  /*fast_assembler*/) {};
+    virtual void setFastAssembler ( std::shared_ptr<FastAssemblerNS>&  /*fast_assembler*/) {};
 
     //@}
 

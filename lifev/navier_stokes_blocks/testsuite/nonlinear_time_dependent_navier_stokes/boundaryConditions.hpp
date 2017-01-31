@@ -52,7 +52,7 @@
 namespace LifeV
 {
 
-typedef boost::shared_ptr<BCHandler> bcPtr_Type;
+typedef std::shared_ptr<BCHandler> bcPtr_Type;
 
 bcPtr_Type BCh_fluid ()
 {

@@ -35,8 +35,6 @@
     @maintainer Davide Forti <davide.forti@epfl.ch>
  */
 
-#include <boost/numeric/ublas/matrix.hpp>
-
 #include <Epetra_CrsMatrix.h>
 #include <Epetra_Vector.h>
 
@@ -68,23 +66,23 @@ public:
     //@{
 
     typedef  Epetra_MultiVector                        vector_Type;
-    typedef  boost::shared_ptr<vector_Type>            vectorPtr_Type;
+    typedef  std::shared_ptr<vector_Type>            vectorPtr_Type;
     typedef  Epetra_Map                                map_Type;
-    typedef  boost::shared_ptr<map_Type> 			   mapPtr_Type;
+    typedef  std::shared_ptr<map_Type> 			   mapPtr_Type;
     typedef  LinearOperatorAlgebra                     super;
     typedef  Epetra_CrsMatrix                          matrix_Type;
-    typedef  boost::shared_ptr<matrix_Type>            matrixPtr_Type;
+    typedef  std::shared_ptr<matrix_Type>            matrixPtr_Type;
     typedef  MatrixEpetra<Real>                        matrixEpetra_Type;
-    typedef  boost::shared_ptr<matrixEpetra_Type>      matrixEpetraPtr_Type;
+    typedef  std::shared_ptr<matrixEpetra_Type>      matrixEpetraPtr_Type;
     typedef  Epetra_Vector                             lumpedMatrix_Type;
-    typedef  boost::shared_ptr<lumpedMatrix_Type>      lumpedMatrixPtr_Type;
+    typedef  std::shared_ptr<lumpedMatrix_Type>      lumpedMatrixPtr_Type;
     typedef  super::comm_Type                          comm_Type;
     typedef  super::commPtr_Type                       commPtr_Type;
-    typedef  boost::shared_ptr<Teuchos::ParameterList> parameterListPtr_Type;
+    typedef  std::shared_ptr<Teuchos::ParameterList> parameterListPtr_Type;
     typedef  MapEpetra                                 mapEpetra_Type;
-    typedef  boost::shared_ptr<mapEpetra_Type>         mapEpetraPtr_Type;
+    typedef  std::shared_ptr<mapEpetra_Type>         mapEpetraPtr_Type;
     typedef  VectorEpetra                              VectorEpetra_Type;
-    typedef  boost::shared_ptr<VectorEpetra_Type>      VectorEpetraPtr_Type;
+    typedef  std::shared_ptr<VectorEpetra_Type>      VectorEpetraPtr_Type;
     //@}
 
     //! @name Constructors and Destructors
@@ -131,10 +129,10 @@ public:
     int SetUseTranspose(bool UseTranspose){M_useTranspose = UseTranspose; return 0;}
 
     //! set the domain map
-    void setDomainMap(const boost::shared_ptr<BlockEpetra_Map> & domainMap){M_operatorDomainMap = domainMap;}
+    void setDomainMap(const std::shared_ptr<BlockEpetra_Map> & domainMap){M_operatorDomainMap = domainMap;}
 
     //! set the range map
-    void setRangeMap(const boost::shared_ptr<BlockEpetra_Map> & rangeMap){M_operatorRangeMap = rangeMap;}
+    void setRangeMap(const std::shared_ptr<BlockEpetra_Map> & rangeMap){M_operatorRangeMap = rangeMap;}
 
     //! Set the momentum preconditioner options
     void setMomentumOptions(const parameterListPtr_Type & _oList);
@@ -215,9 +213,9 @@ private:
     //! create the matrix B*diag(F)^-1*Btranspose
     void buildShurComplement();
 
-    boost::shared_ptr<BlockEpetra_Map> M_operatorDomainMap;
+    std::shared_ptr<BlockEpetra_Map> M_operatorDomainMap;
     //! Range Map
-    boost::shared_ptr<BlockEpetra_Map> M_operatorRangeMap;
+    std::shared_ptr<BlockEpetra_Map> M_operatorRangeMap;
 
     matrixEpetraPtr_Type M_F;
 
@@ -234,9 +232,9 @@ private:
 
     bool M_useTranspose;
 
-    boost::shared_ptr<Operators::ApproximatedInvertibleRowMatrix> M_approximatedMomentumOperator;
+    std::shared_ptr<Operators::ApproximatedInvertibleRowMatrix> M_approximatedMomentumOperator;
 
-    boost::shared_ptr<Operators::ApproximatedInvertibleRowMatrix> M_approximatedSchurComplementOperator;
+    std::shared_ptr<Operators::ApproximatedInvertibleRowMatrix> M_approximatedSchurComplementOperator;
 
     parameterListPtr_Type M_momentumOptions;
 
@@ -244,7 +242,7 @@ private:
 
     mapEpetraPtr_Type M_monolithicMap;
 
-    boost::shared_ptr<Epetra_Vector> M_invD;
+    std::shared_ptr<Epetra_Vector> M_invD;
 
     matrixEpetraPtr_Type M_DBT;
 
@@ -252,15 +250,15 @@ private:
     const std::string M_label;
 
     //! Vectors needed for the apply inverse
-    boost::shared_ptr<VectorEpetra_Type> M_Z;
+    std::shared_ptr<VectorEpetra_Type> M_Z;
 
-    boost::shared_ptr<VectorEpetra_Type> M_X_velocity;
-    boost::shared_ptr<VectorEpetra_Type> M_X_pressure;
-    boost::shared_ptr<VectorEpetra_Type> M_Y_velocity;
-    boost::shared_ptr<VectorEpetra_Type> M_Y_pressure;
+    std::shared_ptr<VectorEpetra_Type> M_X_velocity;
+    std::shared_ptr<VectorEpetra_Type> M_X_pressure;
+    std::shared_ptr<VectorEpetra_Type> M_Y_velocity;
+    std::shared_ptr<VectorEpetra_Type> M_Y_pressure;
     
-    boost::shared_ptr<mapEpetra_Type> M_domainDBT;
-    boost::shared_ptr<mapEpetra_Type> M_rangeDBT;
+    std::shared_ptr<mapEpetra_Type> M_domainDBT;
+    std::shared_ptr<mapEpetra_Type> M_rangeDBT;
 
     bool M_useStabilization;
 

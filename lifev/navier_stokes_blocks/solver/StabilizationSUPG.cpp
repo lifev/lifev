@@ -50,7 +50,7 @@ void StabilizationSUPG::buildGraphs()
 	pressure_previous_newton_step_rep += 1;
 	velocity_rhs_rep += 1;
 
-	boost::shared_ptr<SquareRoot> squareroot(new SquareRoot());
+	std::shared_ptr<SquareRoot> squareroot(new SquareRoot());
 
 	MatrixSmall<3, 3> Eye;
 	Eye *= 0.0;
@@ -161,7 +161,7 @@ void StabilizationSUPG::apply_matrix( const vector_Type& velocity_previous_newto
 	vector_Type pressure_previous_newton_step_rep( pressure_previous_newton_step, Repeated);
 	vector_Type velocity_rhs_rep( velocity_rhs, Repeated);
 
-	boost::shared_ptr<SquareRoot> squareroot(new SquareRoot());
+	std::shared_ptr<SquareRoot> squareroot(new SquareRoot());
 
 	MatrixSmall<3, 3> Eye;
 	Eye *= 0.0;
@@ -233,7 +233,7 @@ void StabilizationSUPG::apply_vector( vectorPtr_Type& residual_velocity,
 	vector_Type pressure_previous_newton_step_rep( pressure_previous_newton_step, Repeated);
 	vector_Type velocity_rhs_rep( velocity_rhs, Repeated);
 
-	boost::shared_ptr<SquareRoot> squareroot(new SquareRoot());
+	std::shared_ptr<SquareRoot> squareroot(new SquareRoot());
 
 	// Matrix needed to evaluate the divergence of a vector (term with TAU_C)
 	MatrixSmall<3, 3> Eye;

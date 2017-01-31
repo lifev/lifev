@@ -127,7 +127,7 @@ void StabilizationSUPG_semi_implicit_ale::computeFineScales ( const vectorPtr_Ty
 
 	using namespace ExpressionAssembly;
 
-	boost::shared_ptr<SquareRoot_supg_semi_implicit_ale> squareroot(new SquareRoot_supg_semi_implicit_ale());
+	std::shared_ptr<SquareRoot_supg_semi_implicit_ale> squareroot(new SquareRoot_supg_semi_implicit_ale());
 
 	EvaluateAtQuadrature ( elements (  M_uFESpace->mesh() ),
 						   M_uFESpace->qr(),
@@ -160,7 +160,7 @@ void StabilizationSUPG_semi_implicit_ale::computeFineScalesForVisualization ( co
 	 vectorPtr_Type pressure_repeated( new vector_Type( *pressure, Repeated ) );
 	 vectorPtr_Type velocity_rhs_repeated( new vector_Type( *M_rhsVelocity, Repeated) );
 
-	 boost::shared_ptr<SquareRoot_supg_semi_implicit_ale> squareroot(new SquareRoot_supg_semi_implicit_ale());
+	 std::shared_ptr<SquareRoot_supg_semi_implicit_ale> squareroot(new SquareRoot_supg_semi_implicit_ale());
 
 	 ComputeFineScaleVel ( elements (  M_fespaceUETA->mesh() ),
 			 	 	 	 	 	qr,
@@ -200,11 +200,11 @@ void StabilizationSUPG_semi_implicit_ale::setExportFineScaleVelocity ( ExporterH
 
 	int* pointerToDofs_scalar (0);
 	pointerToDofs_scalar = &id_elem_scalar[0];
-	boost::shared_ptr<MapEpetra> map_scalar ( new MapEpetra ( -1, static_cast<int> (id_elem_scalar.size() ), pointerToDofs_scalar, M_uFESpace->map().commPtr() ) );
+	std::shared_ptr<MapEpetra> map_scalar ( new MapEpetra ( -1, static_cast<int> (id_elem_scalar.size() ), pointerToDofs_scalar, M_uFESpace->map().commPtr() ) );
 
 	int* pointerToDofs (0);
 	pointerToDofs = &id_elem[0];
-	boost::shared_ptr<MapEpetra> map ( new MapEpetra ( -1, static_cast<int> (id_elem.size() ), pointerToDofs, M_uFESpace->map().commPtr() ) );
+	std::shared_ptr<MapEpetra> map ( new MapEpetra ( -1, static_cast<int> (id_elem.size() ), pointerToDofs, M_uFESpace->map().commPtr() ) );
 
 	M_fineVelocity.reset ( new vector_Type (*map,  Unique ) );
 	M_fineVelocity->zero();
@@ -227,7 +227,7 @@ void StabilizationSUPG_semi_implicit_ale::buildGraphs()
 	
 	velocity_extrapolated_rep += 1;
 	
-	boost::shared_ptr<SquareRoot_supg_semi_implicit_ale> squareroot(new SquareRoot_supg_semi_implicit_ale());
+	std::shared_ptr<SquareRoot_supg_semi_implicit_ale> squareroot(new SquareRoot_supg_semi_implicit_ale());
 
 	{
 		using namespace ExpressionAssembly;
@@ -340,7 +340,7 @@ void StabilizationSUPG_semi_implicit_ale::apply_matrix( const vector_Type& veloc
 	vector_Type velocity_extrapolated_rep( velocityExtrapolated, Repeated);
 	vector_Type velocity_ALE_rep( velocityALE, Repeated);
 
-	boost::shared_ptr<SquareRoot_supg_semi_implicit_ale> squareroot(new SquareRoot_supg_semi_implicit_ale());
+	std::shared_ptr<SquareRoot_supg_semi_implicit_ale> squareroot(new SquareRoot_supg_semi_implicit_ale());
 
 	using namespace ExpressionAssembly;
 
@@ -499,7 +499,7 @@ void StabilizationSUPG_semi_implicit_ale::apply_vector( vectorPtr_Type& rhs_velo
     vector_Type velocity_rhs_rep( velocity_rhs, Repeated);
     vector_Type velocity_extrapolated_rep( velocityExtrapolated, Repeated);
 
-	boost::shared_ptr<SquareRoot_supg_semi_implicit_ale> squareroot(new SquareRoot_supg_semi_implicit_ale());
+	std::shared_ptr<SquareRoot_supg_semi_implicit_ale> squareroot(new SquareRoot_supg_semi_implicit_ale());
 
     using namespace ExpressionAssembly;
 

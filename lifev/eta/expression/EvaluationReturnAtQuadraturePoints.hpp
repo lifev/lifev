@@ -48,9 +48,6 @@
 
 #include <lifev/eta/expression/ExpressionReturnAtQuadraturePoints.hpp>
 
-#include <boost/shared_ptr.hpp>
-
-
 namespace LifeV
 {
 
@@ -83,7 +80,7 @@ public:
     typedef ETFESpace<MeshType, MapType, SpaceDim, FieldDim> fespace_Type;
 
     //! Pointer on the FESpace
-    typedef boost::shared_ptr<fespace_Type> fespacePtr_Type;
+    typedef std::shared_ptr<fespace_Type> fespacePtr_Type;
 
     //! Vector of the values
     typedef std::vector<std::vector<return_Type>> vector_Type;
@@ -297,7 +294,7 @@ public:
     typedef ETFESpace<MeshType, MapType, SpaceDim, 1> fespace_Type;
 
     //! Type of the pointer on the FESpace
-    typedef boost::shared_ptr<fespace_Type> fespacePtr_Type;
+    typedef std::shared_ptr<fespace_Type> fespacePtr_Type;
 
     //! Type of the vector to be used
     typedef std::vector<std::vector<VectorSmall<1>>> vector_Type;

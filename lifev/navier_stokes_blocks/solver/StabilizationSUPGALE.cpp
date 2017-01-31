@@ -54,7 +54,7 @@ void StabilizationSUPGALE::buildGraphs()
 	p_km1 += 1;
 	u_bdf += 1;
 
-	boost::shared_ptr<SquareRoot_SUPGALE> squareroot(new SquareRoot_SUPGALE());
+	std::shared_ptr<SquareRoot_SUPGALE> squareroot(new SquareRoot_SUPGALE());
 
 	MatrixSmall<3, 3> Eye;
 	Eye *= 0.0;
@@ -167,7 +167,7 @@ void StabilizationSUPGALE::apply_matrix( const vector_Type& convective_velocity_
 	vector_Type p_km1( pressure_previous_newton_step, Repeated);
 	vector_Type u_bdf( velocity_rhs, Repeated);
 
-	boost::shared_ptr<SquareRoot_SUPGALE> squareroot(new SquareRoot_SUPGALE());
+	std::shared_ptr<SquareRoot_SUPGALE> squareroot(new SquareRoot_SUPGALE());
 
 	MatrixSmall<3, 3> Eye;
 	Eye *= 0.0;
@@ -241,7 +241,7 @@ void StabilizationSUPGALE::apply_vector( vectorPtr_Type& residual_velocity,
 	vector_Type p_km1( pressure_previous_newton_step, Repeated);
 	vector_Type u_bdf( velocity_rhs, Repeated);
 
-	boost::shared_ptr<SquareRoot_SUPGALE> squareroot(new SquareRoot_SUPGALE());
+	std::shared_ptr<SquareRoot_SUPGALE> squareroot(new SquareRoot_SUPGALE());
 
 	// Matrix needed to evaluate the divergence of a vector (term with TAU_C)
 	MatrixSmall<3, 3> Eye;

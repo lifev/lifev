@@ -600,10 +600,10 @@ public:
      @param map        MapEpetra that contains the indices
      @param matrix_out Matrix restricted
      */
-    void restrict ( const boost::shared_ptr<MapEpetra>& map,
-    				const boost::shared_ptr<VectorEpetra>& numeration,
+    void restrict ( const std::shared_ptr<MapEpetra>& map,
+    				const std::shared_ptr<VectorEpetra>& numeration,
     				const UInt& offset,
-                    boost::shared_ptr<MatrixEpetra<DataType> > & matrix_out );
+    				std::shared_ptr<MatrixEpetra<DataType> > & matrix_out );
 
     //@}
 
@@ -1744,10 +1744,10 @@ MatrixEpetra<DType>* PtAP (const MatrixEpetra<DType>& A, const MatrixEpetra<DTyp
 }
 
 template <typename DataType>
-void MatrixEpetra<DataType>::restrict ( const boost::shared_ptr<MapEpetra>& map,
-										const boost::shared_ptr<VectorEpetra>& numeration,
+void MatrixEpetra<DataType>::restrict ( const std::shared_ptr<MapEpetra>& map,
+										const std::shared_ptr<VectorEpetra>& numeration,
 										const UInt& offset,
-                                        boost::shared_ptr<MatrixEpetra<DataType> > & matrix_out )
+										std::shared_ptr<MatrixEpetra<DataType> > & matrix_out )
 {
     // 1) create matrix P and R
     MatrixEpetra<DataType> P (*M_rangeMap, 50 );

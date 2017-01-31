@@ -11,7 +11,7 @@ M_useTranspose(false)
     
 }
 
-void NavierStokesOperator::setUp(const boost::shared_ptr<BlockEpetra_Map> & map, const commPtr_Type & comm)
+void NavierStokesOperator::setUp(const std::shared_ptr<BlockEpetra_Map> & map, const commPtr_Type & comm)
 {
     M_comm = comm;
     
@@ -24,8 +24,8 @@ void NavierStokesOperator::setUp(const boost::shared_ptr<BlockEpetra_Map> & map,
 
 
 //! SetUp for a "rectangular operator"
-void NavierStokesOperator::setUp(const boost::shared_ptr<BlockEpetra_Map> & domainMap,
-                          const boost::shared_ptr<BlockEpetra_Map> & rangeMap,
+void NavierStokesOperator::setUp(const std::shared_ptr<BlockEpetra_Map> & domainMap,
+                          const std::shared_ptr<BlockEpetra_Map> & rangeMap,
                           const commPtr_Type & comm)
 {
     M_comm = comm;
@@ -40,7 +40,7 @@ void NavierStokesOperator::setUp(const boost::shared_ptr<BlockEpetra_Map> & doma
     
 }
 
-//! SetUp when the operator is given like a boost::matrix
+//! SetUp when the operator is given like a std::matrix
 void NavierStokesOperator::setUp(const operatorPtrContainer_Type & blockOper, const commPtr_Type & comm)
 {
     M_comm = comm;

@@ -21,11 +21,11 @@ public:
     	}
     }
 
-    SignFunction( const boost::shared_ptr<Epetra_Comm>& communicator ) { k = 0; z = 0; comm = communicator; }
+    SignFunction( const std::shared_ptr<Epetra_Comm>& communicator ) { k = 0; z = 0; comm = communicator; }
     SignFunction (const SignFunction&) {}
     ~SignFunction() {}
     int k, z;
-    boost::shared_ptr<Epetra_Comm> comm;
+    std::shared_ptr<Epetra_Comm> comm;
     int interrogate_k () { int k_global; comm->MaxAll(&k,&k_global,1); return k_global; }
     int interrogate_z () { int z_global; comm->MaxAll(&z,&z_global,1); return z_global; }
     void clear_k () { k = 0; }
@@ -210,7 +210,7 @@ void NavierStokesSolverBlocks::setExportFineScaleVelocity( ExporterHDF5<mesh_Typ
 
 void NavierStokesSolverBlocks::setSolversOptions(const Teuchos::ParameterList& solversOptions)
 {
-    boost::shared_ptr<Teuchos::ParameterList> monolithicOptions;
+    std::shared_ptr<Teuchos::ParameterList> monolithicOptions;
     monolithicOptions.reset(new Teuchos::ParameterList(solversOptions.sublist("MonolithicOperator")) );
     M_pListLinSolver = monolithicOptions;
 }
@@ -544,7 +544,7 @@ void NavierStokesSolverBlocks::updateSystem( const vectorPtr_Type& u_star, const
 		if ( M_penalizeReverseFlow )
 		{
 			this->setupPostProc();
-			boost::shared_ptr<SignFunction> signEvaluation(new SignFunction(M_comm));
+			std::shared_ptr<SignFunction> signEvaluation(new SignFunction(M_comm));
 
 			using namespace ExpressionAssembly;
 
@@ -1649,7 +1649,7 @@ void NavierStokesSolverBlocks::solveLaplacian( const UInt& /*flag*/, bcPtr_Type&
     vectorPtr_Type rhs_laplacian_repeated( new vector_Type (M_velocityFESpaceScalar->map(), Repeated ) );
     rhs_laplacian_repeated->zero();
 
-    boost::shared_ptr< MatrixEpetra<Real> > Laplacian;
+    std::shared_ptr< MatrixEpetra<Real> > Laplacian;
     Laplacian.reset ( new MatrixEpetra<Real> ( M_velocityFESpaceScalar->map() ) );
     Laplacian->zero();
 

@@ -98,11 +98,11 @@ protected:
 
     //! The preconditioner operator (the boost copy makes sure that the preconditioner is still alive; see .cpp file for details)
     Teuchos::RCP<Epetra_Operator> M_prec;
-    boost::shared_ptr<Epetra_Operator> M_precBoost;
+    std::shared_ptr<Epetra_Operator> M_precBoost;
 
     //! The operator to be solved (the boost copy makes sure that the operator is still alive; see .cpp file for details)
     Teuchos::RCP<Epetra_Operator> M_oper;
-    boost::shared_ptr<Epetra_Operator> M_operBoost;
+    std::shared_ptr<Epetra_Operator> M_operBoost;
     //! Whenever to use the transpose
     bool M_useTranspose;
     

@@ -48,7 +48,6 @@
 
 #include <lifev/eta/array/ETVectorElemental.hpp>
 
-#include <boost/shared_ptr.hpp>
 
 
 
@@ -84,9 +83,9 @@ public:
     //@{
 
     //! Full data constructor
-    ComputeFineScaleVelocity (const boost::shared_ptr<MeshType>& mesh,
+    ComputeFineScaleVelocity (const std::shared_ptr<MeshType>& mesh,
                             const QRAdapterType& qrAdapter,
-                            const boost::shared_ptr<TestSpaceType>& testSpace,
+                            const std::shared_ptr<TestSpaceType>& testSpace,
                             const ExpressionType& expression,
                             const UInt offset = 0);
 
@@ -141,13 +140,13 @@ private:
     //@}
 
     // Pointer on the mesh
-    boost::shared_ptr<MeshType> M_mesh;
+    std::shared_ptr<MeshType> M_mesh;
 
     // Quadrature to be used
     QRAdapterType M_qrAdapter;
 
     // Shared pointer on the Space
-    boost::shared_ptr<TestSpaceType> M_testSpace;
+    std::shared_ptr<TestSpaceType> M_testSpace;
 
     // Tree to compute the values for the assembly
     evaluation_Type M_evaluation;
@@ -175,9 +174,9 @@ private:
 
 template < typename MeshType, typename TestSpaceType, typename ExpressionType, typename QRAdapterType>
 ComputeFineScaleVelocity < MeshType, TestSpaceType, ExpressionType, QRAdapterType>::
-ComputeFineScaleVelocity (const boost::shared_ptr<MeshType>& mesh,
+ComputeFineScaleVelocity (const std::shared_ptr<MeshType>& mesh,
                         const QRAdapterType& qrAdapter,
-                        const boost::shared_ptr<TestSpaceType>& testSpace,
+                        const std::shared_ptr<TestSpaceType>& testSpace,
                         const ExpressionType& expression,
                         const UInt offset)
     :   M_mesh (mesh),

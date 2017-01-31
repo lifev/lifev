@@ -60,23 +60,23 @@ public:
 
     typedef MatrixEpetra<Real> matrixEpetra_Type;
 
-    typedef boost::shared_ptr<matrixEpetra_Type> matrixEpetraPtr_Type;
+    typedef std::shared_ptr<matrixEpetra_Type> matrixEpetraPtr_Type;
 
     typedef Epetra_Comm comm_Type;
 
-    typedef boost::shared_ptr<comm_Type> commPtr_Type;
+    typedef std::shared_ptr<comm_Type> commPtr_Type;
 
     typedef Epetra_Map map_Type;
 
-    typedef boost::shared_ptr<map_Type> mapPtr_Type;
+    typedef std::shared_ptr<map_Type> mapPtr_Type;
 
-    typedef boost::shared_ptr<const map_Type> constMapPtr_Type;
+    typedef std::shared_ptr<const map_Type> constMapPtr_Type;
 
     typedef Epetra_Operator operator_Type;
 
-    typedef boost::shared_ptr<operator_Type> operatorPtr_Type;
+    typedef std::shared_ptr<operator_Type> operatorPtr_Type;
 
-    typedef  boost::shared_ptr<Teuchos::ParameterList> parameterListPtr_Type;
+    typedef  std::shared_ptr<Teuchos::ParameterList> parameterListPtr_Type;
 
     NavierStokesPreconditionerOperator();
 
@@ -163,9 +163,9 @@ public:
 
     virtual void setOptions ( const Teuchos::ParameterList& solversOptions){};
 
-    virtual void setDomainMap ( const boost::shared_ptr<BlockEpetra_Map> & domainMap){};
+    virtual void setDomainMap ( const std::shared_ptr<BlockEpetra_Map> & domainMap){};
 
-    virtual void setRangeMap ( const boost::shared_ptr<BlockEpetra_Map> & rangeMap){};
+    virtual void setRangeMap ( const std::shared_ptr<BlockEpetra_Map> & rangeMap){};
 
     virtual void updateApproximatedMomentumOperator ( ){};
 
