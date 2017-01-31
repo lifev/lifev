@@ -43,8 +43,6 @@
 #include <lifev/eta/expression/ExpressionBase.hpp>
 #include <lifev/eta/fem/ETFESpace.hpp>
 
-#include <boost/shared_ptr.hpp>
-
 #include <iostream>
 
 namespace LifeV
@@ -90,7 +88,7 @@ public:
     typedef ExpressionBase<ExpressionPatchArea<MeshType, MapType, SpaceDim, FieldDim> > base_Type;
 
     typedef ETFESpace<MeshType, MapType, SpaceDim, FieldDim> ETFESpace_Type;
-    typedef boost::shared_ptr<ETFESpace_Type>                ETFESpacePtr_Type;
+    typedef std::shared_ptr<ETFESpace_Type>                ETFESpacePtr_Type;
     //@}
 
 
@@ -171,7 +169,7 @@ private:
 */
 template<typename MeshType, typename MapType, UInt SpaceDim, UInt FieldDim>
 inline ExpressionPatchArea<MeshType, MapType, SpaceDim, FieldDim>
-patchArea (const boost::shared_ptr<ETFESpace<MeshType, MapType, SpaceDim, FieldDim> > fespace)
+patchArea (const std::shared_ptr<ETFESpace<MeshType, MapType, SpaceDim, FieldDim> > fespace)
 {
     return ExpressionPatchArea<MeshType, MapType, SpaceDim, FieldDim> ( fespace );
 }

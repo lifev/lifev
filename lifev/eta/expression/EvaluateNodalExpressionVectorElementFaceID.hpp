@@ -47,8 +47,6 @@
 
 #include <lifev/eta/array/ETVectorElemental.hpp>
 
-#include <boost/shared_ptr.hpp>
-
 
 
 namespace LifeV
@@ -87,10 +85,10 @@ public:
     //@{
 
     //! Full data constructor
-    EvaluateNodalExpressionVectorElementFaceID (const boost::shared_ptr<MeshType>& mesh,
+    EvaluateNodalExpressionVectorElementFaceID (const std::shared_ptr<MeshType>& mesh,
                            const UInt boundaryID,
                            const QuadratureBoundary& quadratureBD,
-                           const boost::shared_ptr<SolutionTestSpace>& testSpace,
+                           const std::shared_ptr<SolutionTestSpace>& testSpace,
                            const ExpressionType& expression);
 
     //! Copy constructor
@@ -114,7 +112,7 @@ public:
 
     //! Operator wrapping the addTo method (for shared_ptr)
     template <typename VectorType>
-    inline void operator>> (boost::shared_ptr<VectorType> vector)
+    inline void operator>> (std::shared_ptr<VectorType> vector)
     {
         addTo (*vector);
     }
@@ -152,7 +150,7 @@ private:
     //@}
 
     // Pointer on the mesh
-    boost::shared_ptr<MeshType> M_mesh;
+    std::shared_ptr<MeshType> M_mesh;
 
     // Identifier for the boundary
     UInt M_boundaryId;
@@ -161,7 +159,7 @@ private:
     QuadratureBoundary M_quadratureBoundary;
 
     // Shared pointer on the Space
-    boost::shared_ptr<SolutionTestSpace> M_solutionSpace;
+    std::shared_ptr<SolutionTestSpace> M_solutionSpace;
 
     // Tree to compute the values for the assembly
     evaluation_Type M_evaluation;
@@ -183,10 +181,10 @@ private:
 
 template < typename MeshType, typename SolutionTestSpace, typename ExpressionType>
 EvaluateNodalExpressionVectorElementFaceID < MeshType, SolutionTestSpace, ExpressionType>::
-EvaluateNodalExpressionVectorElementFaceID (const boost::shared_ptr<MeshType>& mesh,
+EvaluateNodalExpressionVectorElementFaceID (const std::shared_ptr<MeshType>& mesh,
                        const UInt boundaryID,
                        const QuadratureBoundary& quadratureBD,
-                       const boost::shared_ptr<SolutionTestSpace>& testSpace,
+                       const std::shared_ptr<SolutionTestSpace>& testSpace,
                        const ExpressionType& expression)
     :   M_mesh (mesh),
         M_boundaryId (boundaryID),

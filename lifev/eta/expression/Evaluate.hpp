@@ -48,8 +48,6 @@
 #include <lifev/eta/expression/EvaluateNodalExpressionVectorElement.hpp>
 #include <lifev/eta/expression/EvaluateNodalExpressionVectorElementFaceID.hpp>
 
-#include <boost/shared_ptr.hpp>
-
 namespace LifeV
 {
 
@@ -75,7 +73,7 @@ template < typename MeshType, typename SolutionSpaceType, typename ExpressionTyp
 EvaluateNodalExpressionVectorElement<MeshType, SolutionSpaceType, ExpressionType, QRAdapterType>
 evaluateNode ( const RequestLoopElement<MeshType>& request,
             const QRAdapterBase<QRAdapterType>& qrAdapterBase,
-            const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+            const std::shared_ptr<SolutionSpaceType>& solutionSpace,
             const ExpressionType& expression)
 {
     return EvaluateNodalExpressionVectorElement<MeshType, SolutionSpaceType, ExpressionType, QRAdapterType>
@@ -86,7 +84,7 @@ template < typename MeshType, typename SolutionSpaceType, typename ExpressionTyp
 EvaluateNodalExpressionVectorElement<MeshType, SolutionSpaceType, ExpressionType, QRAdapterNeverAdapt>
 evaluateNode ( const RequestLoopElement<MeshType>& request,
             const QuadratureRule& quadrature,
-            const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+            const std::shared_ptr<SolutionSpaceType>& solutionSpace,
             const ExpressionType& expression)
 {
     return EvaluateNodalExpressionVectorElement<MeshType, SolutionSpaceType, ExpressionType, QRAdapterNeverAdapt>
@@ -97,7 +95,7 @@ template < typename MeshType, typename SolutionSpaceType, typename ExpressionTyp
 EvaluateNodalExpressionVectorElementFaceID<MeshType, SolutionSpaceType, ExpressionType>
 evaluateNode ( const RequestLoopFaceID<MeshType>& request,
                const QuadratureBoundary& quadrature,
-               const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+               const std::shared_ptr<SolutionSpaceType>& solutionSpace,
                const ExpressionType& expression)
 {
     return EvaluateNodalExpressionVectorElementFaceID<MeshType, SolutionSpaceType, ExpressionType>

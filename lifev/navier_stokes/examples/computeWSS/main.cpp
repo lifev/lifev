@@ -105,16 +105,16 @@ public:
 
     // Filters
     typedef LifeV::Exporter<mesh_Type  >                       filter_Type;
-    typedef boost::shared_ptr< LifeV::Exporter<mesh_Type  > >           filterPtr_Type;
+    typedef std::shared_ptr< LifeV::Exporter<mesh_Type  > >           filterPtr_Type;
 
     typedef LifeV::ExporterEmpty<mesh_Type >                            emptyFilter_Type;
-    typedef boost::shared_ptr<emptyFilter_Type>                         emptyFilterPtr_Type;
+    typedef std::shared_ptr<emptyFilter_Type>                         emptyFilterPtr_Type;
     typedef LifeV::ExporterEnsight<mesh_Type >                          ensightFilter_Type;
-    typedef boost::shared_ptr<ensightFilter_Type>                       ensightFilterPtr_Type;
+    typedef std::shared_ptr<ensightFilter_Type>                       ensightFilterPtr_Type;
 
 #ifdef HAVE_HDF5
     typedef LifeV::ExporterHDF5<mesh_Type >                             hdf5Filter_Type;
-    typedef boost::shared_ptr<hdf5Filter_Type>                          hdf5FilterPtr_Type;
+    typedef std::shared_ptr<hdf5Filter_Type>                          hdf5FilterPtr_Type;
 #endif
 
 
@@ -124,7 +124,7 @@ public:
     //@{
     WSS ( int                                   argc,
                 char**                                argv,
-                boost::shared_ptr<Epetra_Comm>        structComm );
+                std::shared_ptr<Epetra_Comm>        structComm );
 
     ~WSS()
     {}
@@ -153,7 +153,7 @@ private:
 
 private:
     struct Private;
-    boost::shared_ptr<Private> parameters;
+    std::shared_ptr<Private> parameters;
     filterPtr_Type M_importer;
 };
 
@@ -163,11 +163,11 @@ struct WSS::Private
 {
     Private()
     {}
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_type;
+    typedef std::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_type;
 
     std::string data_file_name;
 
-    boost::shared_ptr<Epetra_Comm>     comm;
+    std::shared_ptr<Epetra_Comm>     comm;
 
 };
 
@@ -175,7 +175,7 @@ struct WSS::Private
 
 WSS::WSS ( int                                   argc,
            char**                                argv,
-           boost::shared_ptr<Epetra_Comm>        structComm) :
+           std::shared_ptr<Epetra_Comm>        structComm) :
     parameters ( new Private() )
 {
     GetPot command_line (argc, argv);
@@ -206,22 +206,22 @@ void
 WSS::run3d()
 {
     typedef VectorEpetra                                                 vector_Type;
-    typedef boost::shared_ptr<VectorEpetra>                              vectorPtr_Type;
+    typedef std::shared_ptr<VectorEpetra>                              vectorPtr_Type;
 
     typedef FESpace< mesh_Type, MapEpetra >                              wssFESpace_Type;
-    typedef boost::shared_ptr<wssFESpace_Type>                           wssFESpacePtr_Type;
+    typedef std::shared_ptr<wssFESpace_Type>                           wssFESpacePtr_Type;
 
     typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >        vectorialETFESpace_Type;
-    typedef boost::shared_ptr<vectorialETFESpace_Type>                   vectorialETFESpacePtr_Type;
+    typedef std::shared_ptr<vectorialETFESpace_Type>                   vectorialETFESpacePtr_Type;
 
     typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 1 >        scalarETFESpace_Type;
-    typedef boost::shared_ptr<scalarETFESpace_Type>                      scalarETFESpacePtr_Type;
+    typedef std::shared_ptr<scalarETFESpace_Type>                      scalarETFESpacePtr_Type;
 
     bool verbose = (parameters->comm->MyPID() == 0);
 
     //! dataElasticStructure for parameters
     GetPot dataFile ( parameters->data_file_name.c_str() );
-    boost::shared_ptr<OseenData> dataClass (new OseenData( ) );
+    std::shared_ptr<OseenData> dataClass (new OseenData( ) );
     dataClass->setup (dataFile);
 
     dataClass->showMe();
@@ -230,7 +230,7 @@ WSS::run3d()
     MeshData             meshData;
     meshData.setup (dataFile, "fluid/space_discretization");
 
-    boost::shared_ptr<mesh_Type > fullMeshPtr (new RegionMesh<LinearTetra> ( ( parameters->comm ) ) );
+    std::shared_ptr<mesh_Type > fullMeshPtr (new RegionMesh<LinearTetra> ( ( parameters->comm ) ) );
     readMesh (*fullMeshPtr, meshData);
 
     MeshPartitioner< mesh_Type > meshPart ( fullMeshPtr, parameters->comm );
@@ -294,7 +294,7 @@ WSS::run3d()
     M_importer->setMeshProcId (velFESpace->mesh(), velFESpace->map().comm().MyPID() );
 
     //! 6. Post-processing setting
-    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
+    std::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
 
     std::string const exporterType =  dataFile ( "exporter/type", "hdf5");
     std::string const nameExporter =  dataFile ( "exporter/name", "jacobian");
@@ -475,13 +475,13 @@ main ( int argc, char** argv )
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_MpiComm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+    std::shared_ptr<Epetra_MpiComm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
     if ( Comm->MyPID() == 0 )
     {
         std::cout << "% using MPI" << std::endl;
     }
 #else
-    boost::shared_ptr<Epetra_SerialComm> Comm ( new Epetra_SerialComm() );
+    std::shared_ptr<Epetra_SerialComm> Comm ( new Epetra_SerialComm() );
     std::cout << "% using serial Version" << std::endl;
 #endif
 

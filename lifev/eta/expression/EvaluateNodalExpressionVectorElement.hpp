@@ -47,8 +47,6 @@
 
 #include <lifev/eta/array/ETVectorElemental.hpp>
 
-#include <boost/shared_ptr.hpp>
-
 
 
 namespace LifeV
@@ -87,9 +85,9 @@ public:
     //@{
 
     //! Full data constructor
-    EvaluateNodalExpressionVectorElement (const boost::shared_ptr<MeshType>& mesh,
+    EvaluateNodalExpressionVectorElement (const std::shared_ptr<MeshType>& mesh,
                                           const QRAdapterType& qrAdapter,
-                                          const boost::shared_ptr<SolutionSpaceType>& testSpace,
+                                          const std::shared_ptr<SolutionSpaceType>& testSpace,
                                           const ExpressionType& expression);
 
     //! Copy constructor
@@ -113,7 +111,7 @@ public:
 
     //! Operator wrapping the addTo method (for shared_ptr)
     template <typename VectorType>
-    inline void operator>> (boost::shared_ptr<VectorType> vector)
+    inline void operator>> (std::shared_ptr<VectorType> vector)
     {
         addTo (*vector);
     }
@@ -151,13 +149,13 @@ private:
     //@}
 
     // Pointer on the mesh
-    boost::shared_ptr<MeshType> M_mesh;
+    std::shared_ptr<MeshType> M_mesh;
 
     // Quadrature to be used
     QRAdapterType M_qrAdapter;
 
     // Shared pointer on the Space
-    boost::shared_ptr<SolutionSpaceType> M_solutionSpace;
+    std::shared_ptr<SolutionSpaceType> M_solutionSpace;
 
     // Tree to compute the values for the assembly
     evaluation_Type M_evaluation;
@@ -182,9 +180,9 @@ private:
 
 template < typename MeshType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
 EvaluateNodalExpressionVectorElement < MeshType, SolutionSpaceType, ExpressionType, QRAdapterType>::
-EvaluateNodalExpressionVectorElement (const boost::shared_ptr<MeshType>& mesh,
+EvaluateNodalExpressionVectorElement (const std::shared_ptr<MeshType>& mesh,
                         const QRAdapterType& qrAdapter,
-                        const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+                        const std::shared_ptr<SolutionSpaceType>& solutionSpace,
                         const ExpressionType& expression)
     :   M_mesh (mesh),
         M_qrAdapter (qrAdapter),
