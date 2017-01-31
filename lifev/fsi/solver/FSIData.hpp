@@ -42,8 +42,7 @@
 #include <lifev/navier_stokes/solver/OseenData.hpp>
 #include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 
-#include <boost/array.hpp>
-#include <boost/scoped_ptr.hpp>
+#include <array>
 
 namespace LifeV
 {
