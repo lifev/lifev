@@ -327,12 +327,10 @@ Structure::run3d()
     MeshData             meshData;
     meshData.setup (dataFile, "solid/space_discretization");
 
-<<<<<<< HEAD
-    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr (new RegionMesh<LinearTetra> ( ( parameters->comm ) ) );
-    boost::shared_ptr<RegionMesh<LinearTetra> > localMeshPtr (new RegionMesh<LinearTetra> ( ( parameters->comm ) ) );
-=======
+
     std::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr (new RegionMesh<LinearTetra> ( ( parameters->comm ) ) );
->>>>>>> 24ac07b... Versione c++11
+    std::shared_ptr<RegionMesh<LinearTetra> > localMeshPtr (new RegionMesh<LinearTetra> ( ( parameters->comm ) ) );
+
     readMesh (*fullMeshPtr, meshData);
 
     //fullMeshPtr->showMe( );
