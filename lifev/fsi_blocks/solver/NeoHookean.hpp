@@ -64,21 +64,21 @@ class NeoHookean
 
 	typedef Epetra_Comm comm_Type;
 
-	typedef boost::shared_ptr< comm_Type > commPtr_Type;
+	typedef std::shared_ptr< comm_Type > commPtr_Type;
 
     typedef VectorEpetra vector_Type;
 
-    typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type> vectorPtr_Type;
 
     typedef MatrixEpetra<Real> matrix_Type;
 
-    typedef boost::shared_ptr<matrix_Type> matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type> matrixPtr_Type;
 
-    typedef boost::shared_ptr<BCHandler> bcPtr_Type;
+    typedef std::shared_ptr<BCHandler> bcPtr_Type;
 
     typedef RegionMesh<LinearTetra> mesh_Type;
 
-    typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
+    typedef std::shared_ptr<mesh_Type> meshPtr_Type;
 
     typedef MapEpetra map_Type;
 
@@ -142,14 +142,14 @@ public:
      *  @return M_displacementFESpace FE space used for the displacement
      *
      */
-    const boost::shared_ptr<FESpace<mesh_Type, map_Type> >& fespace ( ) const { return M_displacementFESpace; };
+    const std::shared_ptr<FESpace<mesh_Type, map_Type> >& fespace ( ) const { return M_displacementFESpace; };
 
     //! Getter of the ETA FE space
     /*!
      *  @return M_displacementFESpace_ETA ETA FE space used for the displacement
      *
      */
-    const boost::shared_ptr<ETFESpace_displacement >& et_fespace ( ) const { return M_displacementFESpace_ETA; };
+    const std::shared_ptr<ETFESpace_displacement >& et_fespace ( ) const { return M_displacementFESpace_ETA; };
 
 private:
 
@@ -170,10 +170,10 @@ private:
     std::string M_dOrder;
 
     // FE space
-    boost::shared_ptr<FESpace<mesh_Type, map_Type> > M_displacementFESpace;
+    std::shared_ptr<FESpace<mesh_Type, map_Type> > M_displacementFESpace;
 
     // ET FE Space
-    boost::shared_ptr<ETFESpace_displacement > M_displacementFESpace_ETA;
+    std::shared_ptr<ETFESpace_displacement > M_displacementFESpace_ETA;
 
     // jacobian matrix
     matrixPtr_Type M_jacobian;

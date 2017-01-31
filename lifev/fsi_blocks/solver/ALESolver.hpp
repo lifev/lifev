@@ -81,11 +81,11 @@ public:
 
 	typedef RegionMesh<LinearTetra> mesh_Type;
     typedef MatrixEpetra<Real> matrix_Type;
-    typedef boost::shared_ptr<matrix_Type> matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type> matrixPtr_Type;
     typedef VectorEpetra vector_Type;
-    typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type> vectorPtr_Type;
     typedef ETFESpace< mesh_Type, MapEpetra, 3, 3 > ETFESpaceAle_Type;
-    typedef boost::shared_ptr<ETFESpaceAle_Type> ETFESpaceAlePtr_Type;
+    typedef std::shared_ptr<ETFESpaceAle_Type> ETFESpaceAlePtr_Type;
 
     //@}
 
@@ -99,7 +99,7 @@ public:
       \param comm  the Epetra_Comm to be used for communication
     */
 
-    ALESolver ( FESpace<mesh_Type, MapEpetra>& mmFESpace, boost::shared_ptr<Epetra_Comm>  comm);
+    ALESolver ( FESpace<mesh_Type, MapEpetra>& mmFESpace, std::shared_ptr<Epetra_Comm>  comm);
 
     //! Constructors for an harmonics extensions with offset
     /*!
@@ -109,7 +109,7 @@ public:
       \param offset use this offset to fill the matrix (both: row and column offset)
     */
     ALESolver ( FESpace<mesh_Type, MapEpetra>&      mmFESpace,
-                              boost::shared_ptr<Epetra_Comm> comm,
+                              std::shared_ptr<Epetra_Comm> comm,
                               MapEpetra&                     localMap,
                               UInt                           offset = 0
                             );
@@ -225,7 +225,7 @@ public:
         return M_FESpace;
     }
 
-    const boost::shared_ptr<Epetra_Comm>& comm() const
+    const std::shared_ptr<Epetra_Comm>& comm() const
     {
         return M_displayer.comm();
     }

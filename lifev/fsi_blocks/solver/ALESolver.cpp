@@ -10,7 +10,7 @@ namespace LifeV
 
 
 ALESolver::ALESolver ( FESpace<mesh_Type, MapEpetra>& mmFESpace,
-                          boost::shared_ptr<Epetra_Comm>    comm ) :
+                          std::shared_ptr<Epetra_Comm>    comm ) :
     M_FESpace               ( mmFESpace ),
     M_localMap              ( M_FESpace.map() ),
     M_matrHE                ( new matrix_Type (M_localMap ) ),
@@ -29,7 +29,7 @@ ALESolver::ALESolver ( FESpace<mesh_Type, MapEpetra>& mmFESpace,
 }
 
 ALESolver::ALESolver ( FESpace<mesh_Type, MapEpetra>& mmFESpace,
-                          boost::shared_ptr<Epetra_Comm>              comm ,
+                          std::shared_ptr<Epetra_Comm>              comm ,
                           MapEpetra& localMap,
                           UInt offset) :
     M_FESpace               ( mmFESpace ),
@@ -225,19 +225,19 @@ void ALESolver::updateShapeDerivatives ( Real&                          alpha,
             M_FESpace.fe().updateFirstDerivQuadPt ( M_FESpace.mesh()->volumeList ( i ) );
 
             // initialization of elementary vectors
-            boost::shared_ptr<MatrixElemental> elementMatrixPressure ( new MatrixElemental ( pressureFESpace.fe().nbFEDof(),
+            std::shared_ptr<MatrixElemental> elementMatrixPressure ( new MatrixElemental ( pressureFESpace.fe().nbFEDof(),
                                                                        1,
                                                                        0,
                                                                        M_FESpace.fe().nbFEDof(),
                                                                        0,
                                                                        nDimensions ) );
-            boost::shared_ptr<MatrixElemental> elementMatrixVelocity ( new MatrixElemental ( velocityFESpace.fe().nbFEDof(),
+            std::shared_ptr<MatrixElemental> elementMatrixVelocity ( new MatrixElemental ( velocityFESpace.fe().nbFEDof(),
                                                                        nDimensions,
                                                                        0,
                                                                        velocityFESpace.fe().nbFEDof(),
                                                                        0,
                                                                        nDimensions ) );
-            boost::shared_ptr<MatrixElemental> elementMatrixConvective;
+            std::shared_ptr<MatrixElemental> elementMatrixConvective;
 
             if ( convectiveTermDerivative )
             {

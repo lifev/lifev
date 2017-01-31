@@ -52,19 +52,19 @@ main ( int argc, char** argv )
     bool verbose (false);
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> Comm ( new Epetra_MpiComm (MPI_COMM_WORLD) );
     if ( Comm->MyPID() == 0 )
     {
         verbose = true;
     }
 #else
-    boost::shared_ptr<Epetra_Comm> Comm( new Epetra_SerialComm () );
+    std::shared_ptr<Epetra_Comm> Comm( new Epetra_SerialComm () );
     verbose = true;
 #endif
     
     typedef RegionMesh<LinearTetra> mesh_Type;
     typedef VectorEpetra vector_Type;
-    typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type> vectorPtr_Type;
     
     Real normTwo_sol;
 
@@ -134,12 +134,12 @@ main ( int argc, char** argv )
     // Getting the boundary conditions //
     // --------------------------------//
         
-    boost::shared_ptr<BCHandler> interfaceFluidBC ( new BCHandler (*BCh_interfaceFluid ( ) ) );
+    std::shared_ptr<BCHandler> interfaceFluidBC ( new BCHandler (*BCh_interfaceFluid ( ) ) );
     fsi.setFluidInterfaceBoundaryConditions(interfaceFluidBC);
         
-    boost::shared_ptr<BCHandler> fluidBC ( new BCHandler (*BCh_fluid () ) );
-    boost::shared_ptr<BCHandler> structureBC ( new BCHandler (*BCh_structure () ) );
-    boost::shared_ptr<BCHandler> aleBC ( new BCHandler (*BCh_ale () ) );
+    std::shared_ptr<BCHandler> fluidBC ( new BCHandler (*BCh_fluid () ) );
+    std::shared_ptr<BCHandler> structureBC ( new BCHandler (*BCh_structure () ) );
+    std::shared_ptr<BCHandler> aleBC ( new BCHandler (*BCh_ale () ) );
     fsi.setBoundaryConditions( fluidBC, structureBC, aleBC );
 
     std::string preconditioner = dataFile("fluid/preconditionerType","none");

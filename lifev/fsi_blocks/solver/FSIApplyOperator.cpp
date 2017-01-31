@@ -18,7 +18,7 @@ M_useTranspose(false)
 
 }
 
-void FSIApplyOperator::setUp(const boost::shared_ptr<BlockEpetra_Map> & map, const commPtr_Type & comm)
+void FSIApplyOperator::setUp(const std::shared_ptr<BlockEpetra_Map> & map, const commPtr_Type & comm)
 {
     M_comm = comm;
 
@@ -31,8 +31,8 @@ void FSIApplyOperator::setUp(const boost::shared_ptr<BlockEpetra_Map> & map, con
 
 
 //! SetUp for a "rectangular operator"
-void FSIApplyOperator::setUp(const boost::shared_ptr<BlockEpetra_Map> & domainMap,
-                          const boost::shared_ptr<BlockEpetra_Map> & rangeMap,
+void FSIApplyOperator::setUp(const std::shared_ptr<BlockEpetra_Map> & domainMap,
+                          const std::shared_ptr<BlockEpetra_Map> & rangeMap,
                           const commPtr_Type & comm)
 {
     M_comm = comm;

@@ -74,7 +74,7 @@ int main (int argc, char** argv)
     typedef RegionMesh<LinearTetra> mesh_Type;
 
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 
     if (comm->NumProc() != 1)
     {
@@ -106,8 +106,8 @@ int main (int argc, char** argv)
     std::cout << "Name of interface HDF5 container: "
               << interfacePartsFileName << std::endl;
 
-    boost::shared_ptr<mesh_Type> fluidMeshPtr (new mesh_Type ( comm ) );
-    boost::shared_ptr<mesh_Type> solidMeshPtr (new mesh_Type ( comm ) );
+    std::shared_ptr<mesh_Type> fluidMeshPtr (new mesh_Type ( comm ) );
+    std::shared_ptr<mesh_Type> solidMeshPtr (new mesh_Type ( comm ) );
 
     //Fluid
     MeshData fluidMeshData (dataFile, "fluid_mesh");
@@ -139,8 +139,8 @@ int main (int argc, char** argv)
     solidMeshPtr.reset();
 
     // Write fluid, solid, and interface parts
-    boost::shared_ptr<Epetra_MpiComm> mpiComm =
-        boost::dynamic_pointer_cast<Epetra_MpiComm> (comm);
+    std::shared_ptr<Epetra_MpiComm> mpiComm =
+        std::dynamic_pointer_cast<Epetra_MpiComm> (comm);
 
     PartitionIO<mesh_Type> fluidPartitionIO (fluidPartsFileName, mpiComm);
     fluidPartitionIO.write (fsiPartitioner.fluidPartitions() );

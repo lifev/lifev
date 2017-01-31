@@ -53,8 +53,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Epetra_MpiComm.h>
 
-#include <boost/shared_ptr.hpp>
-
 //Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
@@ -80,7 +78,7 @@ main ( int argc, char** argv )
 #ifdef HAVE_MPI
 
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_MpiComm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_MpiComm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 
     const bool verbose (comm->MyPID() == 0);
 
@@ -103,9 +101,9 @@ main ( int argc, char** argv )
         std::cout << " done ! " << std::endl;
     }
 
-    boost::shared_ptr<mesh_Type> fluidMesh;
-    boost::shared_ptr<mesh_Type> solidMesh;
-    boost::shared_ptr<std::map<UInt, UInt> > interfaceMap;
+    std::shared_ptr<mesh_Type> fluidMesh;
+    std::shared_ptr<mesh_Type> solidMesh;
+    std::shared_ptr<std::map<UInt, UInt> > interfaceMap;
 
     {
         // Load fluid mesh part from HDF5

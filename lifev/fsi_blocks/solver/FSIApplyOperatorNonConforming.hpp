@@ -82,27 +82,27 @@ public:
 
     typedef  LinearOperatorAlgebra                     super;
     typedef  Epetra_CrsMatrix                          matrix_Type;
-    typedef  boost::shared_ptr<matrix_Type>            matrixPtr_Type;
+    typedef  std::shared_ptr<matrix_Type>            matrixPtr_Type;
     typedef  MatrixEpetra<Real>                        matrixEpetra_Type;
-    typedef  boost::shared_ptr<matrixEpetra_Type>      matrixEpetraPtr_Type;
+    typedef  std::shared_ptr<matrixEpetra_Type>      matrixEpetraPtr_Type;
     typedef  Epetra_Vector                             lumpedMatrix_Type;
-    typedef  boost::shared_ptr<lumpedMatrix_Type>      lumpedMatrixPtr_Type;
+    typedef  std::shared_ptr<lumpedMatrix_Type>      lumpedMatrixPtr_Type;
     typedef  super::comm_Type                          comm_Type;
     typedef  super::commPtr_Type                       commPtr_Type;
-    typedef  boost::shared_ptr<Teuchos::ParameterList> parameterListPtr_Type;
+    typedef  std::shared_ptr<Teuchos::ParameterList> parameterListPtr_Type;
     typedef  MapEpetra                                 mapEpetra_Type;
-    typedef  boost::shared_ptr<mapEpetra_Type>         mapEpetraPtr_Type;
+    typedef  std::shared_ptr<mapEpetra_Type>         mapEpetraPtr_Type;
     typedef  VectorEpetra                              VectorEpetra_Type;
-    typedef  boost::shared_ptr<VectorEpetra_Type>      VectorEpetraPtr_Type;
-    typedef  boost::shared_ptr<Interpolation>          interpolationPtr_Type;
+    typedef  std::shared_ptr<VectorEpetra_Type>      VectorEpetraPtr_Type;
+    typedef  std::shared_ptr<Interpolation>          interpolationPtr_Type;
 
 	typedef LifeV::Preconditioner                  basePrec_Type;
-	typedef boost::shared_ptr<basePrec_Type>       basePrecPtr_Type;
+	typedef std::shared_ptr<basePrec_Type>       basePrecPtr_Type;
 	typedef LifeV::PreconditionerIfpack            prec_Type;
-	typedef boost::shared_ptr<prec_Type>           precPtr_Type;
+	typedef std::shared_ptr<prec_Type>           precPtr_Type;
 	typedef Teuchos::RCP< Teuchos::ParameterList > parameterListRCP_Type;
 
-	typedef boost::shared_ptr<GetPot> datafilePtr_Type;
+	typedef std::shared_ptr<GetPot> datafilePtr_Type;
 
     //@}
 
@@ -127,9 +127,9 @@ public:
     //! \warning Transpose of this operator is not supported
     int SetUseTranspose(bool UseTranspose){M_useTranspose = UseTranspose; return 0;}
     //! set the domain map
-    void setDomainMap(const boost::shared_ptr<BlockEpetra_Map> & domainMap){M_operatorDomainMap = domainMap;}
+    void setDomainMap(const std::shared_ptr<BlockEpetra_Map> & domainMap){M_operatorDomainMap = domainMap;}
     //! set the range map
-    void setRangeMap(const boost::shared_ptr<BlockEpetra_Map> & rangeMap){M_operatorRangeMap = rangeMap;}
+    void setRangeMap(const std::shared_ptr<BlockEpetra_Map> & rangeMap){M_operatorRangeMap = rangeMap;}
     //@}
 
 
@@ -247,9 +247,9 @@ private:
     //! Create the domain and the range maps
     void setMaps();
 
-    boost::shared_ptr<BlockEpetra_Map> M_operatorDomainMap;
+    std::shared_ptr<BlockEpetra_Map> M_operatorDomainMap;
     //! Range Map
-    boost::shared_ptr<BlockEpetra_Map> M_operatorRangeMap;
+    std::shared_ptr<BlockEpetra_Map> M_operatorRangeMap;
 
     //! Communicator
     commPtr_Type M_comm;
@@ -322,19 +322,19 @@ private:
     const std::string M_label;
 
     //! Vectors needed for the Apply - input vectors associated to each part of the residual
-    boost::shared_ptr<VectorEpetra_Type > M_X_velocity;
-    boost::shared_ptr<VectorEpetra_Type > M_X_pressure;
-    boost::shared_ptr<VectorEpetra_Type > M_X_displacement;
-    boost::shared_ptr<VectorEpetra_Type > M_X_lambda;
-    boost::shared_ptr<VectorEpetra_Type > M_X_geometry;
+    std::shared_ptr<VectorEpetra_Type > M_X_velocity;
+    std::shared_ptr<VectorEpetra_Type > M_X_pressure;
+    std::shared_ptr<VectorEpetra_Type > M_X_displacement;
+    std::shared_ptr<VectorEpetra_Type > M_X_lambda;
+    std::shared_ptr<VectorEpetra_Type > M_X_geometry;
 
     //! Vectors needed for the Apply - output vectors associated to the application of the
     // Jacobian to each part of the residual
-    boost::shared_ptr<VectorEpetra_Type > M_Y_velocity;
-    boost::shared_ptr<VectorEpetra_Type > M_Y_pressure;
-    boost::shared_ptr<VectorEpetra_Type > M_Y_displacement;
-    boost::shared_ptr<VectorEpetra_Type > M_Y_lambda;
-    boost::shared_ptr<VectorEpetra_Type > M_Y_geometry;
+    std::shared_ptr<VectorEpetra_Type > M_Y_velocity;
+    std::shared_ptr<VectorEpetra_Type > M_Y_pressure;
+    std::shared_ptr<VectorEpetra_Type > M_Y_displacement;
+    std::shared_ptr<VectorEpetra_Type > M_Y_lambda;
+    std::shared_ptr<VectorEpetra_Type > M_Y_geometry;
 
     //! If using the stabilization for the fluid
     bool M_useStabilization;

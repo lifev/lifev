@@ -75,13 +75,13 @@ class DOFInterfaceIO
 public:
     //! @name Public Types
     //@{
-    typedef boost::shared_ptr<Epetra_MpiComm> commPtr_Type;
+    typedef std::shared_ptr<Epetra_MpiComm> commPtr_Type;
     typedef DOFInterface3Dto3D interface_Type;
-    typedef boost::shared_ptr<interface_Type> interfacePtr_Type;
+    typedef std::shared_ptr<interface_Type> interfacePtr_Type;
     typedef std::vector<interfacePtr_Type> interfaceVector_Type;
-    typedef boost::shared_ptr<interfaceVector_Type> interfaceVectorPtr_Type;
+    typedef std::shared_ptr<interfaceVector_Type> interfaceVectorPtr_Type;
     typedef std::map<UInt, UInt>                     dofMap_Type;
-    typedef boost::shared_ptr<dofMap_Type>           dofMapPtr_Type;
+    typedef std::shared_ptr<dofMap_Type>           dofMapPtr_Type;
 
     //@}
 

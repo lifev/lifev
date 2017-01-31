@@ -46,9 +46,9 @@ public:
     typedef super::vectorPtr_Type vectorPtr_Type;
 
     typedef  MapEpetra                                 mapEpetra_Type;
-    typedef  boost::shared_ptr<mapEpetra_Type>         mapEpetraPtr_Type;
+    typedef  std::shared_ptr<mapEpetra_Type>         mapEpetraPtr_Type;
     typedef  VectorEpetra                       VectorEpetra_Type;
-    typedef  boost::shared_ptr<VectorEpetra_Type>      VectorEpetraPtr_Type;
+    typedef  std::shared_ptr<VectorEpetra_Type>      VectorEpetraPtr_Type;
 
     typedef boost::numeric::ublas::matrix<operatorPtr_Type> operatorPtrContainer_Type;
     typedef std::vector<vectorPtr_Type> vectorPtrContainer_Type;
@@ -69,7 +69,7 @@ public:
      *                   rangeMap is assumed to be the same of domainMap.
      * @param comm:      the communicator.
      */
-    void setUp (const boost::shared_ptr<BlockEpetra_Map> & map, const commPtr_Type & comm);
+    void setUp (const std::shared_ptr<BlockEpetra_Map> & map, const commPtr_Type & comm);
 
     //! SetUp for a "rectangular operator"
     /*!
@@ -81,8 +81,8 @@ public:
      *                   rangeMap.
      * @param comm:      the communicator.
      */
-    void setUp (const boost::shared_ptr<BlockEpetra_Map> & domainMap,
-                const boost::shared_ptr<BlockEpetra_Map> & rangeMap,
+    void setUp (const std::shared_ptr<BlockEpetra_Map> & domainMap,
+                const std::shared_ptr<BlockEpetra_Map> & rangeMap,
                 const commPtr_Type & comm);
 
     //! SetUp when the operator is given like a boost::matrix
@@ -144,13 +144,13 @@ public:
     const map_Type & OperatorDomainMap() const {return *(M_domainMap->monolithicMap());}
     //! Returns the Epetra_Map object associated with the domain of this operator as a pointer
     const mapPtr_Type & OperatorDomainMap_ptr() const {return M_domainMap->monolithicMap();}
-    const boost::shared_ptr<BlockEpetra_Map> & OperatorDomainBlockMapPtr() const {return M_domainMap;}
+    const std::shared_ptr<BlockEpetra_Map> & OperatorDomainBlockMapPtr() const {return M_domainMap;}
 
     //! Returns the Epetra_Map object associated with the range of this operator.
     const map_Type & OperatorRangeMap() const {return *(M_rangeMap->monolithicMap());}
     //! Returns the Epetra_Map object associated with the range of this operator as a pointer
     const mapPtr_Type & OperatorRangeMap_ptr() const {return M_rangeMap->monolithicMap();}
-    const boost::shared_ptr<BlockEpetra_Map> & OperatorRangeBlockMapPtr() const {return M_rangeMap;}
+    const std::shared_ptr<BlockEpetra_Map> & OperatorRangeBlockMapPtr() const {return M_rangeMap;}
 
 protected:
     //! Compute Y = Op*X;
@@ -180,9 +180,9 @@ private:
     //! @name Maps
     //@{
     //! Domain Map
-    boost::shared_ptr<BlockEpetra_Map> M_domainMap;
+    std::shared_ptr<BlockEpetra_Map> M_domainMap;
     //! Range Map
-    boost::shared_ptr<BlockEpetra_Map> M_rangeMap;
+    std::shared_ptr<BlockEpetra_Map> M_rangeMap;
 
     mapEpetraPtr_Type M_monolithicMap;
     //@}

@@ -133,46 +133,46 @@ public:
 	// Public typedefs
 
     typedef Epetra_Comm comm_Type;
-	typedef boost::shared_ptr< comm_Type > commPtr_Type;
+	typedef std::shared_ptr< comm_Type > commPtr_Type;
 
-    typedef boost::shared_ptr<GetPot> datafilePtr_Type;
+    typedef std::shared_ptr<GetPot> datafilePtr_Type;
 
     typedef RegionMesh<LinearTetra> mesh_Type;
-    typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
+    typedef std::shared_ptr<mesh_Type> meshPtr_Type;
 
-    typedef boost::shared_ptr<MeshData> meshDataPtr_Type;
+    typedef std::shared_ptr<MeshData> meshDataPtr_Type;
 
-    typedef boost::shared_ptr<MeshPartitioner<mesh_Type> > meshPartitionerPtr_Type;
+    typedef std::shared_ptr<MeshPartitioner<mesh_Type> > meshPartitionerPtr_Type;
 
     typedef MapEpetra map_Type;
-	typedef boost::shared_ptr<map_Type> mapPtr_Type;
+	typedef std::shared_ptr<map_Type> mapPtr_Type;
 
     typedef FESpace< mesh_Type, map_Type > FESpace_Type;
-    typedef boost::shared_ptr<FESpace_Type> FESpacePtr_Type;
+    typedef std::shared_ptr<FESpace_Type> FESpacePtr_Type;
 
     typedef ETFESpace< mesh_Type, map_Type, 3, 3 > solidETFESpace_Type;
-    typedef boost::shared_ptr<solidETFESpace_Type> solidETFESpacePtr_Type;
+    typedef std::shared_ptr<solidETFESpace_Type> solidETFESpacePtr_Type;
 
     typedef BCHandler bc_Type;
-    typedef boost::shared_ptr<BCHandler> bcPtr_Type;
+    typedef std::shared_ptr<BCHandler> bcPtr_Type;
 
     typedef VectorEpetra vector_Type;
-	typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
+	typedef std::shared_ptr<vector_Type> vectorPtr_Type;
 
 	typedef MatrixEpetra<Real> matrix_Type;
-	typedef boost::shared_ptr<matrix_Type> matrixPtr_Type;
+	typedef std::shared_ptr<matrix_Type> matrixPtr_Type;
 
 	typedef Teuchos::ParameterList parameterList_Type;
-	typedef boost::shared_ptr<parameterList_Type> parameterListPtr_Type;
+	typedef std::shared_ptr<parameterList_Type> parameterListPtr_Type;
 
 	typedef Interpolation interpolation_Type;
-	typedef boost::shared_ptr<interpolation_Type> interpolationPtr_Type;
+	typedef std::shared_ptr<interpolation_Type> interpolationPtr_Type;
 
 	typedef LifeV::Preconditioner            basePrec_Type;
-	typedef boost::shared_ptr<basePrec_Type> basePrecPtr_Type;
+	typedef std::shared_ptr<basePrec_Type> basePrecPtr_Type;
 
 	typedef LifeV::PreconditionerIfpack  prec_Type;
-	typedef boost::shared_ptr<prec_Type> precPtr_Type;
+	typedef std::shared_ptr<prec_Type> precPtr_Type;
 
 	typedef Teuchos::RCP< Teuchos::ParameterList > parameterListRCP_Type;
 
@@ -271,7 +271,7 @@ public:
     Real getEndTime () { return M_t_end; };
 
     //! Get the fluid solver
-    boost::shared_ptr<NavierStokesSolverBlocks> getFluid() { return M_fluid; };
+    std::shared_ptr<NavierStokesSolverBlocks> getFluid() { return M_fluid; };
 
     //! Method to be used before solveTimeStep. If one does not use
     // the solveFSIproblem() method, the following methods have to called:
@@ -336,7 +336,7 @@ private:
      @param localMesh mesh
      @param outputFileName filename output file
      */
-    void instantiateExporter( boost::shared_ptr< Exporter<mesh_Type > > & exporter,
+    void instantiateExporter( std::shared_ptr< Exporter<mesh_Type > > & exporter,
 			  	  	  	  	  const meshPtr_Type& localMesh,
 			  	  	  	  	  const std::string& outputFileName );
     
@@ -420,15 +420,15 @@ private:
 	solidETFESpacePtr_Type M_displacementETFESpace;
 
     // navier-stokes solver
-    boost::shared_ptr<NavierStokesSolverBlocks> M_fluid;
-    boost::shared_ptr<LinearElasticity> M_structure;
-    boost::shared_ptr<NeoHookean> M_structureNeoHookean;
-    boost::shared_ptr<ALESolver> M_ale;
+    std::shared_ptr<NavierStokesSolverBlocks> M_fluid;
+    std::shared_ptr<LinearElasticity> M_structure;
+    std::shared_ptr<NeoHookean> M_structureNeoHookean;
+    std::shared_ptr<ALESolver> M_ale;
 
     // time advance for the structure
-    boost::shared_ptr<Newmark> M_structureTimeAdvance;
-    boost::shared_ptr<TimeAndExtrapolationHandler> M_aleTimeAdvance;
-    boost::shared_ptr<TimeAndExtrapolationHandler> M_fluidTimeAdvance;
+    std::shared_ptr<Newmark> M_structureTimeAdvance;
+    std::shared_ptr<TimeAndExtrapolationHandler> M_aleTimeAdvance;
+    std::shared_ptr<TimeAndExtrapolationHandler> M_fluidTimeAdvance;
 
     // boundary conditions
     bcPtr_Type M_fluidBC;
@@ -456,16 +456,16 @@ private:
 	UInt M_maxiterNonlinear;
 	std::ofstream M_out_res;
 
-	boost::shared_ptr<DOFInterface3Dto3D> M_dofStructureToFluid;
-	boost::shared_ptr<map_Type> M_structureInterfaceMap;
-	boost::shared_ptr<map_Type> M_fluidInterfaceMap;
-	boost::shared_ptr<map_Type> M_lagrangeMap;
+	std::shared_ptr<DOFInterface3Dto3D> M_dofStructureToFluid;
+	std::shared_ptr<map_Type> M_structureInterfaceMap;
+	std::shared_ptr<map_Type> M_fluidInterfaceMap;
+	std::shared_ptr<map_Type> M_lagrangeMap;
 	vectorPtr_Type M_numerationInterface;
 
-	boost::shared_ptr<FSIcouplingCE> M_coupling;
+	std::shared_ptr<FSIcouplingCE> M_coupling;
 
-	boost::shared_ptr<Exporter<mesh_Type > > M_exporterFluid;
-	boost::shared_ptr<Exporter<mesh_Type > > M_exporterStructure;
+	std::shared_ptr<Exporter<mesh_Type > > M_exporterFluid;
+	std::shared_ptr<Exporter<mesh_Type > > M_exporterStructure;
 
 	// Vectors for the exporters
 	vectorPtr_Type M_fluidVelocity;
@@ -478,7 +478,7 @@ private:
 	vectorPtr_Type M_structureAcceleration;
 
 	// Monolithic map
-	boost::shared_ptr<map_Type> M_monolithicMap;
+	std::shared_ptr<map_Type> M_monolithicMap;
 
 	vectorPtr_Type M_rhsFluid;
 	vectorPtr_Type M_rhsStructure;
@@ -492,19 +492,19 @@ private:
 	matrixPtr_Type M_matrixStructure_noBc;
 
 	// Operator to apply Jacobian of the FSI
-	boost::shared_ptr<LifeV::Operators::FSIApplyOperator> M_applyOperatorJacobian;
+	std::shared_ptr<LifeV::Operators::FSIApplyOperator> M_applyOperatorJacobian;
 
 	// Operator to compute the residual of the FSI
-	boost::shared_ptr<LifeV::Operators::FSIApplyOperator> M_applyOperatorResidual;
+	std::shared_ptr<LifeV::Operators::FSIApplyOperator> M_applyOperatorResidual;
 
 	// Operator to apply Jacobian of the FSI in the nonconforming case
-	boost::shared_ptr<LifeV::Operators::FSIApplyOperatorNonConforming> M_applyOperatorJacobianNonConforming;
+	std::shared_ptr<LifeV::Operators::FSIApplyOperatorNonConforming> M_applyOperatorJacobianNonConforming;
 
 	// Preconditioner operator
-	boost::shared_ptr<LifeV::Operators::DirichletNeumannPreconditioner> M_prec;
+	std::shared_ptr<LifeV::Operators::DirichletNeumannPreconditioner> M_prec;
 
 	// Epetra Operator needed to solve the linear system
-	boost::shared_ptr<Operators::InvertibleOperator> M_invOper;
+	std::shared_ptr<Operators::InvertibleOperator> M_invOper;
 
 	// Parameter list solver
 	parameterListPtr_Type M_pListLinSolver;
@@ -524,11 +524,11 @@ private:
 	// Extrapolation of the initial guess for Newton
 	bool M_extrapolateInitialGuess;
 	UInt M_orderExtrapolationInitialGuess;
-	boost::shared_ptr<TimeAndExtrapolationHandler> M_extrapolationSolution;
+	std::shared_ptr<TimeAndExtrapolationHandler> M_extrapolationSolution;
 
 	// paritioned meshes
 	bool M_usePartitionedMeshes;
-	boost::shared_ptr<std::map<UInt, UInt> > M_localDofMap;
+	std::shared_ptr<std::map<UInt, UInt> > M_localDofMap;
 
 	bool M_subiterateFluidDirichlet;
 
@@ -558,8 +558,8 @@ private:
     
     bool M_restart;
     
-    boost::shared_ptr<ExporterHDF5<mesh_Type > > M_importerFluid;     // Import just from solution in hdf5 format! I do not know
-    boost::shared_ptr<ExporterHDF5<mesh_Type > > M_importerStructure; // if the import with other filters works.
+    std::shared_ptr<ExporterHDF5<mesh_Type > > M_importerFluid;     // Import just from solution in hdf5 format! I do not know
+    std::shared_ptr<ExporterHDF5<mesh_Type > > M_importerStructure; // if the import with other filters works.
 
 	// To handle the post-processing
 	int M_saveEvery;
@@ -575,7 +575,7 @@ private:
 	bool             M_prescribeInflowFlowrate;
 	vectorPtr_Type   M_dsk;
 	bool             M_useBDF;
-	boost::shared_ptr<BDFSecondOrderDerivative> M_structureTimeAdvanceBDF;
+	std::shared_ptr<BDFSecondOrderDerivative> M_structureTimeAdvanceBDF;
 	UInt             M_orderBDFSolid;
 };
 

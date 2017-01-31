@@ -66,21 +66,21 @@ public:
 	// Public typedefs
 
     typedef Epetra_Comm comm_Type;
-	typedef boost::shared_ptr< comm_Type > commPtr_Type;
+	typedef std::shared_ptr< comm_Type > commPtr_Type;
 
     typedef RegionMesh<LinearTetra> mesh_Type;
-    typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
+    typedef std::shared_ptr<mesh_Type> meshPtr_Type;
 
     typedef MapEpetra map_Type;
-	typedef boost::shared_ptr<map_Type> mapPtr_Type;
+	typedef std::shared_ptr<map_Type> mapPtr_Type;
 
 	typedef MatrixEpetra<Real> matrix_Type;
-	typedef boost::shared_ptr<matrix_Type> matrixPtr_Type;
+	typedef std::shared_ptr<matrix_Type> matrixPtr_Type;
 
-	typedef boost::shared_ptr<VectorEpetra> vectorPtr_Type;
+	typedef std::shared_ptr<VectorEpetra> vectorPtr_Type;
 
     typedef FESpace< mesh_Type, map_Type > FESpace_Type;
-    typedef boost::shared_ptr<FESpace_Type> FESpacePtr_Type;
+    typedef std::shared_ptr<FESpace_Type> FESpacePtr_Type;
 
     //! Constructor
 	FSIcouplingCE(const commPtr_Type& communicator);

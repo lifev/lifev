@@ -73,31 +73,31 @@ public:
     //@{
     typedef MeshType mesh_Type;
     typedef MeshType uncutMesh_Type;
-    typedef boost::shared_ptr<uncutMesh_Type> uncutMeshPtr_Type;
+    typedef std::shared_ptr<uncutMesh_Type> uncutMeshPtr_Type;
     typedef std::vector<uncutMeshPtr_Type> uncutMeshVector_Type;
-    typedef boost::shared_ptr<uncutMeshVector_Type> uncutMeshVectorPtr_Type;
+    typedef std::shared_ptr<uncutMeshVector_Type> uncutMeshVectorPtr_Type;
 
     typedef std::vector<std::vector<Int> > graph_Type;
-    typedef boost::shared_ptr<graph_Type> graphPtr_Type;
+    typedef std::shared_ptr<graph_Type> graphPtr_Type;
 
     typedef Epetra_Comm comm_Type;
-    typedef boost::shared_ptr<comm_Type> commPtr_Type;
+    typedef std::shared_ptr<comm_Type> commPtr_Type;
 
     typedef FESpace<uncutMesh_Type, MapEpetra> feSpace_Type;
-    typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
+    typedef std::shared_ptr<feSpace_Type> feSpacePtr_Type;
     typedef std::vector<feSpacePtr_Type> feSpaceVector_Type;
-    typedef boost::shared_ptr<feSpaceVector_Type> feSpaceVectorPtr_Type;
+    typedef std::shared_ptr<feSpaceVector_Type> feSpaceVectorPtr_Type;
 
     typedef DOFInterface3Dto3D interface_Type;
-    typedef boost::shared_ptr<interface_Type> interfacePtr_Type;
+    typedef std::shared_ptr<interface_Type> interfacePtr_Type;
     typedef std::vector<interfacePtr_Type> interfaceVector_Type;
     // The vector contains pointers to each fluid partition's interface with
     // the solid. The vector must be wrapped in a pointer so it can be stored
     // inside HDF5Filter3DMesh when doing output.
-    typedef boost::shared_ptr<interfaceVector_Type> interfaceVectorPtr_Type;
+    typedef std::shared_ptr<interfaceVector_Type> interfaceVectorPtr_Type;
 
     typedef MeshPartitioner<uncutMesh_Type> meshCutter_Type;
-    typedef boost::shared_ptr<meshCutter_Type> meshCutterPtr_Type;
+    typedef std::shared_ptr<meshCutter_Type> meshCutterPtr_Type;
 
     //@}
 
@@ -107,9 +107,9 @@ public:
     //! Constructor
     /*!
         Constructor which configures the MeshPartitionerOfflineFSI object
-        @param uncutFluidMesh const boost::shared_ptr to the unpartitioned
+        @param uncutFluidMesh const std::shared_ptr to the unpartitioned
         fluid mesh
-        @param uncutSolidMesh const boost::shared_ptr to the unpartitioned
+        @param uncutSolidMesh const std::shared_ptr to the unpartitioned
         solid mesh
         @param fluidPartitionNumber Int
         @param solidPartitionNumber Int
@@ -119,7 +119,7 @@ public:
         @param solidInterfaceFlag LifeV::MarkerIDStandardPolicy::markerID_Type (Int)
         @param interfaceTolerance Real
         @param fluidInterfaceVertexFlag Int
-        @param comm boost::shared_ptr to a Epetra_Comm object
+        @param comm std::shared_ptr to a Epetra_Comm object
      */
     MeshPartitionerOfflineFSI (const uncutMeshPtr_Type& uncutFluidMesh,
                                const uncutMeshPtr_Type& uncutSolidMesh,
