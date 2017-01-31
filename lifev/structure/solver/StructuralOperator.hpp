@@ -132,8 +132,8 @@ private:
 class sourceVectorialFunctor
 {
 public:
-    typedef boost::function<VectorSmall<3> ( Real const&, Real const&, Real const&, Real const& ) > volumeForce_Type;
-    typedef boost::shared_ptr<volumeForce_Type >                                                    volumeForcePtr_Type;
+    typedef std::function<VectorSmall<3> ( Real const&, Real const&, Real const&, Real const& ) > volumeForce_Type;
+    typedef std::shared_ptr<volumeForce_Type >                                                    volumeForcePtr_Type;
     typedef VectorSmall<3>              return_Type;
 
     sourceVectorialFunctor ( const volumeForcePtr_Type volumeSource )

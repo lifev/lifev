@@ -60,9 +60,6 @@
 
 #include <lifev/core/array/VectorEpetra.hpp>
 
-#include <boost/shared_ptr.hpp>
-
-
 namespace LifeV
 {
 //! @name Public typedefs
@@ -90,11 +87,11 @@ namespace AssemblyElementalStructure
   @param saveVector the vector from which the values are saved
 */
 template<typename FunctorType, typename MeshType, typename MapType>
-void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, MapType> > dispFESpace,
+void saveVectorAccordingToFunctor ( const std::shared_ptr<FESpace<MeshType, MapType> > dispFESpace,
                                     const FunctorType functor,
                                     const VectorEpetra& originVector,
-                                    const boost::shared_ptr<VectorEpetra> statusVector,
-                                    const boost::shared_ptr<VectorEpetra> saveVector,
+                                    const std::shared_ptr<VectorEpetra> statusVector,
+                                    const std::shared_ptr<VectorEpetra> saveVector,
                                     const UInt offset)
 {
     UInt dim = dispFESpace->dim();
@@ -131,10 +128,10 @@ void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, Ma
 }
 
 template<typename FunctorType, typename MeshType, typename MapType>
-void saveBooleanVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, MapType> > dispFESpace,
+void saveBooleanVectorAccordingToFunctor ( const std::shared_ptr<FESpace<MeshType, MapType> > dispFESpace,
                                            const FunctorType& functor,
-                                           const boost::shared_ptr<VectorEpetra> originVector,
-                                           boost::shared_ptr<VectorEpetra> saveVector,
+                                           const std::shared_ptr<VectorEpetra> originVector,
+                                           std::shared_ptr<VectorEpetra> saveVector,
                                            const UInt offset)
 {
     UInt dim = dispFESpace->dim();

@@ -48,6 +48,7 @@
 #include <lifev/one_d_fsi/solver/OneDFSIData.hpp>
 #include <lifev/one_d_fsi/solver/OneDFSIFlux.hpp>
 #include <lifev/one_d_fsi/solver/OneDFSISource.hpp>
+#include <array>
 
 namespace LifeV
 {

@@ -121,7 +121,7 @@ OneDFSISourceNonLinear::dSdU ( const Real& A, const Real& Q, const ID& row, cons
 
 Real
 OneDFSISourceNonLinear::interpolatedNonConservativeSource ( const Real& A, const Real& Q,
-                                                            const ID& row, const container2D_Type& bcNodes, const Real& cfl ) const
+                                                            const ID& row, const container2D_Type &bcNodes, const Real& cfl ) const
 {
     if ( row == 0 ) // QLS1
     {

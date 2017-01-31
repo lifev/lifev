@@ -43,7 +43,6 @@
 #include <sstream>
 #include <iostream>
 #include <stdexcept>
-#include <boost/scoped_ptr.hpp>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -96,34 +95,34 @@ public:
     typedef StructuralConstitutiveLawData          data_Type;
 
     typedef MatrixEpetra<Real>            matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>         matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type>         matrixPtr_Type;
     typedef VectorEpetra           vector_Type;
-    typedef boost::shared_ptr<vector_Type>         vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type>         vectorPtr_Type;
 
-    typedef typename boost::shared_ptr<data_Type>  dataPtr_Type;
-    typedef typename boost::shared_ptr<const Displayer>    displayerPtr_Type;
+    typedef typename std::shared_ptr<data_Type>  dataPtr_Type;
+    typedef typename std::shared_ptr<const Displayer>    displayerPtr_Type;
 
     typedef FactorySingleton<Factory<StructuralIsotropicConstitutiveLaw<MeshType>, std::string> >  StructureIsotropicMaterialFactory;
 
     typedef std::vector< typename MeshType::element_Type* > vectorVolumes_Type;
 
     typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
-    typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
+    typedef std::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
 
     typedef std::vector<UInt>                             vectorIndexes_Type;
     typedef std::map< UInt, vectorIndexes_Type>           mapMarkerIndexes_Type;
-    typedef boost::shared_ptr<mapMarkerIndexes_Type>      mapMarkerIndexesPtr_Type;
+    typedef std::shared_ptr<mapMarkerIndexes_Type>      mapMarkerIndexesPtr_Type;
 
 
     typedef ETFESpace<MeshType, MapEpetra, 3, 3 >         ETFESpace_Type;
-    typedef boost::shared_ptr<ETFESpace_Type>             ETFESpacePtr_Type;
+    typedef std::shared_ptr<ETFESpace_Type>             ETFESpacePtr_Type;
 
     typedef FESpace< MeshType, MapEpetra >                FESpace_Type;
-    typedef boost::shared_ptr<FESpace_Type>               FESpacePtr_Type;
+    typedef std::shared_ptr<FESpace_Type>               FESpacePtr_Type;
 
     //Vector for vector parameters
     typedef std::vector<std::vector<Real> >           vectorsParameters_Type;
-    typedef boost::shared_ptr<vectorsParameters_Type> vectorsParametersPtr_Type;
+    typedef std::shared_ptr<vectorsParameters_Type> vectorsParametersPtr_Type;
 
 
     // Typedefs for tensors
@@ -158,7 +157,7 @@ public:
     */
     virtual void setup ( const FESpacePtr_Type& dFESpace,
                          const ETFESpacePtr_Type& ETFESpace,
-                         const boost::shared_ptr<const MapEpetra>&   monolithicMap,
+                         const std::shared_ptr<const MapEpetra>&   monolithicMap,
                          const UInt offset, const dataPtr_Type& dataMaterial ) = 0;
 
 
@@ -303,7 +302,7 @@ protected:
 
     ETFESpacePtr_Type                              M_dispETFESpace;
 
-    boost::shared_ptr<const MapEpetra>             M_localMap;
+    std::shared_ptr<const MapEpetra>             M_localMap;
 
     //! Matrix jacobian
     matrixPtr_Type                                 M_jacobian;

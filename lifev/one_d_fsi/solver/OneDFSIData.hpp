@@ -53,6 +53,8 @@
 
 #include <lifev/one_d_fsi/solver/OneDFSIDefinitions.hpp>
 
+#include <array>
+
 namespace LifeV
 {
 

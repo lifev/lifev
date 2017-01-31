@@ -200,7 +200,7 @@ public:
      *  @param cfl cfl used to identify the foot of the characteristic
      */
     Real interpolatedNonConservativeSource ( const Real& A, const Real& Q,
-                                             const ID& row, const container2D_Type& bcNodes, const Real& cfl ) const ;
+                                             const ID& row, const container2D_Type &bcNodes, const Real& cfl ) const ;
 
     //@}
 

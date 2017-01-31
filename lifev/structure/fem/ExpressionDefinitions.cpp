@@ -40,7 +40,7 @@
 #define _EXPRESSIONDEFINITIONS_CPP_
 
 #include <lifev/structure/fem/ExpressionDefinitions.hpp>
-#include <boost/shared_ptr.hpp>
+#include <std/shared_ptr.hpp>
 
 
 namespace LifeV
@@ -50,7 +50,7 @@ namespace LifeV
 
     using namespace ExpressionAssembly;
 
-    deformationGradient_Type deformationGradient( const boost::shared_ptr< ETFESpace_Type > dispETFESpace,
+    deformationGradient_Type deformationGradient( const std::shared_ptr< ETFESpace_Type > dispETFESpace,
 						  const vector_Type& disp, UInt offset, const matrixSmall_Type identity)
     {
       return deformationGradient_Type( grad( dispETFESpace,  disp, offset), value(identity) );
@@ -104,19 +104,19 @@ namespace LifeV
 
 
     // Constructors for anisotropic laws
-    interpolatedValue_Type interpolateFiber( const boost::shared_ptr< ETFESpace_Type > dispETFESpace,
+    interpolatedValue_Type interpolateFiber( const std::shared_ptr< ETFESpace_Type > dispETFESpace,
 					     const vector_Type& fiberVector)
     {
       return interpolatedValue_Type( dispETFESpace, fiberVector ) ;
     }
 
-    interpolatedValue_Type interpolateValue( const boost::shared_ptr< ETFESpace_Type > dispETFESpace,
+    interpolatedValue_Type interpolateValue( const std::shared_ptr< ETFESpace_Type > dispETFESpace,
 					     const vector_Type& valueVector)
     {
       return interpolatedValue_Type( dispETFESpace, valueVector ) ;
     }
 
-    interpolatedScalarValue_Type interpolateScalarValue( const boost::shared_ptr< scalarETFESpace_Type > dispETFESpace,
+    interpolatedScalarValue_Type interpolateScalarValue( const std::shared_ptr< scalarETFESpace_Type > dispETFESpace,
 							 const vector_Type& valueVector)
     {
       return interpolatedScalarValue_Type( dispETFESpace, valueVector ) ;

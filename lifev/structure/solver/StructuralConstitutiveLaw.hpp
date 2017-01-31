@@ -48,7 +48,6 @@
 //#include <sstream>
 #include <iostream>
 #include <stdexcept>
-#include <boost/scoped_ptr.hpp>
 
 
 #include <Epetra_Vector.h>
@@ -345,7 +344,7 @@ template <typename MeshType>
 void
 StructuralConstitutiveLaw<MeshType>::setup (const FESpacePtr_Type& dFESpace,
                                             const ETFESpacePtr_Type& dETFESpace,
-                                            const boost::shared_ptr<const MapEpetra>&  monolithicMap,
+                                            const std::shared_ptr<const MapEpetra>&  monolithicMap,
                                             const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer
                                             )
 {

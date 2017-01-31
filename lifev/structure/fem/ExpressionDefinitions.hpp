@@ -56,8 +56,6 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <boost/shared_ptr.hpp>
-
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
@@ -177,7 +175,7 @@ typedef ExpressionProduct<
 
 //@}
 
- deformationGradient_Type deformationGradient( const boost::shared_ptr< ETFESpace_Type > dispETFESpace,
+ deformationGradient_Type deformationGradient( const std::shared_ptr< ETFESpace_Type > dispETFESpace,
 					       const vector_Type& disp, UInt offset, const matrixSmall_Type identity);
 
   determinantTensorF_Type determinantF( const deformationGradient_Type F );
@@ -199,13 +197,13 @@ typedef ExpressionProduct<
   isochoricTrace_Type isochoricTrace( const powerExpression_Type Jel, const traceTensor_Type I );
 
 // Constructors for anisotropic laws
-  interpolatedValue_Type interpolateFiber( const boost::shared_ptr< ETFESpace_Type > dispETFESpace,
+  interpolatedValue_Type interpolateFiber( const std::shared_ptr< ETFESpace_Type > dispETFESpace,
 					  const vector_Type& fiberVector);
 
-  interpolatedValue_Type interpolateValue( const boost::shared_ptr< ETFESpace_Type > dispETFESpace,
+  interpolatedValue_Type interpolateValue( const std::shared_ptr< ETFESpace_Type > dispETFESpace,
 					   const vector_Type& valueVector);
 
-  interpolatedScalarValue_Type interpolateScalarValue( const boost::shared_ptr< scalarETFESpace_Type > dispETFESpace,
+  interpolatedScalarValue_Type interpolateScalarValue( const std::shared_ptr< scalarETFESpace_Type > dispETFESpace,
                                                        const vector_Type& valueVector);
 
   outerProduct_Type fiberTensor( const interpolatedValue_Type ithFiber );

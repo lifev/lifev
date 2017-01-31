@@ -40,7 +40,7 @@
 #define NonLinearAitken_H
 
 
-#include <boost/array.hpp>
+#include <array>
 
 
 #include <lifev/core/LifeV.hpp>
