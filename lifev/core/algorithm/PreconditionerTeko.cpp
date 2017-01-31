@@ -165,7 +165,7 @@ PreconditionerTeko::buildPreconditionerTeko ( RCP<Teko::BlockPreconditionerFacto
 
     // Building the block operator from the matrix
     Teuchos::RCP<Teko::Epetra::BlockedEpetraOperator> sA
-        = Teuchos::rcp ( new Teko::Epetra::BlockedEpetraOperator ( vec, Teuchos::rcp ( M_oper ) ) );
+        = Teuchos::rcp ( new Teko::Epetra::BlockedEpetraOperator ( vec, Teuchos::rcp ( M_oper.get() ) ) );
 
     M_prec.reset ( prec );
 
