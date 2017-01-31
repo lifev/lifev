@@ -111,7 +111,7 @@ public:
     typedef std::shared_ptr<ensightFilter_Type>                       ensightFilterPtr_Type;
 
     typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >       solidETFESpace_Type;
-    typedef boost::shared_ptr<solidETFESpace_Type>                      solidETFESpacePtr_Type;
+    typedef std::shared_ptr<solidETFESpace_Type>                      solidETFESpacePtr_Type;
 
 
 #ifdef HAVE_HDF5
@@ -337,7 +337,7 @@ Structure::run3d()
 
 
     //! BChandler use to create the StructuralOperator object
-    boost::shared_ptr<BCHandler> BCh ( new BCHandler() );
+    std::shared_ptr<BCHandler> BCh ( new BCHandler() );
 
 
     bool verbose = (parameters->comm->MyPID() == 0);

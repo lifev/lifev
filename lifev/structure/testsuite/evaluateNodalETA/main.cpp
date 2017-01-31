@@ -106,16 +106,16 @@ public:
 
     // Filters
     typedef LifeV::Exporter<mesh_Type  >                       filter_Type;
-    typedef boost::shared_ptr< LifeV::Exporter<mesh_Type  > >           filterPtr_Type;
+    typedef std::shared_ptr< LifeV::Exporter<mesh_Type  > >           filterPtr_Type;
 
     typedef LifeV::ExporterEmpty<mesh_Type >                            emptyFilter_Type;
-    typedef boost::shared_ptr<emptyFilter_Type>                         emptyFilterPtr_Type;
+    typedef std::shared_ptr<emptyFilter_Type>                         emptyFilterPtr_Type;
     typedef LifeV::ExporterEnsight<mesh_Type >                          ensightFilter_Type;
-    typedef boost::shared_ptr<ensightFilter_Type>                       ensightFilterPtr_Type;
+    typedef std::shared_ptr<ensightFilter_Type>                       ensightFilterPtr_Type;
 
 #ifdef HAVE_HDF5
     typedef LifeV::ExporterHDF5<mesh_Type >                             hdf5Filter_Type;
-    typedef boost::shared_ptr<hdf5Filter_Type>                          hdf5FilterPtr_Type;
+    typedef std::shared_ptr<hdf5Filter_Type>                          hdf5FilterPtr_Type;
 #endif
 
 
@@ -125,7 +125,7 @@ public:
     //@{
     Structure ( int                                   argc,
                 char**                                argv,
-                boost::shared_ptr<Epetra_Comm>        structComm );
+                std::shared_ptr<Epetra_Comm>        structComm );
 
     ~Structure()
     {}
@@ -161,7 +161,7 @@ private:
 
 private:
     struct Private;
-    boost::shared_ptr<Private> parameters;
+    std::shared_ptr<Private> parameters;
 };
 
 
@@ -176,12 +176,12 @@ struct Structure::Private
         alpha (1),
         gamma (1)
     {}
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_type;
+    typedef std::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_type;
     double rho, poisson, young, bulk, alpha, gamma;
 
     std::string data_file_name;
 
-    boost::shared_ptr<Epetra_Comm>     comm;
+    std::shared_ptr<Epetra_Comm>     comm;
 
 };
 
@@ -189,7 +189,7 @@ struct Structure::Private
 
 Structure::Structure ( int                                   argc,
                        char**                                argv,
-                       boost::shared_ptr<Epetra_Comm>        structComm) :
+                       std::shared_ptr<Epetra_Comm>        structComm) :
     parameters ( new Private() )
 {
     GetPot command_line (argc, argv);
@@ -222,22 +222,22 @@ Structure::run3d()
 
     // General typedefs
     typedef VectorEpetra                                          vector_Type;
-    typedef boost::shared_ptr<vector_Type>                        vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type>                        vectorPtr_Type;
     typedef FESpace< mesh_Type, MapEpetra >                       solidFESpace_Type;
-    typedef boost::shared_ptr<solidFESpace_Type>                  solidFESpacePtr_Type;
+    typedef std::shared_ptr<solidFESpace_Type>                  solidFESpacePtr_Type;
 
     typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >       solidETFESpace_Type;
-    typedef boost::shared_ptr<solidETFESpace_Type>                      solidETFESpacePtr_Type;
+    typedef std::shared_ptr<solidETFESpace_Type>                      solidETFESpacePtr_Type;
 
     typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 1 >       scalarETFESpace_Type;
-    typedef boost::shared_ptr<scalarETFESpace_Type>                     scalarETFESpacePtr_Type;
+    typedef std::shared_ptr<scalarETFESpace_Type>                     scalarETFESpacePtr_Type;
 
     // typedefs for fibers
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fiberFunction_Type;
-    typedef boost::shared_ptr<fiberFunction_Type> fiberFunctionPtr_Type;
+    typedef std::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fiberFunction_Type;
+    typedef std::shared_ptr<fiberFunction_Type> fiberFunctionPtr_Type;
 
     typedef std::vector<fiberFunctionPtr_Type>                          vectorFiberFunction_Type;
-    typedef boost::shared_ptr<vectorFiberFunction_Type>                 vectorFiberFunctionPtr_Type;
+    typedef std::shared_ptr<vectorFiberFunction_Type>                 vectorFiberFunctionPtr_Type;
 
     typedef std::vector<vectorPtr_Type>                                 vectorInterpolatedFibers_Type;
 
@@ -247,15 +247,15 @@ Structure::run3d()
 
     //! dataElasticStructure for parameters
     GetPot dataFile ( parameters->data_file_name.c_str() );
-    boost::shared_ptr<StructuralConstitutiveLawData> dataStructure (new StructuralConstitutiveLawData( ) );
+    std::shared_ptr<StructuralConstitutiveLawData> dataStructure (new StructuralConstitutiveLawData( ) );
     dataStructure->setup (dataFile);
 
     //! Read and partition mesh
     MeshData             meshData;
     meshData.setup (dataFile, "solid/space_discretization");
 
-    boost::shared_ptr<mesh_Type > fullMeshPtr (new RegionMesh<LinearTetra> ( ( parameters->comm ) ) );
-    boost::shared_ptr<mesh_Type > localMeshPtr (new RegionMesh<LinearTetra> ( ( parameters->comm ) ) );
+    std::shared_ptr<mesh_Type > fullMeshPtr (new RegionMesh<LinearTetra> ( ( parameters->comm ) ) );
+    std::shared_ptr<mesh_Type > localMeshPtr (new RegionMesh<LinearTetra> ( ( parameters->comm ) ) );
     readMesh (*fullMeshPtr, meshData);
 
     MeshPartitioner< mesh_Type > meshPart ( fullMeshPtr, parameters->comm );
@@ -327,7 +327,7 @@ Structure::run3d()
 
 
     //! 6. Post-processing setting
-    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
+    std::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
 
     std::string const exporterType =  dataFile ( "exporter/type", "hdf5");
     std::string const nameExporter =  dataFile ( "exporter/name", "jacobian");
@@ -923,13 +923,13 @@ main ( int argc, char** argv )
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_MpiComm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+    std::shared_ptr<Epetra_MpiComm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
     if ( Comm->MyPID() == 0 )
     {
         std::cout << "% using MPI" << std::endl;
     }
 #else
-    boost::shared_ptr<Epetra_SerialComm> Comm ( new Epetra_SerialComm() );
+    std::shared_ptr<Epetra_SerialComm> Comm ( new Epetra_SerialComm() );
     std::cout << "% using serial Version" << std::endl;
 #endif
 

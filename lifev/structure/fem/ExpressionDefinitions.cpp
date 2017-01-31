@@ -40,7 +40,6 @@
 #define _EXPRESSIONDEFINITIONS_CPP_
 
 #include <lifev/structure/fem/ExpressionDefinitions.hpp>
-#include <std/shared_ptr.hpp>
 
 
 namespace LifeV

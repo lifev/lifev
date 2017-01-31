@@ -295,33 +295,33 @@ void
 Structure::run3d()
 {
     typedef StructuralOperator<mesh_Type >::vector_Type                 vector_Type;
-    typedef boost::shared_ptr<vector_Type>                              vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type>                              vectorPtr_Type;
     typedef FESpace< mesh_Type, MapEpetra >                             solidFESpace_Type;
-    typedef boost::shared_ptr<solidFESpace_Type>                        solidFESpacePtr_Type;
+    typedef std::shared_ptr<solidFESpace_Type>                        solidFESpacePtr_Type;
     typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >       solidETFESpace_Type;
-    typedef boost::shared_ptr<solidETFESpace_Type>                      solidETFESpacePtr_Type;
+    typedef std::shared_ptr<solidETFESpace_Type>                      solidETFESpacePtr_Type;
 
     typedef LifeV::RegionMesh<LinearTetra>                              mesh_Type;
 
     // Filters
     typedef LifeV::Exporter<mesh_Type  >                       filter_Type;
-    typedef boost::shared_ptr< LifeV::Exporter<mesh_Type  > >           filterPtr_Type;
+    typedef std::shared_ptr< LifeV::Exporter<mesh_Type  > >           filterPtr_Type;
 
     typedef LifeV::ExporterEmpty<mesh_Type >                            emptyFilter_Type;
-    typedef boost::shared_ptr<emptyFilter_Type>                         emptyFilterPtr_Type;
+    typedef std::shared_ptr<emptyFilter_Type>                         emptyFilterPtr_Type;
     typedef LifeV::ExporterEnsight<mesh_Type >                          ensightFilter_Type;
-    typedef boost::shared_ptr<ensightFilter_Type>                       ensightFilterPtr_Type;
+    typedef std::shared_ptr<ensightFilter_Type>                       ensightFilterPtr_Type;
 
 #ifdef HAVE_HDF5
     typedef LifeV::ExporterHDF5<mesh_Type >                             hdf5Filter_Type;
-    typedef boost::shared_ptr<hdf5Filter_Type>                          hdf5FilterPtr_Type;
+    typedef std::shared_ptr<hdf5Filter_Type>                          hdf5FilterPtr_Type;
 #endif
 
     bool verbose = (parameters->comm->MyPID() == 0);
 
     //! dataElasticStructure
     GetPot dataFile ( parameters->data_file_name.c_str() );
-    boost::shared_ptr<StructuralConstitutiveLawData> dataStructure (new StructuralConstitutiveLawData( ) );
+    std::shared_ptr<StructuralConstitutiveLawData> dataStructure (new StructuralConstitutiveLawData( ) );
     dataStructure->setup (dataFile);
 
     MeshData             meshData;
@@ -376,7 +376,7 @@ Structure::run3d()
     StructuralOperator<RegionMesh<LinearTetra> >  solid;
 
     //! face BChandler object
-    boost::shared_ptr<BCHandler> BCh ( new BCHandler() );
+    std::shared_ptr<BCHandler> BCh ( new BCHandler() );
 
     //! 2. Its setup
     solid.setup (dataStructure,
@@ -386,7 +386,7 @@ Structure::run3d()
                  parameters->comm);
 
     //! 6. Post-processing setting
-    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
+    std::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
 
     std::string const exporterType =  dataFile ( "exporter/type", "hdf5");
     std::string const nameExporter =  dataFile ( "exporter/name", "");

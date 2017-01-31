@@ -147,9 +147,9 @@ public:
     typedef std::shared_ptr<solidETFESpace_Type>                      solidETFESpacePtr_Type;
 
     // typedefs for fibers
-    // Boost function for fiber direction
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fiberFunction_Type;
-    typedef boost::shared_ptr<fiberFunction_Type> fiberFunctionPtr_Type;
+    // std function for fiber direction
+    typedef std::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fiberFunction_Type;
+    typedef std::shared_ptr<fiberFunction_Type> fiberFunctionPtr_Type;
 
     typedef std::vector<fiberFunctionPtr_Type>                          vectorFiberFunction_Type;
     typedef std::shared_ptr<vectorFiberFunction_Type>                 vectorFiberFunctionPtr_Type;
@@ -611,7 +611,7 @@ Structure::run3d()
     std::vector<vectorPtr_Type> solutionStencil;
     solutionStencil.resize ( timeAdvance->size() );
 
-    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > importerSolid;
+    std::shared_ptr< Exporter<RegionMesh<LinearTetra> > > importerSolid;
 
     if ( restart.compare ( "none" ) )
     {
@@ -742,7 +742,7 @@ Structure::run3d()
     std::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterCheck;
 
 
-    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
+    std::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
 
     std::string const exporterType =  dataFile ( "exporter/type", "ensight");
     std::string const exportFileName = dataFile ( "exporter/nameFile", "structure");

@@ -128,25 +128,25 @@ public:
 
     // Public typedefs
     typedef StructuralOperator< RegionMesh<LinearTetra> >::vector_Type  vector_Type;
-    typedef boost::shared_ptr<vector_Type>                              vectorPtr_Type;
-    typedef boost::shared_ptr< TimeAdvance< vector_Type > >             timeAdvance_Type;
+    typedef std::shared_ptr<vector_Type>                              vectorPtr_Type;
+    typedef std::shared_ptr< TimeAdvance< vector_Type > >             timeAdvance_Type;
     typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >               solidFESpace_Type;
-    typedef boost::shared_ptr<solidFESpace_Type>                        solidFESpacePtr_Type;
+    typedef std::shared_ptr<solidFESpace_Type>                        solidFESpacePtr_Type;
 
     typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >       solidETFESpace_Type;
-    typedef boost::shared_ptr<solidETFESpace_Type>                      solidETFESpacePtr_Type;
+    typedef std::shared_ptr<solidETFESpace_Type>                      solidETFESpacePtr_Type;
 
     // typedefs for fibers
-    // Boost function for fiber direction
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > analyticalFunction_Type;
-    typedef boost::shared_ptr<analyticalFunction_Type> analyticalFunctionPtr_Type;
+    // std function for fiber direction
+    typedef std::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > analyticalFunction_Type;
+    typedef std::shared_ptr<analyticalFunction_Type> analyticalFunctionPtr_Type;
 
-    typedef boost::function<VectorSmall<3> ( Real const&, Real const&, Real const&, Real const& ) > bodyFunction_Type;
-    typedef boost::shared_ptr<bodyFunction_Type> bodyFunctionPtr_Type;
+    typedef std::function<VectorSmall<3> ( Real const&, Real const&, Real const&, Real const& ) > bodyFunction_Type;
+    typedef std::shared_ptr<bodyFunction_Type> bodyFunctionPtr_Type;
 
 
     typedef std::vector<analyticalFunctionPtr_Type>                          vectorFiberFunction_Type;
-    typedef boost::shared_ptr<vectorFiberFunction_Type>                 vectorFiberFunctionPtr_Type;
+    typedef std::shared_ptr<vectorFiberFunction_Type>                 vectorFiberFunctionPtr_Type;
 
     typedef std::vector<vectorPtr_Type>                                 listOfFiberDirections_Type;
 
@@ -155,7 +155,7 @@ public:
     //@{
     Structure ( int                                   argc,
                 char**                                argv,
-                boost::shared_ptr<Epetra_Comm>        structComm );
+                std::shared_ptr<Epetra_Comm>        structComm );
 
     ~Structure()
     {}
@@ -184,7 +184,7 @@ private:
 
 private:
     struct Private;
-    boost::shared_ptr<Private> parameters;
+    std::shared_ptr<Private> parameters;
 };
 
 
@@ -198,14 +198,14 @@ struct Structure::Private
 
     std::string data_file_name;
 
-    boost::shared_ptr<Epetra_Comm>     comm;
+    std::shared_ptr<Epetra_Comm>     comm;
 };
 
 
 
 Structure::Structure ( int                                   argc,
                        char**                                argv,
-                       boost::shared_ptr<Epetra_Comm>        structComm) :
+                       std::shared_ptr<Epetra_Comm>        structComm) :
     parameters ( new Private() )
 {
     GetPot command_line (argc, argv);
@@ -238,12 +238,12 @@ Structure::run3d()
     bool verbose = (parameters->comm->MyPID() == 0);
 
     //! Number of boundary conditions for the velocity and mesh motion
-    boost::shared_ptr<BCHandler> BCh ( new BCHandler() );
+    std::shared_ptr<BCHandler> BCh ( new BCHandler() );
 
     //! dataElasticStructure
     GetPot dataFile ( parameters->data_file_name.c_str() );
 
-    boost::shared_ptr<StructuralConstitutiveLawData> dataStructure (new StructuralConstitutiveLawData( ) );
+    std::shared_ptr<StructuralConstitutiveLawData> dataStructure (new StructuralConstitutiveLawData( ) );
     dataStructure->setup (dataFile);
 
     dataStructure->showMe();
@@ -251,11 +251,11 @@ Structure::run3d()
     MeshData             meshData;
     meshData.setup (dataFile, "solid/space_discretization");
 
-    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr (new RegionMesh<LinearTetra> (  parameters->comm  ) );
+    std::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr (new RegionMesh<LinearTetra> (  parameters->comm  ) );
     readMesh (*fullMeshPtr, meshData);
 
     MeshPartitioner< RegionMesh<LinearTetra> > meshPart ( fullMeshPtr, parameters->comm );
-    boost::shared_ptr<RegionMesh<LinearTetra> > localMeshPtr (new RegionMesh<LinearTetra> (  parameters->comm  ) );
+    std::shared_ptr<RegionMesh<LinearTetra> > localMeshPtr (new RegionMesh<LinearTetra> (  parameters->comm  ) );
     localMeshPtr = meshPart.meshPartition();
 
     std::string dOrder =  dataFile ( "solid/space_discretization/order", "P1");
@@ -427,8 +427,8 @@ Structure::run3d()
 
     MPI_Barrier (MPI_COMM_WORLD);
 
-    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
-    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterCheck;
+    std::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
+    std::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterCheck;
 
     std::string const exporterType =  dataFile ( "exporter/type", "ensight");
     std::string const exporterNameFile =  dataFile ( "exporter/nameFile", "structure");
@@ -573,13 +573,13 @@ main ( int argc, char** argv )
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_MpiComm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+    std::shared_ptr<Epetra_MpiComm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
     if ( Comm->MyPID() == 0 )
     {
         std::cout << "% using MPI" << std::endl;
     }
 #else
-    boost::shared_ptr<Epetra_SerialComm> Comm ( new Epetra_SerialComm() );
+    std::shared_ptr<Epetra_SerialComm> Comm ( new Epetra_SerialComm() );
     std::cout << "% using serial Version" << std::endl;
 #endif
 
