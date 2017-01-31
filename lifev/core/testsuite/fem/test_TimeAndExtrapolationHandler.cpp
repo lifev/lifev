@@ -5,7 +5,6 @@
 #include <cassert>
 #include <cstdlib>
 
-#include <boost/timer.hpp>
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
@@ -36,19 +35,19 @@ using namespace LifeV;
 
 typedef VectorEpetra vector_Type;
 typedef RegionMesh<LinearTetra> mesh_Type;
-typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
+typedef std::shared_ptr<mesh_Type> meshPtr_Type;
 typedef FESpace<mesh_Type, MapEpetra >  FESpace_Type;
-typedef boost::shared_ptr<FESpace_Type> FESpacePtr_Type;
+typedef std::shared_ptr<FESpace_Type> FESpacePtr_Type;
 
 int main (int argc, char** argv)
 {
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
     bool verbose = Comm->MyPID() == 0;
 #else
-    boost::shared_ptr<Epetra_Comm> Comm ( new Epetra_SerialComm() );
+    std::shared_ptr<Epetra_Comm> Comm ( new Epetra_SerialComm() );
     bool verbose = true;
 #endif
 

@@ -133,12 +133,12 @@ void test_bdf::run()
 {
     //Useful typedef
     typedef VectorEpetra vector_Type;
-    typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type> vectorPtr_Type;
 
     typedef LifeV::Preconditioner basePrec_Type;
-    typedef boost::shared_ptr<basePrec_Type> basePrecPtr_Type;
+    typedef std::shared_ptr<basePrec_Type> basePrecPtr_Type;
     typedef LifeV::PreconditionerIfpack prec_Type;
-    typedef boost::shared_ptr<prec_Type> precPtr_Type;
+    typedef std::shared_ptr<prec_Type> precPtr_Type;
 
     // Reading from data file
     GetPot dataFile (Members->data_file_name.c_str() );
@@ -192,8 +192,8 @@ void test_bdf::run()
     MatrixEpetra<double> matM (feSpacePtr->map() ); //mass matrix
     std::shared_ptr<MatrixEpetra<double> > matA_ptr (
         new MatrixEpetra<double> (feSpacePtr->map() ) ); //stiff matrix
-    boost::shared_ptr<VectorEpetra> u ( new VectorEpetra (feSpacePtr->map(), Unique) ); // solution vector
-    boost::shared_ptr<VectorEpetra> f ( new VectorEpetra (feSpacePtr->map(), Unique) ); // forcing term vector
+    std::shared_ptr<VectorEpetra> u ( new VectorEpetra (feSpacePtr->map(), Unique) ); // solution vector
+    std::shared_ptr<VectorEpetra> f ( new VectorEpetra (feSpacePtr->map(), Unique) ); // forcing term vector
 
     LifeChrono chrono;
     //Assembling Matrix M

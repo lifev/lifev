@@ -135,12 +135,12 @@ void test_bdf::run()
 {
     //Useful typedef
 	typedef VectorEpetra vector_Type;
-	typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
+	typedef std::shared_ptr<vector_Type> vectorPtr_Type;
 
 	typedef LifeV::Preconditioner basePrec_Type;
-	typedef boost::shared_ptr<basePrec_Type> basePrecPtr_Type;
+	typedef std::shared_ptr<basePrec_Type> basePrecPtr_Type;
 	typedef LifeV::PreconditionerIfpack prec_Type;
-	typedef boost::shared_ptr<prec_Type> precPtr_Type;
+	typedef std::shared_ptr<prec_Type> precPtr_Type;
 
     // Reading from data file
     GetPot dataFile (Members->data_file_name.c_str() );

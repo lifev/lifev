@@ -125,13 +125,13 @@ Real fRhs ( const Real& /* t */, const Real& x, const Real& /* y */, const Real&
 typedef RegionMesh<LinearTriangle> mesh_Type;
 typedef MatrixEpetra<Real> matrix_Type;
 typedef VectorEpetra vector_Type;
-typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
+typedef std::shared_ptr<vector_Type> vectorPtr_Type;
 typedef FESpace<mesh_Type, MapEpetra> feSpace_Type;
 
 typedef LifeV::Preconditioner basePrec_Type;
-typedef boost::shared_ptr<basePrec_Type> basePrecPtr_Type;
+typedef std::shared_ptr<basePrec_Type> basePrecPtr_Type;
 typedef LifeV::PreconditionerIfpack prec_Type;
-typedef boost::shared_ptr<prec_Type> precPtr_Type;
+typedef std::shared_ptr<prec_Type> precPtr_Type;
 
 typedef std::shared_ptr<feSpace_Type> feSpacePtr_Type;
 
@@ -532,13 +532,10 @@ main ( int argc, char** argv )
     {
         std::cout << " -- Defining the exported quantities ... " << std::flush;
     }
-<<<<<<< HEAD
-    boost::shared_ptr<vector_Type> solutionPtr (new vector_Type (*solution, Repeated) );
-    boost::shared_ptr<vector_Type> solutionErrPtr (new vector_Type (solutionErr, Repeated) );
-=======
-    std::shared_ptr<vector_Type> solutionPtr (new vector_Type (solution, Repeated) );
+
+    std::shared_ptr<vector_Type> solutionPtr (new vector_Type (*solution, Repeated) );
     std::shared_ptr<vector_Type> solutionErrPtr (new vector_Type (solutionErr, Repeated) );
->>>>>>> 24ac07b... Versione c++11
+
     if (verbose)
     {
         std::cout << " done ! " << std::endl;

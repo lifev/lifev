@@ -111,13 +111,13 @@ main ( int argc, char* argv[] )
         typedef RegionMesh<LinearLine> mesh_Type;
         typedef MatrixEpetra<Real> matrix_Type;
         typedef VectorEpetra vector_Type;
-        typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
+        typedef std::shared_ptr<vector_Type> vectorPtr_Type;
         typedef FESpace<mesh_Type, MapEpetra> feSpace_Type;
 
         typedef LifeV::Preconditioner basePrec_Type;
-        typedef boost::shared_ptr<basePrec_Type> basePrecPtr_Type;
+        typedef std::shared_ptr<basePrec_Type> basePrecPtr_Type;
         typedef LifeV::PreconditionerIfpack prec_Type;
-        typedef boost::shared_ptr<prec_Type> precPtr_Type;
+        typedef std::shared_ptr<prec_Type> precPtr_Type;
 
         typedef std::shared_ptr<feSpace_Type> feSpacePtr_Type;
 

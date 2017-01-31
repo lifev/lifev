@@ -120,14 +120,14 @@ Real exact_sol_easy (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, co
 int main (int argc, char** argv )
 {
     typedef VectorEpetra                          vector_Type;
-    typedef boost::shared_ptr<vector_Type >       vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type >       vectorPtr_Type;
     typedef RegionMesh<LinearTetra >              mesh_Type;
-    typedef boost::shared_ptr< mesh_Type >        meshPtr_Type;
+    typedef std::shared_ptr< mesh_Type >        meshPtr_Type;
     typedef RBFInterpolation<mesh_Type>           interpolation_Type;
-    typedef boost::shared_ptr<interpolation_Type> interpolationPtr_Type;
+    typedef std::shared_ptr<interpolation_Type> interpolationPtr_Type;
     typedef FESpace< RegionMesh<LinearTetra>, MapEpetra > FESpace_Type;
 
-    boost::shared_ptr<Epetra_Comm> Comm;
+    std::shared_ptr<Epetra_Comm> Comm;
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
     Comm.reset (new Epetra_MpiComm (MPI_COMM_WORLD) );
@@ -156,17 +156,17 @@ int main (int argc, char** argv )
 
     // PARTITIONING MESHES
     MeshPartitioner<mesh_Type>   Solid_mesh_part;
-    boost::shared_ptr<mesh_Type> Solid_localMesh;
+    std::shared_ptr<mesh_Type> Solid_localMesh;
     Solid_mesh_part.doPartition (Solid_mesh_ptr, Comm);
     Solid_localMesh = Solid_mesh_part.meshPartition();
 
     MeshPartitioner<mesh_Type>   Fluid_mesh_part;
-    boost::shared_ptr<mesh_Type> Fluid_localMesh;
+    std::shared_ptr<mesh_Type> Fluid_localMesh;
     Fluid_mesh_part.doPartition (Fluid_mesh_ptr, Comm);
     Fluid_localMesh = Fluid_mesh_part.meshPartition();
 
     // CREATING A FE-SPACE FOR THE GRID ON WHICH WE ASSUME TO KNOW THE INTERFACE FIELD. DEFINING AN INTERFACE VECTOR TO BE INTERPOLATED.
-    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > Solid_fieldFESpace (new FESpace<mesh_Type, MapEpetra> (Solid_localMesh, "P1", 3, Comm) );
+    std::shared_ptr<FESpace<mesh_Type, MapEpetra> > Solid_fieldFESpace (new FESpace<mesh_Type, MapEpetra> (Solid_localMesh, "P1", 3, Comm) );
     vectorPtr_Type Solid_vector (new vector_Type (Solid_fieldFESpace->map(), Unique) );
     vectorPtr_Type Solid_vector_one (new vector_Type (Solid_fieldFESpace->map(), Unique) );
     Solid_fieldFESpace->interpolate ( static_cast<FESpace_Type::function_Type> ( exact_sol_easy ), *Solid_vector_one, 0.0 );
@@ -175,7 +175,7 @@ int main (int argc, char** argv )
     Solid_fieldFESpace->interpolate ( static_cast<FESpace_Type::function_Type> ( exact_sol ), *Solid_vector, 0.0 );
 
     // CREATING A FE-SPACE FOR THE GRID ON WHICH WE WANT TO INTERPOLATE THE DATA. INITIALIZING THE SOLUTION VECTOR.
-    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > Fluid_fieldFESpace (new FESpace<mesh_Type, MapEpetra> (Fluid_localMesh, "P1", 3, Comm) );
+    std::shared_ptr<FESpace<mesh_Type, MapEpetra> > Fluid_fieldFESpace (new FESpace<mesh_Type, MapEpetra> (Fluid_localMesh, "P1", 3, Comm) );
     vectorPtr_Type Fluid_solution (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
 
     // NUMBER OF FLAGS CONSIDERED: THE DOFS WHOSE FLAG IS 1 AND 20 ARE TAKEN INTO ACCOUNT

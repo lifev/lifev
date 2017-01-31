@@ -121,12 +121,12 @@ int main (int argc, char** argv )
     // and discretized by nonconforming FE spaces
     
     typedef VectorEpetra                          vector_Type;
-    typedef boost::shared_ptr<vector_Type >       vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type >       vectorPtr_Type;
     typedef RegionMesh<LinearTetra >              mesh_Type;
-    typedef boost::shared_ptr< mesh_Type >        meshPtr_Type;
+    typedef std::shared_ptr< mesh_Type >        meshPtr_Type;
     typedef FESpace< RegionMesh<LinearTetra>, MapEpetra > FESpace_Type;
 
-    boost::shared_ptr<Epetra_Comm> Comm;
+    std::shared_ptr<Epetra_Comm> Comm;
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
     Comm.reset (new Epetra_MpiComm (MPI_COMM_WORLD) );
@@ -155,12 +155,12 @@ int main (int argc, char** argv )
 
     // PARTITIONING MESHES
     MeshPartitioner<mesh_Type>   Solid_mesh_part;
-    boost::shared_ptr<mesh_Type> Solid_localMesh;
+    std::shared_ptr<mesh_Type> Solid_localMesh;
     Solid_mesh_part.doPartition (Solid_mesh_ptr, Comm);
     Solid_localMesh = Solid_mesh_part.meshPartition();
 
     MeshPartitioner<mesh_Type>   Fluid_mesh_part;
-    boost::shared_ptr<mesh_Type> Fluid_localMesh;
+    std::shared_ptr<mesh_Type> Fluid_localMesh;
     Fluid_mesh_part.doPartition (Fluid_mesh_ptr, Comm);
     Fluid_localMesh = Fluid_mesh_part.meshPartition();
 
@@ -168,11 +168,11 @@ int main (int argc, char** argv )
     std::string orderFluid = dataFile("fluid/space_discretization/order","default");
     std::string orderStructure = dataFile("solid/space_discretization/order","default");
 
-    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > Solid_fieldFESpace_whole (new FESpace<mesh_Type, MapEpetra> (Solid_mesh_ptr, orderStructure, 3, Comm) );
-    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > Fluid_fieldFESpace_whole (new FESpace<mesh_Type, MapEpetra> (Fluid_mesh_ptr, orderFluid, 3, Comm) );
+    std::shared_ptr<FESpace<mesh_Type, MapEpetra> > Solid_fieldFESpace_whole (new FESpace<mesh_Type, MapEpetra> (Solid_mesh_ptr, orderStructure, 3, Comm) );
+    std::shared_ptr<FESpace<mesh_Type, MapEpetra> > Fluid_fieldFESpace_whole (new FESpace<mesh_Type, MapEpetra> (Fluid_mesh_ptr, orderFluid, 3, Comm) );
 
-    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > Solid_fieldFESpace (new FESpace<mesh_Type, MapEpetra> (Solid_localMesh, orderStructure, 3, Comm) );
-    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > Fluid_fieldFESpace (new FESpace<mesh_Type, MapEpetra> (Fluid_localMesh, orderFluid, 3, Comm) );
+    std::shared_ptr<FESpace<mesh_Type, MapEpetra> > Solid_fieldFESpace (new FESpace<mesh_Type, MapEpetra> (Solid_localMesh, orderStructure, 3, Comm) );
+    std::shared_ptr<FESpace<mesh_Type, MapEpetra> > Fluid_fieldFESpace (new FESpace<mesh_Type, MapEpetra> (Fluid_localMesh, orderFluid, 3, Comm) );
 
     Interpolation intergrid;
     intergrid.setup(dataFile, belosList);
