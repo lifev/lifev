@@ -83,7 +83,7 @@ void MeshColoring::setup ( )
     
     int* pointerToDofs_scalar (0);
     pointerToDofs_scalar = &id_elem_scalar[0];
-    boost::shared_ptr<MapEpetra> map_scalar ( new MapEpetra ( -1, static_cast<int> (id_elem_scalar.size() ), pointerToDofs_scalar, M_comm ) );
+    std::shared_ptr<MapEpetra> map_scalar ( new MapEpetra ( -1, static_cast<int> (id_elem_scalar.size() ), pointerToDofs_scalar, M_comm ) );
     
     M_vectorColors.reset ( new vector_Type ( *map_scalar,  Unique ) );
     M_vectorColors->zero();

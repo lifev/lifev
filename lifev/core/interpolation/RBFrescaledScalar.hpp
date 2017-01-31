@@ -46,29 +46,29 @@ class RBFrescaledScalar: public RBFInterpolation<mesh_Type>
 {
 public:
 
-    typedef boost::shared_ptr<mesh_Type>                                          meshPtr_Type;
+    typedef std::shared_ptr<mesh_Type>                                          meshPtr_Type;
 
     typedef VectorEpetra                                                          vector_Type;
-    typedef boost::shared_ptr<vector_Type >                                       vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type >                                       vectorPtr_Type;
 
     typedef MatrixEpetra<double>                                                  matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>                                        matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type>                                        matrixPtr_Type;
 
     typedef std::vector<int>                                                      flagContainer_Type;
 
-    typedef boost::unordered_set<ID>                                                          idContainer_Type;
+    typedef std::unordered_set<ID>                                                          idContainer_Type;
 
     typedef MapEpetra                                                             map_Type;
-    typedef boost::shared_ptr<MapEpetra>                                          mapPtr_Type;
+    typedef std::shared_ptr<MapEpetra>                                          mapPtr_Type;
 
     typedef GhostHandler<mesh_Type>                                               neighbors_Type;
-    typedef boost::shared_ptr<neighbors_Type>                                     neighborsPtr_Type;
+    typedef std::shared_ptr<neighbors_Type>                                     neighborsPtr_Type;
 
     typedef LifeV::Preconditioner                                                 basePrec_Type;
-    typedef boost::shared_ptr<basePrec_Type>                                      basePrecPtr_Type;
+    typedef std::shared_ptr<basePrec_Type>                                      basePrecPtr_Type;
 
     typedef LifeV::PreconditionerIfpack                                           prec_Type;
-    typedef boost::shared_ptr<prec_Type>                                          precPtr_Type;
+    typedef std::shared_ptr<prec_Type>                                          precPtr_Type;
 
     typedef Teuchos::RCP< Teuchos::ParameterList >                                parameterList_Type;
 
@@ -90,7 +90,7 @@ public:
 
     void interpolateCostantField();
 
-    void identifyNodes (meshPtr_Type LocalMesh, boost::unordered_set<ID>& GID_nodes, vectorPtr_Type CheckVector);
+    void identifyNodes (meshPtr_Type LocalMesh, std::unordered_set<ID>& GID_nodes, vectorPtr_Type CheckVector);
 
     bool isInside (ID pointMarker, flagContainer_Type Flags);
 
@@ -198,13 +198,13 @@ void RBFrescaledScalar<mesh_Type>::interpolationOperator()
 
     int LocalNodesNumber = M_GIdsKnownMesh.size();
 
-    std::vector<boost::unordered_set<ID> > MatrixGraph (LocalNodesNumber);
+    std::vector<std::unordered_set<ID> > MatrixGraph (LocalNodesNumber);
     int* ElementsPerRow = new int[LocalNodesNumber];
     int* GlobalID = new int[LocalNodesNumber];
     int k = 0;
     int Max_entries = 0;
 
-    for (boost::unordered_set<ID>::iterator it = M_GIdsKnownMesh.begin(); it != M_GIdsKnownMesh.end(); ++it)
+    for (std::unordered_set<ID>::iterator it = M_GIdsKnownMesh.begin(); it != M_GIdsKnownMesh.end(); ++it)
     {
         GlobalID[k] = *it;
         MatrixGraph[k] = M_neighbors->neighborsWithinRadius (GlobalID[k], M_radius);
@@ -226,7 +226,7 @@ void RBFrescaledScalar<mesh_Type>::interpolationOperator()
     for ( int i = 0 ; i < LocalNodesNumber; ++i )
     {
         k = 0;
-        for ( boost::unordered_set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
+        for ( std::unordered_set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
         {
             Indices[k] = *it;
             Values[k]  = rbf ( M_fullMeshKnown->point (GlobalID[i]).x(),
@@ -255,7 +255,7 @@ void RBFrescaledScalar<mesh_Type>::projectionOperator()
 
     int LocalNodesNumber = M_GIdsUnknownMesh.size();
 
-    std::vector<boost::unordered_set<ID> > MatrixGraph (LocalNodesNumber);
+    std::vector<std::unordered_set<ID> > MatrixGraph (LocalNodesNumber);
     int* ElementsPerRow = new int[LocalNodesNumber];
     int* GlobalID = new int[LocalNodesNumber];
     int k = 0;
@@ -264,7 +264,7 @@ void RBFrescaledScalar<mesh_Type>::projectionOperator()
     double d_min;
     int nearestPoint;
 
-    for (boost::unordered_set<ID>::iterator it = M_GIdsUnknownMesh.begin(); it != M_GIdsUnknownMesh.end(); ++it)
+    for (std::unordered_set<ID>::iterator it = M_GIdsUnknownMesh.begin(); it != M_GIdsUnknownMesh.end(); ++it)
     {
         GlobalID[k] = *it;
         d_min = 100;
@@ -302,7 +302,7 @@ void RBFrescaledScalar<mesh_Type>::projectionOperator()
     for ( int i = 0 ; i < LocalNodesNumber; ++i )
     {
         k = 0;
-        for ( boost::unordered_set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
+        for ( std::unordered_set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
         {
             Indices[k] = *it;
             Values[k]  = rbf ( M_fullMeshUnknown->point (GlobalID[i]).x(),
@@ -400,7 +400,7 @@ void RBFrescaledScalar<mesh_Type>::interpolate()
 
 
 template <typename mesh_Type>
-void RBFrescaledScalar<mesh_Type>::identifyNodes (meshPtr_Type LocalMesh, boost::unordered_set<ID>& GID_nodes, vectorPtr_Type CheckVector)
+void RBFrescaledScalar<mesh_Type>::identifyNodes (meshPtr_Type LocalMesh, std::unordered_set<ID>& GID_nodes, vectorPtr_Type CheckVector)
 {
 
     if (M_flags[0] == -1)

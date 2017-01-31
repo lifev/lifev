@@ -54,13 +54,13 @@ class MeshColoring
 public:
     
     typedef RegionMesh<LinearTetra> mesh_Type;
-    typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
+    typedef std::shared_ptr<mesh_Type> meshPtr_Type;
     
     typedef Epetra_Comm comm_Type;
-    typedef boost::shared_ptr< comm_Type > commPtr_Type;
+    typedef std::shared_ptr< comm_Type > commPtr_Type;
     
     typedef VectorEpetra vector_Type;
-    typedef boost::shared_ptr< vector_Type > vectorPtr_Type;
+    typedef std::shared_ptr< vector_Type > vectorPtr_Type;
 
     //! @name Constructors & Destructor
     //@{

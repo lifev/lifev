@@ -54,29 +54,29 @@ class RBFInterpolation
 {
 public:
 
-    typedef boost::shared_ptr<mesh_Type>                                          meshPtr_Type;
+    typedef std::shared_ptr<mesh_Type>                                          meshPtr_Type;
 
     typedef VectorEpetra                                                          vector_Type;
-    typedef boost::shared_ptr<vector_Type >                                       vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type >                                       vectorPtr_Type;
 
     typedef MatrixEpetra<double>                                                  matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>                                        matrixPtr_Type;
+    typedef std::shared_ptr<matrix_Type>                                        matrixPtr_Type;
 
     typedef std::vector<int>                                                      flagContainer_Type;
 
-    typedef boost::unordered_set<ID>                                                          idContainer_Type;
+    typedef std::unordered_set<ID>                                                          idContainer_Type;
 
     typedef MapEpetra                                                             map_Type;
-    typedef boost::shared_ptr<MapEpetra>                                          mapPtr_Type;
+    typedef std::shared_ptr<MapEpetra>                                          mapPtr_Type;
 
     typedef GhostHandler<mesh_Type>                                               neighbors_Type;
-    typedef boost::shared_ptr<neighbors_Type>                                     neighborsPtr_Type;
+    typedef std::shared_ptr<neighbors_Type>                                     neighborsPtr_Type;
 
     typedef LifeV::Preconditioner                                                 basePrec_Type;
-    typedef boost::shared_ptr<basePrec_Type>                                      basePrecPtr_Type;
+    typedef std::shared_ptr<basePrec_Type>                                      basePrecPtr_Type;
 
     typedef LifeV::PreconditionerIfpack                                           prec_Type;
-    typedef boost::shared_ptr<prec_Type>                                          precPtr_Type;
+    typedef std::shared_ptr<prec_Type>                                          precPtr_Type;
 
     typedef Teuchos::RCP< Teuchos::ParameterList >                                parameterList_Type;
 

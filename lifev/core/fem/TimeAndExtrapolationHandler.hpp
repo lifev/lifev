@@ -23,7 +23,7 @@ class TimeAndExtrapolationHandler
 
     typedef VectorEpetra vector_Type;
 
-    typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
+    typedef std::shared_ptr<vector_Type> vectorPtr_Type;
 
 public:
 
