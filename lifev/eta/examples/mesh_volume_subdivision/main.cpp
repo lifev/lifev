@@ -76,8 +76,6 @@
 
 #include <lifev/core/filter/ExporterHDF5.hpp>
 
-#include <boost/shared_ptr.hpp>
-
 #include <lifev/eta/examples/laplacian/laplacianFunctor.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/core/mesh/ElementShapes.hpp>
@@ -155,9 +153,9 @@ int main ( int argc, char** argv )
     // MPI initialization
 #ifdef HAVE_MPI
     MPI_Init ( &argc, &argv );
-    boost::shared_ptr< Epetra_Comm > Comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+    std::shared_ptr< Epetra_Comm > Comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
-    boost::shared_ptr< Epetra_Comm > Comm ( new Epetra_SerialComm );
+    std::shared_ptr< Epetra_Comm > Comm ( new Epetra_SerialComm );
 #endif
 
     // Reading parameters through GetPot
@@ -179,13 +177,13 @@ int main ( int argc, char** argv )
 
     typedef RegionMesh< LinearTetra >                                       mesh_Type;
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr ( new mesh_Type ( Comm ) );
+    std::shared_ptr< mesh_Type > fullMeshPtr ( new mesh_Type ( Comm ) );
 
     MeshData meshData;
     meshData.setup ( dataFile, "mesh");
     readMesh (*fullMeshPtr, meshData);
 
-    boost::shared_ptr< mesh_Type > localMeshPtr;
+    std::shared_ptr< mesh_Type > localMeshPtr;
 
     MeshPartitioner< mesh_Type > meshPart;
 
@@ -205,10 +203,10 @@ int main ( int argc, char** argv )
     // +-----------------------------------------------+
 
     typedef FESpace< mesh_Type, MapEpetra >                                 uSpaceStd_Type;
-    typedef boost::shared_ptr< uSpaceStd_Type >                             uSpaceStdPtr_Type;
+    typedef std::shared_ptr< uSpaceStd_Type >                             uSpaceStdPtr_Type;
 
     typedef ETFESpace< mesh_Type, MapEpetra, 3, 1 >                         uSpaceETA_Type;
-    typedef boost::shared_ptr< uSpaceETA_Type >                             uSpaceETAPtr_Type;
+    typedef std::shared_ptr< uSpaceETA_Type >                             uSpaceETAPtr_Type;
 
     typedef FESpace<mesh_Type, MapEpetra>::function_Type                    function_Type;
 
@@ -227,9 +225,9 @@ int main ( int argc, char** argv )
     }
 
     typedef MatrixEpetra< Real >                                            matrix_Type;
-    typedef boost::shared_ptr< MatrixEpetra< Real > >                       matrixPtr_Type;
+    typedef std::shared_ptr< MatrixEpetra< Real > >                       matrixPtr_Type;
     typedef VectorEpetra                                                    vector_Type;
-    typedef boost::shared_ptr<VectorEpetra>                                 vectorPtr_Type;
+    typedef std::shared_ptr<VectorEpetra>                                 vectorPtr_Type;
 
     if ( verbose )
     {
@@ -245,7 +243,7 @@ int main ( int argc, char** argv )
     int numSubregions = dataFile( "physicalParameters/numSubregions", 1 );
 
     typedef LifeV::MeshVolumeSubdivision<RegionMesh<LinearTetra> >          meshSub_Type;
-    typedef boost::shared_ptr<meshSub_Type>                                 meshSubPtr_Type;
+    typedef std::shared_ptr<meshSub_Type>                                 meshSubPtr_Type;
 
     // suppose we are running the test with 4cube1.mesh,
     // so we have 4 subregions identified by the flags 1001,1002,1003,1004
@@ -359,7 +357,7 @@ int main ( int argc, char** argv )
     rhsLap->zero();
     solutionLap->zero();
 
-    boost::shared_ptr<laplacianFunctor< Real > >  laplacianSourceFunctor ( new laplacianFunctor< Real >( sourceFunction ) );
+    std::shared_ptr<laplacianFunctor< Real > >  laplacianSourceFunctor ( new laplacianFunctor< Real >( sourceFunction ) );
 
     {
         using namespace ExpressionAssembly;
@@ -423,9 +421,9 @@ int main ( int argc, char** argv )
     typedef LinearSolver::SolverType                                        solver_Type;
 
     typedef LifeV::Preconditioner                                           basePrec_Type;
-    typedef boost::shared_ptr<basePrec_Type>                                basePrecPtr_Type;
+    typedef std::shared_ptr<basePrec_Type>                                basePrecPtr_Type;
     typedef PreconditionerIfpack                                            prec_Type;
-    typedef boost::shared_ptr<prec_Type>                                    precPtr_Type;
+    typedef std::shared_ptr<prec_Type>                                    precPtr_Type;
 
 
     if (verbose)
@@ -478,11 +476,11 @@ int main ( int argc, char** argv )
     matrixPtr_Type standardSystemMatrix4( new matrix_Type( ETuFESpace->map(), 100 ) );
     matrixPtr_Type systemMatrixTotal( new matrix_Type( ETuFESpace->map(), 100 ) );
 
-    boost::shared_ptr<laplacianFunctor< Real > >  laplacianDiffusionFunctor1 ( new laplacianFunctor< Real >( diffusion4Function1 ) );
-    boost::shared_ptr<laplacianFunctor< Real > >  laplacianDiffusionFunctor2 ( new laplacianFunctor< Real >( diffusion4Function2 ) );
-    boost::shared_ptr<laplacianFunctor< Real > >  laplacianDiffusionFunctor3 ( new laplacianFunctor< Real >( diffusion4Function3 ) );
-    boost::shared_ptr<laplacianFunctor< Real > >  laplacianDiffusionFunctor4 ( new laplacianFunctor< Real >( diffusion4Function4 ) );
-    boost::shared_ptr<laplacianFunctor< Real > >  laplacianDiffusionFunctorTotal ( new laplacianFunctor< Real >( diffusion4FunctionTotal ) );
+    std::shared_ptr<laplacianFunctor< Real > >  laplacianDiffusionFunctor1 ( new laplacianFunctor< Real >( diffusion4Function1 ) );
+    std::shared_ptr<laplacianFunctor< Real > >  laplacianDiffusionFunctor2 ( new laplacianFunctor< Real >( diffusion4Function2 ) );
+    std::shared_ptr<laplacianFunctor< Real > >  laplacianDiffusionFunctor3 ( new laplacianFunctor< Real >( diffusion4Function3 ) );
+    std::shared_ptr<laplacianFunctor< Real > >  laplacianDiffusionFunctor4 ( new laplacianFunctor< Real >( diffusion4Function4 ) );
+    std::shared_ptr<laplacianFunctor< Real > >  laplacianDiffusionFunctorTotal ( new laplacianFunctor< Real >( diffusion4FunctionTotal ) );
 
     {
         using namespace ExpressionAssembly;

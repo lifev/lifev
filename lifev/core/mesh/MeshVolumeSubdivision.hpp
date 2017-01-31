@@ -24,15 +24,15 @@ public:
     //! @name Public Types
     //@{
     typedef MeshType                             mesh_Type;
-    typedef boost::shared_ptr<MeshType>          meshPtr_Type;
+    typedef std::shared_ptr<MeshType>          meshPtr_Type;
 
     MeshVolumeSubdivision();
-    MeshVolumeSubdivision( boost::shared_ptr< Epetra_Comm > _comm );
-    MeshVolumeSubdivision( boost::shared_ptr< Epetra_Comm > _comm, bool _verbose = false );
-    MeshVolumeSubdivision( boost::shared_ptr< Epetra_Comm > _comm, UInt _numSubregions = 1, bool _verbose = false );
-    MeshVolumeSubdivision( boost::shared_ptr< Epetra_Comm > _comm, meshPtr_Type _mesh,
+    MeshVolumeSubdivision( std::shared_ptr< Epetra_Comm > _comm );
+    MeshVolumeSubdivision( std::shared_ptr< Epetra_Comm > _comm, bool _verbose = false );
+    MeshVolumeSubdivision( std::shared_ptr< Epetra_Comm > _comm, UInt _numSubregions = 1, bool _verbose = false );
+    MeshVolumeSubdivision( std::shared_ptr< Epetra_Comm > _comm, meshPtr_Type _mesh,
                      UInt _numSubregions = 1, bool _verbose = false );
-    MeshVolumeSubdivision( boost::shared_ptr< Epetra_Comm > _comm, meshPtr_Type _mesh,
+    MeshVolumeSubdivision( std::shared_ptr< Epetra_Comm > _comm, meshPtr_Type _mesh,
                            Epetra_IntSerialDenseVector _regionFlags, UInt _numSubregions = 1, bool _verbose = false );
 
     ~MeshVolumeSubdivision();
@@ -57,7 +57,7 @@ public:
 private:
 
     bool M_verbose;
-    boost::shared_ptr< Epetra_Comm > M_comm;
+    std::shared_ptr< Epetra_Comm > M_comm;
 
     UInt                             M_numSubregions;
     UInt **                          M_elements;
@@ -71,14 +71,14 @@ private:
 
 template<typename MeshType>
 MeshVolumeSubdivision<MeshType>::
-MeshVolumeSubdivision( boost::shared_ptr< Epetra_Comm > _comm )
+MeshVolumeSubdivision( std::shared_ptr< Epetra_Comm > _comm )
 :
 M_comm( _comm )
 {}
 
 template<typename MeshType>
 MeshVolumeSubdivision<MeshType>::
-MeshVolumeSubdivision( boost::shared_ptr< Epetra_Comm > _comm, bool _verbose )
+MeshVolumeSubdivision( std::shared_ptr< Epetra_Comm > _comm, bool _verbose )
 :
 M_comm(_comm),
 M_verbose( _verbose )
@@ -86,7 +86,7 @@ M_verbose( _verbose )
 
 template<typename MeshType>
 MeshVolumeSubdivision<MeshType>::
-MeshVolumeSubdivision( boost::shared_ptr< Epetra_Comm > _comm, UInt _numSubregions, bool _verbose )
+MeshVolumeSubdivision( std::shared_ptr< Epetra_Comm > _comm, UInt _numSubregions, bool _verbose )
 :
 M_comm(_comm),
 M_verbose( _verbose ),
@@ -104,7 +104,7 @@ M_numSubregions( _numSubregions )
 
 template<typename MeshType>
 MeshVolumeSubdivision<MeshType>::
-MeshVolumeSubdivision( boost::shared_ptr< Epetra_Comm > _comm, meshPtr_Type _mesh,
+MeshVolumeSubdivision( std::shared_ptr< Epetra_Comm > _comm, meshPtr_Type _mesh,
                                             UInt _numSubregions, bool _verbose )
 :
 M_comm(_comm),
@@ -127,7 +127,7 @@ M_readRegionFlags( false )
 
 template<typename MeshType>
 MeshVolumeSubdivision<MeshType>::
-MeshVolumeSubdivision( boost::shared_ptr< Epetra_Comm > _comm, meshPtr_Type _mesh,
+MeshVolumeSubdivision( std::shared_ptr< Epetra_Comm > _comm, meshPtr_Type _mesh,
                                             Epetra_IntSerialDenseVector _regionFlags, UInt _numSubregions, bool _verbose )
 :
 M_comm(_comm),

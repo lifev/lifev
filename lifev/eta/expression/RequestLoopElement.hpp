@@ -166,12 +166,8 @@ private:
  */
 template< typename MeshType >
 RequestLoopElement<MeshType>
-<<<<<<< HEAD
-elements (const boost::shared_ptr<MeshType>& mesh, const UInt flag = 0, const UInt numVolumes = 0,
+elements (const std::shared_ptr<MeshType>& mesh, const UInt flag = 0, const UInt numVolumes = 0,
           const UInt * volumeElements = nullptr, const bool subDomain = false )
-=======
-elements (const std::shared_ptr<MeshType>& mesh, const UInt flag = 0 )
->>>>>>> 24ac07b... Versione c++11
 {
 
     return RequestLoopElement<MeshType> ( mesh, flag, numVolumes, volumeElements, subDomain );

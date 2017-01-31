@@ -621,15 +621,9 @@ int main ( int argc, char** argv )
     std::string pOrder ("P1");
     std::string lsOrder ("P1");
 
-<<<<<<< HEAD
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uFESpace ( new FESpace< mesh_Type, MapEpetra > (localMeshPtr, uOrder, 3, Comm) );
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > pFESpace ( new FESpace< mesh_Type, MapEpetra > (localMeshPtr, pOrder, 1, Comm) );
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > lsFESpace ( new FESpace< mesh_Type, MapEpetra > (localMeshPtr, lsOrder, 1, Comm) );
-=======
-    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > uFESpace ( new FESpace< mesh_Type, MapEpetra > (meshPart, uOrder, 3, Comm) );
-    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > pFESpace ( new FESpace< mesh_Type, MapEpetra > (meshPart, pOrder, 1, Comm) );
-    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > lsFESpace ( new FESpace< mesh_Type, MapEpetra > (meshPart, lsOrder, 1, Comm) );
->>>>>>> 24ac07b... Versione c++11
+    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > uFESpace ( new FESpace< mesh_Type, MapEpetra > (localMeshPtr, uOrder, 3, Comm) );
+    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > pFESpace ( new FESpace< mesh_Type, MapEpetra > (localMeshPtr, pOrder, 1, Comm) );
+    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > lsFESpace ( new FESpace< mesh_Type, MapEpetra > (localMeshPtr, lsOrder, 1, Comm) );
 
     if (verbose)
     {
@@ -1282,13 +1276,10 @@ int main ( int argc, char** argv )
 
         NSSolver.setMatrix (*NSMatrix);
 
-<<<<<<< HEAD
-        boost::shared_ptr<matrix_type> NSMatrixNoBlock (new matrix_type ( NSMatrix->map() ) );
-        *NSMatrixNoBlock += *NSMatrix;
-=======
-        std::shared_ptr<matrix_type> NSMatrixNoBlock (new matrix_type ( NSMatrix->matrixPtr() ) );
 
->>>>>>> 24ac07b... Versione c++11
+        std::shared_ptr<matrix_type> NSMatrixNoBlock (new matrix_type ( NSMatrix->map() ) );
+        *NSMatrixNoBlock += *NSMatrix;
+
         NSSolver.solveSystem (NSRhsUnique, NSSolution, NSMatrixNoBlock);
 
 

@@ -270,7 +270,7 @@ int main ( int argc, char** argv )
 
     std::string uOrder ("P1");
 
-    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > uFESpace ( new FESpace< mesh_Type, MapEpetra > (meshPart, uOrder, 1, Comm) );
+    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > uFESpace ( new FESpace< mesh_Type, MapEpetra > (localMeshPtr, uOrder, 1, Comm) );
 
     if (verbose)
     {

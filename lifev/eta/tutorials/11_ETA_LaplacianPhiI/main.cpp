@@ -74,8 +74,6 @@
 
 #include <lifev/core/util/LifeChrono.hpp>
 
-#include <boost/shared_ptr.hpp>
-
 using namespace LifeV;
 
 typedef RegionMesh<LinearTetra> mesh_Type;
@@ -102,16 +100,16 @@ int main ( int argc, char** argv )
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
+    std::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
     const bool verbose (Comm->MyPID() == 0);
 
     const UInt Nelements (10);
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
+    std::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
 
     Real length = 3.0;
 
@@ -120,7 +118,7 @@ int main ( int argc, char** argv )
                     0.0,  0.0,  0.0);
 
     MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
-    boost::shared_ptr< mesh_Type > meshPtr (meshPart.meshPartition() );
+    std::shared_ptr< mesh_Type > meshPtr (meshPart.meshPartition() );
 
     fullMeshPtr.reset();
 
@@ -130,9 +128,9 @@ int main ( int argc, char** argv )
     // Testing the scalar field case //
     ///////////////////////////////////
 
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 1, Comm) );
+    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 1, Comm) );
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > ETuSpace ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPtr, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), Comm) );
+    std::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > ETuSpace ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPtr, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), Comm) );
 
     vector_Type vectorTestFunctions (uSpace->map(), Unique);
     uSpace->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (uTestFunctions), vectorTestFunctions, 0.0);
@@ -175,10 +173,10 @@ int main ( int argc, char** argv )
     // Testing the vector field case //
     ///////////////////////////////////
 
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpaceVec
+    std::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpaceVec
     ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 3, Comm) );
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 3 > > ETuSpaceVec
+    std::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 3 > > ETuSpaceVec
     ( new ETFESpace< mesh_Type, MapEpetra, 3, 3 > (meshPtr, & (uSpaceVec->refFE() ), & (uSpaceVec->fe().geoMap() ), Comm) );
 
     vector_Type vectorTestFunctionsVec (uSpaceVec->map(), Unique);
