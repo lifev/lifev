@@ -40,7 +40,7 @@
 
 #include <lifev/core/util/LifeDebug.hpp>
 #include <lifev/core/util/ParserSpiritGrammar.hpp>
-#include "muParser.h"
+//#include "muParser.h"
 
 namespace LifeV
 {
@@ -157,7 +157,7 @@ public:
     UInt countSubstring ( const std::string& substring ) const;
 
     //! Clear all the variables.
-    //void clearVariables();
+    void clearVariables();
 
     //@}
 
@@ -202,7 +202,9 @@ private:
 
     bool                M_evaluate;
 
-    mu::Parser 			M_parser;
+    calculator_Type     M_calculator;
+
+    // mu::Parser 			M_parser;
 };
 
 } // Namespace LifeV

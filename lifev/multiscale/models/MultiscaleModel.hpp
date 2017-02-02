@@ -40,7 +40,7 @@
 #include <lifev/multiscale/framework/MultiscaleDefinitions.hpp>
 #include <lifev/multiscale/framework/MultiscaleGlobalData.hpp>
 #include <lifev/multiscale/couplings/MultiscaleCoupling.hpp>
-
+#include <array>
 
 namespace LifeV
 {

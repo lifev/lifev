@@ -126,7 +126,8 @@ inline Real string2number ( const std::string& s )
 template <typename NumberType>
 inline std::string number2string ( const NumberType& n )
 {
-    return std::to_string ( n );
+	return boost::lexical_cast< std::string > ( n );
+    //return std::to_string ( n );
 }
 
 // @author Cristiano Malossi
