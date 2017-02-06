@@ -164,10 +164,7 @@ int TestRepeatedMesh<Dim>::run()
     const bool verbose = dataFile ( "miscellaneous/verbose", 0 ) && isLeader;
 
 #ifdef HAVE_LIFEV_DEBUG
-    std::ofstream debugOut (
-        ( "repeated_mesh." +
-          ( M_comm->NumProc() > 1 ? std::to_string<std::string> ( M_comm->MyPID() ) : "s" ) +
-          ".out" ).c_str() );
+    std::ofstream debugOut ( ( "repeated_mesh." + ( M_comm->NumProc() > 1 ? std::to_string( M_comm->MyPID() ) : "s" ) + ".out" ).c_str() );
 #else
     std::ofstream debugOut ( "/dev/null" );
 #endif
