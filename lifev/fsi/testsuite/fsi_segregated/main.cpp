@@ -541,7 +541,7 @@ public:
                 BCFunctionBase outFlow;
                 outFlow.setFunction (bc_adaptor (*M_fsi->FSIOper() ) );
                 std::cout << "XXX18" << std::endl;
-                M_fsi->FSIOper()->BCh_fluid()->modifyBC (3, outFlow);
+                //M_fsi->FSIOper()->BCh_fluid()->modifyBC (3, outFlow);
                 std::cout << "XXX19" << std::endl;
 
                 /*
