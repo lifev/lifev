@@ -8,28 +8,6 @@ TRIBITS_ADD_EXECUTABLE(
   SOURCES main.cpp
   )
 
-IF (LifeV_ENABLE_NavierStokes)
-
-TRIBITS_ADD_TEST(
-  Framework
-  POSTFIX_AND_ARGS_0 Fluid3D_MTNS       -s 1 -f MultiscaleDatabase/Test_Fluid3D.dat                   -c 267617.11076637130 -o Test_1
-  NUM_MPI_PROCS 4
-  COMM mpi
-  )
-  
-ENDIF ()
-
-IF (LifeV_ENABLE_FSI)
-
-TRIBITS_ADD_TEST(
-  Framework
-  POSTFIX_AND_ARGS_0 FSI3D_MTNS         -s 1 -f MultiscaleDatabase/Test_FSI3D.dat                     -c 69.503547600977484 -o Test_3
-  NUM_MPI_PROCS 4
-  COMM mpi
-  )
-  
-ENDIF ()
-
 IF (LifeV_ENABLE_OneDFSI)
   
 TRIBITS_ADD_TEST(
