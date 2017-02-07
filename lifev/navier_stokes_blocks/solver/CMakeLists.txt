@@ -9,7 +9,6 @@ SET(solver_HEADERS
   solver/StabilizationSUPG_semi_implicit.hpp
   solver/StabilizationSUPG_semi_implicit_ale.hpp
   solver/StabilizationSUPGALE.hpp
-  solver/StabilizationVMSLES_semi_implicit.hpp
   solver/FastAssemblerNS.hpp
 CACHE INTERNAL "")
 
@@ -20,8 +19,7 @@ SET(solver_SOURCES
   solver/StabilizationSUPG.cpp
   solver/StabilizationSUPG_semi_implicit.cpp
   solver/StabilizationSUPG_semi_implicit_ale.cpp
-  solver/StabilizationSUPGALE.cpp	
-  solver/StabilizationVMSLES_semi_implicit.cpp
+  solver/StabilizationSUPGALE.cpp
   solver/FastAssemblerNS.cpp
 CACHE INTERNAL "")
 
