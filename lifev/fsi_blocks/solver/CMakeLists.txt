@@ -4,7 +4,7 @@ SET(solver_HEADERS
   solver/ALESolver.hpp
   solver/FSIApplyOperator.hpp
   solver/FSIApplyOperatorNonConforming.hpp
-  solver/DirichletNeumannPreconditioner.hpp
+  solver/BlockJacobiPreconditioner.hpp
   solver/LinearElasticity.hpp
   solver/NeoHookean.hpp
   solver/AssemblyElementalStructure.hpp
@@ -17,7 +17,7 @@ SET(solver_SOURCES
   solver/ALESolver.cpp
   solver/FSIApplyOperator.cpp	
   solver/FSIApplyOperatorNonConforming.cpp	
-  solver/DirichletNeumannPreconditioner.cpp
+  solver/BlockJacobiPreconditioner.cpp
   solver/LinearElasticity.cpp
   solver/NeoHookean.cpp
   solver/AssemblyElementalStructure.cpp

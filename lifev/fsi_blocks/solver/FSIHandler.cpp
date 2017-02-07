@@ -50,7 +50,7 @@ M_exporterStructure (),
 M_applyOperatorResidual(new Operators::FSIApplyOperator),
 M_applyOperatorJacobian(new Operators::FSIApplyOperator),
 M_applyOperatorJacobianNonConforming(new Operators::FSIApplyOperatorNonConforming),
-M_prec(new Operators::DirichletNeumannPreconditioner),
+M_prec(new Operators::BlockJacobiPreconditioner),
 M_invOper(),
 M_useShapeDerivatives( false ),
 M_printResiduals ( false ),
@@ -2427,14 +2427,14 @@ FSIHandler::solveJac( vector_Type& increment, const vector_Type& residual, const
             M_prec->setBeta ( M_structureTimeAdvance->get_beta() );
         }
         M_prec->setVelocityFESpace ( M_fluid->uFESpace() );
-    	M_prec->setBCInterface ( M_interfaceFluidBC );
+    	M_prec->setBC ( M_interfaceFluidBC );
     	M_prec->setTimeStep ( M_dt );
     	M_prec->setMonolithicMap ( M_monolithicMap );
     }
     else
     {
     	M_prec->setVelocityFESpace ( M_fluid->uFESpace() );
-    	M_prec->setBCInterface ( M_interfaceFluidBC );
+    	M_prec->setBC ( M_interfaceFluidBC );
         M_prec->setDomainMap(M_applyOperatorJacobian->OperatorDomainBlockMapPtr());
         M_prec->setRangeMap(M_applyOperatorJacobian->OperatorRangeBlockMapPtr());
     }

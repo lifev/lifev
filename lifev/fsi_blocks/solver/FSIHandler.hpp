@@ -102,7 +102,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
 
-#include <lifev/fsi_blocks/solver/DirichletNeumannPreconditioner.hpp>
+#include <lifev/fsi_blocks/solver/BlockJacobiPreconditioner.hpp>
 
 #include <lifev/core/filter/PartitionIO.hpp>
 #include <lifev/fsi_blocks/filter/DOFInterfaceIO.hpp>
@@ -501,7 +501,7 @@ private:
 	std::shared_ptr<LifeV::Operators::FSIApplyOperatorNonConforming> M_applyOperatorJacobianNonConforming;
 
 	// Preconditioner operator
-	std::shared_ptr<LifeV::Operators::DirichletNeumannPreconditioner> M_prec;
+	std::shared_ptr<LifeV::Operators::BlockJacobiPreconditioner> M_prec;
 
 	// Epetra Operator needed to solve the linear system
 	std::shared_ptr<Operators::InvertibleOperator> M_invOper;
