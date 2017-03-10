@@ -1,3 +1,28 @@
+
+LifeV 4.0.2:
+============
+
+Enabling FSI blocks by default
+
+LifeV 4.0.1:
+============
+
+Introducting c++11, in particular replacing most of the BOOST funcitonalities with new c++11 features
+
+
+LifeV 4.0.0:
+============
+
+The branch developed at CMCS has been merged to master. Some additional feautures include:
+
+* new Navier Stoke solver
+* new FSI solver
+* Rescaled Localized Radial Basis Function Interpolation
+* INTERNODES solver
+* Fast assembler
+* added expressions to ETA
+
+
 LifeV 3.10.0:
 ============
 
