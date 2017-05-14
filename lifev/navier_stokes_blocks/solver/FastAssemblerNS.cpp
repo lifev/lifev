@@ -1,6 +1,9 @@
 #include <lifev/navier_stokes_blocks/solver/FastAssemblerNS.hpp>
 #include <chrono>
+#ifdef EPETRA_HAVE_OMP
 #include <omp.h>
+#endif
+
 using namespace std::chrono;
 
 using namespace std;
@@ -1065,21 +1068,21 @@ FastAssemblerNS::assemble_constant_terms( matrixPtr_Type& mass, matrixPtr_Type& 
     int NumQuadPoints = M_qr->nbQuadPt();
     int ndof_vec = M_referenceFE_velocity->nbDof()*3;
     M_numScalarDofs =  M_fespace_velocity->dof().numTotalDof();
-    
+
     double w_quad[NumQuadPoints];
     for ( int q = 0; q < NumQuadPoints ; q++ )
     {
         w_quad[q] = M_qr->weight(q);
     }
-    
+
     #pragma omp parallel firstprivate( w_quad, ndof_velocity, ndof_pressure, NumQuadPoints)
     {
         int i_elem, i_dof, q, d1, d2, i_test, i_trial, dim_mat, dim_mat1, dim_mat2;
         double integral, integral_00, integral_01, integral_02, integral_10, integral_11, integral_12;
         double integral_20, integral_21, integral_22;
-        
+
         double dphi_phys_velocity[ndof_velocity][NumQuadPoints][3]; // Gradient in the physical domain
-        
+
         // ELEMENTI
         #pragma omp for
         for ( i_elem = 0; i_elem <  M_numElements ; i_elem++ )
@@ -1094,7 +1097,7 @@ FastAssemblerNS::assemble_constant_terms( matrixPtr_Type& mass, matrixPtr_Type& 
                     for ( d1 = 0; d1 < 3 ; d1++ )
                     {
                         dphi_phys_velocity[i_dof][q][d1] = 0.0;
-                        
+
                         // DIM 2
                         for ( d2 = 0; d2 < 3 ; d2++ )
                         {
@@ -1103,12 +1106,12 @@ FastAssemblerNS::assemble_constant_terms( matrixPtr_Type& mass, matrixPtr_Type& 
                     }
                 }
             }
-            
+
             // DOF - test
             for ( i_test = 0; i_test <  ndof_velocity; i_test++ )
             {
                 M_rows_velocity[i_elem][i_test] = M_elements_velocity[i_elem][i_test];
-                
+
                 // DOF - trial
                 for ( i_trial = 0; i_trial <  ndof_velocity; i_trial++ )
                 {
@@ -1154,27 +1157,27 @@ FastAssemblerNS::assemble_constant_terms( matrixPtr_Type& mass, matrixPtr_Type& 
                         integral_00 += ( 2*dphi_phys_velocity[i_test][q][0] * dphi_phys_velocity[i_trial][q][0] +
                                          dphi_phys_velocity[i_test][q][1] * dphi_phys_velocity[i_trial][q][1]   +
                                          dphi_phys_velocity[i_test][q][2] * dphi_phys_velocity[i_trial][q][2] ) * w_quad[q];
-                        
+
                         integral_01 += dphi_phys_velocity[i_test][q][1] * dphi_phys_velocity[i_trial][q][0] * w_quad[q];
-                        
+
                         integral_02 += dphi_phys_velocity[i_test][q][2] * dphi_phys_velocity[i_trial][q][0] * w_quad[q];
-                        
+
                         integral_10 += dphi_phys_velocity[i_test][q][0] * dphi_phys_velocity[i_trial][q][1] * w_quad[q];
-                        
+
                         integral_11 += ( 2*dphi_phys_velocity[i_test][q][1] * dphi_phys_velocity[i_trial][q][1] +
                                         dphi_phys_velocity[i_test][q][0] * dphi_phys_velocity[i_trial][q][0]   +
                                         dphi_phys_velocity[i_test][q][2] * dphi_phys_velocity[i_trial][q][2] ) * w_quad[q];
-                        
+
                         integral_12 += dphi_phys_velocity[i_test][q][2] * dphi_phys_velocity[i_trial][q][1] * w_quad[q];
-                        
+
                         integral_20 += dphi_phys_velocity[i_test][q][0] * dphi_phys_velocity[i_trial][q][2] * w_quad[q];
-                        
+
                         integral_21 += dphi_phys_velocity[i_test][q][1] * dphi_phys_velocity[i_trial][q][2] * w_quad[q];
-                        
+
                         integral_22 += ( 2*dphi_phys_velocity[i_test][q][2] * dphi_phys_velocity[i_trial][q][2] +
                                         dphi_phys_velocity[i_test][q][0] * dphi_phys_velocity[i_trial][q][0]   +
                                         dphi_phys_velocity[i_test][q][1] * dphi_phys_velocity[i_trial][q][1] ) * w_quad[q];
-                        
+
                     }
                     M_vals_supg[i_elem][0][0][i_test][i_trial] = M_viscosity * integral_00 * M_detJacobian[i_elem];
                     M_vals_supg[i_elem][0][1][i_test][i_trial] = M_viscosity * integral_01 * M_detJacobian[i_elem];
@@ -1187,7 +1190,7 @@ FastAssemblerNS::assemble_constant_terms( matrixPtr_Type& mass, matrixPtr_Type& 
                     M_vals_supg[i_elem][2][2][i_test][i_trial] = M_viscosity * integral_22 * M_detJacobian[i_elem];
                 }
             }
-            
+
             for ( dim_mat = 0; dim_mat < 3 ; dim_mat++ )
             {
                 // DOF - test
@@ -1208,14 +1211,14 @@ FastAssemblerNS::assemble_constant_terms( matrixPtr_Type& mass, matrixPtr_Type& 
                     }
                 }
             }
-            
+
             for ( dim_mat = 0; dim_mat < 3 ; dim_mat++ )
             {
                 // DOF - test
                 for ( i_test = 0; i_test <  ndof_pressure; i_test++ )
                 {
                     M_rows_pressure[i_elem][i_test] = M_elements_pressure[i_elem][i_test];
-                    
+
                     // DOF - trial
                     for ( i_trial = 0; i_trial < ndof_velocity; i_trial++ )
                     {
@@ -1226,35 +1229,35 @@ FastAssemblerNS::assemble_constant_terms( matrixPtr_Type& mass, matrixPtr_Type& 
                         {
                             integral += dphi_phys_velocity[i_trial][q][dim_mat]*M_phi_pressure[i_test][q]*w_quad[q];
                         }
-                        
+
                         M_vals_supg_10[i_elem][dim_mat][i_test][i_trial] = integral * M_detJacobian[i_elem];
                     }
                 }
             }
         }
     }
-    
+
     for ( int k = 0; k < M_numElements; ++k )
     {
         mass->matrixPtr()->InsertGlobalValues ( ndof_velocity, M_rows_velocity[k],
                                                 ndof_velocity, M_cols_velocity[k],
                                                 M_vals_00[k],
                                                 Epetra_FECrsMatrix::ROW_MAJOR);
-        
+
         b01->matrixPtr()->InsertGlobalValues ( ndof_velocity,
                                                M_rows_velocity[k],
                                                ndof_pressure,
                                                M_cols_pressure[k],
                                                M_vals_supg_01[k][0],
                                                Epetra_FECrsMatrix::ROW_MAJOR);
-        
+
         b10->matrixPtr()->InsertGlobalValues ( ndof_pressure, M_rows_pressure[k],
                                                ndof_velocity, M_cols_velocity[k],
                                                M_vals_supg_10[k][0],
                                                Epetra_FECrsMatrix::ROW_MAJOR);
-        
+
     }
-    
+
     for ( UInt d1 = 0; d1 < 3 ; d1++ ) // row index
     {
         for ( int k = 0; k < M_numElements; ++k )
@@ -1269,7 +1272,7 @@ FastAssemblerNS::assemble_constant_terms( matrixPtr_Type& mass, matrixPtr_Type& 
                                                          Epetra_FECrsMatrix::ROW_MAJOR);
 
         }
-        
+
         for ( int k = 0; k < M_numElements; ++k )
         {
             for ( UInt i = 0; i <  ndof_velocity; i++ )
@@ -1281,7 +1284,7 @@ FastAssemblerNS::assemble_constant_terms( matrixPtr_Type& mass, matrixPtr_Type& 
                                                          M_vals_supg[k][d1][1],
                                                          Epetra_FECrsMatrix::ROW_MAJOR);
         }
-        
+
         for ( int k = 0; k < M_numElements; ++k )
         {
             for ( UInt i = 0; i <  ndof_velocity; i++ )
@@ -1294,7 +1297,7 @@ FastAssemblerNS::assemble_constant_terms( matrixPtr_Type& mass, matrixPtr_Type& 
                                                          Epetra_FECrsMatrix::ROW_MAJOR);
         }
     }
-    
+
     for ( UInt d1 = 1; d1 < 3 ; d1++ )
     {
         for ( int k = 0; k < M_numElements; ++k )
@@ -1308,17 +1311,17 @@ FastAssemblerNS::assemble_constant_terms( matrixPtr_Type& mass, matrixPtr_Type& 
                                                     ndof_velocity, M_cols_velocity[k],
                                                     M_vals_00[k],
                                                     Epetra_FECrsMatrix::ROW_MAJOR);
-            
+
             b01->matrixPtr()->InsertGlobalValues ( ndof_velocity, M_rows_velocity[k],
                                                    ndof_pressure, M_cols_pressure[k],
                                                    M_vals_supg_01[k][d1],
                                                    Epetra_FECrsMatrix::ROW_MAJOR);
-            
+
             b10->matrixPtr()->InsertGlobalValues ( ndof_pressure, M_rows_pressure[k],
                                                    ndof_velocity, M_cols_velocity[k],
                                                    M_vals_supg_10[k][d1],
                                                    Epetra_FECrsMatrix::ROW_MAJOR);
-            
+
         }
     }
 }
@@ -1330,22 +1333,22 @@ FastAssemblerNS::assembleConvective( matrixPtr_Type& matrix, const vector_Type& 
     int NumQuadPoints = M_qr->nbQuadPt();
     int ndof_vec = M_referenceFE_velocity->nbDof()*3;
     M_numScalarDofs =  M_fespace_velocity->dof().numTotalDof();
-    
+
     double w_quad[NumQuadPoints];
     for ( int q = 0; q < NumQuadPoints ; q++ )
     {
         w_quad[q] = M_qr->weight(q);
     }
-    
+
     #pragma omp parallel firstprivate( w_quad, ndof_velocity, NumQuadPoints)
     {
         int i_elem, i_dof, q, d1, d2, i_test, i_trial, e_idof;
         double integral;
-        
+
         double dphi_phys_velocity[ndof_velocity][NumQuadPoints][3];
-        
+
         double uhq[3][NumQuadPoints];
-        
+
         // ELEMENTI,
         #pragma omp for
         for ( i_elem = 0; i_elem <  M_numElements; i_elem++ )
@@ -1360,7 +1363,7 @@ FastAssemblerNS::assembleConvective( matrixPtr_Type& matrix, const vector_Type& 
                     for ( d1 = 0; d1 < 3 ; d1++ )
                     {
                         dphi_phys_velocity[i_dof][q][d1] = 0.0;
-                        
+
                         // DIM 2
                         for ( d2 = 0; d2 < 3 ; d2++ )
                         {
@@ -1369,7 +1372,7 @@ FastAssemblerNS::assembleConvective( matrixPtr_Type& matrix, const vector_Type& 
                     }
                 }
             }
-            
+
             // QUAD
             for (  q = 0; q < NumQuadPoints ; q++ )
             {
@@ -1383,19 +1386,19 @@ FastAssemblerNS::assembleConvective( matrixPtr_Type& matrix, const vector_Type& 
                     }
                 }
             }
-            
+
             // DOF - test
             for ( i_test = 0; i_test <  ndof_velocity; i_test++ )
             {
                 M_rows_velocity[i_elem][i_test] = M_elements_velocity[i_elem][i_test];
-                
+
                 // DOF - trial
                 for ( i_trial = 0; i_trial <  ndof_velocity; i_trial++ )
                 {
                     M_cols_velocity[i_elem][i_trial] = M_elements_velocity[i_elem][i_trial];
-                    
+
                     M_vals_00[i_elem][i_test][i_trial] = 0.0;
-                    
+
                     integral = 0.0;
                     // QUAD
                     for ( q = 0; q < NumQuadPoints ; q++ )
@@ -1411,7 +1414,7 @@ FastAssemblerNS::assembleConvective( matrixPtr_Type& matrix, const vector_Type& 
             }
         }
     }
-    
+
     for ( int k = 0; k < M_numElements; ++k )
     {
         matrix->matrixPtr()->InsertGlobalValues ( ndof_velocity, M_rows_velocity[k],
@@ -1419,7 +1422,7 @@ FastAssemblerNS::assembleConvective( matrixPtr_Type& matrix, const vector_Type& 
                                                   M_vals_00[k],
                                                   Epetra_FECrsMatrix::ROW_MAJOR);
     }
-    
+
     for ( UInt d1 = 1; d1 < 3 ; d1++ )
     {
         for ( int k = 0; k < M_numElements; ++k )
@@ -1444,28 +1447,28 @@ FastAssemblerNS::jacobianNS( matrixPtr_Type& matrix, const vector_Type& u_h )
     int NumQuadPoints = M_qr->nbQuadPt();
     int ndof_vec = M_referenceFE_velocity->nbDof()*3;
     M_numScalarDofs =  M_fespace_velocity->dof().numTotalDof();
-    
+
     double w_quad[NumQuadPoints];
     for ( int q = 0; q < NumQuadPoints ; q++ )
     {
         w_quad[q] = M_qr->weight(q);
     }
-    
+
     #pragma omp parallel firstprivate( w_quad, ndof_velocity, NumQuadPoints)
     {
         int i_elem, i_dof, q, d1, d2, i_test, i_trial, e_idof;
         double integral, integral_00, integral_01, integral_02, integral_10, integral_11, integral_12;
         double integral_20, integral_21, integral_22;
-        
+
         double dphi_phys_velocity[ndof_velocity][NumQuadPoints][3];
-        
+
         double duhq[3][3][NumQuadPoints];
-        
+
         // ELEMENTI,
         #pragma omp for
         for ( i_elem = 0; i_elem <  M_numElements; i_elem++ )
         {
-            
+
             // DOF
             for ( i_dof = 0; i_dof <  ndof_velocity; i_dof++ )
             {
@@ -1476,7 +1479,7 @@ FastAssemblerNS::jacobianNS( matrixPtr_Type& matrix, const vector_Type& u_h )
                     for ( d1 = 0; d1 < 3 ; d1++ )
                     {
                         dphi_phys_velocity[i_dof][q][d1] = 0.0;
-                        
+
                         // DIM 2
                         for ( d2 = 0; d2 < 3 ; d2++ )
                         {
@@ -1485,7 +1488,7 @@ FastAssemblerNS::jacobianNS( matrixPtr_Type& matrix, const vector_Type& u_h )
                     }
                 }
             }
-            
+
             // QUAD
             for (  q = 0; q < NumQuadPoints ; q++ )
             {
@@ -1502,7 +1505,7 @@ FastAssemblerNS::jacobianNS( matrixPtr_Type& matrix, const vector_Type& u_h )
                     }
                 }
             }
-            
+
             // DOF - test
             for ( i_test = 0; i_test <  ndof_velocity; i_test++ )
             {
@@ -1511,7 +1514,7 @@ FastAssemblerNS::jacobianNS( matrixPtr_Type& matrix, const vector_Type& u_h )
                 for ( i_trial = 0; i_trial <  ndof_velocity; i_trial++ )
                 {
                     M_cols_velocity[i_elem][i_trial] = M_elements_velocity[i_elem][i_trial];
-                    
+
                     M_vals_supg[i_elem][0][0][i_test][i_trial] = 0.0;
                     M_vals_supg[i_elem][0][1][i_test][i_trial] = 0.0;
                     M_vals_supg[i_elem][0][2][i_test][i_trial] = 0.0;
@@ -1534,23 +1537,23 @@ FastAssemblerNS::jacobianNS( matrixPtr_Type& matrix, const vector_Type& u_h )
                     for ( q = 0; q < NumQuadPoints ; q++ )
                     {
                         integral_00 += M_phi_velocity[i_test][q] * duhq[0][0][q] * M_phi_velocity[i_trial][q] * w_quad[q];
-                        
+
                         integral_01 += M_phi_velocity[i_test][q] * duhq[0][1][q] * M_phi_velocity[i_trial][q] * w_quad[q];
-                        
+
                         integral_02 += M_phi_velocity[i_test][q] * duhq[0][2][q] * M_phi_velocity[i_trial][q] * w_quad[q];
-                        
+
                         integral_10 += M_phi_velocity[i_test][q] * duhq[1][0][q] * M_phi_velocity[i_trial][q] * w_quad[q];
-                        
+
                         integral_11 += M_phi_velocity[i_test][q] * duhq[1][1][q] * M_phi_velocity[i_trial][q] * w_quad[q];
-                        
+
                         integral_12 += M_phi_velocity[i_test][q] * duhq[1][2][q] * M_phi_velocity[i_trial][q] * w_quad[q];
-                        
+
                         integral_20 += M_phi_velocity[i_test][q] * duhq[2][0][q] * M_phi_velocity[i_trial][q] * w_quad[q];
-                        
+
                         integral_21 += M_phi_velocity[i_test][q] * duhq[2][1][q] * M_phi_velocity[i_trial][q] * w_quad[q];
-                        
+
                         integral_22 += M_phi_velocity[i_test][q] * duhq[2][2][q] * M_phi_velocity[i_trial][q] * w_quad[q];
-                        
+
                     }
                     M_vals_supg[i_elem][0][0][i_test][i_trial] = M_density * integral_00 * M_detJacobian[i_elem];
                     M_vals_supg[i_elem][0][1][i_test][i_trial] = M_density * integral_01 * M_detJacobian[i_elem];
@@ -1565,7 +1568,7 @@ FastAssemblerNS::jacobianNS( matrixPtr_Type& matrix, const vector_Type& u_h )
             }
         }
     }
-    
+
     for ( UInt d1 = 0; d1 < 3 ; d1++ ) // row index
     {
         for ( int k = 0; k < M_numElements; ++k )
@@ -1578,9 +1581,9 @@ FastAssemblerNS::jacobianNS( matrixPtr_Type& matrix, const vector_Type& u_h )
                                                       ndof_velocity, M_cols_velocity[k],
                                                       M_vals_supg[k][d1][0],
                                                       Epetra_FECrsMatrix::ROW_MAJOR);
-            
+
         }
-        
+
         for ( int k = 0; k < M_numElements; ++k )
         {
             for ( UInt i = 0; i <  ndof_velocity; i++ )
@@ -1592,7 +1595,7 @@ FastAssemblerNS::jacobianNS( matrixPtr_Type& matrix, const vector_Type& u_h )
                                                       M_vals_supg[k][d1][1],
                                                       Epetra_FECrsMatrix::ROW_MAJOR);
         }
-        
+
         for ( int k = 0; k < M_numElements; ++k )
         {
             for ( UInt i = 0; i <  ndof_velocity; i++ )
@@ -1622,18 +1625,18 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
     int NumQuadPoints = M_qr->nbQuadPt();
     int ndof_vec = M_referenceFE_velocity->nbDof()*3;
     M_numScalarDofs =  M_fespace_velocity->dof().numTotalDof();
-    
+
     double w_quad[NumQuadPoints];
     for ( int q = 0; q < NumQuadPoints ; q++ )
     {
         w_quad[q] = M_qr->weight(q);
     }
-    
+
 #pragma omp parallel firstprivate( w_quad, ndof_velocity, ndof_pressure, NumQuadPoints)
     {
         int i_elem, i_dof, q, d1, d2, i_test, i_trial, e_idof, dim_mat, iCoor, jCoor, k1, k2;
         double integral, integral_test, integral_trial, integral_partial, integral_lapl, partialSum;
-        
+
         double dphi_phys_velocity[ndof_velocity][NumQuadPoints][3];
         double dphi_phys_pressure[ndof_pressure][NumQuadPoints][3];
         double d2phi_phys_velocity[ndof_velocity][NumQuadPoints][3][3];
@@ -1644,7 +1647,7 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
         double i_00, i_01, i_02, i_10, i_11, i_12, i_20, i_21, i_22;
         double d_ukm1_q[3][3][NumQuadPoints];
         double d_pkm1_q[3][NumQuadPoints];
-        
+
         // ELEMENTI,
 #pragma omp for
         for ( i_elem = 0; i_elem <  M_numElements; i_elem++ )
@@ -1659,7 +1662,7 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                     for ( d1 = 0; d1 < 3 ; d1++ )
                     {
                         dphi_phys_velocity[i_dof][q][d1] = 0.0;
-                        
+
                         // DIM 2
                         for ( d2 = 0; d2 < 3 ; d2++ )
                         {
@@ -1668,7 +1671,7 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                     }
                 }
             }
-            
+
             // DOF -- nota che può essere ottimizzato rishapando il gradiente fisico. Prima q poi d1 poi d2 e poi i_dof
             for ( i_dof = 0; i_dof <  ndof_pressure; i_dof++ )
             {
@@ -1679,7 +1682,7 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                     for ( d1 = 0; d1 < 3 ; d1++ )
                     {
                         dphi_phys_pressure[i_dof][q][d1] = 0.0;
-                        
+
                         // DIM 2
                         for ( d2 = 0; d2 < 3 ; d2++ )
                         {
@@ -1688,7 +1691,7 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                     }
                 }
             }
-            
+
             // QUAD
             for (  q = 0; q < NumQuadPoints ; q++ )
             {
@@ -1705,16 +1708,16 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                         u_bdf_q[d1][q] += u_bdf[e_idof] * M_phi_velocity[i_dof][q];
                     }
                 }
-                
+
                 p_km1_q[q] = 0.0;
                 for ( i_dof = 0; i_dof < ndof_pressure; i_dof++ )
                 {
                     e_idof =  M_elements_pressure[i_elem][i_dof];
                     p_km1_q[q] += p_km1[e_idof] * M_phi_pressure[i_dof][q];
                 }
-                
+
             }
-            
+
             // QUAD
             for (  q = 0; q < NumQuadPoints ; q++ )
             {
@@ -1731,7 +1734,7 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                     }
                 }
             }
-            
+
             // QUAD
             for (  q = 0; q < NumQuadPoints ; q++ )
             {
@@ -1745,7 +1748,7 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                     }
                 }
             }
-            
+
             // STABILIZZAZIONE - coefficienti Tau_M e Tau_C
             for (  q = 0; q < NumQuadPoints ; q++ )
             {
@@ -1761,27 +1764,27 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                                                                                    M_G[i_elem][2][0]*M_G[i_elem][2][0] + M_G[i_elem][2][1]*M_G[i_elem][2][1] + M_G[i_elem][2][2]*M_G[i_elem][2][2]
                                                                                    )  // TAU_M_DEN_VISC
                                                    );
-                
+
                 M_Tau_C[i_elem][q] = 1.0/( M_g[i_elem][0]*M_Tau_M[i_elem][q]*M_g[i_elem][0] +
                                           M_g[i_elem][1]*M_Tau_M[i_elem][q]*M_g[i_elem][1] +
                                           M_g[i_elem][2]*M_Tau_M[i_elem][q]*M_g[i_elem][2]
                                           );
-                
+
             }
-            
+
             // DOF - test
             for ( i_test = 0; i_test <  ndof_velocity; i_test++ )
             {
                 M_rows_velocity[i_elem][i_test] = M_elements_velocity[i_elem][i_test];
-                
+
                 // DOF - trial
                 for ( i_trial = 0; i_trial <  ndof_velocity; i_trial++ )
                 {
                     M_cols_velocity[i_elem][i_trial] = M_elements_velocity[i_elem][i_trial];
-                    
+
                     integral = 0.0;
                     i_00 = 0.0; i_01 = 0.0; i_02 = 0.0; i_10 = 0.0; i_11 = 0.0; i_12 = 0.0; i_20 = 0.0; i_21 = 0.0; i_22 = 0.0;
-                    
+
                     M_vals_supg[i_elem][0][0][i_test][i_trial] = 0.0;
                     M_vals_supg[i_elem][0][1][i_test][i_trial] = 0.0;
                     M_vals_supg[i_elem][0][2][i_test][i_trial] = 0.0;
@@ -1791,20 +1794,20 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                     M_vals_supg[i_elem][2][0][i_test][i_trial] = 0.0;
                     M_vals_supg[i_elem][2][1][i_test][i_trial] = 0.0;
                     M_vals_supg[i_elem][2][2][i_test][i_trial] = 0.0;
-                    
+
                     // QUAD
                     for ( q = 0; q < NumQuadPoints ; q++ )
                     {
                         integral_test = 0.0;
                         integral_trial = 0.0;
                         integral_partial = 0.0;
-                        
+
                         // DIM 1
                         for ( d1 = 0; d1 < 3 ; d1++ )
                         {
                             integral_test += beta_km1_q[d1][q] * dphi_phys_velocity[i_test][q][d1];
                         }
-                        
+
     integral_partial = ( dphi_phys_velocity[i_test][q][0] * beta_km1_q[0][q] +
                           dphi_phys_velocity[i_test][q][1] * beta_km1_q[1][q] +
                           dphi_phys_velocity[i_test][q][2] * beta_km1_q[2][q]
@@ -1813,7 +1816,7 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                           dphi_phys_velocity[i_trial][q][1] * beta_km1_q[1][q] +
                           dphi_phys_velocity[i_trial][q][2] * beta_km1_q[2][q]
                          );
-                        
+
     i_00 += ( M_Tau_M[i_elem][q] * ( M_density * dphi_phys_velocity[i_test][q][0] * M_phi_velocity[i_trial][q] *
                                    ( M_density * M_alpha / M_timestep * u_km1_q[0][q] +
                                      d_pkm1_q[0][q]
@@ -1829,7 +1832,7 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                                  )
               +M_Tau_C[i_elem][q] * ( dphi_phys_velocity[i_test][q][0] * dphi_phys_velocity[i_trial][q][0] )
              ) * w_quad[q];
-    
+
     i_01 += ( M_Tau_M[i_elem][q] * ( M_density * dphi_phys_velocity[i_test][q][1] * M_phi_velocity[i_trial][q] *
                                    ( M_density * M_alpha / M_timestep * u_km1_q[0][q] +
                                      d_pkm1_q[0][q]
@@ -1845,7 +1848,7 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                                  )
              +M_Tau_C[i_elem][q] * ( dphi_phys_velocity[i_test][q][0] * dphi_phys_velocity[i_trial][q][1] )
                         ) * w_quad[q];
-    
+
     i_02 += ( M_Tau_M[i_elem][q] * ( M_density * dphi_phys_velocity[i_test][q][2] * M_phi_velocity[i_trial][q] *
                                    ( M_density * M_alpha / M_timestep * u_km1_q[0][q] +
                                      d_pkm1_q[0][q]
@@ -1861,7 +1864,7 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                                  )
             +M_Tau_C[i_elem][q] * ( dphi_phys_velocity[i_test][q][0] * dphi_phys_velocity[i_trial][q][2] )
                         ) * w_quad[q];
-    
+
     i_10 += ( M_Tau_M[i_elem][q] * ( M_density * dphi_phys_velocity[i_test][q][0] * M_phi_velocity[i_trial][q] *
                                    ( M_density * M_alpha / M_timestep * u_km1_q[1][q] +
                                      d_pkm1_q[1][q]
@@ -1877,7 +1880,7 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                                  )
             +M_Tau_C[i_elem][q] * ( dphi_phys_velocity[i_test][q][1] * dphi_phys_velocity[i_trial][q][0] )
                         ) * w_quad[q];
-    
+
     i_11 += ( M_Tau_M[i_elem][q] * ( M_density * dphi_phys_velocity[i_test][q][1] * M_phi_velocity[i_trial][q] *
                                    ( M_density * M_alpha / M_timestep * u_km1_q[1][q] +
                                      d_pkm1_q[1][q]
@@ -1893,7 +1896,7 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                                  )
             +M_Tau_C[i_elem][q] * ( dphi_phys_velocity[i_test][q][1] * dphi_phys_velocity[i_trial][q][1] )
                         ) * w_quad[q];
-    
+
     i_12 += ( M_Tau_M[i_elem][q] * ( M_density * dphi_phys_velocity[i_test][q][2] * M_phi_velocity[i_trial][q] *
                                    ( M_density * M_alpha / M_timestep * u_km1_q[1][q] +
                                      d_pkm1_q[1][q]
@@ -1909,7 +1912,7 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                                  )
              + M_Tau_C[i_elem][q] * ( dphi_phys_velocity[i_test][q][1] * dphi_phys_velocity[i_trial][q][2] )
              ) * w_quad[q];
-    
+
     i_20 += ( M_Tau_M[i_elem][q] * ( M_density * dphi_phys_velocity[i_test][q][0] * M_phi_velocity[i_trial][q] *
                                    ( M_density * M_alpha / M_timestep * u_km1_q[2][q] +
                                      d_pkm1_q[2][q]
@@ -1925,7 +1928,7 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                                  )
              +M_Tau_C[i_elem][q] * ( dphi_phys_velocity[i_test][q][2] * dphi_phys_velocity[i_trial][q][0] )
              ) * w_quad[q];
-    
+
     i_21 += ( M_Tau_M[i_elem][q] * ( M_density * dphi_phys_velocity[i_test][q][1] * M_phi_velocity[i_trial][q] *
                                    ( M_density * M_alpha / M_timestep * u_km1_q[2][q] +
                                      d_pkm1_q[2][q]
@@ -1941,7 +1944,7 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                                  )
              +M_Tau_C[i_elem][q] * ( dphi_phys_velocity[i_test][q][2] * dphi_phys_velocity[i_trial][q][1] )
              ) * w_quad[q];
-    
+
     i_22 += ( M_Tau_M[i_elem][q] * ( M_density * dphi_phys_velocity[i_test][q][2] * M_phi_velocity[i_trial][q] *
                                    ( M_density * M_alpha / M_timestep * u_km1_q[2][q] +
                                      d_pkm1_q[2][q]
@@ -1957,13 +1960,13 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                                  )
              +M_Tau_C[i_elem][q] * ( dphi_phys_velocity[i_test][q][2] * dphi_phys_velocity[i_trial][q][2] )
              ) * w_quad[q];
-                        
+
     integral +=  M_Tau_M[i_elem][q] * (  M_density * M_density * M_alpha / M_timestep * integral_test * M_phi_velocity[i_trial][q]
                                        + M_density * M_density * integral_partial
                                       ) * w_quad[q];
-                        
+
                     }
-                    
+
                     M_vals_supg[i_elem][0][0][i_test][i_trial] = (i_00 + integral) *  M_detJacobian[i_elem];
                     M_vals_supg[i_elem][0][1][i_test][i_trial] = (i_01 ) *  M_detJacobian[i_elem];
                     M_vals_supg[i_elem][0][2][i_test][i_trial] = (i_02 ) *  M_detJacobian[i_elem];
@@ -1973,18 +1976,18 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                     M_vals_supg[i_elem][2][0][i_test][i_trial] = (i_20 ) *  M_detJacobian[i_elem];
                     M_vals_supg[i_elem][2][1][i_test][i_trial] = (i_21 ) *  M_detJacobian[i_elem];
                     M_vals_supg[i_elem][2][2][i_test][i_trial] = (i_22 + integral) *  M_detJacobian[i_elem];
-                    
+
                 }
-                
+
                 for ( i_trial = 0; i_trial <  ndof_pressure; i_trial++ )
                 {
                     for ( dim_mat = 0; dim_mat < 3 ; dim_mat++ )
                     {
                         M_cols_pressure[i_elem][i_trial] = M_elements_pressure[i_elem][i_trial];
                         M_vals_supg_01[i_elem][dim_mat][i_test][i_trial] = 0.0;
-                        
+
                         integral = 0.0;
-                        
+
                         // QUAD
                         for ( q = 0; q < NumQuadPoints ; q++ )
                         {
@@ -1998,13 +2001,13 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                         M_vals_supg_01[i_elem][dim_mat][i_test][i_trial] = integral * M_detJacobian[i_elem];
                     }
                 }
-                
+
             }// end test
-            
+
             for ( i_test = 0; i_test <  ndof_pressure; i_test++ )
             {
                 M_rows_pressure[i_elem][i_test] = M_elements_pressure[i_elem][i_test];
-                
+
                 // DOF - trial
                 for ( i_trial = 0; i_trial <  ndof_pressure; i_trial++ )
                 {
@@ -2022,7 +2025,7 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                     M_vals_11[i_elem][i_test][i_trial] = integral * M_detJacobian[i_elem];
                 }
             }
-            
+
             // DOF - test
             for ( i_test = 0; i_test <  ndof_pressure; i_test++ )
             {
@@ -2032,17 +2035,17 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                     i_00 = 0.0;
                     i_10 = 0.0;
                     i_20 = 0.0;
-                    
+
                     M_vals_supg_10[i_elem][0][i_test][i_trial] = 0.0;
                     M_vals_supg_10[i_elem][1][i_test][i_trial] = 0.0;
                     M_vals_supg_10[i_elem][2][i_test][i_trial] = 0.0;
-                    
+
                     // QUAD
                     for ( q = 0; q < NumQuadPoints ; q++ )
                     {
                         i_00 += M_Tau_M[i_elem][q] * (
                                                     M_alpha * M_density / M_timestep * dphi_phys_pressure[i_test][q][0] * M_phi_velocity[i_trial][q]
-                                                   
+
                                                    +M_density * ( dphi_phys_pressure[i_test][q][0] * M_phi_velocity[i_trial][q] * d_ukm1_q[0][0][q]
                                                                  +dphi_phys_pressure[i_test][q][1] * M_phi_velocity[i_trial][q] * d_ukm1_q[1][0][q]
                                                                  +dphi_phys_pressure[i_test][q][2] * M_phi_velocity[i_trial][q] * d_ukm1_q[2][0][q]
@@ -2053,7 +2056,7 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                                                                                                     +dphi_phys_velocity[i_trial][q][2]*beta_km1_q[2][q]
                                                                                                    )
                                                      ) * w_quad[q];
-                        
+
                         i_10 += M_Tau_M[i_elem][q] * (
                                                       M_alpha * M_density / M_timestep * dphi_phys_pressure[i_test][q][1] * M_phi_velocity[i_trial][q]
                                                       +M_density * ( dphi_phys_pressure[i_test][q][0] * M_phi_velocity[i_trial][q] * d_ukm1_q[0][1][q]
@@ -2065,9 +2068,9 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                                                                                                        +dphi_phys_velocity[i_trial][q][1]*beta_km1_q[1][q]
                                                                                                        +dphi_phys_velocity[i_trial][q][2]*beta_km1_q[2][q]
                                                                                                        )
-                                                      
+
                                                       ) * w_quad[q];
-                        
+
                         i_20 += M_Tau_M[i_elem][q] * (
                                                       M_alpha * M_density / M_timestep * dphi_phys_pressure[i_test][q][2] * M_phi_velocity[i_trial][q]
                                                       +M_density * ( dphi_phys_pressure[i_test][q][0] * M_phi_velocity[i_trial][q] * d_ukm1_q[0][2][q]
@@ -2079,19 +2082,19 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                                                                                                        +dphi_phys_velocity[i_trial][q][1]*beta_km1_q[1][q]
                                                                                                        +dphi_phys_velocity[i_trial][q][2]*beta_km1_q[2][q]
                                                                                                        )
-                                                      
+
                                                       ) * w_quad[q];
                     }
-                    
+
                     M_vals_supg_10[i_elem][0][i_test][i_trial] = i_00 * M_detJacobian[i_elem];
                     M_vals_supg_10[i_elem][1][i_test][i_trial] = i_10 * M_detJacobian[i_elem];
                     M_vals_supg_10[i_elem][2][i_test][i_trial] = i_20 * M_detJacobian[i_elem];
                 }
             }
-            
+
         }// end elements
     }// end parallel region
-    
+
     for ( UInt d1 = 0; d1 < 3 ; d1++ ) // row index
     {
         for ( int k = 0; k < M_numElements; ++k )
@@ -2109,7 +2112,7 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                                                        M_vals_supg_01[k][d1],
                                                        Epetra_FECrsMatrix::ROW_MAJOR);
         }
-        
+
         for ( int k = 0; k < M_numElements; ++k )
         {
             for ( UInt i = 0; i <  ndof_velocity; i++ )
@@ -2121,7 +2124,7 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                                                        M_vals_supg[k][d1][1],
                                                        Epetra_FECrsMatrix::ROW_MAJOR);
         }
-        
+
         for ( int k = 0; k < M_numElements; ++k )
         {
             for ( UInt i = 0; i <  ndof_velocity; i++ )
@@ -2134,7 +2137,7 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                                                        Epetra_FECrsMatrix::ROW_MAJOR);
         }
     }
-    
+
     for ( int k = 0; k < M_numElements; ++k )
     {
         block11->matrixPtr()->InsertGlobalValues ( ndof_pressure, M_rows_pressure[k],
@@ -2142,7 +2145,7 @@ FastAssemblerNS::supg_FI_FSI_terms ( matrixPtr_Type& block00,
                                                    M_vals_11[k],
                                                    Epetra_FECrsMatrix::ROW_MAJOR);
     }
-    
+
     for ( UInt d1 = 0; d1 < 3 ; d1++ )
     {
         for ( int k = 0; k < M_numElements; ++k )
@@ -2172,25 +2175,25 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
     int NumQuadPoints = M_qr->nbQuadPt();
     int ndof_vec = M_referenceFE_velocity->nbDof()*3;
     M_numScalarDofs =  M_fespace_velocity->dof().numTotalDof();
-    
+
     double w_quad[NumQuadPoints];
     for ( int q = 0; q < NumQuadPoints ; q++ )
     {
         w_quad[q] = M_qr->weight(q);
     }
-    
+
     #pragma omp parallel firstprivate( w_quad, ndof_velocity, ndof_pressure, NumQuadPoints)
     {
         int i_elem, i_dof, q, d1, d2, i_test, i_trial, e_idof, dim_mat, iCoor, jCoor, k1, k2;
         double integral, integral_test, integral_trial, integral_partial, integral_lapl, partialSum;
-        
+
         double dphi_phys_velocity[ndof_velocity][NumQuadPoints][3];
         double dphi_phys_pressure[ndof_pressure][NumQuadPoints][3];
         double d2phi_phys_velocity[ndof_velocity][NumQuadPoints][3][3];
         double uhq[3][NumQuadPoints];
         double i_00, i_01, i_02, i_10, i_11, i_12, i_20, i_21, i_22;
 
-        
+
         // ELEMENTI,
         #pragma omp for
         for ( i_elem = 0; i_elem <  M_numElements; i_elem++ )
@@ -2205,7 +2208,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                     for ( d1 = 0; d1 < 3 ; d1++ )
                     {
                         dphi_phys_velocity[i_dof][q][d1] = 0.0;
-                        
+
                         // DIM 2
                         for ( d2 = 0; d2 < 3 ; d2++ )
                         {
@@ -2214,7 +2217,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                     }
                 }
             }
-            
+
             for ( i_dof = 0; i_dof <  ndof_pressure; i_dof++ )
             {
                 // QUAD
@@ -2224,7 +2227,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                     for ( d1 = 0; d1 < 3 ; d1++ )
                     {
                         dphi_phys_pressure[i_dof][q][d1] = 0.0;
-                        
+
                         // DIM 2
                         for ( d2 = 0; d2 < 3 ; d2++ )
                         {
@@ -2233,7 +2236,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                     }
                 }
             }
-            
+
             // QUAD
             for (  q = 0; q < NumQuadPoints ; q++ )
             {
@@ -2277,7 +2280,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                     }
                 }
             }
-            
+
             // STABILIZZAZIONE - coefficienti Tau_M e Tau_C
             for (  q = 0; q < NumQuadPoints ; q++ )
             {
@@ -2292,27 +2295,27 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                                                                    M_G[i_elem][2][0]*M_G[i_elem][2][0] + M_G[i_elem][2][1]*M_G[i_elem][2][1] + M_G[i_elem][2][2]*M_G[i_elem][2][2]
                                                                                    )  // TAU_M_DEN_VISC*/
                                                    );
-                
+
                 M_Tau_C[i_elem][q] = 1.0/( M_g[i_elem][0]*M_Tau_M[i_elem][q]*M_g[i_elem][0] +
                                           M_g[i_elem][1]*M_Tau_M[i_elem][q]*M_g[i_elem][1] +
                                           M_g[i_elem][2]*M_Tau_M[i_elem][q]*M_g[i_elem][2]
                                           );
-                
+
                 M_Tau_M_hat[i_elem][q] = 1.0/( M_alpha * M_density / M_timestep + 1.0/M_Tau_M[i_elem][q]);
             }
-            
+
             // DOF - test
             for ( i_test = 0; i_test <  ndof_velocity; i_test++ )
             {
                 M_rows_velocity[i_elem][i_test] = M_elements_velocity[i_elem][i_test];
-                
+
                 // DOF - trial
                 for ( i_trial = 0; i_trial <  ndof_velocity; i_trial++ )
                 {
                     M_cols_velocity[i_elem][i_trial] = M_elements_velocity[i_elem][i_trial];
-                    
+
                     i_00 = 0.0; i_01 = 0.0; i_02 = 0.0; i_10 = 0.0; i_11 = 0.0; i_12 = 0.0; i_20 = 0.0; i_21 = 0.0; i_22 = 0.0;
-                    
+
                     M_vals_supg[i_elem][0][0][i_test][i_trial] = 0.0;
                     M_vals_supg[i_elem][0][1][i_test][i_trial] = 0.0;
                     M_vals_supg[i_elem][0][2][i_test][i_trial] = 0.0;
@@ -2322,24 +2325,24 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                     M_vals_supg[i_elem][2][0][i_test][i_trial] = 0.0;
                     M_vals_supg[i_elem][2][1][i_test][i_trial] = 0.0;
                     M_vals_supg[i_elem][2][2][i_test][i_trial] = 0.0;
-                
+
                     double tmp_supg = 0.0;
                     double tmp_supg_test = 0.0;
                     double tmp_supg_trial = 0.0;
-                    
+
                     // QUAD
                     for ( q = 0; q < NumQuadPoints ; q++ )
                     {
     tmp_supg = M_alpha * M_density * M_density / M_timestep * (
     dphi_phys_velocity[i_test][q][0] * uhq[0][q] + dphi_phys_velocity[i_test][q][1] * uhq[1][q] + dphi_phys_velocity[i_test][q][2] * uhq[2][q]
                                                                ) * M_phi_velocity[i_trial][q];
-                        
+
     tmp_supg_test =
     dphi_phys_velocity[i_test][q][0] * uhq[0][q] + dphi_phys_velocity[i_test][q][1] * uhq[1][q] + dphi_phys_velocity[i_test][q][2] * uhq[2][q];
-                        
+
     tmp_supg_trial =
     dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q];
-                        
+
                         i_00 += ( M_Tau_M_hat[i_elem][q] * (
     M_alpha * M_density * M_density / M_timestep * dphi_phys_velocity[i_test][q][0] * fine_scale[i_elem][q][0] * M_phi_velocity[i_trial][q] +
     M_density * dphi_phys_velocity[i_test][q][0] * fine_scale[i_elem][q][0] * (
@@ -2353,7 +2356,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
        dphi_phys_velocity[i_trial][q][0] * uhq[0][q] + dphi_phys_velocity[i_trial][q][1] * uhq[1][q] + dphi_phys_velocity[i_trial][q][2] * uhq[2][q]
                                                                             )
     -M_density * M_viscosity * dphi_phys_velocity[i_test][q][0] * uhq[0][q] * (
-       d2phi_phys_velocity[i_trial][q][0][0] + d2phi_phys_velocity[i_trial][q][1][1] + d2phi_phys_velocity[i_trial][q][2][2]                                                     
+       d2phi_phys_velocity[i_trial][q][0][0] + d2phi_phys_velocity[i_trial][q][1][1] + d2phi_phys_velocity[i_trial][q][2][2]
                                                                               )
     // SUPG
     +tmp_supg
@@ -2363,9 +2366,9 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                                )
                                                             )
                                  + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][0] * dphi_phys_velocity[i_trial][q][0]
-                                 
+
                                 ) * w_quad[q];
-                        
+
                         i_01 += ( M_Tau_M_hat[i_elem][q] * (
     M_alpha * M_density * M_density / M_timestep * dphi_phys_velocity[i_test][q][1] * fine_scale[i_elem][q][0] * M_phi_velocity[i_trial][q] +
     M_density * dphi_phys_velocity[i_test][q][1] * fine_scale[i_elem][q][0] * (
@@ -2384,7 +2387,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                                             )
                                  + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][0] * dphi_phys_velocity[i_trial][q][1]
                                  ) * w_quad[q];
-                        
+
                         i_02 += ( M_Tau_M_hat[i_elem][q] * (
     M_alpha * M_density * M_density / M_timestep * dphi_phys_velocity[i_test][q][2] * fine_scale[i_elem][q][0] * M_phi_velocity[i_trial][q] +
     M_density * dphi_phys_velocity[i_test][q][2] * fine_scale[i_elem][q][0] * (
@@ -2403,7 +2406,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                                          )
                                  + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][0] * dphi_phys_velocity[i_trial][q][2]
                                  ) * w_quad[q];
-                        
+
                         i_10 += ( M_Tau_M_hat[i_elem][q] * (
     M_alpha * M_density * M_density / M_timestep * dphi_phys_velocity[i_test][q][0] * fine_scale[i_elem][q][1] * M_phi_velocity[i_trial][q] +
     M_density * dphi_phys_velocity[i_test][q][0] * fine_scale[i_elem][q][1] * (
@@ -2422,7 +2425,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                                             )
                                  + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][1] * dphi_phys_velocity[i_trial][q][0]
                                                          ) * w_quad[q];
-                        
+
                         i_11 += ( M_Tau_M_hat[i_elem][q] * (
     M_alpha * M_density * M_density / M_timestep * dphi_phys_velocity[i_test][q][1] * fine_scale[i_elem][q][1] * M_phi_velocity[i_trial][q] +
     M_density * dphi_phys_velocity[i_test][q][1] * fine_scale[i_elem][q][1] * (
@@ -2447,7 +2450,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                                           )
                                  + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][1] * dphi_phys_velocity[i_trial][q][1]
                                                          ) * w_quad[q];
-                        
+
                         i_12 += ( M_Tau_M_hat[i_elem][q] * (
     M_alpha * M_density * M_density / M_timestep * dphi_phys_velocity[i_test][q][2] * fine_scale[i_elem][q][1] * M_phi_velocity[i_trial][q] +
     M_density * dphi_phys_velocity[i_test][q][2] * fine_scale[i_elem][q][1] * (
@@ -2466,7 +2469,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                                             )
                                  + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][1] * dphi_phys_velocity[i_trial][q][2]
                                                          ) * w_quad[q];
-                        
+
                         i_20 += ( M_Tau_M_hat[i_elem][q] * (
     M_alpha * M_density * M_density / M_timestep * dphi_phys_velocity[i_test][q][0] * fine_scale[i_elem][q][2] * M_phi_velocity[i_trial][q] +
     M_density * dphi_phys_velocity[i_test][q][0] * fine_scale[i_elem][q][2] * (
@@ -2485,7 +2488,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                                             )
                                  + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][2] * dphi_phys_velocity[i_trial][q][0]
                                                          ) * w_quad[q];
-                        
+
                         i_21 += ( M_Tau_M_hat[i_elem][q] * (
     M_alpha * M_density * M_density / M_timestep * dphi_phys_velocity[i_test][q][1] * fine_scale[i_elem][q][2] * M_phi_velocity[i_trial][q] +
     M_density * dphi_phys_velocity[i_test][q][1] * fine_scale[i_elem][q][2] * (
@@ -2504,7 +2507,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                                             )
                                  + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][2] * dphi_phys_velocity[i_trial][q][1]
                                                          ) * w_quad[q];
-                        
+
                         i_22 += ( M_Tau_M_hat[i_elem][q] * (
     M_alpha * M_density * M_density / M_timestep * dphi_phys_velocity[i_test][q][2] * fine_scale[i_elem][q][2] * M_phi_velocity[i_trial][q] +
     M_density * dphi_phys_velocity[i_test][q][2] * fine_scale[i_elem][q][2] * (
@@ -2529,10 +2532,10 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                                             )
                                  + M_Tau_C[i_elem][q] * dphi_phys_velocity[i_test][q][2] * dphi_phys_velocity[i_trial][q][2]
                                                          ) * w_quad[q];
-                        
-                        
+
+
                     } // end quadrature
-                    
+
                     M_vals_supg[i_elem][0][0][i_test][i_trial] = (i_00 ) *  M_detJacobian[i_elem];
                     M_vals_supg[i_elem][0][1][i_test][i_trial] = (i_01 ) *  M_detJacobian[i_elem];
                     M_vals_supg[i_elem][0][2][i_test][i_trial] = (i_02 ) *  M_detJacobian[i_elem];
@@ -2544,18 +2547,18 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                     M_vals_supg[i_elem][2][2][i_test][i_trial] = (i_22 ) *  M_detJacobian[i_elem];
 
                 } // end trial
-                
+
                 for ( i_trial = 0; i_trial <  ndof_pressure; i_trial++ )
                 {
                     M_cols_pressure[i_elem][i_trial] = M_elements_pressure[i_elem][i_trial];
                     M_vals_supg_01[i_elem][0][i_test][i_trial] = 0.0;
                     M_vals_supg_01[i_elem][1][i_test][i_trial] = 0.0;
                     M_vals_supg_01[i_elem][2][i_test][i_trial] = 0.0;
-                    
+
                     i_00 = 0.0;
                     i_10 = 0.0;
                     i_20 = 0.0;
-                    
+
                     // QUAD
                     for ( q = 0; q < NumQuadPoints ; q++ )
                     {
@@ -2571,7 +2574,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
     + dphi_phys_velocity[i_test][q][2] * uhq[0][q] * dphi_phys_pressure[i_trial][q][2]
                                              )
                                                           ) * w_quad[q];
-                        
+
                         i_10 += M_Tau_M_hat[i_elem][q] * (
                                 dphi_phys_velocity[i_test][q][0] * fine_scale[i_elem][q][1] * dphi_phys_pressure[i_trial][q][0]
                                +dphi_phys_velocity[i_test][q][1] * fine_scale[i_elem][q][1] * dphi_phys_pressure[i_trial][q][1]
@@ -2584,7 +2587,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
     + dphi_phys_velocity[i_test][q][2] * uhq[1][q] * dphi_phys_pressure[i_trial][q][2]
                                              )
                                                           ) * w_quad[q];
-                        
+
                         i_20 += M_Tau_M_hat[i_elem][q] * (
                                 dphi_phys_velocity[i_test][q][0] * fine_scale[i_elem][q][2] * dphi_phys_pressure[i_trial][q][0]
                                +dphi_phys_velocity[i_test][q][1] * fine_scale[i_elem][q][2] * dphi_phys_pressure[i_trial][q][1]
@@ -2598,25 +2601,25 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                              )
                                                           ) * w_quad[q];
                     }
-                    
+
                     M_vals_supg_01[i_elem][0][i_test][i_trial] = i_00 * M_detJacobian[i_elem];
                     M_vals_supg_01[i_elem][1][i_test][i_trial] = i_10 * M_detJacobian[i_elem];
                     M_vals_supg_01[i_elem][2][i_test][i_trial] = i_20 * M_detJacobian[i_elem];
-                    
+
                 }
-                
+
             } // end dof test
-            
+
             // DOF - test - assemblo blocchi (1,0) e (1,1)
             for ( i_test = 0; i_test <  ndof_pressure; i_test++ )
             {
                 M_rows_pressure[i_elem][i_test] = M_elements_pressure[i_elem][i_test];
-                
+
                 // DOF - trial
                 for ( i_trial = 0; i_trial <  ndof_pressure; i_trial++ )
                 {
                     M_vals_11[i_elem][i_test][i_trial] = 0.0;
-                    
+
                     integral = 0.0;
                     // QUAD
                     for ( q = 0; q < NumQuadPoints ; q++ )
@@ -2630,7 +2633,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                     M_vals_11[i_elem][i_test][i_trial] = integral * M_detJacobian[i_elem];
                 }
             }
-            
+
             // DOF - test
             for ( i_test = 0; i_test <  ndof_pressure; i_test++ )
             {
@@ -2640,7 +2643,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                     i_00 = 0.0;
                     i_01 = 0.0;
                     i_02 = 0.0;
-                    
+
                     // QUAD
                     for ( q = 0; q < NumQuadPoints ; q++ )
                     {
@@ -2653,7 +2656,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
           d2phi_phys_velocity[i_trial][q][0][0] + d2phi_phys_velocity[i_trial][q][1][1] + d2phi_phys_velocity[i_trial][q][2][2]
                                                           )
                                                          ) * w_quad[q];
-                        
+
                         i_01 += M_Tau_M_hat[i_elem][q] * (
          M_density * M_alpha / M_timestep * dphi_phys_pressure[i_test][q][1] * M_phi_velocity[i_trial][q]
         +M_density * dphi_phys_pressure[i_test][q][1] * (
@@ -2663,7 +2666,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
           d2phi_phys_velocity[i_trial][q][0][0] + d2phi_phys_velocity[i_trial][q][1][1] + d2phi_phys_velocity[i_trial][q][2][2]
                                                           )
                                                          ) * w_quad[q];
-                        
+
                         i_02 += M_Tau_M_hat[i_elem][q] * (
          M_density * M_alpha / M_timestep * dphi_phys_pressure[i_test][q][2] * M_phi_velocity[i_trial][q]
         +M_density * dphi_phys_pressure[i_test][q][2] * (
@@ -2674,7 +2677,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                                           )
                                                          ) * w_quad[q];
                     }
-                    
+
                     M_vals_supg_10[i_elem][0][i_test][i_trial] = i_00 * M_detJacobian[i_elem];
                     M_vals_supg_10[i_elem][1][i_test][i_trial] = i_01 * M_detJacobian[i_elem];
                     M_vals_supg_10[i_elem][2][i_test][i_trial] = i_02 * M_detJacobian[i_elem];
@@ -2683,7 +2686,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
 
         }
     }
-    
+
     for ( UInt d1 = 0; d1 < 3 ; d1++ ) // row index
     {
         for ( int k = 0; k < M_numElements; ++k )
@@ -2696,13 +2699,13 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                                        ndof_velocity, M_cols_velocity[k],
                                                        M_vals_supg[k][d1][0],
                                                        Epetra_FECrsMatrix::ROW_MAJOR);
-            
+
             block01->matrixPtr()->InsertGlobalValues ( ndof_velocity, M_rows_tmp[k],
                                                        ndof_pressure, M_cols_pressure[k],
                                                        M_vals_supg_01[k][d1],
                                                        Epetra_FECrsMatrix::ROW_MAJOR);
         }
-        
+
         for ( int k = 0; k < M_numElements; ++k )
         {
             for ( UInt i = 0; i <  ndof_velocity; i++ )
@@ -2714,7 +2717,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
                                                        M_vals_supg[k][d1][1],
                                                        Epetra_FECrsMatrix::ROW_MAJOR);
         }
-        
+
         for ( int k = 0; k < M_numElements; ++k )
         {
             for ( UInt i = 0; i <  ndof_velocity; i++ )
@@ -2732,7 +2735,7 @@ FastAssemblerNS::vmsles_semi_implicit_terms ( matrixPtr_Type& block00,
     {
         block11->matrixPtr()->InsertGlobalValues ( ndof_pressure, M_rows_pressure[k], ndof_pressure, M_cols_pressure[k], M_vals_11[k], Epetra_FECrsMatrix::ROW_MAJOR);
     }
-    
+
     for ( UInt d1 = 0; d1 < 3 ; d1++ )
     {
         for ( int k = 0; k < M_numElements; ++k )
