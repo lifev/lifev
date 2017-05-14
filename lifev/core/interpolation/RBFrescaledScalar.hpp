@@ -241,10 +241,10 @@ void RBFrescaledScalar<mesh_Type>::interpolationOperator()
         M_interpolationOperator->matrixPtr()->InsertGlobalValues (GlobalID[i], k, Values, Indices);
     }
     M_interpolationOperator->globalAssemble();
-    delete Indices;
-    delete Values;
-    delete ElementsPerRow;
-    delete GlobalID;
+    delete[] Indices;
+    delete[] Values;
+    delete[] ElementsPerRow;
+    delete[] GlobalID;
 }
 
 template <typename mesh_Type>
@@ -317,10 +317,10 @@ void RBFrescaledScalar<mesh_Type>::projectionOperator()
         M_projectionOperator->matrixPtr()->InsertGlobalValues (GlobalID[i], k, Values, Indices);
     }
     M_projectionOperator->globalAssemble (M_interpolationOperatorMap, M_projectionOperatorMap);
-    delete Indices;
-    delete Values;
-    delete ElementsPerRow;
-    delete GlobalID;
+    delete[] Indices;
+    delete[] Values;
+    delete[] ElementsPerRow;
+    delete[] GlobalID;
 }
 
 template <typename mesh_Type>
