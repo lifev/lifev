@@ -66,7 +66,7 @@ int main (int argc, char** argv)
 
     typedef RegionMesh<LinearTetra> mesh_Type;
     typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
-    
+
     MPI_Init (&argc, &argv);
     boost::shared_ptr<Epetra_Comm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 
@@ -79,7 +79,7 @@ int main (int argc, char** argv)
     }
 
     GetPot commandLine (argc, argv);
-    string dataFileName = commandLine.follow ("data", 2, "-f", "--file");
+    std::string dataFileName = commandLine.follow ("data", 2, "-f", "--file");
     GetPot dataFile (dataFileName);
 
     const UInt numParts (dataFile ("test/num_parts", 4) );
@@ -97,7 +97,7 @@ int main (int argc, char** argv)
     MeshData meshData;
 	meshData.setup(dataFile, "mesh");
 	readMesh(*fullMeshPtr, meshData);
-    
+
     MeshPartitioner<mesh_Type> meshPart;
     meshPart.setup (numParts, comm);
 

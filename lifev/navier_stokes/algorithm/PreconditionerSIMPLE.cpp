@@ -74,7 +74,7 @@ PreconditionerSIMPLE::createParametersList ( list_Type&         list,
 
     std::string precType = dataFile ( ( section + "/prectype" ).data(), "SIMPLE" );
     list.set ( "prectype", precType );
-    string SIMPLEType = dataFile ( ( section + "/" + subsection + "/SIMPLE_type" ).data(), "SIMPLE" );
+    std::string SIMPLEType = dataFile ( ( section + "/" + subsection + "/SIMPLE_type" ).data(), "SIMPLE" );
 
     std::string fluidPrec = dataFile ( ( section + "/" + subsection + "/subprecs/fluid_prec" ).data(), "ML" );
     list.set ( "subprecs: fluid prec", fluidPrec );

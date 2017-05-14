@@ -500,7 +500,7 @@ Structure::run3d()
 
     exporter->postProcess ( 0 );
     exporterCheck->postProcess ( 0 );
-    cout.precision(16);
+    std::cout.precision(16);
 
     // Saving the analyitical displacement
     exporterCheck->postProcess ( 1.0 );

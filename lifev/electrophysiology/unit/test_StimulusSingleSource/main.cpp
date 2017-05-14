@@ -85,7 +85,7 @@ Int main ( Int argc, char** argv )
     GetPot command_line (argc, argv);
 
 
-    const string stimulus_datafile_name = command_line.follow ("StimulationParameters.xml", 2, "-s", "--stimulus");
+    const std::string stimulus_datafile_name = command_line.follow ("StimulationParameters.xml", 2, "-s", "--stimulus");
     Teuchos::ParameterList stimulusList = * ( Teuchos::getParametersFromXmlFile ( stimulus_datafile_name ) );
 
     StimulusSingleSource stimulus;

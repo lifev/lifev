@@ -124,7 +124,7 @@ Int main (Int argc, char** argv)
     // checking if we are checking for the nightly build
     const bool check = command_line.search (2, "-c", "--check");
 
-    string fileName = command_line.follow ("data", 2, "-f", "--file");
+    std::string fileName = command_line.follow ("data", 2, "-f", "--file");
     GetPot dataFile ( fileName );
 
     // *********************************

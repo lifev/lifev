@@ -114,7 +114,7 @@ test_bdf::test_bdf (int argc, char** argv) :
     Members (new Private)
 {
     GetPot command_line (argc, argv);
-    const string data_file_name =
+    const std::string data_file_name =
         command_line.follow ("data", 2, "-f", "--file");
     GetPot dataFile (data_file_name);
 
@@ -300,7 +300,7 @@ void test_bdf::run()
         Members->comm->Barrier();
         if (verbose)
         {
-            cout << "Now we are at time " << t << endl;
+            std::cout << "Now we are at time " << t << std::endl;
         }
 
         chrono.start();
@@ -320,8 +320,8 @@ void test_bdf::run()
 
         chrono.stop();
         if (verbose)
+            std::cout << "A has been constructed in " << chrono.diff() << "s." << std::endl;
         {
-            cout << "A has been constructed in " << chrono.diff() << "s." << endl;
         }
 
         // Handling of the right hand side
@@ -332,7 +332,7 @@ void test_bdf::run()
         // Treatment of the Boundary conditions
         if (verbose)
         {
-            cout << "*** BC Management: " << endl;
+            std::cout << "*** BC Management: " << std::endl;
         }
         Real tgv = 1.;
         chrono.start();
@@ -341,7 +341,7 @@ void test_bdf::run()
         chrono.stop();
         if (verbose)
         {
-            cout << chrono.diff() << "s." << endl;
+            std::cout << chrono.diff() << "s." << std::endl;
         }
 
         //Set Up the linear system
@@ -360,8 +360,8 @@ void test_bdf::run()
         bdf.shiftRight (*u);
 
         if (verbose)
-            cout << "*** Solution computed in " << chrono.diff() << "s."
-                 << endl;
+            std::cout << "*** Solution computed in " << chrono.diff() << "s."
+                 << std::endl;
 
         Members->comm->Barrier();
 

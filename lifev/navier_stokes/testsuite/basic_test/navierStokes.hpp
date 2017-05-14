@@ -316,7 +316,7 @@ NavierStokes<MeshType, Problem>::NavierStokes ( int argc,
     M_outputName (outputName)
 {
     GetPot command_line (argc, argv);
-    string data_file_name = command_line.follow (defaultDataName.c_str(), 2, "-f", "--file");
+    std::string data_file_name = command_line.follow (defaultDataName.c_str(), 2, "-f", "--file");
     GetPot dataFile ( data_file_name );
 
     M_data->data_file_name = data_file_name;
@@ -326,7 +326,7 @@ NavierStokes<MeshType, Problem>::NavierStokes ( int argc,
                  dataFile ( "fluid/physics/density", 1. );
 
     // Test type
-    string testType = dataFile ("NavierStokes/test", "none");
+    std::string testType = dataFile ("NavierStokes/test", "none");
     if (testType == "none")
     {
         M_test = None;
@@ -349,7 +349,7 @@ NavierStokes<MeshType, Problem>::NavierStokes ( int argc,
     M_accuracyTol = dataFile ("NavierStokes/accuracy_tolerance", 1.0);
 
     // Method of initialization
-    string initType = dataFile ("NavierStokes/initialization", "projection");
+    std::string initType = dataFile ("NavierStokes/initialization", "projection");
     if (initType == "projection")
     {
         M_initMethod = Projection;

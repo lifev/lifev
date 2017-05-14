@@ -903,15 +903,15 @@ public:
         return  M_solidTimeAdvance;
     }
 
-    const string ALETimeAdvanceMethod() const
+    const std::string ALETimeAdvanceMethod() const
     {
         return  M_ALETimeAdvanceMethod;
     }
-    const string fluidTimeAdvanceMethod() const
+    const std::string fluidTimeAdvanceMethod() const
     {
         return  M_fluidTimeAdvanceMethod;
     }
-    const string solidTimeAdvanceMethod() const
+    const std::string solidTimeAdvanceMethod() const
     {
         return  M_solidTimeAdvanceMethod;
     }

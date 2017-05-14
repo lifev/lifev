@@ -597,12 +597,12 @@ Int main ( Int argc, char** argv )
         // Creating exporters to save the solution    //
         //********************************************//
         ExporterHDF5< RegionMesh <LinearTetra> > exporterSplitting;
-        string filenameSplitting =  monodomainList.get ("OutputFile", "MinMod" );
+        std::string filenameSplitting =  monodomainList.get ("OutputFile", "MinMod" );
         filenameSplitting += "Splitting";
         splitting -> setupPotentialExporter ( exporterSplitting, filenameSplitting );
 
         ExporterHDF5< RegionMesh <LinearTetra> > exporterSplittingRestart;
-        string filenameSplittingLast =  monodomainList.get ("OutputFile", "MinMod" );
+        std::string filenameSplittingLast =  monodomainList.get ("OutputFile", "MinMod" );
         filenameSplittingLast += "RESTART";
         splitting -> setupExporter ( exporterSplittingRestart, filenameSplittingLast );
 
