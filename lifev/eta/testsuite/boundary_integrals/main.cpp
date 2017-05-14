@@ -246,7 +246,7 @@ int main ( int argc, char** argv )
 
     // Open and read the data file
     GetPot command_line (argc, argv);
-    string data_file_name = command_line.follow ("data", 2, "-f", "--file");
+    std::string data_file_name = command_line.follow ("data", 2, "-f", "--file");
     GetPot dataFile ( data_file_name );
 
     // Load the mesh
@@ -596,5 +596,3 @@ int main ( int argc, char** argv )
 
 
 }
-
-

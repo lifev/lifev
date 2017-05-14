@@ -313,7 +313,7 @@ Int main ( Int argc, char** argv )
     // the preconditioner.                        //
     //********************************************//
     GetPot command_line (argc, argv);
-    const string data_file_name = command_line.follow ("data", 2, "-f", "--file");
+    const std::string data_file_name = command_line.follow ("data", 2, "-f", "--file");
     GetPot dataFile (data_file_name);
 
     //********************************************//
