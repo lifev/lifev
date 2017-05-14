@@ -56,7 +56,7 @@
 #include <BelosMVOPTester.hpp>
 #include <BelosBlockCGSolMgr.hpp>
 #include <BelosBlockGmresSolMgr.hpp>
-#include <BelosGCRODRSolMgr.hpp>
+//#include <BelosGCRODRSolMgr.hpp>
 #include <BelosGmresPolySolMgr.hpp>
 #include <BelosPCPGSolMgr.hpp>
 #include <BelosPseudoBlockCGSolMgr.hpp>
