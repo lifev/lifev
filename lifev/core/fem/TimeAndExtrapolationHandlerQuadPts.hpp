@@ -58,7 +58,7 @@ public:
 
     // get the value of alpha that should go in front of the term u_(n+1) (see the paper cited at the beginning of the doc)
     Real alpha();
-    
+
     // extrapolation
     void extrapolate(vector_Type& extrapolation);
 
@@ -115,11 +115,11 @@ void
 TimeAndExtrapolationHandlerQuadPts<DIM>::initialize(const std::vector<vector_Type> InitialData)
 {
     ASSERT( M_BDForder != 0, "Order of the BDF scheme has not been set, please use TimeAndExtrapolationHandler::setBDForder(const UInt order)");
-    
+
     M_sizeStencil = M_BDForder;
-    
+
     ASSERT( InitialData.size() == M_sizeStencil, "Wrong initial data dimension, it has to be of size equal max(M_BDForder, M_maximumExtrapolationOrder)");
-    
+
     for ( int i = 0; i < M_sizeStencil; ++i )
         M_states.push_back(InitialData[i]);
 }
@@ -151,12 +151,12 @@ void
 TimeAndExtrapolationHandlerQuadPts<DIM>::rhsContribution(vector_Type& rhs_bdf)
 {
     ASSERT( M_timeStep != 0, "Timestep has not been set, please use TimeAndExtrapolationHandler::setTimeStep(const Real dt) ");
-    
+
     // nota: M_states.size() -> orderBDF
     //       M_states[0].size() -> numElements per process
     //       M_states[0][0].size() -> numQuadPts per element
     //       DIM is the size of the vector small
-    
+
     switch (M_BDForder) {
             case 1:
             for (int i = 0 ; i < M_states[0].size() ; ++i ) // loop elements
@@ -207,7 +207,7 @@ void
 TimeAndExtrapolationHandlerQuadPts<DIM>::extrapolate(vector_Type& extrapolation)
 {
     ASSERT( M_timeStep != 0, "Timestep has not been set, please use TimeAndExtrapolationHandler::setTimeStep(const Real dt) ");
-    
+
     switch (M_BDForder) {
         case 1:
             for (int i = 0 ; i < M_states[0].size() ; ++i ) // loop elements
@@ -252,7 +252,7 @@ TimeAndExtrapolationHandlerQuadPts<DIM>::extrapolate(vector_Type& extrapolation)
             break;
     }
 }
-    
+
 template <UInt DIM>
 Real
 TimeAndExtrapolationHandlerQuadPts<DIM>::alpha()
@@ -270,8 +270,9 @@ TimeAndExtrapolationHandlerQuadPts<DIM>::alpha()
         default:
             break;
     }
+    RETURN_UNDEFINED;
 }
-    
+
 } // end namespace LifeV
 
 #endif
