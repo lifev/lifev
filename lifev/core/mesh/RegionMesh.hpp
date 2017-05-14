@@ -97,7 +97,9 @@ public:
 
     //! static const S_geoDimensions: the dimensions (1,2,3) of the geometry
     static const UInt S_geoDimensions = geoShape_Type::S_nDimensions;
-
+    static const Int S_facetDimension = static_cast<const Int>(S_geoDimensions)-1;
+    static const Int S_ridgeDimension = static_cast<const Int>(S_geoDimensions)-2;
+    static const Int S_peakDimension = static_cast<const Int>(S_geoDimensions)-3; 
 
     /** @name GeoDim Types
      *  @ingroup public_types
@@ -152,10 +154,10 @@ public:
     typedef MeshElementMarked<0, S_geoDimensions, geoShape_Type, markerCommon_Type> point_Type;
 
     typedef MeshElementMarked<S_geoDimensions, S_geoDimensions, geoShape_Type, markerCommon_Type>  element_Type;
-    typedef MeshElementMarked < S_geoDimensions - 1, S_geoDimensions, geoShape_Type, markerCommon_Type > facet_Type;
-    typedef MeshElementMarked < S_geoDimensions - 2, S_geoDimensions, geoShape_Type, markerCommon_Type > ridge_Type;
-    typedef MeshElementMarked < S_geoDimensions - 3, S_geoDimensions, geoShape_Type, markerCommon_Type >  peak_Type;
-
+    typedef MeshElementMarked < S_facetDimension, S_geoDimensions, geoShape_Type, markerCommon_Type > facet_Type;
+    typedef MeshElementMarked < S_ridgeDimension, S_geoDimensions, geoShape_Type, markerCommon_Type > ridge_Type;
+    typedef MeshElementMarked < S_peakDimension, S_geoDimensions, geoShape_Type, markerCommon_Type >  peak_Type;
+  
     /** @} */ // End of group Geometric Element Types
 
 
