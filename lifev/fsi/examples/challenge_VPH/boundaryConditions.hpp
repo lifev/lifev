@@ -117,7 +117,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFlux()
     //     BCFunctionBase flow_jean (aortaFluxJean);
 
     //uncomment  to use fluxes
-    BCh_fluid->addBC ("InFlow" , INLET,  Flux, /*Full/**/Normal, flow_in);
+    BCh_fluid->addBC ("InFlow" , INLET,  Flux, /*Full*/Normal, flow_in);
     // BCh_fluid->addBC("OutFlow" , OUTLET,  Flux/*Essential*/, Normal, flow_3);
 
     // BCh_fluid->addBC("Flow4" , 4,  Flux/*Essential*/, Normal, flow_4);
