@@ -104,13 +104,13 @@ public:
 
     virtual void identifyNodes (meshPtr_Type LocalMesh, std::set<ID>& GID_nodes, vectorPtr_Type CheckVector) {};
 
-    virtual bool isInside (ID pointMarker, flagContainer_Type Flags) {};
+    virtual bool isInside (ID pointMarker, flagContainer_Type Flags) {RETURN_UNDEFINED};
 
-    virtual double computeRBFradius (meshPtr_Type , meshPtr_Type , idContainer_Type , ID ) {};
+    virtual double computeRBFradius (meshPtr_Type , meshPtr_Type , idContainer_Type , ID ) {RETURN_UNDEFINED;};
 
     virtual void setBasis (const std::string &) {};
 
-    virtual double rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius) {};
+    virtual double rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius) {RETURN_UNDEFINED;};
 
     virtual void interpolate() {};
 
@@ -135,9 +135,9 @@ public:
     virtual void buildKnownInterfaceMap(){};
 
     virtual void buildUnknownInterfaceMap(){};
-    
+
     virtual void buildInterpolationOperatorMap(){};
-    
+
     virtual void buildProjectionOperatorMap(){};
 
     virtual void getKnownInterfaceMap(mapPtr_Type& map){};
