@@ -339,6 +339,7 @@ Real aortaFluxIn (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Re
     {
         return    0.0000e+00;
     }
+    RETURN_UNDEFINED;
 }
 
 Real aortaPhisPress (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
@@ -673,6 +674,7 @@ Real aortaPhisPress (const Real&  t, const Real& /*x*/, const Real& /*y*/, const
     return 0.0;
     break;}
     return 0.;*/
+    RETURN_UNDEFINED;
 }
 
 
@@ -998,6 +1000,7 @@ Real aortaFlux3 (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Rea
     {
         return 3.300E-05 * 1e6;
     }
+    RETURN_UNDEFINED;
 }//thoracic aorta,
 
 Real aortaFlux5 (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
@@ -1322,6 +1325,7 @@ Real aortaFlux5 (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Rea
     {
         return  3.016E-06 * 1e6;
     }
+    RETURN_UNDEFINED;
 }//first branchstd::placeholders::_1,
 
 Real aortaFlux6 (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
@@ -1646,6 +1650,7 @@ Real aortaFlux6 (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Rea
     {
         return  7.754E-07 * 1e6;
     }
+    RETURN_UNDEFINED;
 }//branch 1_2 smallest
 
 Real aortaFlux7 (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
@@ -1970,6 +1975,7 @@ Real aortaFlux7 (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Rea
     {
         return  2.185E-06 * 1e6;
     }
+    RETURN_UNDEFINED;
 }//R. Brachia, branch 1_3
 
 Real aortaFlux8 (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
@@ -2294,6 +2300,7 @@ Real aortaFlux8 (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Rea
     {
         return  2.433E-06 * 1e6;
     }
+    RETURN_UNDEFINED;
 }// 15, LCCA, branch 2
 
 Real aortaFlux9 (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
@@ -2618,6 +2625,7 @@ Real aortaFlux9 (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Rea
     {
         return  7.807E-07 * 1e6;
     }
+    RETURN_UNDEFINED;
 }// 20 LVA branch 3_1
 
 Real aortaFlux4 (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
@@ -2942,6 +2950,7 @@ Real aortaFlux4 (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Rea
     {
         return  2.661E-06 * 1e6;
     }
+    RETURN_UNDEFINED;
 }//21, L. Brachia, bhanch 3_2
 
 
@@ -3000,6 +3009,7 @@ Real E (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& z, 
     {
         return 19 * 1e3;
     }
+    RETURN_UNDEFINED;
 }
 
 
@@ -3021,6 +3031,7 @@ Real d0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*
             ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
             break;
     }
+    RETURN_UNDEFINED;
 }
 
 Real w0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
@@ -3041,6 +3052,7 @@ Real w0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*
             ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
             break;
     }
+    RETURN_UNDEFINED;
 }
 
 
@@ -3511,6 +3523,7 @@ Real aortaFlux3_ (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Re
     {
         return  33.1             ;
     }
+    RETURN_UNDEFINED;
 }
 
 Real aortaFlux6_ (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
@@ -3835,6 +3848,7 @@ Real aortaFlux6_ (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Re
     {
         return    0.6674071250000001;
     }
+    RETURN_UNDEFINED;
 }
 
 Real u2 (Real  /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
@@ -3843,4 +3857,3 @@ Real u2 (Real  /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, c
 }
 
 }
-
