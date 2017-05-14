@@ -1,6 +1,8 @@
 #include <lifev/core/fem/FastAssemblerMixed.hpp>
 #include <chrono>
+#ifdef EPETRA_HAVE_OMP
 #include <omp.h>
+#endif
 using namespace std::chrono;
 
 using namespace std;
