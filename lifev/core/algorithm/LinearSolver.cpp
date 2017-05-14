@@ -118,7 +118,7 @@ LinearSolver::solve ( vectorPtr_Type solutionPtr )
         }
     }
 
-    if ( M_rhs.get() == 0 || M_operator == 0 )
+    if ( M_rhs.get() == 0 || M_operator == nullptr )
     {
         M_displayer->leaderPrint ( "SLV-  ERROR: LinearSolver failed to set up correctly!\n" );
         return -1;
