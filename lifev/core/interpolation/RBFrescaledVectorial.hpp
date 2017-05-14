@@ -237,10 +237,10 @@ void RBFrescaledVectorial<Mesh>::interpolationOperator()
         M_interpolationOperator->matrixPtr()->InsertGlobalValues (GlobalID[i], k, Values, Indices);
     }
     M_interpolationOperator->globalAssemble();
-    delete Indices;
-    delete Values;
-    delete ElementsPerRow;
-    delete GlobalID;
+    delete[] Indices;
+    delete[] Values;
+    delete[] ElementsPerRow;
+    delete[] GlobalID;
 }
 
 template <typename mesh_Type>
