@@ -72,6 +72,7 @@ BDFSecondOrderDerivative::massCoefficient() // Note: there is no division by dt^
         default:
             break;
     }
+    RETURN_UNDEFINED;
 }
 
 Real
@@ -87,6 +88,7 @@ BDFSecondOrderDerivative::coefficientFirstDerivative() // Note: there is no divi
         default:
             break;
     }
+    RETURN_UNDEFINED;
 }
 
 void
