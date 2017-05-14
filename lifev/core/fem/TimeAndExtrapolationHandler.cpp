@@ -129,6 +129,7 @@ TimeAndExtrapolationHandler::alpha()
         default:
             break;
     }
+    RETURN_UNDEFINED;
 }
 
 }
