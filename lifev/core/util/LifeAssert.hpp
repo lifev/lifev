@@ -67,6 +67,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #define ABORT() std::abort()
 
 #define ERROR_MSG(A) LIFEV_ASSERT( 0 ).error( A );
+#define RETURN_UNDEFINED ERROR_MSG("undefined return"); return 0;
 #define ASSERT0(X,A) LIFEV_ASSERT( X ).error( A );
 #define ASSERT_PRE0(X,A) LIFEV_ASSERT( X ).error( "Precondition Error"  );
 #define ASSERT_POS0(X,A) LIFEV_ASSERT( X ).error( "Postcondition Error"  );
@@ -114,4 +115,3 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #endif /* LIFE_ASSERT_H */
-
