@@ -309,7 +309,7 @@ MultiscaleAlgorithmBroyden::exportJacobianToHDF5()
     }
 
     if ( M_multiscale->globalData()->dataTime()->timeStepNumber() % multiscaleSaveEachNTimeSteps == 0 || M_multiscale->globalData()->dataTime()->isLastTimeStep() )
-        if ( !M_jacobian.get() == nullptr )
+        if ( M_jacobian.get() != nullptr )
         {
             if ( M_comm->MyPID() == 0 )
             {
