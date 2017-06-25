@@ -45,7 +45,6 @@
  * In particular:
  *
  * for Fluid:
->>>>>>> master
 #include <lifev/bc_interface/3D/function/fluid/BCInterfaceFunctionParserFluid3D.hpp>
 #include <lifev/bc_interface/3D/function/fluid/BCInterfaceFunctionParserSolverFluid3D.hpp>
 #include <lifev/bc_interface/3D/function/fluid/BCInterfaceFunctionUserDefinedFluid3D.hpp>
@@ -56,12 +55,6 @@
 #include <lifev/bc_interface/3D/function/solid/BCInterfaceFunctionSolverDefinedSolid3D.hpp>
 #include <lifev/bc_interface/3D/function/solid/BCInterfaceFunctionUserDefinedSolid3D.hpp>
 
-<<<<<<< HEAD
-//#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionParserFSI3D.hpp>
-//#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionParserSolverFSI3D.hpp>
-//#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionSolverDefinedFSI3D.hpp>
-//#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionUserDefinedFSI3D.hpp>
-=======
  * For FSI:
 #include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionParserFSI3D.hpp>
 #include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionParserSolverFSI3D.hpp>
