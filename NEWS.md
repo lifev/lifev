@@ -1,4 +1,10 @@
 
+LifeV 4.0.3:
+============
+
+* Better compatibility with c++11
+* right dependence between modules. bc_interface and physical solvers had reverse dependence.
+
 LifeV 4.0.2:
 ============
 
